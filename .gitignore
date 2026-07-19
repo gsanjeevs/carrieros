@@ -6,3 +6,5 @@
 .claude/settings.local.json
 supabase/.temp/
 supabase/.branches/
+
+/docs
