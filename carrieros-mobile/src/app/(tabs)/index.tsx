@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { LOAD_STATUS_PILL, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
@@ -26,6 +26,10 @@ type LoadRow = {
   delivery_city: string | null;
   delivery_state: string | null;
 };
+
+// design-tokens.md "Surface / Neutral": surface.page — app background behind
+// white cards. Local to this screen only, see note at the ThemedView below.
+const PAGE_BACKGROUND = StatusColors.grayLight;
 
 // Status keys map 1:1 to src/messages/*.json loads.status.* — see t() calls
 // below rather than a hardcoded label map.
@@ -90,7 +94,12 @@ export default function MyLoadsScreen() {
   }
 
   return (
-    <ThemedView style={styles.container}>
+    // Page tint (surface.page, #f4f6f9) is applied here only, not through
+    // theme.ts's shared `background` token — load-detail/DVIR rely on that
+    // token staying white, so we don't want a global change bleeding into
+    // them. See design-tokens.md "Cards (Mobile)": white cards need a
+    // slightly-off-white page behind them for the shadow to read.
+    <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title" style={styles.heading}>
           {role === 'driver' ? t('loads.titleDriver') : t('loads.titleOffice')}
@@ -106,29 +115,42 @@ export default function MyLoadsScreen() {
               {t('loads.empty')}
             </ThemedText>
           }
-          renderItem={({ item }) => (
-            <Pressable
-              style={[styles.card, { backgroundColor: theme.backgroundElement }]}
-              onPress={() => router.push({ pathname: '/load/[id]', params: { id: String(item.id) } })}
-            >
-              <ThemedView style={styles.cardHeader} type="backgroundElement">
-                <ThemedText type="smallBold">{item.load_number}</ThemedText>
+          renderItem={({ item }) => {
+            const pill = LOAD_STATUS_PILL[item.status] ?? LOAD_STATUS_PILL.draft;
+            const statusLabel = (STATUS_KEYS as readonly string[]).includes(item.status)
+              ? t(`loads.status.${item.status}`)
+              : item.status;
+
+            return (
+              <Pressable
+                style={[styles.card, { backgroundColor: theme.background }, styles.cardShadow]}
+                onPress={() => router.push({ pathname: '/load/[id]', params: { id: String(item.id) } })}
+              >
+                <ThemedView style={styles.cardHeader} type="background">
+                  <ThemedText type="smallBold">{item.load_number}</ThemedText>
+                  <ThemedView style={[styles.statusPill, { backgroundColor: pill.bg }]}>
+                    <ThemedText type="small" style={[styles.statusPillText, { color: pill.text }]}>
+                      {statusLabel}
+                    </ThemedText>
+                  </ThemedView>
+                </ThemedView>
                 <ThemedText type="small" themeColor="textSecondary">
-                  {(STATUS_KEYS as readonly string[]).includes(item.status)
-                    ? t(`loads.status.${item.status}`)
-                    : item.status}
+                  {item.customer_name_raw ?? t('common.unknownCustomer')}
                 </ThemedText>
-              </ThemedView>
-              <ThemedText type="small" themeColor="textSecondary">
-                {item.customer_name_raw ?? t('common.unknownCustomer')}
-              </ThemedText>
-              <ThemedText type="default">
-                {item.pickup_city ?? '—'}{item.pickup_state ? `, ${item.pickup_state}` : ''}
-                {'  →  '}
-                {item.delivery_city ?? '—'}{item.delivery_state ? `, ${item.delivery_state}` : ''}
-              </ThemedText>
-            </Pressable>
-          )}
+                <ThemedView style={styles.routeRow} type="background">
+                  <ThemedText type="default" style={styles.routeText}>
+                    {item.pickup_city ?? '—'}{item.pickup_state ? `, ${item.pickup_state}` : ''}
+                  </ThemedText>
+                  <ThemedText type="default" themeColor="textSecondary" style={styles.routeArrow}>
+                    {'  →  '}
+                  </ThemedText>
+                  <ThemedText type="default" style={styles.routeText}>
+                    {item.delivery_city ?? '—'}{item.delivery_state ? `, ${item.delivery_state}` : ''}
+                  </ThemedText>
+                </ThemedView>
+              </Pressable>
+            );
+          }}
           ListFooterComponent={
             <Pressable onPress={() => supabase.auth.signOut()} style={styles.signOut}>
               <ThemedText type="link" themeColor="textSecondary">{t('loads.signOut')}</ThemedText>
@@ -148,6 +170,20 @@ const styles = StyleSheet.create({
   listContent: { gap: Spacing.two, paddingBottom: Spacing.four },
   empty: { textAlign: 'center', marginTop: Spacing.five },
   signOut: { alignItems: 'center', paddingVertical: Spacing.four, marginTop: Spacing.three },
-  card: { borderRadius: 12, padding: Spacing.three, gap: 4 },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between' },
+  // design-tokens.md "Cards (Mobile)": bg-white rounded-3xl p-4 mb-3 shadow-card
+  card: { borderRadius: 16, padding: Spacing.three, gap: 4 },
+  // shadow-card = 0 1px 6px rgba(0,0,0,0.06)
+  cardShadow: {
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  statusPill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
+  statusPillText: { fontWeight: '700' },
+  routeRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' },
+  routeText: { fontWeight: '600' },
+  routeArrow: { fontSize: 13 },
 });
