@@ -1284,6 +1284,13 @@ export type Database = {
           status: string
         }[]
       }
+      get_public_tracking_events: {
+        Args: { p_token: string }
+        Returns: {
+          created_at: string
+          event_type: string
+        }[]
+      }
       mark_overdue_invoices: { Args: never; Returns: number }
       my_org_id: { Args: never; Returns: number }
       my_role: { Args: never; Returns: string }

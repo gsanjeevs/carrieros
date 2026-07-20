@@ -4,6 +4,13 @@
 // set of columns is ever exposed to the anon role. Do NOT query `loads`
 // directly here — see RPC contract note in the task brief.
 //
+// The status timeline below uses the companion RPC
+// get_public_tracking_events(), which returns ONLY event_type + created_at
+// (never load_events.note, which can contain internal driver/dispatcher
+// commentary, and never created_by). Do NOT query `load_events` directly
+// here, and do NOT widen that RPC's return columns without re-reading the
+// security note next to its definition in supabase/schema/schema.sql.
+//
 // Deliberately does not import STATUS_BADGE from the authenticated
 // loads pages — this page must keep working even if that module changes.
 // Text still comes from the tracking.*/loads.status_* message catalogs.
@@ -25,6 +32,24 @@ const STATUS_COLOR: Record<string, string> = {
 function formatDate(value: string | null, locale: string): string {
   if (!value) return '—'
   return toDate(value).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+function formatDateTime(value: string, locale: string): string {
+  return toDate(value).toLocaleString(locale, {
+    month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+  })
+}
+
+// event_type values are written as `status_${status}` (see
+// app/api/loads/[id]/route.ts) — reuse the same loads.status_* catalog the
+// header badge uses rather than adding a parallel set of timeline strings.
+function eventLabel(eventType: string, tLoads: TimeAgoT): string {
+  const status = eventType.replace(/^status_/, '')
+  try {
+    return tLoads(`status_${status}`)
+  } catch {
+    return eventType.replace(/_/g, ' ')
+  }
 }
 
 type TimeAgoT = Awaited<ReturnType<typeof getTranslations>>
@@ -82,7 +107,7 @@ export default async function TrackingPage({
           <div className="mb-8 flex justify-center">
             <Logo />
           </div>
-          <div className="bg-white/5 border border-white/8 rounded-xl px-6 py-12">
+          <div className="bg-white/5 border border-white/8 rounded-xl px-6 py-12 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
             <span className="material-symbols-outlined text-slate-600 text-4xl">search_off</span>
             <h1 className="text-white text-lg font-semibold mt-4">{t('notFoundTitle')}</h1>
             <p className="text-slate-400 text-sm mt-2">
@@ -100,6 +125,9 @@ export default async function TrackingPage({
   const destination = [load.delivery_city, load.delivery_state].filter(Boolean).join(', ') || '—'
   const hasCarrierInfo = load.carrier_name || load.carrier_phone || load.carrier_email
 
+  const { data: events } = await supabase.rpc('get_public_tracking_events', { p_token: token })
+  const timeline = events ?? []
+
   return (
     <div className="min-h-screen bg-[#0f1923] px-4 py-10 sm:py-16">
       <div className="w-full max-w-md mx-auto">
@@ -108,7 +136,7 @@ export default async function TrackingPage({
           <Logo />
         </div>
 
-        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden">
+        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
           <div className="px-5 sm:px-6 py-5 border-b border-white/5">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -120,6 +148,15 @@ export default async function TrackingPage({
               </span>
             </div>
           </div>
+
+          {load.delivery_date && (
+            <div className="px-5 sm:px-6 py-5 border-b border-white/5 text-center bg-gradient-to-b from-white/[0.03] to-transparent">
+              <p className="text-slate-500 text-xs uppercase tracking-wide mb-2">{t('estimatedDelivery')}</p>
+              <p className="text-white text-2xl font-extrabold tracking-tight">
+                {formatDate(load.delivery_date, locale)}
+              </p>
+            </div>
+          )}
 
           <div className="px-5 sm:px-6 py-5 border-b border-white/5">
             <p className="text-slate-500 text-xs uppercase tracking-wide mb-3">{tLoads('route')}</p>
@@ -148,6 +185,26 @@ export default async function TrackingPage({
               </p>
             )}
           </div>
+
+          {timeline.length > 0 && (
+            <div className="px-5 sm:px-6 py-5 border-b border-white/5">
+              <p className="text-slate-500 text-xs uppercase tracking-wide mb-3">{t('timeline')}</p>
+              <div className="space-y-4">
+                {timeline.map((event, i) => (
+                  <div key={`${event.event_type}-${event.created_at}`} className="flex items-start gap-3">
+                    <div className="flex flex-col items-center pt-1">
+                      <div className={`w-2 h-2 rounded-full ${i === timeline.length - 1 ? 'bg-[#1abc9c]' : 'bg-white/20'}`} />
+                      {i < timeline.length - 1 && <div className="w-px h-6 bg-white/10 mt-1" />}
+                    </div>
+                    <div className="flex-1 pb-0.5">
+                      <p className="text-white text-sm font-medium">{eventLabel(event.event_type, tLoads)}</p>
+                      <p className="text-slate-500 text-xs mt-0.5">{formatDateTime(event.created_at, locale)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {hasCarrierInfo && (
             <div className="px-5 sm:px-6 py-5">

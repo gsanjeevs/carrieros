@@ -477,6 +477,31 @@ $$;
 
 GRANT EXECUTE ON FUNCTION get_public_tracking(TEXT) TO anon;
 
+-- Public tracking timeline (decision R2, /track/[token]). Companion to
+-- get_public_tracking() above -- same token-scoped SECURITY DEFINER pattern.
+-- load_events.note is free-text internal driver/dispatcher commentary and
+-- must NEVER be exposed here, and created_by must never be exposed either
+-- (it's a profiles.id FK, effectively identifying an internal user to an
+-- anonymous public visitor). Only event_type + created_at are returned.
+-- anon has NO direct SELECT on load_events (see carrier_load_events_select
+-- policy) -- this function is the one sanctioned way to expose timeline
+-- history to a tracking-link visitor. Do not add an anon policy on
+-- load_events instead.
+CREATE OR REPLACE FUNCTION get_public_tracking_events(p_token TEXT)
+RETURNS TABLE(
+  event_type TEXT,
+  created_at TIMESTAMPTZ
+)
+LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public AS $$
+  SELECT e.event_type, e.created_at
+  FROM load_events e
+  JOIN loads l ON l.id = e.load_id
+  WHERE l.tracking_token = p_token
+  ORDER BY e.created_at ASC
+$$;
+
+GRANT EXECUTE ON FUNCTION get_public_tracking_events(TEXT) TO anon;
+
 -- ────────────────────────────────────────────────────────────
 -- SECTION 8: ROW LEVEL SECURITY
 -- ────────────────────────────────────────────────────────────
