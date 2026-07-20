@@ -1,6 +1,7 @@
 // app/(app)/dashboard/page.tsx
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { getTranslations, getLocale } from 'next-intl/server'
 
 interface KpiCard {
@@ -9,6 +10,20 @@ interface KpiCard {
   sub?: string
   color?: string
   icon: string
+}
+
+// Mirrors app/(app)/loads/page.tsx's STATUS_COLOR — this codebase keeps a
+// local copy per page rather than sharing one constant (see also
+// app/(app)/loads/[load_number]/page.tsx, app/track/[token]/page.tsx).
+const STATUS_COLOR: Record<string, string> = {
+  draft:       'bg-slate-500/20 text-slate-400',
+  scheduled:   'bg-blue-500/20 text-blue-400',
+  dispatched:  'bg-[#f97316]/20 text-[#f97316]',
+  picked_up:   'bg-amber-500/20 text-amber-400',
+  in_transit:  'bg-[#1abc9c]/20 text-[#1abc9c]',
+  delivered:   'bg-[#16a34a]/20 text-[#16a34a]',
+  invoiced:    'bg-purple-500/20 text-purple-400',
+  paid:        'bg-[#16a34a]/20 text-[#16a34a]',
 }
 
 export default async function DashboardPage() {
@@ -26,10 +41,15 @@ export default async function DashboardPage() {
   const orgId   = profile?.org_id
 
   const t = await getTranslations('dashboard')
+  const tLoads = await getTranslations('loads')
   const tNav = await getTranslations('nav')
   const locale = await getLocale()
 
-  const [loadsRes, trucksRes, driversRes, invoicesRes] = await Promise.all([
+  const STATUS_BADGE: Record<string, { label: string; color: string }> = Object.fromEntries(
+    Object.entries(STATUS_COLOR).map(([key, color]) => [key, { label: tLoads(`status_${key}`), color }])
+  )
+
+  const [loadsRes, trucksRes, driversRes, invoicesRes, recentLoadsRes] = await Promise.all([
     orgId
       ? supabase.from('loads').select('id, status', { count: 'exact' }).eq('carrier_org_id', orgId)
       : Promise.resolve({ count: 0, data: [] }),
@@ -42,7 +62,17 @@ export default async function DashboardPage() {
     orgId
       ? supabase.from('invoices').select('id, status', { count: 'exact' }).eq('carrier_org_id', orgId).eq('status', 'sent')
       : Promise.resolve({ count: 0 }),
+    orgId
+      ? supabase
+          .from('loads')
+          .select('id, load_number, status, pickup_city, pickup_state, delivery_city, delivery_state, customer_name_raw')
+          .eq('carrier_org_id', orgId)
+          .order('created_at', { ascending: false })
+          .limit(5)
+      : Promise.resolve({ data: [] }),
   ])
+
+  const recentLoads = recentLoadsRes.data ?? []
 
   const activeLoads = (loadsRes.data ?? []).filter(
     (l: { status: string | null }) =>
@@ -87,13 +117,44 @@ export default async function DashboardPage() {
           <h2 className="text-white font-medium text-sm">{t('recentLoads')}</h2>
           <a href="/loads" className="text-[#f97316] text-xs hover:underline">{t('viewAll')}</a>
         </div>
-        <div className="px-5 py-12 text-center">
-          <span className="material-symbols-outlined text-slate-600 text-4xl">local_shipping</span>
-          <p className="text-slate-500 text-sm mt-3">{t('noLoadsYet')}</p>
-          <a href="/loads/new" className="inline-block mt-4 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition">
-            {t('createFirstLoad')}
-          </a>
-        </div>
+        {recentLoads.length === 0 ? (
+          <div className="px-5 py-12 text-center">
+            <span className="material-symbols-outlined text-slate-600 text-4xl">local_shipping</span>
+            <p className="text-slate-500 text-sm mt-3">{t('noLoadsYet')}</p>
+            <a href="/loads/new" className="inline-block mt-4 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition">
+              {t('createFirstLoad')}
+            </a>
+          </div>
+        ) : (
+          <div className="divide-y divide-white/5">
+            {recentLoads.map((load) => {
+              const badge = (load.status ? STATUS_BADGE[load.status] : null) ?? STATUS_BADGE.draft
+              const route =
+                [load.pickup_city, load.pickup_state].filter(Boolean).join(', ') +
+                ' → ' +
+                [load.delivery_city, load.delivery_state].filter(Boolean).join(', ')
+
+              return (
+                <Link
+                  key={load.id}
+                  href={`/loads/${load.load_number}`}
+                  className="flex items-center justify-between px-5 py-3.5 hover:bg-white/3 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-white font-medium">{load.load_number}</span>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${badge.color}`}>
+                      {badge.label}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 min-w-0">
+                    <span className="text-slate-400 text-sm max-w-[160px] truncate">{load.customer_name_raw ?? '—'}</span>
+                    <span className="text-slate-300 text-sm max-w-[220px] truncate hidden sm:inline">{route}</span>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        )}
       </div>
     </div>
   )

@@ -51,6 +51,16 @@ export default async function InvoicesPage({
     .maybeSingle()
   const currency = org?.currency ?? 'USD'
 
+  // Opportunistic housekeeping: there's no cron/job scheduler in this project
+  // yet, so we flip 'sent' invoices past their due_date to 'overdue' right
+  // here, on every load of this page, as a pragmatic stopgap rather than a
+  // real scheduled job. mark_overdue_invoices() is scoped to the caller's own
+  // org server-side. Replace this with a real schedule (Supabase's pg_cron
+  // extension, or a Vercel Cron hitting an API route) once the project has a
+  // home for scheduled jobs.
+  const { error: overdueError } = await supabase.rpc('mark_overdue_invoices')
+  if (overdueError) console.error('[invoices] mark_overdue_invoices failed:', overdueError.message)
+
   let query = supabase
     .from('invoices')
     .select(`

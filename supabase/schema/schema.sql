@@ -634,6 +634,34 @@ CREATE POLICY "customer_invoices_select" ON invoices FOR SELECT USING (
   AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('customer_admin','customer_viewer')
 );
 
+-- Opportunistic overdue-invoice housekeeping. There is no cron/job scheduler
+-- in this project yet, so this is called from the /invoices list page's
+-- server component on every load (see app/(app)/invoices/page.tsx) as a
+-- pragmatic stopgap rather than a real scheduled job. Replace with a real
+-- schedule (Supabase's pg_cron extension, or a Vercel Cron hitting an API
+-- route) once the project has a home for scheduled jobs.
+-- SECURITY DEFINER so any org member viewing invoices can trigger it
+-- regardless of role, but SECURITY DEFINER bypasses RLS entirely — so the
+-- UPDATE is explicitly scoped to the caller's own org via my_org_id() to
+-- avoid touching every carrier's invoices system-wide.
+CREATE OR REPLACE FUNCTION mark_overdue_invoices()
+RETURNS INTEGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_count INTEGER;
+BEGIN
+  UPDATE invoices SET status = 'overdue'
+  WHERE status = 'sent' AND due_date < CURRENT_DATE
+    AND carrier_org_id = my_org_id();
+  GET DIAGNOSTICS v_count = ROW_COUNT;
+  RETURN v_count;
+END;
+$$;
+GRANT EXECUTE ON FUNCTION mark_overdue_invoices() TO authenticated;
+
 -- DRIVERS
 ALTER TABLE drivers ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "owner_solo_drivers_all" ON drivers FOR ALL USING (
