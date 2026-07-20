@@ -1213,6 +1213,25 @@ export type Database = {
           org_id: number
         }[]
       }
+      get_public_tracking: {
+        Args: { p_token: string }
+        Returns: {
+          carrier_email: string
+          carrier_name: string
+          carrier_phone: string
+          delivery_city: string
+          delivery_date: string
+          delivery_state: string
+          last_location_at: string
+          last_location_lat: number
+          last_location_lng: number
+          load_number: string
+          pickup_city: string
+          pickup_date: string
+          pickup_state: string
+          status: string
+        }[]
+      }
       my_org_id: { Args: never; Returns: number }
       my_role: { Args: never; Returns: string }
       next_entity_val: {

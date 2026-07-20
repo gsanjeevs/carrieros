@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -38,6 +39,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 export default function MyLoadsScreen() {
   const theme = useTheme();
+  const router = useRouter();
   const { session } = useSession();
   const [role, setRole] = useState<Role | null>(null);
   const [loads, setLoads] = useState<LoadRow[]>([]);
@@ -101,7 +103,10 @@ export default function MyLoadsScreen() {
             </ThemedText>
           }
           renderItem={({ item }) => (
-            <Pressable style={[styles.card, { backgroundColor: theme.backgroundElement }]}>
+            <Pressable
+              style={[styles.card, { backgroundColor: theme.backgroundElement }]}
+              onPress={() => router.push({ pathname: '/load/[id]', params: { id: String(item.id) } })}
+            >
               <ThemedView style={styles.cardHeader} type="backgroundElement">
                 <ThemedText type="smallBold">{item.load_number}</ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
