@@ -12,8 +12,15 @@ check it for anything not covered here.
   `carrieros-mobile/AGENTS.md` first, same reason.
 - `supabase/` — local Supabase project (Postgres + Auth), shared by both
   apps. No `supabase/migrations/` — schema changes are applied ad hoc via
-  `docker exec supabase_db_carrieros psql ...` and then hand-copied into
-  `docs/carrieros-db/schema.sql` to keep it as the source-of-truth doc.
+  `docker exec supabase_db_carrieros psql ...` and then written into
+  **`supabase/schema/schema.sql`**, which is the version-controlled source of
+  truth. Read `supabase/schema/README.md` before editing it: policies go
+  next to the table they guard (a duplicate `CREATE POLICY` name fails on a
+  fresh run), and anything calling `my_org_id()`/`my_role()` must appear
+  after those functions are defined — an ordering bug there already shipped
+  once. Verify by replaying the file against a scratch DB (recipe in the
+  README) before committing. `docs/carrieros-db/schema.sql` is a copy kept so
+  the product docs stay self-contained; if they disagree, the repo wins.
 - `.claude/launch.json` — dev server configs for the Browser-pane preview
   tool (`carrieros-web`, `carrieros-mobile (web preview)`, `supabase`).
 
