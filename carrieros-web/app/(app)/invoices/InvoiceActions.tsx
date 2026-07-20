@@ -18,7 +18,7 @@ import {
 } from './actions'
 
 const inputCls =
-  'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-[#f97316] transition'
+  'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 transition'
 const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
 
 interface Props {
@@ -121,14 +121,14 @@ export default function InvoiceActions({
   return (
     <>
       {/* Status actions */}
-      <div className="bg-white/5 border border-white/8 rounded-xl p-5">
+      <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
         <h2 className="text-white font-medium text-sm mb-4">{t('actions')}</h2>
 
         <div className="space-y-2.5">
           <button
             onClick={() => run(() => markInvoiceSent(invoiceId))}
             disabled={busy || status === 'paid'}
-            className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition"
+            className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
           >
             <span className="material-symbols-outlined text-[18px]">outgoing_mail</span>
             {t('markSent')}
@@ -137,7 +137,7 @@ export default function InvoiceActions({
           <button
             onClick={() => run(() => markInvoicePaid(invoiceId))}
             disabled={busy || status === 'paid'}
-            className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#16a34a] hover:bg-[#15803d] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition"
+            className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#16a34a] hover:bg-[#15803d] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
           >
             <span className="material-symbols-outlined text-[18px]">paid</span>
             {t('markPaid')}
@@ -163,7 +163,7 @@ export default function InvoiceActions({
       </div>
 
       {/* Payment method */}
-      <div className="bg-white/5 border border-white/8 rounded-xl p-5">
+      <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
         <h2 className="text-white font-medium text-sm mb-4">{t('paymentMethod')}</h2>
         <label className={labelCls}>{t('collectVia')}</label>
         <select
@@ -193,7 +193,7 @@ export default function InvoiceActions({
 
       {/* Factoring — only meaningful when this invoice is collected that way */}
       {method === 'factoring' && (
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5">
+        <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
           <h2 className="text-white font-medium text-sm mb-4">{t('factoring')}</h2>
 
           {factoredAtLabel && (
@@ -227,7 +227,7 @@ export default function InvoiceActions({
             <button
               onClick={sendToFactoring}
               disabled={busy || !company.trim()}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#1abc9c] hover:bg-[#16a085] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition"
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#1abc9c] hover:bg-[#16a085] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
             >
               <span className="material-symbols-outlined text-[18px]">account_balance</span>
               {factorLoading ? t('sendingToFactoring') : t('sendToFactoring')}

@@ -71,7 +71,7 @@ export default async function BillingPage() {
 
       <div className="space-y-4">
         {/* Plan */}
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5">
+        <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">{t('currentPlan')}</p>
           <div className="flex items-center justify-between">
             <span className="text-white text-lg font-semibold capitalize">{t(`tier_${tier}` as never)}</span>
@@ -81,7 +81,7 @@ export default async function BillingPage() {
 
         {/* Trial status */}
         {isTrialing && (
-          <div className="bg-white/5 border border-white/8 rounded-xl p-5">
+          <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">{t('trialStatus')}</p>
             {trialDaysLeft !== null ? (
               <>
@@ -101,7 +101,7 @@ export default async function BillingPage() {
         )}
 
         {/* Payment method */}
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5">
+        <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">{t('paymentMethod')}</p>
           <div className="flex items-center justify-between gap-4">
             <div>

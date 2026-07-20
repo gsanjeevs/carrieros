@@ -67,7 +67,7 @@ export default function Sidebar({ role, userName, userId, preferredLanguage }: P
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#f97316]/50 ${
                 active
                   ? 'bg-[#f97316]/10 text-[#f97316]'
                   : 'text-slate-400 hover:text-white hover:bg-white/5'
@@ -97,7 +97,7 @@ export default function Sidebar({ role, userName, userId, preferredLanguage }: P
         <form action={signOut}>
           <button
             type="submit"
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
           >
             <span className="material-symbols-outlined text-[18px] leading-none">logout</span>
             {tCommon('signOut')}

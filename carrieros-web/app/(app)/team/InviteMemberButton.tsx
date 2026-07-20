@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl'
 
 const ROLES = ['dispatcher', 'finance', 'owner'] as const
 
-const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-[#f97316] transition'
+const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 transition'
 const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
 
 export default function InviteMemberButton() {
@@ -76,7 +76,7 @@ export default function InviteMemberButton() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition"
+        className="flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
       >
         <span className="material-symbols-outlined text-[18px]">add</span>
         {t('inviteMember')}
@@ -84,10 +84,10 @@ export default function InviteMemberButton() {
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
-          <div className="w-full max-w-md bg-[#0f1923] border border-white/10 rounded-2xl p-6">
+          <div className="w-full max-w-md bg-[#0f1923] border border-white/10 rounded-2xl p-6 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-white font-semibold text-lg">{t('inviteMember')}</h2>
-              <button onClick={close} className="text-slate-500 hover:text-white transition">
+              <button onClick={close} className="text-slate-500 hover:text-white transition rounded focus:outline-none focus:ring-2 focus:ring-[#f97316]/50">
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
@@ -129,7 +129,7 @@ export default function InviteMemberButton() {
 
               <p className="text-xs text-slate-500">
                 {t('driverRoleNote')}{' '}
-                <Link href="/drivers" className="text-[#f97316] hover:underline">
+                <Link href="/drivers" className="text-[#f97316] hover:underline rounded focus:outline-none focus:ring-2 focus:ring-[#f97316]/50">
                   {t('driversHintLink')}
                 </Link>
               </p>
@@ -144,14 +144,14 @@ export default function InviteMemberButton() {
                 <button
                   onClick={close}
                   disabled={loading}
-                  className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm"
+                  className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
                 >
                   {tCommon('cancel')}
                 </button>
                 <button
                   onClick={submit}
                   disabled={loading || !form.email}
-                  className="flex-2 flex-grow py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm"
+                  className="flex-2 flex-grow py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
                 >
                   {loading ? t('sendingInvite') : t('sendInvite')}
                 </button>

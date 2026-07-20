@@ -122,10 +122,10 @@ export default function LoadDocuments({
   }
 
   const selectCls =
-    'bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#f97316] transition'
+    'bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 transition'
 
   return (
-    <div className="bg-white/5 border border-white/8 rounded-xl p-5">
+    <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-white font-medium text-sm">{t('documents')}</h2>
         {canUpload && (
@@ -155,7 +155,7 @@ export default function LoadDocuments({
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={busy}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition"
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
             >
               <span className="material-symbols-outlined text-[18px]">upload</span>
               {busy ? t('docUploading') : t('docUpload')}
@@ -173,13 +173,13 @@ export default function LoadDocuments({
           {documents.map((doc) => (
             <div
               key={doc.id}
-              className="group relative bg-white/5 border border-white/8 rounded-lg overflow-hidden"
+              className="group relative bg-white/5 border border-white/8 rounded-lg overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.35)] hover:bg-white/[0.07] hover:border-white/15 hover:shadow-[0_8px_24px_rgba(0,0,0,0.5)] transition-all duration-150"
             >
               <a
                 href={doc.signedUrl ?? '#'}
                 target="_blank"
                 rel="noreferrer"
-                className="block"
+                className="block focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
               >
                 {doc.isImage && doc.signedUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -215,7 +215,7 @@ export default function LoadDocuments({
                   disabled={deletingId === doc.id}
                   title={t('docDelete')}
                   aria-label={t('docDelete')}
-                  className="absolute top-1.5 right-1.5 w-7 h-7 rounded-md bg-black/60 hover:bg-red-500/80 text-white flex items-center justify-center transition disabled:opacity-40"
+                  className="absolute top-1.5 right-1.5 w-7 h-7 rounded-md bg-black/60 hover:bg-red-500/80 text-white flex items-center justify-center transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
                 >
                   <span className="material-symbols-outlined text-[16px]">delete</span>
                 </button>

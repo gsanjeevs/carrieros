@@ -36,16 +36,18 @@ export default async function SettingsPage() {
       <h1 className="text-white text-xl font-semibold mb-1">{t('title')}</h1>
       <p className="text-slate-400 text-sm mb-8">{t('subtitle')}</p>
 
-      <ProfileSettingsForm
-        userId={user.id}
-        current={{
-          preferred_language: profile?.preferred_language ?? 'en',
-          uom_system: (profile?.uom_system as 'imperial' | 'metric' | null) ?? null,
-          date_format: profile?.date_format ?? 'MM/DD/YYYY',
-          time_format: profile?.time_format ?? '12h',
-        }}
-        orgDefaultUom={orgDefaultUom}
-      />
+      <div className="bg-white/5 border border-white/8 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.35)] p-6">
+        <ProfileSettingsForm
+          userId={user.id}
+          current={{
+            preferred_language: profile?.preferred_language ?? 'en',
+            uom_system: (profile?.uom_system as 'imperial' | 'metric' | null) ?? null,
+            date_format: profile?.date_format ?? 'MM/DD/YYYY',
+            time_format: profile?.time_format ?? '12h',
+          }}
+          orgDefaultUom={orgDefaultUom}
+        />
+      </div>
     </div>
   )
 }

@@ -114,7 +114,7 @@ export default async function InvoicesPage({
       </div>
 
       {!invoices || invoices.length === 0 ? (
-        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center">
+        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
           <span className="material-symbols-outlined text-slate-600 text-4xl">receipt_long</span>
           <p className="text-slate-500 text-sm mt-3">
             {activeStatus ? t('noInvoicesForFilter') : t('noInvoicesYet')}
@@ -122,14 +122,14 @@ export default async function InvoicesPage({
           <p className="text-slate-600 text-xs mt-2">{t('createFromLoadHint')}</p>
           <Link
             href="/loads"
-            className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition"
+            className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
           >
             <span className="material-symbols-outlined text-[16px]">local_shipping</span>
             {t('goToLoads')}
           </Link>
         </div>
       ) : (
-        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden">
+        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/5">
@@ -144,11 +144,11 @@ export default async function InvoicesPage({
             </thead>
             <tbody className="divide-y divide-white/5">
               {invoices.map((inv) => (
-                <tr key={inv.id} className="hover:bg-white/3 transition-colors">
+                <tr key={inv.id} className="hover:bg-white/[0.07] transition-colors duration-150">
                   <td className="px-5 py-3.5">
                     <Link
                       href={`/invoices/${inv.invoice_number}`}
-                      className="text-white font-medium hover:text-[#f97316] transition-colors"
+                      className="text-white font-medium hover:text-[#f97316] transition-colors rounded focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
                     >
                       {inv.invoice_number}
                     </Link>
@@ -160,7 +160,7 @@ export default async function InvoicesPage({
                     {inv.loads?.load_number ? (
                       <Link
                         href={`/loads/${inv.loads.load_number}`}
-                        className="hover:text-[#f97316] transition-colors"
+                        className="hover:text-[#f97316] transition-colors rounded focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
                       >
                         {inv.loads.load_number}
                       </Link>
@@ -198,7 +198,7 @@ function FilterChip({ href, label, active }: { href: string; label: string; acti
   return (
     <Link
       href={href}
-      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-[#f97316]/50 ${
         active
           ? 'bg-[#f97316]/15 text-[#f97316] border border-[#f97316]/30'
           : 'bg-white/5 text-slate-400 border border-white/8 hover:text-white hover:bg-white/10'

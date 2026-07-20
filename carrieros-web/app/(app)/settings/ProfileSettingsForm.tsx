@@ -31,7 +31,7 @@ interface Current {
 }
 
 const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
-const selectCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#f97316] transition'
+const selectCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 transition'
 
 export default function ProfileSettingsForm({
   userId,
@@ -143,7 +143,7 @@ export default function ProfileSettingsForm({
       <button
         onClick={save}
         disabled={saving}
-        className="px-5 py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 text-white font-semibold rounded-lg transition text-sm"
+        className="px-5 py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
       >
         {saving ? t('saving') : saved ? t('saved') : t('saveChanges')}
       </button>

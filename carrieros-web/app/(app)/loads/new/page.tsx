@@ -6,7 +6,7 @@ export default function NewLoadPage() {
     <div className="p-8 max-w-2xl mx-auto">
 
       <div className="mb-8">
-        <Link href="/loads" className="text-slate-400 text-sm hover:text-white flex items-center gap-1.5 mb-4">
+        <Link href="/loads" className="text-slate-400 text-sm hover:text-white flex items-center gap-1.5 mb-4 rounded focus:outline-none focus:ring-2 focus:ring-[#f97316]/50">
           <span className="material-symbols-outlined text-[16px]">arrow_back</span>
           Back to Loads
         </Link>
@@ -19,7 +19,7 @@ export default function NewLoadPage() {
         {/* Paste rate con */}
         <Link
           href="/loads/new/paste"
-          className="group flex items-start gap-4 p-5 bg-white/5 border border-white/8 hover:border-[#f97316]/40 hover:bg-[#f97316]/5 rounded-xl transition-colors"
+          className="group flex items-start gap-4 p-5 bg-white/5 border border-white/8 hover:border-[#f97316]/40 hover:bg-[#f97316]/5 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.35)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.5)] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
         >
           <div className="w-10 h-10 rounded-lg bg-[#f97316]/15 flex items-center justify-center flex-shrink-0 group-hover:bg-[#f97316]/25 transition-colors">
             <span className="material-symbols-outlined text-[#f97316] text-[20px]">content_paste</span>
@@ -37,7 +37,7 @@ export default function NewLoadPage() {
             extraction feature that hasn't been scoped. */}
         <div
           aria-disabled="true"
-          className="flex items-start gap-4 p-5 bg-white/5 border border-white/8 rounded-xl opacity-50 cursor-not-allowed"
+          className="flex items-start gap-4 p-5 bg-white/5 border border-white/8 rounded-xl opacity-50 cursor-not-allowed shadow-[0_2px_8px_rgba(0,0,0,0.35)]"
         >
           <div className="w-10 h-10 rounded-lg bg-[#1abc9c]/15 flex items-center justify-center flex-shrink-0">
             <span className="material-symbols-outlined text-[#1abc9c] text-[20px]">upload_file</span>
@@ -52,7 +52,7 @@ export default function NewLoadPage() {
         {/* Manual entry — same issue, same fix (/loads/new/manual didn't exist). */}
         <div
           aria-disabled="true"
-          className="flex items-start gap-4 p-5 bg-white/5 border border-white/8 rounded-xl opacity-50 cursor-not-allowed"
+          className="flex items-start gap-4 p-5 bg-white/5 border border-white/8 rounded-xl opacity-50 cursor-not-allowed shadow-[0_2px_8px_rgba(0,0,0,0.35)]"
         >
           <div className="w-10 h-10 rounded-lg bg-white/8 flex items-center justify-center flex-shrink-0">
             <span className="material-symbols-outlined text-slate-400 text-[20px]">edit</span>

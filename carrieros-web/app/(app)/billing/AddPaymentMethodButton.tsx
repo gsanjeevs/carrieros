@@ -48,7 +48,7 @@ export default function AddPaymentMethodButton({ hasPaymentMethod }: { hasPaymen
       <button
         onClick={addPaymentMethod}
         disabled={loading}
-        className="flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition whitespace-nowrap"
+        className="flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
       >
         <span className="material-symbols-outlined text-[18px]">credit_card</span>
         {loading ? t('addingPaymentMethod') : hasPaymentMethod ? t('replacePaymentMethod') : t('addPaymentMethod')}

@@ -73,7 +73,7 @@ export default async function LoadsPage({
         </div>
         <Link
           href="/loads/new"
-          className="flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition"
+          className="flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
           {t('addLoad')}
@@ -88,19 +88,19 @@ export default async function LoadsPage({
       )}
 
       {!loads || loads.length === 0 ? (
-        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center">
+        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
           <span className="material-symbols-outlined text-slate-600 text-4xl">local_shipping</span>
           <p className="text-slate-500 text-sm mt-3">{t('noLoadsYet')}</p>
           <Link
             href="/loads/new"
-            className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition"
+            className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
           >
             <span className="material-symbols-outlined text-[16px]">add</span>
             {t('createFirstLoad')}
           </Link>
         </div>
       ) : (
-        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden">
+        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/5">
@@ -123,9 +123,9 @@ export default async function LoadsPage({
                   [load.delivery_city, load.delivery_state].filter(Boolean).join(', ')
 
                 return (
-                  <tr key={load.id} className="hover:bg-white/3 transition-colors">
+                  <tr key={load.id} className="hover:bg-white/[0.07] transition-colors duration-150">
                     <td className="px-5 py-3.5">
-                      <Link href={`/loads/${load.load_number}`} className="text-white font-medium hover:text-[#f97316] transition-colors">
+                      <Link href={`/loads/${load.load_number}`} className="text-white font-medium hover:text-[#f97316] transition-colors rounded focus:outline-none focus:ring-2 focus:ring-[#f97316]/50">
                         {load.load_number}
                       </Link>
                     </td>

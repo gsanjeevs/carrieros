@@ -172,7 +172,7 @@ export default async function LoadDetailPage({
       <div className="flex items-start justify-between mb-8">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <Link href="/loads" className="text-slate-500 hover:text-white transition">
+            <Link href="/loads" className="text-slate-500 hover:text-white transition rounded focus:outline-none focus:ring-2 focus:ring-[#f97316]/50">
               <span className="material-symbols-outlined text-[20px]">arrow_back</span>
             </Link>
             <h1 className="text-2xl font-semibold text-white">{load.load_number}</h1>
@@ -189,7 +189,7 @@ export default async function LoadDetailPage({
       </div>
 
       {/* Status timeline */}
-      <div className="bg-white/5 border border-white/8 rounded-xl p-5 mb-6">
+      <div className="bg-white/5 border border-white/8 rounded-xl p-5 mb-6 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
         <div className="flex items-center gap-0 overflow-x-auto">
           {STATUS_FLOW.map((s, i) => {
             const done    = i < currentIdx
@@ -224,7 +224,7 @@ export default async function LoadDetailPage({
         <div className="lg:col-span-2 space-y-6">
 
           {/* Route */}
-          <div className="bg-white/5 border border-white/8 rounded-xl p-5">
+          <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
             <h2 className="text-white font-medium text-sm mb-4">{t('route')}</h2>
             <div className="grid grid-cols-2 gap-6">
               <div>
@@ -243,7 +243,7 @@ export default async function LoadDetailPage({
           </div>
 
           {/* Load info */}
-          <div className="bg-white/5 border border-white/8 rounded-xl p-5">
+          <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
             <h2 className="text-white font-medium text-sm mb-3">{t('loadDetails')}</h2>
             <InfoRow label={t('customer')}  value={customerName ?? load.customer_name_raw} />
             <InfoRow label={t('commodity')} value={load.commodity} />
@@ -264,7 +264,7 @@ export default async function LoadDetailPage({
           />
 
           {/* Timeline */}
-          <div className="bg-white/5 border border-white/8 rounded-xl p-5">
+          <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
             <h2 className="text-white font-medium text-sm mb-4">{t('activity')}</h2>
             {!events || events.length === 0 ? (
               <p className="text-slate-500 text-sm">{t('noActivityYet')}</p>
@@ -294,7 +294,7 @@ export default async function LoadDetailPage({
 
         {/* Right: Dispatch panel */}
         <div className="space-y-6">
-          <div className="bg-white/5 border border-white/8 rounded-xl p-5">
+          <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
             <h2 className="text-white font-medium text-sm mb-4">{t('assignment')}</h2>
             <div className="space-y-3 mb-4">
               <div className="flex items-center gap-3">

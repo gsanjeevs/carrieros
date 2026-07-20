@@ -67,13 +67,13 @@ export default async function TrucksPage({
       )}
 
       {trucks.length === 0 ? (
-        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center">
+        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
           <span className="material-symbols-outlined text-slate-600 text-4xl">fire_truck</span>
           <p className="text-slate-500 text-sm mt-3">{t('noTrucksYet')}</p>
           {canManage && <AddTruckButton variant="empty" />}
         </div>
       ) : (
-        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden">
+        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/5">
@@ -89,7 +89,7 @@ export default async function TrucksPage({
                 const plate = [truck.license_plate, truck.license_state].filter(Boolean).join(' / ')
 
                 return (
-                  <tr key={truck.id} className="hover:bg-white/3 transition-colors">
+                  <tr key={truck.id} className="hover:bg-white/[0.07] transition-colors duration-150">
                     <td className="px-5 py-3.5 text-white font-medium">{truck.truck_number}</td>
                     <td className="px-4 py-3.5 text-slate-300">{truck.nickname ?? '—'}</td>
                     <td className="px-4 py-3.5 text-slate-400">{ymm || '—'}</td>

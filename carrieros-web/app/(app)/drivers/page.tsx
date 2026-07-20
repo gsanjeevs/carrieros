@@ -94,13 +94,13 @@ export default async function DriversPage({
       )}
 
       {drivers.length === 0 ? (
-        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center">
+        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
           <span className="material-symbols-outlined text-slate-600 text-4xl">person</span>
           <p className="text-slate-500 text-sm mt-3">{t('noDriversYet')}</p>
           {canManage && <InviteDriverButton trucks={trucks} variant="empty" />}
         </div>
       ) : (
-        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden">
+        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/5">
@@ -118,7 +118,7 @@ export default async function DriversPage({
                 const name = [driver.profiles?.first_name, driver.profiles?.last_name].filter(Boolean).join(' ') || '—'
 
                 return (
-                  <tr key={driver.id} className="hover:bg-white/3 transition-colors">
+                  <tr key={driver.id} className="hover:bg-white/[0.07] transition-colors duration-150">
                     <td className="px-5 py-3.5 text-white font-medium">{driver.driver_number}</td>
                     <td className="px-4 py-3.5 text-slate-300">{name}</td>
                     <td className="px-4 py-3.5">
