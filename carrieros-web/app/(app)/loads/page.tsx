@@ -114,7 +114,7 @@ export default async function LoadsPage({
             </thead>
             <tbody className="divide-y divide-white/5">
               {loads.map((load) => {
-                const badge = STATUS_BADGE[load.status] ?? STATUS_BADGE.draft
+                const badge = (load.status ? STATUS_BADGE[load.status] : null) ?? STATUS_BADGE.draft
                 const route =
                   [load.pickup_city, load.pickup_state].filter(Boolean).join(', ') +
                   ' → ' +

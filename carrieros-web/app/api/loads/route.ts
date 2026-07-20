@@ -3,6 +3,30 @@ import { generateLoadNumber } from '@/lib/generate-number'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 
+// The request body is untrusted JSON, so every field is narrowed to the
+// column's actual type before it reaches the insert. Absent/empty means null;
+// a value of the wrong shape (an object where a string belongs, a
+// non-numeric weight) is a client error, not something to coerce silently.
+class InvalidField extends Error {
+  constructor(field: string) { super(`Invalid value for "${field}"`) }
+}
+
+function text(body: Record<string, unknown>, field: string): string | null {
+  const v = body[field]
+  if (v === null || v === undefined || v === '') return null
+  if (typeof v === 'string') return v
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v)
+  throw new InvalidField(field)
+}
+
+function number(body: Record<string, unknown>, field: string): number | null {
+  const v = body[field]
+  if (v === null || v === undefined || v === '') return null
+  const n = typeof v === 'number' ? v : typeof v === 'string' ? Number(v) : NaN
+  if (!Number.isFinite(n)) throw new InvalidField(field)
+  return n
+}
+
 export async function POST(request: NextRequest) {
   const ctx = await getAuthedContext(request)
   if (isErrorResponse(ctx)) return ctx
@@ -29,33 +53,45 @@ export async function POST(request: NextRequest) {
     return apiError('VALIDATION_ERROR', 'Invalid request body', 400)
   }
 
+  let values
+  try {
+    values = {
+      customer_name_raw: text(body, 'customer_name_raw'),
+      pickup_address:    text(body, 'pickup_address'),
+      pickup_city:       text(body, 'pickup_city'),
+      pickup_state:      text(body, 'pickup_state'),
+      pickup_zip:        text(body, 'pickup_zip'),
+      pickup_date:       text(body, 'pickup_date'),
+      pickup_time:       text(body, 'pickup_time'),
+      delivery_address:  text(body, 'delivery_address'),
+      delivery_city:     text(body, 'delivery_city'),
+      delivery_state:    text(body, 'delivery_state'),
+      delivery_zip:      text(body, 'delivery_zip'),
+      delivery_date:     text(body, 'delivery_date'),
+      delivery_time:     text(body, 'delivery_time'),
+      commodity:         text(body, 'commodity'),
+      weight_lbs:        number(body, 'weight_lbs'),
+      rate:              number(body, 'rate'),
+      total_miles:       number(body, 'total_miles'),
+      intake_method:     text(body, 'intake_method') ?? 'manual',
+      raw_intake_text:   text(body, 'raw_intake_text'),
+    }
+  } catch (e) {
+    if (e instanceof InvalidField) return apiError('VALIDATION_ERROR', e.message, 400)
+    throw e
+  }
+
+  // Only after the body validates — next_entity_val() burns a sequence value
+  // on every call, so a rejected request must not consume a load number.
   const load_number = await generateLoadNumber(supabase, profile.org_id)
 
   const { data: load, error } = await supabase
     .from('loads')
     .insert({
-      carrier_org_id:    profile.org_id,
+      carrier_org_id: profile.org_id,
       load_number,
-      customer_name_raw: body.customer_name_raw ?? null,
-      pickup_address:    body.pickup_address    ?? null,
-      pickup_city:       body.pickup_city       ?? null,
-      pickup_state:      body.pickup_state      ?? null,
-      pickup_zip:        body.pickup_zip        ?? null,
-      pickup_date:       body.pickup_date       ?? null,
-      pickup_time:       body.pickup_time       ?? null,
-      delivery_address:  body.delivery_address  ?? null,
-      delivery_city:     body.delivery_city     ?? null,
-      delivery_state:    body.delivery_state    ?? null,
-      delivery_zip:      body.delivery_zip      ?? null,
-      delivery_date:     body.delivery_date     ?? null,
-      delivery_time:     body.delivery_time     ?? null,
-      commodity:         body.commodity         ?? null,
-      weight_lbs:        body.weight_lbs        ?? null,
-      rate:              body.rate              ?? null,
-      total_miles:       body.total_miles       ?? null,
-      intake_method:     body.intake_method     ?? 'manual',
-      raw_intake_text:   body.raw_intake_text   ?? null,
-      status:           'draft',
+      status: 'draft',
+      ...values,
     })
     .select('load_number')
     .single()

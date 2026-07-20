@@ -45,7 +45,8 @@ export default async function DashboardPage() {
   ])
 
   const activeLoads = (loadsRes.data ?? []).filter(
-    (l: { status: string }) => ['dispatched','picked_up','in_transit'].includes(l.status)
+    (l: { status: string | null }) =>
+      l.status !== null && ['dispatched','picked_up','in_transit'].includes(l.status)
   ).length
 
   const kpis: KpiCard[] = [

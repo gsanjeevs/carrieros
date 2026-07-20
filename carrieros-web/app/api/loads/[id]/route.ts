@@ -27,12 +27,21 @@ export async function PATCH(
     return apiError('FORBIDDEN', 'Insufficient permissions', 403)
 
   const body = await request.json()
-  const update: Record<string, unknown> = {}
+  const update: { driver_id?: number | null; truck_id?: number | null; status?: string } = {}
 
-  if ('driver_id' in body) update.driver_id = body.driver_id ?? null
-  if ('truck_id'  in body) update.truck_id  = body.truck_id  ?? null
+  // driver_id/truck_id are BIGINT FKs — null clears the assignment, anything
+  // that isn't a number is a client error rather than something to pass through.
+  for (const field of ['driver_id', 'truck_id'] as const) {
+    if (!(field in body)) continue
+    const v = body[field]
+    if (v === null || v === undefined || v === '') { update[field] = null; continue }
+    const n = typeof v === 'number' ? v : typeof v === 'string' ? Number(v) : NaN
+    if (!Number.isInteger(n)) return apiError('VALIDATION_ERROR', `Invalid ${field}`, 400)
+    update[field] = n
+  }
+
   if ('status' in body) {
-    if (!VALID_STATUSES.includes(body.status))
+    if (typeof body.status !== 'string' || !VALID_STATUSES.includes(body.status))
       return apiError('VALIDATION_ERROR', 'Invalid status', 400)
     update.status = body.status
   }
