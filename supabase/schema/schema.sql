@@ -614,8 +614,14 @@ CREATE POLICY "customer_loads_select" ON loads FOR SELECT USING (
   customer_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
   AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('customer_admin','customer_viewer')
 );
-CREATE POLICY "public_tracking_select" ON loads FOR SELECT TO anon
-  USING (tracking_token IS NOT NULL);
+-- REMOVED 2026-07-20 (audit finding): this had no token equality check at
+-- all -- USING (tracking_token IS NOT NULL) -- inert only because `anon` has
+-- no SELECT grant on loads. The moment anyone grants that for any unrelated
+-- reason, every load in every org leaks to unauthenticated callers. The
+-- public tracking page (app/track/[token]/page.tsx) never queries `loads`
+-- directly anyway -- it goes through get_public_tracking(p_token), a
+-- SECURITY DEFINER RPC with an explicit column allowlist. Do not re-add a
+-- broad anon policy here; extend that RPC instead.
 
 -- INVOICES
 ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
