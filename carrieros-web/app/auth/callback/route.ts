@@ -3,6 +3,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse, type NextRequest } from 'next/server'
+import type { EmailOtpType } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase'
 
 const ROLE_HOME: Record<string, string> = {
@@ -16,9 +17,22 @@ const ROLE_HOME: Record<string, string> = {
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/'
+  // Admin-issued links (invite, and any other type sent via the Admin Auth
+  // API rather than a browser-initiated signInWithOtp/OAuth call) have no
+  // PKCE code_verifier to redeem against, so GoTrue can't hand back a
+  // `code`. Our invite email template (supabase/templates/invite.html)
+  // instead links here with token_hash + type, verified via verifyOtp —
+  // same destination, same role-redirect logic below either way.
+  const token_hash = searchParams.get('token_hash')
+  const type = searchParams.get('type') as EmailOtpType | null
+  // No caller currently passes `next` (neither the team nor drivers invite
+  // route sets it on redirectTo). Defaulting it to '/' would trivially pass
+  // the startsWith('/') check below and silently win over the role-based
+  // `home`, so every invited user would land on /dashboard regardless of
+  // role. Only trust `next` when the request actually supplied one.
+  const nextParam = searchParams.get('next')
 
-  if (!code) {
+  if (!code && !token_hash) {
     return NextResponse.redirect(`${origin}/login?error=missing_code`)
   }
 
@@ -38,7 +52,9 @@ export async function GET(request: NextRequest) {
     }
   )
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code)
+  const { error } = code
+    ? await supabase.auth.exchangeCodeForSession(code)
+    : await supabase.auth.verifyOtp({ type: type ?? 'invite', token_hash: token_hash! })
 
   if (error) {
     console.error('[auth/callback] error:', error.message)
@@ -58,7 +74,7 @@ export async function GET(request: NextRequest) {
     const home = ROLE_HOME[role] ?? '/dashboard'
 
     // If 'next' is a safe internal path, use it; otherwise use role home
-    const destination = next.startsWith('/') ? next : home
+    const destination = nextParam && nextParam.startsWith('/') ? nextParam : home
     return NextResponse.redirect(`${origin}${destination}`)
   }
 
