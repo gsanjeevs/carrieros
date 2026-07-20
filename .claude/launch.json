@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "carrieros-web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "carrieros-web"],
+      "port": 3000
+    },
+    {
+      "name": "carrieros-mobile (web preview)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "web", "--prefix", "carrieros-mobile"],
+      "port": 8081
+    },
+    {
+      "name": "supabase (local Studio)",
+      "runtimeExecutable": "supabase",
+      "runtimeArgs": ["start"],
+      "port": 54323
+    }
+  ]
+}
