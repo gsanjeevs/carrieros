@@ -180,7 +180,7 @@
   },
   "invoices": {
     "title": "انوائسز",
-    "invoiceCount": "{count} انوائسز",
+    "invoiceCount": "{count, plural, =0 {کوئی انوائس نہیں} one {# انوائس} other {# انوائسز}}",
     "totalValue": "کل {amount}",
     "createdSuccess": "انوائس {invoiceNumber} بن گیا۔",
     "filterAll": "سب",

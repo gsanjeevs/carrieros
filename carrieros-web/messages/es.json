@@ -180,7 +180,7 @@
   },
   "invoices": {
     "title": "Facturas",
-    "invoiceCount": "{count} facturas",
+    "invoiceCount": "{count, plural, =0 {Sin facturas} one {# factura} other {# facturas}}",
     "totalValue": "{amount} en total",
     "createdSuccess": "Factura {invoiceNumber} creada.",
     "filterAll": "Todas",
