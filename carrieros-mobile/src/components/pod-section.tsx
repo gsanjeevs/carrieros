@@ -5,9 +5,11 @@
 // Storage contract (must be matched exactly or the upload 403s):
 //   bucket `documents` (PRIVATE) — path `{carrier_org_id}/loads/{load_id}/{file}`
 // RLS on storage.objects keys INSERT/SELECT off the FIRST path segment
-// equalling the caller's org id. Only owner/solo may DELETE, which is why the
-// orphan-cleanup path below can fail for a driver and falls back to surfacing
-// the orphaned path in the error message.
+// equalling the caller's org id. DELETE is owner/solo-only via
+// `owner_solo_docs_delete`, but the additional `member_deletes_orphan_docs`
+// policy lets ANY org member delete an object as long as no `documents` row
+// references it — which is exactly the rollback case below, so drivers can
+// now clean up their own failed uploads.
 //
 // The bucket is private, so listing thumbnails uses createSignedUrl() —
 // getPublicUrl() returns a URL that always 400s here.
@@ -151,15 +153,14 @@ export function PodSection({ loadId }: { loadId: number }) {
       });
 
       if (insertErr) {
-        // Don't leave a silent orphan in the bucket. Drivers can't DELETE
-        // from storage (owner/solo only), so if the cleanup itself fails we
-        // name the orphaned path in the error instead of swallowing it.
+        // Don't leave a silent orphan in the bucket. The insert failed, so no
+        // `documents` row points at this object and `member_deletes_orphan_docs`
+        // permits the delete for every role — the rollback is expected to
+        // succeed. It's still best-effort (a network drop could strand the
+        // file), so a failed cleanup is logged rather than claimed as clean.
         const { error: removeErr } = await supabase.storage.from(BUCKET).remove([storagePath]);
-        setError(
-          removeErr
-            ? t('pod.errorSaveFailedOrphan', { path: storagePath })
-            : t('pod.errorSaveFailed')
-        );
+        if (removeErr) console.warn('POD rollback failed to remove', storagePath, removeErr);
+        setError(t('pod.errorSaveFailed'));
         return;
       }
 

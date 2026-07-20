@@ -7,13 +7,24 @@
 // .signature_url stays null. Revisit once a signature capture approach is
 // chosen — don't treat the checkbox as the permanent design.
 //
-// Also deferred: defect photos (dvir_defects.photo_path). expo-camera/
-// expo-image-picker are installed but unused here — wiring that up needs a
-// Supabase Storage bucket, which doesn't exist yet (see tech-spec §9).
+// Defect photos (dvir_defects.photo_path) upload to the PRIVATE `documents`
+// bucket at `{carrier_org_id}/dvir/{inspection_id}/{file}` — storage RLS keys
+// INSERT/SELECT off the first path segment matching the caller's org. The
+// inspection id doesn't exist until the dvir_inspections row is inserted, so
+// photos are held in local state and uploaded *after* that insert, and before
+// the dvir_defects rows that reference their paths.
+//
+// The DVIR itself is the compliance artifact: a failed photo upload must NOT
+// abort the inspection. Those defects are saved with a null photo_path and
+// the driver gets a warning instead.
+//
+// Blob is deliberately avoided — see src/lib/base64.ts (RN Blob uploads
+// 0 bytes). Same pick/upload approach as src/components/pod-section.tsx.
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
+import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -21,12 +32,14 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
+import { base64ToArrayBuffer } from '@/lib/base64';
 import { supabase } from '@/lib/supabase';
 import { resolveSubmitter } from '@/lib/submitter';
 
 const ORANGE = '#f97316';
 const RED = '#dc2626';
 const GREEN = '#16a34a';
+const BUCKET = 'documents';
 
 // Keys map 1:1 to src/messages/*.json dvir.areas.* — labels are resolved via
 // t() at render time, not hardcoded here.
@@ -42,7 +55,16 @@ const AREAS = [
 ] as const;
 
 type AreaKey = (typeof AREAS)[number]['key'];
-type AreaState = { defect: boolean; description: string; severity: 'minor' | 'major' };
+// `photo` holds the picked image locally until submit — one per defect,
+// matching the single-path dvir_defects.photo_path column. `uri` is only for
+// the pre-submit preview thumbnail; `base64` is what actually gets uploaded.
+type DefectPhoto = { uri: string; base64: string };
+type AreaState = {
+  defect: boolean;
+  description: string;
+  severity: 'minor' | 'major';
+  photo: DefectPhoto | null;
+};
 
 export default function DVIRScreen() {
   const theme = useTheme();
@@ -52,7 +74,9 @@ export default function DVIRScreen() {
   const { t } = useLocale();
 
   const [areas, setAreas] = useState<Record<AreaKey, AreaState>>(() =>
-    Object.fromEntries(AREAS.map((a) => [a.key, { defect: false, description: '', severity: 'minor' as const }])) as Record<AreaKey, AreaState>
+    Object.fromEntries(
+      AREAS.map((a) => [a.key, { defect: false, description: '', severity: 'minor' as const, photo: null }])
+    ) as Record<AreaKey, AreaState>
   );
   const [odometer, setOdometer] = useState('');
   const [certified, setCertified] = useState(false);
@@ -60,6 +84,9 @@ export default function DVIRScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
+  // Non-fatal: photos that failed to upload after the inspection was already
+  // saved. Shown on the confirmation screen, not treated as a submit failure.
+  const [photoWarningCount, setPhotoWarningCount] = useState(0);
 
   // resolveSubmitter (who's filing this inspection, and under which carrier
   // org) now lives in src/lib/submitter.ts — POD upload needs the same
@@ -94,6 +121,51 @@ export default function DVIRScreen() {
       ...prev,
       [key]: { ...prev[key], severity: prev[key].severity === 'minor' ? 'major' : 'minor' },
     }));
+  }
+
+  // Mirrors pod-section.tsx's pick(): permissions are no-ops on web, but must
+  // be requested before launching on native. base64:true is required — see the
+  // Blob note in src/lib/base64.ts.
+  async function pickPhoto(key: AreaKey, source: 'camera' | 'library') {
+    setError('');
+
+    const permission =
+      source === 'camera'
+        ? await ImagePicker.requestCameraPermissionsAsync()
+        : await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permission.granted) {
+      setError(source === 'camera' ? t('dvir.errorCameraDenied') : t('dvir.errorLibraryDenied'));
+      return;
+    }
+
+    const options: ImagePicker.ImagePickerOptions = {
+      mediaTypes: ['images'],
+      quality: 0.7,
+      base64: true,
+    };
+
+    const result =
+      source === 'camera'
+        ? await ImagePicker.launchCameraAsync(options)
+        : await ImagePicker.launchImageLibraryAsync(options);
+
+    if (result.canceled) return;
+
+    const asset = result.assets?.[0];
+    if (!asset?.base64) {
+      setError(t('dvir.errorNoImageData'));
+      return;
+    }
+
+    setAreas((prev) => ({
+      ...prev,
+      [key]: { ...prev[key], photo: { uri: asset.uri, base64: asset.base64! } },
+    }));
+  }
+
+  function removePhoto(key: AreaKey) {
+    setAreas((prev) => ({ ...prev, [key]: { ...prev[key], photo: null } }));
   }
 
   async function submit() {
@@ -151,19 +223,49 @@ export default function DVIRScreen() {
     }
 
     if (defectAreas.length > 0) {
-      const { error: defectsErr } = await supabase.from('dvir_defects').insert(
-        defectAreas.map((a) => ({
+      // Photos can only be uploaded now that we have an inspection id for the
+      // path. A failure here is deliberately non-fatal: the defect row is
+      // still written, just with photo_path null.
+      let failedPhotos = 0;
+      const rows = [];
+
+      for (const a of defectAreas) {
+        const state = areas[a.key];
+        let photoPath: string | null = null;
+
+        if (state.photo) {
+          const path = `${submitter.carrierOrgId}/dvir/${inspection.id}/${a.key}-${Date.now()}.jpg`;
+          try {
+            const { error: uploadErr } = await supabase.storage
+              .from(BUCKET)
+              .upload(path, base64ToArrayBuffer(state.photo.base64), {
+                contentType: 'image/jpeg',
+                upsert: false,
+              });
+            if (uploadErr) failedPhotos += 1;
+            else photoPath = path;
+          } catch {
+            failedPhotos += 1;
+          }
+        }
+
+        rows.push({
           inspection_id: inspection.id,
           area: a.key,
-          description: areas[a.key].description.trim(),
-          severity: areas[a.key].severity,
-        }))
-      );
+          description: state.description.trim(),
+          severity: state.severity,
+          photo_path: photoPath,
+        });
+      }
+
+      const { error: defectsErr } = await supabase.from('dvir_defects').insert(rows);
       if (defectsErr) {
         setError(t('dvir.errorDefectsSaveFailed'));
         setSubmitting(false);
         return;
       }
+
+      setPhotoWarningCount(failedPhotos);
     }
 
     setSubmitting(false);
@@ -174,6 +276,11 @@ export default function DVIRScreen() {
     return (
       <ThemedView style={styles.centered}>
         <ThemedText type="title" style={{ color: GREEN, fontSize: 22 }}>{t('dvir.submitted')}</ThemedText>
+        {photoWarningCount > 0 && (
+          <ThemedText type="small" style={[styles.warning, styles.doneWarning]}>
+            {t('dvir.photoUploadFailedWarning', { count: photoWarningCount })}
+          </ThemedText>
+        )}
         <Pressable onPress={() => router.back()} style={styles.doneButton}>
           <ThemedText type="smallBold" style={{ color: '#ffffff' }}>{t('dvir.backToLoad')}</ThemedText>
         </Pressable>
@@ -236,6 +343,31 @@ export default function DVIRScreen() {
                         {state.severity === 'major' ? t('dvir.severityMajor') : t('dvir.severityMinor')}
                       </ThemedText>
                     </Pressable>
+
+                    {state.photo ? (
+                      <View style={styles.photoRow}>
+                        <Image source={{ uri: state.photo.uri }} style={styles.photoThumb} resizeMode="cover" />
+                        <View style={styles.photoMeta}>
+                          <ThemedText type="small" themeColor="textSecondary">
+                            {t('dvir.photoAttached')}
+                          </ThemedText>
+                          <Pressable onPress={() => removePhoto(a.key)}>
+                            <ThemedText type="smallBold" style={{ color: RED }}>
+                              {t('dvir.removePhoto')}
+                            </ThemedText>
+                          </Pressable>
+                        </View>
+                      </View>
+                    ) : (
+                      <View style={styles.photoButtonRow}>
+                        <Pressable style={styles.photoButton} onPress={() => pickPhoto(a.key, 'camera')}>
+                          <ThemedText type="smallBold" themeColor="text">{t('dvir.takePhoto')}</ThemedText>
+                        </Pressable>
+                        <Pressable style={styles.photoButton} onPress={() => pickPhoto(a.key, 'library')}>
+                          <ThemedText type="smallBold" themeColor="text">{t('dvir.chooseFromLibrary')}</ThemedText>
+                        </Pressable>
+                      </View>
+                    )}
                   </ThemedView>
                 )}
               </ThemedView>
@@ -296,6 +428,19 @@ const styles = StyleSheet.create({
   heading: { fontSize: 22 },
   subheading: { marginBottom: Spacing.two },
   warning: { color: '#d97706', marginBottom: Spacing.two },
+  doneWarning: { textAlign: 'center', paddingHorizontal: Spacing.four },
+  photoButtonRow: { flexDirection: 'row', gap: Spacing.two },
+  photoButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: ORANGE,
+    borderRadius: 8,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  photoRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
+  photoThumb: { width: 64, height: 64, borderRadius: 8, backgroundColor: '#00000022' },
+  photoMeta: { gap: 4 },
   areaCard: { borderRadius: 12, padding: Spacing.three, gap: Spacing.two },
   areaHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   areaPill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },

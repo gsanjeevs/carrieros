@@ -75,7 +75,15 @@
     "errorMissingDescription": "Add a description for every area flagged as a defect.",
     "errorResolveAccount": "Could not resolve your account for this inspection.",
     "errorSubmitFailed": "Could not submit inspection. Try again.",
-    "errorDefectsSaveFailed": "Inspection saved, but defect details failed to save. Notify your dispatcher directly."
+    "errorDefectsSaveFailed": "Inspection saved, but defect details failed to save. Notify your dispatcher directly.",
+    "takePhoto": "Take Photo",
+    "chooseFromLibrary": "Choose from Library",
+    "photoAttached": "Photo attached",
+    "removePhoto": "Remove photo",
+    "errorCameraDenied": "Camera access was denied. Enable camera permission in your device settings to take a photo.",
+    "errorLibraryDenied": "Photo library access was denied. Enable photo permission in your device settings to choose a photo.",
+    "errorNoImageData": "Could not read the selected image. Please try again.",
+    "photoUploadFailedWarning": "The inspection was saved, but %{count} defect photo(s) could not be uploaded. Those defects were recorded without a photo — report them to your dispatcher."
   },
   "settings": {
     "title": "Settings",
@@ -110,7 +118,6 @@
     "errorNotSignedIn": "You are signed out. Sign in again to upload.",
     "errorResolveAccount": "Could not resolve your carrier account.",
     "errorUploadFailed": "Upload failed. Check your connection and try again.",
-    "errorSaveFailed": "The photo could not be saved to this load. The upload was removed — please try again.",
-    "errorSaveFailedOrphan": "The photo uploaded but could not be attached to this load, and the file could not be removed. Ask your carrier admin to clean up %{path}."
+    "errorSaveFailed": "The photo could not be saved to this load. The upload was removed — please try again."
   }
 }

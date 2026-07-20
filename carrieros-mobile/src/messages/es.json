@@ -75,7 +75,15 @@
     "errorMissingDescription": "Agrega una descripción para cada área marcada como defecto.",
     "errorResolveAccount": "No se pudo identificar tu cuenta para esta inspección.",
     "errorSubmitFailed": "No se pudo enviar la inspección. Inténtalo de nuevo.",
-    "errorDefectsSaveFailed": "Inspección guardada, pero los detalles del defecto no se guardaron. Notifica directamente a tu despachador."
+    "errorDefectsSaveFailed": "Inspección guardada, pero los detalles del defecto no se guardaron. Notifica directamente a tu despachador.",
+    "takePhoto": "Tomar foto",
+    "chooseFromLibrary": "Elegir de la galería",
+    "photoAttached": "Foto adjunta",
+    "removePhoto": "Quitar foto",
+    "errorCameraDenied": "Se denegó el acceso a la cámara. Habilite el permiso de cámara en los ajustes de su dispositivo para tomar una foto.",
+    "errorLibraryDenied": "Se denegó el acceso a la galería. Habilite el permiso de fotos en los ajustes de su dispositivo para elegir una foto.",
+    "errorNoImageData": "No se pudo leer la imagen seleccionada. Inténtelo de nuevo.",
+    "photoUploadFailedWarning": "La inspección se guardó, pero %{count} foto(s) de defecto no se pudieron subir. Esos defectos se registraron sin foto — infórmelos a su despachador."
   },
   "settings": {
     "title": "Configuración",
@@ -110,7 +118,6 @@
     "errorNotSignedIn": "Su sesión se cerró. Inicie sesión de nuevo para subir archivos.",
     "errorResolveAccount": "No se pudo determinar su cuenta de transportista.",
     "errorUploadFailed": "Error al subir. Verifique su conexión e inténtelo de nuevo.",
-    "errorSaveFailed": "La foto no se pudo guardar en esta carga. La subida se eliminó; inténtelo de nuevo.",
-    "errorSaveFailedOrphan": "La foto se subió pero no se pudo adjuntar a esta carga, y el archivo no se pudo eliminar. Pida al administrador de su transportista que elimine %{path}."
+    "errorSaveFailed": "La foto no se pudo guardar en esta carga. La subida se eliminó; inténtelo de nuevo."
   }
 }
