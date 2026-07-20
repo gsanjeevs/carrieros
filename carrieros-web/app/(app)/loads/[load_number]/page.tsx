@@ -2,17 +2,20 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
+import { getTranslations, getLocale } from 'next-intl/server'
 import DispatchPanel from '@/components/DispatchPanel'
+import LoadDocuments, { type DocType, type LoadDocument } from '@/components/LoadDocuments'
+import { formatDateTime } from '@/lib/format-datetime'
 
-const STATUS_FLOW = [
-  { key: 'draft',      label: 'Draft',      icon: 'draft' },
-  { key: 'scheduled',  label: 'Scheduled',  icon: 'event' },
-  { key: 'dispatched', label: 'Dispatched', icon: 'send' },
-  { key: 'picked_up',  label: 'Picked Up',  icon: 'inventory_2' },
-  { key: 'in_transit', label: 'In Transit', icon: 'local_shipping' },
-  { key: 'delivered',  label: 'Delivered',  icon: 'where_to_vote' },
-  { key: 'invoiced',   label: 'Invoiced',   icon: 'receipt' },
-  { key: 'paid',       label: 'Paid',       icon: 'paid' },
+const STATUS_FLOW_KEYS = [
+  { key: 'draft',      icon: 'draft' },
+  { key: 'scheduled',  icon: 'event' },
+  { key: 'dispatched', icon: 'send' },
+  { key: 'picked_up',  icon: 'inventory_2' },
+  { key: 'in_transit', icon: 'local_shipping' },
+  { key: 'delivered',  icon: 'where_to_vote' },
+  { key: 'invoiced',   icon: 'receipt' },
+  { key: 'paid',       icon: 'paid' },
 ]
 
 const STATUS_COLOR: Record<string, string> = {
@@ -26,9 +29,9 @@ const STATUS_COLOR: Record<string, string> = {
   paid:       'bg-green-500/20 text-green-400',
 }
 
-function fmt(date: string | null) {
+function fmt(date: string | null, locale: string) {
   if (!date) return '—'
-  return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  return new Date(date).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 function InfoRow({ label, value }: { label: string; value: string | number | null | undefined }) {
@@ -53,11 +56,16 @@ export default async function LoadDetailPage({
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('org_id, role')
+    .select('org_id, role, date_format, time_format')
     .eq('id', user.id)
     .single()
 
   if (!profile?.org_id) redirect('/onboarding')
+
+  const t = await getTranslations('loads')
+  const locale = await getLocale()
+
+  const STATUS_FLOW = STATUS_FLOW_KEYS.map((s) => ({ ...s, label: t(`status_${s.key}`) }))
 
   // Fetch load
   const { data: load } = await supabase
@@ -91,8 +99,41 @@ export default async function LoadDetailPage({
     .eq('load_id', load.id)
     .order('created_at', { ascending: true })
 
+  // Documents — RLS scopes these to the caller's org (carrier_docs_select).
+  const { data: docRows } = await supabase
+    .from('documents')
+    .select('id, type, storage_path, created_at, profiles(first_name, last_name)')
+    .eq('load_id', load.id)
+    .order('created_at', { ascending: false })
+
+  const IMAGE_EXT = ['jpg', 'jpeg', 'png', 'heic', 'webp']
+  const documents: LoadDocument[] = await Promise.all(
+    (docRows ?? []).map(async (d) => {
+      const fileName = d.storage_path.split('/').pop() ?? d.storage_path
+      const ext = fileName.split('.').pop()?.toLowerCase() ?? ''
+      // Bucket is PRIVATE — thumbnails and links both need a signed URL.
+      const { data: signed } = await supabase.storage
+        .from('documents')
+        .createSignedUrl(d.storage_path, 60 * 60)
+      return {
+        id: d.id,
+        type: (d.type ?? 'other') as DocType,
+        storagePath: d.storage_path,
+        fileName: fileName.replace(/^\d{10,}-/, ''),
+        isImage: IMAGE_EXT.includes(ext),
+        signedUrl: signed?.signedUrl ?? null,
+        createdAtLabel: formatDateTime(d.created_at, profile),
+        uploaderName: d.profiles
+          ? [d.profiles.first_name, d.profiles.last_name].filter(Boolean).join(' ') || null
+          : null,
+      }
+    })
+  )
+
   const showRate    = ['owner', 'solo', 'finance'].includes(profile.role)
   const canDispatch = ['owner', 'solo', 'dispatcher'].includes(profile.role)
+  const canUploadDoc = ['owner', 'solo', 'dispatcher'].includes(profile.role)
+  const canDeleteDoc = ['owner', 'solo'].includes(profile.role)
 
   const currentIdx  = STATUS_FLOW.findIndex(s => s.key === load.status)
   const driverName  = load.drivers?.profiles
@@ -113,7 +154,7 @@ export default async function LoadDetailPage({
               <span className="material-symbols-outlined text-[20px]">arrow_back</span>
             </Link>
             <h1 className="text-2xl font-semibold text-white">{load.load_number}</h1>
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold ${STATUS_COLOR[load.status] ?? STATUS_COLOR.draft}`}>
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold ${STATUS_COLOR[load.status ?? 'draft'] ?? STATUS_COLOR.draft}`}>
               {STATUS_FLOW.find(s => s.key === load.status)?.label ?? load.status}
             </span>
           </div>
@@ -131,7 +172,6 @@ export default async function LoadDetailPage({
           {STATUS_FLOW.map((s, i) => {
             const done    = i < currentIdx
             const current = i === currentIdx
-            const future  = i > currentIdx
             return (
               <div key={s.key} className="flex items-center flex-1 min-w-0">
                 <div className="flex flex-col items-center gap-1 shrink-0">
@@ -163,39 +203,49 @@ export default async function LoadDetailPage({
 
           {/* Route */}
           <div className="bg-white/5 border border-white/8 rounded-xl p-5">
-            <h2 className="text-white font-medium text-sm mb-4">Route</h2>
+            <h2 className="text-white font-medium text-sm mb-4">{t('route')}</h2>
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-[#f97316] font-semibold mb-2">Pickup</p>
+                <p className="text-[10px] uppercase tracking-wider text-[#f97316] font-semibold mb-2">{t('pickup')}</p>
                 <p className="text-white text-sm font-medium">{load.pickup_address ?? '—'}</p>
                 <p className="text-slate-400 text-sm">{[load.pickup_city, load.pickup_state, load.pickup_zip].filter(Boolean).join(', ')}</p>
-                <p className="text-slate-500 text-xs mt-2">{fmt(load.pickup_date)}{load.pickup_time ? ` · ${load.pickup_time}` : ''}</p>
+                <p className="text-slate-500 text-xs mt-2">{fmt(load.pickup_date, locale)}{load.pickup_time ? ` · ${load.pickup_time}` : ''}</p>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-[#1abc9c] font-semibold mb-2">Delivery</p>
+                <p className="text-[10px] uppercase tracking-wider text-[#1abc9c] font-semibold mb-2">{t('delivery')}</p>
                 <p className="text-white text-sm font-medium">{load.delivery_address ?? '—'}</p>
                 <p className="text-slate-400 text-sm">{[load.delivery_city, load.delivery_state, load.delivery_zip].filter(Boolean).join(', ')}</p>
-                <p className="text-slate-500 text-xs mt-2">{fmt(load.delivery_date)}{load.delivery_time ? ` · ${load.delivery_time}` : ''}</p>
+                <p className="text-slate-500 text-xs mt-2">{fmt(load.delivery_date, locale)}{load.delivery_time ? ` · ${load.delivery_time}` : ''}</p>
               </div>
             </div>
           </div>
 
           {/* Load info */}
           <div className="bg-white/5 border border-white/8 rounded-xl p-5">
-            <h2 className="text-white font-medium text-sm mb-3">Load Details</h2>
-            <InfoRow label="Customer"   value={customerName ?? load.customer_name_raw} />
-            <InfoRow label="Commodity"  value={load.commodity} />
-            <InfoRow label="Weight"     value={load.weight_lbs ? `${Number(load.weight_lbs).toLocaleString()} lbs` : null} />
-            <InfoRow label="Miles"      value={load.total_miles ? `${load.total_miles} mi` : null} />
-            {showRate && <InfoRow label="Rate" value={load.rate != null ? `$${Number(load.rate).toLocaleString()}` : null} />}
-            <InfoRow label="Intake"     value={load.intake_method} />
+            <h2 className="text-white font-medium text-sm mb-3">{t('loadDetails')}</h2>
+            <InfoRow label={t('customer')}  value={customerName ?? load.customer_name_raw} />
+            <InfoRow label={t('commodity')} value={load.commodity} />
+            <InfoRow label={t('weight')}    value={load.weight_lbs ? `${Number(load.weight_lbs).toLocaleString()} lbs` : null} />
+            <InfoRow label={t('miles')}     value={load.total_miles ? `${load.total_miles} mi` : null} />
+            {showRate && <InfoRow label={t('rate')} value={load.rate != null ? `$${Number(load.rate).toLocaleString()}` : null} />}
+            <InfoRow label={t('intake')}    value={load.intake_method} />
           </div>
+
+          {/* Documents */}
+          <LoadDocuments
+            documents={documents}
+            loadId={load.id}
+            orgId={profile.org_id}
+            userId={user.id}
+            canUpload={canUploadDoc}
+            canDelete={canDeleteDoc}
+          />
 
           {/* Timeline */}
           <div className="bg-white/5 border border-white/8 rounded-xl p-5">
-            <h2 className="text-white font-medium text-sm mb-4">Activity</h2>
+            <h2 className="text-white font-medium text-sm mb-4">{t('activity')}</h2>
             {!events || events.length === 0 ? (
-              <p className="text-slate-500 text-sm">No activity yet.</p>
+              <p className="text-slate-500 text-sm">{t('noActivityYet')}</p>
             ) : (
               <div className="space-y-3">
                 {events.map((e) => {
@@ -209,7 +259,7 @@ export default async function LoadDetailPage({
                         <p className="text-white text-sm">{e.event_type.replace(/_/g, ' ')}</p>
                         {e.note && <p className="text-slate-400 text-xs mt-0.5">{e.note}</p>}
                         <p className="text-slate-600 text-xs mt-0.5">
-                          {actor} · {new Date(e.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                          {actor} · {new Date(e.created_at ?? Date.now()).toLocaleString(locale, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                         </p>
                       </div>
                     </div>
@@ -223,20 +273,20 @@ export default async function LoadDetailPage({
         {/* Right: Dispatch panel */}
         <div className="space-y-6">
           <div className="bg-white/5 border border-white/8 rounded-xl p-5">
-            <h2 className="text-white font-medium text-sm mb-4">Assignment</h2>
+            <h2 className="text-white font-medium text-sm mb-4">{t('assignment')}</h2>
             <div className="space-y-3 mb-4">
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-slate-500 text-[20px]">person</span>
                 <div>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider">Driver</p>
-                  <p className="text-white text-sm">{driverName ?? 'Unassigned'}</p>
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider">{t('driver')}</p>
+                  <p className="text-white text-sm">{driverName ?? t('unassigned')}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-slate-500 text-[20px]">local_shipping</span>
                 <div>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider">Truck</p>
-                  <p className="text-white text-sm">{truckLabel ?? 'Unassigned'}</p>
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider">{t('truck')}</p>
+                  <p className="text-white text-sm">{truckLabel ?? t('unassigned')}</p>
                 </div>
               </div>
             </div>
@@ -245,7 +295,7 @@ export default async function LoadDetailPage({
               <DispatchPanel
                 loadId={load.id}
                 loadNumber={load.load_number}
-                currentStatus={load.status}
+                currentStatus={load.status ?? 'draft'}
                 currentDriverId={load.driver_id}
                 currentTruckId={load.truck_id}
                 orgId={profile.org_id}

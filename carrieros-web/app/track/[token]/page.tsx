@@ -3,33 +3,48 @@
 // Uses the SECURITY DEFINER RPC get_public_tracking() so only an allowlisted
 // set of columns is ever exposed to the anon role. Do NOT query `loads`
 // directly here — see RPC contract note in the task brief.
+//
+// Deliberately does not import STATUS_BADGE from the authenticated
+// loads pages — this page must keep working even if that module changes.
+// Text still comes from the tracking.*/loads.status_* message catalogs.
 import { createClient } from '@/lib/supabase/server'
+import { getTranslations, getLocale } from 'next-intl/server'
 
-const STATUS_BADGE: Record<string, { label: string; color: string }> = {
-  draft:       { label: 'Draft',      color: 'bg-slate-500/20 text-slate-400' },
-  scheduled:   { label: 'Scheduled',  color: 'bg-blue-500/20 text-blue-400' },
-  dispatched:  { label: 'Dispatched', color: 'bg-[#f97316]/20 text-[#f97316]' },
-  picked_up:   { label: 'Picked Up',  color: 'bg-amber-500/20 text-amber-400' },
-  in_transit:  { label: 'In Transit', color: 'bg-[#1abc9c]/20 text-[#1abc9c]' },
-  delivered:   { label: 'Delivered',  color: 'bg-[#16a34a]/20 text-[#16a34a]' },
-  invoiced:    { label: 'Invoiced',   color: 'bg-purple-500/20 text-purple-400' },
-  paid:        { label: 'Paid',       color: 'bg-[#16a34a]/20 text-[#16a34a]' },
+const STATUS_COLOR: Record<string, string> = {
+  draft:       'bg-slate-500/20 text-slate-400',
+  scheduled:   'bg-blue-500/20 text-blue-400',
+  dispatched:  'bg-[#f97316]/20 text-[#f97316]',
+  picked_up:   'bg-amber-500/20 text-amber-400',
+  in_transit:  'bg-[#1abc9c]/20 text-[#1abc9c]',
+  delivered:   'bg-[#16a34a]/20 text-[#16a34a]',
+  invoiced:    'bg-purple-500/20 text-purple-400',
+  paid:        'bg-[#16a34a]/20 text-[#16a34a]',
 }
 
-function formatDate(value: string | null): string {
+function formatDate(value: string | null, locale: string): string {
   if (!value) return '—'
-  return new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  return new Date(value).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-function timeAgo(value: string): string {
+type TimeAgoT = Awaited<ReturnType<typeof getTranslations>>
+
+function timeAgo(value: string, t: TimeAgoT): string {
   const seconds = Math.floor((Date.now() - new Date(value).getTime()) / 1000)
-  if (seconds < 60) return 'just now'
+  if (seconds < 60) return t('justNow')
+
   const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`
+  if (minutes < 60) {
+    const unit = minutes === 1 ? t('minuteSingular') : t('minutePlural')
+    return t('lastUpdated', { time: `${minutes} ${unit}` })
+  }
   const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`
+  if (hours < 24) {
+    const unit = hours === 1 ? t('hourSingular') : t('hourPlural')
+    return t('lastUpdated', { time: `${hours} ${unit}` })
+  }
   const days = Math.floor(hours / 24)
-  return `${days} day${days === 1 ? '' : 's'} ago`
+  const unit = days === 1 ? t('daySingular') : t('dayPlural')
+  return t('lastUpdated', { time: `${days} ${unit}` })
 }
 
 function Logo() {
@@ -55,6 +70,10 @@ export default async function TrackingPage({
 
   const load = !error && data && data.length > 0 ? data[0] : null
 
+  const t = await getTranslations('tracking')
+  const tLoads = await getTranslations('loads')
+  const locale = await getLocale()
+
   if (!load) {
     return (
       <div className="min-h-screen bg-[#0f1923] flex items-center justify-center px-4">
@@ -64,9 +83,9 @@ export default async function TrackingPage({
           </div>
           <div className="bg-white/5 border border-white/8 rounded-xl px-6 py-12">
             <span className="material-symbols-outlined text-slate-600 text-4xl">search_off</span>
-            <h1 className="text-white text-lg font-semibold mt-4">Tracking link not found</h1>
+            <h1 className="text-white text-lg font-semibold mt-4">{t('notFoundTitle')}</h1>
             <p className="text-slate-400 text-sm mt-2">
-              This link may be invalid or expired. Please check the link or contact the carrier for an update.
+              {t('notFoundBody')}
             </p>
           </div>
         </div>
@@ -74,7 +93,8 @@ export default async function TrackingPage({
     )
   }
 
-  const badge = STATUS_BADGE[load.status] ?? STATUS_BADGE.draft
+  const badgeColor = STATUS_COLOR[load.status] ?? STATUS_COLOR.draft
+  const badgeLabel = tLoads(`status_${load.status}`)
   const origin = [load.pickup_city, load.pickup_state].filter(Boolean).join(', ') || '—'
   const destination = [load.delivery_city, load.delivery_state].filter(Boolean).join(', ') || '—'
   const hasCarrierInfo = load.carrier_name || load.carrier_phone || load.carrier_email
@@ -91,17 +111,17 @@ export default async function TrackingPage({
           <div className="px-5 sm:px-6 py-5 border-b border-white/5">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-slate-500 text-xs uppercase tracking-wide">Load</p>
+                <p className="text-slate-500 text-xs uppercase tracking-wide">{t('loadLabel')}</p>
                 <p className="text-white text-lg font-semibold">{load.load_number}</p>
               </div>
-              <span className={`inline-flex items-center px-2.5 py-1 rounded text-xs font-medium whitespace-nowrap ${badge.color}`}>
-                {badge.label}
+              <span className={`inline-flex items-center px-2.5 py-1 rounded text-xs font-medium whitespace-nowrap ${badgeColor}`}>
+                {badgeLabel}
               </span>
             </div>
           </div>
 
           <div className="px-5 sm:px-6 py-5 border-b border-white/5">
-            <p className="text-slate-500 text-xs uppercase tracking-wide mb-3">Route</p>
+            <p className="text-slate-500 text-xs uppercase tracking-wide mb-3">{tLoads('route')}</p>
             <div className="flex items-start gap-3">
               <div className="flex flex-col items-center pt-1">
                 <div className="w-2 h-2 rounded-full bg-[#f97316]" />
@@ -111,11 +131,11 @@ export default async function TrackingPage({
               <div className="flex-1 space-y-6">
                 <div>
                   <p className="text-white text-sm font-medium">{origin}</p>
-                  <p className="text-slate-500 text-xs mt-0.5">Pickup {formatDate(load.pickup_date)}</p>
+                  <p className="text-slate-500 text-xs mt-0.5">{tLoads('pickup')} {formatDate(load.pickup_date, locale)}</p>
                 </div>
                 <div>
                   <p className="text-white text-sm font-medium">{destination}</p>
-                  <p className="text-slate-500 text-xs mt-0.5">Delivery {formatDate(load.delivery_date)}</p>
+                  <p className="text-slate-500 text-xs mt-0.5">{tLoads('delivery')} {formatDate(load.delivery_date, locale)}</p>
                 </div>
               </div>
             </div>
@@ -123,14 +143,14 @@ export default async function TrackingPage({
             {load.last_location_at && (
               <p className="text-slate-500 text-xs mt-4 flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[14px]">schedule</span>
-                Last updated: {timeAgo(load.last_location_at)}
+                {timeAgo(load.last_location_at, t)}
               </p>
             )}
           </div>
 
           {hasCarrierInfo && (
             <div className="px-5 sm:px-6 py-5">
-              <p className="text-slate-500 text-xs uppercase tracking-wide mb-3">Carrier</p>
+              <p className="text-slate-500 text-xs uppercase tracking-wide mb-3">{t('carrierContact')}</p>
               <div className="space-y-2">
                 {load.carrier_name && (
                   <p className="text-white text-sm font-medium">{load.carrier_name}</p>
@@ -159,7 +179,7 @@ export default async function TrackingPage({
         </div>
 
         <p className="text-center text-xs text-slate-600 mt-6">
-          Powered by CarrierOS
+          {t('poweredBy')}
         </p>
       </div>
     </div>

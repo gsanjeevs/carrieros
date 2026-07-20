@@ -5,6 +5,7 @@ import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { useSession } from '@/hooks/use-session';
+import { LocaleProvider } from '@/hooks/use-locale';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -32,9 +33,14 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <AnimatedSplashOverlay />
-      <AuthGate>
-        <Slot />
-      </AuthGate>
+      {/* LocaleProvider sits alongside AuthGate (not instead of it): it reads
+          its own useSession() so locale resolution and auth redirects are
+          independent concerns, same as the rest of this file. */}
+      <LocaleProvider>
+        <AuthGate>
+          <Slot />
+        </AuthGate>
+      </LocaleProvider>
     </ThemeProvider>
   );
 }

@@ -8,3 +8,6 @@ supabase/.temp/
 supabase/.branches/
 
 /docs
+
+# Claude Code worktree checkouts (nested copies of this repo)
+**/.claude/worktrees/

@@ -12,8 +12,12 @@ import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
 import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { useLocale } from '@/hooks/use-locale';
 
 export default function AppTabs() {
+  // "explore" tab was repurposed as the language picker (src/app/(tabs)/explore.tsx)
+  // — relabeled here to match, using the same t('settings.title') as that screen.
+  const { t } = useLocale();
   return (
     <Tabs>
       <TabSlot style={{ height: '100%' }} />
@@ -23,7 +27,7 @@ export default function AppTabs() {
             <TabButton>Home</TabButton>
           </TabTrigger>
           <TabTrigger name="explore" href="/explore" asChild>
-            <TabButton>Explore</TabButton>
+            <TabButton>{t('settings.title')}</TabButton>
           </TabTrigger>
         </CustomTabList>
       </TabList>

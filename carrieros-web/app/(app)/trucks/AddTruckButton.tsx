@@ -5,6 +5,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { friendlyApiError } from '@/lib/api-errors'
 
 const US_STATES = [
@@ -19,6 +20,8 @@ const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
 
 export default function AddTruckButton({ variant }: { variant?: 'empty' }) {
   const router = useRouter()
+  const t = useTranslations('trucks')
+  const tCommon = useTranslations('common')
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -67,7 +70,7 @@ export default function AddTruckButton({ variant }: { variant?: 'empty' }) {
       router.push(`/trucks?created=${json.truck_number}`)
       router.refresh()
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Something went wrong')
+      setError(e instanceof Error ? e.message : tCommon('somethingWentWrong'))
     } finally {
       setLoading(false)
     }
@@ -81,7 +84,7 @@ export default function AddTruckButton({ variant }: { variant?: 'empty' }) {
           className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition"
         >
           <span className="material-symbols-outlined text-[16px]">add</span>
-          Add first truck
+          {t('addFirstTruck')}
         </button>
       ) : (
         <button
@@ -89,7 +92,7 @@ export default function AddTruckButton({ variant }: { variant?: 'empty' }) {
           className="flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
-          Add Truck
+          {t('addTruck')}
         </button>
       )}
 
@@ -97,7 +100,7 @@ export default function AddTruckButton({ variant }: { variant?: 'empty' }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
           <div className="w-full max-w-md bg-[#0f1923] border border-white/10 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-white font-semibold text-lg">Add Truck</h2>
+              <h2 className="text-white font-semibold text-lg">{t('addTruck')}</h2>
               <button onClick={close} className="text-slate-500 hover:text-white transition">
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
@@ -105,7 +108,7 @@ export default function AddTruckButton({ variant }: { variant?: 'empty' }) {
 
             <div className="space-y-4">
               <div>
-                <label className={labelCls}>Nickname *</label>
+                <label className={labelCls}>{t('nickname')} *</label>
                 <input
                   className={inputCls}
                   placeholder="Big Red"
@@ -116,17 +119,17 @@ export default function AddTruckButton({ variant }: { variant?: 'empty' }) {
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className={labelCls}>Year</label>
+                  <label className={labelCls}>{t('year')}</label>
                   <input className={inputCls} placeholder="2022" inputMode="numeric"
                     value={form.year} onChange={e => set('year', e.target.value)} />
                 </div>
                 <div>
-                  <label className={labelCls}>Make</label>
+                  <label className={labelCls}>{t('make')}</label>
                   <input className={inputCls} placeholder="Freightliner"
                     value={form.make} onChange={e => set('make', e.target.value)} />
                 </div>
                 <div>
-                  <label className={labelCls}>Model</label>
+                  <label className={labelCls}>{t('model')}</label>
                   <input className={inputCls} placeholder="Cascadia"
                     value={form.model} onChange={e => set('model', e.target.value)} />
                 </div>
@@ -140,14 +143,14 @@ export default function AddTruckButton({ variant }: { variant?: 'empty' }) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className={labelCls}>License plate</label>
+                  <label className={labelCls}>{t('licensePlate')}</label>
                   <input className={inputCls} placeholder="ABC-1234"
                     value={form.license_plate} onChange={e => set('license_plate', e.target.value)} />
                 </div>
                 <div>
-                  <label className={labelCls}>License state</label>
+                  <label className={labelCls}>{t('licenseState')}</label>
                   <select className={inputCls} value={form.license_state} onChange={e => set('license_state', e.target.value)}>
-                    <option value="">Select…</option>
+                    <option value="">{tCommon('selectPlaceholder')}</option>
                     {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
@@ -165,14 +168,14 @@ export default function AddTruckButton({ variant }: { variant?: 'empty' }) {
                   disabled={loading}
                   className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm"
                 >
-                  Cancel
+                  {tCommon('cancel')}
                 </button>
                 <button
                   onClick={submit}
                   disabled={loading || !form.nickname}
                   className="flex-2 flex-grow py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm"
                 >
-                  {loading ? 'Adding…' : 'Add Truck'}
+                  {loading ? t('adding') : t('addTruck')}
                 </button>
               </div>
             </div>

@@ -11,12 +11,14 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
 
 const ORANGE = '#f97316';
 
 export default function LoginScreen() {
   const theme = useTheme();
+  const { t } = useLocale();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,7 +32,7 @@ export default function LoginScreen() {
     setLoading(false);
     // On success, the root layout's AuthGate picks up the new session via
     // onAuthStateChange and redirects automatically — no manual nav here.
-    if (error) setError('Invalid email or password');
+    if (error) setError(t('login.invalidCredentials'));
   }
 
   return (
@@ -46,12 +48,12 @@ export default function LoginScreen() {
         </ThemedView>
 
         <ThemedText type="subtitle" style={styles.heading}>
-          Sign in to your account
+          {t('login.subtitle')}
         </ThemedText>
 
         <ThemedView style={styles.form}>
           <ThemedText type="small" themeColor="textSecondary">
-            Email
+            {t('login.email')}
           </ThemedText>
           <TextInput
             style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
@@ -65,7 +67,7 @@ export default function LoginScreen() {
           />
 
           <ThemedText type="small" themeColor="textSecondary" style={styles.fieldSpacing}>
-            Password
+            {t('login.password')}
           </ThemedText>
           <TextInput
             style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
@@ -92,7 +94,7 @@ export default function LoginScreen() {
               <ActivityIndicator color="#ffffff" />
             ) : (
               <ThemedText type="smallBold" style={{ color: '#ffffff' }}>
-                Sign in
+                {t('login.signIn')}
               </ThemedText>
             )}
           </Pressable>

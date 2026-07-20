@@ -20,21 +20,25 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
+import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
+import { resolveSubmitter } from '@/lib/submitter';
 
 const ORANGE = '#f97316';
 const RED = '#dc2626';
 const GREEN = '#16a34a';
 
+// Keys map 1:1 to src/messages/*.json dvir.areas.* — labels are resolved via
+// t() at render time, not hardcoded here.
 const AREAS = [
-  { key: 'brakes', label: 'Brakes' },
-  { key: 'lights', label: 'Lights' },
-  { key: 'tires', label: 'Tires' },
-  { key: 'steering', label: 'Steering' },
-  { key: 'horn', label: 'Horn' },
-  { key: 'mirrors', label: 'Mirrors' },
-  { key: 'coupling_devices', label: 'Coupling Devices' },
-  { key: 'emergency_equipment', label: 'Emergency Equipment' },
+  { key: 'brakes' },
+  { key: 'lights' },
+  { key: 'tires' },
+  { key: 'steering' },
+  { key: 'horn' },
+  { key: 'mirrors' },
+  { key: 'coupling_devices' },
+  { key: 'emergency_equipment' },
 ] as const;
 
 type AreaKey = (typeof AREAS)[number]['key'];
@@ -45,6 +49,7 @@ export default function DVIRScreen() {
   const router = useRouter();
   const { loadId, type } = useLocalSearchParams<{ loadId: string; type: 'pre_trip' | 'post_trip' }>();
   const { session } = useSession();
+  const { t } = useLocale();
 
   const [areas, setAreas] = useState<Record<AreaKey, AreaState>>(() =>
     Object.fromEntries(AREAS.map((a) => [a.key, { defect: false, description: '', severity: 'minor' as const }])) as Record<AreaKey, AreaState>
@@ -56,26 +61,9 @@ export default function DVIRScreen() {
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
 
-  // Resolves who's submitting this inspection. Solo (owner who also drives)
-  // has no `drivers` row at all — that table is only for invited
-  // employee-drivers — so driver_id stays null for them. RLS still permits
-  // the insert via owner_solo_dvir_all (a FOR ALL policy keyed on role, not
-  // driver_id), so this is a real, RLS-sanctioned path, not a workaround.
-  async function resolveSubmitter(userId: string) {
-    const { data: profile } = await supabase.from('profiles').select('role, org_id').eq('id', userId).single();
-    if (profile?.role === 'driver') {
-      const { data: driver } = await supabase
-        .from('drivers')
-        .select('id, carrier_org_id, default_truck_id')
-        .eq('profile_id', userId)
-        .single();
-      if (!driver) return null;
-      return { carrierOrgId: driver.carrier_org_id, driverId: driver.id, defaultTruckId: driver.default_truck_id };
-    }
-    // solo / owner
-    if (!profile?.org_id) return null;
-    return { carrierOrgId: profile.org_id, driverId: null, defaultTruckId: null };
-  }
+  // resolveSubmitter (who's filing this inspection, and under which carrier
+  // org) now lives in src/lib/submitter.ts — POD upload needs the same
+  // driver-vs-solo branch. See that file for why solo has no `drivers` row.
 
   useEffect(() => {
     // Just a heads-up if no truck can be resolved — doesn't block submit,
@@ -111,14 +99,14 @@ export default function DVIRScreen() {
   async function submit() {
     if (!session?.user.id || !loadId) return;
     if (!certified) {
-      setError('You must certify this inspection before submitting.');
+      setError(t('dvir.errorMustCertify'));
       return;
     }
 
     const defectAreas = AREAS.filter((a) => areas[a.key].defect);
     const missingDescription = defectAreas.some((a) => !areas[a.key].description.trim());
     if (missingDescription) {
-      setError('Add a description for every area flagged as a defect.');
+      setError(t('dvir.errorMissingDescription'));
       return;
     }
 
@@ -128,7 +116,7 @@ export default function DVIRScreen() {
     const submitter = await resolveSubmitter(session.user.id);
 
     if (!submitter) {
-      setError('Could not resolve your account for this inspection.');
+      setError(t('dvir.errorResolveAccount'));
       setSubmitting(false);
       return;
     }
@@ -157,7 +145,7 @@ export default function DVIRScreen() {
       .single();
 
     if (inspectionErr || !inspection) {
-      setError('Could not submit inspection. Try again.');
+      setError(t('dvir.errorSubmitFailed'));
       setSubmitting(false);
       return;
     }
@@ -172,7 +160,7 @@ export default function DVIRScreen() {
         }))
       );
       if (defectsErr) {
-        setError('Inspection saved, but defect details failed to save. Notify your dispatcher directly.');
+        setError(t('dvir.errorDefectsSaveFailed'));
         setSubmitting(false);
         return;
       }
@@ -185,9 +173,9 @@ export default function DVIRScreen() {
   if (done) {
     return (
       <ThemedView style={styles.centered}>
-        <ThemedText type="title" style={{ color: GREEN, fontSize: 22 }}>Inspection submitted</ThemedText>
+        <ThemedText type="title" style={{ color: GREEN, fontSize: 22 }}>{t('dvir.submitted')}</ThemedText>
         <Pressable onPress={() => router.back()} style={styles.doneButton}>
-          <ThemedText type="smallBold" style={{ color: '#ffffff' }}>Back to Load</ThemedText>
+          <ThemedText type="smallBold" style={{ color: '#ffffff' }}>{t('dvir.backToLoad')}</ThemedText>
         </Pressable>
       </ThemedView>
     );
@@ -198,19 +186,19 @@ export default function DVIRScreen() {
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <Pressable onPress={() => router.back()} style={styles.backLink}>
-            <ThemedText type="link" themeColor="textSecondary">← Back</ThemedText>
+            <ThemedText type="link" themeColor="textSecondary">{t('common.back')}</ThemedText>
           </Pressable>
 
           <ThemedText type="title" style={styles.heading}>
-            {type === 'post_trip' ? 'Post-Trip Inspection' : 'Pre-Trip Inspection'}
+            {type === 'post_trip' ? t('dvir.postTripHeading') : t('dvir.preTripHeading')}
           </ThemedText>
           <ThemedText type="small" themeColor="textSecondary" style={styles.subheading}>
-            Tap any area to log a defect
+            {t('dvir.subheading')}
           </ThemedText>
 
           {noTruckWarning && (
             <ThemedText type="small" style={styles.warning}>
-              No truck on file for this load — the inspection will be saved without one. Ask your dispatcher to assign a truck.
+              {t('dvir.noTruckWarning')}
             </ThemedText>
           )}
 
@@ -219,7 +207,7 @@ export default function DVIRScreen() {
             return (
               <ThemedView key={a.key} type="backgroundElement" style={styles.areaCard}>
                 <Pressable onPress={() => toggleDefect(a.key)} style={styles.areaHeader}>
-                  <ThemedText type="default">{a.label}</ThemedText>
+                  <ThemedText type="default">{t(`dvir.areas.${a.key}`)}</ThemedText>
                   <ThemedView
                     style={[
                       styles.areaPill,
@@ -227,7 +215,7 @@ export default function DVIRScreen() {
                     ]}
                   >
                     <ThemedText type="small" style={{ color: state.defect ? RED : GREEN }}>
-                      {state.defect ? 'Defect' : 'Pass'}
+                      {state.defect ? t('dvir.defect') : t('dvir.pass')}
                     </ThemedText>
                   </ThemedView>
                 </Pressable>
@@ -236,16 +224,16 @@ export default function DVIRScreen() {
                   <ThemedView style={styles.defectDetails}>
                     <TextInput
                       style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
-                      placeholder="Describe the defect"
+                      placeholder={t('dvir.describeDefect')}
                       placeholderTextColor={theme.textSecondary}
                       value={state.description}
                       onChangeText={(v) => updateDescription(a.key, v)}
                       multiline
                     />
                     <Pressable onPress={() => toggleSeverity(a.key)} style={styles.severityRow}>
-                      <ThemedText type="small" themeColor="textSecondary">Severity:</ThemedText>
+                      <ThemedText type="small" themeColor="textSecondary">{t('dvir.severityLabel')}</ThemedText>
                       <ThemedText type="smallBold" style={{ color: state.severity === 'major' ? RED : theme.text }}>
-                        {state.severity === 'major' ? 'Major — do not drive' : 'Minor'}
+                        {state.severity === 'major' ? t('dvir.severityMajor') : t('dvir.severityMinor')}
                       </ThemedText>
                     </Pressable>
                   </ThemedView>
@@ -256,11 +244,11 @@ export default function DVIRScreen() {
 
           <ThemedView type="backgroundElement" style={styles.section}>
             <ThemedText type="small" themeColor="textSecondary" style={{ marginBottom: 4 }}>
-              Odometer (optional)
+              {t('dvir.odometer')}
             </ThemedText>
             <TextInput
               style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
-              placeholder="e.g. 128450"
+              placeholder={t('dvir.odometerPlaceholder')}
               placeholderTextColor={theme.textSecondary}
               value={odometer}
               onChangeText={setOdometer}
@@ -276,7 +264,7 @@ export default function DVIRScreen() {
               ]}
             />
             <ThemedText type="small" style={styles.certifyText}>
-              I certify this inspection is accurate to the best of my knowledge.
+              {t('dvir.certifyText')}
             </ThemedText>
           </Pressable>
 
@@ -290,7 +278,7 @@ export default function DVIRScreen() {
             {submitting ? (
               <ActivityIndicator color="#ffffff" />
             ) : (
-              <ThemedText type="smallBold" style={{ color: '#ffffff' }}>Submit Inspection</ThemedText>
+              <ThemedText type="smallBold" style={{ color: '#ffffff' }}>{t('dvir.submit')}</ThemedText>
             )}
           </Pressable>
         </ScrollView>

@@ -1,6 +1,7 @@
 // app/(app)/trucks/page.tsx
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import AddTruckButton from './AddTruckButton'
 
 type Truck = {
@@ -34,6 +35,8 @@ export default async function TrucksPage({
   const justCreated = params.created
   const canManage = ['owner', 'solo'].includes(profile?.role ?? '')
 
+  const t = await getTranslations('trucks')
+
   let trucks: Truck[] = []
 
   if (profile?.org_id) {
@@ -50,8 +53,8 @@ export default async function TrucksPage({
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Trucks</h1>
-          <p className="text-slate-400 text-sm mt-1">{trucks.length} trucks</p>
+          <h1 className="text-2xl font-semibold text-white">{t('title')}</h1>
+          <p className="text-slate-400 text-sm mt-1">{t('truckCount', { count: trucks.length })}</p>
         </div>
         {canManage && <AddTruckButton />}
       </div>
@@ -59,14 +62,14 @@ export default async function TrucksPage({
       {justCreated && (
         <div className="mb-6 flex items-center gap-3 rounded-lg bg-[#16a34a]/10 border border-[#16a34a]/20 px-4 py-3">
           <span className="material-symbols-outlined text-[#16a34a] text-[18px]">check_circle</span>
-          <p className="text-[#16a34a] text-sm">Truck <span className="font-semibold">{justCreated}</span> added successfully.</p>
+          <p className="text-[#16a34a] text-sm">{t('addedSuccess', { nickname: justCreated })}</p>
         </div>
       )}
 
       {trucks.length === 0 ? (
         <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center">
           <span className="material-symbols-outlined text-slate-600 text-4xl">fire_truck</span>
-          <p className="text-slate-500 text-sm mt-3">No trucks yet.</p>
+          <p className="text-slate-500 text-sm mt-3">{t('noTrucksYet')}</p>
           {canManage && <AddTruckButton variant="empty" />}
         </div>
       ) : (
@@ -74,10 +77,10 @@ export default async function TrucksPage({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/5">
-                <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Truck #</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Nickname</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Year / Make / Model</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Plate</th>
+                <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('truckNumber')}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('nickname')}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('yearMakeModel')}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('plate')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">

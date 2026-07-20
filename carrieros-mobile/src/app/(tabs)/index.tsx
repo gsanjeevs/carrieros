@@ -8,6 +8,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
+import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
 
 type Role = 'owner' | 'solo' | 'driver' | 'dispatcher' | 'finance';
@@ -26,21 +27,24 @@ type LoadRow = {
   delivery_state: string | null;
 };
 
-const STATUS_LABEL: Record<string, string> = {
-  draft: 'Draft',
-  scheduled: 'Scheduled',
-  dispatched: 'Dispatched',
-  picked_up: 'Picked Up',
-  in_transit: 'In Transit',
-  delivered: 'Delivered',
-  invoiced: 'Invoiced',
-  paid: 'Paid',
-};
+// Status keys map 1:1 to src/messages/*.json loads.status.* — see t() calls
+// below rather than a hardcoded label map.
+const STATUS_KEYS = [
+  'draft',
+  'scheduled',
+  'dispatched',
+  'picked_up',
+  'in_transit',
+  'delivered',
+  'invoiced',
+  'paid',
+] as const;
 
 export default function MyLoadsScreen() {
   const theme = useTheme();
   const router = useRouter();
   const { session } = useSession();
+  const { t } = useLocale();
   const [role, setRole] = useState<Role | null>(null);
   const [loads, setLoads] = useState<LoadRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -89,7 +93,7 @@ export default function MyLoadsScreen() {
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title" style={styles.heading}>
-          {role === 'driver' ? 'My Loads' : 'Loads'}
+          {role === 'driver' ? t('loads.titleDriver') : t('loads.titleOffice')}
         </ThemedText>
 
         <FlatList
@@ -99,7 +103,7 @@ export default function MyLoadsScreen() {
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
             <ThemedText type="small" themeColor="textSecondary" style={styles.empty}>
-              No loads yet.
+              {t('loads.empty')}
             </ThemedText>
           }
           renderItem={({ item }) => (
@@ -110,11 +114,13 @@ export default function MyLoadsScreen() {
               <ThemedView style={styles.cardHeader} type="backgroundElement">
                 <ThemedText type="smallBold">{item.load_number}</ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
-                  {STATUS_LABEL[item.status] ?? item.status}
+                  {(STATUS_KEYS as readonly string[]).includes(item.status)
+                    ? t(`loads.status.${item.status}`)
+                    : item.status}
                 </ThemedText>
               </ThemedView>
               <ThemedText type="small" themeColor="textSecondary">
-                {item.customer_name_raw ?? 'Unknown customer'}
+                {item.customer_name_raw ?? t('common.unknownCustomer')}
               </ThemedText>
               <ThemedText type="default">
                 {item.pickup_city ?? '—'}{item.pickup_state ? `, ${item.pickup_state}` : ''}
@@ -125,7 +131,7 @@ export default function MyLoadsScreen() {
           )}
           ListFooterComponent={
             <Pressable onPress={() => supabase.auth.signOut()} style={styles.signOut}>
-              <ThemedText type="link" themeColor="textSecondary">Sign out</ThemedText>
+              <ThemedText type="link" themeColor="textSecondary">{t('loads.signOut')}</ThemedText>
             </Pressable>
           }
         />

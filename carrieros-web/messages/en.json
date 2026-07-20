@@ -6,7 +6,9 @@
     "back": "Back",
     "loading": "Loading…",
     "comingSoon": "Coming soon.",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "selectPlaceholder": "Select…",
+    "somethingWentWrong": "Something went wrong"
   },
   "errors": {
     "AUTH_REQUIRED": "Please sign in to continue.",
@@ -28,7 +30,8 @@
     "invoices": "Invoices",
     "maintenance": "Maintenance",
     "documents": "Documents",
-    "team": "Team"
+    "team": "Team",
+    "settings": "Settings"
   },
   "login": {
     "title": "Sign in to your account",
@@ -58,7 +61,11 @@
     "roleOwner": "Owner (I have employees/drivers)",
     "roleSolo": "Solo operator (I drive myself)",
     "launch": "Launch CarrierOS",
-    "settingUp": "Setting up…"
+    "settingUp": "Setting up…",
+    "countryUS": "United States",
+    "countryCA": "Canada",
+    "countryMX": "Mexico",
+    "setupFailed": "Setup failed"
   },
   "dashboard": {
     "title": "Fleet Overview",
@@ -96,10 +103,37 @@
     "status_in_transit": "In Transit",
     "status_delivered": "Delivered",
     "status_invoiced": "Invoiced",
-    "status_paid": "Paid"
+    "status_paid": "Paid",
+    "commodity": "Commodity",
+    "weight": "Weight",
+    "miles": "Miles",
+    "intake": "Intake",
+    "loadDetails": "Load Details",
+    "activity": "Activity",
+    "noActivityYet": "No activity yet.",
+    "assignment": "Assignment",
+    "driver": "Driver",
+    "truck": "Truck",
+    "unassigned": "Unassigned",
+    "documents": "Documents",
+    "noDocumentsYet": "No documents yet.",
+    "docUpload": "Upload",
+    "docUploading": "Uploading…",
+    "docUploadFailed": "Upload failed. Please try again.",
+    "docTooLarge": "That file is larger than 10 MB.",
+    "docType": "Document type",
+    "docType_pod": "POD",
+    "docType_rate_con": "Rate Con",
+    "docType_bol": "BOL",
+    "docType_other": "Other",
+    "docDelete": "Delete document",
+    "docDeleteConfirm": "Delete {name}? This cannot be undone.",
+    "docDeleteFailed": "Couldn't delete that document. Please try again.",
+    "docUnknownUploader": "Unknown"
   },
   "drivers": {
     "title": "Drivers",
+    "driverCount": "{count} drivers",
     "inviteDriver": "Invite Driver",
     "driverNumber": "Driver #",
     "name": "Name",
@@ -115,10 +149,17 @@
     "truckOptional": "Truck (optional)",
     "sendInvite": "Send Invite",
     "noDriversYet": "No drivers yet.",
-    "inviteSent": "Invite sent to {email}."
+    "inviteSent": "Invite sent to {email}.",
+    "cdlExpiry": "CDL Expiry",
+    "medCertExpiry": "Med Cert Expiry",
+    "invitedSuccess": "Driver {driverNumber} invited successfully.",
+    "inviteFirstDriver": "Invite first driver",
+    "sendingInvite": "Sending invite…",
+    "noDefaultTruck": "No default truck"
   },
   "trucks": {
     "title": "Trucks",
+    "truckCount": "{count} trucks",
     "addTruck": "Add Truck",
     "truckNumber": "Truck #",
     "nickname": "Nickname",
@@ -128,12 +169,44 @@
     "licensePlate": "License Plate",
     "licenseState": "License State",
     "noTrucksYet": "No trucks yet.",
-    "addedSuccess": "Truck {nickname} added."
+    "addedSuccess": "Truck {nickname} added.",
+    "yearMakeModel": "Year / Make / Model",
+    "plate": "Plate",
+    "addFirstTruck": "Add first truck",
+    "adding": "Adding…"
   },
   "tracking": {
     "notFoundTitle": "Tracking link not found",
     "notFoundBody": "This link may be invalid or the load may no longer be tracked.",
     "lastUpdated": "Last updated {time} ago",
-    "carrierContact": "Carrier"
+    "carrierContact": "Carrier",
+    "justNow": "Just now",
+    "minuteSingular": "minute",
+    "minutePlural": "minutes",
+    "hourSingular": "hour",
+    "hourPlural": "hours",
+    "daySingular": "day",
+    "dayPlural": "days",
+    "loadLabel": "Load",
+    "poweredBy": "Powered by CarrierOS"
+  },
+  "settings": {
+    "title": "Profile settings",
+    "subtitle": "These preferences are personal to your account.",
+    "language": "Language",
+    "units": "Units",
+    "unitsCompanyDefault": "Use company default ({unit})",
+    "unitsImperial": "Imperial — miles, pounds",
+    "unitsMetric": "Metric — kilometers, kilograms",
+    "unitsImperialShort": "Imperial — mi, lb",
+    "unitsMetricShort": "Metric — km, kg",
+    "dateFormat": "Date format",
+    "timeFormat": "Time format",
+    "time12h": "12-hour (2:30 PM)",
+    "time24h": "24-hour (14:30)",
+    "saveChanges": "Save changes",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "saveError": "Could not save your settings. Please try again."
   }
 }

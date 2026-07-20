@@ -6,7 +6,9 @@
     "back": "Atrás",
     "loading": "Cargando…",
     "comingSoon": "Próximamente.",
-    "signOut": "Cerrar sesión"
+    "signOut": "Cerrar sesión",
+    "selectPlaceholder": "Seleccionar…",
+    "somethingWentWrong": "Algo salió mal"
   },
   "errors": {
     "AUTH_REQUIRED": "Inicia sesión para continuar.",
@@ -28,7 +30,8 @@
     "invoices": "Facturas",
     "maintenance": "Mantenimiento",
     "documents": "Documentos",
-    "team": "Equipo"
+    "team": "Equipo",
+    "settings": "Configuración"
   },
   "login": {
     "title": "Inicia sesión en tu cuenta",
@@ -58,7 +61,11 @@
     "roleOwner": "Propietario (tengo empleados/conductores)",
     "roleSolo": "Operador independiente (yo mismo manejo)",
     "launch": "Iniciar CarrierOS",
-    "settingUp": "Configurando…"
+    "settingUp": "Configurando…",
+    "countryUS": "Estados Unidos",
+    "countryCA": "Canadá",
+    "countryMX": "México",
+    "setupFailed": "No se pudo completar la configuración"
   },
   "dashboard": {
     "title": "Resumen de la Flota",
@@ -96,10 +103,37 @@
     "status_in_transit": "En Tránsito",
     "status_delivered": "Entregada",
     "status_invoiced": "Facturada",
-    "status_paid": "Pagada"
+    "status_paid": "Pagada",
+    "commodity": "Mercancía",
+    "weight": "Peso",
+    "miles": "Millas",
+    "intake": "Origen",
+    "loadDetails": "Detalles de la Carga",
+    "activity": "Actividad",
+    "noActivityYet": "Aún no hay actividad.",
+    "assignment": "Asignación",
+    "driver": "Conductor",
+    "truck": "Camión",
+    "unassigned": "Sin asignar",
+    "documents": "Documentos",
+    "noDocumentsYet": "Aún no hay documentos.",
+    "docUpload": "Subir",
+    "docUploading": "Subiendo…",
+    "docUploadFailed": "Error al subir. Inténtalo de nuevo.",
+    "docTooLarge": "Ese archivo supera los 10 MB.",
+    "docType": "Tipo de documento",
+    "docType_pod": "POD",
+    "docType_rate_con": "Confirmación de tarifa",
+    "docType_bol": "BOL",
+    "docType_other": "Otro",
+    "docDelete": "Eliminar documento",
+    "docDeleteConfirm": "¿Eliminar {name}? Esta acción no se puede deshacer.",
+    "docDeleteFailed": "No se pudo eliminar ese documento. Inténtalo de nuevo.",
+    "docUnknownUploader": "Desconocido"
   },
   "drivers": {
     "title": "Conductores",
+    "driverCount": "{count} conductores",
     "inviteDriver": "Invitar Conductor",
     "driverNumber": "Conductor #",
     "name": "Nombre",
@@ -115,10 +149,17 @@
     "truckOptional": "Camión (opcional)",
     "sendInvite": "Enviar Invitación",
     "noDriversYet": "Aún no hay conductores.",
-    "inviteSent": "Invitación enviada a {email}."
+    "inviteSent": "Invitación enviada a {email}.",
+    "cdlExpiry": "Vencimiento de CDL",
+    "medCertExpiry": "Vencimiento de Certificado Médico",
+    "invitedSuccess": "Conductor {driverNumber} invitado exitosamente.",
+    "inviteFirstDriver": "Invitar primer conductor",
+    "sendingInvite": "Enviando invitación…",
+    "noDefaultTruck": "Sin camión predeterminado"
   },
   "trucks": {
     "title": "Camiones",
+    "truckCount": "{count} camiones",
     "addTruck": "Agregar Camión",
     "truckNumber": "Camión #",
     "nickname": "Apodo",
@@ -128,12 +169,44 @@
     "licensePlate": "Placa",
     "licenseState": "Estado de la Placa",
     "noTrucksYet": "Aún no hay camiones.",
-    "addedSuccess": "Camión {nickname} agregado."
+    "addedSuccess": "Camión {nickname} agregado.",
+    "yearMakeModel": "Año / Marca / Modelo",
+    "plate": "Placa",
+    "addFirstTruck": "Agregar primer camión",
+    "adding": "Agregando…"
   },
   "tracking": {
     "notFoundTitle": "Enlace de rastreo no encontrado",
     "notFoundBody": "Este enlace puede ser inválido o la carga ya no está siendo rastreada.",
     "lastUpdated": "Actualizado hace {time}",
-    "carrierContact": "Transportista"
+    "carrierContact": "Transportista",
+    "justNow": "Justo ahora",
+    "minuteSingular": "minuto",
+    "minutePlural": "minutos",
+    "hourSingular": "hora",
+    "hourPlural": "horas",
+    "daySingular": "día",
+    "dayPlural": "días",
+    "loadLabel": "Carga",
+    "poweredBy": "Con tecnología de CarrierOS"
+  },
+  "settings": {
+    "title": "Configuración de perfil",
+    "subtitle": "Estas preferencias son personales de tu cuenta.",
+    "language": "Idioma",
+    "units": "Unidades",
+    "unitsCompanyDefault": "Usar valor predeterminado de la empresa ({unit})",
+    "unitsImperial": "Imperial — millas, libras",
+    "unitsMetric": "Métrico — kilómetros, kilogramos",
+    "unitsImperialShort": "Imperial — mi, lb",
+    "unitsMetricShort": "Métrico — km, kg",
+    "dateFormat": "Formato de fecha",
+    "timeFormat": "Formato de hora",
+    "time12h": "12 horas (2:30 PM)",
+    "time24h": "24 horas (14:30)",
+    "saveChanges": "Guardar cambios",
+    "saving": "Guardando…",
+    "saved": "Guardado",
+    "saveError": "No se pudo guardar tu configuración. Inténtalo de nuevo."
   }
 }

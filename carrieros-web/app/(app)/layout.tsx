@@ -16,16 +16,17 @@ export default async function AppLayout({
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role, first_name, last_name')
+    .select('role, first_name, last_name, preferred_language')
     .eq('id', user.id)
     .single()
 
   const role = profile?.role ?? 'solo'
   const name = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || user.email || 'User'
+  const preferredLanguage = profile?.preferred_language ?? 'en'
 
   return (
     <div className="flex h-screen bg-[#0f1923] overflow-hidden">
-      <Sidebar role={role} userName={name} />
+      <Sidebar role={role} userName={name} userId={user.id} preferredLanguage={preferredLanguage} />
       <main className="flex-1 overflow-y-auto">
         {children}
       </main>

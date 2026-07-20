@@ -7,11 +7,13 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { PodSection } from '@/components/pod-section';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
+import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
 
 const ORANGE = '#f97316';
@@ -44,24 +46,27 @@ type LoadEvent = {
   created_at: string | null;
 };
 
-const STATUS_LABEL: Record<string, string> = {
-  draft: 'Draft',
-  scheduled: 'Scheduled',
-  dispatched: 'Dispatched',
-  picked_up: 'Picked Up',
-  in_transit: 'In Transit',
-  delivered: 'Delivered',
-  invoiced: 'Invoiced',
-  paid: 'Paid',
-};
+// Status keys map 1:1 to src/messages/*.json loads.status.* — see t() calls
+// below rather than a hardcoded label map.
+const STATUS_KEYS = [
+  'draft',
+  'scheduled',
+  'dispatched',
+  'picked_up',
+  'in_transit',
+  'delivered',
+  'invoiced',
+  'paid',
+] as const;
 
 // Forward progression a driver (or dispatcher/owner) can trigger from this
 // screen with one tap. draft→scheduled and invoiced→paid are office-side
-// steps, not driver actions — not included here.
-const NEXT_STATUS: Record<string, { next: string; actionLabel: string }> = {
-  dispatched: { next: 'picked_up', actionLabel: 'Mark Picked Up' },
-  picked_up: { next: 'in_transit', actionLabel: 'Start Transit' },
-  in_transit: { next: 'delivered', actionLabel: 'Mark Delivered' },
+// steps, not driver actions — not included here. actionLabelKey maps to
+// src/messages/*.json loadDetail.action*.
+const NEXT_STATUS: Record<string, { next: string; actionLabelKey: string }> = {
+  dispatched: { next: 'picked_up', actionLabelKey: 'loadDetail.actionPickedUp' },
+  picked_up: { next: 'in_transit', actionLabelKey: 'loadDetail.actionStartTransit' },
+  in_transit: { next: 'delivered', actionLabelKey: 'loadDetail.actionDelivered' },
 };
 
 const DETAIL_COLS =
@@ -74,6 +79,7 @@ export default function LoadDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { session } = useSession();
+  const { t } = useLocale();
 
   const [role, setRole] = useState<Role | null>(null);
   const [load, setLoad] = useState<LoadDetail | null>(null);
@@ -100,7 +106,7 @@ export default function LoadDetailScreen() {
         : await supabase.from('loads').select(DETAIL_COLS).eq('id', Number(id)).single();
 
     if (loadErr) {
-      setError('Could not load this load — it may not be assigned to you.');
+      setError(t('loadDetail.loadAccessError'));
     } else {
       setLoad(loadData as unknown as LoadDetail);
     }
@@ -136,7 +142,7 @@ export default function LoadDetailScreen() {
       .eq('id', load.id);
 
     if (updateErr) {
-      setError('Could not update status — you may not have permission.');
+      setError(t('loadDetail.statusUpdateError'));
       setAdvancing(false);
       return;
     }
@@ -164,38 +170,40 @@ export default function LoadDetailScreen() {
     return (
       <ThemedView style={styles.centered}>
         <ThemedText type="default" themeColor="textSecondary">
-          {error || 'Load not found.'}
+          {error || t('loadDetail.loadNotFound')}
         </ThemedText>
         <Pressable onPress={() => router.back()} style={styles.backLink}>
-          <ThemedText type="link" themeColor="textSecondary">← Back</ThemedText>
+          <ThemedText type="link" themeColor="textSecondary">{t('common.back')}</ThemedText>
         </Pressable>
       </ThemedView>
     );
   }
 
   const step = NEXT_STATUS[load.status];
+  const statusLabel = (status: string) =>
+    (STATUS_KEYS as readonly string[]).includes(status) ? t(`loads.status.${status}`) : status;
 
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <Pressable onPress={() => router.back()} style={styles.backLink}>
-            <ThemedText type="link" themeColor="textSecondary">← Back</ThemedText>
+            <ThemedText type="link" themeColor="textSecondary">{t('common.back')}</ThemedText>
           </Pressable>
 
           <ThemedView style={styles.headerRow}>
             <ThemedText type="title" style={styles.loadNumber}>{load.load_number}</ThemedText>
             <ThemedView style={[styles.statusPill, { backgroundColor: theme.backgroundSelected }]}>
-              <ThemedText type="smallBold">{STATUS_LABEL[load.status] ?? load.status}</ThemedText>
+              <ThemedText type="smallBold">{statusLabel(load.status)}</ThemedText>
             </ThemedView>
           </ThemedView>
 
           <ThemedText type="default" style={styles.customer}>
-            {load.customer_name_raw ?? 'Unknown customer'}
+            {load.customer_name_raw ?? t('common.unknownCustomer')}
           </ThemedText>
 
           <ThemedView type="backgroundElement" style={styles.section}>
-            <SectionLabel text="Pickup" />
+            <SectionLabel text={t('loadDetail.sectionPickup')} />
             <ThemedText type="default">
               {load.pickup_address ?? '—'}
             </ThemedText>
@@ -207,7 +215,7 @@ export default function LoadDetailScreen() {
           </ThemedView>
 
           <ThemedView type="backgroundElement" style={styles.section}>
-            <SectionLabel text="Delivery" />
+            <SectionLabel text={t('loadDetail.sectionDelivery')} />
             <ThemedText type="default">
               {load.delivery_address ?? '—'}
             </ThemedText>
@@ -219,38 +227,40 @@ export default function LoadDetailScreen() {
           </ThemedView>
 
           <ThemedView type="backgroundElement" style={styles.section}>
-            <SectionLabel text="Load Details" />
-            <DetailRow label="Commodity" value={load.commodity ?? '—'} />
-            <DetailRow label="Weight" value={load.weight_lbs ? `${load.weight_lbs.toLocaleString()} lbs` : '—'} />
-            <DetailRow label="Miles" value={load.total_miles ? `${load.total_miles} mi` : '—'} />
+            <SectionLabel text={t('loadDetail.sectionDetails')} />
+            <DetailRow label={t('loadDetail.commodity')} value={load.commodity ?? '—'} />
+            <DetailRow label={t('loadDetail.weight')} value={load.weight_lbs ? `${load.weight_lbs.toLocaleString()} lbs` : '—'} />
+            <DetailRow label={t('loadDetail.miles')} value={load.total_miles ? `${load.total_miles} mi` : '—'} />
           </ThemedView>
 
           {(role === 'driver' || role === 'solo') && (
             <ThemedView type="backgroundElement" style={styles.section}>
-              <SectionLabel text="Compliance" />
+              <SectionLabel text={t('loadDetail.sectionCompliance')} />
               <ThemedView style={styles.dvirRow}>
                 <Pressable
                   style={styles.dvirButton}
                   onPress={() => router.push({ pathname: '/dvir/[loadId]', params: { loadId: String(load.id), type: 'pre_trip' } })}
                 >
-                  <ThemedText type="smallBold" themeColor="text">Pre-Trip DVIR</ThemedText>
+                  <ThemedText type="smallBold" themeColor="text">{t('loadDetail.preTripDvir')}</ThemedText>
                 </Pressable>
                 <Pressable
                   style={styles.dvirButton}
                   onPress={() => router.push({ pathname: '/dvir/[loadId]', params: { loadId: String(load.id), type: 'post_trip' } })}
                 >
-                  <ThemedText type="smallBold" themeColor="text">Post-Trip DVIR</ThemedText>
+                  <ThemedText type="smallBold" themeColor="text">{t('loadDetail.postTripDvir')}</ThemedText>
                 </Pressable>
               </ThemedView>
             </ThemedView>
           )}
 
+          {(role === 'driver' || role === 'solo') && <PodSection loadId={load.id} />}
+
           {events.length > 0 && (
             <ThemedView type="backgroundElement" style={styles.section}>
-              <SectionLabel text="Timeline" />
+              <SectionLabel text={t('loadDetail.sectionTimeline')} />
               {events.map((e) => (
                 <ThemedView key={e.id} style={styles.eventRow}>
-                  <ThemedText type="small">{e.event_type.replace('status_', '').replace(/_/g, ' ')}</ThemedText>
+                  <ThemedText type="small">{statusLabel(e.event_type.replace('status_', ''))}</ThemedText>
                   <ThemedText type="small" themeColor="textSecondary">
                     {e.created_at ? new Date(e.created_at).toLocaleString() : ''}
                   </ThemedText>
@@ -273,7 +283,7 @@ export default function LoadDetailScreen() {
                 <ActivityIndicator color="#ffffff" />
               ) : (
                 <ThemedText type="smallBold" style={{ color: '#ffffff' }}>
-                  {step.actionLabel}
+                  {t(step.actionLabelKey)}
                 </ThemedText>
               )}
             </Pressable>

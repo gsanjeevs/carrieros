@@ -2,14 +2,26 @@ import { Platform, StyleSheet, Text, type TextProps } from 'react-native';
 
 import { Fonts, ThemeColor } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useLocale } from '@/hooks/use-locale';
 
 export type ThemedTextProps = TextProps & {
   type?: 'default' | 'title' | 'small' | 'smallBold' | 'subtitle' | 'link' | 'linkPrimary' | 'code';
   themeColor?: ThemeColor;
 };
 
+const BOLD_TYPES: ThemedTextProps['type'][] = ['title', 'subtitle', 'smallBold'];
+
 export function ThemedText({ style, type = 'default', themeColor, ...rest }: ThemedTextProps) {
   const theme = useTheme();
+  // Punjabi/Urdu need a custom font family (system fonts don't cover
+  // Gurmukhi/Nastaliq well) — English/Spanish keep the system font, see
+  // src/constants/theme.ts Fonts. fontFamily is null until the matching
+  // font finishes loading (see src/hooks/use-locale.tsx), so text renders
+  // with the system font briefly rather than not at all.
+  const { fontFamily } = useLocale();
+  const localeFontStyle = fontFamily
+    ? { fontFamily: BOLD_TYPES.includes(type) ? fontFamily.bold : fontFamily.regular }
+    : null;
 
   return (
     <Text
@@ -23,6 +35,7 @@ export function ThemedText({ style, type = 'default', themeColor, ...rest }: The
         type === 'link' && styles.link,
         type === 'linkPrimary' && styles.linkPrimary,
         type === 'code' && styles.code,
+        localeFontStyle,
         style,
       ]}
       {...rest}

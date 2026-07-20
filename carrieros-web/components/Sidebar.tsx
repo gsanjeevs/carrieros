@@ -1,37 +1,43 @@
-// components/Sidebar.tsx
 'use client'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { signOut } from '@/app/login/actions'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 interface NavItem {
-  label: string
+  labelKey: string
   href: string
   icon: string
   roles: string[]
 }
 
 const NAV: NavItem[] = [
-  { label: 'Dashboard',   href: '/dashboard',  icon: 'dashboard',        roles: ['owner','solo','dispatcher','finance'] },
-  { label: 'Loads',       href: '/loads',       icon: 'local_shipping',   roles: ['owner','solo','dispatcher','finance'] },
-  { label: 'Dispatch',    href: '/dispatch',    icon: 'swap_driving_apps',roles: ['owner','solo','dispatcher'] },
-  { label: 'Drivers',     href: '/drivers',     icon: 'person',           roles: ['owner','solo','dispatcher'] },
-  { label: 'Trucks',      href: '/trucks',      icon: 'fire_truck',       roles: ['owner','solo'] },
-  { label: 'Customers',   href: '/customers',   icon: 'business',         roles: ['owner','solo','dispatcher','finance'] },
-  { label: 'Invoices',    href: '/finance',     icon: 'receipt_long',     roles: ['owner','solo','finance'] },
-  { label: 'Maintenance', href: '/maintenance', icon: 'build',            roles: ['owner','solo','dispatcher'] },
-  { label: 'Documents',   href: '/documents',   icon: 'folder',           roles: ['owner','solo','finance'] },
-  { label: 'Team',        href: '/team',        icon: 'group',            roles: ['owner','solo'] },
+  { labelKey: 'dashboard',   href: '/dashboard',  icon: 'dashboard',        roles: ['owner','solo','dispatcher','finance'] },
+  { labelKey: 'loads',       href: '/loads',       icon: 'local_shipping',   roles: ['owner','solo','dispatcher','finance'] },
+  { labelKey: 'dispatch',    href: '/dispatch',    icon: 'swap_driving_apps',roles: ['owner','solo','dispatcher'] },
+  { labelKey: 'drivers',     href: '/drivers',     icon: 'person',           roles: ['owner','solo','dispatcher'] },
+  { labelKey: 'trucks',      href: '/trucks',      icon: 'fire_truck',       roles: ['owner','solo'] },
+  { labelKey: 'customers',   href: '/customers',   icon: 'business',         roles: ['owner','solo','dispatcher','finance'] },
+  { labelKey: 'invoices',    href: '/finance',     icon: 'receipt_long',     roles: ['owner','solo','finance'] },
+  { labelKey: 'maintenance', href: '/maintenance', icon: 'build',            roles: ['owner','solo','dispatcher'] },
+  { labelKey: 'documents',   href: '/documents',   icon: 'folder',           roles: ['owner','solo','finance'] },
+  { labelKey: 'team',        href: '/team',        icon: 'group',            roles: ['owner','solo'] },
+  { labelKey: 'settings',    href: '/settings',    icon: 'settings',         roles: ['owner','solo','driver','dispatcher','finance'] },
 ]
 
 interface Props {
   role: string
   userName: string
+  userId: string
+  preferredLanguage: string
 }
 
-export default function Sidebar({ role, userName }: Props) {
+export default function Sidebar({ role, userName, userId, preferredLanguage }: Props) {
   const pathname = usePathname()
+  const t = useTranslations('nav')
+  const tCommon = useTranslations('common')
   const visible = NAV.filter((item) => item.roles.includes(role))
 
   const initials = userName
@@ -67,13 +73,13 @@ export default function Sidebar({ role, userName }: Props) {
               }`}
             >
               <span className="material-symbols-outlined text-[18px] leading-none">{item.icon}</span>
-              {item.label}
+              {t(item.labelKey)}
             </Link>
           )
         })}
       </nav>
 
-      {/* User + Sign out */}
+      {/* User + Language + Sign out */}
       <div className="px-3 py-4 border-t border-white/5">
         <div className="flex items-center gap-3 px-3 py-2 mb-1">
           <div className="w-7 h-7 rounded-full bg-[#f97316]/20 flex items-center justify-center flex-shrink-0">
@@ -84,13 +90,16 @@ export default function Sidebar({ role, userName }: Props) {
             <p className="text-slate-500 text-xs capitalize">{role}</p>
           </div>
         </div>
+        <div className="px-3 py-2 mb-1">
+          <LanguageSwitcher userId={userId} current={preferredLanguage} />
+        </div>
         <form action={signOut}>
           <button
             type="submit"
             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
           >
             <span className="material-symbols-outlined text-[18px] leading-none">logout</span>
-            Sign out
+            {tCommon('signOut')}
           </button>
         </form>
       </div>

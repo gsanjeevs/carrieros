@@ -834,6 +834,7 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string | null
+          date_format: string | null
           first_name: string | null
           id: string
           last_name: string | null
@@ -841,10 +842,13 @@ export type Database = {
           phone: string | null
           preferred_language: string | null
           role: string
+          time_format: string | null
           timezone: string | null
+          uom_system: string | null
         }
         Insert: {
           created_at?: string | null
+          date_format?: string | null
           first_name?: string | null
           id: string
           last_name?: string | null
@@ -852,10 +856,13 @@ export type Database = {
           phone?: string | null
           preferred_language?: string | null
           role: string
+          time_format?: string | null
           timezone?: string | null
+          uom_system?: string | null
         }
         Update: {
           created_at?: string | null
+          date_format?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null
@@ -863,7 +870,9 @@ export type Database = {
           phone?: string | null
           preferred_language?: string | null
           role?: string
+          time_format?: string | null
           timezone?: string | null
+          uom_system?: string | null
         }
         Relationships: [
           {

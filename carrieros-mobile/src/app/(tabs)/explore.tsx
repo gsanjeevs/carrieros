@@ -1,180 +1,194 @@
-import { Image } from 'expo-image';
-import { SymbolView } from 'expo-symbols';
-import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
+// src/app/(tabs)/explore.tsx
+// Profile settings: language, units, date format, time format. There's no
+// other settings/profile screen, so this tab (previously unused scaffold
+// content) is repurposed as the one reachable place to change these —
+// all personal profiles columns, see src/hooks/use-locale.tsx.
+import { useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ExternalLink } from '@/components/external-link';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Collapsible } from '@/components/ui/collapsible';
-import { WebBadge } from '@/components/web-badge';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useLocale, type DateFormat, type TimeFormat, type Uom } from '@/hooks/use-locale';
+import { SUPPORTED_LOCALES, type Locale } from '@/lib/i18n';
 
-export default function TabTwoScreen() {
-  const safeAreaInsets = useSafeAreaInsets();
-  const insets = {
-    ...safeAreaInsets,
-    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
-  };
+const ORANGE = '#f97316';
+
+const LANGUAGE_LABEL_KEY: Record<Locale, string> = {
+  en: 'settings.english',
+  es: 'settings.spanish',
+  pa: 'settings.punjabi',
+  ur: 'settings.urdu',
+};
+
+const DATE_FORMAT_EXAMPLES: Record<DateFormat, string> = {
+  'MM/DD/YYYY': '07/20/2026',
+  'DD/MM/YYYY': '20/07/2026',
+  'YYYY-MM-DD': '2026-07-20',
+};
+
+type OptionKey = string;
+
+export default function SettingsScreen() {
+  const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const { locale, setLocale, t, prefs, setUomSystem, setDateFormat, setTimeFormat } = useLocale();
+  const [saving, setSaving] = useState<OptionKey | null>(null);
 
-  const contentPlatformStyle = Platform.select({
-    android: {
-      paddingTop: insets.top,
-      paddingLeft: insets.left,
-      paddingRight: insets.right,
-      paddingBottom: insets.bottom,
-    },
-    web: {
-      paddingTop: Spacing.six,
-      paddingBottom: Spacing.four,
-    },
-  });
+  async function withSaving(key: OptionKey, run: () => Promise<void>) {
+    if (saving) return;
+    setSaving(key);
+    try {
+      await run();
+    } finally {
+      setSaving(null);
+    }
+  }
+
+  function OptionRow({
+    optionKey,
+    label,
+    selected,
+    onPress,
+  }: {
+    optionKey: OptionKey;
+    label: string;
+    selected: boolean;
+    onPress: () => void;
+  }) {
+    return (
+      <Pressable
+        onPress={onPress}
+        disabled={saving !== null}
+        style={[
+          styles.option,
+          { borderColor: selected ? ORANGE : theme.backgroundSelected, backgroundColor: theme.backgroundElement },
+        ]}
+      >
+        <ThemedText type="default" style={selected ? { color: ORANGE, fontWeight: 700 } : undefined}>
+          {label}
+        </ThemedText>
+        {saving === optionKey ? (
+          <ActivityIndicator color={ORANGE} />
+        ) : selected ? (
+          <ThemedText type="smallBold" style={{ color: ORANGE }}>✓</ThemedText>
+        ) : null}
+      </Pressable>
+    );
+  }
 
   return (
     <ScrollView
       style={[styles.scrollView, { backgroundColor: theme.background }]}
-      contentInset={insets}
-      contentContainerStyle={[styles.contentContainer, contentPlatformStyle]}>
+      contentContainerStyle={[
+        styles.contentContainer,
+        { paddingTop: insets.top + Spacing.six, paddingBottom: insets.bottom + BottomTabInset + Spacing.three },
+      ]}
+    >
       <ThemedView style={styles.container}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="subtitle">Explore</ThemedText>
-          <ThemedText style={styles.centerText} themeColor="textSecondary">
-            This starter app includes example{'\n'}code to help you get started.
-          </ThemedText>
+        <ThemedText type="subtitle" style={styles.title}>{t('settings.title')}</ThemedText>
+        <ThemedText type="small" themeColor="textSecondary" style={styles.subtitle}>
+          {t('settings.subtitle')}
+        </ThemedText>
 
-          <ExternalLink href="https://docs.expo.dev" asChild>
-            <Pressable style={({ pressed }) => pressed && styles.pressed}>
-              <ThemedView type="backgroundElement" style={styles.linkButton}>
-                <ThemedText type="link">Expo documentation</ThemedText>
-                <SymbolView
-                  tintColor={theme.text}
-                  name={{ ios: 'arrow.up.right.square', android: 'link', web: 'link' }}
-                  size={12}
-                />
-              </ThemedView>
-            </Pressable>
-          </ExternalLink>
+        {/* Language */}
+        <ThemedText type="default" style={[styles.sectionHeading, styles.sectionHeadingText]}>{t('settings.languageSection')}</ThemedText>
+        <ThemedText type="small" themeColor="textSecondary" style={styles.sectionSubtitle}>
+          {t('settings.languageSubtitle')}
+        </ThemedText>
+        <ThemedView style={styles.options}>
+          {SUPPORTED_LOCALES.map((code) => (
+            <OptionRow
+              key={code}
+              optionKey={`locale-${code}`}
+              label={t(LANGUAGE_LABEL_KEY[code])}
+              selected={code === locale}
+              onPress={() => withSaving(`locale-${code}`, () => setLocale(code))}
+            />
+          ))}
+        </ThemedView>
+        {/* Urdu is right-to-left. See the applyRTL() comment in
+            src/hooks/use-locale.tsx for exactly what does and doesn't take
+            effect immediately — short version: native needs a restart, this
+            web preview mirrors immediately via the DOM `dir` attribute. */}
+        <ThemedText type="small" themeColor="textSecondary" style={styles.notice}>
+          {t('settings.restartNotice')}
+        </ThemedText>
+
+        {/* Units */}
+        <ThemedText type="default" style={[styles.sectionHeading, styles.sectionHeadingText]}>{t('settings.unitsSection')}</ThemedText>
+        <ThemedView style={styles.options}>
+          <OptionRow
+            optionKey="uom-default"
+            label={t('settings.unitsCompanyDefault', {
+              unit: t(prefs.orgDefaultUom === 'imperial' ? 'settings.unitsImperialShort' : 'settings.unitsMetricShort'),
+            })}
+            selected={prefs.uomSystem === null}
+            onPress={() => withSaving('uom-default', () => setUomSystem(null))}
+          />
+          {(['imperial', 'metric'] as Uom[]).map((uom) => (
+            <OptionRow
+              key={uom}
+              optionKey={`uom-${uom}`}
+              label={t(uom === 'imperial' ? 'settings.unitsImperial' : 'settings.unitsMetric')}
+              selected={prefs.uomSystem === uom}
+              onPress={() => withSaving(`uom-${uom}`, () => setUomSystem(uom))}
+            />
+          ))}
         </ThemedView>
 
-        <ThemedView style={styles.sectionsWrapper}>
-          <Collapsible title="File-based routing">
-            <ThemedText type="small">
-              This app has two screens: <ThemedText type="code">src/app/index.tsx</ThemedText> and{' '}
-              <ThemedText type="code">src/app/explore.tsx</ThemedText>
-            </ThemedText>
-            <ThemedText type="small">
-              The layout file in <ThemedText type="code">src/app/_layout.tsx</ThemedText> sets up
-              the tab navigator.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/router/introduction">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Android, iOS, and web support">
-            <ThemedView type="backgroundElement" style={styles.collapsibleContent}>
-              <ThemedText type="small">
-                You can open this project on Android, iOS, and the web. To open the web version,
-                press <ThemedText type="smallBold">w</ThemedText> in the terminal running this
-                project.
-              </ThemedText>
-              <Image
-                source={require('@/assets/images/tutorial-web.png')}
-                style={styles.imageTutorial}
-              />
-            </ThemedView>
-          </Collapsible>
-
-          <Collapsible title="Images">
-            <ThemedText type="small">
-              For static images, you can use the <ThemedText type="code">@2x</ThemedText> and{' '}
-              <ThemedText type="code">@3x</ThemedText> suffixes to provide files for different
-              screen densities.
-            </ThemedText>
-            <Image source={require('@/assets/images/react-logo.png')} style={styles.imageReact} />
-            <ExternalLink href="https://reactnative.dev/docs/images">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Light and dark mode components">
-            <ThemedText type="small">
-              This template has light and dark mode support. The{' '}
-              <ThemedText type="code">useColorScheme()</ThemedText> hook lets you inspect what the
-              user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Animations">
-            <ThemedText type="small">
-              This template includes an example of an animated component. The{' '}
-              <ThemedText type="code">src/components/ui/collapsible.tsx</ThemedText> component uses
-              the powerful <ThemedText type="code">react-native-reanimated</ThemedText> library to
-              animate opening this hint.
-            </ThemedText>
-          </Collapsible>
+        {/* Date format */}
+        <ThemedText type="default" style={[styles.sectionHeading, styles.sectionHeadingText]}>{t('settings.dateFormatSection')}</ThemedText>
+        <ThemedView style={styles.options}>
+          {(Object.keys(DATE_FORMAT_EXAMPLES) as DateFormat[]).map((format) => (
+            <OptionRow
+              key={format}
+              optionKey={`date-${format}`}
+              label={`${format} (${DATE_FORMAT_EXAMPLES[format]})`}
+              selected={prefs.dateFormat === format}
+              onPress={() => withSaving(`date-${format}`, () => setDateFormat(format))}
+            />
+          ))}
         </ThemedView>
-        {Platform.OS === 'web' && <WebBadge />}
+
+        {/* Time format */}
+        <ThemedText type="default" style={[styles.sectionHeading, styles.sectionHeadingText]}>{t('settings.timeFormatSection')}</ThemedText>
+        <ThemedView style={styles.options}>
+          {(['12h', '24h'] as TimeFormat[]).map((format) => (
+            <OptionRow
+              key={format}
+              optionKey={`time-${format}`}
+              label={t(format === '12h' ? 'settings.time12h' : 'settings.time24h')}
+              selected={prefs.timeFormat === format}
+              onPress={() => withSaving(`time-${format}`, () => setTimeFormat(format))}
+            />
+          ))}
+        </ThemedView>
       </ThemedView>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
-  contentContainer: {
+  scrollView: { flex: 1 },
+  contentContainer: { flexDirection: 'row', justifyContent: 'center' },
+  container: { maxWidth: MaxContentWidth, flexGrow: 1, paddingHorizontal: Spacing.four, gap: Spacing.two },
+  title: {},
+  subtitle: { marginTop: -Spacing.two, marginBottom: Spacing.two },
+  sectionHeading: { marginTop: Spacing.three },
+  sectionHeadingText: { fontWeight: 700 },
+  sectionSubtitle: { marginTop: -Spacing.one },
+  options: { gap: Spacing.two, marginTop: Spacing.one },
+  option: {
     flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  container: {
-    maxWidth: MaxContentWidth,
-    flexGrow: 1,
-  },
-  titleContainer: {
-    gap: Spacing.three,
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.six,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.three,
   },
-  centerText: {
-    textAlign: 'center',
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-  linkButton: {
-    flexDirection: 'row',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
-    justifyContent: 'center',
-    gap: Spacing.one,
-    alignItems: 'center',
-  },
-  sectionsWrapper: {
-    gap: Spacing.five,
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
-  },
-  collapsibleContent: {
-    alignItems: 'center',
-  },
-  imageTutorial: {
-    width: '100%',
-    aspectRatio: 296 / 171,
-    borderRadius: Spacing.three,
-    marginTop: Spacing.two,
-  },
-  imageReact: {
-    width: 100,
-    height: 100,
-    alignSelf: 'center',
-  },
+  notice: { marginTop: Spacing.one },
 });

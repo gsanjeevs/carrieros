@@ -6,7 +6,9 @@
     "back": "واپس",
     "loading": "لوڈ ہو رہا ہے…",
     "comingSoon": "جلد آ رہا ہے۔",
-    "signOut": "سائن آؤٹ"
+    "signOut": "سائن آؤٹ",
+    "selectPlaceholder": "منتخب کریں…",
+    "somethingWentWrong": "کچھ غلط ہو گیا"
   },
   "errors": {
     "AUTH_REQUIRED": "جاری رکھنے کے لیے براہ کرم سائن ان کریں۔",
@@ -28,7 +30,8 @@
     "invoices": "انوائسز",
     "maintenance": "دیکھ بھال",
     "documents": "دستاویزات",
-    "team": "ٹیم"
+    "team": "ٹیم",
+    "settings": "ترتیبات"
   },
   "login": {
     "title": "اپنے اکاؤنٹ میں سائن ان کریں",
@@ -58,7 +61,11 @@
     "roleOwner": "مالک (میرے پاس ملازمین/ڈرائیورز ہیں)",
     "roleSolo": "تنہا آپریٹر (میں خود گاڑی چلاتا ہوں)",
     "launch": "CarrierOS شروع کریں",
-    "settingUp": "سیٹ اپ ہو رہا ہے…"
+    "settingUp": "سیٹ اپ ہو رہا ہے…",
+    "countryUS": "ریاستہائے متحدہ",
+    "countryCA": "کینیڈا",
+    "countryMX": "میکسیکو",
+    "setupFailed": "سیٹ اپ ناکام ہو گیا"
   },
   "dashboard": {
     "title": "فلیٹ کا جائزہ",
@@ -96,10 +103,37 @@
     "status_in_transit": "راستے میں",
     "status_delivered": "ڈیلیور ہو گیا",
     "status_invoiced": "انوائس ہو گیا",
-    "status_paid": "ادا شدہ"
+    "status_paid": "ادا شدہ",
+    "commodity": "سامان",
+    "weight": "وزن",
+    "miles": "میل",
+    "intake": "ماخذ",
+    "loadDetails": "لوڈ کی تفصیلات",
+    "activity": "سرگرمی",
+    "noActivityYet": "ابھی تک کوئی سرگرمی نہیں۔",
+    "assignment": "تفویض",
+    "driver": "ڈرائیور",
+    "truck": "ٹرک",
+    "unassigned": "غیر تفویض شدہ",
+    "documents": "دستاویزات",
+    "noDocumentsYet": "ابھی کوئی دستاویز نہیں۔",
+    "docUpload": "اپ لوڈ",
+    "docUploading": "اپ لوڈ ہو رہا ہے…",
+    "docUploadFailed": "اپ لوڈ ناکام۔ دوبارہ کوشش کریں۔",
+    "docTooLarge": "یہ فائل 10 MB سے بڑی ہے۔",
+    "docType": "دستاویز کی قسم",
+    "docType_pod": "POD",
+    "docType_rate_con": "ریٹ کنفرمیشن",
+    "docType_bol": "BOL",
+    "docType_other": "دیگر",
+    "docDelete": "دستاویز حذف کریں",
+    "docDeleteConfirm": "{name} حذف کریں؟ اسے واپس نہیں کیا جا سکتا۔",
+    "docDeleteFailed": "دستاویز حذف نہیں ہو سکی۔ دوبارہ کوشش کریں۔",
+    "docUnknownUploader": "نامعلوم"
   },
   "drivers": {
     "title": "ڈرائیورز",
+    "driverCount": "{count} ڈرائیورز",
     "inviteDriver": "ڈرائیور کو مدعو کریں",
     "driverNumber": "ڈرائیور #",
     "name": "نام",
@@ -115,10 +149,17 @@
     "truckOptional": "ٹرک (اختیاری)",
     "sendInvite": "دعوت بھیجیں",
     "noDriversYet": "ابھی تک کوئی ڈرائیور نہیں۔",
-    "inviteSent": "{email} کو دعوت بھیج دی گئی۔"
+    "inviteSent": "{email} کو دعوت بھیج دی گئی۔",
+    "cdlExpiry": "CDL کی میعاد ختم ہونے کی تاریخ",
+    "medCertExpiry": "میڈیکل سرٹیفکیٹ کی میعاد",
+    "invitedSuccess": "ڈرائیور {driverNumber} کو کامیابی سے مدعو کیا گیا۔",
+    "inviteFirstDriver": "پہلے ڈرائیور کو مدعو کریں",
+    "sendingInvite": "دعوت بھیجی جا رہی ہے…",
+    "noDefaultTruck": "کوئی طے شدہ ٹرک نہیں"
   },
   "trucks": {
     "title": "ٹرکس",
+    "truckCount": "{count} ٹرکس",
     "addTruck": "ٹرک شامل کریں",
     "truckNumber": "ٹرک #",
     "nickname": "عرفیت",
@@ -128,12 +169,44 @@
     "licensePlate": "لائسنس پلیٹ",
     "licenseState": "لائسنس ریاست",
     "noTrucksYet": "ابھی تک کوئی ٹرک نہیں۔",
-    "addedSuccess": "ٹرک {nickname} شامل کر دیا گیا۔"
+    "addedSuccess": "ٹرک {nickname} شامل کر دیا گیا۔",
+    "yearMakeModel": "سال / میک / ماڈل",
+    "plate": "پلیٹ",
+    "addFirstTruck": "پہلا ٹرک شامل کریں",
+    "adding": "شامل کیا جا رہا ہے…"
   },
   "tracking": {
     "notFoundTitle": "ٹریکنگ لنک نہیں ملا",
     "notFoundBody": "یہ لنک غلط ہو سکتا ہے یا لوڈ اب ٹریک نہیں کیا جا رہا۔",
     "lastUpdated": "{time} پہلے اپ ڈیٹ ہوا",
-    "carrierContact": "کیریئر"
+    "carrierContact": "کیریئر",
+    "justNow": "ابھی ابھی",
+    "minuteSingular": "منٹ",
+    "minutePlural": "منٹ",
+    "hourSingular": "گھنٹہ",
+    "hourPlural": "گھنٹے",
+    "daySingular": "دن",
+    "dayPlural": "دن",
+    "loadLabel": "لوڈ",
+    "poweredBy": "CarrierOS کی طرف سے تقویت یافتہ"
+  },
+  "settings": {
+    "title": "پروفائل کی ترتیبات",
+    "subtitle": "یہ ترجیحات آپ کے اکاؤنٹ کے لیے ذاتی ہیں۔",
+    "language": "زبان",
+    "units": "اکائیاں",
+    "unitsCompanyDefault": "کمپنی کا ڈیفالٹ استعمال کریں ({unit})",
+    "unitsImperial": "امپیریل — میل، پاؤنڈ",
+    "unitsMetric": "میٹرک — کلومیٹر، کلوگرام",
+    "unitsImperialShort": "امپیریل — mi, lb",
+    "unitsMetricShort": "میٹرک — km, kg",
+    "dateFormat": "تاریخ کی شکل",
+    "timeFormat": "وقت کی شکل",
+    "time12h": "12 گھنٹے (2:30 PM)",
+    "time24h": "24 گھنٹے (14:30)",
+    "saveChanges": "تبدیلیاں محفوظ کریں",
+    "saving": "محفوظ ہو رہا ہے…",
+    "saved": "محفوظ ہو گیا",
+    "saveError": "آپ کی ترتیبات محفوظ نہیں ہو سکیں۔ دوبارہ کوشش کریں۔"
   }
 }

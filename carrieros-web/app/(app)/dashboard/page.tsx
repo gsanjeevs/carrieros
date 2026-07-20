@@ -1,6 +1,7 @@
 // app/(app)/dashboard/page.tsx
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { getTranslations, getLocale } from 'next-intl/server'
 
 interface KpiCard {
   label: string
@@ -24,6 +25,10 @@ export default async function DashboardPage() {
   const role    = profile?.role ?? 'solo'
   const orgId   = profile?.org_id
 
+  const t = await getTranslations('dashboard')
+  const tNav = await getTranslations('nav')
+  const locale = await getLocale()
+
   const [loadsRes, trucksRes, driversRes, invoicesRes] = await Promise.all([
     orgId
       ? supabase.from('loads').select('id, status', { count: 'exact' }).eq('carrier_org_id', orgId)
@@ -44,20 +49,20 @@ export default async function DashboardPage() {
   ).length
 
   const kpis: KpiCard[] = [
-    { label: 'Active Loads',     value: activeLoads,            sub: `${loadsRes.count ?? 0} total`,   icon: 'local_shipping', color: '#f97316' },
-    { label: 'Trucks',           value: trucksRes.count ?? 0,   sub: 'active fleet',                   icon: 'fire_truck',     color: '#1abc9c' },
-    { label: 'Drivers',          value: driversRes.count ?? 0,  sub: 'active',                         icon: 'person',         color: '#3b82f6' },
-    { label: 'Unpaid Invoices',  value: invoicesRes.count ?? 0, sub: 'awaiting payment',               icon: 'receipt_long',   color: '#d97706' },
+    { label: t('activeLoads'),    value: activeLoads,            sub: t('totalLoads', { count: loadsRes.count ?? 0 }),   icon: 'local_shipping', color: '#f97316' },
+    { label: t('trucks'),         value: trucksRes.count ?? 0,   sub: t('activeFleet'),                                  icon: 'fire_truck',     color: '#1abc9c' },
+    { label: t('drivers'),        value: driversRes.count ?? 0,  sub: t('active'),                                       icon: 'person',         color: '#3b82f6' },
+    { label: t('unpaidInvoices'), value: invoicesRes.count ?? 0, sub: t('awaitingPayment'),                              icon: 'receipt_long',   color: '#d97706' },
   ]
 
   return (
     <div className="p-8">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-white">
-          {role === 'owner' || role === 'solo' ? 'Fleet Overview' : 'Dashboard'}
+          {role === 'owner' || role === 'solo' ? t('title') : tNav('dashboard')}
         </h1>
         <p className="text-slate-400 text-sm mt-1">
-          {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+          {new Date().toLocaleDateString(locale, { weekday: 'long', month: 'long', day: 'numeric' })}
         </p>
       </div>
 
@@ -78,14 +83,14 @@ export default async function DashboardPage() {
 
       <div className="bg-white/5 border border-white/8 rounded-xl">
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
-          <h2 className="text-white font-medium text-sm">Recent Loads</h2>
-          <a href="/loads" className="text-[#f97316] text-xs hover:underline">View all</a>
+          <h2 className="text-white font-medium text-sm">{t('recentLoads')}</h2>
+          <a href="/loads" className="text-[#f97316] text-xs hover:underline">{t('viewAll')}</a>
         </div>
         <div className="px-5 py-12 text-center">
           <span className="material-symbols-outlined text-slate-600 text-4xl">local_shipping</span>
-          <p className="text-slate-500 text-sm mt-3">No loads yet.</p>
+          <p className="text-slate-500 text-sm mt-3">{t('noLoadsYet')}</p>
           <a href="/loads/new" className="inline-block mt-4 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition">
-            Create first load
+            {t('createFirstLoad')}
           </a>
         </div>
       </div>

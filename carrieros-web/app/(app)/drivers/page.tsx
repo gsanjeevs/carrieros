@@ -1,12 +1,13 @@
 // app/(app)/drivers/page.tsx
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { getTranslations, getLocale } from 'next-intl/server'
 import InviteDriverButton from './InviteDriverButton'
 
-const STATUS_BADGE: Record<string, { label: string; color: string }> = {
-  pending:  { label: 'Pending',  color: 'bg-amber-500/20 text-amber-400' },
-  accepted: { label: 'Active',   color: 'bg-[#16a34a]/20 text-[#16a34a]' },
-  revoked:  { label: 'Revoked',  color: 'bg-slate-500/20 text-slate-400' },
+const STATUS_COLOR: Record<string, string> = {
+  pending:  'bg-amber-500/20 text-amber-400',
+  accepted: 'bg-[#16a34a]/20 text-[#16a34a]',
+  revoked:  'bg-slate-500/20 text-slate-400',
 }
 
 type Driver = {
@@ -45,6 +46,13 @@ export default async function DriversPage({
   const justInvited = params.invited
   const canManage = ['owner', 'solo'].includes(profile?.role ?? '')
 
+  const t = await getTranslations('drivers')
+  const locale = await getLocale()
+
+  const STATUS_BADGE: Record<string, { label: string; color: string }> = Object.fromEntries(
+    Object.entries(STATUS_COLOR).map(([key, color]) => [key, { label: t(`inviteStatus_${key}`), color }])
+  )
+
   let drivers: Driver[] = []
   let trucks: Truck[] = []
 
@@ -72,8 +80,8 @@ export default async function DriversPage({
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Drivers</h1>
-          <p className="text-slate-400 text-sm mt-1">{drivers.length} drivers</p>
+          <h1 className="text-2xl font-semibold text-white">{t('title')}</h1>
+          <p className="text-slate-400 text-sm mt-1">{t('driverCount', { count: drivers.length })}</p>
         </div>
         {canManage && <InviteDriverButton trucks={trucks} />}
       </div>
@@ -81,14 +89,14 @@ export default async function DriversPage({
       {justInvited && (
         <div className="mb-6 flex items-center gap-3 rounded-lg bg-[#16a34a]/10 border border-[#16a34a]/20 px-4 py-3">
           <span className="material-symbols-outlined text-[#16a34a] text-[18px]">check_circle</span>
-          <p className="text-[#16a34a] text-sm">Driver <span className="font-semibold">{justInvited}</span> invited successfully.</p>
+          <p className="text-[#16a34a] text-sm">{t('invitedSuccess', { driverNumber: justInvited })}</p>
         </div>
       )}
 
       {drivers.length === 0 ? (
         <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center">
           <span className="material-symbols-outlined text-slate-600 text-4xl">person</span>
-          <p className="text-slate-500 text-sm mt-3">No drivers yet.</p>
+          <p className="text-slate-500 text-sm mt-3">{t('noDriversYet')}</p>
           {canManage && <InviteDriverButton trucks={trucks} variant="empty" />}
         </div>
       ) : (
@@ -96,12 +104,12 @@ export default async function DriversPage({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/5">
-                <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Driver #</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Name</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Status</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Phone</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">CDL Expiry</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Med Cert Expiry</th>
+                <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('driverNumber')}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('name')}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('status')}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('phone')}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('cdlExpiry')}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('medCertExpiry')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
@@ -121,12 +129,12 @@ export default async function DriversPage({
                     <td className="px-4 py-3.5 text-slate-400">{driver.profiles?.phone ?? '—'}</td>
                     <td className="px-4 py-3.5 text-slate-400">
                       {driver.cdl_expiry
-                        ? new Date(driver.cdl_expiry).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                        ? new Date(driver.cdl_expiry).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })
                         : '—'}
                     </td>
                     <td className="px-4 py-3.5 text-slate-400">
                       {driver.med_cert_expiry
-                        ? new Date(driver.med_cert_expiry).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                        ? new Date(driver.med_cert_expiry).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })
                         : '—'}
                     </td>
                   </tr>

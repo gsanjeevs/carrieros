@@ -5,6 +5,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { friendlyApiError } from '@/lib/api-errors'
 
 type Truck = {
@@ -18,6 +19,8 @@ const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
 
 export default function InviteDriverButton({ trucks, variant }: { trucks: Truck[]; variant?: 'empty' }) {
   const router = useRouter()
+  const t = useTranslations('drivers')
+  const tCommon = useTranslations('common')
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -62,7 +65,7 @@ export default function InviteDriverButton({ trucks, variant }: { trucks: Truck[
       router.push(`/drivers?invited=${json.driver_number}`)
       router.refresh()
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Something went wrong')
+      setError(e instanceof Error ? e.message : tCommon('somethingWentWrong'))
     } finally {
       setLoading(false)
     }
@@ -76,7 +79,7 @@ export default function InviteDriverButton({ trucks, variant }: { trucks: Truck[
           className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition"
         >
           <span className="material-symbols-outlined text-[16px]">add</span>
-          Invite first driver
+          {t('inviteFirstDriver')}
         </button>
       ) : (
         <button
@@ -84,7 +87,7 @@ export default function InviteDriverButton({ trucks, variant }: { trucks: Truck[
           className="flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
-          Invite Driver
+          {t('inviteDriver')}
         </button>
       )}
 
@@ -92,7 +95,7 @@ export default function InviteDriverButton({ trucks, variant }: { trucks: Truck[
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
           <div className="w-full max-w-md bg-[#0f1923] border border-white/10 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-white font-semibold text-lg">Invite Driver</h2>
+              <h2 className="text-white font-semibold text-lg">{t('inviteDriver')}</h2>
               <button onClick={close} className="text-slate-500 hover:text-white transition">
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
@@ -100,7 +103,7 @@ export default function InviteDriverButton({ trucks, variant }: { trucks: Truck[
 
             <div className="space-y-4">
               <div>
-                <label className={labelCls}>Email *</label>
+                <label className={labelCls}>{t('email')} *</label>
                 <input
                   className={inputCls}
                   type="email"
@@ -112,27 +115,27 @@ export default function InviteDriverButton({ trucks, variant }: { trucks: Truck[
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className={labelCls}>First name</label>
+                  <label className={labelCls}>{t('firstName')}</label>
                   <input className={inputCls} placeholder="John"
                     value={form.first_name} onChange={e => set('first_name', e.target.value)} />
                 </div>
                 <div>
-                  <label className={labelCls}>Last name</label>
+                  <label className={labelCls}>{t('lastName')}</label>
                   <input className={inputCls} placeholder="Smith"
                     value={form.last_name} onChange={e => set('last_name', e.target.value)} />
                 </div>
               </div>
 
               <div>
-                <label className={labelCls}>Phone</label>
+                <label className={labelCls}>{t('phone')}</label>
                 <input className={inputCls} placeholder="(555) 123-4567"
                   value={form.phone} onChange={e => set('phone', e.target.value)} />
               </div>
 
               <div>
-                <label className={labelCls}>Default truck</label>
+                <label className={labelCls}>{t('truckOptional')}</label>
                 <select className={inputCls} value={form.default_truck_id} onChange={e => set('default_truck_id', e.target.value)}>
-                  <option value="">No default truck</option>
+                  <option value="">{t('noDefaultTruck')}</option>
                   {trucks.map(t => (
                     <option key={t.id} value={t.id}>
                       {t.truck_number}{t.nickname ? ` — ${t.nickname}` : ''}
@@ -153,14 +156,14 @@ export default function InviteDriverButton({ trucks, variant }: { trucks: Truck[
                   disabled={loading}
                   className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm"
                 >
-                  Cancel
+                  {tCommon('cancel')}
                 </button>
                 <button
                   onClick={submit}
                   disabled={loading || !form.email}
                   className="flex-2 flex-grow py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm"
                 >
-                  {loading ? 'Sending invite…' : 'Send Invite'}
+                  {loading ? t('sendingInvite') : t('sendInvite')}
                 </button>
               </div>
             </div>
