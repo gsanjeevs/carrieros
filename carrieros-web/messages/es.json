@@ -21,7 +21,12 @@
     "SERVER_ERROR": "Algo salió mal. Inténtalo de nuevo.",
     "INVOICE_EXISTS": "Esta carga ya tiene una factura.",
     "LOAD_NOT_DELIVERED": "Solo puede facturar una carga cuando ya fue entregada.",
-    "NOT_FACTORING": "Primero cambie el método de cobro de esta factura a factoraje."
+    "NOT_FACTORING": "Primero cambie el método de cobro de esta factura a factoraje.",
+    "EMAIL_EXISTS": "Ese correo electrónico ya tiene una cuenta.",
+    "SELF_ROLE_CHANGE": "No puedes cambiar tu propio rol. Pídeselo a otro propietario.",
+    "CANNOT_REMOVE_SELF": "No puedes eliminar tu propia cuenta.",
+    "LAST_OWNER": "Tu empresa debe conservar al menos un propietario.",
+    "MANAGE_DRIVER_ELSEWHERE": "Administra las cuentas de conductores desde la página Conductores."
   },
   "nav": {
     "dashboard": "Panel",
@@ -272,5 +277,39 @@
     "saving": "Guardando…",
     "saved": "Guardado",
     "saveError": "No se pudo guardar tu configuración. Inténtalo de nuevo."
+  },
+  "team": {
+    "title": "Equipo",
+    "memberCount": "{count} personas",
+    "inviteMember": "Invitar miembro",
+    "name": "Nombre",
+    "email": "Correo electrónico",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "role": "Rol",
+    "status": "Estado",
+    "joined": "Se unió",
+    "you": "(tú)",
+    "statusActive": "Activo",
+    "statusPending": "Invitación pendiente",
+    "cannotEditSelf": "No puedes cambiar tu propio rol",
+    "manageOnDrivers": "Administrar en Conductores",
+    "driversHint": "Los conductores se invitan por separado, porque también reciben un registro de conductor y asignación de camión.",
+    "driversHintLink": "Ir a Conductores",
+    "driverRoleNote": "¿Vas a invitar a un conductor? Usa la página Conductores.",
+    "sendInvite": "Enviar invitación",
+    "sendingInvite": "Enviando invitación…",
+    "changeRole": "Cambiar rol",
+    "remove": "Eliminar",
+    "removeTitle": "Eliminar miembro del equipo",
+    "removeConfirm": "¿Eliminar a {name} de tu empresa? Perderá el acceso de inmediato. Esto no se puede deshacer.",
+    "role_owner": "Propietario",
+    "role_solo": "Propietario-operador",
+    "role_driver": "Conductor",
+    "role_dispatcher": "Despachador",
+    "role_finance": "Finanzas",
+    "roleHelp_dispatcher": "Puede asignar cargas, administrar conductores y despachar. No ve tarifas ni facturas.",
+    "roleHelp_finance": "Puede ver facturas, tarifas e informes financieros. No puede despachar.",
+    "roleHelp_owner": "Acceso total, incluida la gestión del equipo y la facturación."
   }
 }

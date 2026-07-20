@@ -21,7 +21,12 @@
     "SERVER_ERROR": "Something went wrong. Please try again.",
     "INVOICE_EXISTS": "This load already has an invoice.",
     "LOAD_NOT_DELIVERED": "You can only invoice a load once it has been delivered.",
-    "NOT_FACTORING": "Set this invoice's payment method to factoring first."
+    "NOT_FACTORING": "Set this invoice's payment method to factoring first.",
+    "EMAIL_EXISTS": "That email address already has an account.",
+    "SELF_ROLE_CHANGE": "You cannot change your own role. Ask another owner to do it.",
+    "CANNOT_REMOVE_SELF": "You cannot remove your own account.",
+    "LAST_OWNER": "Your company must keep at least one owner.",
+    "MANAGE_DRIVER_ELSEWHERE": "Manage driver accounts from the Drivers page."
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -272,5 +277,39 @@
     "saving": "Saving…",
     "saved": "Saved",
     "saveError": "Could not save your settings. Please try again."
+  },
+  "team": {
+    "title": "Team",
+    "memberCount": "{count} people",
+    "inviteMember": "Invite Member",
+    "name": "Name",
+    "email": "Email",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "role": "Role",
+    "status": "Status",
+    "joined": "Joined",
+    "you": "(you)",
+    "statusActive": "Active",
+    "statusPending": "Invite pending",
+    "cannotEditSelf": "You cannot change your own role",
+    "manageOnDrivers": "Manage on Drivers",
+    "driversHint": "Drivers are invited separately, because they also get a driver record and truck assignment.",
+    "driversHintLink": "Go to Drivers",
+    "driverRoleNote": "Inviting a driver? Use the Drivers page instead.",
+    "sendInvite": "Send Invite",
+    "sendingInvite": "Sending invite…",
+    "changeRole": "Change role",
+    "remove": "Remove",
+    "removeTitle": "Remove team member",
+    "removeConfirm": "Remove {name} from your company? They will lose access immediately. This cannot be undone.",
+    "role_owner": "Owner",
+    "role_solo": "Owner-operator",
+    "role_driver": "Driver",
+    "role_dispatcher": "Dispatcher",
+    "role_finance": "Finance",
+    "roleHelp_dispatcher": "Can assign loads, manage drivers and dispatch. Cannot see rates or invoices.",
+    "roleHelp_finance": "Can see invoices, rates and financial reports. Cannot dispatch.",
+    "roleHelp_owner": "Full access, including team management and billing."
   }
 }

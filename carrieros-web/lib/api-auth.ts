@@ -24,6 +24,12 @@ export type ErrorCode =
   | 'INVOICE_EXISTS'
   | 'LOAD_NOT_DELIVERED'
   | 'NOT_FACTORING'
+  // Team management (app/api/team/*)
+  | 'EMAIL_EXISTS'
+  | 'SELF_ROLE_CHANGE'
+  | 'CANNOT_REMOVE_SELF'
+  | 'LAST_OWNER'
+  | 'MANAGE_DRIVER_ELSEWHERE'
   | 'SERVER_ERROR'
 
 // message is an English fallback for logs/devs only — never render it

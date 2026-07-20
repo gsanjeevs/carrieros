@@ -9,6 +9,11 @@ export const ERROR_MESSAGES: Record<string, string> = {
   NOT_ONBOARDED: 'Your company setup is incomplete.',
   VALIDATION_ERROR: 'Please check the form and try again.',
   SERVER_ERROR:  'Something went wrong. Please try again.',
+  EMAIL_EXISTS:  'That email address already has an account.',
+  SELF_ROLE_CHANGE: 'You cannot change your own role. Ask another owner to do it.',
+  CANNOT_REMOVE_SELF: 'You cannot remove your own account.',
+  LAST_OWNER:    'Your company must keep at least one owner.',
+  MANAGE_DRIVER_ELSEWHERE: 'Manage driver accounts from the Drivers page.',
 }
 
 const DEFAULT_MESSAGE = 'Something went wrong. Please try again.'
