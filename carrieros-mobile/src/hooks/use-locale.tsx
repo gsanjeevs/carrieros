@@ -213,11 +213,33 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   const isRTL = isRTLLocale(locale);
   const fontsReady = locale === 'en' || locale === 'es' ? true : fontFamily !== null;
 
+  // `translate` (imported as `t`/`translate` from `@/lib/i18n`) is a stable
+  // module-level function reference — it always reads the *current*
+  // i18n.locale internally, so it stays correct if you call it directly.
+  // But screens don't call it directly: they destructure `t` from
+  // useLocale() and let the React Compiler auto-memoize JSX built from it.
+  // The compiler's generated cache checks `$[i] !== t` to decide whether to
+  // recompute a memoized JSX node — and since `translate`'s identity never
+  // changes, that check is permanently false after the first render, so
+  // t()-derived JSX gets frozen at whatever locale was active on first
+  // mount, even though `t()` itself would return the right string if called
+  // again. (This is exactly why a screen with an unrelated post-mount state
+  // update — e.g. /load/[id] fetching its data — "looks" locale-reactive:
+  // the other changed dependency forces that JSX node to recompute, which
+  // incidentally re-invokes t() too. A screen with no such post-mount
+  // update, like /dvir/[loadId], never gets that nudge and stays stuck on
+  // its first-paint locale.)
+  //
+  // Fix: wrap it in a callback keyed on `locale` so `t`'s *identity* changes
+  // exactly when the locale does. That gives the compiler's existing
+  // `$[i] !== t` dependency check a real signal to invalidate on.
+  const t = useCallback<typeof translate>((scope, options) => translate(scope, options), [locale]);
+
   const value = useMemo<LocaleContextValue>(
     () => ({
       locale,
       setLocale,
-      t: translate,
+      t,
       isRTL,
       fontsReady,
       fontFamily,
@@ -226,7 +248,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       setDateFormat,
       setTimeFormat,
     }),
-    [locale, setLocale, isRTL, fontsReady, fontFamily, prefs, setUomSystem, setDateFormat, setTimeFormat]
+    [locale, setLocale, t, isRTL, fontsReady, fontFamily, prefs, setUomSystem, setDateFormat, setTimeFormat]
   );
 
   return (
