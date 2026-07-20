@@ -137,7 +137,14 @@
     "docDelete": "دستاویز حذف کریں",
     "docDeleteConfirm": "{name} حذف کریں؟ اسے واپس نہیں کیا جا سکتا۔",
     "docDeleteFailed": "دستاویز حذف نہیں ہو سکی۔ دوبارہ کوشش کریں۔",
-    "docUnknownUploader": "نامعلوم"
+    "docUnknownUploader": "نامعلوم",
+    "assignDriver": "ڈرائیور مقرر کریں",
+    "assignTruck": "ٹرک مقرر کریں",
+    "actionMarkScheduled": "شیڈول شدہ نشان زد کریں",
+    "actionDispatch": "ڈسپیچ کریں",
+    "actionMarkPickedUp": "پک اپ نشان زد کریں",
+    "actionMarkInTransit": "راستے میں نشان زد کریں",
+    "actionMarkDelivered": "ڈیلیور شدہ نشان زد کریں"
   },
   "drivers": {
     "title": "ڈرائیورز",

@@ -137,7 +137,14 @@
     "docDelete": "Delete document",
     "docDeleteConfirm": "Delete {name}? This cannot be undone.",
     "docDeleteFailed": "Couldn't delete that document. Please try again.",
-    "docUnknownUploader": "Unknown"
+    "docUnknownUploader": "Unknown",
+    "assignDriver": "Assign Driver",
+    "assignTruck": "Assign Truck",
+    "actionMarkScheduled": "Mark Scheduled",
+    "actionDispatch": "Dispatch",
+    "actionMarkPickedUp": "Mark Picked Up",
+    "actionMarkInTransit": "Mark In Transit",
+    "actionMarkDelivered": "Mark Delivered"
   },
   "drivers": {
     "title": "Drivers",

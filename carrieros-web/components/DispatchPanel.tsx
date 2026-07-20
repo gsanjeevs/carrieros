@@ -4,6 +4,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 interface Driver { id: number; driver_number: string; profiles: { first_name: string; last_name: string } | null }
 interface Truck  { id: number; truck_number: string; nickname: string }
@@ -21,12 +22,13 @@ const NEXT_STATUS: Record<string, string> = {
   // labelled "Create Invoice" that created no invoice at all.
 }
 
-const STATUS_ACTION: Record<string, string> = {
-  draft:      'Mark Scheduled',
-  scheduled:  'Dispatch',
-  dispatched: 'Mark Picked Up',
-  picked_up:  'Mark In Transit',
-  in_transit: 'Mark Delivered',
+// Maps to loads.action* keys in messages/*.json, not hardcoded English.
+const STATUS_ACTION_KEY: Record<string, string> = {
+  draft:      'actionMarkScheduled',
+  scheduled:  'actionDispatch',
+  dispatched: 'actionMarkPickedUp',
+  picked_up:  'actionMarkInTransit',
+  in_transit: 'actionMarkDelivered',
 }
 
 export default function DispatchPanel({
@@ -40,6 +42,19 @@ export default function DispatchPanel({
   orgId:           number
 }) {
   const router = useRouter()
+  const t = useTranslations('loads')
+  const tCommon = useTranslations('common')
+  const tErrors = useTranslations('errors')
+
+  function friendly(code?: string) {
+    if (!code) return tCommon('somethingWentWrong')
+    try {
+      return tErrors(code as never)
+    } catch {
+      return tCommon('somethingWentWrong')
+    }
+  }
+
   const [drivers, setDrivers] = useState<Driver[]>([])
   const [trucks,  setTrucks]  = useState<Truck[]>([])
   const [driverId, setDriverId] = useState<string>(currentDriverId?.toString() ?? '')
@@ -67,11 +82,11 @@ export default function DispatchPanel({
       })
       if (!res.ok) {
         const j = await res.json()
-        throw new Error(j.error ?? 'Failed')
+        throw new Error(friendly(j.error_code))
       }
       router.refresh()
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Something went wrong')
+      setError(e instanceof Error ? e.message : tCommon('somethingWentWrong'))
     } finally {
       setSaving(false)
     }
@@ -79,14 +94,14 @@ export default function DispatchPanel({
 
   const selectCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#f97316] transition'
   const nextStatus = NEXT_STATUS[currentStatus]
-  const actionLabel = STATUS_ACTION[currentStatus]
+  const actionKey = STATUS_ACTION_KEY[currentStatus]
 
   return (
     <div className="space-y-3">
       <div>
-        <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">Assign Driver</label>
+        <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">{t('assignDriver')}</label>
         <select className={selectCls} value={driverId} onChange={e => setDriverId(e.target.value)}>
-          <option value="">— Unassigned —</option>
+          <option value="">— {t('unassigned')} —</option>
           {drivers.map(d => {
             const name = d.profiles
               ? [d.profiles.first_name, d.profiles.last_name].filter(Boolean).join(' ')
@@ -97,11 +112,11 @@ export default function DispatchPanel({
       </div>
 
       <div>
-        <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">Assign Truck</label>
+        <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">{t('assignTruck')}</label>
         <select className={selectCls} value={truckId} onChange={e => setTruckId(e.target.value)}>
-          <option value="">— Unassigned —</option>
-          {trucks.map(t => (
-            <option key={t.id} value={t.id}>{t.truck_number} · {t.nickname}</option>
+          <option value="">— {t('unassigned')} —</option>
+          {trucks.map(tr => (
+            <option key={tr.id} value={tr.id}>{tr.truck_number} · {tr.nickname}</option>
           ))}
         </select>
       </div>
@@ -114,15 +129,15 @@ export default function DispatchPanel({
           disabled={saving}
           className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-white text-sm font-medium rounded-lg transition disabled:opacity-40"
         >
-          Save
+          {tCommon('save')}
         </button>
-        {nextStatus && actionLabel && (
+        {nextStatus && actionKey && (
           <button
             onClick={() => save(nextStatus)}
             disabled={saving}
             className="flex-1 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition disabled:opacity-40"
           >
-            {saving ? '…' : actionLabel}
+            {saving ? '…' : t(actionKey as never)}
           </button>
         )}
       </div>

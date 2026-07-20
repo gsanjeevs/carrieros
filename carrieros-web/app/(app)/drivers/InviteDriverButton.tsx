@@ -6,7 +6,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { friendlyApiError } from '@/lib/api-errors'
 
 type Truck = {
   id: number
@@ -21,6 +20,16 @@ export default function InviteDriverButton({ trucks, variant }: { trucks: Truck[
   const router = useRouter()
   const t = useTranslations('drivers')
   const tCommon = useTranslations('common')
+  const tErrors = useTranslations('errors')
+
+  // `errors` messages are keyed by error_code — never render a raw API string.
+  function friendly(code?: string) {
+    try {
+      return tErrors(code as never)
+    } catch {
+      return tErrors('SERVER_ERROR')
+    }
+  }
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -58,7 +67,7 @@ export default function InviteDriverButton({ trucks, variant }: { trucks: Truck[
         }),
       })
       const json = await res.json()
-      if (!res.ok) throw new Error(friendlyApiError(json.error_code))
+      if (!res.ok) throw new Error(friendly(json.error_code))
 
       setOpen(false)
       setForm({ email: '', phone: '', first_name: '', last_name: '', default_truck_id: '' })

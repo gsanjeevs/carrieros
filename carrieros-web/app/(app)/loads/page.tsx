@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getTranslations, getLocale } from 'next-intl/server'
+import { formatMoney } from '@/lib/format-money'
 
 const STATUS_COLOR: Record<string, string> = {
   draft:       'bg-slate-500/20 text-slate-400',
@@ -143,7 +144,7 @@ export default async function LoadsPage({
                     </td>
                     {showRate && (
                       <td className="px-5 py-3.5 text-right text-white font-medium">
-                        {load.rate != null ? `$${Number(load.rate).toLocaleString()}` : '—'}
+                        {formatMoney(load.rate, 'USD', locale)}
                       </td>
                     )}
                   </tr>

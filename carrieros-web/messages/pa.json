@@ -137,7 +137,14 @@
     "docDelete": "ਦਸਤਾਵੇਜ਼ ਮਿਟਾਓ",
     "docDeleteConfirm": "{name} ਮਿਟਾਉਣਾ ਹੈ? ਇਹ ਵਾਪਸ ਨਹੀਂ ਹੋ ਸਕਦਾ।",
     "docDeleteFailed": "ਦਸਤਾਵੇਜ਼ ਮਿਟਾਇਆ ਨਹੀਂ ਜਾ ਸਕਿਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
-    "docUnknownUploader": "ਅਣਜਾਣ"
+    "docUnknownUploader": "ਅਣਜਾਣ",
+    "assignDriver": "ਡਰਾਈਵਰ ਨਿਯੁਕਤ ਕਰੋ",
+    "assignTruck": "ਟਰੱਕ ਨਿਯੁਕਤ ਕਰੋ",
+    "actionMarkScheduled": "ਤਹਿ ਕੀਤਾ ਵਜੋਂ ਚਿੰਨ੍ਹਿਤ ਕਰੋ",
+    "actionDispatch": "ਭੇਜੋ",
+    "actionMarkPickedUp": "ਪਿਕਅੱਪ ਹੋਇਆ ਵਜੋਂ ਚਿੰਨ੍ਹਿਤ ਕਰੋ",
+    "actionMarkInTransit": "ਰਸਤੇ ਵਿੱਚ ਵਜੋਂ ਚਿੰਨ੍ਹਿਤ ਕਰੋ",
+    "actionMarkDelivered": "ਡਿਲੀਵਰ ਹੋਇਆ ਵਜੋਂ ਚਿੰਨ੍ਹਿਤ ਕਰੋ"
   },
   "drivers": {
     "title": "ਡਰਾਈਵਰ",

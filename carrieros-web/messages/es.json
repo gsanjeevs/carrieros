@@ -137,7 +137,14 @@
     "docDelete": "Eliminar documento",
     "docDeleteConfirm": "¿Eliminar {name}? Esta acción no se puede deshacer.",
     "docDeleteFailed": "No se pudo eliminar ese documento. Inténtalo de nuevo.",
-    "docUnknownUploader": "Desconocido"
+    "docUnknownUploader": "Desconocido",
+    "assignDriver": "Asignar Conductor",
+    "assignTruck": "Asignar Camión",
+    "actionMarkScheduled": "Marcar Programada",
+    "actionDispatch": "Despachar",
+    "actionMarkPickedUp": "Marcar Recogida",
+    "actionMarkInTransit": "Marcar En Tránsito",
+    "actionMarkDelivered": "Marcar Entregada"
   },
   "drivers": {
     "title": "Conductores",

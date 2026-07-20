@@ -249,7 +249,7 @@ export default async function LoadDetailPage({
             <InfoRow label={t('commodity')} value={load.commodity} />
             <InfoRow label={t('weight')}    value={load.weight_lbs ? `${Number(load.weight_lbs).toLocaleString()} lbs` : null} />
             <InfoRow label={t('miles')}     value={load.total_miles ? `${load.total_miles} mi` : null} />
-            {showRate && <InfoRow label={t('rate')} value={load.rate != null ? `$${Number(load.rate).toLocaleString()}` : null} />}
+            {showRate && <InfoRow label={t('rate')} value={load.rate != null ? formatMoney(load.rate, carrierOrg?.currency ?? 'USD', locale) : null} />}
             <InfoRow label={t('intake')}    value={load.intake_method} />
           </div>
 

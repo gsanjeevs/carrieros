@@ -6,7 +6,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { friendlyApiError } from '@/lib/api-errors'
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
@@ -22,6 +21,16 @@ export default function AddTruckButton({ variant }: { variant?: 'empty' }) {
   const router = useRouter()
   const t = useTranslations('trucks')
   const tCommon = useTranslations('common')
+  const tErrors = useTranslations('errors')
+
+  // `errors` messages are keyed by error_code — never render a raw API string.
+  function friendly(code?: string) {
+    try {
+      return tErrors(code as never)
+    } catch {
+      return tErrors('SERVER_ERROR')
+    }
+  }
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -63,7 +72,7 @@ export default function AddTruckButton({ variant }: { variant?: 'empty' }) {
         }),
       })
       const json = await res.json()
-      if (!res.ok) throw new Error(friendlyApiError(json.error_code))
+      if (!res.ok) throw new Error(friendly(json.error_code))
 
       setOpen(false)
       setForm({ nickname: '', year: '', make: '', model: '', vin: '', license_plate: '', license_state: '' })
