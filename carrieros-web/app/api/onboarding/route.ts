@@ -1,8 +1,9 @@
 // app/api/onboarding/route.ts
 // Creates organizations + carrier_details + profiles atomically for a new carrier user.
 // Uses admin client (service role) for DB writes to bypass RLS during initial setup.
-import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 
 // Derive timezone from country + state
 function deriveTimezone(country: string, state: string): string {
@@ -42,10 +43,9 @@ function deriveTimezone(country: string, state: string): string {
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const ctx = await getAuthedContext(request)
+  if (isErrorResponse(ctx)) return ctx
+  const { supabase, user } = ctx
 
   // Prevent double-onboarding
   const { data: existing } = await supabase
@@ -55,13 +55,13 @@ export async function POST(request: NextRequest) {
     .maybeSingle()
 
   if (existing?.org_id)
-    return NextResponse.json({ error: 'Already onboarded' }, { status: 409 })
+    return apiError('ALREADY_ONBOARDED', 'Already onboarded', 409)
 
   const body = await request.json()
   const { company_name, mc_number, dot_number, country, state, city, first_name, last_name, role } = body
 
   if (!company_name || !state || !first_name || !last_name)
-    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    return apiError('VALIDATION_ERROR', 'Missing required fields', 400)
 
   const timezone  = deriveTimezone(country ?? 'US', state)
   const uom       = country === 'CA' ? 'metric' : 'imperial'
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     .select('id')
     .single()
 
-  if (orgErr) { console.error('[onboarding] step1 org:', orgErr); return NextResponse.json({ error: `[step1] ${orgErr.message}`, code: orgErr.code }, { status: 500 }) }
+  if (orgErr) { console.error('[onboarding] step1 org:', orgErr); return NextResponse.json({ error_code: 'SERVER_ERROR', error: `[step1] ${orgErr.message}`, code: orgErr.code }, { status: 500 }) }
   const orgId = Number(org.id)
   console.log('[onboarding] org created:', orgId)
 
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       uom_system: uom,
     })
 
-  if (detailErr) { console.error('[onboarding] step2 carrier_details:', detailErr); return NextResponse.json({ error: `[step2] ${detailErr.message}`, code: detailErr.code }, { status: 500 }) }
+  if (detailErr) { console.error('[onboarding] step2 carrier_details:', detailErr); return NextResponse.json({ error_code: 'SERVER_ERROR', error: `[step2] ${detailErr.message}`, code: detailErr.code }, { status: 500 }) }
   console.log('[onboarding] carrier_details created')
 
   // 3. Upsert profile
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
       last_name:  last_name.trim(),
     }, { onConflict: 'id' })
 
-  if (profileErr) { console.error('[onboarding] step3 profile:', profileErr); return NextResponse.json({ error: `[step3] ${profileErr.message}`, code: profileErr.code }, { status: 500 }) }
+  if (profileErr) { console.error('[onboarding] step3 profile:', profileErr); return NextResponse.json({ error_code: 'SERVER_ERROR', error: `[step3] ${profileErr.message}`, code: profileErr.code }, { status: 500 }) }
   console.log('[onboarding] profile upserted for', user.id)
 
   return NextResponse.json({ org_id: orgId }, { status: 201 })

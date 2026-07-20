@@ -1,7 +1,7 @@
 // app/api/loads/[id]/route.ts
 // PATCH — update driver, truck, and/or status on a load
-import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 
 const VALID_STATUSES = ['draft','scheduled','dispatched','picked_up','in_transit','delivered','invoiced','paid']
 
@@ -10,10 +10,9 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const ctx = await getAuthedContext(request)
+  if (isErrorResponse(ctx)) return ctx
+  const { supabase, user } = ctx
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -22,10 +21,10 @@ export async function PATCH(
     .single()
 
   if (!profile?.org_id)
-    return NextResponse.json({ error: 'No organization' }, { status: 400 })
+    return apiError('NOT_ONBOARDED', 'No organization', 400)
 
   if (!['owner', 'solo', 'dispatcher'].includes(profile.role))
-    return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
+    return apiError('FORBIDDEN', 'Insufficient permissions', 403)
 
   const body = await request.json()
   const update: Record<string, unknown> = {}
@@ -34,12 +33,12 @@ export async function PATCH(
   if ('truck_id'  in body) update.truck_id  = body.truck_id  ?? null
   if ('status' in body) {
     if (!VALID_STATUSES.includes(body.status))
-      return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
+      return apiError('VALIDATION_ERROR', 'Invalid status', 400)
     update.status = body.status
   }
 
   if (Object.keys(update).length === 0)
-    return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })
+    return apiError('VALIDATION_ERROR', 'Nothing to update', 400)
 
   const { error } = await supabase
     .from('loads')
@@ -47,7 +46,7 @@ export async function PATCH(
     .eq('id', Number(id))
     .eq('carrier_org_id', profile.org_id)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return apiError('SERVER_ERROR', error.message, 500)
 
   // Log status change event
   if (update.status) {

@@ -27,6 +27,15 @@ const PUBLIC_PREFIXES = ['/login', '/auth', '/track', '/onboarding']
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const isPublic = PUBLIC_PREFIXES.some((p) => pathname.startsWith(p))
+  const isApiRoute = pathname.startsWith('/api/')
+
+  // API routes authenticate themselves via lib/api-auth.ts, which accepts
+  // EITHER a cookie session (web) OR an `Authorization: Bearer <token>`
+  // header (carrieros-mobile — Expo has no cookies). This middleware's own
+  // session check below only reads cookies, so it must not gate /api/*
+  // requests — otherwise every Bearer-token request from mobile gets
+  // redirected to /login before the route handler ever runs.
+  if (isApiRoute) return NextResponse.next({ request })
 
   let response = NextResponse.next({ request })
 
@@ -61,8 +70,8 @@ export async function proxy(request: NextRequest) {
   }
 
   // ── New user with no org → onboarding ──────────────────────
-  // Skip for API routes — they handle their own auth and org checks
-  if (user && !isPublic && !pathname.startsWith('/onboarding') && !pathname.startsWith('/api/')) {
+  // (/api/ already returned above — this only ever runs for page routes)
+  if (user && !isPublic && !pathname.startsWith('/onboarding')) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('org_id')

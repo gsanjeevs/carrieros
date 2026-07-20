@@ -1,6 +1,7 @@
 // app/api/extract-load/route.ts
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
+import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -39,11 +40,14 @@ const SCHEMA = `{
 }`
 
 export async function POST(request: NextRequest) {
+  // Any authenticated carrier user (web or mobile) may extract a load —
+  // this just needs *a* valid session, not org/role checks, since the
+  // caller hasn't created a load yet at this point.
+  const ctx = await getAuthedContext(request)
+  if (isErrorResponse(ctx)) return ctx
+
   if (!process.env.ANTHROPIC_API_KEY) {
-    return NextResponse.json(
-      { error: 'ANTHROPIC_API_KEY not configured' },
-      { status: 500 }
-    )
+    return apiError('SERVER_ERROR', 'ANTHROPIC_API_KEY not configured', 500)
   }
 
   let text: string
@@ -51,10 +55,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     text = body.text
     if (!text || typeof text !== 'string' || text.trim().length < 10) {
-      return NextResponse.json({ error: 'Text is required' }, { status: 400 })
+      return apiError('VALIDATION_ERROR', 'Text is required', 400)
     }
   } catch {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    return apiError('VALIDATION_ERROR', 'Invalid request body', 400)
   }
 
   try {
@@ -79,9 +83,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(extracted)
   } catch (err) {
     console.error('[extract-load] error:', err)
-    return NextResponse.json(
-      { error: 'Extraction failed. Check your API key and try again.' },
-      { status: 500 }
-    )
+    return apiError('EXTRACTION_FAILED', 'Extraction failed. Check your API key and try again.', 500)
   }
 }

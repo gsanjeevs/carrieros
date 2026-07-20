@@ -1,13 +1,12 @@
 // app/api/loads/route.ts
-import { createClient } from '@/lib/supabase/server'
 import { generateLoadNumber } from '@/lib/generate-number'
 import { NextRequest, NextResponse } from 'next/server'
+import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 
 export async function POST(request: NextRequest) {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const ctx = await getAuthedContext(request)
+  if (isErrorResponse(ctx)) return ctx
+  const { supabase, user } = ctx
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -16,18 +15,18 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (!profile?.org_id) {
-    return NextResponse.json({ error: 'No organization found for this user' }, { status: 400 })
+    return apiError('NOT_ONBOARDED', 'No organization found for this user', 400)
   }
 
   if (!['owner', 'solo', 'dispatcher'].includes(profile.role)) {
-    return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
+    return apiError('FORBIDDEN', 'Insufficient permissions', 403)
   }
 
   let body: Record<string, unknown>
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    return apiError('VALIDATION_ERROR', 'Invalid request body', 400)
   }
 
   const load_number = await generateLoadNumber(supabase, profile.org_id)
@@ -63,7 +62,7 @@ export async function POST(request: NextRequest) {
 
   if (error) {
     console.error('[api/loads POST]', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return apiError('SERVER_ERROR', error.message, 500)
   }
 
   return NextResponse.json({ load_number: load.load_number }, { status: 201 })

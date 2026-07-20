@@ -1,12 +1,12 @@
 // app/api/trucks/route.ts
-import { createClient } from '@/lib/supabase/server'
 import { generateTruckNumber } from '@/lib/generate-number'
 import { NextRequest, NextResponse } from 'next/server'
+import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 
-export async function GET() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function GET(request: NextRequest) {
+  const ctx = await getAuthedContext(request)
+  if (isErrorResponse(ctx)) return ctx
+  const { supabase, user } = ctx
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -14,7 +14,7 @@ export async function GET() {
     .eq('id', user.id)
     .single()
 
-  if (!profile?.org_id) return NextResponse.json([], { status: 200 })
+  if (!profile?.org_id) return NextResponse.json([])
 
   const { data } = await supabase
     .from('trucks')
@@ -27,9 +27,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const ctx = await getAuthedContext(request)
+  if (isErrorResponse(ctx)) return ctx
+  const { supabase, user } = ctx
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -38,10 +38,10 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (!profile?.org_id)
-    return NextResponse.json({ error: 'No company' }, { status: 400 })
+    return apiError('NOT_ONBOARDED', 'No company', 400)
 
   if (!['owner', 'solo'].includes(profile.role))
-    return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
+    return apiError('FORBIDDEN', 'Insufficient permissions', 403)
 
   const body = await request.json()
 
@@ -63,6 +63,6 @@ export async function POST(request: NextRequest) {
     .select('truck_number, nickname')
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return apiError('SERVER_ERROR', error.message, 500)
   return NextResponse.json(data, { status: 201 })
 }
