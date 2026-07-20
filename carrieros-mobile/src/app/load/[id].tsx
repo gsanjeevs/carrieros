@@ -225,7 +225,7 @@ export default function LoadDetailScreen() {
             <DetailRow label="Miles" value={load.total_miles ? `${load.total_miles} mi` : '—'} />
           </ThemedView>
 
-          {role === 'driver' && (
+          {(role === 'driver' || role === 'solo') && (
             <ThemedView type="backgroundElement" style={styles.section}>
               <SectionLabel text="Compliance" />
               <ThemedView style={styles.dvirRow}>

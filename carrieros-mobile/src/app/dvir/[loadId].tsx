@@ -56,22 +56,39 @@ export default function DVIRScreen() {
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
 
+  // Resolves who's submitting this inspection. Solo (owner who also drives)
+  // has no `drivers` row at all — that table is only for invited
+  // employee-drivers — so driver_id stays null for them. RLS still permits
+  // the insert via owner_solo_dvir_all (a FOR ALL policy keyed on role, not
+  // driver_id), so this is a real, RLS-sanctioned path, not a workaround.
+  async function resolveSubmitter(userId: string) {
+    const { data: profile } = await supabase.from('profiles').select('role, org_id').eq('id', userId).single();
+    if (profile?.role === 'driver') {
+      const { data: driver } = await supabase
+        .from('drivers')
+        .select('id, carrier_org_id, default_truck_id')
+        .eq('profile_id', userId)
+        .single();
+      if (!driver) return null;
+      return { carrierOrgId: driver.carrier_org_id, driverId: driver.id, defaultTruckId: driver.default_truck_id };
+    }
+    // solo / owner
+    if (!profile?.org_id) return null;
+    return { carrierOrgId: profile.org_id, driverId: null, defaultTruckId: null };
+  }
+
   useEffect(() => {
     // Just a heads-up if no truck can be resolved — doesn't block submit,
     // truck_id is nullable on dvir_inspections.
     async function checkTruck() {
       if (!session?.user.id) return;
-      const { data: driver } = await supabase
-        .from('drivers')
-        .select('default_truck_id')
-        .eq('profile_id', session.user.id)
-        .single();
+      const submitter = await resolveSubmitter(session.user.id);
       const { data: load } = await supabase
         .from('loads_driver_view')
         .select('truck_id')
         .eq('id', Number(loadId))
         .single();
-      if (!load?.truck_id && !driver?.default_truck_id) setNoTruckWarning(true);
+      if (!load?.truck_id && !submitter?.defaultTruckId) setNoTruckWarning(true);
     }
     checkTruck();
   }, [session?.user.id, loadId]);
@@ -108,14 +125,10 @@ export default function DVIRScreen() {
     setSubmitting(true);
     setError('');
 
-    const { data: driver, error: driverErr } = await supabase
-      .from('drivers')
-      .select('id, carrier_org_id, default_truck_id')
-      .eq('profile_id', session.user.id)
-      .single();
+    const submitter = await resolveSubmitter(session.user.id);
 
-    if (driverErr || !driver) {
-      setError('Could not find your driver record.');
+    if (!submitter) {
+      setError('Could not resolve your account for this inspection.');
       setSubmitting(false);
       return;
     }
@@ -126,16 +139,16 @@ export default function DVIRScreen() {
       .eq('id', Number(loadId))
       .single();
 
-    const truckId = load?.truck_id ?? driver.default_truck_id ?? null;
+    const truckId = load?.truck_id ?? submitter.defaultTruckId ?? null;
     const condition = defectAreas.length > 0 ? 'defects_noted' : 'satisfactory';
 
     const { data: inspection, error: inspectionErr } = await supabase
       .from('dvir_inspections')
       .insert({
-        carrier_org_id: driver.carrier_org_id,
+        carrier_org_id: submitter.carrierOrgId,
         truck_id: truckId,
         load_id: Number(loadId),
-        driver_id: driver.id,
+        driver_id: submitter.driverId,
         type,
         condition,
         odometer: odometer ? Number(odometer) : null,
