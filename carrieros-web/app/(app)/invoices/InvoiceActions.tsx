@@ -45,6 +45,7 @@ export default function InvoiceActions({
   const tErrors = useTranslations('errors')
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState('')
+  const [warning, setWarning] = useState('')
   const [method, setMethod] = useState(paymentMethod)
   const [company, setCompany] = useState(factoringCompany ?? defaultFactoringCompany)
   const [reference, setReference] = useState(factoringReference ?? '')
@@ -61,11 +62,15 @@ export default function InvoiceActions({
 
   function run(fn: () => Promise<ActionResult>) {
     setError('')
+    setWarning('')
     startTransition(async () => {
       const res = await fn()
       if (!res.ok) {
         setError(friendly(res.error_code))
         return
+      }
+      if (res.warning_code === 'NO_RECIPIENT_EMAIL') {
+        setWarning(t('sentNoRecipientWarning'))
       }
       router.refresh()
     })
@@ -139,10 +144,16 @@ export default function InvoiceActions({
           </button>
         </div>
 
-        {/* No email provider is configured in this project. "Mark as Sent" is a
-            state transition the carrier records after sending the invoice by
-            their own means — it does not email anyone. Say so, don't imply a send. */}
+        {/* This really does email the customer now (lib/send-email.ts, real
+            SMTP send). Say so plainly, and be honest that it only reaches
+            whoever's email is on file for the customer. */}
         <p className="text-slate-500 text-xs mt-3 leading-relaxed">{t('markSentHelp')}</p>
+
+        {warning && (
+          <div className="mt-3 rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-2.5 text-amber-400 text-xs">
+            {warning}
+          </div>
+        )}
 
         {error && (
           <div className="mt-3 rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2.5 text-red-400 text-xs">

@@ -37,7 +37,17 @@ CREATE TABLE carrier_details (
   -- lives on invoices.payment_method.
   default_payment_method TEXT NOT NULL DEFAULT 'other'
                          CHECK (default_payment_method IN ('stripe','factoring','other')),
-  factoring_company      TEXT
+  factoring_company      TEXT,
+  -- Carrier's own subscription billing (demo-mode seam — see lib/stripe.ts).
+  -- stripe_customer_id NULL means no payment method on file yet; a
+  -- 'demo_cus_...' placeholder once the demo "Add Payment Method" flow runs.
+  -- Swapping in real Stripe replaces only createStripeCustomer()'s body.
+  billing_status      TEXT NOT NULL DEFAULT 'trialing'
+                      CHECK (billing_status IN ('trialing','active','past_due','canceled')),
+  trial_ends_at       TIMESTAMPTZ DEFAULT (now() + interval '90 days'),
+  stripe_customer_id  TEXT,
+  card_brand          TEXT,
+  card_last4          TEXT
 );
 
 -- Customer-only fields (shipper/broker, per carrier)

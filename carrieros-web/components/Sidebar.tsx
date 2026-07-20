@@ -24,6 +24,7 @@ const NAV: NavItem[] = [
   { labelKey: 'maintenance', href: '/maintenance', icon: 'build',            roles: ['owner','solo','dispatcher'] },
   { labelKey: 'documents',   href: '/documents',   icon: 'folder',           roles: ['owner','solo','finance'] },
   { labelKey: 'team',        href: '/team',        icon: 'group',            roles: ['owner','solo'] },
+  { labelKey: 'billing',     href: '/billing',     icon: 'credit_card',      roles: ['owner','solo'] },
   { labelKey: 'settings',    href: '/settings',    icon: 'settings',         roles: ['owner','solo','driver','dispatcher','finance'] },
 ]
 

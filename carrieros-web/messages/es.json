@@ -26,7 +26,8 @@
     "SELF_ROLE_CHANGE": "No puedes cambiar tu propio rol. Pídeselo a otro propietario.",
     "CANNOT_REMOVE_SELF": "No puedes eliminar tu propia cuenta.",
     "LAST_OWNER": "Tu empresa debe conservar al menos un propietario.",
-    "MANAGE_DRIVER_ELSEWHERE": "Administra las cuentas de conductores desde la página Conductores."
+    "MANAGE_DRIVER_ELSEWHERE": "Administra las cuentas de conductores desde la página Conductores.",
+    "EMAIL_SEND_FAILED": "No pudimos enviar el correo de la factura. Inténtalo de nuevo."
   },
   "nav": {
     "dashboard": "Panel",
@@ -39,6 +40,7 @@
     "maintenance": "Mantenimiento",
     "documents": "Documentos",
     "team": "Equipo",
+    "billing": "Facturación",
     "settings": "Configuración"
   },
   "login": {
@@ -233,7 +235,8 @@
     "actions": "Acciones",
     "markSent": "Marcar como enviada",
     "markPaid": "Marcar como pagada",
-    "markSentHelp": "Esto registra la factura como enviada. CarrierOS no la envía por correo — no hay proveedor de correo conectado. Envíe la factura a su cliente usted mismo y luego márquela aquí.",
+    "markSentHelp": "Esto envía la factura por correo a la dirección registrada de su cliente y la marca como enviada.",
+    "sentNoRecipientWarning": "Marcada como enviada, pero no se envió ningún correo — este cliente no tiene una dirección de correo registrada.",
     "collectVia": "Cobrar esta factura por",
     "stripeNotConfigured": "Stripe todavía no está configurado, así que esta factura no tiene enlace de pago. Elija otro método de cobro por ahora.",
     "otherMethodHelp": "Se cobra fuera de CarrierOS — cheque, ACH o efectivo.",
@@ -318,5 +321,27 @@
     "roleHelp_dispatcher": "Puede asignar cargas, administrar conductores y despachar. No ve tarifas ni facturas.",
     "roleHelp_finance": "Puede ver facturas, tarifas e informes financieros. No puede despachar.",
     "roleHelp_owner": "Acceso total, incluida la gestión del equipo y la facturación."
+  },
+  "billing": {
+    "title": "Facturación",
+    "subtitle": "Administra tu plan de suscripción y método de pago.",
+    "demoModeBanner": "Modo demo — no se recopila ninguna información de pago real. Agregar un método de pago abajo simula la tarjeta de prueba publicada por Stripe (4242 4242 4242 4242); no hay ningún campo aquí para escribir una tarjeta real.",
+    "currentPlan": "Plan actual",
+    "tier_starter": "Starter",
+    "tier_growth": "Growth",
+    "tier_pro": "Pro",
+    "tier_enterprise": "Enterprise",
+    "trialStatus": "Estado de la prueba",
+    "trialDaysLeft": "{count} días restantes de prueba",
+    "trialEnded": "La prueba ha terminado",
+    "trialEndsOn": "La prueba termina el {date}",
+    "noTrialData": "No hay datos de prueba disponibles.",
+    "paymentMethod": "Método de pago",
+    "noPaymentMethod": "No hay método de pago registrado",
+    "cardOnFile": "{brand} •••• {last4}",
+    "addPaymentMethod": "Agregar método de pago",
+    "replacePaymentMethod": "Reemplazar método de pago",
+    "addingPaymentMethod": "Agregando…",
+    "addFailed": "No se pudo agregar el método de pago. Inténtalo de nuevo."
   }
 }

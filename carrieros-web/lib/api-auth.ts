@@ -24,6 +24,7 @@ export type ErrorCode =
   | 'INVOICE_EXISTS'
   | 'LOAD_NOT_DELIVERED'
   | 'NOT_FACTORING'
+  | 'EMAIL_SEND_FAILED'
   // Team management (app/api/team/*)
   | 'EMAIL_EXISTS'
   | 'SELF_ROLE_CHANGE'

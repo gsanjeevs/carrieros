@@ -36,36 +36,51 @@ export type Database = {
     Tables: {
       carrier_details: {
         Row: {
+          billing_status: string
+          card_brand: string | null
+          card_last4: string | null
           default_payment_method: string
           dot_number: string | null
           factoring_company: string | null
           load_email: string | null
           mc_number: string | null
           org_id: number
+          stripe_customer_id: string | null
           tier: string | null
           timezone: string | null
+          trial_ends_at: string | null
           uom_system: string | null
         }
         Insert: {
+          billing_status?: string
+          card_brand?: string | null
+          card_last4?: string | null
           default_payment_method?: string
           dot_number?: string | null
           factoring_company?: string | null
           load_email?: string | null
           mc_number?: string | null
           org_id: number
+          stripe_customer_id?: string | null
           tier?: string | null
           timezone?: string | null
+          trial_ends_at?: string | null
           uom_system?: string | null
         }
         Update: {
+          billing_status?: string
+          card_brand?: string | null
+          card_last4?: string | null
           default_payment_method?: string
           dot_number?: string | null
           factoring_company?: string | null
           load_email?: string | null
           mc_number?: string | null
           org_id?: number
+          stripe_customer_id?: string | null
           tier?: string | null
           timezone?: string | null
+          trial_ends_at?: string | null
           uom_system?: string | null
         }
         Relationships: [
@@ -1240,6 +1255,16 @@ export type Database = {
           org_id: number
         }[]
       }
+      driver_self_update_allowed: {
+        Args: {
+          p_active: boolean
+          p_cdl_expiry: string
+          p_med_expiry: string
+          p_number: string
+          p_org: number
+        }
+        Returns: boolean
+      }
       get_public_tracking: {
         Args: { p_token: string }
         Returns: {
@@ -1259,6 +1284,7 @@ export type Database = {
           status: string
         }[]
       }
+      mark_overdue_invoices: { Args: never; Returns: number }
       my_org_id: { Args: never; Returns: number }
       my_role: { Args: never; Returns: string }
       next_entity_val: {

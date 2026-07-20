@@ -26,7 +26,8 @@
     "SELF_ROLE_CHANGE": "You cannot change your own role. Ask another owner to do it.",
     "CANNOT_REMOVE_SELF": "You cannot remove your own account.",
     "LAST_OWNER": "Your company must keep at least one owner.",
-    "MANAGE_DRIVER_ELSEWHERE": "Manage driver accounts from the Drivers page."
+    "MANAGE_DRIVER_ELSEWHERE": "Manage driver accounts from the Drivers page.",
+    "EMAIL_SEND_FAILED": "We couldn't send that invoice email. Please try again."
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -39,6 +40,7 @@
     "maintenance": "Maintenance",
     "documents": "Documents",
     "team": "Team",
+    "billing": "Billing",
     "settings": "Settings"
   },
   "login": {
@@ -233,7 +235,8 @@
     "actions": "Actions",
     "markSent": "Mark as Sent",
     "markPaid": "Mark as Paid",
-    "markSentHelp": "This records the invoice as sent. CarrierOS does not email it — no email provider is connected. Send the invoice to your customer yourself, then mark it here.",
+    "markSentHelp": "This emails the invoice to your customer's address on file and marks it as sent.",
+    "sentNoRecipientWarning": "Marked as sent, but no email was sent — this customer has no email address on file.",
     "collectVia": "Collect this invoice via",
     "stripeNotConfigured": "Stripe is not configured yet, so there is no payment link on this invoice. Pick another method to collect it for now.",
     "otherMethodHelp": "Collected outside CarrierOS — check, ACH, or cash.",
@@ -318,5 +321,27 @@
     "roleHelp_dispatcher": "Can assign loads, manage drivers and dispatch. Cannot see rates or invoices.",
     "roleHelp_finance": "Can see invoices, rates and financial reports. Cannot dispatch.",
     "roleHelp_owner": "Full access, including team management and billing."
+  },
+  "billing": {
+    "title": "Billing",
+    "subtitle": "Manage your subscription plan and payment method.",
+    "demoModeBanner": "Demo Mode — no real payment information is collected. Adding a payment method below simulates Stripe's own published test card (4242 4242 4242 4242); there is no field here to type in a real card.",
+    "currentPlan": "Current Plan",
+    "tier_starter": "Starter",
+    "tier_growth": "Growth",
+    "tier_pro": "Pro",
+    "tier_enterprise": "Enterprise",
+    "trialStatus": "Trial Status",
+    "trialDaysLeft": "{count} days left in trial",
+    "trialEnded": "Trial ended",
+    "trialEndsOn": "Trial ends {date}",
+    "noTrialData": "No trial data available.",
+    "paymentMethod": "Payment Method",
+    "noPaymentMethod": "No payment method on file",
+    "cardOnFile": "{brand} •••• {last4}",
+    "addPaymentMethod": "Add Payment Method",
+    "replacePaymentMethod": "Replace Payment Method",
+    "addingPaymentMethod": "Adding…",
+    "addFailed": "Couldn't add a payment method. Please try again."
   }
 }
