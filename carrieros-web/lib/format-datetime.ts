@@ -16,7 +16,11 @@ const pad = (n: number) => String(n).padStart(2, '0')
 // date would render one day early. Parse date-only values as local dates.
 const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/
 
-function toDate(value: string | Date): Date {
+// Exported so callers that build their own display format (e.g. via
+// `.toLocaleDateString(locale, {...})` for a "Jul 21, 2026" style rather than
+// this file's fixed MM/DD/YYYY-style output) can still get the same
+// date-only-parses-as-local fix without changing their display format.
+export function toDate(value: string | Date): Date {
   if (value instanceof Date) return value
   if (DATE_ONLY.test(value)) {
     const [y, m, d] = value.split('-').map(Number)

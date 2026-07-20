@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { formatMoney } from '@/lib/format-money'
+import { toDate } from '@/lib/format-datetime'
 
 const STATUS_COLOR: Record<string, string> = {
   draft:       'bg-slate-500/20 text-slate-400',
@@ -136,7 +137,7 @@ export default async function LoadsPage({
                     <td className="px-4 py-3.5 text-slate-300 max-w-[220px] truncate">{route}</td>
                     <td className="px-4 py-3.5 text-slate-400">
                       {load.pickup_date
-                        ? new Date(load.pickup_date).toLocaleDateString(locale, { month: 'short', day: 'numeric' })
+                        ? toDate(load.pickup_date).toLocaleDateString(locale, { month: 'short', day: 'numeric' })
                         : '—'}
                     </td>
                     <td className="px-4 py-3.5 text-slate-400 max-w-[160px] truncate">

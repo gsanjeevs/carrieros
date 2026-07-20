@@ -9,6 +9,7 @@
 // Text still comes from the tracking.*/loads.status_* message catalogs.
 import { createClient } from '@/lib/supabase/server'
 import { getTranslations, getLocale } from 'next-intl/server'
+import { toDate } from '@/lib/format-datetime'
 
 const STATUS_COLOR: Record<string, string> = {
   draft:       'bg-slate-500/20 text-slate-400',
@@ -23,7 +24,7 @@ const STATUS_COLOR: Record<string, string> = {
 
 function formatDate(value: string | null, locale: string): string {
   if (!value) return '—'
-  return new Date(value).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })
+  return toDate(value).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 type TimeAgoT = Awaited<ReturnType<typeof getTranslations>>

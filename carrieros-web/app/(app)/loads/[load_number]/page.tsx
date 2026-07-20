@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { getTranslations, getLocale } from 'next-intl/server'
 import DispatchPanel from '@/components/DispatchPanel'
 import LoadDocuments, { type DocType, type LoadDocument } from '@/components/LoadDocuments'
-import { formatDateTime } from '@/lib/format-datetime'
+import { formatDateTime, toDate } from '@/lib/format-datetime'
 import { formatMoney } from '@/lib/format-money'
 import CreateInvoiceButton from './CreateInvoiceButton'
 
@@ -33,7 +33,7 @@ const STATUS_COLOR: Record<string, string> = {
 
 function fmt(date: string | null, locale: string) {
   if (!date) return '—'
-  return new Date(date).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })
+  return toDate(date).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 function InfoRow({ label, value }: { label: string; value: string | number | null | undefined }) {
