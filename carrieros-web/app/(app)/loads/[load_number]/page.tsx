@@ -6,6 +6,8 @@ import { getTranslations, getLocale } from 'next-intl/server'
 import DispatchPanel from '@/components/DispatchPanel'
 import LoadDocuments, { type DocType, type LoadDocument } from '@/components/LoadDocuments'
 import { formatDateTime } from '@/lib/format-datetime'
+import { formatMoney } from '@/lib/format-money'
+import CreateInvoiceButton from './CreateInvoiceButton'
 
 const STATUS_FLOW_KEYS = [
   { key: 'draft',      icon: 'draft' },
@@ -129,6 +131,26 @@ export default async function LoadDetailPage({
       }
     })
   )
+
+  // Billing — owner/solo/finance only (same roles as the `billing_invoices_all`
+  // RLS policy; for anyone else this query returns nothing anyway).
+  const canBill = ['owner', 'solo', 'finance'].includes(profile.role)
+  let existingInvoiceNumber: string | null = null
+  if (canBill) {
+    const { data: existingInvoice } = await supabase
+      .from('invoices')
+      .select('invoice_number')
+      .eq('load_id', load.id)
+      .maybeSingle()
+    existingInvoiceNumber = existingInvoice?.invoice_number ?? null
+  }
+  const billable = canBill && ['delivered', 'invoiced'].includes(load.status ?? '')
+
+  const { data: carrierOrg } = await supabase
+    .from('organizations')
+    .select('currency')
+    .eq('id', profile.org_id)
+    .maybeSingle()
 
   const showRate    = ['owner', 'solo', 'finance'].includes(profile.role)
   const canDispatch = ['owner', 'solo', 'dispatcher'].includes(profile.role)
@@ -302,6 +324,16 @@ export default async function LoadDetailPage({
               />
             )}
           </div>
+
+          {canBill && (
+            <CreateInvoiceButton
+              loadId={load.id}
+              billable={billable}
+              existingInvoiceNumber={existingInvoiceNumber}
+              amountLabel={formatMoney(load.rate, carrierOrg?.currency ?? 'USD', locale)}
+              customerName={customerName ?? load.customer_name_raw}
+            />
+          )}
         </div>
 
       </div>

@@ -21,6 +21,9 @@ export type ErrorCode =
   | 'VALIDATION_ERROR'
   | 'NOT_FOUND'
   | 'EXTRACTION_FAILED'
+  | 'INVOICE_EXISTS'
+  | 'LOAD_NOT_DELIVERED'
+  | 'NOT_FACTORING'
   | 'SERVER_ERROR'
 
 // message is an English fallback for logs/devs only — never render it

@@ -10,9 +10,24 @@ export interface DateTimePrefs {
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
+// Postgres DATE columns (invoices.due_date, loads.pickup_date, …) arrive as a
+// bare 'YYYY-MM-DD'. `new Date('2026-08-19')` parses that as UTC midnight,
+// which is the previous calendar day in every timezone west of UTC — a due
+// date would render one day early. Parse date-only values as local dates.
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/
+
+function toDate(value: string | Date): Date {
+  if (value instanceof Date) return value
+  if (DATE_ONLY.test(value)) {
+    const [y, m, d] = value.split('-').map(Number)
+    return new Date(y, m - 1, d)
+  }
+  return new Date(value)
+}
+
 export function formatDate(value: string | Date | null | undefined, prefs?: DateTimePrefs): string {
   if (!value) return '—'
-  const d = value instanceof Date ? value : new Date(value)
+  const d = toDate(value)
   if (Number.isNaN(d.getTime())) return '—'
 
   const yyyy = String(d.getFullYear())
@@ -28,7 +43,7 @@ export function formatDate(value: string | Date | null | undefined, prefs?: Date
 
 export function formatTime(value: string | Date | null | undefined, prefs?: DateTimePrefs): string {
   if (!value) return '—'
-  const d = value instanceof Date ? value : new Date(value)
+  const d = toDate(value)
   if (Number.isNaN(d.getTime())) return '—'
 
   const h24 = d.getHours()

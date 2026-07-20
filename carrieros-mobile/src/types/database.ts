@@ -36,7 +36,9 @@ export type Database = {
     Tables: {
       carrier_details: {
         Row: {
+          default_payment_method: string
           dot_number: string | null
+          factoring_company: string | null
           load_email: string | null
           mc_number: string | null
           org_id: number
@@ -45,7 +47,9 @@ export type Database = {
           uom_system: string | null
         }
         Insert: {
+          default_payment_method?: string
           dot_number?: string | null
+          factoring_company?: string | null
           load_email?: string | null
           mc_number?: string | null
           org_id: number
@@ -54,7 +58,9 @@ export type Database = {
           uom_system?: string | null
         }
         Update: {
+          default_payment_method?: string
           dot_number?: string | null
+          factoring_company?: string | null
           load_email?: string | null
           mc_number?: string | null
           org_id?: number
@@ -378,11 +384,15 @@ export type Database = {
           created_at: string | null
           customer_org_id: number | null
           due_date: string | null
+          factored_at: string | null
+          factoring_company: string | null
+          factoring_reference: string | null
           id: number
           invoice_number: string
           load_id: number | null
           notes: string | null
           paid_at: string | null
+          payment_method: string
           sent_at: string | null
           status: string | null
         }
@@ -392,11 +402,15 @@ export type Database = {
           created_at?: string | null
           customer_org_id?: number | null
           due_date?: string | null
+          factored_at?: string | null
+          factoring_company?: string | null
+          factoring_reference?: string | null
           id?: number
           invoice_number: string
           load_id?: number | null
           notes?: string | null
           paid_at?: string | null
+          payment_method?: string
           sent_at?: string | null
           status?: string | null
         }
@@ -406,11 +420,15 @@ export type Database = {
           created_at?: string | null
           customer_org_id?: number | null
           due_date?: string | null
+          factored_at?: string | null
+          factoring_company?: string | null
+          factoring_reference?: string | null
           id?: number
           invoice_number?: string
           load_id?: number | null
           notes?: string | null
           paid_at?: string | null
+          payment_method?: string
           sent_at?: string | null
           status?: string | null
         }

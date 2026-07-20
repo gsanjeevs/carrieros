@@ -20,7 +20,7 @@ const NAV: NavItem[] = [
   { labelKey: 'drivers',     href: '/drivers',     icon: 'person',           roles: ['owner','solo','dispatcher'] },
   { labelKey: 'trucks',      href: '/trucks',      icon: 'fire_truck',       roles: ['owner','solo'] },
   { labelKey: 'customers',   href: '/customers',   icon: 'business',         roles: ['owner','solo','dispatcher','finance'] },
-  { labelKey: 'invoices',    href: '/finance',     icon: 'receipt_long',     roles: ['owner','solo','finance'] },
+  { labelKey: 'invoices',    href: '/invoices',    icon: 'receipt_long',     roles: ['owner','solo','finance'] },
   { labelKey: 'maintenance', href: '/maintenance', icon: 'build',            roles: ['owner','solo','dispatcher'] },
   { labelKey: 'documents',   href: '/documents',   icon: 'folder',           roles: ['owner','solo','finance'] },
   { labelKey: 'team',        href: '/team',        icon: 'group',            roles: ['owner','solo'] },

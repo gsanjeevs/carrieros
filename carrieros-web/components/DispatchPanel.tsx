@@ -14,8 +14,11 @@ const NEXT_STATUS: Record<string, string> = {
   dispatched: 'picked_up',
   picked_up:  'in_transit',
   in_transit: 'delivered',
-  delivered:  'invoiced',
-  invoiced:   'paid',
+  // 'delivered' → 'invoiced' and 'invoiced' → 'paid' are deliberately NOT here.
+  // Those two transitions belong to the invoice flow: creating an invoice for
+  // the load sets it to 'invoiced', and marking that invoice paid sets it to
+  // 'paid'. This panel used to flip the status on its own with a button
+  // labelled "Create Invoice" that created no invoice at all.
 }
 
 const STATUS_ACTION: Record<string, string> = {
@@ -24,8 +27,6 @@ const STATUS_ACTION: Record<string, string> = {
   dispatched: 'Mark Picked Up',
   picked_up:  'Mark In Transit',
   in_transit: 'Mark Delivered',
-  delivered:  'Create Invoice',
-  invoiced:   'Mark Paid',
 }
 
 export default function DispatchPanel({
