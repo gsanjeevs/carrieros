@@ -123,6 +123,11 @@ export default function MyLoadsScreen() {
               </ThemedText>
             </Pressable>
           )}
+          ListFooterComponent={
+            <Pressable onPress={() => supabase.auth.signOut()} style={styles.signOut}>
+              <ThemedText type="link" themeColor="textSecondary">Sign out</ThemedText>
+            </Pressable>
+          }
         />
       </SafeAreaView>
     </ThemedView>
@@ -136,6 +141,7 @@ const styles = StyleSheet.create({
   heading: { fontSize: 24, marginBottom: Spacing.three },
   listContent: { gap: Spacing.two, paddingBottom: Spacing.four },
   empty: { textAlign: 'center', marginTop: Spacing.five },
+  signOut: { alignItems: 'center', paddingVertical: Spacing.four, marginTop: Spacing.three },
   card: { borderRadius: 12, padding: Spacing.three, gap: 4 },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between' },
 });
