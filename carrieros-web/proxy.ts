@@ -74,12 +74,21 @@ export async function proxy(request: NextRequest) {
   if (user && !isPublic && !pathname.startsWith('/onboarding')) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('org_id')
+      .select('org_id, preferred_language')
       .eq('id', user.id)
       .maybeSingle()
 
     if (!profile?.org_id) {
       return NextResponse.redirect(new URL('/onboarding', request.url))
+    }
+
+    // Sync the `locale` cookie from the source of truth (profiles.preferred_language,
+    // decisions.md L2 — language follows the user, not the company). i18n/request.ts
+    // reads this cookie; Server Components can't set cookies directly, so middleware
+    // is where this has to happen. Only writes when it actually changed.
+    const locale = profile.preferred_language ?? 'en'
+    if (request.cookies.get('locale')?.value !== locale) {
+      response.cookies.set('locale', locale, { path: '/', maxAge: 60 * 60 * 24 * 365 })
     }
   }
 
