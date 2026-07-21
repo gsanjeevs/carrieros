@@ -41,7 +41,11 @@
     "documents": "دستاویزات",
     "team": "ٹیم",
     "billing": "بلنگ",
-    "settings": "ترتیبات"
+    "settings": "ترتیبات",
+    "section_main": "مرکزی",
+    "section_fleet": "فلیٹ",
+    "section_billing": "بلنگ",
+    "section_team": "ٹیم"
   },
   "login": {
     "title": "اپنے اکاؤنٹ میں سائن ان کریں",

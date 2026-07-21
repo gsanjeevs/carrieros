@@ -41,7 +41,11 @@
     "documents": "ਦਸਤਾਵੇਜ਼",
     "team": "ਟੀਮ",
     "billing": "ਬਿਲਿੰਗ",
-    "settings": "ਸੈਟਿੰਗਾਂ"
+    "settings": "ਸੈਟਿੰਗਾਂ",
+    "section_main": "ਮੁੱਖ",
+    "section_fleet": "ਫਲੀਟ",
+    "section_billing": "ਬਿਲਿੰਗ",
+    "section_team": "ਟੀਮ"
   },
   "login": {
     "title": "ਆਪਣੇ ਖਾਤੇ ਵਿੱਚ ਸਾਈਨ ਇਨ ਕਰੋ",

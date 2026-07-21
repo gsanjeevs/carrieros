@@ -12,15 +12,81 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Brand palette — docs/design/design-tokens.md "Color Palette" section is
+   the source of truth; keep these in sync if that doc changes. Deliberately
+   a SEPARATE, non-`inline` @theme block from the one above: `@theme inline`
+   is for values that reference another CSS custom property (like
+   var(--font-geist-sans)) and substitutes at use-site rather than declaring
+   a standalone :root property -- literal hex values placed there never
+   appeared anywhere in the compiled CSS, not even as bare custom-property
+   declarations (confirmed by inspecting the compiled .next output directly,
+   not just a browser fetch). Each `--color-X` here auto-generates
+   `bg-X`/`text-X`/`border-X`/etc. utilities (v4 CSS-first config, no
+   tailwind.config.ts) once something in the codebase actually uses the
+   class name -- e.g. `--color-navy-light` -> `bg-navy-light`, matching
+   design-tokens.md's own Tailwind-class column exactly. */
+@theme {
+  --color-navy: #0f1923;
+  --color-navy-light: #1e3a5f;
+  --color-navy-muted: #4b5a6e;
+  --color-brand-orange: #f97316;
+
+  --color-success: #16a34a;
+  --color-success-light: #e8f9f1;
+  --color-success-dark: #1a9e5c;
+
+  --color-warning: #d97706;
+  --color-warning-light: #fff7ed;
+  --color-warning-border: #fed7aa;
+  --color-warning-dark: #9a3412;
+  --color-warning-amber: #f0a500;
+
+  --color-danger: #dc2626;
+  --color-danger-light: #fdecea;
+  --color-danger-dark: #c0392b;
+
+  --color-teal: #1abc9c;
+
+  --color-info: #1a5eb8;
+  --color-info-light: #e8f0fe;
+
+  --color-purple: #6c3abf;
+  --color-purple-light: #f3eeff;
+
+  /* Sidebar/team avatar initials — bg is navy-light, text is this specific
+     light blue (design-gap-analysis.md 1.4), not reused elsewhere. */
+  --color-avatar-text: #93c5fd;
+
+  /* design-tokens.md typography scale: 2xs (10px) has no Tailwind default
+     and is used for uppercase section labels / table headers. */
+  --text-2xs: 0.625rem;
 }
 
+/* Subtle dot-grid texture every mockup uses behind the whole app shell
+   (docs/design/mockups/*.html: `radial-gradient(rgba(255,255,255,.018) 1px,
+   transparent 1px)` at 28px), plus a ::before full-viewport layer so every
+   route (login, onboarding, the authenticated app shell, the public
+   tracking page) gets it automatically — no per-page class needed.
+   `position: relative` is merged into this single `body` rule (a second,
+   separate `body { }` block elsewhere in this file caused everything after
+   it to be silently dropped from the compiled output — one block only). */
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  position: relative;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  /* Negative, not 0: a `position:fixed` + `z-index:0` pseudo-element paints
+     ABOVE normal in-flow content per CSS stacking order (positioned
+     descendants at z-index:0/auto paint after non-positioned in-flow
+     content) — the opposite of "background texture." -1 keeps it correctly
+     behind everything, painted just above body's own background color. */
+  z-index: -1;
 }

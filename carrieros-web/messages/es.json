@@ -41,7 +41,11 @@
     "documents": "Documentos",
     "team": "Equipo",
     "billing": "Facturación",
-    "settings": "Configuración"
+    "settings": "Configuración",
+    "section_main": "Principal",
+    "section_fleet": "Flota",
+    "section_billing": "Facturación",
+    "section_team": "Equipo"
   },
   "login": {
     "title": "Inicia sesión en tu cuenta",

@@ -41,7 +41,11 @@
     "documents": "Documents",
     "team": "Team",
     "billing": "Billing",
-    "settings": "Settings"
+    "settings": "Settings",
+    "section_main": "Main",
+    "section_fleet": "Fleet",
+    "section_billing": "Billing",
+    "section_team": "Team"
   },
   "login": {
     "title": "Sign in to your account",
