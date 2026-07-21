@@ -39,6 +39,7 @@ export type Database = {
           billing_status: string
           card_brand: string | null
           card_last4: string | null
+          default_language: string
           default_payment_method: string
           dot_number: string | null
           factoring_company: string | null
@@ -55,6 +56,7 @@ export type Database = {
           billing_status?: string
           card_brand?: string | null
           card_last4?: string | null
+          default_language?: string
           default_payment_method?: string
           dot_number?: string | null
           factoring_company?: string | null
@@ -71,6 +73,7 @@ export type Database = {
           billing_status?: string
           card_brand?: string | null
           card_last4?: string | null
+          default_language?: string
           default_payment_method?: string
           dot_number?: string | null
           factoring_company?: string | null
@@ -194,6 +197,64 @@ export type Database = {
           },
         ]
       }
+      driver_documents: {
+        Row: {
+          carrier_org_id: number | null
+          created_at: string | null
+          doc_type: string
+          driver_id: number | null
+          expiry_date: string | null
+          id: number
+          label: string | null
+          storage_path: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          carrier_org_id?: number | null
+          created_at?: string | null
+          doc_type: string
+          driver_id?: number | null
+          expiry_date?: string | null
+          id?: number
+          label?: string | null
+          storage_path: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          carrier_org_id?: number | null
+          created_at?: string | null
+          doc_type?: string
+          driver_id?: number | null
+          expiry_date?: string | null
+          id?: number
+          label?: string | null
+          storage_path?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_documents_carrier_org_id_fkey"
+            columns: ["carrier_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_documents_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       drivers: {
         Row: {
           carrier_org_id: number
@@ -202,7 +263,7 @@ export type Database = {
           cdl_number: string | null
           cdl_state: string | null
           created_at: string | null
-          default_truck_id: number | null
+          default_vehicle_id: number | null
           driver_number: string | null
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
@@ -221,7 +282,7 @@ export type Database = {
           cdl_number?: string | null
           cdl_state?: string | null
           created_at?: string | null
-          default_truck_id?: number | null
+          default_vehicle_id?: number | null
           driver_number?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
@@ -240,7 +301,7 @@ export type Database = {
           cdl_number?: string | null
           cdl_state?: string | null
           created_at?: string | null
-          default_truck_id?: number | null
+          default_vehicle_id?: number | null
           driver_number?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
@@ -262,9 +323,9 @@ export type Database = {
           },
           {
             foreignKeyName: "drivers_default_truck_id_fkey"
-            columns: ["default_truck_id"]
+            columns: ["default_vehicle_id"]
             isOneToOne: false
-            referencedRelation: "trucks"
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
           {
@@ -325,8 +386,8 @@ export type Database = {
           odometer: number | null
           signature_url: string | null
           submitted_at: string | null
-          truck_id: number | null
           type: string
+          vehicle_id: number | null
         }
         Insert: {
           carrier_org_id?: number | null
@@ -338,8 +399,8 @@ export type Database = {
           odometer?: number | null
           signature_url?: string | null
           submitted_at?: string | null
-          truck_id?: number | null
           type: string
+          vehicle_id?: number | null
         }
         Update: {
           carrier_org_id?: number | null
@@ -351,8 +412,8 @@ export type Database = {
           odometer?: number | null
           signature_url?: string | null
           submitted_at?: string | null
-          truck_id?: number | null
           type?: string
+          vehicle_id?: number | null
         }
         Relationships: [
           {
@@ -385,10 +446,39 @@ export type Database = {
           },
           {
             foreignKeyName: "dvir_inspections_truck_id_fkey"
-            columns: ["truck_id"]
+            columns: ["vehicle_id"]
             isOneToOne: false
-            referencedRelation: "trucks"
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      features: {
+        Row: {
+          display_order: number
+          key: string
+          label: string
+          min_tier: string
+        }
+        Insert: {
+          display_order: number
+          key: string
+          label: string
+          min_tier: string
+        }
+        Update: {
+          display_order?: number
+          key?: string
+          label?: string
+          min_tier?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "features_min_tier_fkey"
+            columns: ["min_tier"]
+            isOneToOne: false
+            referencedRelation: "tiers"
+            referencedColumns: ["code"]
           },
         ]
       }
@@ -477,6 +567,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      languages: {
+        Row: {
+          code: string
+          display_order: number
+          flag_emoji: string
+          label: string
+          native_name: string
+        }
+        Insert: {
+          code: string
+          display_order: number
+          flag_emoji: string
+          label: string
+          native_name: string
+        }
+        Update: {
+          code?: string
+          display_order?: number
+          flag_emoji?: string
+          label?: string
+          native_name?: string
+        }
+        Relationships: []
       }
       load_events: {
         Row: {
@@ -569,8 +683,8 @@ export type Database = {
           status: string | null
           total_miles: number | null
           tracking_token: string | null
-          truck_id: number | null
           updated_at: string | null
+          vehicle_id: number | null
           weight_lbs: number | null
         }
         Insert: {
@@ -608,8 +722,8 @@ export type Database = {
           status?: string | null
           total_miles?: number | null
           tracking_token?: string | null
-          truck_id?: number | null
           updated_at?: string | null
+          vehicle_id?: number | null
           weight_lbs?: number | null
         }
         Update: {
@@ -647,8 +761,8 @@ export type Database = {
           status?: string | null
           total_miles?: number | null
           tracking_token?: string | null
-          truck_id?: number | null
           updated_at?: string | null
+          vehicle_id?: number | null
           weight_lbs?: number | null
         }
         Relationships: [
@@ -675,9 +789,9 @@ export type Database = {
           },
           {
             foreignKeyName: "loads_truck_id_fkey"
-            columns: ["truck_id"]
+            columns: ["vehicle_id"]
             isOneToOne: false
-            referencedRelation: "trucks"
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
         ]
@@ -695,7 +809,7 @@ export type Database = {
           reminder_type: string
           trigger_miles: number | null
           trigger_months: number | null
-          truck_id: number | null
+          vehicle_id: number | null
         }
         Insert: {
           carrier_org_id?: number | null
@@ -709,7 +823,7 @@ export type Database = {
           reminder_type: string
           trigger_miles?: number | null
           trigger_months?: number | null
-          truck_id?: number | null
+          vehicle_id?: number | null
         }
         Update: {
           carrier_org_id?: number | null
@@ -723,7 +837,7 @@ export type Database = {
           reminder_type?: string
           trigger_miles?: number | null
           trigger_months?: number | null
-          truck_id?: number | null
+          vehicle_id?: number | null
         }
         Relationships: [
           {
@@ -735,9 +849,9 @@ export type Database = {
           },
           {
             foreignKeyName: "maintenance_reminders_truck_id_fkey"
-            columns: ["truck_id"]
+            columns: ["vehicle_id"]
             isOneToOne: false
-            referencedRelation: "trucks"
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
         ]
@@ -828,6 +942,7 @@ export type Database = {
           currency: string | null
           email: string | null
           id: number
+          logo_path: string | null
           name: string
           phone: string | null
           state: string | null
@@ -842,6 +957,7 @@ export type Database = {
           currency?: string | null
           email?: string | null
           id?: number
+          logo_path?: string | null
           name: string
           phone?: string | null
           state?: string | null
@@ -856,6 +972,7 @@ export type Database = {
           currency?: string | null
           email?: string | null
           id?: number
+          logo_path?: string | null
           name?: string
           phone?: string | null
           state?: string | null
@@ -866,6 +983,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_path: string | null
           created_at: string | null
           date_format: string | null
           first_name: string | null
@@ -880,6 +998,7 @@ export type Database = {
           uom_system: string | null
         }
         Insert: {
+          avatar_path?: string | null
           created_at?: string | null
           date_format?: string | null
           first_name?: string | null
@@ -894,6 +1013,7 @@ export type Database = {
           uom_system?: string | null
         }
         Update: {
+          avatar_path?: string | null
           created_at?: string | null
           date_format?: string | null
           first_name?: string | null
@@ -917,6 +1037,33 @@ export type Database = {
           },
         ]
       }
+      roles: {
+        Row: {
+          abbreviation: string
+          code: string
+          color_token: string
+          display_order: number
+          id: number
+          label: string
+        }
+        Insert: {
+          abbreviation: string
+          code: string
+          color_token: string
+          display_order: number
+          id?: number
+          label: string
+        }
+        Update: {
+          abbreviation?: string
+          code?: string
+          color_token?: string
+          display_order?: number
+          id?: number
+          label?: string
+        }
+        Relationships: []
+      }
       service_logs: {
         Row: {
           carrier_org_id: number | null
@@ -926,10 +1073,11 @@ export type Database = {
           logged_by: string | null
           notes: string | null
           odometer: number | null
+          receipt_path: string | null
           service_date: string
           service_type: string
           shop_name: string | null
-          truck_id: number | null
+          vehicle_id: number | null
         }
         Insert: {
           carrier_org_id?: number | null
@@ -939,10 +1087,11 @@ export type Database = {
           logged_by?: string | null
           notes?: string | null
           odometer?: number | null
+          receipt_path?: string | null
           service_date: string
           service_type: string
           shop_name?: string | null
-          truck_id?: number | null
+          vehicle_id?: number | null
         }
         Update: {
           carrier_org_id?: number | null
@@ -952,10 +1101,11 @@ export type Database = {
           logged_by?: string | null
           notes?: string | null
           odometer?: number | null
+          receipt_path?: string | null
           service_date?: string
           service_type?: string
           shop_name?: string | null
-          truck_id?: number | null
+          vehicle_id?: number | null
         }
         Relationships: [
           {
@@ -974,14 +1124,80 @@ export type Database = {
           },
           {
             foreignKeyName: "service_logs_truck_id_fkey"
-            columns: ["truck_id"]
+            columns: ["vehicle_id"]
             isOneToOne: false
-            referencedRelation: "trucks"
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
         ]
       }
-      truck_documents: {
+      tiers: {
+        Row: {
+          code: string
+          included_trucks: number
+          label: string
+          monthly_price: number
+          price_per_additional_truck: number
+          rank: number
+        }
+        Insert: {
+          code: string
+          included_trucks: number
+          label: string
+          monthly_price: number
+          price_per_additional_truck: number
+          rank: number
+        }
+        Update: {
+          code?: string
+          included_trucks?: number
+          label?: string
+          monthly_price?: number
+          price_per_additional_truck?: number
+          rank?: number
+        }
+        Relationships: []
+      }
+      vehicle_classifications: {
+        Row: {
+          code: string
+          display_order: number
+          id: number
+          label: string
+          license_category_note: string | null
+          max_weight_kg: number | null
+          min_weight_kg: number | null
+          region: string
+          requires_special_license: boolean
+          scheme_name: string
+        }
+        Insert: {
+          code: string
+          display_order: number
+          id?: number
+          label: string
+          license_category_note?: string | null
+          max_weight_kg?: number | null
+          min_weight_kg?: number | null
+          region: string
+          requires_special_license?: boolean
+          scheme_name: string
+        }
+        Update: {
+          code?: string
+          display_order?: number
+          id?: number
+          label?: string
+          license_category_note?: string | null
+          max_weight_kg?: number | null
+          min_weight_kg?: number | null
+          region?: string
+          requires_special_license?: boolean
+          scheme_name?: string
+        }
+        Relationships: []
+      }
+      vehicle_documents: {
         Row: {
           carrier_org_id: number | null
           created_at: string | null
@@ -990,8 +1206,8 @@ export type Database = {
           id: number
           label: string | null
           storage_path: string
-          truck_id: number | null
           uploaded_by: string | null
+          vehicle_id: number | null
         }
         Insert: {
           carrier_org_id?: number | null
@@ -1001,8 +1217,8 @@ export type Database = {
           id?: number
           label?: string | null
           storage_path: string
-          truck_id?: number | null
           uploaded_by?: string | null
+          vehicle_id?: number | null
         }
         Update: {
           carrier_org_id?: number | null
@@ -1012,8 +1228,8 @@ export type Database = {
           id?: number
           label?: string | null
           storage_path?: string
-          truck_id?: number | null
           uploaded_by?: string | null
+          vehicle_id?: number | null
         }
         Relationships: [
           {
@@ -1025,9 +1241,9 @@ export type Database = {
           },
           {
             foreignKeyName: "truck_documents_truck_id_fkey"
-            columns: ["truck_id"]
+            columns: ["vehicle_id"]
             isOneToOne: false
-            referencedRelation: "trucks"
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
           {
@@ -1039,10 +1255,82 @@ export type Database = {
           },
         ]
       }
-      trucks: {
+      vehicle_type_classifications: {
         Row: {
+          classification_id: number
+          vehicle_type_id: number
+        }
+        Insert: {
+          classification_id: number
+          vehicle_type_id: number
+        }
+        Update: {
+          classification_id?: number
+          vehicle_type_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_type_classifications_classification_id_fkey"
+            columns: ["classification_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_classifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_type_classifications_vehicle_type_id_fkey"
+            columns: ["vehicle_type_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_types: {
+        Row: {
+          code: string
+          display_order: number
+          generic_photo_path: string | null
+          icon: string
+          id: number
+          label: string
+          specialized_capacity_note: string | null
+          typical_cargo_volume_cuft: number | null
+          typical_length_ft: number | null
+          typical_payload_capacity_lbs: number | null
+        }
+        Insert: {
+          code: string
+          display_order: number
+          generic_photo_path?: string | null
+          icon: string
+          id?: number
+          label: string
+          specialized_capacity_note?: string | null
+          typical_cargo_volume_cuft?: number | null
+          typical_length_ft?: number | null
+          typical_payload_capacity_lbs?: number | null
+        }
+        Update: {
+          code?: string
+          display_order?: number
+          generic_photo_path?: string | null
+          icon?: string
+          id?: number
+          label?: string
+          specialized_capacity_note?: string | null
+          typical_cargo_volume_cuft?: number | null
+          typical_length_ft?: number | null
+          typical_payload_capacity_lbs?: number | null
+        }
+        Relationships: []
+      }
+      vehicles: {
+        Row: {
+          cab_type: string | null
           carrier_org_id: number
+          color: string | null
           created_at: string | null
+          dimensions: string | null
           id: number
           is_active: boolean | null
           license_plate: string | null
@@ -1050,13 +1338,19 @@ export type Database = {
           make: string | null
           model: string | null
           nickname: string
-          truck_number: string | null
+          photo_path: string | null
+          status: string
+          vehicle_number: string | null
+          vehicle_type_id: number
           vin: string | null
           year: number | null
         }
         Insert: {
+          cab_type?: string | null
           carrier_org_id: number
+          color?: string | null
           created_at?: string | null
+          dimensions?: string | null
           id?: number
           is_active?: boolean | null
           license_plate?: string | null
@@ -1064,13 +1358,19 @@ export type Database = {
           make?: string | null
           model?: string | null
           nickname: string
-          truck_number?: string | null
+          photo_path?: string | null
+          status?: string
+          vehicle_number?: string | null
+          vehicle_type_id: number
           vin?: string | null
           year?: number | null
         }
         Update: {
+          cab_type?: string | null
           carrier_org_id?: number
+          color?: string | null
           created_at?: string | null
+          dimensions?: string | null
           id?: number
           is_active?: boolean | null
           license_plate?: string | null
@@ -1078,7 +1378,10 @@ export type Database = {
           make?: string | null
           model?: string | null
           nickname?: string
-          truck_number?: string | null
+          photo_path?: string | null
+          status?: string
+          vehicle_number?: string | null
+          vehicle_type_id?: number
           vin?: string | null
           year?: number | null
         }
@@ -1088,6 +1391,13 @@ export type Database = {
             columns: ["carrier_org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicles_vehicle_type_id_fkey"
+            columns: ["vehicle_type_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_types"
             referencedColumns: ["id"]
           },
         ]
@@ -1229,7 +1539,7 @@ export type Database = {
             foreignKeyName: "loads_truck_id_fkey"
             columns: ["truck_id"]
             isOneToOne: false
-            referencedRelation: "trucks"
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
         ]
@@ -1291,6 +1601,7 @@ export type Database = {
           event_type: string
         }[]
       }
+      has_feature: { Args: { feature_key: string }; Returns: boolean }
       mark_overdue_invoices: { Args: never; Returns: number }
       my_org_id: { Args: never; Returns: number }
       my_role: { Args: never; Returns: string }

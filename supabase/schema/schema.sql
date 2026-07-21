@@ -21,6 +21,9 @@ CREATE TABLE organizations (
   zip        TEXT,
   country    TEXT DEFAULT 'US' CHECK (country IN ('US','CA','MX')),
   currency   TEXT DEFAULT 'USD' CHECK (currency IN ('USD','CAD','MXN')),
+  -- Carrier or customer branding logo (added 2026-07-21) -- same `documents`
+  -- bucket/path convention as everything else, path {org_id}/logo/{filename}.
+  logo_path  TEXT,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -33,6 +36,10 @@ CREATE TABLE carrier_details (
   tier       TEXT DEFAULT 'starter' CHECK (tier IN ('starter','growth','pro','enterprise')),
   timezone   TEXT DEFAULT 'America/Los_Angeles',
   uom_system TEXT DEFAULT 'imperial' CHECK (uom_system IN ('imperial','metric')),
+  -- Carrier-level default language (added 2026-07-21, decisions.md L4) -- new
+  -- team members with a NULL profiles.preferred_language inherit this, same
+  -- inheritance shape as uom_system above. Unrelated to roles.
+  default_language TEXT NOT NULL DEFAULT 'en' CHECK (default_language IN ('en','es','pa','ur')),
   -- Default billing rail for new invoices (decision R1). Per-invoice override
   -- lives on invoices.payment_method.
   default_payment_method TEXT NOT NULL DEFAULT 'other'
@@ -61,6 +68,193 @@ CREATE TABLE customer_details (
 );
 
 -- ────────────────────────────────────────────────────────────
+-- SECTION 1b: GLOBAL MASTER DATA (2026-07-21)
+-- Developer-owned reference/lookup data, shared by every carrier org — no
+-- org scoping, no app-writable policy (all RLS is SELECT-only, in SECTION 8
+-- alongside every other table's policies, per this file's actual convention).
+-- ────────────────────────────────────────────────────────────
+
+-- Vehicle type definitions (icon, generic photo, typical specs) — selected
+-- FROM when adding a vehicle. See decisions.md S8.
+CREATE TABLE vehicle_types (
+  id                            BIGSERIAL PRIMARY KEY,
+  code                          TEXT NOT NULL UNIQUE,
+  label                         TEXT NOT NULL,
+  icon                          TEXT NOT NULL,   -- custom illustrated SVG icon key (NOT Material
+                                                  -- Symbols), resolved against carrieros-web/
+                                                  -- components/icons/vehicle-types/{code}.tsx
+  generic_photo_path            TEXT,            -- stock photo fallback wherever a vehicle has no
+                                                  -- per-vehicle photo yet
+  typical_length_ft             NUMERIC,         -- reference figures only, not a real per-vehicle spec
+  typical_payload_capacity_lbs  NUMERIC,
+  typical_cargo_volume_cuft     NUMERIC,
+  specialized_capacity_note     TEXT,
+  display_order                 INT NOT NULL
+);
+INSERT INTO vehicle_types
+  (code, label, icon, typical_length_ft, typical_payload_capacity_lbs, typical_cargo_volume_cuft, specialized_capacity_note, display_order)
+VALUES
+  ('semi','Semi (Tractor-Trailer)','local_shipping',53,45000,3489,NULL,1),
+  ('box_truck','Box Truck','airport_shuttle',24,10000,1200,NULL,2),
+  ('flatbed','Flatbed','view_agenda',48,48000,NULL,'Open deck -- no enclosed cargo volume.',3),
+  ('reefer','Reefer','ac_unit',53,44000,3000,'Temperature range approx. -20 deg F to 80 deg F.',4),
+  ('step_deck','Step Deck','stairs',48,48000,NULL,'Open deck, two-level (upper ~11 ft / lower ~37 ft) -- no enclosed cargo volume.',5),
+  ('tanker','Tanker','propane_tank',43,NULL,NULL,'Liquid capacity typically 5,500-11,600 gal depending on compartment config -- payload varies with liquid density, not a fixed lbs figure.',6),
+  ('dump','Dump','delete_sweep',23,25000,NULL,'Volume typically measured in cubic yards (10-16 cu yd), not cubic feet.',7);
+
+-- Multi-region vehicle weight/license classification schemes — many-to-many
+-- against vehicle_types via vehicle_type_classifications below, since one
+-- type is e.g. simultaneously "US Class 8 AND EU N3 AND China Heavy Truck".
+-- 24 rows across 11 regions; deliberately not exhaustive per-region coverage
+-- (a representative seed, not a legal reference — see decisions.md S8).
+CREATE TABLE vehicle_classifications (
+  id                        BIGSERIAL PRIMARY KEY,
+  region                    TEXT NOT NULL,   -- plain TEXT, not a CHECK enum -- new regions are added
+                                              -- as master-data rows, not a schema change
+  scheme_name               TEXT NOT NULL,
+  code                      TEXT NOT NULL,
+  label                     TEXT NOT NULL,
+  min_weight_kg             NUMERIC,
+  max_weight_kg             NUMERIC,         -- NULL = open-ended top class
+  requires_special_license  BOOLEAN NOT NULL DEFAULT true,
+  license_category_note     TEXT,
+  display_order             INT NOT NULL,
+  UNIQUE (region, code)
+);
+INSERT INTO vehicle_classifications
+  (region, scheme_name, code, label, min_weight_kg, max_weight_kg, requires_special_license, license_category_note, display_order)
+VALUES
+  ('US','FHWA GVWR','class_4_6','Class 4-6',6350,11793,false,NULL,1),
+  ('US','FHWA GVWR','class_8','Class 8',14969,NULL,true,'CDL Class A',2),
+  ('EU','EU Vehicle Category (2007/46/EC)','n1','N1',NULL,3500,false,NULL,3),
+  ('EU','EU Vehicle Category (2007/46/EC)','n3','N3',12000,NULL,true,'Category C+E',4),
+  ('GB','UK Retained EU Vehicle Category (DVSA)','n1','N1',NULL,3500,false,'Category B',5),
+  ('GB','UK Retained EU Vehicle Category (DVSA)','n3','N3',12000,NULL,true,'Category C+E',6),
+  ('CA','Transport Canada / CCMTA Weight Classification','class_4_6','Class 4-6',6350,11793,false,NULL,7),
+  ('CA','Transport Canada / CCMTA Weight Classification','class_8','Class 8',14969,NULL,true,'Class 1 (AZ in Ontario)',8),
+  ('MX','NOM-012-SCT-2-2017 Vehicle Configuration','c2','C2 (Rigid, 2-axle)',NULL,17500,false,NULL,9),
+  ('MX','NOM-012-SCT-2-2017 Vehicle Configuration','t3_s2','T3-S2 (5-axle tractor-trailer, up to 48t GCW)',17500,48000,true,'Federal Type A/E License',10),
+  ('MX','NOM-012-SCT-2-2017 Vehicle Configuration','t3_s3','T3-S3 (6-axle tractor-trailer, 48t+ GCW, special permit)',48000,NULL,true,'Federal Type A/E License + route permit',11),
+  ('CN','China GVW Classification (GB/T 15089)','medium_truck','Medium Truck',6000,14000,false,NULL,12),
+  ('CN','China GVW Classification (GB/T 15089)','heavy_truck','Heavy Truck',14000,NULL,true,NULL,13),
+  ('IN','India GVW Classification (Motor Vehicles Act)','lcv','LCV',3500,7500,false,NULL,14),
+  ('IN','India GVW Classification (Motor Vehicles Act)','hcv','HCV',16000,NULL,true,NULL,15),
+  ('JP','Japan Vehicle Size/Weight Classification','kei_truck','Kei Truck (Light Vehicle)',NULL,2000,false,'Ordinary License',16),
+  ('JP','Japan Vehicle Size/Weight Classification','large_size','Large-Size Truck',11000,NULL,true,'Class 1 Large License',17),
+  ('KR','South Korea Truck Weight Classification','small_size','Small-Size Truck',NULL,3000,false,NULL,18),
+  ('KR','South Korea Truck Weight Classification','large_size','Large-Size Truck',10000,NULL,true,'Class 1 Large License',19),
+  ('AU','Australian Heavy Vehicle Licence Category (NHVR)','light_rigid','Light Rigid (LR)',4500,8000,true,'LR Licence',20),
+  ('AU','Australian Heavy Vehicle Licence Category (NHVR)','heavy_combination','Heavy Combination (HC)',9000,NULL,true,'HC Licence',21),
+  ('AU','Australian Heavy Vehicle Licence Category (NHVR)','multi_combination','Multi Combination (MC -- B-doubles, road trains)',NULL,NULL,true,'MC Licence',22),
+  ('BR','CONTRAN Vehicle Category (Brazilian Traffic Code)','category_c','Category C',3500,6000,true,'CNH Category C',23),
+  ('BR','CONTRAN Vehicle Category (Brazilian Traffic Code)','category_e','Category E',6000,NULL,true,'CNH Category E',24);
+
+-- Many-to-many join: 77 rows (7 vehicle_types x 11 regions). MX's t3_s3 and
+-- AU's multi_combination stay reachable via vehicle_classifications directly
+-- but are not a default join for any type (specialty configurations).
+CREATE TABLE vehicle_type_classifications (
+  vehicle_type_id    BIGINT NOT NULL REFERENCES vehicle_types(id),
+  classification_id  BIGINT NOT NULL REFERENCES vehicle_classifications(id),
+  PRIMARY KEY (vehicle_type_id, classification_id)
+);
+INSERT INTO vehicle_type_classifications (vehicle_type_id, classification_id)
+SELECT vt.id, vc.id FROM vehicle_types vt, vehicle_classifications vc
+WHERE (vt.code, vc.region, vc.code) IN (
+  ('box_truck','US','class_4_6'), ('box_truck','EU','n1'), ('box_truck','GB','n1'),
+  ('box_truck','CA','class_4_6'), ('box_truck','MX','c2'), ('box_truck','CN','medium_truck'),
+  ('box_truck','IN','lcv'), ('box_truck','JP','kei_truck'), ('box_truck','KR','small_size'),
+  ('box_truck','AU','light_rigid'), ('box_truck','BR','category_c'),
+  ('semi','US','class_8'), ('semi','EU','n3'), ('semi','GB','n3'), ('semi','CA','class_8'),
+  ('semi','MX','t3_s2'), ('semi','CN','heavy_truck'), ('semi','IN','hcv'), ('semi','JP','large_size'),
+  ('semi','KR','large_size'), ('semi','AU','heavy_combination'), ('semi','BR','category_e'),
+  ('flatbed','US','class_8'), ('flatbed','EU','n3'), ('flatbed','GB','n3'), ('flatbed','CA','class_8'),
+  ('flatbed','MX','t3_s2'), ('flatbed','CN','heavy_truck'), ('flatbed','IN','hcv'), ('flatbed','JP','large_size'),
+  ('flatbed','KR','large_size'), ('flatbed','AU','heavy_combination'), ('flatbed','BR','category_e'),
+  ('reefer','US','class_8'), ('reefer','EU','n3'), ('reefer','GB','n3'), ('reefer','CA','class_8'),
+  ('reefer','MX','t3_s2'), ('reefer','CN','heavy_truck'), ('reefer','IN','hcv'), ('reefer','JP','large_size'),
+  ('reefer','KR','large_size'), ('reefer','AU','heavy_combination'), ('reefer','BR','category_e'),
+  ('step_deck','US','class_8'), ('step_deck','EU','n3'), ('step_deck','GB','n3'), ('step_deck','CA','class_8'),
+  ('step_deck','MX','t3_s2'), ('step_deck','CN','heavy_truck'), ('step_deck','IN','hcv'), ('step_deck','JP','large_size'),
+  ('step_deck','KR','large_size'), ('step_deck','AU','heavy_combination'), ('step_deck','BR','category_e'),
+  ('tanker','US','class_8'), ('tanker','EU','n3'), ('tanker','GB','n3'), ('tanker','CA','class_8'),
+  ('tanker','MX','t3_s2'), ('tanker','CN','heavy_truck'), ('tanker','IN','hcv'), ('tanker','JP','large_size'),
+  ('tanker','KR','large_size'), ('tanker','AU','heavy_combination'), ('tanker','BR','category_e'),
+  ('dump','US','class_8'), ('dump','EU','n3'), ('dump','GB','n3'), ('dump','CA','class_8'),
+  ('dump','MX','t3_s2'), ('dump','CN','heavy_truck'), ('dump','IN','hcv'), ('dump','JP','large_size'),
+  ('dump','KR','large_size'), ('dump','AU','heavy_combination'), ('dump','BR','category_e')
+);
+
+-- Role reference/display data (label/abbreviation/color) — NOT a foreign key,
+-- profiles.role keeps its own CHECK as the enforced value. See decisions.md S9.
+CREATE TABLE roles (
+  id            BIGSERIAL PRIMARY KEY,
+  code          TEXT NOT NULL UNIQUE,   -- must exactly match profiles.role's CHECK list
+  label         TEXT NOT NULL,          -- English fallback/dev-reference only -- UI renders via
+                                        -- t('roles.' + code), not this column, in end-user surfaces
+  abbreviation  TEXT NOT NULL,
+  color_token   TEXT NOT NULL,          -- an existing Phase-0A color token name, not a new hex value
+  display_order INT NOT NULL
+);
+INSERT INTO roles (code, label, abbreviation, color_token, display_order) VALUES
+  ('owner','Owner','OW','brand-orange',1),
+  ('solo','Solo','SO','brand-orange',2),
+  ('driver','Driver','DR','success',3),
+  ('dispatcher','Dispatcher','DI','info',4),
+  ('finance','Finance','FI','purple',5),
+  ('customer_admin','Customer Admin','CA','navy-muted',6),
+  ('customer_viewer','Customer Viewer','CV','navy-muted',7);
+
+-- Language reference/display data — NOT a foreign key, profiles.preferred_language
+-- and carrier_details.default_language keep their own CHECKs. native_name IS the
+-- correct display value regardless of UI locale (a language's own name in its own
+-- script). See decisions.md S9/L4.
+CREATE TABLE languages (
+  code          TEXT PRIMARY KEY,
+  label         TEXT NOT NULL,
+  native_name   TEXT NOT NULL,
+  flag_emoji    TEXT NOT NULL,
+  display_order INT NOT NULL
+);
+INSERT INTO languages (code, label, native_name, flag_emoji, display_order) VALUES
+  ('en','English','English','🇺🇸',1),
+  ('es','Spanish','Español','🇲🇽',2),
+  ('pa','Punjabi','ਪੰਜਾਬੀ','🇮🇳',3),
+  ('ur','Urdu','اردو','🇵🇰',4);
+
+-- Tier entitlements master data (2026-07-21, decisions.md S11). Cumulative/
+-- ordered by `rank`, not a many-to-many join -- Growth includes everything
+-- Starter has, per BRD's own "Growth+" notation. Real pricing per BR-24.
+CREATE TABLE tiers (
+  code                        TEXT PRIMARY KEY CHECK (code IN ('starter','growth','pro','enterprise')),
+  label                       TEXT NOT NULL,
+  rank                        INT NOT NULL UNIQUE,
+  monthly_price               NUMERIC(10,2) NOT NULL,
+  included_trucks             INT NOT NULL,
+  price_per_additional_truck  NUMERIC(10,2) NOT NULL
+);
+INSERT INTO tiers (code, label, rank, monthly_price, included_trucks, price_per_additional_truck) VALUES
+  ('starter','Starter',1,49,1,15),
+  ('growth','Growth',2,99,3,20),
+  ('pro','Pro',3,199,6,25),
+  ('enterprise','Enterprise',4,349,12,30);
+
+-- One row per gated feature, checked via has_feature() (SECTION 8, defined
+-- after my_org_id()). Seeded incrementally as each gated feature is actually
+-- built -- these 3 back Phase 6's exceptions-system gating (decisions.md P2
+-- amendment); mockups 17-21's not-yet-built Growth/Pro items are NOT
+-- speculatively seeded here.
+CREATE TABLE features (
+  key           TEXT PRIMARY KEY,
+  label         TEXT NOT NULL,
+  min_tier      TEXT NOT NULL REFERENCES tiers(code),
+  display_order INT NOT NULL
+);
+INSERT INTO features (key, label, min_tier, display_order) VALUES
+  ('full_exceptions_inbox','Full Exceptions Inbox','growth',1),
+  ('exception_history','Exception History Timelines','growth',2),
+  ('customer_health_score','Customer Health Score','growth',3);
+
+-- ────────────────────────────────────────────────────────────
 -- SECTION 2: PROFILES — ALL users in the system
 -- Carrier users:          org_id → carrier organization, role ∈ {owner,solo,driver,dispatcher,finance}
 -- Customer portal users:  org_id → customer organization, role ∈ {customer_admin,customer_viewer}
@@ -76,13 +270,18 @@ CREATE TABLE profiles (
   first_name         TEXT,
   last_name          TEXT,
   phone              TEXT,
-  preferred_language TEXT DEFAULT 'en' CHECK (preferred_language IN ('en','es','pa','ur')),
+  -- Nullable as of 2026-07-21 (decisions.md L4) -- NULL means "inherit
+  -- carrier_details.default_language", same shape as uom_system below.
+  preferred_language TEXT CHECK (preferred_language IN ('en','es','pa','ur')),
   timezone           TEXT,
   -- Per-user overrides of carrier_details defaults (decisions.md L2 — personal
   -- prefs follow the user). NULL uom_system means "inherit from carrier_details".
   uom_system         TEXT CHECK (uom_system IN ('imperial','metric')),
   date_format        TEXT DEFAULT 'MM/DD/YYYY' CHECK (date_format IN ('MM/DD/YYYY','DD/MM/YYYY','YYYY-MM-DD')),
   time_format        TEXT DEFAULT '12h' CHECK (time_format IN ('12h','24h')),
+  -- Driver photo (2026-07-21, decisions.md S10) -- mobile-captured only, web
+  -- is display-only (signed URL). Same `documents` bucket path convention.
+  avatar_path        TEXT,
   created_at         TIMESTAMPTZ DEFAULT now()
 );
 
@@ -90,19 +289,34 @@ CREATE TABLE profiles (
 -- SECTION 3: CARRIER ENTITIES
 -- ────────────────────────────────────────────────────────────
 
-CREATE TABLE trucks (
-  id             BIGSERIAL PRIMARY KEY,
-  carrier_org_id BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-  truck_number   TEXT,
-  nickname       TEXT NOT NULL,
-  year           INT,
-  make           TEXT,
-  model          TEXT,
-  vin            TEXT,
-  license_plate  TEXT,
-  license_state  TEXT,
-  is_active      BOOLEAN DEFAULT true,
-  created_at     TIMESTAMPTZ DEFAULT now()
+-- Renamed from `trucks` (2026-07-21, decisions.md S8) -- region-neutral name
+-- to match the international vehicle_types/vehicle_classifications taxonomy.
+CREATE TABLE vehicles (
+  id              BIGSERIAL PRIMARY KEY,
+  carrier_org_id  BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  vehicle_number  TEXT,
+  nickname        TEXT NOT NULL,
+  year            INT,
+  make            TEXT,
+  model           TEXT,
+  vin             TEXT,
+  license_plate   TEXT,
+  license_state   TEXT,
+  is_active       BOOLEAN DEFAULT true,
+  -- Added 2026-07-21 (decisions.md S8): required, backfilled to 'semi' for
+  -- pre-existing rows before being made NOT NULL.
+  vehicle_type_id BIGINT NOT NULL REFERENCES vehicle_types(id),
+  -- Cab configuration -- nullable, only meaningful for tractor-style vehicles.
+  cab_type        TEXT CHECK (cab_type IN ('sleeper','day_cab','other')),
+  color           TEXT,
+  dimensions      TEXT,
+  -- Manually toggled fleet status (decisions.md, "Vehicle status" decision) --
+  -- not derived from maintenance data, which can't represent "in shop right now".
+  status          TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','idle','in_shop')),
+  -- Vehicle photo (2026-07-21, decisions.md S10) -- both mobile (DVIR-flow
+  -- capture) and web (simple upload) surfaces write here.
+  photo_path      TEXT,
+  created_at      TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE drivers (
@@ -111,7 +325,7 @@ CREATE TABLE drivers (
   profile_id                 UUID NOT NULL REFERENCES profiles(id),
   driver_number              TEXT,
   invite_status              TEXT DEFAULT 'pending' CHECK (invite_status IN ('pending','accepted','revoked')),
-  default_truck_id           BIGINT REFERENCES trucks(id),
+  default_vehicle_id         BIGINT REFERENCES vehicles(id),
   is_active                  BOOLEAN DEFAULT true,
   cdl_number                 TEXT,
   cdl_class                  TEXT CHECK (cdl_class IN ('A','B','C')),
@@ -132,7 +346,7 @@ CREATE TABLE loads (
   customer_name_raw TEXT,
   load_number       TEXT NOT NULL,
   driver_id         BIGINT REFERENCES drivers(id),
-  truck_id          BIGINT REFERENCES trucks(id),
+  vehicle_id        BIGINT REFERENCES vehicles(id),
   pickup_address    TEXT,
   pickup_city       TEXT,
   pickup_state      TEXT,
@@ -154,7 +368,7 @@ CREATE TABLE loads (
   weight_lbs        INT,
   rate              NUMERIC(10,2),
   status            TEXT DEFAULT 'draft' CHECK (status IN (
-    'draft','scheduled','dispatched','picked_up','in_transit','delivered','invoiced','paid'
+    'draft','scheduled','dispatched','picked_up','in_transit','delivered','invoiced','paid','cancelled'
   )),
   intake_method     TEXT CHECK (intake_method IN ('email','pdf','paste','manual')),
   raw_intake_text   TEXT,
@@ -222,7 +436,7 @@ CREATE UNIQUE INDEX invoices_load_unique ON invoices(load_id) WHERE load_id IS N
 CREATE TABLE dvir_inspections (
   id             BIGSERIAL PRIMARY KEY,
   carrier_org_id BIGINT REFERENCES organizations(id),
-  truck_id       BIGINT REFERENCES trucks(id),
+  vehicle_id     BIGINT REFERENCES vehicles(id),
   load_id        BIGINT REFERENCES loads(id),
   driver_id      BIGINT REFERENCES drivers(id),
   type           TEXT NOT NULL CHECK (type IN ('pre_trip','post_trip')),
@@ -245,7 +459,7 @@ CREATE TABLE dvir_defects (
 
 CREATE TABLE service_logs (
   id             BIGSERIAL PRIMARY KEY,
-  truck_id       BIGINT REFERENCES trucks(id) ON DELETE CASCADE,
+  vehicle_id     BIGINT REFERENCES vehicles(id) ON DELETE CASCADE,
   carrier_org_id BIGINT REFERENCES organizations(id),
   service_type   TEXT NOT NULL,
   service_date   DATE NOT NULL,
@@ -253,13 +467,17 @@ CREATE TABLE service_logs (
   cost           NUMERIC(10,2),
   shop_name      TEXT,
   notes          TEXT,
+  -- Shop receipt/invoice photo (2026-07-21, decisions.md S10) -- one column,
+  -- not a separate document table, since a service log entry has exactly one
+  -- receipt in the common case.
+  receipt_path   TEXT,
   logged_by      UUID REFERENCES profiles(id),
   created_at     TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE maintenance_reminders (
   id                BIGSERIAL PRIMARY KEY,
-  truck_id          BIGINT REFERENCES trucks(id) ON DELETE CASCADE,
+  vehicle_id        BIGINT REFERENCES vehicles(id) ON DELETE CASCADE,
   carrier_org_id    BIGINT REFERENCES organizations(id),
   reminder_type     TEXT NOT NULL,
   trigger_miles     INT,
@@ -272,9 +490,12 @@ CREATE TABLE maintenance_reminders (
   created_at        TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE TABLE truck_documents (
+-- Renamed from `truck_documents` (2026-07-21, decisions.md S8/S10) — real
+-- upload/display UI added this pass (VehicleDocuments.tsx); schema/RLS shape
+-- unchanged, only the name and its FK column.
+CREATE TABLE vehicle_documents (
   id             BIGSERIAL PRIMARY KEY,
-  truck_id       BIGINT REFERENCES trucks(id) ON DELETE CASCADE,
+  vehicle_id     BIGINT REFERENCES vehicles(id) ON DELETE CASCADE,
   carrier_org_id BIGINT REFERENCES organizations(id),
   doc_type       TEXT NOT NULL CHECK (doc_type IN (
     'registration','insurance_cert','dot_authority','annual_inspection','other'
@@ -299,6 +520,41 @@ CREATE TABLE org_documents (
   uploaded_by  UUID REFERENCES profiles(id),
   created_at   TIMESTAMPTZ DEFAULT now(),
   updated_at   TIMESTAMPTZ DEFAULT now()
+);
+
+-- Actual CDL/medical-certificate photo scans (2026-07-21, decisions.md S10) --
+-- distinct from drivers.cdl_expiry/cdl_class (structured data, already
+-- rendered by a stylized CDL-card UI). expiry_date here is informational
+-- (what the scan itself says); drivers.cdl_expiry/med_cert_expiry stay the
+-- authoritative fields the exceptions system reads.
+CREATE TABLE driver_documents (
+  id             BIGSERIAL PRIMARY KEY,
+  driver_id      BIGINT REFERENCES drivers(id) ON DELETE CASCADE,
+  carrier_org_id BIGINT REFERENCES organizations(id),
+  doc_type       TEXT NOT NULL CHECK (doc_type IN ('cdl_scan','medical_cert','other')),
+  label          TEXT,
+  storage_path   TEXT NOT NULL,
+  expiry_date    DATE,
+  uploaded_by    UUID REFERENCES profiles(id),
+  created_at     TIMESTAMPTZ DEFAULT now()
+);
+
+-- Permanent exception history log (2026-07-21, decisions.md P2 amendment) --
+-- distinct from get_exceptions() (SECTION 8), which stays a live computed
+-- view for "what's active right now". Writes happen for every tier; only the
+-- UI that surfaces this history is Growth+ (has_feature('exception_history')).
+CREATE TABLE exception_events (
+  id             BIGSERIAL PRIMARY KEY,
+  carrier_org_id BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  entity_type    TEXT NOT NULL CHECK (entity_type IN ('driver','vehicle','customer','invoice','load')),
+  entity_id      BIGINT NOT NULL,       -- polymorphic; no formal FK constraint, matches entity_type
+  event_type     TEXT NOT NULL,         -- 'reminder_sent'|'late_delivery'|'dvir_defect'|'doc_expired'|
+                                        -- 'invoice_overdue'|'resolved'|'clean_period'|...
+  severity       TEXT CHECK (severity IN ('info','warning','urgent')),
+  title          TEXT NOT NULL,
+  detail         TEXT,
+  occurred_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  created_at     TIMESTAMPTZ DEFAULT now()
 );
 
 -- ────────────────────────────────────────────────────────────
@@ -389,7 +645,7 @@ $$;
 CREATE VIEW loads_driver_view AS
 SELECT
   id, load_number, carrier_org_id, customer_org_id, customer_name_raw,
-  driver_id, truck_id,
+  driver_id, vehicle_id,
   pickup_address, pickup_city, pickup_state, pickup_zip, pickup_lat, pickup_lng,
   delivery_address, delivery_city, delivery_state, delivery_zip, delivery_lat, delivery_lng,
   total_miles, pickup_date, pickup_time, delivery_date, delivery_time,
@@ -417,7 +673,7 @@ REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON loads_driver_view FROM anon;
 CREATE INDEX idx_orgs_type              ON organizations(type);
 CREATE INDEX idx_customer_details_carrier ON customer_details(carrier_org_id);
 CREATE INDEX idx_profiles_org           ON profiles(org_id);
-CREATE INDEX idx_trucks_carrier         ON trucks(carrier_org_id);
+CREATE INDEX idx_vehicles_carrier       ON vehicles(carrier_org_id);
 CREATE INDEX idx_drivers_carrier        ON drivers(carrier_org_id);
 CREATE INDEX idx_drivers_profile        ON drivers(profile_id);
 CREATE INDEX idx_loads_carrier          ON loads(carrier_org_id);
@@ -429,15 +685,17 @@ CREATE INDEX idx_load_events_load       ON load_events(load_id);
 CREATE INDEX idx_invoices_carrier       ON invoices(carrier_org_id);
 CREATE INDEX idx_invoices_customer      ON invoices(customer_org_id);
 CREATE INDEX idx_invoices_load          ON invoices(load_id);
-CREATE INDEX idx_dvir_truck             ON dvir_inspections(truck_id);
+CREATE INDEX idx_dvir_vehicle           ON dvir_inspections(vehicle_id);
 CREATE INDEX idx_dvir_driver            ON dvir_inspections(driver_id);
-CREATE INDEX idx_service_truck          ON service_logs(truck_id);
-CREATE INDEX idx_truck_docs_truck       ON truck_documents(truck_id);
+CREATE INDEX idx_service_vehicle        ON service_logs(vehicle_id);
+CREATE INDEX idx_vehicle_docs_vehicle   ON vehicle_documents(vehicle_id);
 CREATE INDEX idx_org_docs               ON org_documents(org_id);
+CREATE INDEX idx_driver_docs_driver     ON driver_documents(driver_id);
+CREATE INDEX idx_exception_events_entity ON exception_events(entity_type, entity_id);
 
 CREATE UNIQUE INDEX idx_customer_number ON customer_details(carrier_org_id, customer_number) WHERE customer_number IS NOT NULL;
 CREATE UNIQUE INDEX idx_driver_number   ON drivers(carrier_org_id, driver_number)            WHERE driver_number   IS NOT NULL;
-CREATE UNIQUE INDEX idx_truck_number    ON trucks(carrier_org_id, truck_number)              WHERE truck_number    IS NOT NULL;
+CREATE UNIQUE INDEX idx_vehicle_number  ON vehicles(carrier_org_id, vehicle_number)           WHERE vehicle_number  IS NOT NULL;
 
 -- Public tracking lookup (decision R2, /track/[token]). Explicit column
 -- allowlist — never rate/driver_id/financials. SECURITY DEFINER so it can
@@ -531,6 +789,47 @@ SET search_path = public
 AS $$
   SELECT role FROM profiles WHERE id = auth.uid()
 $$;
+
+-- Tier entitlements gate (2026-07-21, decisions.md S11) — real, RLS-usable
+-- function (same idiom as my_org_id()/my_role() above, not just an app-layer
+-- JS helper), so any future tier-gated table's RLS policy can reference
+-- has_feature('driver_chat') directly. Must be defined here, after
+-- my_org_id() — placing it near tiers/features in SECTION 1b would break a
+-- fresh schema replay with "function my_org_id() does not exist".
+CREATE OR REPLACE FUNCTION has_feature(feature_key TEXT)
+RETURNS BOOLEAN LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
+  SELECT (SELECT rank FROM tiers WHERE code = (
+            SELECT tier FROM carrier_details WHERE org_id = my_org_id()
+          ))
+         >=
+         (SELECT rank FROM tiers WHERE code = (
+            SELECT min_tier FROM features WHERE key = feature_key
+          ));
+$$;
+GRANT EXECUTE ON FUNCTION has_feature TO authenticated;
+
+-- GLOBAL MASTER DATA — read-only reference tables, no org scoping, no
+-- app-writable policy (closed sets, changed only via schema.sql + redeploy).
+ALTER TABLE vehicle_types ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "vehicle_types_select" ON vehicle_types FOR SELECT TO authenticated USING (true);
+
+ALTER TABLE vehicle_classifications ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "vehicle_classifications_select" ON vehicle_classifications FOR SELECT TO authenticated USING (true);
+
+ALTER TABLE vehicle_type_classifications ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "vehicle_type_classifications_select" ON vehicle_type_classifications FOR SELECT TO authenticated USING (true);
+
+ALTER TABLE roles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "roles_select" ON roles FOR SELECT TO authenticated USING (true);
+
+ALTER TABLE languages ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "languages_select" ON languages FOR SELECT TO authenticated USING (true);
+
+ALTER TABLE tiers ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "tiers_select" ON tiers FOR SELECT TO authenticated USING (true);
+
+ALTER TABLE features ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "features_select" ON features FOR SELECT TO authenticated USING (true);
 
 -- ORGANIZATIONS
 ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
@@ -735,8 +1034,8 @@ REVOKE ALL ON FUNCTION driver_self_update_allowed(BIGINT,DATE,DATE,BOOLEAN,TEXT)
 GRANT EXECUTE ON FUNCTION driver_self_update_allowed(BIGINT,DATE,DATE,BOOLEAN,TEXT) TO authenticated;
 
 -- A driver may edit their own contact details (emergency contact, CDL
--- number/class/state, endorsements, default truck) but not the fields defining
--- their employment or compliance standing.
+-- number/class/state, endorsements, default vehicle) but not the fields
+-- defining their employment or compliance standing.
 CREATE POLICY "driver_own_record_update" ON drivers FOR UPDATE TO authenticated
   USING (profile_id = auth.uid())
   WITH CHECK (
@@ -744,12 +1043,12 @@ CREATE POLICY "driver_own_record_update" ON drivers FOR UPDATE TO authenticated
     AND driver_self_update_allowed(carrier_org_id, cdl_expiry, med_cert_expiry, is_active, driver_number)
   );
 
--- TRUCKS
-ALTER TABLE trucks ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "carrier_trucks_select" ON trucks FOR SELECT USING (
+-- VEHICLES (renamed from TRUCKS, 2026-07-21, decisions.md S8)
+ALTER TABLE vehicles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "carrier_vehicles_select" ON vehicles FOR SELECT USING (
   carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
 );
-CREATE POLICY "owner_solo_trucks_all" ON trucks FOR ALL USING (
+CREATE POLICY "owner_solo_vehicles_all" ON vehicles FOR ALL USING (
   carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
   AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
 );
@@ -864,12 +1163,12 @@ CREATE POLICY "owner_solo_reminders_all" ON maintenance_reminders FOR ALL USING 
   AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
 );
 
--- TRUCK DOCUMENTS
-ALTER TABLE truck_documents ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "carrier_truck_docs_select" ON truck_documents FOR SELECT USING (
+-- VEHICLE DOCUMENTS (renamed from TRUCK DOCUMENTS, 2026-07-21, decisions.md S8)
+ALTER TABLE vehicle_documents ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "carrier_vehicle_docs_select" ON vehicle_documents FOR SELECT USING (
   carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
 );
-CREATE POLICY "owner_solo_truck_docs_all" ON truck_documents FOR ALL USING (
+CREATE POLICY "owner_solo_vehicle_docs_all" ON vehicle_documents FOR ALL USING (
   carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
   AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
 );
@@ -884,6 +1183,28 @@ CREATE POLICY "finance_org_docs_select" ON org_documents FOR SELECT USING (
   org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
   AND (SELECT role FROM profiles WHERE id = auth.uid()) = 'finance'
 );
+
+-- DRIVER DOCUMENTS (new, 2026-07-21, decisions.md S10 — mirrors
+-- vehicle_documents' shape exactly, scoped via a direct profiles subquery)
+ALTER TABLE driver_documents ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "carrier_driver_docs_select" ON driver_documents FOR SELECT USING (
+  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+);
+CREATE POLICY "owner_solo_driver_docs_all" ON driver_documents FOR ALL USING (
+  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+);
+
+-- EXCEPTION EVENTS (new, 2026-07-21, decisions.md P2 amendment) — scoped via
+-- my_org_id(), a deliberate choice for this new table, not a claim that every
+-- older table's policy uses the same shape (older ones use a direct profiles
+-- subquery; only newer tables use the helper function).
+ALTER TABLE exception_events ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "carrier_exception_events_select" ON exception_events FOR SELECT TO authenticated
+  USING (carrier_org_id = my_org_id());
+CREATE POLICY "owner_solo_exception_events_all" ON exception_events FOR ALL TO authenticated
+  USING (carrier_org_id = my_org_id() AND my_role() IN ('owner','solo'))
+  WITH CHECK (carrier_org_id = my_org_id() AND my_role() IN ('owner','solo'));
 
 -- ────────────────────────────────────────────────────────────
 -- SECTION 8b: STORAGE (bucket + object-level RLS)
