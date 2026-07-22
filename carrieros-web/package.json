@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:extraction": "vitest run --config vitest.extraction.config.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.112.3",

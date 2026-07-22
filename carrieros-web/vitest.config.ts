@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config'
+import { defineConfig, configDefaults } from 'vitest/config'
 import path from 'node:path'
 
 // These tests are integration tests against the real local Supabase/Postgres
@@ -17,6 +17,11 @@ export default defineConfig({
     // some (entity numbering, admin-role checks) are order-sensitive within
     // their own describe block; cross-file parallelism is still fine.
     fileParallelism: true,
+    // *.golden.test.ts hits the real Anthropic API (real tokens, real
+    // latency, non-deterministic-ish output) — excluded from the default
+    // `npm test` run so the fast/free suite stays fast and free. Run
+    // explicitly via `npm run test:extraction`.
+    exclude: [...configDefaults.exclude, '**/*.golden.test.ts'],
   },
   resolve: {
     alias: {
