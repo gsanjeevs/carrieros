@@ -83,6 +83,17 @@ export const INVOICE_STATUS_PILL: Record<string, { bg: string; text: string }> =
   overdue: { bg: StatusColors.dangerLight, text: StatusColors.dangerDark },
 };
 
+// get_exceptions() tier -> pill {bg, text}, same pastel-bg/dark-text
+// convention as the pills above, and the same today=danger/this_week=warning/
+// upcoming=info semantic mapping carrieros-web's dashboard uses for the same
+// three tiers (app/(app)/exceptions/page.tsx's TIER_COLOR). Used by the
+// Alerts tab's tier badges and the inline exception chips on Fleet/Customers.
+export const EXCEPTION_TIER_PILL: Record<string, { bg: string; text: string }> = {
+  today: { bg: StatusColors.dangerLight, text: StatusColors.dangerDark },
+  this_week: { bg: StatusColors.warningLight, text: StatusColors.warningDark },
+  upcoming: { bg: StatusColors.infoLight, text: StatusColors.info },
+};
+
 export const Colors = {
   light: {
     text: '#0f1923',

@@ -10,10 +10,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { ExceptionChip } from '@/components/exception-chip';
 import { Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
+import { fetchExceptions, topExceptionByEntity, type ExceptionRow } from '@/lib/exceptions';
 
 const PAGE_BACKGROUND = StatusColors.grayLight;
 
@@ -27,16 +29,23 @@ export default function CustomersScreen() {
   const theme = useTheme();
   const { t } = useLocale();
   const [customers, setCustomers] = useState<CustomerRow[]>([]);
+  const [exceptions, setExceptions] = useState<ExceptionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
-    const { data } = await supabase
-      .from('customer_details')
-      .select('org_id, contact_name, organizations(name, phone, email)')
-      .order('org_id', { ascending: true });
+    const [{ data }, exceptionRows] = await Promise.all([
+      supabase
+        .from('customer_details')
+        .select('org_id, contact_name, organizations(name, phone, email)')
+        .order('org_id', { ascending: true }),
+      fetchExceptions(),
+    ]);
     setCustomers((data as unknown as CustomerRow[] | null) ?? []);
+    setExceptions(exceptionRows);
   }, []);
+
+  const topExceptionByCustomer = topExceptionByEntity(exceptions, 'customer');
 
   useEffect(() => {
     load().finally(() => setLoading(false));
@@ -72,12 +81,14 @@ export default function CustomersScreen() {
           }
           renderItem={({ item }) => {
             const contact = item.organizations?.phone ?? item.organizations?.email;
+            const topException = topExceptionByCustomer.get(item.org_id);
             return (
               <ThemedView style={[styles.card, { backgroundColor: theme.background }, styles.cardShadow]}>
                 <ThemedText type="smallBold">{item.organizations?.name ?? t('common.unknownCustomer')}</ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
                   {contact ?? t('customers.noContact')}
                 </ThemedText>
+                {topException ? <ExceptionChip item={topException} /> : null}
               </ThemedView>
             );
           }}

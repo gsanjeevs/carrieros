@@ -2,8 +2,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
+import Link from 'next/link'
 import AddVehicleButton from './AddVehicleButton'
 import { VEHICLE_TYPE_ICONS } from '@/components/icons/vehicle-types'
+import ExceptionChip from '@/components/ExceptionChip'
+import { getExceptions } from '@/lib/exceptions'
 
 type Vehicle = {
   id: number
@@ -43,15 +46,30 @@ export default async function VehiclesPage({
   const t = await getTranslations('vehicles')
 
   let vehicles: Vehicle[] = []
+  let exceptions: Awaited<ReturnType<typeof getExceptions>> = []
 
   if (profile?.org_id) {
-    const { data } = await supabase
-      .from('vehicles')
-      .select('id, vehicle_number, nickname, year, make, model, license_plate, license_state, is_active, vehicle_type_id, cab_type, color, dimensions, vehicle_types(code, generic_photo_path)')
-      .eq('carrier_org_id', profile.org_id)
-      .eq('is_active', true)
-      .order('vehicle_number')
+    const [{ data }, exceptionItems] = await Promise.all([
+      supabase
+        .from('vehicles')
+        .select('id, vehicle_number, nickname, year, make, model, license_plate, license_state, is_active, vehicle_type_id, cab_type, color, dimensions, vehicle_types(code, generic_photo_path)')
+        .eq('carrier_org_id', profile.org_id)
+        .eq('is_active', true)
+        .order('vehicle_number'),
+      getExceptions(supabase, profile.org_id),
+    ])
     vehicles = (data as unknown as Vehicle[]) ?? []
+    exceptions = exceptionItems
+  }
+
+  // get_exceptions() is already sorted most-urgent-first (today, then
+  // this_week, then upcoming, by due_at within a tier) — the first match per
+  // vehicle is its top exception.
+  const topExceptionByVehicle = new Map<number, (typeof exceptions)[number]>()
+  for (const item of exceptions) {
+    if (item.entity_type === 'vehicle' && !topExceptionByVehicle.has(item.entity_id)) {
+      topExceptionByVehicle.set(item.entity_id, item)
+    }
   }
 
   return (
@@ -88,6 +106,7 @@ export default async function VehiclesPage({
                 <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('yearMakeModel')}</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('plate')}</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('details')}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
@@ -97,10 +116,20 @@ export default async function VehiclesPage({
                 const vt = Array.isArray(vehicle.vehicle_types) ? vehicle.vehicle_types[0] : vehicle.vehicle_types
                 const Icon = vt ? VEHICLE_TYPE_ICONS[vt.code] : undefined
                 const details = [vehicle.color, vehicle.dimensions].filter(Boolean).join(' · ')
+                const topException = topExceptionByVehicle.get(vehicle.id)
 
                 return (
                   <tr key={vehicle.id} className="hover:bg-white/[0.07] transition-colors duration-150">
-                    <td className="px-5 py-3.5 text-white font-medium">{vehicle.vehicle_number}</td>
+                    <td className="px-5 py-3.5 text-white font-medium">
+                      {vehicle.vehicle_number ? (
+                        <Link
+                          href={`/vehicles/${vehicle.vehicle_number}`}
+                          className="hover:text-[#f97316] transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+                        >
+                          {vehicle.vehicle_number}
+                        </Link>
+                      ) : '—'}
+                    </td>
                     <td className="px-4 py-3.5 text-slate-300">
                       {vt ? (
                         <span className="inline-flex items-center gap-2">
@@ -113,6 +142,7 @@ export default async function VehiclesPage({
                     <td className="px-4 py-3.5 text-slate-400">{ymm || '—'}</td>
                     <td className="px-4 py-3.5 text-slate-400">{plate || '—'}</td>
                     <td className="px-4 py-3.5 text-slate-500 text-xs">{details || '—'}</td>
+                    <td className="px-4 py-3.5">{topException && <ExceptionChip item={topException} />}</td>
                   </tr>
                 )
               })}

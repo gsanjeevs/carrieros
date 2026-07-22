@@ -643,6 +643,53 @@ export type Database = {
           },
         ]
       }
+      exception_events: {
+        Row: {
+          carrier_org_id: number
+          created_at: string | null
+          detail: string | null
+          entity_id: number
+          entity_type: string
+          event_type: string
+          id: number
+          occurred_at: string
+          severity: string | null
+          title: string
+        }
+        Insert: {
+          carrier_org_id: number
+          created_at?: string | null
+          detail?: string | null
+          entity_id: number
+          entity_type: string
+          event_type: string
+          id?: number
+          occurred_at?: string
+          severity?: string | null
+          title: string
+        }
+        Update: {
+          carrier_org_id?: number
+          created_at?: string | null
+          detail?: string | null
+          entity_id?: number
+          entity_type?: string
+          event_type?: string
+          id?: number
+          occurred_at?: string
+          severity?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exception_events_carrier_org_id_fkey"
+            columns: ["carrier_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       features: {
         Row: {
           display_order: number
@@ -2059,6 +2106,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      get_customer_health_score: {
+        Args: { customer_org_id: number }
+        Returns: number
+      }
       get_exceptions: {
         Args: never
         Returns: {
@@ -2126,6 +2177,7 @@ export type Database = {
         Args: { carrier_org_bigint: number; entity_name: string }
         Returns: number
       }
+      send_expiry_reminders: { Args: never; Returns: number }
     }
     Enums: {
       [_ in never]: never

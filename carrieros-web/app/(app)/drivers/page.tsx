@@ -2,7 +2,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getTranslations, getLocale } from 'next-intl/server'
+import Link from 'next/link'
 import InviteDriverButton from './InviteDriverButton'
+import ExceptionChip from '@/components/ExceptionChip'
+import { getExceptions } from '@/lib/exceptions'
 
 const STATUS_COLOR: Record<string, string> = {
   pending:  'bg-amber-500/20 text-amber-400',
@@ -69,15 +72,20 @@ export default async function DriversPage({
 
   let drivers: Driver[] = []
   let vehicles: Vehicle[] = []
+  let exceptions: Awaited<ReturnType<typeof getExceptions>> = []
 
   if (profile?.org_id) {
-    const { data } = await supabase
-      .from('drivers')
-      .select('id, driver_number, invite_status, default_vehicle_id, cdl_number, cdl_class, cdl_state, cdl_expiry, med_cert_expiry, endorsements, is_active, profiles(first_name, last_name, phone)')
-      .eq('carrier_org_id', profile.org_id)
-      .eq('is_active', true)
-      .order('driver_number')
+    const [{ data }, exceptionItems] = await Promise.all([
+      supabase
+        .from('drivers')
+        .select('id, driver_number, invite_status, default_vehicle_id, cdl_number, cdl_class, cdl_state, cdl_expiry, med_cert_expiry, endorsements, is_active, profiles(first_name, last_name, phone)')
+        .eq('carrier_org_id', profile.org_id)
+        .eq('is_active', true)
+        .order('driver_number'),
+      getExceptions(supabase, profile.org_id),
+    ])
     drivers = (data ?? []) as unknown as Driver[]
+    exceptions = exceptionItems
 
     if (canManage) {
       const { data: vehicleData } = await supabase
@@ -87,6 +95,15 @@ export default async function DriversPage({
         .eq('is_active', true)
         .order('vehicle_number')
       vehicles = vehicleData ?? []
+    }
+  }
+
+  // get_exceptions() is already sorted most-urgent-first — first match per
+  // driver is its top exception.
+  const topExceptionByDriver = new Map<number, (typeof exceptions)[number]>()
+  for (const item of exceptions) {
+    if (item.entity_type === 'driver' && !topExceptionByDriver.has(item.entity_id)) {
+      topExceptionByDriver.set(item.entity_id, item)
     }
   }
 
@@ -124,6 +141,7 @@ export default async function DriversPage({
                 <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('phone')}</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('cdlExpiry')}</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('medCertExpiry')}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
@@ -136,10 +154,18 @@ export default async function DriversPage({
                   glow === 'success' ? 'bg-[#16a34a] shadow-glow-success' :
                   glow === 'warning' ? 'bg-amber-500 shadow-glow-warning' :
                   'bg-rose-500 shadow-glow-danger'
+                const topException = topExceptionByDriver.get(driver.id)
 
                 return (
                   <tr key={driver.id} className="hover:bg-white/[0.07] transition-colors duration-150">
-                    <td className="px-5 py-3.5 text-white font-medium">{driver.driver_number}</td>
+                    <td className="px-5 py-3.5 text-white font-medium">
+                      <Link
+                        href={`/drivers/${driver.driver_number}`}
+                        className="hover:text-[#f97316] transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+                      >
+                        {driver.driver_number}
+                      </Link>
+                    </td>
                     <td className="px-4 py-3.5 text-slate-300">{name}</td>
                     <td className="px-4 py-3.5">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${badge.color}`}>
@@ -187,6 +213,7 @@ export default async function DriversPage({
                         ? new Date(driver.med_cert_expiry).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })
                         : '—'}
                     </td>
+                    <td className="px-4 py-3.5">{topException && <ExceptionChip item={topException} />}</td>
                   </tr>
                 )
               })}

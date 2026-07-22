@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { formatMoney } from '@/lib/format-money'
+import ExceptionsBanner from './ExceptionsBanner'
 
 interface KpiCard {
   label: string
@@ -204,6 +205,7 @@ export default async function OwnerView({ orgId, embedded = false }: { orgId: nu
 
   return (
     <div className={embedded ? '' : 'p-8'}>
+      <ExceptionsBanner orgId={orgId} />
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
         {kpis.map((kpi) => (
           <div key={kpi.label} className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">

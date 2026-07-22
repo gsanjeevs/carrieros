@@ -1420,8 +1420,16 @@ LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public AS $$
   -- 2) ORG DOCUMENTS: carrier's own compliance docs (COI, MC authority, UCR,
   -- etc.) -- these are typically annual filings, so the "upcoming" horizon
   -- is the widest of the doc branches (180 days, per the UCR-style hint).
+  -- entity_type is 'organization', NOT 'customer' -- this branch is scoped
+  -- to `od.org_id = my_org_id()`, i.e. the CARRIER's own org, never an
+  -- actual customer org. Bug found 2026-07-21: it was originally mislabeled
+  -- 'customer', which meant these exceptions silently could never match any
+  -- customer-entity filter anywhere in the app (there's no page that lists
+  -- exceptions for the carrier's own org itself, only the aggregate inbox/
+  -- banner, which don't filter by entity_type -- so this only ever broke a
+  -- hypothetical future per-entity view, not anything currently built).
   SELECT
-    'customer'::TEXT,
+    'organization'::TEXT,
     od.org_id,
     CASE WHEN od.expiry_date < CURRENT_DATE THEN 'doc_expired' ELSE 'doc_expiring' END,
     CASE
@@ -1563,6 +1571,233 @@ LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public AS $$
 $$;
 
 GRANT EXECUTE ON FUNCTION get_exceptions() TO authenticated;
+
+-- send_expiry_reminders() is the scheduled-job counterpart to get_exceptions():
+-- get_exceptions() is per-session/per-org (my_org_id()-scoped, called by a
+-- logged-in user); this runs org-agnostically across ALL orgs, because a
+-- cron-style job has no caller session to scope from. SECURITY DEFINER so it
+-- can read every org's drivers/vehicle_documents/org_documents in one pass.
+-- Internal maintenance function only -- never callable by a logged-in user,
+-- so EXECUTE is revoked from authenticated/anon and granted only to
+-- service_role (matches this schema's service_role-bypasses-RLS convention,
+-- SECTION 8 policy comments near line 1172). Invoked today only via manual
+-- `SELECT send_expiry_reminders();` or the carrieros-web
+-- /api/cron/send-reminders route (service-role client); no scheduler
+-- (pg_cron -- not installed on this instance -- or an external cron hitting
+-- that route) is wired up yet. That's a deployment-environment decision, not
+-- made here.
+--
+-- Horizons intentionally reuse get_exceptions()'s exact numbers so a
+-- "reminder" and the exception-inbox item it corresponds to agree on when
+-- something is showing up at all: CDL 30 days, medical cert 30 days,
+-- vehicle_documents 60 days, org_documents 180 days (see that function's
+-- per-branch comments for why each horizon was chosen).
+--
+-- Dedup: within 24h, keyed on (entity_type, entity_id, event_type, title).
+-- event_type is always 'reminder_sent' here, and entity_id is the
+-- driver/vehicle/org id (not the individual document row, same
+-- entity_id-means-the-parent-entity convention get_exceptions() uses for
+-- vehicle_documents/org_documents) -- so title (which embeds the specific
+-- field/doc) is what keeps e.g. a driver's CDL reminder and med-cert
+-- reminder, or two different expiring docs on the same vehicle, from
+-- colliding into one dedup bucket.
+--
+-- entity_type for org_documents is 'customer', same stand-in get_exceptions()
+-- uses (exception_events.entity_type's CHECK list has no 'organization'
+-- value; org_documents.org_id is the caller's own carrier org, but
+-- 'customer' is the only CHECK value backed by the organizations table).
+CREATE OR REPLACE FUNCTION send_expiry_reminders()
+RETURNS INTEGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_total INTEGER := 0;
+  v_rows  INTEGER;
+BEGIN
+  -- 1) Driver CDL expiry -- 30-day horizon (matches get_exceptions() #4).
+  INSERT INTO exception_events (carrier_org_id, entity_type, entity_id, event_type, severity, title, detail, occurred_at)
+  SELECT
+    d.carrier_org_id,
+    'driver',
+    d.id,
+    'reminder_sent',
+    CASE
+      WHEN d.cdl_expiry < CURRENT_DATE THEN 'urgent'
+      WHEN d.cdl_expiry <= CURRENT_DATE + INTERVAL '7 days' THEN 'urgent'
+      ELSE 'warning'
+    END,
+    'CDL expiring reminder sent',
+    trim(COALESCE(p.first_name, '') || ' ' || COALESCE(p.last_name, '')) || '''s CDL expires ' || to_char(d.cdl_expiry, 'Mon DD, YYYY'),
+    now()
+  FROM drivers d
+  JOIN profiles p ON p.id = d.profile_id
+  WHERE d.cdl_expiry IS NOT NULL
+    AND d.cdl_expiry <= CURRENT_DATE + INTERVAL '30 days'
+    AND NOT EXISTS (
+      SELECT 1 FROM exception_events ee
+      WHERE ee.entity_type = 'driver' AND ee.entity_id = d.id AND ee.event_type = 'reminder_sent'
+        AND ee.title = 'CDL expiring reminder sent'
+        AND ee.created_at >= now() - INTERVAL '24 hours'
+    );
+  GET DIAGNOSTICS v_rows = ROW_COUNT;
+  v_total := v_total + v_rows;
+
+  -- 2) Driver medical cert expiry -- 30-day horizon (matches get_exceptions() #5).
+  INSERT INTO exception_events (carrier_org_id, entity_type, entity_id, event_type, severity, title, detail, occurred_at)
+  SELECT
+    d.carrier_org_id,
+    'driver',
+    d.id,
+    'reminder_sent',
+    CASE
+      WHEN d.med_cert_expiry < CURRENT_DATE THEN 'urgent'
+      WHEN d.med_cert_expiry <= CURRENT_DATE + INTERVAL '7 days' THEN 'urgent'
+      ELSE 'warning'
+    END,
+    'Medical certificate expiring reminder sent',
+    trim(COALESCE(p.first_name, '') || ' ' || COALESCE(p.last_name, '')) || '''s medical certificate expires ' || to_char(d.med_cert_expiry, 'Mon DD, YYYY'),
+    now()
+  FROM drivers d
+  JOIN profiles p ON p.id = d.profile_id
+  WHERE d.med_cert_expiry IS NOT NULL
+    AND d.med_cert_expiry <= CURRENT_DATE + INTERVAL '30 days'
+    AND NOT EXISTS (
+      SELECT 1 FROM exception_events ee
+      WHERE ee.entity_type = 'driver' AND ee.entity_id = d.id AND ee.event_type = 'reminder_sent'
+        AND ee.title = 'Medical certificate expiring reminder sent'
+        AND ee.created_at >= now() - INTERVAL '24 hours'
+    );
+  GET DIAGNOSTICS v_rows = ROW_COUNT;
+  v_total := v_total + v_rows;
+
+  -- 3) Vehicle documents -- 60-day horizon (matches get_exceptions() #3).
+  INSERT INTO exception_events (carrier_org_id, entity_type, entity_id, event_type, severity, title, detail, occurred_at)
+  SELECT
+    vd.carrier_org_id,
+    'vehicle',
+    vd.vehicle_id,
+    'reminder_sent',
+    CASE
+      WHEN vd.expiry_date < CURRENT_DATE THEN 'urgent'
+      WHEN vd.expiry_date <= CURRENT_DATE + INTERVAL '7 days' THEN 'urgent'
+      ELSE 'warning'
+    END,
+    'Vehicle document expiring: ' || COALESCE(vd.label, vd.doc_type),
+    v.nickname || ': ' || COALESCE(vd.label, vd.doc_type) || ' expires ' || to_char(vd.expiry_date, 'Mon DD, YYYY'),
+    now()
+  FROM vehicle_documents vd
+  JOIN vehicles v ON v.id = vd.vehicle_id
+  WHERE vd.carrier_org_id IS NOT NULL
+    AND vd.expiry_date IS NOT NULL
+    AND vd.expiry_date <= CURRENT_DATE + INTERVAL '60 days'
+    AND NOT EXISTS (
+      SELECT 1 FROM exception_events ee
+      WHERE ee.entity_type = 'vehicle' AND ee.entity_id = vd.vehicle_id AND ee.event_type = 'reminder_sent'
+        AND ee.title = 'Vehicle document expiring: ' || COALESCE(vd.label, vd.doc_type)
+        AND ee.created_at >= now() - INTERVAL '24 hours'
+    );
+  GET DIAGNOSTICS v_rows = ROW_COUNT;
+  v_total := v_total + v_rows;
+
+  -- 4) Org (carrier compliance) documents -- 180-day horizon (matches
+  -- get_exceptions() #2). entity_type 'customer' per the note above.
+  INSERT INTO exception_events (carrier_org_id, entity_type, entity_id, event_type, severity, title, detail, occurred_at)
+  SELECT
+    od.org_id,
+    'customer',
+    od.org_id,
+    'reminder_sent',
+    CASE
+      WHEN od.expiry_date < CURRENT_DATE THEN 'urgent'
+      WHEN od.expiry_date <= CURRENT_DATE + INTERVAL '7 days' THEN 'urgent'
+      ELSE 'warning'
+    END,
+    'Compliance document expiring: ' || COALESCE(od.label, od.doc_type),
+    COALESCE(od.label, od.doc_type) || ' expires ' || to_char(od.expiry_date, 'Mon DD, YYYY'),
+    now()
+  FROM org_documents od
+  WHERE od.org_id IS NOT NULL
+    AND od.expiry_date IS NOT NULL
+    AND od.expiry_date <= CURRENT_DATE + INTERVAL '180 days'
+    AND NOT EXISTS (
+      SELECT 1 FROM exception_events ee
+      WHERE ee.entity_type = 'customer' AND ee.entity_id = od.org_id AND ee.event_type = 'reminder_sent'
+        AND ee.title = 'Compliance document expiring: ' || COALESCE(od.label, od.doc_type)
+        AND ee.created_at >= now() - INTERVAL '24 hours'
+    );
+  GET DIAGNOSTICS v_rows = ROW_COUNT;
+  v_total := v_total + v_rows;
+
+  RETURN v_total;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION send_expiry_reminders() FROM PUBLIC;
+REVOKE ALL ON FUNCTION send_expiry_reminders() FROM authenticated, anon;
+GRANT EXECUTE ON FUNCTION send_expiry_reminders() TO service_role;
+
+-- Customer health score (Growth+, has_feature('customer_health_score')) --
+-- live computed 0-100 score, same "computed live, not stored" idiom as
+-- get_exceptions()/mark_overdue_invoices() above. Must be defined after
+-- my_org_id() for the same fresh-replay ordering reason as every other
+-- function in this section.
+--
+-- Formula: 70% on-time-payment rate + 30% inverse exception-frequency score,
+-- both normalized 0-100.
+--   - On-time-payment rate: of this customer's PAID invoices that have a
+--     due_date, the % paid at or before that due_date. Invoices with a null
+--     due_date are excluded from the denominator rather than guessed at (an
+--     invoice with no due date was never "late"). A customer with zero paid
+--     invoices has no payment signal yet, so this component defaults to 100
+--     (benefit of the doubt) rather than 0 (which would unfairly read as
+--     "bad payer" for a brand-new relationship).
+--   - Exception frequency: count of exception_events for this customer
+--     (entity_type='customer') in the last 90 days, as a rough proxy for
+--     recent relationship friction. Capped at 10 events -> treated as the
+--     floor (score 0); 0 events -> 100. Linear in between
+--     (100 - count*10), clamped to [0,100].
+-- The two components are then blended 70/30 and rounded to the nearest
+-- whole point.
+CREATE OR REPLACE FUNCTION get_customer_health_score(customer_org_id BIGINT)
+RETURNS NUMERIC
+LANGUAGE plpgsql SECURITY DEFINER STABLE SET search_path = public AS $$
+DECLARE
+  v_paid_total   INT;
+  v_paid_on_time INT;
+  v_payment_pct  NUMERIC;
+  v_exception_ct INT;
+  v_exception_pct NUMERIC;
+BEGIN
+  SELECT
+    COUNT(*) FILTER (WHERE due_date IS NOT NULL),
+    COUNT(*) FILTER (WHERE due_date IS NOT NULL AND paid_at IS NOT NULL AND paid_at::DATE <= due_date)
+  INTO v_paid_total, v_paid_on_time
+  FROM invoices
+  WHERE invoices.customer_org_id = get_customer_health_score.customer_org_id
+    AND carrier_org_id = my_org_id()
+    AND status = 'paid';
+
+  v_payment_pct := CASE WHEN v_paid_total > 0
+    THEN (v_paid_on_time::NUMERIC / v_paid_total) * 100
+    ELSE 100
+  END;
+
+  SELECT COUNT(*)
+  INTO v_exception_ct
+  FROM exception_events
+  WHERE exception_events.entity_type = 'customer'
+    AND exception_events.entity_id = get_customer_health_score.customer_org_id
+    AND carrier_org_id = my_org_id()
+    AND occurred_at >= now() - INTERVAL '90 days';
+
+  v_exception_pct := GREATEST(0, 100 - (LEAST(v_exception_ct, 10) * 10));
+
+  RETURN ROUND((v_payment_pct * 0.7) + (v_exception_pct * 0.3));
+END;
+$$;
+GRANT EXECUTE ON FUNCTION get_customer_health_score(BIGINT) TO authenticated;
 
 -- DRIVERS
 ALTER TABLE drivers ENABLE ROW LEVEL SECURITY;

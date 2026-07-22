@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { STATUS_COLOR } from './OwnerView'
+import ExceptionsBanner from './ExceptionsBanner'
 
 export default async function DispatcherView({ orgId }: { orgId: number | undefined }) {
   const supabase = await createClient()
@@ -48,6 +49,7 @@ export default async function DispatcherView({ orgId }: { orgId: number | undefi
 
   return (
     <div className="p-8">
+      <ExceptionsBanner orgId={orgId} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
           <div className="flex items-start justify-between mb-3">

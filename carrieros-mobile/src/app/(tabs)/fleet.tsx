@@ -8,10 +8,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { ExceptionChip } from '@/components/exception-chip';
 import { Spacing, StatusColors, VEHICLE_STATUS_PILL } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
+import { fetchExceptions, topExceptionByEntity, type ExceptionRow } from '@/lib/exceptions';
 
 const PAGE_BACKGROUND = StatusColors.grayLight;
 
@@ -26,17 +28,24 @@ export default function FleetScreen() {
   const theme = useTheme();
   const { t } = useLocale();
   const [vehicles, setVehicles] = useState<VehicleRow[]>([]);
+  const [exceptions, setExceptions] = useState<ExceptionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
-    const { data } = await supabase
-      .from('vehicles')
-      .select('id, vehicle_number, nickname, status')
-      .eq('is_active', true)
-      .order('vehicle_number', { ascending: true });
+    const [{ data }, exceptionRows] = await Promise.all([
+      supabase
+        .from('vehicles')
+        .select('id, vehicle_number, nickname, status')
+        .eq('is_active', true)
+        .order('vehicle_number', { ascending: true }),
+      fetchExceptions(),
+    ]);
     setVehicles((data as VehicleRow[] | null) ?? []);
+    setExceptions(exceptionRows);
   }, []);
+
+  const topExceptionByVehicle = topExceptionByEntity(exceptions, 'vehicle');
 
   useEffect(() => {
     load().finally(() => setLoading(false));
@@ -91,6 +100,10 @@ export default function FleetScreen() {
                 {item.vehicle_number ? (
                   <ThemedText type="small" themeColor="textSecondary">{item.vehicle_number}</ThemedText>
                 ) : null}
+                {(() => {
+                  const topException = topExceptionByVehicle.get(item.id);
+                  return topException ? <ExceptionChip item={topException} /> : null;
+                })()}
               </ThemedView>
             );
           }}
