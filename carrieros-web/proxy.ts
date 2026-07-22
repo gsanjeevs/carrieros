@@ -1,4 +1,5 @@
-// middleware.ts  (place at carrieros-web/middleware.ts — project root)
+// proxy.ts (project root — Next.js 16 renamed `middleware.ts` to `proxy.ts`;
+// the old filename silently does nothing, see decisions.md T1)
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 

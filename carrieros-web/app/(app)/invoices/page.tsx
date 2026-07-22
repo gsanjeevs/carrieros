@@ -7,8 +7,8 @@ import Link from 'next/link'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { formatDate } from '@/lib/format-datetime'
 import { formatMoney } from '@/lib/format-money'
+import { INVOICE_ROLES } from '@/lib/roles-policy'
 
-const BILLING_ROLES = ['owner', 'solo', 'finance']
 const STATUSES = ['draft', 'sent', 'paid', 'overdue'] as const
 
 const STATUS_COLOR: Record<string, string> = {
@@ -34,7 +34,7 @@ export default async function InvoicesPage({
     .single()
 
   if (!profile?.org_id) redirect('/onboarding')
-  if (!BILLING_ROLES.includes(profile.role)) redirect('/dashboard')
+  if (!INVOICE_ROLES.includes(profile.role)) redirect('/dashboard')
 
   const params = await searchParams
   const activeStatus = STATUSES.includes(params.status as typeof STATUSES[number])

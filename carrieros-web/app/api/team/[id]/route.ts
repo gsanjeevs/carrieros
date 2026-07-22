@@ -16,6 +16,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'
 import { hasFeature } from '@/lib/entitlements'
+import { logError } from '@/lib/observability'
 
 const ASSIGNABLE_ROLES = ['dispatcher', 'finance', 'owner'] as const
 const ADMIN_ROLES = ['owner', 'solo']
@@ -122,7 +123,7 @@ export async function PATCH(request: NextRequest, { params }: Ctx) {
 
   const { error } = await admin.from('profiles').update({ role }).eq('id', target.id)
   if (error) {
-    console.error('[team/:id] role update:', error)
+    logError({ route: 'api/team/:id', userId: callerId, orgId }, error, { action: 'role_update', targetId: target.id })
     return apiError('SERVER_ERROR', error.message, 500)
   }
 
@@ -150,7 +151,7 @@ export async function DELETE(request: NextRequest, { params }: Ctx) {
   // auth user removes the profile too — one call, no orphan window.
   const { error } = await admin.auth.admin.deleteUser(target.id)
   if (error) {
-    console.error('[team/:id] delete:', error)
+    logError({ route: 'api/team/:id', userId: callerId, orgId }, error, { action: 'delete', targetId: target.id })
     return apiError('SERVER_ERROR', error.message, 500)
   }
 

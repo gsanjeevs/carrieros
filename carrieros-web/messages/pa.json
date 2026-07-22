@@ -115,6 +115,7 @@
   },
   "dashboard": {
     "title": "ਫਲੀਟ ਸੰਖੇਪ ਜਾਣਕਾਰੀ",
+    "noViewForRole": "ਇਸ ਭੂਮਿਕਾ ਲਈ ਅਜੇ ਕੋਈ ਡੈਸ਼ਬੋਰਡ ਵਿਊ ਨਹੀਂ ਬਣਾਇਆ ਗਿਆ।",
     "activeLoads": "ਸਰਗਰਮ ਲੋਡ",
     "totalLoads": "ਕੁੱਲ {count}",
     "trucks": "ਵਾਹਨ",

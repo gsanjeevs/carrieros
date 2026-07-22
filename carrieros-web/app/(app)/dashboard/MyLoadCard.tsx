@@ -5,6 +5,7 @@
 // via the drivers.profile_id -> loads.driver_id chain (same pattern as
 // app/(app)/loads/page.tsx's driver-scoping query).
 import Link from 'next/link'
+import { STATUS_COLOR } from '@/lib/domain/load-status'
 
 export interface MyLoad {
   load_number: string
@@ -14,17 +15,6 @@ export interface MyLoad {
   delivery_city: string | null
   delivery_state: string | null
   customer_name_raw: string | null
-}
-
-// Mirrors OwnerView's STATUS_COLOR — see that file's comment for why this
-// codebase keeps a local copy per component rather than sharing one constant.
-const STATUS_COLOR: Record<string, string> = {
-  draft:       'bg-slate-500/20 text-slate-400',
-  scheduled:   'bg-blue-500/20 text-blue-400',
-  dispatched:  'bg-[#f97316]/20 text-[#f97316]',
-  picked_up:   'bg-amber-500/20 text-amber-400',
-  in_transit:  'bg-[#1abc9c]/20 text-[#1abc9c]',
-  delivered:   'bg-[#16a34a]/20 text-[#16a34a]',
 }
 
 export default function MyLoadCard({

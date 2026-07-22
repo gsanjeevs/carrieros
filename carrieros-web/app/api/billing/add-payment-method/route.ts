@@ -20,8 +20,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { createStripeCustomer } from '@/lib/stripe'
-
-const BILLING_ROLES = ['owner', 'solo']
+import { SUBSCRIPTION_ROLES } from '@/lib/roles-policy'
+import { logError, logEvent } from '@/lib/observability'
 
 export async function POST(request: NextRequest) {
   const ctx = await getAuthedContext(request)
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (!profile?.org_id) return apiError('NOT_ONBOARDED', 'No organization', 400)
-  if (!BILLING_ROLES.includes(profile.role))
+  if (!SUBSCRIPTION_ROLES.includes(profile.role))
     return apiError('FORBIDDEN', 'Insufficient permissions', 403)
 
   const { data: org } = await supabase
@@ -57,7 +57,13 @@ export async function POST(request: NextRequest) {
     .select('stripe_customer_id, card_brand, card_last4, billing_status, trial_ends_at')
     .single()
 
-  if (updateError) return apiError('SERVER_ERROR', updateError.message, 500)
+  if (updateError) {
+    logError({ route: 'api/billing/add-payment-method', userId: user.id, orgId: profile.org_id }, updateError)
+    return apiError('SERVER_ERROR', updateError.message, 500)
+  }
 
+  logEvent({ route: 'api/billing/add-payment-method', userId: user.id, orgId: profile.org_id }, {
+    card_brand: result.card_brand,
+  })
   return NextResponse.json(updated)
 }

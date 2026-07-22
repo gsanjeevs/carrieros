@@ -11,7 +11,10 @@
 -- All companies in the system: carriers (SaaS tenants) and customers (shippers/brokers)
 CREATE TABLE organizations (
   id         BIGSERIAL PRIMARY KEY,
-  type       TEXT NOT NULL CHECK (type IN ('carrier','customer')),
+  -- 'platform' (added 2026-07-22) is ShipmentX's own tenant row -- the
+  -- platform-operator org, not a carrier or customer. See SECTION 3c and
+  -- the sx_* profiles.role values below.
+  type       TEXT NOT NULL CHECK (type IN ('carrier','customer','platform')),
   name       TEXT NOT NULL,
   phone      TEXT,
   email      TEXT,
@@ -54,7 +57,13 @@ CREATE TABLE carrier_details (
   trial_ends_at       TIMESTAMPTZ DEFAULT (now() + interval '90 days'),
   stripe_customer_id  TEXT,
   card_brand          TEXT,
-  card_last4          TEXT
+  card_last4          TEXT,
+  -- Grace period after a failed payment (added 2026-07-22, Phase 8
+  -- foundation) -- NULL means not in a grace period. Set/cleared by
+  -- ShipmentX admin action (see SECTION 3c's admin_events) or, once real
+  -- Stripe webhooks exist, by billing automation. Scaffolded now even
+  -- though billing_events/Stripe webhooks are demo-only today (lib/stripe.ts).
+  grace_period_until  TIMESTAMPTZ
 );
 
 -- Customer-only fields (shipper/broker, per carrier)
@@ -193,16 +202,31 @@ CREATE TABLE roles (
                                         -- t('roles.' + code), not this column, in end-user surfaces
   abbreviation  TEXT NOT NULL,
   color_token   TEXT NOT NULL,          -- an existing Phase-0A color token name, not a new hex value
+  -- Which kind of org this role belongs to (added 2026-07-22, Phase 8 foundation) --
+  -- lets the UI/audits tell platform-staff roles apart from tenant roles at a glance.
+  -- Adding a role means updating profiles.role's CHECK list AND this table's scope
+  -- together, same drift risk already flagged for code/label above.
+  scope         TEXT NOT NULL CHECK (scope IN ('carrier','customer','platform')),
   display_order INT NOT NULL
 );
-INSERT INTO roles (code, label, abbreviation, color_token, display_order) VALUES
-  ('owner','Owner','OW','brand-orange',1),
-  ('solo','Solo','SO','brand-orange',2),
-  ('driver','Driver','DR','success',3),
-  ('dispatcher','Dispatcher','DI','info',4),
-  ('finance','Finance','FI','purple',5),
-  ('customer_admin','Customer Admin','CA','navy-muted',6),
-  ('customer_viewer','Customer Viewer','CV','navy-muted',7);
+INSERT INTO roles (code, label, abbreviation, color_token, scope, display_order) VALUES
+  ('owner','Owner','OW','brand-orange','carrier',1),
+  ('solo','Solo','SO','brand-orange','carrier',2),
+  ('driver','Driver','DR','success','carrier',3),
+  ('dispatcher','Dispatcher','DI','info','carrier',4),
+  ('finance','Finance','FI','purple','carrier',5),
+  ('customer_admin','Customer Admin','CA','navy-muted','customer',6),
+  ('customer_viewer','Customer Viewer','CV','navy-muted','customer',7),
+  -- ShipmentX platform-staff roles (2026-07-22, Phase 8 foundation). These
+  -- profiles live in the ShipmentX 'platform'-type org (see SECTION 3c) --
+  -- ordinary auth/profiles rows, no separate auth system. sx_owner: full
+  -- access; sx_finance: billing/pipeline scope; sx_support: triage/health/
+  -- org-detail/notes scope, no billing or feature-flag writes. Enforced in
+  -- app code via lib/admin-auth.ts's requireAdminRole(), not RLS bolted onto
+  -- tenant tables -- see the note on SECTION 3c below for why.
+  ('sx_owner','SX Owner','SX','brand-orange','platform',8),
+  ('sx_finance','SX Finance','SF','purple','platform',9),
+  ('sx_support','SX Support','SS','info','platform',10);
 
 -- Language reference/display data — NOT a foreign key, profiles.preferred_language
 -- and carrier_details.default_language keep their own CHECKs. native_name IS the
@@ -285,9 +309,15 @@ INSERT INTO features (key, label, min_tier, display_order) VALUES
 CREATE TABLE profiles (
   id                 UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   org_id             BIGINT NOT NULL REFERENCES organizations(id),
+  -- sx_owner/sx_finance/sx_support (added 2026-07-22, Phase 8 foundation) are
+  -- ShipmentX platform-staff roles -- these profiles live in the ShipmentX
+  -- 'platform'-type org (SECTION 3c), not any carrier/customer tenant.
+  -- Adding a role here means updating the roles table's scope column too
+  -- (see its comment) or the new role silently has no display data.
   role               TEXT NOT NULL CHECK (role IN (
     'owner','solo','driver','dispatcher','finance',
-    'customer_admin','customer_viewer'
+    'customer_admin','customer_viewer',
+    'sx_owner','sx_finance','sx_support'
   )),
   first_name         TEXT,
   last_name          TEXT,
@@ -640,6 +670,94 @@ CREATE TABLE settlement_deductions (
   deduction_type TEXT NOT NULL,   -- 'advance'|'garnishment'|'other' -- exact set TBD
   amount         NUMERIC NOT NULL,
   note           TEXT
+);
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 3c: PLATFORM ADMIN (SHIPMENTX) BACKEND (2026-07-22, Phase 8 foundation)
+-- ────────────────────────────────────────────────────────────
+-- ShipmentX platform staff are ordinary profiles rows in a 'platform'-type
+-- organizations row (see SECTION 1's type CHECK), with role IN
+-- ('sx_owner','sx_finance','sx_support') -- no separate auth system, reuses
+-- the same Supabase Auth/magic-link/session machinery as every other user.
+--
+-- CRITICAL: a ShipmentX profile's my_org_id() still resolves to ShipmentX's
+-- OWN org id. Org membership must NEVER be bolted onto an existing tenant
+-- table's RLS policy as an "OR is platform staff" exception -- that risks
+-- the recursive-RLS/missing-grant bug classes this project has already hit
+-- twice (the org_sequences ordering bug, a table shipped with RLS enabled
+-- but no policy). The 5 tables below are ShipmentX's OWN domain data, so
+-- ordinary RLS keyed on my_role() is fine here. Cross-org READS of existing
+-- tenant tables (loads/invoices/carrier_details/etc, needed for the triage
+-- queue and health board) go through app/api/admin/** routes using the
+-- service-role client, gated by the same role check in application code
+-- (lib/admin-auth.ts's requireAdminRole()) -- never through loosened RLS on
+-- the tenant tables themselves. See docs/design/mockups/mockup-23-super-admin.html
+-- for the screens this backs.
+
+CREATE TABLE admin_notes (
+  id         BIGSERIAL PRIMARY KEY,
+  org_id     BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  body       TEXT NOT NULL,
+  admin_id   UUID REFERENCES profiles(id),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX idx_admin_notes_org ON admin_notes(org_id);
+
+-- Audit trail of ShipmentX admin-initiated actions (impersonate, suspend,
+-- extend-trial, change-tier, flag-edit, note-add). Scoped to admin actions
+-- only for this pass -- NOT a mirror of all tenant activity across every
+-- org (every load/invoice/login event) -- that would require instrumenting
+-- many existing routes across the app and is a larger, separate future
+-- effort. org_id/admin_id are nullable for system-wide events with no
+-- single org or human actor.
+CREATE TABLE admin_events (
+  id         BIGSERIAL PRIMARY KEY,
+  org_id     BIGINT REFERENCES organizations(id) ON DELETE SET NULL,
+  admin_id   UUID REFERENCES profiles(id),
+  event_type TEXT NOT NULL,   -- 'admin.impersonate'|'admin.suspend'|'admin.extend_trial'|
+                              -- 'admin.change_tier'|'admin.flag_edit'|'admin.note_add'
+  metadata   JSONB,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX idx_admin_events_org ON admin_events(org_id);
+CREATE INDEX idx_admin_events_created ON admin_events(created_at);
+
+-- Scaffolded now per the 2026-07-22 decision even though Stripe is still a
+-- demo-only stub (lib/stripe.ts) -- populated once real Stripe webhooks
+-- exist; the Billing & Payments admin screen shows empty/demo state until
+-- then, same seam-first approach as the rest of this app's Stripe handling.
+CREATE TABLE billing_events (
+  id              BIGSERIAL PRIMARY KEY,
+  org_id          BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  stripe_event_id TEXT UNIQUE,   -- NULL for any demo-seam-inserted row until real Stripe exists
+  event_type      TEXT NOT NULL,   -- 'charge.succeeded'|'charge.failed'|'card.expiring'|...
+  amount          NUMERIC,
+  status          TEXT,
+  card_last4      TEXT,
+  resolved_at     TIMESTAMPTZ,
+  created_at      TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX idx_billing_events_org ON billing_events(org_id);
+
+-- Operational kill-switches / staged-rollout flags -- deliberately a
+-- SEPARATE system from SECTION 1b's tiers/features/has_feature() (which is
+-- commercial tier entitlement gating). platform_flags is about whether a
+-- capability is operationally on at all (e.g. "is AI load-extraction
+-- enabled right now"), independent of what tier an org is on.
+CREATE TABLE platform_flags (
+  flag_key        TEXT PRIMARY KEY,
+  description     TEXT NOT NULL,
+  default_enabled BOOLEAN NOT NULL DEFAULT false,
+  created_at      TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE org_flag_overrides (
+  org_id     BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  flag_key   TEXT NOT NULL REFERENCES platform_flags(flag_key) ON DELETE CASCADE,
+  enabled    BOOLEAN NOT NULL,
+  set_by     UUID REFERENCES profiles(id),
+  set_at     TIMESTAMPTZ DEFAULT now(),
+  PRIMARY KEY (org_id, flag_key)
 );
 
 -- ────────────────────────────────────────────────────────────
@@ -2078,6 +2196,38 @@ CREATE POLICY "carrier_exception_events_select" ON exception_events FOR SELECT T
 CREATE POLICY "owner_solo_exception_events_all" ON exception_events FOR ALL TO authenticated
   USING (carrier_org_id = my_org_id() AND my_role() IN ('owner','solo'))
   WITH CHECK (carrier_org_id = my_org_id() AND my_role() IN ('owner','solo'));
+
+-- PLATFORM ADMIN (SHIPMENTX) TABLES (new, 2026-07-22, Phase 8 foundation) --
+-- gated on my_role() alone, no org-membership check needed since only a
+-- trusted action ever assigns an sx_* role (see SECTION 3c's comment for why
+-- this is safe and why cross-org tenant-table reads do NOT get a matching
+-- policy here). admin_events and billing_events get no authenticated INSERT
+-- policy at all -- both are written exclusively by service-role admin API
+-- routes, so default-deny is correct for direct client writes.
+ALTER TABLE admin_notes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "sx_admin_notes_all" ON admin_notes FOR ALL TO authenticated
+  USING (my_role() IN ('sx_owner','sx_finance','sx_support'))
+  WITH CHECK (my_role() IN ('sx_owner','sx_finance','sx_support'));
+
+ALTER TABLE admin_events ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "sx_admin_events_select" ON admin_events FOR SELECT TO authenticated
+  USING (my_role() IN ('sx_owner','sx_finance','sx_support'));
+
+ALTER TABLE billing_events ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "sx_billing_events_select" ON billing_events FOR SELECT TO authenticated
+  USING (my_role() IN ('sx_owner','sx_finance'));
+
+ALTER TABLE platform_flags ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "sx_platform_flags_select" ON platform_flags FOR SELECT TO authenticated
+  USING (my_role() IN ('sx_owner','sx_finance','sx_support'));
+CREATE POLICY "sx_owner_platform_flags_write" ON platform_flags FOR ALL TO authenticated
+  USING (my_role() = 'sx_owner') WITH CHECK (my_role() = 'sx_owner');
+
+ALTER TABLE org_flag_overrides ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "sx_org_flag_overrides_select" ON org_flag_overrides FOR SELECT TO authenticated
+  USING (my_role() IN ('sx_owner','sx_finance','sx_support'));
+CREATE POLICY "sx_owner_org_flag_overrides_write" ON org_flag_overrides FOR ALL TO authenticated
+  USING (my_role() = 'sx_owner') WITH CHECK (my_role() = 'sx_owner');
 
 -- ────────────────────────────────────────────────────────────
 -- SECTION 8b: STORAGE (bucket + object-level RLS)

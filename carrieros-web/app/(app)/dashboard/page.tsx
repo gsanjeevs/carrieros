@@ -26,6 +26,16 @@ export default async function DashboardPage() {
   const tNav = await getTranslations('nav')
   const locale = await getLocale()
 
+  // Rule A (docs/architecture-principles.md) — this used to be five sibling
+  // `{role === 'x' && <View/>}` checks with no fallback, so any role outside
+  // that original five (found this session: the new sx_owner/sx_finance/
+  // sx_support ShipmentX roles, and pre-existing: customer_admin/
+  // customer_viewer) silently rendered a blank page body below the header,
+  // no error anywhere. `hasKnownView` makes the missing case visible instead.
+  const hasKnownView =
+    role === 'owner' || role === 'solo' || role === 'driver' ||
+    role === 'dispatcher' || role === 'finance'
+
   return (
     <div>
       <div className="px-8 pt-8">
@@ -42,6 +52,11 @@ export default async function DashboardPage() {
       {role === 'driver' && <DriverView userId={user.id} />}
       {role === 'dispatcher' && <DispatcherView orgId={orgId} />}
       {role === 'finance' && <FinanceView orgId={orgId} />}
+      {!hasKnownView && (
+        <div className="px-8 py-6">
+          <p className="text-slate-400 text-sm">{t('noViewForRole')}</p>
+        </div>
+      )}
     </div>
   )
 }

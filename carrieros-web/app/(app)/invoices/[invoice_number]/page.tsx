@@ -6,8 +6,7 @@ import { getTranslations, getLocale } from 'next-intl/server'
 import { formatDate, formatDateTime } from '@/lib/format-datetime'
 import { formatMoney } from '@/lib/format-money'
 import InvoiceActions from '../InvoiceActions'
-
-const BILLING_ROLES = ['owner', 'solo', 'finance']
+import { INVOICE_ROLES } from '@/lib/roles-policy'
 
 const STATUS_COLOR: Record<string, string> = {
   draft:   'bg-slate-500/20 text-slate-400',
@@ -43,7 +42,7 @@ export default async function InvoiceDetailPage({
     .single()
 
   if (!profile?.org_id) redirect('/onboarding')
-  if (!BILLING_ROLES.includes(profile.role)) redirect('/dashboard')
+  if (!INVOICE_ROLES.includes(profile.role)) redirect('/dashboard')
 
   const t = await getTranslations('invoices')
   const locale = await getLocale()

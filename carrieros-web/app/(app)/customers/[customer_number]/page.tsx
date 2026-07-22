@@ -18,8 +18,9 @@ import { hasFeature } from '@/lib/entitlements'
 import CustomerTabs from './CustomerTabs'
 import CustomerContacts from '@/components/CustomerContacts'
 
+import { INVOICE_ROLES } from '@/lib/roles-policy'
+
 const VIEW_ROLES = ['owner', 'solo', 'dispatcher', 'finance']
-const BILLING_ROLES = ['owner', 'solo', 'finance']
 
 const LOAD_STATUS_COLOR: Record<string, string> = {
   draft:       'bg-slate-500/20 text-slate-400',
@@ -151,7 +152,7 @@ export default async function CustomerDetailPage({
   const currency = carrierOrg?.currency ?? 'USD'
 
   const canSeeRevenue = ['owner', 'solo', 'finance'].includes(profile.role)
-  const canBill = BILLING_ROLES.includes(profile.role)
+  const canBill = INVOICE_ROLES.includes(profile.role)
 
   // Loads for this customer.
   const { data: loadsData } = await supabase

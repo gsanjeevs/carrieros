@@ -2,7 +2,7 @@
 //
 // POST /api/billing/change-tier — the demo tier upgrade/downgrade flow.
 // Owner/solo only, matching /billing's page-level gate and
-// add-payment-method's BILLING_ROLES convention.
+// add-payment-method's SUBSCRIPTION_ROLES (lib/roles-policy.ts).
 //
 // DEMO MODE (2026-07-21, same seam philosophy as add-payment-method/route.ts
 // and lib/stripe.ts's createStripeCustomer() stub): there is no real Stripe
@@ -18,8 +18,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
-
-const BILLING_ROLES = ['owner', 'solo']
+import { SUBSCRIPTION_ROLES } from '@/lib/roles-policy'
+import { logError, logEvent } from '@/lib/observability'
 
 export async function POST(request: NextRequest) {
   const ctx = await getAuthedContext(request)
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (!profile?.org_id) return apiError('NOT_ONBOARDED', 'No organization', 400)
-  if (!BILLING_ROLES.includes(profile.role))
+  if (!SUBSCRIPTION_ROLES.includes(profile.role))
     return apiError('FORBIDDEN', 'Insufficient permissions', 403)
 
   const body = await request.json()
@@ -57,7 +57,11 @@ export async function POST(request: NextRequest) {
     .select('tier')
     .single()
 
-  if (updateError) return apiError('SERVER_ERROR', updateError.message, 500)
+  if (updateError) {
+    logError({ route: 'api/billing/change-tier', userId: user.id, orgId: profile.org_id }, updateError)
+    return apiError('SERVER_ERROR', updateError.message, 500)
+  }
 
+  logEvent({ route: 'api/billing/change-tier', userId: user.id, orgId: profile.org_id }, { to_tier: tier })
   return NextResponse.json(updated)
 }

@@ -13,6 +13,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'
 import { hasFeature } from '@/lib/entitlements'
+import { logError } from '@/lib/observability'
 
 // Deliberately excludes 'driver' (has its own flow on /drivers, which also
 // creates the drivers row) and 'solo' (owner+driver combined — only ever set
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
     const msg = inviteErr?.message ?? ''
     if (inviteErr?.status === 422 || /already/i.test(msg))
       return apiError('EMAIL_EXISTS', msg || 'That email is already registered', 409)
-    console.error('[team/invite] invite:', inviteErr)
+    logError({ route: 'api/team/invite', userId: user.id, orgId: profile.org_id }, inviteErr)
     return apiError('SERVER_ERROR', msg || 'Failed to send invite', 500)
   }
 
@@ -97,7 +98,9 @@ export async function POST(request: NextRequest) {
   if (profileErr) {
     // The auth.users row exists but has no profile — it would be a ghost that
     // can sign in with no org. Roll it back so the invite is all-or-nothing.
-    console.error('[team/invite] profile:', profileErr)
+    logError({ route: 'api/team/invite', userId: user.id, orgId: profile.org_id }, profileErr, {
+      rolled_back_auth_user: newUserId,
+    })
     await admin.auth.admin.deleteUser(newUserId).catch(() => {})
     return apiError('SERVER_ERROR', profileErr.message, 500)
   }

@@ -14,12 +14,11 @@ import { generateInvoiceNumber } from '@/lib/generate-number'
 import { sendEmail } from '@/lib/send-email'
 import { formatMoney } from '@/lib/format-money'
 import { revalidatePath } from 'next/cache'
+import { INVOICE_ROLES } from '@/lib/roles-policy'
 
 export type ActionResult =
   | { ok: true; invoice_number?: string; warning_code?: string }
   | { ok: false; error_code: string }
-
-const BILLING_ROLES = ['owner', 'solo', 'finance']
 const PAYMENT_METHODS = ['stripe', 'factoring', 'other']
 
 // Net-30 by default.
@@ -41,7 +40,7 @@ async function billingContext(): Promise<BillingContext> {
     .single()
 
   if (!profile?.org_id) return { error_code: 'NOT_ONBOARDED' as const }
-  if (!BILLING_ROLES.includes(profile.role)) return { error_code: 'FORBIDDEN' as const }
+  if (!INVOICE_ROLES.includes(profile.role)) return { error_code: 'FORBIDDEN' as const }
 
   return { supabase, orgId: profile.org_id, role: profile.role }
 }

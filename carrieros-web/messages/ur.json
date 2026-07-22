@@ -115,6 +115,7 @@
   },
   "dashboard": {
     "title": "فلیٹ کا جائزہ",
+    "noViewForRole": "اس کردار کے لیے ابھی تک کوئی ڈیش بورڈ ویو نہیں بنایا گیا۔",
     "activeLoads": "فعال لوڈز",
     "totalLoads": "کل {count}",
     "trucks": "گاڑیاں",

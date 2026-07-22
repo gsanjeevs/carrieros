@@ -115,6 +115,7 @@
   },
   "dashboard": {
     "title": "Resumen de la Flota",
+    "noViewForRole": "Todavía no hay una vista de panel creada para este rol.",
     "activeLoads": "Cargas Activas",
     "totalLoads": "{count} en total",
     "trucks": "Vehículos",

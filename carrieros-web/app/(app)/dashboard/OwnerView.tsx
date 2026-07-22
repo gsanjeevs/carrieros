@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { formatMoney } from '@/lib/format-money'
 import ExceptionsBanner from './ExceptionsBanner'
+import { STATUS_COLOR } from '@/lib/domain/load-status'
 
 interface KpiCard {
   label: string
@@ -34,20 +35,11 @@ interface BreakdownCard {
 // within this window (including already-expired, i.e. a negative day count).
 const COMPLIANCE_DUE_SOON_DAYS = 30
 
-// Mirrors app/(app)/loads/page.tsx's STATUS_COLOR — this codebase keeps a
-// local copy per page rather than sharing one constant (see also
-// app/(app)/loads/[load_number]/page.tsx, app/track/[token]/page.tsx).
-export const STATUS_COLOR: Record<string, string> = {
-  draft:       'bg-slate-500/20 text-slate-400',
-  scheduled:   'bg-blue-500/20 text-blue-400',
-  dispatched:  'bg-[#f97316]/20 text-[#f97316]',
-  picked_up:   'bg-amber-500/20 text-amber-400',
-  in_transit:  'bg-[#1abc9c]/20 text-[#1abc9c]',
-  delivered:   'bg-[#16a34a]/20 text-[#16a34a]',
-  invoiced:    'bg-purple-500/20 text-purple-400',
-  paid:        'bg-[#16a34a]/20 text-[#16a34a]',
-  cancelled:   'bg-rose-500/10 text-rose-400',
-}
+// Was: a local copy of loads/page.tsx's STATUS_COLOR. Now sourced from
+// lib/domain/load-status.ts (docs/architecture-principles.md Rule A) —
+// re-exported here since DispatcherView.tsx already imports it from this
+// file; new call sites should import directly from lib/domain/load-status.
+export { STATUS_COLOR }
 
 export default async function OwnerView({ orgId, embedded = false }: { orgId: number | undefined; embedded?: boolean }) {
   const supabase = await createClient()

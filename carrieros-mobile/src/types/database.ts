@@ -34,6 +34,131 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_events: {
+        Row: {
+          admin_id: string | null
+          created_at: string | null
+          event_type: string
+          id: number
+          metadata: Json | null
+          org_id: number | null
+        }
+        Insert: {
+          admin_id?: string | null
+          created_at?: string | null
+          event_type: string
+          id?: number
+          metadata?: Json | null
+          org_id?: number | null
+        }
+        Update: {
+          admin_id?: string | null
+          created_at?: string | null
+          event_type?: string
+          id?: number
+          metadata?: Json | null
+          org_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_events_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_events_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_notes: {
+        Row: {
+          admin_id: string | null
+          body: string
+          created_at: string | null
+          id: number
+          org_id: number
+        }
+        Insert: {
+          admin_id?: string | null
+          body: string
+          created_at?: string | null
+          id?: number
+          org_id: number
+        }
+        Update: {
+          admin_id?: string | null
+          body?: string
+          created_at?: string | null
+          id?: number
+          org_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_notes_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_notes_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_events: {
+        Row: {
+          amount: number | null
+          card_last4: string | null
+          created_at: string | null
+          event_type: string
+          id: number
+          org_id: number
+          resolved_at: string | null
+          status: string | null
+          stripe_event_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          card_last4?: string | null
+          created_at?: string | null
+          event_type: string
+          id?: number
+          org_id: number
+          resolved_at?: string | null
+          status?: string | null
+          stripe_event_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          card_last4?: string | null
+          created_at?: string | null
+          event_type?: string
+          id?: number
+          org_id?: number
+          resolved_at?: string | null
+          status?: string | null
+          stripe_event_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_events_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       carrier_details: {
         Row: {
           billing_status: string
@@ -43,6 +168,7 @@ export type Database = {
           default_payment_method: string
           dot_number: string | null
           factoring_company: string | null
+          grace_period_until: string | null
           load_email: string | null
           mc_number: string | null
           org_id: number
@@ -60,6 +186,7 @@ export type Database = {
           default_payment_method?: string
           dot_number?: string | null
           factoring_company?: string | null
+          grace_period_until?: string | null
           load_email?: string | null
           mc_number?: string | null
           org_id: number
@@ -77,6 +204,7 @@ export type Database = {
           default_payment_method?: string
           dot_number?: string | null
           factoring_company?: string | null
+          grace_period_until?: string | null
           load_email?: string | null
           mc_number?: string | null
           org_id?: number
@@ -1466,6 +1594,52 @@ export type Database = {
           },
         ]
       }
+      org_flag_overrides: {
+        Row: {
+          enabled: boolean
+          flag_key: string
+          org_id: number
+          set_at: string | null
+          set_by: string | null
+        }
+        Insert: {
+          enabled: boolean
+          flag_key: string
+          org_id: number
+          set_at?: string | null
+          set_by?: string | null
+        }
+        Update: {
+          enabled?: boolean
+          flag_key?: string
+          org_id?: number
+          set_at?: string | null
+          set_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_flag_overrides_flag_key_fkey"
+            columns: ["flag_key"]
+            isOneToOne: false
+            referencedRelation: "platform_flags"
+            referencedColumns: ["flag_key"]
+          },
+          {
+            foreignKeyName: "org_flag_overrides_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_flag_overrides_set_by_fkey"
+            columns: ["set_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_sequences: {
         Row: {
           entity: string
@@ -1540,6 +1714,27 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_flags: {
+        Row: {
+          created_at: string | null
+          default_enabled: boolean
+          description: string
+          flag_key: string
+        }
+        Insert: {
+          created_at?: string | null
+          default_enabled?: boolean
+          description: string
+          flag_key: string
+        }
+        Update: {
+          created_at?: string | null
+          default_enabled?: boolean
+          description?: string
+          flag_key?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_path: string | null
@@ -1607,6 +1802,7 @@ export type Database = {
           display_order: number
           id: number
           label: string
+          scope: string
         }
         Insert: {
           abbreviation: string
@@ -1615,6 +1811,7 @@ export type Database = {
           display_order: number
           id?: number
           label: string
+          scope: string
         }
         Update: {
           abbreviation?: string
@@ -1623,6 +1820,7 @@ export type Database = {
           display_order?: number
           id?: number
           label?: string
+          scope?: string
         }
         Relationships: []
       }

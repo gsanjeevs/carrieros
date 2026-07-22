@@ -18,8 +18,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
-
-const BILLING_ROLES = ['owner', 'solo', 'finance']
+import { INVOICE_ROLES } from '@/lib/roles-policy'
 
 /** The one thing a real integration replaces. */
 export interface FactoringNotification {
@@ -75,7 +74,7 @@ export async function POST(
     .single()
 
   if (!profile?.org_id) return apiError('NOT_ONBOARDED', 'No organization', 400)
-  if (!BILLING_ROLES.includes(profile.role))
+  if (!INVOICE_ROLES.includes(profile.role))
     return apiError('FORBIDDEN', 'Insufficient permissions', 403)
 
   let body: { factoring_company?: unknown; factoring_reference?: unknown }

@@ -4,6 +4,7 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
+import { logError, logEvent } from '@/lib/observability'
 
 // Derive timezone from country + state
 function deriveTimezone(country: string, state: string): string {
@@ -86,9 +87,12 @@ export async function POST(request: NextRequest) {
     .select('id')
     .single()
 
-  if (orgErr) { console.error('[onboarding] step1 org:', orgErr); return NextResponse.json({ error_code: 'SERVER_ERROR', error: `[step1] ${orgErr.message}`, code: orgErr.code }, { status: 500 }) }
+  if (orgErr) {
+    logError({ route: 'api/onboarding', userId: user.id }, orgErr, { step: 1 })
+    return NextResponse.json({ error_code: 'SERVER_ERROR', error: `[step1] ${orgErr.message}`, code: orgErr.code }, { status: 500 })
+  }
   const orgId = Number(org.id)
-  console.log('[onboarding] org created:', orgId)
+  logEvent({ route: 'api/onboarding', userId: user.id, orgId }, { step: 1, event: 'org_created' })
 
   // 2. Create carrier_details
   const { error: detailErr } = await admin
@@ -102,8 +106,11 @@ export async function POST(request: NextRequest) {
       uom_system: uom,
     })
 
-  if (detailErr) { console.error('[onboarding] step2 carrier_details:', detailErr); return NextResponse.json({ error_code: 'SERVER_ERROR', error: `[step2] ${detailErr.message}`, code: detailErr.code }, { status: 500 }) }
-  console.log('[onboarding] carrier_details created')
+  if (detailErr) {
+    logError({ route: 'api/onboarding', userId: user.id, orgId }, detailErr, { step: 2 })
+    return NextResponse.json({ error_code: 'SERVER_ERROR', error: `[step2] ${detailErr.message}`, code: detailErr.code }, { status: 500 })
+  }
+  logEvent({ route: 'api/onboarding', userId: user.id, orgId }, { step: 2, event: 'carrier_details_created' })
 
   // 3. Upsert profile
   const { error: profileErr } = await admin
@@ -116,8 +123,11 @@ export async function POST(request: NextRequest) {
       last_name:  last_name.trim(),
     }, { onConflict: 'id' })
 
-  if (profileErr) { console.error('[onboarding] step3 profile:', profileErr); return NextResponse.json({ error_code: 'SERVER_ERROR', error: `[step3] ${profileErr.message}`, code: profileErr.code }, { status: 500 }) }
-  console.log('[onboarding] profile upserted for', user.id)
+  if (profileErr) {
+    logError({ route: 'api/onboarding', userId: user.id, orgId }, profileErr, { step: 3 })
+    return NextResponse.json({ error_code: 'SERVER_ERROR', error: `[step3] ${profileErr.message}`, code: profileErr.code }, { status: 500 })
+  }
+  logEvent({ route: 'api/onboarding', userId: user.id, orgId }, { step: 3, event: 'profile_upserted' })
 
   return NextResponse.json({ org_id: orgId }, { status: 201 })
 }

@@ -2,6 +2,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
+import { logError, logEvent } from '@/lib/observability'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -61,8 +62,15 @@ export async function POST(request: NextRequest) {
     return apiError('VALIDATION_ERROR', 'Invalid request body', 400)
   }
 
+  // Model call and JSON-parsing are separate try/catches on purpose (Gate
+  // 0→1 AI-failure-mode handling, docs/production-gates.md) — a rate-limit/
+  // auth/network failure from Anthropic and a malformed-JSON response from
+  // the model are different failure modes with different causes (infra vs.
+  // prompt/model drift), and should be distinguishable in logs, not folded
+  // into one generic catch.
+  let message: Anthropic.Message
   try {
-    const message = await client.messages.create({
+    message = await client.messages.create({
       model: 'claude-haiku-4-5',
       max_tokens: 1024,
       system: SYSTEM_PROMPT,
@@ -73,16 +81,34 @@ export async function POST(request: NextRequest) {
         },
       ],
     })
+  } catch (err) {
+    const status = err instanceof Anthropic.APIError ? err.status : undefined
+    const failureMode =
+      status === 429 ? 'rate_limited' :
+      status === 401 || status === 403 ? 'auth_error' :
+      status && status >= 500 ? 'provider_outage' :
+      'unknown'
+    logError({ route: 'api/extract-load', userId: ctx.user.id }, err, { failure_mode: failureMode, status })
+    return apiError('EXTRACTION_FAILED', 'Extraction failed. Please try again shortly.', 502)
+  }
 
-    const raw = message.content[0].type === 'text' ? message.content[0].text : ''
+  const raw = message.content[0].type === 'text' ? message.content[0].text : ''
+  const cleaned = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
 
-    // Strip markdown code fences if present
-    const cleaned = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
-
+  try {
     const extracted = JSON.parse(cleaned)
+    logEvent({ route: 'api/extract-load', userId: ctx.user.id }, {
+      input_tokens: message.usage.input_tokens,
+      output_tokens: message.usage.output_tokens,
+    })
     return NextResponse.json(extracted)
   } catch (err) {
-    console.error('[extract-load] error:', err)
+    // The model responded, but not with valid JSON — a prompt/model-drift
+    // signal, not an infra failure. Logged separately from the block above.
+    logError({ route: 'api/extract-load', userId: ctx.user.id }, err, {
+      failure_mode: 'malformed_model_output',
+      raw_response_length: raw.length,
+    })
     return apiError('EXTRACTION_FAILED', 'Extraction failed. Check your API key and try again.', 500)
   }
 }

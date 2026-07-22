@@ -115,6 +115,7 @@
   },
   "dashboard": {
     "title": "Fleet Overview",
+    "noViewForRole": "There's no dashboard view built for this role yet.",
     "activeLoads": "Active Loads",
     "totalLoads": "{count} total",
     "trucks": "Vehicles",

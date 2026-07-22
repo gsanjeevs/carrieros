@@ -26,9 +26,24 @@ ad hoc, then written into this file:
 2. Edit `schema.sql` here to match, **in place** — put each policy next to the
    table it guards, not appended at the end. A duplicate `CREATE POLICY` name
    fails on a fresh run.
-3. Regenerate types: `./scripts/regen-types.sh`, then `npx tsc --noEmit` in both
+3. **If this change alters a `CHECK` constraint's value set or a column's
+   meaning** (adding a new nullable column or a new table is low-risk and
+   skips this step): grep every branch site over that column across both
+   apps — `grep -rn "columnName" carrieros-web/app carrieros-web/lib
+   carrieros-web/components carrieros-mobile/src` — and confirm each site
+   either has a safe fallback/exhaustive handling or gets updated as part of
+   this same change. `tsc --noEmit` passing does NOT prove this: these
+   columns are `TEXT + CHECK`, not Postgres enum types, so Supabase's
+   generated types are plain `string` with no compiler-level exhaustiveness
+   check. This is exactly the manual check that caught a real bug
+   (2026-07-22): adding `sx_owner`/`sx_finance`/`sx_support` to
+   `profiles.role` typechecked fine, but `dashboard/page.tsx` branched over
+   `profile.role` with no fallback case, silently rendering a blank page for
+   the new roles. See `docs/architecture-principles.md` (Rule E) for the
+   full reasoning.
+4. Regenerate types: `./scripts/regen-types.sh`, then `npx tsc --noEmit` in both
    apps.
-4. Commit `schema.sql` with the code that depends on it.
+5. Commit `schema.sql` with the code that depends on it.
 
 ## Ordering matters
 

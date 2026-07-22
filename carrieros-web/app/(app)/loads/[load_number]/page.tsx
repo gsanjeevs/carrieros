@@ -9,6 +9,7 @@ import LoadDocuments, { type DocType, type LoadDocument } from '@/components/Loa
 import { formatDateTime, toDate } from '@/lib/format-datetime'
 import { formatMoney } from '@/lib/format-money'
 import CreateInvoiceButton from './CreateInvoiceButton'
+import { STATUS_COLOR } from '@/lib/domain/load-status'
 
 const STATUS_FLOW_KEYS = [
   { key: 'draft',      icon: 'draft' },
@@ -20,18 +21,6 @@ const STATUS_FLOW_KEYS = [
   { key: 'invoiced',   icon: 'receipt' },
   { key: 'paid',       icon: 'paid' },
 ]
-
-const STATUS_COLOR: Record<string, string> = {
-  draft:      'bg-slate-500/20 text-slate-400',
-  scheduled:  'bg-blue-500/20 text-blue-400',
-  dispatched: 'bg-[#f97316]/20 text-[#f97316]',
-  picked_up:  'bg-amber-500/20 text-amber-400',
-  in_transit: 'bg-[#1abc9c]/20 text-[#1abc9c]',
-  delivered:  'bg-green-500/20 text-green-400',
-  invoiced:   'bg-purple-500/20 text-purple-400',
-  paid:       'bg-green-500/20 text-green-400',
-  cancelled:  'bg-rose-500/10 text-rose-400',
-}
 
 function fmt(date: string | null, locale: string) {
   if (!date) return '—'

@@ -5,18 +5,7 @@ import Link from 'next/link'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { formatMoney } from '@/lib/format-money'
 import { toDate } from '@/lib/format-datetime'
-
-const STATUS_COLOR: Record<string, string> = {
-  draft:       'bg-slate-500/20 text-slate-400',
-  scheduled:   'bg-blue-500/20 text-blue-400',
-  dispatched:  'bg-[#f97316]/20 text-[#f97316]',
-  picked_up:   'bg-amber-500/20 text-amber-400',
-  in_transit:  'bg-[#1abc9c]/20 text-[#1abc9c]',
-  delivered:   'bg-[#16a34a]/20 text-[#16a34a]',
-  invoiced:    'bg-purple-500/20 text-purple-400',
-  paid:        'bg-[#16a34a]/20 text-[#16a34a]',
-  cancelled:   'bg-rose-500/10 text-rose-400',
-}
+import { STATUS_COLOR } from '@/lib/domain/load-status'
 
 type LoadGroupKey = 'needs_dispatch' | 'in_progress' | 'completed' | 'cancelled'
 
