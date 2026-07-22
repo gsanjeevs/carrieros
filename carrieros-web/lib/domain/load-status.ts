@@ -77,3 +77,42 @@ export function loadStatusColor(status: LoadStatus): string {
 export const STATUS_COLOR: Record<string, string> = Object.fromEntries(
   LOAD_STATUSES.map(s => [s, loadStatusColor(s)])
 )
+
+// Maps to components/ui/StatusBadge.tsx's variant union (2026-07-22 —
+// that component is generic/semantic, it has no idea `loads.status` exists,
+// so this mapping is what a call site uses to pick a variant:
+// `<StatusBadge variant={loadStatusVariant(load.status)}>`. Deliberately not
+// importing StatusBadgeVariant's type from components/ui here — this module
+// stays UI-component-agnostic (domain logic shouldn't depend on a specific
+// component library), so the return type is a plain string-literal union
+// that must be kept in sync with StatusBadge's variant list by hand. If
+// StatusBadge's variants ever change, update the switch below to match.
+export type StatusBadgeVariant =
+  | 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'brand' | 'teal' | 'purple'
+
+export function loadStatusVariant(status: LoadStatus): StatusBadgeVariant {
+  switch (status) {
+    case 'draft':
+      return 'neutral'
+    case 'scheduled':
+      return 'info'
+    case 'dispatched':
+      return 'brand'
+    case 'picked_up':
+      return 'warning'
+    case 'in_transit':
+      return 'teal'
+    case 'delivered':
+      return 'success'
+    case 'invoiced':
+      return 'purple'
+    case 'paid':
+      return 'success'
+    case 'cancelled':
+      return 'danger'
+    default: {
+      const _exhaustive: never = status
+      return _exhaustive
+    }
+  }
+}
