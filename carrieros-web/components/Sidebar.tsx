@@ -56,17 +56,39 @@ const NAV_SECTIONS: NavSection[] = [
   },
 ]
 
+// role_token color -> badge classes. Literal strings (not template-built)
+// so Tailwind's v4 content scanner picks them up at build time.
+const ROLE_BADGE_CLASSES: Record<string, string> = {
+  'brand-orange': 'bg-brand-orange/10 text-brand-orange',
+  success: 'bg-success/10 text-success',
+  info: 'bg-info/10 text-info',
+  purple: 'bg-purple/10 text-purple',
+  'navy-muted': 'bg-navy-muted/10 text-navy-muted',
+}
+
 interface Props {
   role: string
   userName: string
   userId: string
   preferredLanguage: string
+  roleAbbreviation?: string
+  roleColorToken?: string
 }
 
-export default function Sidebar({ role, userName, userId, preferredLanguage }: Props) {
+export default function Sidebar({ role, userName, userId, preferredLanguage, roleAbbreviation, roleColorToken }: Props) {
   const pathname = usePathname()
   const t = useTranslations('nav')
   const tCommon = useTranslations('common')
+  const tRoles = useTranslations('roles')
+  // Defensive: `role` is a raw DB string: fall back to it verbatim rather
+  // than throwing if a role somehow has no translation entry yet.
+  function roleLabel(code: string) {
+    try {
+      return tRoles(code as never)
+    } catch {
+      return code
+    }
+  }
   const sections = NAV_SECTIONS
     .map((section) => ({ ...section, items: section.items.filter((item) => item.roles.includes(role)) }))
     .filter((section) => section.items.length > 0)
@@ -127,11 +149,22 @@ export default function Sidebar({ role, userName, userId, preferredLanguage }: P
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-white text-xs font-medium truncate">{userName}</p>
-            <p className="text-slate-500 text-xs capitalize">{role}</p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              {roleAbbreviation && (
+                <span
+                  className={`inline-flex items-center justify-center rounded px-1 py-px text-[10px] font-bold leading-tight ${
+                    ROLE_BADGE_CLASSES[roleColorToken ?? ''] ?? 'bg-navy-muted/10 text-navy-muted'
+                  }`}
+                >
+                  {roleAbbreviation}
+                </span>
+              )}
+              <p className="text-slate-500 text-xs truncate">{roleLabel(role)}</p>
+            </div>
           </div>
         </div>
         <div className="px-3 py-2 mb-1">
-          <LanguageSwitcher userId={userId} current={preferredLanguage} />
+          <LanguageSwitcher userId={userId} current={preferredLanguage} compact />
         </div>
         <form action={signOut}>
           <button

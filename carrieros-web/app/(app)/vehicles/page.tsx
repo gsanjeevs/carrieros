@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import AddVehicleButton from './AddVehicleButton'
+import { VEHICLE_TYPE_ICONS } from '@/components/icons/vehicle-types'
 
 type Vehicle = {
   id: number
@@ -14,6 +15,10 @@ type Vehicle = {
   license_plate: string | null
   license_state: string | null
   is_active: boolean | null
+  cab_type: string | null
+  color: string | null
+  dimensions: string | null
+  vehicle_types: { code: string } | { code: string }[] | null
 }
 
 export default async function VehiclesPage({
@@ -42,11 +47,11 @@ export default async function VehiclesPage({
   if (profile?.org_id) {
     const { data } = await supabase
       .from('vehicles')
-      .select('id, vehicle_number, nickname, year, make, model, license_plate, license_state, is_active')
+      .select('id, vehicle_number, nickname, year, make, model, license_plate, license_state, is_active, vehicle_type_id, cab_type, color, dimensions, vehicle_types(code, generic_photo_path)')
       .eq('carrier_org_id', profile.org_id)
       .eq('is_active', true)
       .order('vehicle_number')
-    vehicles = data ?? []
+    vehicles = (data as unknown as Vehicle[]) ?? []
   }
 
   return (
@@ -78,22 +83,36 @@ export default async function VehiclesPage({
             <thead>
               <tr className="border-b border-white/5">
                 <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('truckNumber')}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('type')}</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('nickname')}</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('yearMakeModel')}</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('plate')}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('details')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {vehicles.map((vehicle) => {
                 const ymm = [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(' ')
                 const plate = [vehicle.license_plate, vehicle.license_state].filter(Boolean).join(' / ')
+                const vt = Array.isArray(vehicle.vehicle_types) ? vehicle.vehicle_types[0] : vehicle.vehicle_types
+                const Icon = vt ? VEHICLE_TYPE_ICONS[vt.code] : undefined
+                const details = [vehicle.color, vehicle.dimensions].filter(Boolean).join(' · ')
 
                 return (
                   <tr key={vehicle.id} className="hover:bg-white/[0.07] transition-colors duration-150">
                     <td className="px-5 py-3.5 text-white font-medium">{vehicle.vehicle_number}</td>
+                    <td className="px-4 py-3.5 text-slate-300">
+                      {vt ? (
+                        <span className="inline-flex items-center gap-2">
+                          {Icon && <Icon className="w-5 h-5 text-slate-400" />}
+                          <span className="text-slate-300 text-sm">{t(`type_${vt.code}` as never)}</span>
+                        </span>
+                      ) : '—'}
+                    </td>
                     <td className="px-4 py-3.5 text-slate-300">{vehicle.nickname ?? '—'}</td>
                     <td className="px-4 py-3.5 text-slate-400">{ymm || '—'}</td>
                     <td className="px-4 py-3.5 text-slate-400">{plate || '—'}</td>
+                    <td className="px-4 py-3.5 text-slate-500 text-xs">{details || '—'}</td>
                   </tr>
                 )
               })}

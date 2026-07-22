@@ -125,7 +125,21 @@
     "recentLoads": "حالیہ لوڈز",
     "viewAll": "سب دیکھیں",
     "noLoadsYet": "ابھی تک کوئی لوڈ نہیں۔",
-    "createFirstLoad": "پہلا لوڈ بنائیں"
+    "createFirstLoad": "پہلا لوڈ بنائیں",
+    "revenueThisMonth": "اس مہینے کی آمدنی",
+    "revenueThisMonthSub": "اس مہینے ادا شدہ",
+    "outstandingInvoices": "بقایا انوائسز",
+    "outstandingInvoicesSub": "{count} انوائسز",
+    "avgRatePerLoad": "اوسط ریٹ / لوڈ",
+    "avgRatePerLoadSub": "{count} لوڈز",
+    "fleetStatus": "فلیٹ کی صورتحال",
+    "fleetActive": "فعال",
+    "fleetIdle": "خالی",
+    "fleetInShop": "ورکشاپ میں",
+    "driverCompliance": "ڈرائیور کی تعمیل",
+    "complianceClear": "درست",
+    "complianceDueSoon": "جلد ختم",
+    "complianceIncomplete": "نامکمل"
   },
   "loads": {
     "title": "لوڈز",
@@ -133,7 +147,14 @@
     "addLoad": "لوڈ شامل کریں",
     "createdSuccess": "لوڈ {loadNumber} کامیابی سے بنایا گیا۔",
     "noLoadsYet": "ابھی تک کوئی لوڈ نہیں۔",
+    "noLoadsInGroup": "اس گروپ میں کوئی لوڈ نہیں۔",
     "createFirstLoad": "پہلا لوڈ بنائیں",
+    "filterAll": "تمام",
+    "groupNeedsDispatch": "ڈسپیچ درکار",
+    "groupInProgress": "جاری ہے",
+    "groupCompleted": "مکمل",
+    "groupCancelled": "منسوخ شدہ",
+    "dispatchAction": "ڈسپیچ →",
     "loadNumber": "لوڈ #",
     "status": "حیثیت",
     "route": "روٹ",
@@ -184,7 +205,15 @@
     "actionMarkInTransit": "راستے میں نشان زد کریں",
     "actionMarkDelivered": "ڈیلیور شدہ نشان زد کریں",
     "actionCancelLoad": "لوڈ منسوخ کریں",
-    "confirmCancelLoad": "کیا اس لوڈ کو منسوخ کرنا ہے؟ اسے واپس نہیں لیا جا سکتا۔"
+    "confirmCancelLoad": "کیا اس لوڈ کو منسوخ کرنا ہے؟ اسے واپس نہیں لیا جا سکتا۔",
+    "actionShareTracking": "ٹریکنگ شیئر کریں",
+    "actionCopied": "کاپی ہو گیا!",
+    "actionRateConfirmation": "ریٹ کی تصدیق",
+    "actionEditLoad": "لوڈ میں ترمیم کریں",
+    "actionEditLoadSoon": "جلد آ رہا ہے",
+    "actionCancelUnavailable": "یہ لوڈ پہلے ہی حتمی حالت تک پہنچ چکا ہے۔",
+    "rateHero": "ریٹ",
+    "cancelledEndState": "منسوخ شدہ"
   },
   "drivers": {
     "title": "ڈرائیورز",
@@ -210,7 +239,14 @@
     "invitedSuccess": "ڈرائیور {driverNumber} کو کامیابی سے مدعو کیا گیا۔",
     "inviteFirstDriver": "پہلے ڈرائیور کو مدعو کریں",
     "sendingInvite": "دعوت بھیجی جا رہی ہے…",
-    "noDefaultTruck": "کوئی طے شدہ گاڑی نہیں"
+    "noDefaultTruck": "کوئی طے شدہ گاڑی نہیں",
+    "cdlClass": "کلاس {class}",
+    "cdlClassUnknown": "کوئی CDL نہیں",
+    "endorsement_hazmat": "خطرناک مواد",
+    "endorsement_tanker": "ٹینکر",
+    "endorsement_doubles": "ڈبل/ٹرپل",
+    "endorsement_airbrakes": "ایئر بریک",
+    "endorsement_passenger": "مسافر"
   },
   "vehicles": {
     "title": "گاڑیاں",
@@ -228,7 +264,26 @@
     "yearMakeModel": "سال / میک / ماڈل",
     "plate": "پلیٹ",
     "addFirstTruck": "پہلی گاڑی شامل کریں",
-    "adding": "شامل کیا جا رہا ہے…"
+    "adding": "شامل کیا جا رہا ہے…",
+    "chooseType": "گاڑی کی قسم",
+    "chooseTypeRequired": "جاری رکھنے کے لیے گاڑی کی قسم منتخب کریں۔",
+    "type_semi": "سیمی (ٹریکٹر ٹریلر)",
+    "type_box_truck": "باکس ٹرک",
+    "type_flatbed": "فلیٹ بیڈ",
+    "type_reefer": "ریفر",
+    "type_step_deck": "سٹیپ ڈیک",
+    "type_tanker": "ٹینکر",
+    "type_dump": "ڈمپ",
+    "cabType": "کیبن کی قسم",
+    "cabTypeSleeper": "سلیپر",
+    "cabTypeDayCab": "ڈے کیبن",
+    "cabTypeOther": "دیگر",
+    "cabTypeNotApplicable": "لاگو نہیں",
+    "color": "رنگ",
+    "dimensions": "طول و عرض",
+    "dimensionsPlaceholder": "مثلاً 53 فٹ x 8.5 فٹ",
+    "type": "قسم",
+    "details": "تفصیلات"
   },
   "invoices": {
     "title": "انوائسز",
@@ -430,6 +485,7 @@
     "noTrucksYet": "ابھی تک کوئی گاڑی نہیں ہے۔ پہلے ایک گاڑی شامل کریں۔",
     "noRemindersForTruck": "اس گاڑی کے لیے ابھی تک کوئی دیکھ بھال یاد دہانی سیٹ نہیں کی گئی۔",
     "reminderType": "یاد دہانی",
+    "dueProgress": "مقررہ تاریخ کی طرف پیش رفت",
     "lastService": "آخری سروس",
     "nextDue": "اگلی واجب الادا تاریخ",
     "status": "حیثیت",
@@ -458,5 +514,17 @@
     "selectTruckRequired": "ایک گاڑی منتخب کریں۔",
     "serviceTypeRequired": "سروس کی قسم درج کریں۔",
     "notes": "نوٹس"
+  },
+  "roles": {
+    "owner": "مالک",
+    "solo": "سولو آپریٹر",
+    "driver": "ڈرائیور",
+    "dispatcher": "ڈسپیچر",
+    "finance": "فنانس",
+    "customer_admin": "کسٹمر ایڈمن",
+    "customer_viewer": "کسٹمر ویور"
+  },
+  "language": {
+    "appliesEverywhere": "آپ کی زبان کی ترجیح پوری ایپ پر لاگو ہوتی ہے۔"
   }
 }

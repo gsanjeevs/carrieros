@@ -18,10 +18,19 @@ const STATUS_COLOR: Record<string, string> = {
   cancelled:   'bg-rose-500/10 text-rose-400',
 }
 
+type LoadGroupKey = 'needs_dispatch' | 'in_progress' | 'completed' | 'cancelled'
+
+const GROUPS: { key: LoadGroupKey; statuses: string[]; labelKey: string; accent: string }[] = [
+  { key: 'needs_dispatch', statuses: ['draft', 'scheduled'], labelKey: 'groupNeedsDispatch', accent: 'border-l-[3px] border-l-[#f97316]' },
+  { key: 'in_progress', statuses: ['dispatched', 'picked_up', 'in_transit'], labelKey: 'groupInProgress', accent: 'border-l-[3px] border-l-blue-500/60' },
+  { key: 'completed', statuses: ['delivered', 'invoiced', 'paid'], labelKey: 'groupCompleted', accent: 'border-l-[3px] border-l-white/10' },
+  { key: 'cancelled', statuses: ['cancelled'], labelKey: 'groupCancelled', accent: 'border-l-[3px] border-l-rose-500/40' },
+]
+
 export default async function LoadsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ created?: string }>
+  searchParams: Promise<{ created?: string; status?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -35,6 +44,7 @@ export default async function LoadsPage({
 
   const params = await searchParams
   const justCreated = params.created
+  const activeGroup = GROUPS.find((g) => g.key === params.status)
 
   const t = await getTranslations('loads')
   const locale = await getLocale()
@@ -60,6 +70,10 @@ export default async function LoadsPage({
       .eq('profile_id', user.id)
       .single()
     if (driver) query = query.eq('driver_id', driver.id)
+  }
+
+  if (activeGroup) {
+    query = query.in('status', activeGroup.statuses)
   }
 
   const { data: loads } = await query
@@ -88,7 +102,7 @@ export default async function LoadsPage({
         </div>
       )}
 
-      {!loads || loads.length === 0 ? (
+      {!loads || (loads.length === 0 && !activeGroup) ? (
         <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-card-dark">
           <span className="material-symbols-outlined text-slate-600 text-4xl">local_shipping</span>
           <p className="text-slate-500 text-sm mt-3">{t('noLoadsYet')}</p>
@@ -101,60 +115,108 @@ export default async function LoadsPage({
           </Link>
         </div>
       ) : (
-        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/5">
-                <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('loadNumber')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('status')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('route')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('pickup')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('customer')}</th>
-                {showRate && (
-                  <th className="text-right px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('rate')}</th>
-                )}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {loads.map((load) => {
-                const badge = (load.status ? STATUS_BADGE[load.status] : null) ?? STATUS_BADGE.draft
-                const route =
-                  [load.pickup_city, load.pickup_state].filter(Boolean).join(', ') +
-                  ' → ' +
-                  [load.delivery_city, load.delivery_state].filter(Boolean).join(', ')
+        <>
+          <div className="flex flex-wrap items-center gap-2 mb-6">
+            <Link
+              href="/loads"
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
+                !activeGroup
+                  ? 'bg-[#f97316] text-white'
+                  : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200'
+              }`}
+            >
+              {t('filterAll')}
+            </Link>
+            {GROUPS.map((group) => (
+              <Link
+                key={group.key}
+                href={`/loads?status=${group.key}`}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
+                  activeGroup?.key === group.key
+                    ? 'bg-[#f97316] text-white'
+                    : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200'
+                }`}
+              >
+                {t(group.labelKey)}
+              </Link>
+            ))}
+          </div>
 
-                return (
-                  <tr key={load.id} className="hover:bg-white/[0.07] transition-colors duration-150">
-                    <td className="px-5 py-3.5">
-                      <Link href={`/loads/${load.load_number}`} className="text-white font-medium hover:text-[#f97316] transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
-                        {load.load_number}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3.5">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${badge.color}`}>
-                        {badge.label}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3.5 text-slate-300 max-w-[220px] truncate">{route}</td>
-                    <td className="px-4 py-3.5 text-slate-400">
-                      {load.pickup_date
-                        ? toDate(load.pickup_date).toLocaleDateString(locale, { month: 'short', day: 'numeric' })
-                        : '—'}
-                    </td>
-                    <td className="px-4 py-3.5 text-slate-400 max-w-[160px] truncate">
-                      {load.customer_name_raw ?? '—'}
-                    </td>
-                    {showRate && (
-                      <td className="px-5 py-3.5 text-right text-white font-medium">
-                        {formatMoney(load.rate, 'USD', locale)}
-                      </td>
-                    )}
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+          {loads.length === 0 && activeGroup && (
+            <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-card-dark">
+              <span className="material-symbols-outlined text-slate-600 text-4xl">local_shipping</span>
+              <p className="text-slate-500 text-sm mt-3">{t('noLoadsInGroup')}</p>
+            </div>
+          )}
+
+          <div className="space-y-8">
+            {GROUPS.map((group) => {
+              const groupLoads = loads.filter((load) => group.statuses.includes(load.status ?? ''))
+              if (groupLoads.length === 0) return null
+
+              return (
+                <div key={group.key}>
+                  <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
+                    {t(group.labelKey)} ({groupLoads.length})
+                  </h2>
+                  <div className="space-y-2">
+                    {groupLoads.map((load) => {
+                      const badge = (load.status ? STATUS_BADGE[load.status] : null) ?? STATUS_BADGE.draft
+                      const route =
+                        [load.pickup_city, load.pickup_state].filter(Boolean).join(', ') +
+                        ' → ' +
+                        [load.delivery_city, load.delivery_state].filter(Boolean).join(', ')
+
+                      return (
+                        <div
+                          key={load.id}
+                          className={`bg-white/5 border border-white/8 ${group.accent} rounded-xl px-5 py-4 shadow-card-dark hover:bg-white/[0.07] transition-colors duration-150 flex items-center justify-between gap-4`}
+                        >
+                          <div className="flex items-center gap-4 min-w-0 flex-1">
+                            <Link
+                              href={`/loads/${load.load_number}`}
+                              className="text-white font-medium hover:text-[#f97316] transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50 shrink-0"
+                            >
+                              {load.load_number}
+                            </Link>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${badge.color}`}>
+                              {badge.label}
+                            </span>
+                            <span className="text-slate-300 text-sm truncate">{route}</span>
+                          </div>
+
+                          <div className="flex items-center gap-6 shrink-0">
+                            <span className="text-slate-400 text-sm hidden sm:inline">
+                              {load.pickup_date
+                                ? toDate(load.pickup_date).toLocaleDateString(locale, { month: 'short', day: 'numeric' })
+                                : '—'}
+                            </span>
+                            <span className="text-slate-400 text-sm max-w-[160px] truncate hidden md:inline">
+                              {load.customer_name_raw ?? '—'}
+                            </span>
+                            {showRate && (
+                              <span className="text-white font-medium text-sm">
+                                {formatMoney(load.rate, 'USD', locale)}
+                              </span>
+                            )}
+                            {group.key === 'needs_dispatch' && (
+                              <Link
+                                href={`/loads/${load.load_number}`}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-[#f97316]/10 hover:bg-[#f97316]/20 text-[#f97316] text-xs font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+                              >
+                                {t('dispatchAction')}
+                              </Link>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </>
       )}
     </div>
   )

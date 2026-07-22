@@ -125,7 +125,21 @@
     "recentLoads": "Recent Loads",
     "viewAll": "View all",
     "noLoadsYet": "No loads yet.",
-    "createFirstLoad": "Create first load"
+    "createFirstLoad": "Create first load",
+    "revenueThisMonth": "Revenue MTD",
+    "revenueThisMonthSub": "paid this month",
+    "outstandingInvoices": "Outstanding Invoices",
+    "outstandingInvoicesSub": "{count} invoices",
+    "avgRatePerLoad": "Avg Rate / Load",
+    "avgRatePerLoadSub": "{count} loads",
+    "fleetStatus": "Fleet Status",
+    "fleetActive": "Active",
+    "fleetIdle": "Idle",
+    "fleetInShop": "In Shop",
+    "driverCompliance": "Driver Compliance",
+    "complianceClear": "Clear",
+    "complianceDueSoon": "Due Soon",
+    "complianceIncomplete": "Incomplete"
   },
   "loads": {
     "title": "Loads",
@@ -133,7 +147,14 @@
     "addLoad": "Add Load",
     "createdSuccess": "Load {loadNumber} created successfully.",
     "noLoadsYet": "No loads yet.",
+    "noLoadsInGroup": "No loads in this group.",
     "createFirstLoad": "Create first load",
+    "filterAll": "All",
+    "groupNeedsDispatch": "Needs Dispatch",
+    "groupInProgress": "In Progress",
+    "groupCompleted": "Completed",
+    "groupCancelled": "Cancelled",
+    "dispatchAction": "Dispatch →",
     "loadNumber": "Load #",
     "status": "Status",
     "route": "Route",
@@ -184,7 +205,15 @@
     "actionMarkInTransit": "Mark In Transit",
     "actionMarkDelivered": "Mark Delivered",
     "actionCancelLoad": "Cancel Load",
-    "confirmCancelLoad": "Cancel this load? This cannot be undone."
+    "confirmCancelLoad": "Cancel this load? This cannot be undone.",
+    "actionShareTracking": "Share Tracking",
+    "actionCopied": "Copied!",
+    "actionRateConfirmation": "Rate Confirmation",
+    "actionEditLoad": "Edit Load",
+    "actionEditLoadSoon": "Coming soon",
+    "actionCancelUnavailable": "This load has already reached a final status.",
+    "rateHero": "Rate",
+    "cancelledEndState": "Cancelled"
   },
   "drivers": {
     "title": "Drivers",
@@ -210,7 +239,14 @@
     "invitedSuccess": "Driver {driverNumber} invited successfully.",
     "inviteFirstDriver": "Invite first driver",
     "sendingInvite": "Sending invite…",
-    "noDefaultTruck": "No default vehicle"
+    "noDefaultTruck": "No default vehicle",
+    "cdlClass": "Class {class}",
+    "cdlClassUnknown": "No CDL",
+    "endorsement_hazmat": "Hazmat",
+    "endorsement_tanker": "Tanker",
+    "endorsement_doubles": "Doubles/Triples",
+    "endorsement_airbrakes": "Air Brakes",
+    "endorsement_passenger": "Passenger"
   },
   "vehicles": {
     "title": "Vehicles",
@@ -228,7 +264,26 @@
     "yearMakeModel": "Year / Make / Model",
     "plate": "Plate",
     "addFirstTruck": "Add first vehicle",
-    "adding": "Adding…"
+    "adding": "Adding…",
+    "chooseType": "Vehicle Type",
+    "chooseTypeRequired": "Choose a vehicle type to continue.",
+    "type_semi": "Semi (Tractor-Trailer)",
+    "type_box_truck": "Box Truck",
+    "type_flatbed": "Flatbed",
+    "type_reefer": "Reefer",
+    "type_step_deck": "Step Deck",
+    "type_tanker": "Tanker",
+    "type_dump": "Dump",
+    "cabType": "Cab Type",
+    "cabTypeSleeper": "Sleeper",
+    "cabTypeDayCab": "Day Cab",
+    "cabTypeOther": "Other",
+    "cabTypeNotApplicable": "N/A",
+    "color": "Color",
+    "dimensions": "Dimensions",
+    "dimensionsPlaceholder": "e.g. 53 ft x 8.5 ft",
+    "type": "Type",
+    "details": "Details"
   },
   "invoices": {
     "title": "Invoices",
@@ -430,6 +485,7 @@
     "noTrucksYet": "No vehicles yet. Add a vehicle first.",
     "noRemindersForTruck": "No maintenance reminders set up for this vehicle yet.",
     "reminderType": "Reminder",
+    "dueProgress": "Progress toward due date",
     "lastService": "Last Service",
     "nextDue": "Next Due",
     "status": "Status",
@@ -458,5 +514,17 @@
     "selectTruckRequired": "Select a vehicle.",
     "serviceTypeRequired": "Enter a service type.",
     "notes": "Notes"
+  },
+  "roles": {
+    "owner": "Owner",
+    "solo": "Solo Operator",
+    "driver": "Driver",
+    "dispatcher": "Dispatcher",
+    "finance": "Finance",
+    "customer_admin": "Customer Admin",
+    "customer_viewer": "Customer Viewer"
+  },
+  "language": {
+    "appliesEverywhere": "Your language preference applies to the entire app."
   }
 }

@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
-interface Driver { id: number; driver_number: string; profiles: { first_name: string; last_name: string } | null }
+interface Driver { id: number; driver_number: string; default_vehicle_id: number | null; profiles: { first_name: string; last_name: string } | null }
 interface Vehicle { id: number; vehicle_number: string; nickname: string }
 
 const NEXT_STATUS: Record<string, string> = {
@@ -92,7 +92,33 @@ export default function DispatchPanel({
     }
   }
 
-  const selectCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 transition'
+  function driverInitials(d: Driver): string {
+    const name = d.profiles
+      ? [d.profiles.first_name, d.profiles.last_name].filter(Boolean).join(' ')
+      : d.driver_number
+    const initials = name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2)
+    return initials || d.driver_number.slice(0, 2).toUpperCase()
+  }
+
+  function selectDriver(id: string) {
+    setDriverId(id)
+    // Auto-fill the driver's default vehicle, but only if the vehicle field
+    // is currently empty — never clobber a vehicle already chosen manually.
+    if (!id || vehicleId) return
+    const driver = drivers.find(d => d.id.toString() === id)
+    if (driver?.default_vehicle_id) {
+      setVehicleId(driver.default_vehicle_id.toString())
+    }
+  }
+
+  const cardBaseCls = 'flex-shrink-0 flex items-center gap-2 px-2.5 py-2 rounded-lg border text-left transition focus:outline-none focus:ring-2 focus:ring-[#f97316]/50'
+  const cardSelectedCls = 'border-[#f97316] bg-[#f97316]/10'
+  const cardUnselectedCls = 'border-white/10 bg-white/5 hover:bg-white/10'
   const nextStatus = NEXT_STATUS[currentStatus]
   const actionKey = STATUS_ACTION_KEY[currentStatus]
   const TERMINAL_STATUSES = ['delivered', 'invoiced', 'paid', 'cancelled']
@@ -107,25 +133,75 @@ export default function DispatchPanel({
     <div className="space-y-3">
       <div>
         <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">{t('assignDriver')}</label>
-        <select className={selectCls} value={driverId} onChange={e => setDriverId(e.target.value)}>
-          <option value="">— {t('unassigned')} —</option>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => selectDriver('')}
+            className={`${cardBaseCls} ${driverId === '' ? cardSelectedCls : cardUnselectedCls}`}
+          >
+            <span className="w-7 h-7 rounded-full bg-navy-light flex items-center justify-center flex-shrink-0">
+              <span className="material-symbols-outlined text-avatar-text text-[16px]">person_off</span>
+            </span>
+            <span className="text-white text-xs font-medium">— {t('unassigned')} —</span>
+          </button>
           {drivers.map(d => {
             const name = d.profiles
               ? [d.profiles.first_name, d.profiles.last_name].filter(Boolean).join(' ')
               : d.driver_number
-            return <option key={d.id} value={d.id}>{d.driver_number} · {name}</option>
+            const isSelected = driverId === d.id.toString()
+            return (
+              <button
+                type="button"
+                key={d.id}
+                onClick={() => selectDriver(d.id.toString())}
+                className={`${cardBaseCls} ${isSelected ? cardSelectedCls : cardUnselectedCls}`}
+              >
+                <span className="w-7 h-7 rounded-full bg-navy-light flex items-center justify-center flex-shrink-0">
+                  <span className="text-avatar-text text-xs font-semibold">{driverInitials(d)}</span>
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-white text-xs font-medium truncate max-w-[9rem]">{name}</span>
+                  <span className="block text-slate-500 text-[10px]">{d.driver_number}</span>
+                </span>
+              </button>
+            )
           })}
-        </select>
+        </div>
       </div>
 
       <div>
         <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">{t('assignTruck')}</label>
-        <select className={selectCls} value={vehicleId} onChange={e => setVehicleId(e.target.value)}>
-          <option value="">— {t('unassigned')} —</option>
-          {vehicles.map(v => (
-            <option key={v.id} value={v.id}>{v.vehicle_number} · {v.nickname}</option>
-          ))}
-        </select>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setVehicleId('')}
+            className={`${cardBaseCls} ${vehicleId === '' ? cardSelectedCls : cardUnselectedCls}`}
+          >
+            <span className="w-7 h-7 rounded-full bg-navy-light flex items-center justify-center flex-shrink-0">
+              <span className="material-symbols-outlined text-avatar-text text-[16px]">block</span>
+            </span>
+            <span className="text-white text-xs font-medium">— {t('unassigned')} —</span>
+          </button>
+          {vehicles.map(v => {
+            const isSelected = vehicleId === v.id.toString()
+            return (
+              <button
+                type="button"
+                key={v.id}
+                onClick={() => setVehicleId(v.id.toString())}
+                className={`${cardBaseCls} ${isSelected ? cardSelectedCls : cardUnselectedCls}`}
+              >
+                <span className="w-7 h-7 rounded-full bg-navy-light flex items-center justify-center flex-shrink-0">
+                  <span className="material-symbols-outlined text-avatar-text text-[16px]">local_shipping</span>
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-white text-xs font-medium truncate max-w-[9rem]">{v.vehicle_number}</span>
+                  <span className="block text-slate-500 text-[10px] truncate max-w-[9rem]">{v.nickname}</span>
+                </span>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {error && <p className="text-red-400 text-xs">{error}</p>}

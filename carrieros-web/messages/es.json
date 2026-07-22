@@ -125,7 +125,21 @@
     "recentLoads": "Cargas Recientes",
     "viewAll": "Ver todas",
     "noLoadsYet": "Aún no hay cargas.",
-    "createFirstLoad": "Crear primera carga"
+    "createFirstLoad": "Crear primera carga",
+    "revenueThisMonth": "Ingresos del Mes",
+    "revenueThisMonthSub": "pagado este mes",
+    "outstandingInvoices": "Facturas por Cobrar",
+    "outstandingInvoicesSub": "{count} facturas",
+    "avgRatePerLoad": "Tarifa Media / Carga",
+    "avgRatePerLoadSub": "{count} cargas",
+    "fleetStatus": "Estado de la Flota",
+    "fleetActive": "Activos",
+    "fleetIdle": "Inactivos",
+    "fleetInShop": "En Taller",
+    "driverCompliance": "Cumplimiento de Conductores",
+    "complianceClear": "Al Día",
+    "complianceDueSoon": "Por Vencer",
+    "complianceIncomplete": "Incompleto"
   },
   "loads": {
     "title": "Cargas",
@@ -133,7 +147,14 @@
     "addLoad": "Agregar Carga",
     "createdSuccess": "Carga {loadNumber} creada exitosamente.",
     "noLoadsYet": "Aún no hay cargas.",
+    "noLoadsInGroup": "No hay cargas en este grupo.",
     "createFirstLoad": "Crear primera carga",
+    "filterAll": "Todas",
+    "groupNeedsDispatch": "Por despachar",
+    "groupInProgress": "En curso",
+    "groupCompleted": "Completadas",
+    "groupCancelled": "Canceladas",
+    "dispatchAction": "Despachar →",
     "loadNumber": "Carga #",
     "status": "Estado",
     "route": "Ruta",
@@ -184,7 +205,15 @@
     "actionMarkInTransit": "Marcar En Tránsito",
     "actionMarkDelivered": "Marcar Entregada",
     "actionCancelLoad": "Cancelar Carga",
-    "confirmCancelLoad": "¿Cancelar esta carga? Esta acción no se puede deshacer."
+    "confirmCancelLoad": "¿Cancelar esta carga? Esta acción no se puede deshacer.",
+    "actionShareTracking": "Compartir Seguimiento",
+    "actionCopied": "¡Copiado!",
+    "actionRateConfirmation": "Confirmación de Tarifa",
+    "actionEditLoad": "Editar Carga",
+    "actionEditLoadSoon": "Próximamente",
+    "actionCancelUnavailable": "Esta carga ya llegó a un estado final.",
+    "rateHero": "Tarifa",
+    "cancelledEndState": "Cancelada"
   },
   "drivers": {
     "title": "Conductores",
@@ -210,7 +239,14 @@
     "invitedSuccess": "Conductor {driverNumber} invitado exitosamente.",
     "inviteFirstDriver": "Invitar primer conductor",
     "sendingInvite": "Enviando invitación…",
-    "noDefaultTruck": "Sin vehículo predeterminado"
+    "noDefaultTruck": "Sin vehículo predeterminado",
+    "cdlClass": "Clase {class}",
+    "cdlClassUnknown": "Sin CDL",
+    "endorsement_hazmat": "Materiales peligrosos",
+    "endorsement_tanker": "Cisterna",
+    "endorsement_doubles": "Dobles/Triples",
+    "endorsement_airbrakes": "Frenos de aire",
+    "endorsement_passenger": "Pasajeros"
   },
   "vehicles": {
     "title": "Vehículos",
@@ -228,7 +264,26 @@
     "yearMakeModel": "Año / Marca / Modelo",
     "plate": "Placa",
     "addFirstTruck": "Agregar primer vehículo",
-    "adding": "Agregando…"
+    "adding": "Agregando…",
+    "chooseType": "Tipo de vehículo",
+    "chooseTypeRequired": "Elige un tipo de vehículo para continuar.",
+    "type_semi": "Camión (tractocamión)",
+    "type_box_truck": "Camión de caja",
+    "type_flatbed": "Plataforma",
+    "type_reefer": "Refrigerado",
+    "type_step_deck": "Plataforma escalonada",
+    "type_tanker": "Cisterna",
+    "type_dump": "Volquete",
+    "cabType": "Tipo de cabina",
+    "cabTypeSleeper": "Con literas",
+    "cabTypeDayCab": "Cabina diurna",
+    "cabTypeOther": "Otro",
+    "cabTypeNotApplicable": "N/D",
+    "color": "Color",
+    "dimensions": "Dimensiones",
+    "dimensionsPlaceholder": "p. ej. 53 pies x 8.5 pies",
+    "type": "Tipo",
+    "details": "Detalles"
   },
   "invoices": {
     "title": "Facturas",
@@ -430,6 +485,7 @@
     "noTrucksYet": "Aún no hay vehículos. Agrega un vehículo primero.",
     "noRemindersForTruck": "Aún no hay recordatorios de mantenimiento para este vehículo.",
     "reminderType": "Recordatorio",
+    "dueProgress": "Progreso hacia la fecha de vencimiento",
     "lastService": "Último Servicio",
     "nextDue": "Próximo Vencimiento",
     "status": "Estado",
@@ -458,5 +514,17 @@
     "selectTruckRequired": "Selecciona un vehículo.",
     "serviceTypeRequired": "Ingresa un tipo de servicio.",
     "notes": "Notas"
+  },
+  "roles": {
+    "owner": "Propietario",
+    "solo": "Operador independiente",
+    "driver": "Conductor",
+    "dispatcher": "Despachador",
+    "finance": "Finanzas",
+    "customer_admin": "Administrador de cliente",
+    "customer_viewer": "Visor de cliente"
+  },
+  "language": {
+    "appliesEverywhere": "Tu preferencia de idioma se aplica a toda la aplicación."
   }
 }

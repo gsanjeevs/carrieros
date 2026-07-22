@@ -125,7 +125,21 @@
     "recentLoads": "ਹਾਲੀਆ ਲੋਡ",
     "viewAll": "ਸਭ ਵੇਖੋ",
     "noLoadsYet": "ਅਜੇ ਕੋਈ ਲੋਡ ਨਹੀਂ।",
-    "createFirstLoad": "ਪਹਿਲਾ ਲੋਡ ਬਣਾਓ"
+    "createFirstLoad": "ਪਹਿਲਾ ਲੋਡ ਬਣਾਓ",
+    "revenueThisMonth": "ਇਸ ਮਹੀਨੇ ਦੀ ਆਮਦਨ",
+    "revenueThisMonthSub": "ਇਸ ਮਹੀਨੇ ਅਦਾ ਕੀਤਾ",
+    "outstandingInvoices": "ਬਕਾਇਆ ਇਨਵੌਇਸ",
+    "outstandingInvoicesSub": "{count} ਇਨਵੌਇਸ",
+    "avgRatePerLoad": "ਔਸਤ ਰੇਟ / ਲੋਡ",
+    "avgRatePerLoadSub": "{count} ਲੋਡ",
+    "fleetStatus": "ਫਲੀਟ ਸਥਿਤੀ",
+    "fleetActive": "ਸਰਗਰਮ",
+    "fleetIdle": "ਵਿਹਲੇ",
+    "fleetInShop": "ਵਰਕਸ਼ਾਪ ਵਿੱਚ",
+    "driverCompliance": "ਡਰਾਈਵਰ ਪਾਲਣਾ",
+    "complianceClear": "ਠੀਕ",
+    "complianceDueSoon": "ਜਲਦੀ ਖਤਮ",
+    "complianceIncomplete": "ਅਧੂਰਾ"
   },
   "loads": {
     "title": "ਲੋਡ",
@@ -133,7 +147,14 @@
     "addLoad": "ਲੋਡ ਸ਼ਾਮਲ ਕਰੋ",
     "createdSuccess": "ਲੋਡ {loadNumber} ਸਫਲਤਾਪੂਰਵਕ ਬਣਾਇਆ ਗਿਆ।",
     "noLoadsYet": "ਅਜੇ ਕੋਈ ਲੋਡ ਨਹੀਂ।",
+    "noLoadsInGroup": "ਇਸ ਸਮੂਹ ਵਿੱਚ ਕੋਈ ਲੋਡ ਨਹੀਂ।",
     "createFirstLoad": "ਪਹਿਲਾ ਲੋਡ ਬਣਾਓ",
+    "filterAll": "ਸਾਰੇ",
+    "groupNeedsDispatch": "ਡਿਸਪੈਚ ਲੋੜੀਂਦਾ",
+    "groupInProgress": "ਜਾਰੀ ਹੈ",
+    "groupCompleted": "ਪੂਰਾ ਹੋਇਆ",
+    "groupCancelled": "ਰੱਦ ਕੀਤਾ",
+    "dispatchAction": "ਡਿਸਪੈਚ →",
     "loadNumber": "ਲੋਡ #",
     "status": "ਸਥਿਤੀ",
     "route": "ਰੂਟ",
@@ -184,7 +205,15 @@
     "actionMarkInTransit": "ਰਸਤੇ ਵਿੱਚ ਵਜੋਂ ਚਿੰਨ੍ਹਿਤ ਕਰੋ",
     "actionMarkDelivered": "ਡਿਲੀਵਰ ਹੋਇਆ ਵਜੋਂ ਚਿੰਨ੍ਹਿਤ ਕਰੋ",
     "actionCancelLoad": "ਲੋਡ ਰੱਦ ਕਰੋ",
-    "confirmCancelLoad": "ਕੀ ਇਸ ਲੋਡ ਨੂੰ ਰੱਦ ਕਰਨਾ ਹੈ? ਇਹ ਵਾਪਸ ਨਹੀਂ ਲਿਆ ਜਾ ਸਕਦਾ।"
+    "confirmCancelLoad": "ਕੀ ਇਸ ਲੋਡ ਨੂੰ ਰੱਦ ਕਰਨਾ ਹੈ? ਇਹ ਵਾਪਸ ਨਹੀਂ ਲਿਆ ਜਾ ਸਕਦਾ।",
+    "actionShareTracking": "ਟ੍ਰੈਕਿੰਗ ਸਾਂਝੀ ਕਰੋ",
+    "actionCopied": "ਕਾਪੀ ਹੋ ਗਿਆ!",
+    "actionRateConfirmation": "ਰੇਟ ਪੁਸ਼ਟੀ",
+    "actionEditLoad": "ਲੋਡ ਸੋਧੋ",
+    "actionEditLoadSoon": "ਜਲਦੀ ਆ ਰਿਹਾ ਹੈ",
+    "actionCancelUnavailable": "ਇਹ ਲੋਡ ਪਹਿਲਾਂ ਹੀ ਅੰਤਿਮ ਸਥਿਤੀ 'ਤੇ ਪਹੁੰਚ ਚੁੱਕਾ ਹੈ।",
+    "rateHero": "ਰੇਟ",
+    "cancelledEndState": "ਰੱਦ ਕੀਤਾ"
   },
   "drivers": {
     "title": "ਡਰਾਈਵਰ",
@@ -210,7 +239,14 @@
     "invitedSuccess": "ਡਰਾਈਵਰ {driverNumber} ਨੂੰ ਸਫਲਤਾਪੂਰਵਕ ਸੱਦਾ ਦਿੱਤਾ ਗਿਆ।",
     "inviteFirstDriver": "ਪਹਿਲੇ ਡਰਾਈਵਰ ਨੂੰ ਸੱਦਾ ਦਿਓ",
     "sendingInvite": "ਸੱਦਾ ਭੇਜਿਆ ਜਾ ਰਿਹਾ ਹੈ…",
-    "noDefaultTruck": "ਕੋਈ ਮੂਲ ਵਾਹਨ ਨਹੀਂ"
+    "noDefaultTruck": "ਕੋਈ ਮੂਲ ਵਾਹਨ ਨਹੀਂ",
+    "cdlClass": "ਸ਼੍ਰੇਣੀ {class}",
+    "cdlClassUnknown": "ਕੋਈ CDL ਨਹੀਂ",
+    "endorsement_hazmat": "ਖਤਰਨਾਕ ਮਾਲ",
+    "endorsement_tanker": "ਟੈਂਕਰ",
+    "endorsement_doubles": "ਡਬਲ/ਟ੍ਰਿਪਲ",
+    "endorsement_airbrakes": "ਏਅਰ ਬ੍ਰੇਕ",
+    "endorsement_passenger": "ਯਾਤਰੀ"
   },
   "vehicles": {
     "title": "ਵਾਹਨ",
@@ -228,7 +264,26 @@
     "yearMakeModel": "ਸਾਲ / ਮੇਕ / ਮਾਡਲ",
     "plate": "ਪਲੇਟ",
     "addFirstTruck": "ਪਹਿਲਾ ਵਾਹਨ ਸ਼ਾਮਲ ਕਰੋ",
-    "adding": "ਸ਼ਾਮਲ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"
+    "adding": "ਸ਼ਾਮਲ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…",
+    "chooseType": "ਵਾਹਨ ਦੀ ਕਿਸਮ",
+    "chooseTypeRequired": "ਜਾਰੀ ਰੱਖਣ ਲਈ ਵਾਹਨ ਦੀ ਕਿਸਮ ਚੁਣੋ।",
+    "type_semi": "ਸੈਮੀ (ਟਰੈਕਟਰ-ਟ੍ਰੇਲਰ)",
+    "type_box_truck": "ਬਾਕਸ ਟਰੱਕ",
+    "type_flatbed": "ਫਲੈਟਬੈੱਡ",
+    "type_reefer": "ਰੀਫਰ",
+    "type_step_deck": "ਸਟੈਪ ਡੈੱਕ",
+    "type_tanker": "ਟੈਂਕਰ",
+    "type_dump": "ਡੰਪ",
+    "cabType": "ਕੈਬ ਦੀ ਕਿਸਮ",
+    "cabTypeSleeper": "ਸਲੀਪਰ",
+    "cabTypeDayCab": "ਡੇ ਕੈਬ",
+    "cabTypeOther": "ਹੋਰ",
+    "cabTypeNotApplicable": "ਲਾਗੂ ਨਹੀਂ",
+    "color": "ਰੰਗ",
+    "dimensions": "ਮਾਪ",
+    "dimensionsPlaceholder": "ਉਦਾਹਰਨ: 53 ਫੁੱਟ x 8.5 ਫੁੱਟ",
+    "type": "ਕਿਸਮ",
+    "details": "ਵੇਰਵੇ"
   },
   "invoices": {
     "title": "ਇਨਵੌਇਸ",
@@ -430,6 +485,7 @@
     "noTrucksYet": "ਹਾਲੇ ਕੋਈ ਵਾਹਨ ਨਹੀਂ ਹੈ। ਪਹਿਲਾਂ ਇੱਕ ਵਾਹਨ ਸ਼ਾਮਲ ਕਰੋ।",
     "noRemindersForTruck": "ਇਸ ਵਾਹਨ ਲਈ ਹਾਲੇ ਕੋਈ ਰੱਖ-ਰਖਾਅ ਰਿਮਾਈਂਡਰ ਸੈੱਟ ਨਹੀਂ ਹੈ।",
     "reminderType": "ਰਿਮਾਈਂਡਰ",
+    "dueProgress": "ਬਕਾਇਆ ਮਿਤੀ ਵੱਲ ਤਰੱਕੀ",
     "lastService": "ਆਖਰੀ ਸਰਵਿਸ",
     "nextDue": "ਅਗਲੀ ਬਕਾਇਆ ਮਿਤੀ",
     "status": "ਸਥਿਤੀ",
@@ -458,5 +514,17 @@
     "selectTruckRequired": "ਇੱਕ ਵਾਹਨ ਚੁਣੋ।",
     "serviceTypeRequired": "ਸਰਵਿਸ ਦੀ ਕਿਸਮ ਦਰਜ ਕਰੋ।",
     "notes": "ਨੋਟਸ"
+  },
+  "roles": {
+    "owner": "ਮਾਲਕ",
+    "solo": "ਸੋਲੋ ਆਪਰੇਟਰ",
+    "driver": "ਡਰਾਈਵਰ",
+    "dispatcher": "ਡਿਸਪੈਚਰ",
+    "finance": "ਵਿੱਤ",
+    "customer_admin": "ਗਾਹਕ ਐਡਮਿਨ",
+    "customer_viewer": "ਗਾਹਕ ਦਰਸ਼ਕ"
+  },
+  "language": {
+    "appliesEverywhere": "ਤੁਹਾਡੀ ਭਾਸ਼ਾ ਦੀ ਤਰਜੀਹ ਪੂਰੀ ਐਪ 'ਤੇ ਲਾਗੂ ਹੁੰਦੀ ਹੈ।"
   }
 }

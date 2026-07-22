@@ -24,9 +24,26 @@ export default async function AppLayout({
   const name = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || user.email || 'User'
   const preferredLanguage = profile?.preferred_language ?? 'en'
 
+  // roles is master data (abbreviation + color_token for the sidebar badge) —
+  // fetched here, server-side, and prop-drilled down rather than queried from
+  // the client Sidebar component, matching how preferredLanguage/role are
+  // already passed down.
+  const { data: roleRow } = await supabase
+    .from('roles')
+    .select('abbreviation, color_token')
+    .eq('code', role)
+    .single()
+
   return (
     <div className="flex h-screen bg-[#0f1923] overflow-hidden">
-      <Sidebar role={role} userName={name} userId={user.id} preferredLanguage={preferredLanguage} />
+      <Sidebar
+        role={role}
+        userName={name}
+        userId={user.id}
+        preferredLanguage={preferredLanguage}
+        roleAbbreviation={roleRow?.abbreviation}
+        roleColorToken={roleRow?.color_token}
+      />
       <main className="flex-1 overflow-y-auto">
         {children}
       </main>

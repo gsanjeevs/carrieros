@@ -4,6 +4,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getTranslations, getLocale } from 'next-intl/server'
 import DispatchPanel from '@/components/DispatchPanel'
+import LoadActionGrid from '@/components/LoadActionGrid'
 import LoadDocuments, { type DocType, type LoadDocument } from '@/components/LoadDocuments'
 import { formatDateTime, toDate } from '@/lib/format-datetime'
 import { formatMoney } from '@/lib/format-money'
@@ -158,7 +159,10 @@ export default async function LoadDetailPage({
   const canUploadDoc = ['owner', 'solo', 'dispatcher'].includes(profile.role)
   const canDeleteDoc = ['owner', 'solo'].includes(profile.role)
 
+  const isCancelled = load.status === 'cancelled'
   const currentIdx  = STATUS_FLOW.findIndex(s => s.key === load.status)
+  const TERMINAL_STATUSES = ['delivered', 'invoiced', 'paid', 'cancelled']
+  const canCancelLoad = !TERMINAL_STATUSES.includes(load.status ?? 'draft')
   const driverName  = load.drivers?.profiles
     ? [load.drivers.profiles.first_name, load.drivers.profiles.last_name].filter(Boolean).join(' ')
     : null
@@ -170,31 +174,58 @@ export default async function LoadDetailPage({
     <div className="p-8 max-w-5xl mx-auto">
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-8">
-        <div>
-          <div className="flex items-center gap-3 mb-1">
-            <Link href="/loads" className="text-slate-500 hover:text-white transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
-              <span className="material-symbols-outlined text-[20px]">arrow_back</span>
-            </Link>
-            <h1 className="text-2xl font-semibold text-white">{load.load_number}</h1>
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${STATUS_COLOR[load.status ?? 'draft'] ?? STATUS_COLOR.draft}`}>
-              {load.status ? t(`status_${load.status}` as never) : t('status_draft' as never)}
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-3">
+          <Link href="/loads" className="text-slate-500 hover:text-white transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
+            <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+          </Link>
+          <h1 className="text-2xl font-semibold text-white">{load.load_number}</h1>
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${STATUS_COLOR[load.status ?? 'draft'] ?? STATUS_COLOR.draft}`}>
+            {load.status ? t(`status_${load.status}` as never) : t('status_draft' as never)}
+          </span>
+        </div>
+
+        {/* Route strip */}
+        <div className="flex items-center gap-3 ml-9">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-[#f97316] shrink-0" />
+            <span className="text-white text-sm font-medium truncate">
+              {[load.pickup_city, load.pickup_state].filter(Boolean).join(', ') || '—'}
             </span>
           </div>
-          <p className="text-slate-400 text-sm ml-9">
-            {[load.pickup_city, load.pickup_state].filter(Boolean).join(', ')}
-            {' → '}
-            {[load.delivery_city, load.delivery_state].filter(Boolean).join(', ')}
+          <div className="flex-1 h-px bg-white/10 min-w-[24px] max-w-[80px]" />
+          <span className="material-symbols-outlined text-slate-600 text-[16px] -mx-1 shrink-0">arrow_forward</span>
+          <div className="flex-1 h-px bg-white/10 min-w-[24px] max-w-[80px]" />
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-[#1abc9c] shrink-0" />
+            <span className="text-white text-sm font-medium truncate">
+              {[load.delivery_city, load.delivery_state].filter(Boolean).join(', ') || '—'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Hero rate card */}
+      {showRate && (
+        <div className="bg-white/5 border border-white/8 rounded-xl p-6 mb-6 shadow-card-dark flex flex-col items-center text-center">
+          <p className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold mb-1">{t('rateHero')}</p>
+          <p className="text-4xl font-extrabold text-brand-orange">
+            {load.rate != null ? formatMoney(load.rate, carrierOrg?.currency ?? 'USD', locale) : '—'}
           </p>
         </div>
+      )}
+
+      {/* Action grid */}
+      <div className="mb-6">
+        <LoadActionGrid trackingToken={load.tracking_token ?? null} canCancel={canCancelLoad} />
       </div>
 
       {/* Status timeline */}
       <div className="bg-white/5 border border-white/8 rounded-xl p-5 mb-6 shadow-card-dark">
-        <div className="flex items-center gap-0 overflow-x-auto">
+        <div className={`flex items-center gap-0 overflow-x-auto ${isCancelled ? 'opacity-40 grayscale' : ''}`}>
           {STATUS_FLOW.map((s, i) => {
-            const done    = i < currentIdx
-            const current = i === currentIdx
+            const done    = !isCancelled && i < currentIdx
+            const current = !isCancelled && i === currentIdx
             return (
               <div key={s.key} className="flex items-center flex-1 min-w-0">
                 <div className="flex flex-col items-center gap-1 shrink-0">
@@ -217,6 +248,14 @@ export default async function LoadDetailPage({
             )
           })}
         </div>
+        {isCancelled && (
+          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-white/8">
+            <span className="material-symbols-outlined text-[18px] text-rose-400">cancel</span>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400">
+              {t('cancelledEndState')}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -250,11 +289,11 @@ export default async function LoadDetailPage({
             <InfoRow label={t('commodity')} value={load.commodity} />
             <InfoRow label={t('weight')}    value={load.weight_lbs ? `${Number(load.weight_lbs).toLocaleString()} lbs` : null} />
             <InfoRow label={t('miles')}     value={load.total_miles ? `${load.total_miles} mi` : null} />
-            {showRate && <InfoRow label={t('rate')} value={load.rate != null ? formatMoney(load.rate, carrierOrg?.currency ?? 'USD', locale) : null} />}
             <InfoRow label={t('intake')}    value={load.intake_method} />
           </div>
 
           {/* Documents */}
+          <div id="documents">
           <LoadDocuments
             documents={documents}
             loadId={load.id}
@@ -263,6 +302,7 @@ export default async function LoadDetailPage({
             canUpload={canUploadDoc}
             canDelete={canDeleteDoc}
           />
+          </div>
 
           {/* Timeline */}
           <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
@@ -295,7 +335,7 @@ export default async function LoadDetailPage({
 
         {/* Right: Dispatch panel */}
         <div className="space-y-6">
-          <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
+          <div id="assignment" className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark scroll-mt-6">
             <h2 className="text-white font-medium text-sm mb-4">{t('assignment')}</h2>
             <div className="space-y-3 mb-4">
               <div className="flex items-center gap-3">

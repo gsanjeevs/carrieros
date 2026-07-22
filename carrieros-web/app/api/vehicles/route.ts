@@ -45,24 +45,19 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json()
 
+  // Validate BEFORE burning a sequence number (the same bug class already
+  // fixed once in app/api/loads/route.ts — don't repeat it here).
+  if (!body.nickname || !body.vehicle_type_id)
+    return apiError('VALIDATION_ERROR', 'nickname and vehicle_type_id are required', 400)
+
   const vehicle_number = await generateVehicleNumber(supabase, profile.org_id)
-
-  // Placeholder default until the real vehicle-type picker ships (Phase 3D UI work).
-  const { data: vehicleType } = await supabase
-    .from('vehicle_types')
-    .select('id')
-    .eq('code', 'semi')
-    .single()
-
-  if (!vehicleType?.id)
-    return apiError('SERVER_ERROR', 'Default vehicle type not found', 500)
 
   const { data, error } = await supabase
     .from('vehicles')
     .insert({
-      carrier_org_id:    profile.org_id,
+      carrier_org_id:   profile.org_id,
       vehicle_number,
-      vehicle_type_id: vehicleType.id,
+      vehicle_type_id: body.vehicle_type_id,
       nickname:      body.nickname,
       year:          body.year          ?? null,
       make:          body.make          ?? null,
@@ -70,6 +65,9 @@ export async function POST(request: NextRequest) {
       vin:           body.vin           ?? null,
       license_plate: body.license_plate ?? null,
       license_state: body.license_state ?? null,
+      cab_type:      body.cab_type      ?? null,
+      color:         body.color         ?? null,
+      dimensions:    body.dimensions    ?? null,
     })
     .select('vehicle_number, nickname')
     .single()

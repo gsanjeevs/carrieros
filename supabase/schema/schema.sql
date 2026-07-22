@@ -1093,6 +1093,13 @@ CREATE POLICY "roles_select" ON roles FOR SELECT TO authenticated USING (true);
 
 ALTER TABLE languages ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "languages_select" ON languages FOR SELECT TO authenticated USING (true);
+-- Also readable by logged-out visitors: LanguageSwitcher renders on /login
+-- (decisions.md L4 — pick a language before you can even authenticate),
+-- and SECTION 8c's blanket base-table GRANT only covers
+-- authenticated/service_role, so anon needs both its own RLS policy and
+-- its own base SELECT grant (see SECTION 8c's note on that gotcha).
+CREATE POLICY "languages_select_anon" ON languages FOR SELECT TO anon USING (true);
+GRANT SELECT ON languages TO anon;
 
 ALTER TABLE tiers ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "tiers_select" ON tiers FOR SELECT TO authenticated USING (true);

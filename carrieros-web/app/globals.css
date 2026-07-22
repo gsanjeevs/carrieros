@@ -75,6 +75,7 @@
      no prior token existed for this motif. */
   --shadow-glow-success: 0 0 6px rgba(22, 163, 74, 0.6);
   --shadow-glow-warning: 0 0 6px rgba(217, 119, 6, 0.6);
+  --shadow-glow-danger: 0 0 6px rgba(225, 29, 72, 0.6);
 }
 
 /* Subtle dot-grid texture every mockup uses behind the whole app shell

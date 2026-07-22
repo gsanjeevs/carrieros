@@ -10,13 +10,27 @@ const STATUS_COLOR: Record<string, string> = {
   revoked:  'bg-slate-500/20 text-slate-400',
 }
 
+// CDL-card glow-dot status: red/rose when missing or already expired, amber
+// within 30 days of expiry, green when comfortably valid beyond that.
+function cdlGlowStatus(cdlExpiry: string | null): 'success' | 'warning' | 'danger' {
+  if (!cdlExpiry) return 'danger'
+  const daysUntil = (new Date(cdlExpiry).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+  if (daysUntil < 0) return 'danger'
+  if (daysUntil <= 30) return 'warning'
+  return 'success'
+}
+
 type Driver = {
   id: number
   driver_number: string
   invite_status: string
   default_vehicle_id: number | null
+  cdl_number: string | null
+  cdl_class: string | null
+  cdl_state: string | null
   cdl_expiry: string | null
   med_cert_expiry: string | null
+  endorsements: string[] | null
   is_active: boolean
   profiles: { first_name: string | null; last_name: string | null; phone: string | null } | null
 }
@@ -59,7 +73,7 @@ export default async function DriversPage({
   if (profile?.org_id) {
     const { data } = await supabase
       .from('drivers')
-      .select('id, driver_number, invite_status, default_vehicle_id, cdl_expiry, med_cert_expiry, is_active, profiles(first_name, last_name, phone)')
+      .select('id, driver_number, invite_status, default_vehicle_id, cdl_number, cdl_class, cdl_state, cdl_expiry, med_cert_expiry, endorsements, is_active, profiles(first_name, last_name, phone)')
       .eq('carrier_org_id', profile.org_id)
       .eq('is_active', true)
       .order('driver_number')
@@ -117,6 +131,12 @@ export default async function DriversPage({
                 const badge = STATUS_BADGE[driver.invite_status] ?? STATUS_BADGE.pending
                 const name = [driver.profiles?.first_name, driver.profiles?.last_name].filter(Boolean).join(' ') || '—'
 
+                const glow = cdlGlowStatus(driver.cdl_expiry)
+                const glowDotClass =
+                  glow === 'success' ? 'bg-[#16a34a] shadow-glow-success' :
+                  glow === 'warning' ? 'bg-amber-500 shadow-glow-warning' :
+                  'bg-rose-500 shadow-glow-danger'
+
                 return (
                   <tr key={driver.id} className="hover:bg-white/[0.07] transition-colors duration-150">
                     <td className="px-5 py-3.5 text-white font-medium">{driver.driver_number}</td>
@@ -127,10 +147,40 @@ export default async function DriversPage({
                       </span>
                     </td>
                     <td className="px-4 py-3.5 text-slate-400">{driver.profiles?.phone ?? '—'}</td>
-                    <td className="px-4 py-3.5 text-slate-400">
-                      {driver.cdl_expiry
-                        ? new Date(driver.cdl_expiry).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })
-                        : '—'}
+                    <td className="px-4 py-3.5">
+                      <div className="inline-flex flex-col gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 min-w-[148px]">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-400 text-2xs font-semibold tracking-wide">
+                            {driver.cdl_class ? t('cdlClass', { class: driver.cdl_class }) : t('cdlClassUnknown')}
+                          </span>
+                          <span
+                            className={`w-2 h-2 rounded-full shrink-0 ${glowDotClass}`}
+                            style={{
+                              boxShadow:
+                                glow === 'success' ? 'var(--shadow-glow-success)' :
+                                glow === 'warning' ? 'var(--shadow-glow-warning)' :
+                                'var(--shadow-glow-danger)',
+                            }}
+                          />
+                        </div>
+                        <div className="text-slate-400 text-xs">
+                          {driver.cdl_expiry
+                            ? new Date(driver.cdl_expiry).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })
+                            : '—'}
+                        </div>
+                        {driver.endorsements && driver.endorsements.length > 0 && (
+                          <div className="flex flex-wrap gap-1 pt-0.5">
+                            {driver.endorsements.map((code) => (
+                              <span
+                                key={code}
+                                className="inline-flex items-center px-1.5 py-0.5 rounded border border-amber-500/40 bg-amber-500/5 text-amber-400 text-2xs font-medium"
+                              >
+                                {t.has(`endorsement_${code}`) ? t(`endorsement_${code}`) : code}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3.5 text-slate-400">
                       {driver.med_cert_expiry

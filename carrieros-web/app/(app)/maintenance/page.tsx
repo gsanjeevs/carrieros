@@ -19,6 +19,7 @@ import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { formatDate, toDate } from '@/lib/format-datetime'
 import LogServiceButton from './LogServiceButton'
+import { getMaintenanceIcon } from '@/components/icons/maintenance'
 
 const VIEW_ROLES   = ['owner', 'solo', 'dispatcher']
 const MANAGE_ROLES = ['owner', 'solo']
@@ -73,6 +74,54 @@ const STATUS_COLOR: Record<Status, string> = {
   dueSoon: 'bg-amber-500/20 text-amber-400',
   ok:      'bg-[#16a34a]/20 text-[#16a34a]',
   noDate:  'bg-slate-500/20 text-slate-400',
+}
+
+// date-only equivalent of LogServiceButton's addMonths, run in reverse — used
+// to back into a baseline date when a reminder has next_due_date +
+// trigger_months but no last_service_date (e.g. a reminder created directly
+// with a due date, never yet serviced).
+function subtractMonths(dateStr: string, months: number): string {
+  const d = toDate(dateStr)
+  d.setMonth(d.getMonth() - months)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+type Progress = { pct: number; status: Status } | null
+
+// Progress toward a reminder's due date, as a 0–1 fraction of the interval
+// between when the clock started (last_service_date, or — if that's
+// missing — next_due_date minus trigger_months as an approximation) and
+// next_due_date itself.
+//
+// next_due_miles exists on this table too, but there is no live
+// current-odometer feed anywhere in the schema to compare it against (see
+// the schema.sql note above maintenance_reminders' upcoming-reminders view;
+// vehicles has no odometer column and service_logs/dvir odometer readings
+// are only point-in-time snapshots from past services). So mileage-based
+// reminders fall back to the plain status chip instead of a fabricated bar.
+function computeProgress(r: Reminder): Progress {
+  const status = computeStatus(r.next_due_date)
+  if (!r.next_due_date) return null
+
+  const baseline = r.last_service_date
+    ?? (r.trigger_months ? subtractMonths(r.next_due_date, r.trigger_months) : null)
+  if (!baseline) return null
+
+  const start = toDate(baseline).getTime()
+  const end = toDate(r.next_due_date).getTime()
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
+
+  if (end <= start) return { pct: 1, status }
+  const pct = (now.getTime() - start) / (end - start)
+  return { pct: Math.min(1, Math.max(0, pct)), status }
+}
+
+const PROGRESS_BAR_COLOR: Record<Status, string> = {
+  overdue: 'bg-red-500',
+  dueSoon: 'bg-amber-500',
+  ok:      'bg-[#16a34a]',
+  noDate:  'bg-slate-600',
 }
 
 export default async function MaintenancePage({
@@ -190,17 +239,41 @@ export default async function MaintenancePage({
                     <tbody className="divide-y divide-white/5">
                       {vehicleReminders.map((r) => {
                         const status = computeStatus(r.next_due_date)
+                        const progress = computeProgress(r)
                         const nextDue = [
                           r.next_due_date ? formatDate(r.next_due_date, profile) : null,
                           r.next_due_miles ? t('milesValue', { miles: r.next_due_miles.toLocaleString() }) : null,
                         ].filter(Boolean).join(' · ') || '—'
+                        const Icon = getMaintenanceIcon(r.reminder_type)
                         return (
                           <tr key={r.id} className="hover:bg-white/[0.07] transition-colors duration-150">
-                            <td className="px-5 py-3 text-white font-medium">{r.reminder_type}</td>
+                            <td className="px-5 py-3 text-white font-medium">
+                              <div className="flex items-center gap-2.5">
+                                <Icon className="w-4 h-4 shrink-0 text-slate-400" />
+                                {r.reminder_type}
+                              </div>
+                            </td>
                             <td className="px-4 py-3 text-slate-400">
                               {r.last_service_date ? formatDate(r.last_service_date, profile) : t('never')}
                             </td>
-                            <td className="px-4 py-3 text-slate-300">{nextDue}</td>
+                            <td className="px-4 py-3 text-slate-300">
+                              <div>{nextDue}</div>
+                              {progress && (
+                                <div
+                                  className="mt-1.5 h-1.5 w-24 rounded-full bg-white/10 overflow-hidden"
+                                  role="progressbar"
+                                  aria-valuenow={Math.round(progress.pct * 100)}
+                                  aria-valuemin={0}
+                                  aria-valuemax={100}
+                                  aria-label={t('dueProgress')}
+                                >
+                                  <div
+                                    className={`h-full rounded-full transition-[width] ${PROGRESS_BAR_COLOR[progress.status]}`}
+                                    style={{ width: `${Math.round(progress.pct * 100)}%` }}
+                                  />
+                                </div>
+                              )}
+                            </td>
                             <td className="px-5 py-3 text-right">
                               <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLOR[status]}`}>
                                 {t(`status_${status}`)}

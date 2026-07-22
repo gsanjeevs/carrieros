@@ -9,18 +9,49 @@
 // user, not the company), so when `userId` is passed this writes there
 // directly; the `locale` cookie is set immediately too so the reload
 // doesn't have to wait on proxy.ts's next request to resync it.
-import { useState } from 'react'
+//
+// Language options come from the `languages` master-data table rather
+// than a hardcoded list. We render `native_name`/`flag_emoji`, NOT the
+// `label` column — `label` is English-only dev-reference data (same rule
+// as vehicle_types.label), while native_name is always shown in its own
+// script regardless of the current UI locale.
+import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 
-const LANGUAGES: { code: string; label: string }[] = [
-  { code: 'en', label: 'English' },
-  { code: 'es', label: 'Español' },
-  { code: 'pa', label: 'ਪੰਜਾਬੀ' },
-  { code: 'ur', label: 'اردو' },
-]
+interface Language {
+  code: string
+  native_name: string
+  flag_emoji: string
+}
 
-export default function LanguageSwitcher({ userId, current }: { userId?: string; current: string }) {
+export default function LanguageSwitcher({
+  userId,
+  current,
+  compact = false,
+}: {
+  userId?: string
+  current: string
+  compact?: boolean
+}) {
+  const t = useTranslations('language')
+  const [languages, setLanguages] = useState<Language[]>([])
   const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    const supabase = createClient()
+    supabase
+      .from('languages')
+      .select('code, native_name, flag_emoji')
+      .order('display_order')
+      .then(({ data }) => {
+        if (!cancelled && data) setLanguages(data)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   async function selectLanguage(code: string) {
     if (code === current || saving) return
@@ -36,19 +67,73 @@ export default function LanguageSwitcher({ userId, current }: { userId?: string;
     window.location.reload()
   }
 
+  if (languages.length === 0) {
+    return <div className={compact ? 'h-9' : 'h-16'} aria-hidden />
+  }
+
+  if (compact) {
+    return (
+      <div className="flex items-center gap-1.5" role="group" aria-label="Language">
+        {languages.map((l) => {
+          const selected = l.code === current
+          return (
+            <button
+              key={l.code}
+              type="button"
+              title={l.native_name}
+              aria-label={l.native_name}
+              aria-pressed={selected}
+              disabled={saving}
+              onClick={() => selectLanguage(l.code)}
+              className={`relative w-8 h-8 rounded-lg flex items-center justify-center text-base transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
+                selected
+                  ? 'bg-brand-orange/10 border-2 border-brand-orange'
+                  : 'border border-white/10 bg-white/5 hover:bg-white/10'
+              }`}
+            >
+              <span aria-hidden>{l.flag_emoji}</span>
+              {selected && (
+                <span className="material-symbols-outlined absolute -top-1.5 -right-1.5 text-[13px] leading-none text-brand-orange bg-navy rounded-full">
+                  check_circle
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+    )
+  }
+
   return (
-    <select
-      value={current}
-      onChange={(e) => selectLanguage(e.target.value)}
-      disabled={saving}
-      aria-label="Language"
-      className="rounded-lg bg-white/5 border border-white/10 px-2.5 py-1.5 text-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-[#f97316]"
-    >
-      {LANGUAGES.map((l) => (
-        <option key={l.code} value={l.code} className="bg-[#0f1923]">
-          {l.label}
-        </option>
-      ))}
-    </select>
+    <div>
+      <div className="grid grid-cols-2 gap-2.5" role="group" aria-label="Language">
+        {languages.map((l) => {
+          const selected = l.code === current
+          return (
+            <button
+              key={l.code}
+              type="button"
+              disabled={saving}
+              aria-pressed={selected}
+              onClick={() => selectLanguage(l.code)}
+              className={`relative flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
+                selected
+                  ? 'border-2 border-brand-orange bg-brand-orange/10'
+                  : 'border border-white/10 bg-white/5 hover:bg-white/10'
+              }`}
+            >
+              <span className="text-lg leading-none" aria-hidden>{l.flag_emoji}</span>
+              <span className="text-white text-sm font-medium truncate">{l.native_name}</span>
+              {selected && (
+                <span className="material-symbols-outlined absolute top-1.5 right-1.5 text-[16px] leading-none text-brand-orange">
+                  check_circle
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+      <p className="mt-2.5 text-xs text-slate-500">{t('appliesEverywhere')}</p>
+    </div>
   )
 }
