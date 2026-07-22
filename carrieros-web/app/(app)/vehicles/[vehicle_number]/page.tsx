@@ -9,24 +9,9 @@ import { VEHICLE_TYPE_ICONS } from '@/components/icons/vehicle-types'
 import { MAINTENANCE_ICONS } from '@/components/icons/maintenance'
 import { formatDate, formatDateTime, toDate } from '@/lib/format-datetime'
 import { formatMoney } from '@/lib/format-money'
-
-const LOAD_STATUS_COLOR: Record<string, string> = {
-  draft:       'bg-slate-500/20 text-slate-400',
-  scheduled:   'bg-blue-500/20 text-blue-400',
-  dispatched:  'bg-[#f97316]/20 text-[#f97316]',
-  picked_up:   'bg-amber-500/20 text-amber-400',
-  in_transit:  'bg-[#1abc9c]/20 text-[#1abc9c]',
-  delivered:   'bg-[#16a34a]/20 text-[#16a34a]',
-  invoiced:    'bg-purple-500/20 text-purple-400',
-  paid:        'bg-[#16a34a]/20 text-[#16a34a]',
-  cancelled:   'bg-rose-500/10 text-rose-400',
-}
-
-const VEHICLE_STATUS_COLOR: Record<string, string> = {
-  active:  'bg-[#16a34a]/20 text-[#16a34a]',
-  idle:    'bg-slate-500/20 text-slate-400',
-  in_shop: 'bg-amber-500/20 text-amber-400',
-}
+import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
+import { vehicleStatusVariant, type VehicleStatus } from '@/lib/domain/vehicle-status'
+import StatusBadge, { type StatusBadgeVariant } from '@/components/ui/StatusBadge'
 
 type MaintStatus = 'overdue' | 'dueSoon' | 'ok' | 'noDate'
 
@@ -41,11 +26,15 @@ function computeMaintStatus(nextDueDate: string | null): MaintStatus {
   return 'ok'
 }
 
-const MAINT_STATUS_COLOR: Record<MaintStatus, string> = {
-  overdue: 'bg-red-500/20 text-red-400',
-  dueSoon: 'bg-amber-500/20 text-amber-400',
-  ok:      'bg-[#16a34a]/20 text-[#16a34a]',
-  noDate:  'bg-slate-500/20 text-slate-400',
+// Not a DB column (computed client-side from vehicles.next_due_date), and
+// only rendered on this page — no cross-file drift risk, so this stays
+// local rather than becoming a lib/domain/ module (unlike LoadStatus/
+// VehicleStatus/InviteStatus, which are duplicated elsewhere).
+const MAINT_STATUS_VARIANT: Record<MaintStatus, StatusBadgeVariant> = {
+  overdue: 'danger',
+  dueSoon: 'warning',
+  ok:      'success',
+  noDate:  'neutral',
 }
 
 function subtractMonths(dateStr: string, months: number): string {
@@ -255,9 +244,9 @@ export default async function VehicleDetailPage({
           {TypeIcon
             ? <TypeIcon className="w-16 h-16 text-slate-400 mb-3" />
             : <span className="material-symbols-outlined text-slate-600 text-5xl mb-3">fire_truck</span>}
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${VEHICLE_STATUS_COLOR[vehicle.status ?? 'active'] ?? VEHICLE_STATUS_COLOR.active}`}>
+          <StatusBadge variant={vehicleStatusVariant((vehicle.status ?? 'active') as VehicleStatus)}>
             {t(`vstatus_${vehicle.status ?? 'active'}` as never)}
-          </span>
+          </StatusBadge>
         </div>
       </div>
     </div>
@@ -314,9 +303,9 @@ export default async function VehicleDetailPage({
                     </Link>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${LOAD_STATUS_COLOR[l.status ?? 'draft'] ?? LOAD_STATUS_COLOR.draft}`}>
+                    <StatusBadge variant={loadStatusVariant((l.status ?? 'draft') as LoadStatus)} size="sm">
                       {tLoads(`status_${l.status ?? 'draft'}` as never)}
-                    </span>
+                    </StatusBadge>
                   </td>
                   <td className="px-4 py-3 text-slate-300">
                     {[l.pickup_city, l.pickup_state].filter(Boolean).join(', ')} → {[l.delivery_city, l.delivery_state].filter(Boolean).join(', ')}
@@ -383,9 +372,9 @@ export default async function VehicleDetailPage({
                       )}
                     </td>
                     <td className="px-5 py-3 text-right">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${MAINT_STATUS_COLOR[status]}`}>
+                      <StatusBadge variant={MAINT_STATUS_VARIANT[status]} size="sm">
                         {t(`mstatus_${status}`)}
-                      </span>
+                      </StatusBadge>
                     </td>
                   </tr>
                 )
@@ -500,9 +489,9 @@ export default async function VehicleDetailPage({
             <span className="material-symbols-outlined text-[20px]">arrow_back</span>
           </Link>
           <h1 className="text-2xl font-semibold text-white">{label}</h1>
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${VEHICLE_STATUS_COLOR[vehicle.status ?? 'active'] ?? VEHICLE_STATUS_COLOR.active}`}>
+          <StatusBadge variant={vehicleStatusVariant((vehicle.status ?? 'active') as VehicleStatus)}>
             {t(`vstatus_${vehicle.status ?? 'active'}` as never)}
-          </span>
+          </StatusBadge>
         </div>
         <p className="text-slate-400 text-sm ml-9">{ymm || vt ? [ymm, vt ? t(`type_${vt.code}` as never) : null].filter(Boolean).join(' · ') : ''}</p>
       </div>

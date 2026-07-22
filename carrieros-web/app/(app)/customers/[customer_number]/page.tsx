@@ -17,29 +17,13 @@ import { formatMoney } from '@/lib/format-money'
 import { hasFeature } from '@/lib/entitlements'
 import CustomerTabs from './CustomerTabs'
 import CustomerContacts from '@/components/CustomerContacts'
+import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
+import { invoiceStatusVariant, type InvoiceStatus } from '@/lib/domain/invoice-status'
+import StatusBadge from '@/components/ui/StatusBadge'
 
 import { INVOICE_ROLES } from '@/lib/roles-policy'
 
 const VIEW_ROLES = ['owner', 'solo', 'dispatcher', 'finance']
-
-const LOAD_STATUS_COLOR: Record<string, string> = {
-  draft:       'bg-slate-500/20 text-slate-400',
-  scheduled:   'bg-blue-500/20 text-blue-400',
-  dispatched:  'bg-[#f97316]/20 text-[#f97316]',
-  picked_up:   'bg-amber-500/20 text-amber-400',
-  in_transit:  'bg-[#1abc9c]/20 text-[#1abc9c]',
-  delivered:   'bg-[#16a34a]/20 text-[#16a34a]',
-  invoiced:    'bg-purple-500/20 text-purple-400',
-  paid:        'bg-[#16a34a]/20 text-[#16a34a]',
-  cancelled:   'bg-rose-500/10 text-rose-400',
-}
-
-const INVOICE_STATUS_COLOR: Record<string, string> = {
-  draft:   'bg-slate-500/20 text-slate-400',
-  sent:    'bg-blue-500/20 text-blue-400',
-  paid:    'bg-[#16a34a]/20 text-[#16a34a]',
-  overdue: 'bg-red-500/20 text-red-400',
-}
 
 const SEVERITY_COLOR: Record<string, string> = {
   info:    'bg-blue-500/20 text-blue-400',
@@ -306,9 +290,9 @@ export default async function CustomerDetailPage({
                 </Link>
               </td>
               <td className="px-4 py-3.5">
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${LOAD_STATUS_COLOR[l.status ?? 'draft'] ?? LOAD_STATUS_COLOR.draft}`}>
+                <StatusBadge variant={loadStatusVariant((l.status ?? 'draft') as LoadStatus)}>
                   {tLoads(`status_${l.status ?? 'draft'}` as never)}
-                </span>
+                </StatusBadge>
               </td>
               <td className="px-4 py-3.5 text-slate-300">
                 {[l.pickup_city, l.pickup_state].filter(Boolean).join(', ') || '—'}
@@ -384,9 +368,9 @@ export default async function CustomerDetailPage({
                 </Link>
               </td>
               <td className="px-4 py-3.5">
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${INVOICE_STATUS_COLOR[inv.status ?? 'draft'] ?? INVOICE_STATUS_COLOR.draft}`}>
+                <StatusBadge variant={invoiceStatusVariant((inv.status ?? 'draft') as InvoiceStatus)}>
                   {tInvoices(`status_${inv.status ?? 'draft'}` as never)}
-                </span>
+                </StatusBadge>
               </td>
               <td className="px-4 py-3.5 text-slate-400">{formatDate(inv.due_date, profile)}</td>
               <td className="px-5 py-3.5 text-right text-white font-medium">{formatMoney(inv.amount, currency, locale)}</td>

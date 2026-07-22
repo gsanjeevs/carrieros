@@ -6,22 +6,9 @@ import Link from 'next/link'
 import InviteDriverButton from './InviteDriverButton'
 import ExceptionChip from '@/components/ExceptionChip'
 import { getExceptions } from '@/lib/exceptions'
-
-const STATUS_COLOR: Record<string, string> = {
-  pending:  'bg-amber-500/20 text-amber-400',
-  accepted: 'bg-[#16a34a]/20 text-[#16a34a]',
-  revoked:  'bg-slate-500/20 text-slate-400',
-}
-
-// CDL-card glow-dot status: red/rose when missing or already expired, amber
-// within 30 days of expiry, green when comfortably valid beyond that.
-function cdlGlowStatus(cdlExpiry: string | null): 'success' | 'warning' | 'danger' {
-  if (!cdlExpiry) return 'danger'
-  const daysUntil = (new Date(cdlExpiry).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-  if (daysUntil < 0) return 'danger'
-  if (daysUntil <= 30) return 'warning'
-  return 'success'
-}
+import { inviteStatusVariant, type InviteStatus } from '@/lib/domain/invite-status'
+import { cdlGlowStatus } from '@/lib/domain/driver-compliance'
+import StatusBadge from '@/components/ui/StatusBadge'
 
 type Driver = {
   id: number
@@ -65,10 +52,6 @@ export default async function DriversPage({
 
   const t = await getTranslations('drivers')
   const locale = await getLocale()
-
-  const STATUS_BADGE: Record<string, { label: string; color: string }> = Object.fromEntries(
-    Object.entries(STATUS_COLOR).map(([key, color]) => [key, { label: t(`inviteStatus_${key}`), color }])
-  )
 
   let drivers: Driver[] = []
   let vehicles: Vehicle[] = []
@@ -146,7 +129,7 @@ export default async function DriversPage({
             </thead>
             <tbody className="divide-y divide-white/5">
               {drivers.map((driver) => {
-                const badge = STATUS_BADGE[driver.invite_status] ?? STATUS_BADGE.pending
+                const inviteStatus = (driver.invite_status || 'pending') as InviteStatus
                 const name = [driver.profiles?.first_name, driver.profiles?.last_name].filter(Boolean).join(' ') || '—'
 
                 const glow = cdlGlowStatus(driver.cdl_expiry)
@@ -168,9 +151,9 @@ export default async function DriversPage({
                     </td>
                     <td className="px-4 py-3.5 text-slate-300">{name}</td>
                     <td className="px-4 py-3.5">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${badge.color}`}>
-                        {badge.label}
-                      </span>
+                      <StatusBadge variant={inviteStatusVariant(inviteStatus)} size="sm">
+                        {t(`inviteStatus_${inviteStatus}`)}
+                      </StatusBadge>
                     </td>
                     <td className="px-4 py-3.5 text-slate-400">{driver.profiles?.phone ?? '—'}</td>
                     <td className="px-4 py-3.5">

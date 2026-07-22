@@ -7,36 +7,10 @@ import DriverTabs from './DriverTabs'
 import DriverDocuments, { type DriverDocType, type DriverDocument } from '@/components/DriverDocuments'
 import { formatDate, formatDateTime } from '@/lib/format-datetime'
 import { formatMoney } from '@/lib/format-money'
-
-const INVITE_STATUS_COLOR: Record<string, string> = {
-  pending:  'bg-amber-500/20 text-amber-400',
-  accepted: 'bg-[#16a34a]/20 text-[#16a34a]',
-  revoked:  'bg-slate-500/20 text-slate-400',
-}
-
-const LOAD_STATUS_COLOR: Record<string, string> = {
-  draft:      'bg-slate-500/20 text-slate-400',
-  scheduled:  'bg-blue-500/20 text-blue-400',
-  dispatched: 'bg-[#f97316]/20 text-[#f97316]',
-  picked_up:  'bg-amber-500/20 text-amber-400',
-  in_transit: 'bg-[#1abc9c]/20 text-[#1abc9c]',
-  delivered:  'bg-[#16a34a]/20 text-[#16a34a]',
-  invoiced:   'bg-purple-500/20 text-purple-400',
-  paid:       'bg-[#16a34a]/20 text-[#16a34a]',
-  cancelled:  'bg-rose-500/10 text-rose-400',
-}
-
-// CDL-card glow-dot status: red/rose when missing or already expired, amber
-// within 30 days of expiry, green when comfortably valid beyond that.
-// Duplicated from app/(app)/drivers/page.tsx (deliberately not imported —
-// that file is owned by a concurrent change; keep this page self-contained).
-function cdlGlowStatus(cdlExpiry: string | null): 'success' | 'warning' | 'danger' {
-  if (!cdlExpiry) return 'danger'
-  const daysUntil = (new Date(cdlExpiry).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-  if (daysUntil < 0) return 'danger'
-  if (daysUntil <= 30) return 'warning'
-  return 'success'
-}
+import { inviteStatusVariant, type InviteStatus } from '@/lib/domain/invite-status'
+import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
+import { cdlGlowStatus } from '@/lib/domain/driver-compliance'
+import StatusBadge from '@/components/ui/StatusBadge'
 
 function InfoRow({ label, value }: { label: string; value: string | number | null | undefined }) {
   return (
@@ -170,7 +144,7 @@ export default async function DriverDetailPage({
     glow === 'success' ? 'bg-[#16a34a] shadow-glow-success' :
     glow === 'warning' ? 'bg-amber-500 shadow-glow-warning' :
     'bg-rose-500 shadow-glow-danger'
-  const inviteBadge = INVITE_STATUS_COLOR[driver.invite_status ?? 'pending'] ?? INVITE_STATUS_COLOR.pending
+  const inviteStatus = (driver.invite_status ?? 'pending') as InviteStatus
 
   const vehicleLabel = driver.vehicles
     ? `${driver.vehicles.vehicle_number ?? ''}${driver.vehicles.nickname ? ` — ${driver.vehicles.nickname}` : ''}`.trim()
@@ -216,8 +190,10 @@ export default async function DriverDetailPage({
             </div>
           )}
           <p className="text-white text-sm font-medium">{driverName}</p>
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold mt-2 ${inviteBadge}`}>
-            {t(`inviteStatus_${driver.invite_status}` as never)}
+          <span className="mt-2">
+            <StatusBadge variant={inviteStatusVariant(inviteStatus)}>
+              {t(`inviteStatus_${driver.invite_status}` as never)}
+            </StatusBadge>
           </span>
         </div>
 
@@ -326,9 +302,9 @@ export default async function DriverDetailPage({
                     </Link>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${LOAD_STATUS_COLOR[l.status ?? 'draft'] ?? LOAD_STATUS_COLOR.draft}`}>
+                    <StatusBadge variant={loadStatusVariant((l.status ?? 'draft') as LoadStatus)} size="sm">
                       {l.status ?? 'draft'}
-                    </span>
+                    </StatusBadge>
                   </td>
                   <td className="px-4 py-3 text-slate-300">
                     {[l.pickup_city, l.pickup_state].filter(Boolean).join(', ')} → {[l.delivery_city, l.delivery_state].filter(Boolean).join(', ')}
@@ -411,9 +387,9 @@ export default async function DriverDetailPage({
             <span className="material-symbols-outlined text-[20px]">arrow_back</span>
           </Link>
           <h1 className="text-2xl font-semibold text-white">{driverName}</h1>
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${inviteBadge}`}>
+          <StatusBadge variant={inviteStatusVariant(inviteStatus)}>
             {t(`inviteStatus_${driver.invite_status}` as never)}
-          </span>
+          </StatusBadge>
         </div>
         <p className="text-slate-400 text-sm ml-9">{driver.driver_number}</p>
       </div>
