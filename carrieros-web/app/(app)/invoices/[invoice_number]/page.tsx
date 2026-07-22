@@ -94,7 +94,7 @@ export default async function InvoiceDetailPage({
       <div className="flex items-start justify-between mb-8">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <Link href="/invoices" className="text-slate-500 hover:text-white transition rounded focus:outline-none focus:ring-2 focus:ring-[#f97316]/50">
+            <Link href="/invoices" className="text-slate-500 hover:text-white transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
               <span className="material-symbols-outlined text-[20px]">arrow_back</span>
             </Link>
             <h1 className="text-2xl font-semibold text-white">{invoice.invoice_number}</h1>
@@ -117,7 +117,7 @@ export default async function InvoiceDetailPage({
         {/* Left: summary + line items */}
         <div className="lg:col-span-2 space-y-6">
 
-          <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+          <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
             <h2 className="text-white font-medium text-sm mb-3">{t('summary')}</h2>
             <InfoRow label={t('from')} value={org?.name ?? '—'} />
             <InfoRow label={t('customer')} value={customerName ?? '—'} />
@@ -125,7 +125,7 @@ export default async function InvoiceDetailPage({
               label={t('load')}
               value={
                 invoice.loads?.load_number ? (
-                  <Link href={`/loads/${invoice.loads.load_number}`} className="text-[#f97316] hover:underline rounded focus:outline-none focus:ring-2 focus:ring-[#f97316]/50">
+                  <Link href={`/loads/${invoice.loads.load_number}`} className="text-[#f97316] hover:underline rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
                     {invoice.loads.load_number}
                   </Link>
                 ) : '—'
@@ -145,7 +145,7 @@ export default async function InvoiceDetailPage({
           </div>
 
           {/* Line items */}
-          <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+          <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
             <h2 className="text-white font-medium text-sm px-5 pt-5 pb-3">{t('lineItems')}</h2>
             <table className="w-full text-sm">
               <thead>
@@ -182,7 +182,7 @@ export default async function InvoiceDetailPage({
           </div>
 
           {invoice.notes && (
-            <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+            <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
               <h2 className="text-white font-medium text-sm mb-2">{t('notes')}</h2>
               <p className="text-slate-400 text-sm whitespace-pre-wrap">{invoice.notes}</p>
             </div>

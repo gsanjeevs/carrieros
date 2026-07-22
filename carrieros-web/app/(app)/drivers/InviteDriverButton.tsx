@@ -85,7 +85,7 @@ export default function InviteDriverButton({ vehicles, variant }: { vehicles: Ve
       {variant === 'empty' ? (
         <button
           onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
+          className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
         >
           <span className="material-symbols-outlined text-[16px]">add</span>
           {t('inviteFirstDriver')}
@@ -93,7 +93,7 @@ export default function InviteDriverButton({ vehicles, variant }: { vehicles: Ve
       ) : (
         <button
           onClick={() => setOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
+          className="flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
           {t('inviteDriver')}
@@ -102,10 +102,10 @@ export default function InviteDriverButton({ vehicles, variant }: { vehicles: Ve
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
-          <div className="w-full max-w-md bg-[#0f1923] border border-white/10 rounded-2xl p-6 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+          <div className="w-full max-w-md bg-[#0f1923] border border-white/10 rounded-2xl p-6 shadow-modal-dark">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-white font-semibold text-lg">{t('inviteDriver')}</h2>
-              <button onClick={close} className="text-slate-500 hover:text-white transition rounded focus:outline-none focus:ring-2 focus:ring-[#f97316]/50">
+              <button onClick={close} className="text-slate-500 hover:text-white transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
@@ -163,14 +163,14 @@ export default function InviteDriverButton({ vehicles, variant }: { vehicles: Ve
                 <button
                   onClick={close}
                   disabled={loading}
-                  className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
+                  className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
                 >
                   {tCommon('cancel')}
                 </button>
                 <button
                   onClick={submit}
                   disabled={loading || !form.email}
-                  className="flex-2 flex-grow py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
+                  className="flex-2 flex-grow py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
                 >
                   {loading ? t('sendingInvite') : t('sendInvite')}
                 </button>

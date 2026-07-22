@@ -99,7 +99,7 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
         {kpis.map((kpi) => (
-          <div key={kpi.label} className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+          <div key={kpi.label} className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
             <div className="flex items-start justify-between mb-3">
               <span className="text-slate-400 text-sm font-medium">{kpi.label}</span>
               <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${kpi.color}20` }}>
@@ -112,16 +112,16 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      <div className="bg-white/5 border border-white/8 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+      <div className="bg-white/5 border border-white/8 rounded-xl shadow-card-dark">
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
           <h2 className="text-white font-medium text-sm">{t('recentLoads')}</h2>
-          <a href="/loads" className="text-[#f97316] text-xs hover:underline rounded focus:outline-none focus:ring-2 focus:ring-[#f97316]/50">{t('viewAll')}</a>
+          <a href="/loads" className="text-[#f97316] text-xs hover:underline rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">{t('viewAll')}</a>
         </div>
         {recentLoads.length === 0 ? (
           <div className="px-5 py-12 text-center">
             <span className="material-symbols-outlined text-slate-600 text-4xl">local_shipping</span>
             <p className="text-slate-500 text-sm mt-3">{t('noLoadsYet')}</p>
-            <a href="/loads/new" className="inline-block mt-4 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-[#f97316]/50">
+            <a href="/loads/new" className="inline-block mt-4 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
               {t('createFirstLoad')}
             </a>
           </div>
@@ -138,7 +138,7 @@ export default async function DashboardPage() {
                 <Link
                   key={load.id}
                   href={`/loads/${load.load_number}`}
-                  className="flex items-center justify-between px-5 py-3.5 hover:bg-white/[0.07] hover:shadow-[0_8px_24px_rgba(0,0,0,0.5)] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
+                  className="flex items-center justify-between px-5 py-3.5 hover:bg-white/[0.07] hover:shadow-hover-dark transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <span className="text-white font-medium">{load.load_number}</span>

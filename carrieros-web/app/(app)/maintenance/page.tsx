@@ -153,14 +153,14 @@ export default async function MaintenancePage({
       </div>
 
       {params.logged && (
-        <div className="mb-6 flex items-center gap-3 rounded-lg bg-[#16a34a]/10 border border-[#16a34a]/20 px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+        <div className="mb-6 flex items-center gap-3 rounded-lg bg-[#16a34a]/10 border border-[#16a34a]/20 px-4 py-3 shadow-card-dark">
           <span className="material-symbols-outlined text-[#16a34a] text-[18px]">check_circle</span>
           <p className="text-[#16a34a] text-sm">{t('loggedSuccess', { truck: params.logged })}</p>
         </div>
       )}
 
       {vehicles.length === 0 ? (
-        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-card-dark">
           <span className="material-symbols-outlined text-slate-600 text-4xl">build</span>
           <p className="text-slate-500 text-sm mt-3">{t('noTrucksYet')}</p>
         </div>
@@ -169,7 +169,7 @@ export default async function MaintenancePage({
           {vehicles.map((vehicle) => {
             const vehicleReminders = remindersByVehicle.get(vehicle.id) ?? []
             return (
-              <div key={vehicle.id} className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+              <div key={vehicle.id} className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
                 <div className="px-5 py-3.5 border-b border-white/5 flex items-center gap-2">
                   <span className="material-symbols-outlined text-slate-500 text-[18px]">fire_truck</span>
                   <span className="text-white font-medium">{vehicle.vehicle_number}</span>
@@ -220,11 +220,11 @@ export default async function MaintenancePage({
 
       <h2 className="text-white font-semibold text-lg mb-3">{t('recentServiceLogs')}</h2>
       {logs.length === 0 ? (
-        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-10 text-center shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-10 text-center shadow-card-dark">
           <p className="text-slate-500 text-sm">{t('noServiceLogsYet')}</p>
         </div>
       ) : (
-        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/5">

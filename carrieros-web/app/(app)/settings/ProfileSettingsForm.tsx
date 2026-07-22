@@ -143,7 +143,7 @@ export default function ProfileSettingsForm({
       <button
         onClick={save}
         disabled={saving}
-        className="px-5 py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
+        className="px-5 py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
       >
         {saving ? t('saving') : saved ? t('saved') : t('saveChanges')}
       </button>

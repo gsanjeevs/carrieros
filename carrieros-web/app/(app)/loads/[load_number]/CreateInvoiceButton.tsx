@@ -35,12 +35,12 @@ export default function CreateInvoiceButton({
 
   if (existingInvoiceNumber) {
     return (
-      <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+      <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
         <h2 className="text-white font-medium text-sm mb-3">{t('billing')}</h2>
         <p className="text-slate-400 text-sm mb-3">{t('loadAlreadyInvoiced')}</p>
         <Link
           href={`/invoices/${existingInvoiceNumber}`}
-          className="w-full flex items-center justify-center gap-2 py-2.5 bg-white/5 hover:bg-white/10 text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
+          className="w-full flex items-center justify-center gap-2 py-2.5 bg-white/5 hover:bg-white/10 text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
         >
           <span className="material-symbols-outlined text-[18px]">receipt_long</span>
           {existingInvoiceNumber}
@@ -67,7 +67,7 @@ export default function CreateInvoiceButton({
   }
 
   return (
-    <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+    <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
       <h2 className="text-white font-medium text-sm mb-3">{t('billing')}</h2>
       <p className="text-slate-400 text-sm mb-1">
         {t('createInvoicePrefill', { amount: amountLabel, customer: customerName ?? '—' })}
@@ -76,7 +76,7 @@ export default function CreateInvoiceButton({
       <button
         onClick={create}
         disabled={pending}
-        className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
+        className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
       >
         <span className="material-symbols-outlined text-[18px]">receipt_long</span>
         {pending ? t('creating') : t('createInvoice')}

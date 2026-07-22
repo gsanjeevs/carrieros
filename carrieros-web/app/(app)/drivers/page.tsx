@@ -94,13 +94,13 @@ export default async function DriversPage({
       )}
 
       {drivers.length === 0 ? (
-        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-card-dark">
           <span className="material-symbols-outlined text-slate-600 text-4xl">person</span>
           <p className="text-slate-500 text-sm mt-3">{t('noDriversYet')}</p>
           {canManage && <InviteDriverButton vehicles={vehicles} variant="empty" />}
         </div>
       ) : (
-        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/5">

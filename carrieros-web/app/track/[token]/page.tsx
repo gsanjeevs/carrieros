@@ -107,7 +107,7 @@ export default async function TrackingPage({
           <div className="mb-8 flex justify-center">
             <Logo />
           </div>
-          <div className="bg-white/5 border border-white/8 rounded-xl px-6 py-12 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+          <div className="bg-white/5 border border-white/8 rounded-xl px-6 py-12 shadow-card-dark">
             <span className="material-symbols-outlined text-slate-600 text-4xl">search_off</span>
             <h1 className="text-white text-lg font-semibold mt-4">{t('notFoundTitle')}</h1>
             <p className="text-slate-400 text-sm mt-2">
@@ -136,7 +136,7 @@ export default async function TrackingPage({
           <Logo />
         </div>
 
-        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
           <div className="px-5 sm:px-6 py-5 border-b border-white/5">
             <div className="flex items-center justify-between gap-3">
               <div>

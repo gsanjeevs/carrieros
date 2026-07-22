@@ -96,7 +96,7 @@ export default function AddCustomerButton({ variant }: { variant?: 'empty' }) {
       {variant === 'empty' ? (
         <button
           onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
+          className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
         >
           <span className="material-symbols-outlined text-[16px]">add</span>
           {t('addFirstCustomer')}
@@ -104,7 +104,7 @@ export default function AddCustomerButton({ variant }: { variant?: 'empty' }) {
       ) : (
         <button
           onClick={() => setOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
+          className="flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
           {t('addCustomer')}
@@ -116,7 +116,7 @@ export default function AddCustomerButton({ variant }: { variant?: 'empty' }) {
           <div className="w-full max-w-md bg-[#0f1923] border border-white/10 rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-white font-semibold text-lg">{t('addCustomer')}</h2>
-              <button onClick={close} className="text-slate-500 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[#f97316]/50 rounded">
+              <button onClick={close} className="text-slate-500 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 rounded">
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
@@ -193,14 +193,14 @@ export default function AddCustomerButton({ variant }: { variant?: 'empty' }) {
                 <button
                   onClick={close}
                   disabled={loading}
-                  className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
+                  className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
                 >
                   {tCommon('cancel')}
                 </button>
                 <button
                   onClick={submit}
                   disabled={loading || !form.name.trim()}
-                  className="flex-2 flex-grow py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
+                  className="flex-2 flex-grow py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
                 >
                   {loading ? t('adding') : t('addCustomer')}
                 </button>

@@ -86,7 +86,7 @@ export default function MemberActions({
         <button
           onClick={() => { setError(''); setConfirming(true) }}
           disabled={busy}
-          className="text-slate-500 hover:text-red-400 disabled:opacity-40 transition rounded focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
+          className="text-slate-500 hover:text-red-400 disabled:opacity-40 transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
           title={t('remove')}
         >
           <span className="material-symbols-outlined text-[18px] leading-none align-middle">person_remove</span>
@@ -97,7 +97,7 @@ export default function MemberActions({
 
       {confirming && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
-          <div className="w-full max-w-sm bg-[#0f1923] border border-white/10 rounded-2xl p-6 text-left shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+          <div className="w-full max-w-sm bg-[#0f1923] border border-white/10 rounded-2xl p-6 text-left shadow-modal-dark">
             <h2 className="text-white font-semibold text-base mb-2">{t('removeTitle')}</h2>
             <p className="text-slate-400 text-sm mb-5">{t('removeConfirm', { name })}</p>
             {error && (
@@ -109,14 +109,14 @@ export default function MemberActions({
               <button
                 onClick={() => { if (!busy) { setConfirming(false); setError('') } }}
                 disabled={busy}
-                className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
+                className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
               >
                 {tCommon('cancel')}
               </button>
               <button
                 onClick={remove}
                 disabled={busy}
-                className="flex-1 py-2.5 bg-red-500/90 hover:bg-red-500 disabled:opacity-40 text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
+                className="flex-1 py-2.5 bg-red-500/90 hover:bg-red-500 disabled:opacity-40 text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
               >
                 {busy ? tCommon('loading') : t('remove')}
               </button>

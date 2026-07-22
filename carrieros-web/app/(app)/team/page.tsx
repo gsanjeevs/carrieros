@@ -75,17 +75,17 @@ export default async function TeamPage() {
         <InviteMemberButton />
       </div>
 
-      <div className="mb-6 flex items-start gap-3 rounded-lg bg-white/5 border border-white/8 px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+      <div className="mb-6 flex items-start gap-3 rounded-lg bg-white/5 border border-white/8 px-4 py-3 shadow-card-dark">
         <span className="material-symbols-outlined text-slate-500 text-[18px]">info</span>
         <p className="text-slate-400 text-sm">
           {t('driversHint')}{' '}
-          <Link href="/drivers" className="text-[#f97316] hover:underline rounded focus:outline-none focus:ring-2 focus:ring-[#f97316]/50">
+          <Link href="/drivers" className="text-[#f97316] hover:underline rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
             {t('driversHintLink')}
           </Link>
         </p>
       </div>
 
-      <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+      <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/5">
@@ -129,7 +129,7 @@ export default async function TeamPage() {
                       // Enforced in /api/team/[id]; not offered here either.
                       <span className="text-xs text-slate-600">{t('cannotEditSelf')}</span>
                     ) : isDriverRole(m.role) ? (
-                      <Link href="/drivers" className="text-xs text-slate-500 hover:text-[#f97316] transition rounded focus:outline-none focus:ring-2 focus:ring-[#f97316]/50">
+                      <Link href="/drivers" className="text-xs text-slate-500 hover:text-[#f97316] transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
                         {t('manageOnDrivers')}
                       </Link>
                     ) : (

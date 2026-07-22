@@ -127,7 +127,7 @@ export default function DispatchPanel({
         <button
           onClick={() => save()}
           disabled={saving}
-          className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-white text-sm font-medium rounded-lg transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
+          className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-white text-sm font-medium rounded-lg transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
         >
           {tCommon('save')}
         </button>
@@ -135,7 +135,7 @@ export default function DispatchPanel({
           <button
             onClick={() => save(nextStatus)}
             disabled={saving}
-            className="flex-1 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
+            className="flex-1 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
           >
             {saving ? '…' : t(actionKey as never)}
           </button>
