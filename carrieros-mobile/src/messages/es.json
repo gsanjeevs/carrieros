@@ -23,7 +23,8 @@
       "in_transit": "En Tránsito",
       "delivered": "Entregada",
       "invoiced": "Facturada",
-      "paid": "Pagada"
+      "paid": "Pagada",
+      "cancelled": "Cancelada"
     }
   },
   "loadDetail": {

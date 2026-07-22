@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { hasFeature } from '@/lib/entitlements'
 
-const VALID_STATUSES = ['draft','scheduled','dispatched','picked_up','in_transit','delivered','invoiced','paid']
+const VALID_STATUSES = ['draft','scheduled','dispatched','picked_up','in_transit','delivered','invoiced','paid','cancelled']
 
 export async function PATCH(
   request: NextRequest,

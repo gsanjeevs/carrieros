@@ -15,6 +15,7 @@ const STATUS_COLOR: Record<string, string> = {
   delivered:   'bg-[#16a34a]/20 text-[#16a34a]',
   invoiced:    'bg-purple-500/20 text-purple-400',
   paid:        'bg-[#16a34a]/20 text-[#16a34a]',
+  cancelled:   'bg-rose-500/10 text-rose-400',
 }
 
 export default async function LoadsPage({
@@ -130,7 +131,7 @@ export default async function LoadsPage({
                       </Link>
                     </td>
                     <td className="px-4 py-3.5">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${badge.color}`}>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${badge.color}`}>
                         {badge.label}
                       </span>
                     </td>

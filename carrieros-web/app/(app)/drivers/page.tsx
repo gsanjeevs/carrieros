@@ -122,7 +122,7 @@ export default async function DriversPage({
                     <td className="px-5 py-3.5 text-white font-medium">{driver.driver_number}</td>
                     <td className="px-4 py-3.5 text-slate-300">{name}</td>
                     <td className="px-4 py-3.5">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${badge.color}`}>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${badge.color}`}>
                         {badge.label}
                       </span>
                     </td>

@@ -23,7 +23,8 @@
       "in_transit": "In Transit",
       "delivered": "Delivered",
       "invoiced": "Invoiced",
-      "paid": "Paid"
+      "paid": "Paid",
+      "cancelled": "Cancelled"
     }
   },
   "loadDetail": {
@@ -48,7 +49,7 @@
     "preTripHeading": "Pre-Trip Inspection",
     "postTripHeading": "Post-Trip Inspection",
     "subheading": "Tap any area to log a defect",
-    "noVehicleWarning": "No truck on file for this load — the inspection will be saved without one. Ask your dispatcher to assign a truck.",
+    "noVehicleWarning": "No vehicle on file for this load — the inspection will be saved without one. Ask your dispatcher to assign a vehicle.",
     "areas": {
       "brakes": "Brakes",
       "lights": "Lights",

@@ -29,6 +29,7 @@ const STATUS_COLOR: Record<string, string> = {
   delivered:  'bg-green-500/20 text-green-400',
   invoiced:   'bg-purple-500/20 text-purple-400',
   paid:       'bg-green-500/20 text-green-400',
+  cancelled:  'bg-rose-500/10 text-rose-400',
 }
 
 function fmt(date: string | null, locale: string) {
@@ -176,8 +177,8 @@ export default async function LoadDetailPage({
               <span className="material-symbols-outlined text-[20px]">arrow_back</span>
             </Link>
             <h1 className="text-2xl font-semibold text-white">{load.load_number}</h1>
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold ${STATUS_COLOR[load.status ?? 'draft'] ?? STATUS_COLOR.draft}`}>
-              {STATUS_FLOW.find(s => s.key === load.status)?.label ?? load.status}
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${STATUS_COLOR[load.status ?? 'draft'] ?? STATUS_COLOR.draft}`}>
+              {load.status ? t(`status_${load.status}` as never) : t('status_draft' as never)}
             </span>
           </div>
           <p className="text-slate-400 text-sm ml-9">

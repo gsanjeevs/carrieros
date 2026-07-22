@@ -98,7 +98,7 @@ export default async function InvoiceDetailPage({
               <span className="material-symbols-outlined text-[20px]">arrow_back</span>
             </Link>
             <h1 className="text-2xl font-semibold text-white">{invoice.invoice_number}</h1>
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold ${STATUS_COLOR[invoice.status ?? 'draft'] ?? STATUS_COLOR.draft}`}>
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${STATUS_COLOR[invoice.status ?? 'draft'] ?? STATUS_COLOR.draft}`}>
               {t(`status_${invoice.status ?? 'draft'}`)}
             </span>
           </div>

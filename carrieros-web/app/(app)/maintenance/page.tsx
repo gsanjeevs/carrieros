@@ -202,7 +202,7 @@ export default async function MaintenancePage({
                             </td>
                             <td className="px-4 py-3 text-slate-300">{nextDue}</td>
                             <td className="px-5 py-3 text-right">
-                              <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLOR[status]}`}>
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLOR[status]}`}>
                                 {t(`status_${status}`)}
                               </span>
                             </td>

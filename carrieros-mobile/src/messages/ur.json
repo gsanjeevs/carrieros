@@ -23,7 +23,8 @@
       "in_transit": "راستے میں",
       "delivered": "ڈیلیور کیا گیا",
       "invoiced": "انوائس شدہ",
-      "paid": "ادا شدہ"
+      "paid": "ادا شدہ",
+      "cancelled": "منسوخ شدہ"
     }
   },
   "loadDetail": {

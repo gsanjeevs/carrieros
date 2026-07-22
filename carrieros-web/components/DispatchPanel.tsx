@@ -95,6 +95,13 @@ export default function DispatchPanel({
   const selectCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 transition'
   const nextStatus = NEXT_STATUS[currentStatus]
   const actionKey = STATUS_ACTION_KEY[currentStatus]
+  const TERMINAL_STATUSES = ['delivered', 'invoiced', 'paid', 'cancelled']
+  const canCancel = !TERMINAL_STATUSES.includes(currentStatus)
+
+  function cancelLoad() {
+    if (!window.confirm(t('confirmCancelLoad'))) return
+    save('cancelled')
+  }
 
   return (
     <div className="space-y-3">
@@ -138,6 +145,15 @@ export default function DispatchPanel({
             className="flex-1 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
           >
             {saving ? '…' : t(actionKey as never)}
+          </button>
+        )}
+        {canCancel && (
+          <button
+            onClick={cancelLoad}
+            disabled={saving}
+            className="flex-1 py-2 bg-transparent border border-red-500/30 text-red-400 hover:bg-red-500/10 text-sm font-medium rounded-lg transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-red-500/40"
+          >
+            {t('actionCancelLoad')}
           </button>
         )}
       </div>

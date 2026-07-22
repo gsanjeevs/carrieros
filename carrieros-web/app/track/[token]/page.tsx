@@ -27,6 +27,7 @@ const STATUS_COLOR: Record<string, string> = {
   delivered:   'bg-[#16a34a]/20 text-[#16a34a]',
   invoiced:    'bg-purple-500/20 text-purple-400',
   paid:        'bg-[#16a34a]/20 text-[#16a34a]',
+  cancelled:   'bg-rose-500/10 text-rose-400',
 }
 
 function formatDate(value: string | null, locale: string): string {
@@ -143,7 +144,7 @@ export default async function TrackingPage({
                 <p className="text-slate-500 text-xs uppercase tracking-wide">{t('loadLabel')}</p>
                 <p className="text-white text-lg font-semibold">{load.load_number}</p>
               </div>
-              <span className={`inline-flex items-center px-2.5 py-1 rounded text-xs font-medium whitespace-nowrap ${badgeColor}`}>
+              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${badgeColor}`}>
                 {badgeLabel}
               </span>
             </div>

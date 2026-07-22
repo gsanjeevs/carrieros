@@ -167,7 +167,7 @@ export default async function InvoicesPage({
                     ) : '—'}
                   </td>
                   <td className="px-4 py-3.5">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLOR[inv.status ?? 'draft'] ?? STATUS_COLOR.draft}`}>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLOR[inv.status ?? 'draft'] ?? STATUS_COLOR.draft}`}>
                       {t(`status_${inv.status ?? 'draft'}`)}
                     </span>
                   </td>
