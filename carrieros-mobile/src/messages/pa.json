@@ -107,6 +107,99 @@
     "time12h": "12-ਘੰਟੇ (2:30 PM)",
     "time24h": "24-ਘੰਟੇ (14:30)"
   },
+  "tabs": {
+    "home": "ਹੋਮ",
+    "loads": "ਲੋਡ",
+    "alerts": "ਚੇਤਾਵਨੀਆਂ",
+    "fleet": "ਫਲੀਟ",
+    "customers": "ਗਾਹਕ",
+    "more": "ਹੋਰ",
+    "myLoad": "ਮੇਰਾ ਲੋਡ",
+    "dvir": "DVIR",
+    "history": "ਇਤਿਹਾਸ",
+    "profile": "ਪ੍ਰੋਫਾਈਲ",
+    "invoices": "ਇਨਵੌਇਸ",
+    "reports": "ਰਿਪੋਰਟਾਂ"
+  },
+  "home": {
+    "titleOwner": "ਡੈਸ਼ਬੋਰਡ",
+    "titleDispatcher": "ਓਪਸ ਬੋਰਡ",
+    "titleFinance": "ਵਿੱਤ",
+    "activeLoads": "ਸਰਗਰਮ ਲੋਡ",
+    "fleetStatus": "ਫਲੀਟ ਸਥਿਤੀ",
+    "statusActive": "ਸਰਗਰਮ",
+    "statusIdle": "ਵਿਹਲਾ",
+    "statusInShop": "ਦੁਕਾਨ ਵਿੱਚ",
+    "recentLoads": "ਹਾਲੀਆ ਲੋਡ",
+    "noRecentLoads": "ਹਾਲੇ ਕੋਈ ਹਾਲੀਆ ਲੋਡ ਨਹੀਂ।",
+    "myLoadToday": "ਅੱਜ ਦਾ ਮੇਰਾ ਲੋਡ",
+    "noActiveLoads": "ਇਸ ਵੇਲੇ ਕੋਈ ਸਰਗਰਮ ਲੋਡ ਨਹੀਂ।",
+    "staleFlag": "ਪੁਰਾਣਾ",
+    "availableDrivers": "ਉਪਲਬਧ ਡਰਾਈਵਰ",
+    "availableVehicles": "ਉਪਲਬਧ ਵਾਹਨ",
+    "outstanding": "ਬਕਾਇਆ",
+    "mostOverdue": "ਸਭ ਤੋਂ ਵੱਧ ਬਕਾਇਆ",
+    "noOverdueInvoices": "ਕੋਈ ਬਕਾਇਆ ਇਨਵੌਇਸ ਨਹੀਂ।",
+    "recentPayments": "ਹਾਲੀਆ ਭੁਗਤਾਨ",
+    "noRecentPayments": "ਕੋਈ ਹਾਲੀਆ ਭੁਗਤਾਨ ਨਹੀਂ।",
+    "due": "ਦੇਣ ਦੀ ਮਿਤੀ"
+  },
+  "alerts": {
+    "title": "ਚੇਤਾਵਨੀਆਂ",
+    "empty": "ਇਸ ਵੇਲੇ ਕੋਈ ਚੇਤਾਵਨੀ ਨਹੀਂ।",
+    "tierToday": "ਅੱਜ",
+    "tierThisWeek": "ਇਸ ਹਫ਼ਤੇ",
+    "tierUpcoming": "ਆਉਣ ਵਾਲੇ"
+  },
+  "fleet": {
+    "title": "ਫਲੀਟ",
+    "empty": "ਹਾਲੇ ਕੋਈ ਵਾਹਨ ਨਹੀਂ।"
+  },
+  "customers": {
+    "title": "ਗਾਹਕ",
+    "empty": "ਹਾਲੇ ਕੋਈ ਗਾਹਕ ਨਹੀਂ।",
+    "noContact": "ਕੋਈ ਸੰਪਰਕ ਜਾਣਕਾਰੀ ਨਹੀਂ"
+  },
+  "invoices": {
+    "title": "ਇਨਵੌਇਸ",
+    "empty": "ਹਾਲੇ ਕੋਈ ਇਨਵੌਇਸ ਨਹੀਂ।",
+    "due": "ਦੇਣ ਦੀ ਮਿਤੀ",
+    "status": {
+      "draft": "ਡਰਾਫਟ",
+      "sent": "ਭੇਜਿਆ",
+      "paid": "ਭੁਗਤਾਨ ਹੋ ਗਿਆ",
+      "overdue": "ਬਕਾਇਆ"
+    }
+  },
+  "reports": {
+    "comingSoon": "ਜਲਦੀ ਆ ਰਿਹਾ ਹੈ",
+    "comingSoonDetail": "ਰਿਪੋਰਟਿੰਗ ਹਾਲੇ ਉਪਲਬਧ ਨਹੀਂ ਹੈ — ਭਵਿੱਖ ਦੇ ਅੱਪਡੇਟ ਵਿੱਚ ਦੁਬਾਰਾ ਦੇਖੋ।"
+  },
+  "myLoadTab": {
+    "heading": "ਮੇਰਾ ਲੋਡ",
+    "noActiveLoad": "ਇਸ ਵੇਲੇ ਤੁਹਾਡੇ ਕੋਲ ਕੋਈ ਸਰਗਰਮ ਲੋਡ ਨਹੀਂ ਹੈ।",
+    "noActiveLoadDetail": "ਤੁਹਾਡਾ ਡਿਸਪੈਚਰ ਤੁਹਾਡਾ ਅਗਲਾ ਲੋਡ ਇੱਥੇ ਸੌਂਪੇਗਾ।",
+    "nextLoad": "ਅਗਲਾ ਲੋਡ",
+    "noNextLoad": "ਕੋਈ ਆਉਣ ਵਾਲਾ ਲੋਡ ਤਹਿ ਨਹੀਂ ਹੈ।",
+    "compliance": "ਪਾਲਣਾ",
+    "cdl": "CDL",
+    "medCert": "ਮੈਡੀਕਲ ਸਰਟੀਫਿਕੇਟ",
+    "expired": "ਮਿਆਦ ਪੁੱਗ ਗਈ",
+    "expiringSoon": "ਜਲਦੀ ਖਤਮ ਹੋ ਰਹੀ",
+    "valid": "ਵੈਧ",
+    "noExpiry": "ਦਰਜ ਨਹੀਂ"
+  },
+  "dvirTab": {
+    "heading": "DVIR",
+    "startPreTrip": "ਪ੍ਰੀ-ਟ੍ਰਿਪ DVIR ਸ਼ੁਰੂ ਕਰੋ",
+    "startPostTrip": "ਪੋਸਟ-ਟ੍ਰਿਪ DVIR ਸ਼ੁਰੂ ਕਰੋ",
+    "noActiveLoad": "DVIR ਲਈ ਇੱਕ ਸਰਗਰਮ ਲੋਡ ਲੋੜੀਂਦਾ ਹੈ।",
+    "noActiveLoadDetail": "ਜਦੋਂ ਤੁਹਾਡੇ ਕੋਲ ਸਰਗਰਮ ਲੋਡ ਹੋਵੇ, ਤਾਂ ਤੁਸੀਂ ਇੱਥੇ ਪ੍ਰੀ-ਟ੍ਰਿਪ ਜਾਂ ਪੋਸਟ-ਟ੍ਰਿਪ ਨਿਰੀਖਣ ਸ਼ੁਰੂ ਕਰ ਸਕਦੇ ਹੋ।"
+  },
+  "history": {
+    "title": "ਇਤਿਹਾਸ",
+    "empty": "ਹਾਲੇ ਕੋਈ ਪੁਰਾਣਾ ਲੋਡ ਨਹੀਂ।"
+  },
   "pod": {
     "sectionTitle": "ਡਿਲਿਵਰੀ ਦਾ ਸਬੂਤ",
     "takePhoto": "ਫੋਟੋ ਖਿੱਚੋ",

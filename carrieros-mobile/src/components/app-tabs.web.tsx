@@ -12,23 +12,35 @@ import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
 import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { TAB_SETS } from '@/constants/tab-sets';
 import { useLocale } from '@/hooks/use-locale';
+import { useProfileRole } from '@/hooks/use-profile-role';
 
 export default function AppTabs() {
-  // "explore" tab was repurposed as the language picker (src/app/(tabs)/explore.tsx)
-  // — relabeled here to match, using the same t('settings.title') as that screen.
   const { t } = useLocale();
+  const { role, loading } = useProfileRole();
+
+  // See app-tabs.tsx (native) for the same brief-loading-window note.
+  if (loading || !role) return null;
+
+  const tabs = TAB_SETS[role];
+
   return (
     <Tabs>
       <TabSlot style={{ height: '100%' }} />
       <TabList asChild>
         <CustomTabList>
-          <TabTrigger name="home" href="/" asChild>
-            <TabButton>Home</TabButton>
-          </TabTrigger>
-          <TabTrigger name="explore" href="/explore" asChild>
-            <TabButton>{t('settings.title')}</TabButton>
-          </TabTrigger>
+          {/* Route names are assembled dynamically from TAB_SETS (per-role),
+              which typed-routes' generated Href union can't express
+              statically — same well-known limitation as any data-driven
+              expo-router tab list. Screens themselves are still fully
+              typechecked; only this href string loses literal-union
+              narrowing. */}
+          {tabs.map((tab) => (
+            <TabTrigger key={tab.name} name={tab.name} href={`/${tab.name}` as never} asChild>
+              <TabButton>{t(tab.labelKey)}</TabButton>
+            </TabTrigger>
+          ))}
         </CustomTabList>
       </TabList>
     </Tabs>

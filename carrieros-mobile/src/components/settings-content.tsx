@@ -1,8 +1,10 @@
-// src/app/(tabs)/explore.tsx
-// Profile settings: language, units, date format, time format. There's no
-// other settings/profile screen, so this tab (previously unused scaffold
-// content) is repurposed as the one reachable place to change these —
-// all personal profiles columns, see src/hooks/use-locale.tsx.
+// src/components/settings-content.tsx
+// Shared settings/profile content — language, units, date/time format, sign
+// out. Extracted from the old (tabs)/explore.tsx (previously the app's only
+// "Settings" tab) so it can be reused by two tabs in the new per-role tab
+// bars: Driver's "Profile" tab and the Owner/Solo/Finance "More" tab. Both
+// need the same personal-preferences functionality plus a way to sign out,
+// since neither of those role groups has any other settings surface.
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,6 +15,7 @@ import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale, type DateFormat, type TimeFormat, type Uom } from '@/hooks/use-locale';
 import { SUPPORTED_LOCALES, type Locale } from '@/lib/i18n';
+import { supabase } from '@/lib/supabase';
 
 const ORANGE = '#f97316';
 
@@ -31,7 +34,7 @@ const DATE_FORMAT_EXAMPLES: Record<DateFormat, string> = {
 
 type OptionKey = string;
 
-export default function SettingsScreen() {
+export function SettingsContent() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const { locale, setLocale, t, prefs, setUomSystem, setDateFormat, setTimeFormat } = useLocale();
@@ -166,6 +169,10 @@ export default function SettingsScreen() {
             />
           ))}
         </ThemedView>
+
+        <Pressable onPress={() => supabase.auth.signOut()} style={styles.signOut}>
+          <ThemedText type="link" themeColor="textSecondary">{t('loads.signOut')}</ThemedText>
+        </Pressable>
       </ThemedView>
     </ScrollView>
   );
@@ -191,4 +198,5 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
   },
   notice: { marginTop: Spacing.one },
+  signOut: { alignItems: 'center', paddingVertical: Spacing.four, marginTop: Spacing.three },
 });

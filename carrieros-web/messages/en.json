@@ -139,7 +139,16 @@
     "driverCompliance": "Driver Compliance",
     "complianceClear": "Clear",
     "complianceDueSoon": "Due Soon",
-    "complianceIncomplete": "Incomplete"
+    "complianceIncomplete": "Incomplete",
+    "myLoadToday": "My Load Today",
+    "noActiveLoad": "No active load right now.",
+    "invoiceAging": "Invoice Aging",
+    "agingCurrent": "Current",
+    "aging30": "30+ days",
+    "aging60": "60+ days",
+    "aging90": "90+ days",
+    "agingOldest": "Oldest due {date}",
+    "agingNoneOutstanding": "No outstanding invoices."
   },
   "loads": {
     "title": "Loads",

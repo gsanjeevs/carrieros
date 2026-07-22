@@ -139,7 +139,16 @@
     "driverCompliance": "ਡਰਾਈਵਰ ਪਾਲਣਾ",
     "complianceClear": "ਠੀਕ",
     "complianceDueSoon": "ਜਲਦੀ ਖਤਮ",
-    "complianceIncomplete": "ਅਧੂਰਾ"
+    "complianceIncomplete": "ਅਧੂਰਾ",
+    "myLoadToday": "ਅੱਜ ਦਾ ਮੇਰਾ ਲੋਡ",
+    "noActiveLoad": "ਇਸ ਵੇਲੇ ਕੋਈ ਸਰਗਰਮ ਲੋਡ ਨਹੀਂ ਹੈ।",
+    "invoiceAging": "ਇਨਵੌਇਸ ਦੀ ਮਿਆਦ",
+    "agingCurrent": "ਚਾਲੂ",
+    "aging30": "30+ ਦਿਨ",
+    "aging60": "60+ ਦਿਨ",
+    "aging90": "90+ ਦਿਨ",
+    "agingOldest": "ਸਭ ਤੋਂ ਪੁਰਾਣੀ ਮਿਆਦ {date}",
+    "agingNoneOutstanding": "ਕੋਈ ਬਕਾਇਆ ਇਨਵੌਇਸ ਨਹੀਂ।"
   },
   "loads": {
     "title": "ਲੋਡ",

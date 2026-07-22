@@ -107,6 +107,99 @@
     "time12h": "12-hour (2:30 PM)",
     "time24h": "24-hour (14:30)"
   },
+  "tabs": {
+    "home": "Home",
+    "loads": "Loads",
+    "alerts": "Alerts",
+    "fleet": "Fleet",
+    "customers": "Customers",
+    "more": "More",
+    "myLoad": "My Load",
+    "dvir": "DVIR",
+    "history": "History",
+    "profile": "Profile",
+    "invoices": "Invoices",
+    "reports": "Reports"
+  },
+  "home": {
+    "titleOwner": "Dashboard",
+    "titleDispatcher": "Ops Board",
+    "titleFinance": "Finance",
+    "activeLoads": "Active Loads",
+    "fleetStatus": "Fleet Status",
+    "statusActive": "Active",
+    "statusIdle": "Idle",
+    "statusInShop": "In Shop",
+    "recentLoads": "Recent Loads",
+    "noRecentLoads": "No recent loads.",
+    "myLoadToday": "My Load Today",
+    "noActiveLoads": "No active loads right now.",
+    "staleFlag": "Stale",
+    "availableDrivers": "Available Drivers",
+    "availableVehicles": "Available Vehicles",
+    "outstanding": "Outstanding",
+    "mostOverdue": "Most Overdue",
+    "noOverdueInvoices": "No overdue invoices.",
+    "recentPayments": "Recent Payments",
+    "noRecentPayments": "No recent payments.",
+    "due": "Due"
+  },
+  "alerts": {
+    "title": "Alerts",
+    "empty": "No alerts right now.",
+    "tierToday": "Today",
+    "tierThisWeek": "This Week",
+    "tierUpcoming": "Upcoming"
+  },
+  "fleet": {
+    "title": "Fleet",
+    "empty": "No vehicles yet."
+  },
+  "customers": {
+    "title": "Customers",
+    "empty": "No customers yet.",
+    "noContact": "No contact info on file"
+  },
+  "invoices": {
+    "title": "Invoices",
+    "empty": "No invoices yet.",
+    "due": "Due",
+    "status": {
+      "draft": "Draft",
+      "sent": "Sent",
+      "paid": "Paid",
+      "overdue": "Overdue"
+    }
+  },
+  "reports": {
+    "comingSoon": "Coming soon",
+    "comingSoonDetail": "Reporting isn't available yet — check back in a future update."
+  },
+  "myLoadTab": {
+    "heading": "My Load",
+    "noActiveLoad": "You have no active load right now.",
+    "noActiveLoadDetail": "Your dispatcher will assign your next load here.",
+    "nextLoad": "Next Load",
+    "noNextLoad": "No upcoming load scheduled.",
+    "compliance": "Compliance",
+    "cdl": "CDL",
+    "medCert": "Med Cert",
+    "expired": "Expired",
+    "expiringSoon": "Expiring Soon",
+    "valid": "Valid",
+    "noExpiry": "Not on file"
+  },
+  "dvirTab": {
+    "heading": "DVIR",
+    "startPreTrip": "Start Pre-Trip DVIR",
+    "startPostTrip": "Start Post-Trip DVIR",
+    "noActiveLoad": "DVIR requires an active load.",
+    "noActiveLoadDetail": "Once you have an active load, you can start a pre-trip or post-trip inspection here."
+  },
+  "history": {
+    "title": "History",
+    "empty": "No past loads yet."
+  },
   "pod": {
     "sectionTitle": "Proof of Delivery",
     "takePhoto": "Take Photo",

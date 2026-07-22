@@ -107,6 +107,99 @@
     "time12h": "12 گھنٹے (2:30 PM)",
     "time24h": "24 گھنٹے (14:30)"
   },
+  "tabs": {
+    "home": "ہوم",
+    "loads": "لوڈز",
+    "alerts": "الرٹس",
+    "fleet": "فلیٹ",
+    "customers": "کسٹمرز",
+    "more": "مزید",
+    "myLoad": "میرا لوڈ",
+    "dvir": "DVIR",
+    "history": "تاریخ",
+    "profile": "پروفائل",
+    "invoices": "انوائسز",
+    "reports": "رپورٹس"
+  },
+  "home": {
+    "titleOwner": "ڈیش بورڈ",
+    "titleDispatcher": "آپس بورڈ",
+    "titleFinance": "فنانس",
+    "activeLoads": "فعال لوڈز",
+    "fleetStatus": "فلیٹ کی صورتحال",
+    "statusActive": "فعال",
+    "statusIdle": "غیر فعال",
+    "statusInShop": "ورکشاپ میں",
+    "recentLoads": "حالیہ لوڈز",
+    "noRecentLoads": "ابھی تک کوئی حالیہ لوڈ نہیں۔",
+    "myLoadToday": "آج کا میرا لوڈ",
+    "noActiveLoads": "اس وقت کوئی فعال لوڈ نہیں۔",
+    "staleFlag": "پرانا",
+    "availableDrivers": "دستیاب ڈرائیورز",
+    "availableVehicles": "دستیاب گاڑیاں",
+    "outstanding": "بقایا",
+    "mostOverdue": "سب سے زیادہ تاخیر شدہ",
+    "noOverdueInvoices": "کوئی تاخیر شدہ انوائس نہیں۔",
+    "recentPayments": "حالیہ ادائیگیاں",
+    "noRecentPayments": "کوئی حالیہ ادائیگی نہیں۔",
+    "due": "ادائیگی کی تاریخ"
+  },
+  "alerts": {
+    "title": "الرٹس",
+    "empty": "اس وقت کوئی الرٹ نہیں۔",
+    "tierToday": "آج",
+    "tierThisWeek": "اس ہفتے",
+    "tierUpcoming": "آنے والے"
+  },
+  "fleet": {
+    "title": "فلیٹ",
+    "empty": "ابھی تک کوئی گاڑی نہیں۔"
+  },
+  "customers": {
+    "title": "کسٹمرز",
+    "empty": "ابھی تک کوئی کسٹمر نہیں۔",
+    "noContact": "کوئی رابطہ معلومات دستیاب نہیں"
+  },
+  "invoices": {
+    "title": "انوائسز",
+    "empty": "ابھی تک کوئی انوائس نہیں۔",
+    "due": "ادائیگی کی تاریخ",
+    "status": {
+      "draft": "ڈرافٹ",
+      "sent": "بھیج دیا گیا",
+      "paid": "ادا شدہ",
+      "overdue": "تاخیر شدہ"
+    }
+  },
+  "reports": {
+    "comingSoon": "جلد آ رہا ہے",
+    "comingSoonDetail": "رپورٹنگ ابھی دستیاب نہیں ہے — مستقبل کی اپڈیٹ میں دوبارہ چیک کریں۔"
+  },
+  "myLoadTab": {
+    "heading": "میرا لوڈ",
+    "noActiveLoad": "اس وقت آپ کے پاس کوئی فعال لوڈ نہیں ہے۔",
+    "noActiveLoadDetail": "آپ کا ڈسپیچر آپ کا اگلا لوڈ یہاں تفویض کرے گا۔",
+    "nextLoad": "اگلا لوڈ",
+    "noNextLoad": "کوئی آنے والا لوڈ طے شدہ نہیں۔",
+    "compliance": "تعمیل",
+    "cdl": "CDL",
+    "medCert": "میڈیکل سرٹیفکیٹ",
+    "expired": "میعاد ختم",
+    "expiringSoon": "جلد ختم ہونے والا",
+    "valid": "درست",
+    "noExpiry": "درج نہیں"
+  },
+  "dvirTab": {
+    "heading": "DVIR",
+    "startPreTrip": "پری ٹرپ DVIR شروع کریں",
+    "startPostTrip": "پوسٹ ٹرپ DVIR شروع کریں",
+    "noActiveLoad": "DVIR کے لیے ایک فعال لوڈ درکار ہے۔",
+    "noActiveLoadDetail": "جب آپ کے پاس فعال لوڈ ہو، تو آپ یہاں پری ٹرپ یا پوسٹ ٹرپ معائنہ شروع کر سکتے ہیں۔"
+  },
+  "history": {
+    "title": "تاریخ",
+    "empty": "ابھی تک کوئی پرانا لوڈ نہیں۔"
+  },
   "pod": {
     "sectionTitle": "ثبوتِ ترسیل",
     "takePhoto": "تصویر لیں",

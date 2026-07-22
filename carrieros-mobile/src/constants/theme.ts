@@ -65,6 +65,24 @@ export const LOAD_STATUS_PILL: Record<string, { bg: string; text: string }> = {
   paid: { bg: StatusColors.successLight, text: StatusColors.successDark },
 };
 
+// Vehicle status -> pill {bg, text}, same pastel-bg/dark-text convention as
+// LOAD_STATUS_PILL above. Used by the Fleet tab and Home's fleet-status
+// summary (Owner/Solo/Dispatcher).
+export const VEHICLE_STATUS_PILL: Record<string, { bg: string; text: string }> = {
+  active: { bg: StatusColors.successLight, text: StatusColors.successDark },
+  idle: { bg: StatusColors.grayLight, text: StatusColors.gray },
+  in_shop: { bg: StatusColors.warningLight, text: StatusColors.warningDark },
+};
+
+// Invoice status -> pill {bg, text}, same convention. Used by the Invoices
+// tab and Finance's Home content.
+export const INVOICE_STATUS_PILL: Record<string, { bg: string; text: string }> = {
+  draft: { bg: StatusColors.grayLight, text: StatusColors.gray },
+  sent: { bg: StatusColors.infoLight, text: StatusColors.info },
+  paid: { bg: StatusColors.successLight, text: StatusColors.successDark },
+  overdue: { bg: StatusColors.dangerLight, text: StatusColors.dangerDark },
+};
+
 export const Colors = {
   light: {
     text: '#0f1923',

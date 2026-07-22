@@ -139,7 +139,16 @@
     "driverCompliance": "Cumplimiento de Conductores",
     "complianceClear": "Al Día",
     "complianceDueSoon": "Por Vencer",
-    "complianceIncomplete": "Incompleto"
+    "complianceIncomplete": "Incompleto",
+    "myLoadToday": "Mi Carga de Hoy",
+    "noActiveLoad": "No hay ninguna carga activa en este momento.",
+    "invoiceAging": "Antigüedad de Facturas",
+    "agingCurrent": "Al Día",
+    "aging30": "30+ días",
+    "aging60": "60+ días",
+    "aging90": "90+ días",
+    "agingOldest": "La más antigua vence {date}",
+    "agingNoneOutstanding": "No hay facturas pendientes."
   },
   "loads": {
     "title": "Cargas",

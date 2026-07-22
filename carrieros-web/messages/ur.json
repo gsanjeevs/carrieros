@@ -139,7 +139,16 @@
     "driverCompliance": "ڈرائیور کی تعمیل",
     "complianceClear": "درست",
     "complianceDueSoon": "جلد ختم",
-    "complianceIncomplete": "نامکمل"
+    "complianceIncomplete": "نامکمل",
+    "myLoadToday": "آج کا میرا لوڈ",
+    "noActiveLoad": "اس وقت کوئی فعال لوڈ نہیں ہے۔",
+    "invoiceAging": "انوائس کی مدت",
+    "agingCurrent": "رواں",
+    "aging30": "30+ دن",
+    "aging60": "60+ دن",
+    "aging90": "90+ دن",
+    "agingOldest": "قدیم ترین کی میعاد {date}",
+    "agingNoneOutstanding": "کوئی بقایا انوائس نہیں۔"
   },
   "loads": {
     "title": "لوڈز",

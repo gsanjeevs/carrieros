@@ -107,6 +107,99 @@
     "time12h": "12 horas (2:30 PM)",
     "time24h": "24 horas (14:30)"
   },
+  "tabs": {
+    "home": "Inicio",
+    "loads": "Cargas",
+    "alerts": "Alertas",
+    "fleet": "Flota",
+    "customers": "Clientes",
+    "more": "Más",
+    "myLoad": "Mi Carga",
+    "dvir": "DVIR",
+    "history": "Historial",
+    "profile": "Perfil",
+    "invoices": "Facturas",
+    "reports": "Informes"
+  },
+  "home": {
+    "titleOwner": "Panel",
+    "titleDispatcher": "Tablero de Operaciones",
+    "titleFinance": "Finanzas",
+    "activeLoads": "Cargas Activas",
+    "fleetStatus": "Estado de la Flota",
+    "statusActive": "Activo",
+    "statusIdle": "Inactivo",
+    "statusInShop": "En Taller",
+    "recentLoads": "Cargas Recientes",
+    "noRecentLoads": "Aún no hay cargas recientes.",
+    "myLoadToday": "Mi Carga de Hoy",
+    "noActiveLoads": "No hay cargas activas en este momento.",
+    "staleFlag": "Sin Actualizar",
+    "availableDrivers": "Conductores Disponibles",
+    "availableVehicles": "Vehículos Disponibles",
+    "outstanding": "Pendiente",
+    "mostOverdue": "Más Vencidas",
+    "noOverdueInvoices": "No hay facturas vencidas.",
+    "recentPayments": "Pagos Recientes",
+    "noRecentPayments": "No hay pagos recientes.",
+    "due": "Vence"
+  },
+  "alerts": {
+    "title": "Alertas",
+    "empty": "No hay alertas en este momento.",
+    "tierToday": "Hoy",
+    "tierThisWeek": "Esta Semana",
+    "tierUpcoming": "Próximamente"
+  },
+  "fleet": {
+    "title": "Flota",
+    "empty": "Aún no hay vehículos."
+  },
+  "customers": {
+    "title": "Clientes",
+    "empty": "Aún no hay clientes.",
+    "noContact": "Sin información de contacto"
+  },
+  "invoices": {
+    "title": "Facturas",
+    "empty": "Aún no hay facturas.",
+    "due": "Vence",
+    "status": {
+      "draft": "Borrador",
+      "sent": "Enviada",
+      "paid": "Pagada",
+      "overdue": "Vencida"
+    }
+  },
+  "reports": {
+    "comingSoon": "Próximamente",
+    "comingSoonDetail": "Los informes aún no están disponibles — vuelve a consultarlos en una futura actualización."
+  },
+  "myLoadTab": {
+    "heading": "Mi Carga",
+    "noActiveLoad": "No tienes ninguna carga activa en este momento.",
+    "noActiveLoadDetail": "Tu despachador asignará tu próxima carga aquí.",
+    "nextLoad": "Próxima Carga",
+    "noNextLoad": "No hay ninguna carga próxima programada.",
+    "compliance": "Cumplimiento",
+    "cdl": "CDL",
+    "medCert": "Certificado Médico",
+    "expired": "Vencido",
+    "expiringSoon": "Por Vencer",
+    "valid": "Vigente",
+    "noExpiry": "No registrado"
+  },
+  "dvirTab": {
+    "heading": "DVIR",
+    "startPreTrip": "Iniciar DVIR Pre-Viaje",
+    "startPostTrip": "Iniciar DVIR Post-Viaje",
+    "noActiveLoad": "El DVIR requiere una carga activa.",
+    "noActiveLoadDetail": "Cuando tengas una carga activa, podrás iniciar una inspección pre-viaje o post-viaje aquí."
+  },
+  "history": {
+    "title": "Historial",
+    "empty": "Aún no hay cargas pasadas."
+  },
   "pod": {
     "sectionTitle": "Comprobante de entrega",
     "takePhoto": "Tomar foto",
