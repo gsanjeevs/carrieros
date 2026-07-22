@@ -1,7 +1,8 @@
 // app/api/loads/[id]/route.ts
-// PATCH — update driver, truck, and/or status on a load
+// PATCH — update driver, vehicle, and/or status on a load
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
+import { hasFeature } from '@/lib/entitlements'
 
 const VALID_STATUSES = ['draft','scheduled','dispatched','picked_up','in_transit','delivered','invoiced','paid']
 
@@ -27,11 +28,11 @@ export async function PATCH(
     return apiError('FORBIDDEN', 'Insufficient permissions', 403)
 
   const body = await request.json()
-  const update: { driver_id?: number | null; truck_id?: number | null; status?: string } = {}
+  const update: { driver_id?: number | null; vehicle_id?: number | null; status?: string } = {}
 
-  // driver_id/truck_id are BIGINT FKs — null clears the assignment, anything
+  // driver_id/vehicle_id are BIGINT FKs — null clears the assignment, anything
   // that isn't a number is a client error rather than something to pass through.
-  for (const field of ['driver_id', 'truck_id'] as const) {
+  for (const field of ['driver_id', 'vehicle_id'] as const) {
     if (!(field in body)) continue
     const v = body[field]
     if (v === null || v === undefined || v === '') { update[field] = null; continue }
@@ -66,5 +67,35 @@ export async function PATCH(
     })
   }
 
-  return NextResponse.json({ ok: true })
+  // IFTA completeness check (Phase 7C, check_ifta_completeness DB function,
+  // ifta_mileage_log feature / BR-22's 60% GPS-completeness threshold).
+  // Starter orgs don't have the feature at all, so they skip the check
+  // entirely rather than being told about a threshold they can't act on.
+  //
+  // This is data-scaffolding only: a `false` result does NOT block or alter
+  // the delivered transition above — deciding whether/how to enforce
+  // completeness before allowing delivery is a business-logic call this
+  // round doesn't own. The boolean is surfaced on the response purely as an
+  // informational field so a future consumer (UI banner, blocking flow,
+  // notification) has something to act on.
+  let iftaMileageComplete: boolean | null = null
+  if (update.status === 'delivered') {
+    const iftaEntitled = await hasFeature(supabase, 'ifta_mileage_log')
+    if (iftaEntitled) {
+      const { data: completeness, error: iftaError } = await supabase.rpc(
+        'check_ifta_completeness',
+        { p_load_id: Number(id) }
+      )
+      if (iftaError) {
+        console.error('[api/loads/[id] PATCH] check_ifta_completeness failed', iftaError)
+      } else {
+        iftaMileageComplete = completeness ?? null
+      }
+    }
+  }
+
+  return NextResponse.json({
+    ok: true,
+    ...(iftaMileageComplete !== null ? { ifta_mileage_complete: iftaMileageComplete } : {}),
+  })
 }
