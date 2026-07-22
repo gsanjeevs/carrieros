@@ -27,14 +27,15 @@
     "CANNOT_REMOVE_SELF": "You cannot remove your own account.",
     "LAST_OWNER": "Your company must keep at least one owner.",
     "MANAGE_DRIVER_ELSEWHERE": "Manage driver accounts from the Drivers page.",
-    "EMAIL_SEND_FAILED": "We couldn't send that invoice email. Please try again."
+    "EMAIL_SEND_FAILED": "We couldn't send that invoice email. Please try again.",
+    "TIER_UPGRADE_REQUIRED": "This requires an upgrade to the Growth plan or above."
   },
   "nav": {
     "dashboard": "Dashboard",
     "loads": "Loads",
     "dispatch": "Dispatch",
     "drivers": "Drivers",
-    "trucks": "Trucks",
+    "vehicles": "Trucks",
     "customers": "Customers",
     "invoices": "Invoices",
     "maintenance": "Maintenance",
@@ -178,7 +179,7 @@
     "sendingInvite": "Sending invite…",
     "noDefaultTruck": "No default truck"
   },
-  "trucks": {
+  "vehicles": {
     "title": "Trucks",
     "truckCount": "{count} trucks",
     "addTruck": "Add Truck",
@@ -348,7 +349,17 @@
     "addPaymentMethod": "Add Payment Method",
     "replacePaymentMethod": "Replace Payment Method",
     "addingPaymentMethod": "Adding…",
-    "addFailed": "Couldn't add a payment method. Please try again."
+    "addFailed": "Couldn't add a payment method. Please try again.",
+    "fleetUsage": "Fleet Usage",
+    "trucksUsed": "{count} of {included} included trucks in use",
+    "overageFee": "+{count} additional {count, plural, one {truck} other {trucks}} · +${fee}/mo",
+    "comparePlans": "Compare Plans",
+    "includedTrucks": "{count} {count, plural, one {truck} other {trucks}} included",
+    "currentPlanBadge": "Current Plan",
+    "upgrade": "Upgrade",
+    "downgrade": "Downgrade",
+    "changingPlan": "Updating…",
+    "changeTierFailed": "Couldn't change your plan. Please try again."
   },
   "customers": {
     "title": "Customers",

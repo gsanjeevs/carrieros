@@ -1,5 +1,5 @@
 // app/(app)/maintenance/page.tsx
-// Fleet maintenance — upcoming reminders per truck + a "log a completed
+// Fleet maintenance — upcoming reminders per vehicle + a "log a completed
 // service" flow.
 //
 // RLS note (checked before building this — see report): Sidebar.tsx lists
@@ -23,15 +23,15 @@ import LogServiceButton from './LogServiceButton'
 const VIEW_ROLES   = ['owner', 'solo', 'dispatcher']
 const MANAGE_ROLES = ['owner', 'solo']
 
-type Truck = {
+type Vehicle = {
   id: number
-  truck_number: string | null
+  vehicle_number: string | null
   nickname: string | null
 }
 
 type Reminder = {
   id: number
-  truck_id: number
+  vehicle_id: number
   reminder_type: string
   trigger_miles: number | null
   trigger_months: number | null
@@ -40,19 +40,19 @@ type Reminder = {
   next_due_date: string | null
   next_due_miles: number | null
   is_active: boolean | null
-  trucks: { id: number; truck_number: string | null; nickname: string | null } | null
+  vehicles: { id: number; vehicle_number: string | null; nickname: string | null } | null
 }
 
 type ServiceLog = {
   id: number
-  truck_id: number | null
+  vehicle_id: number | null
   service_type: string
   service_date: string
   odometer: number | null
   cost: number | null
   shop_name: string | null
   notes: string | null
-  trucks: { truck_number: string | null; nickname: string | null } | null
+  vehicles: { vehicle_number: string | null; nickname: string | null } | null
 }
 
 type Status = 'overdue' | 'dueSoon' | 'ok' | 'noDate'
@@ -97,22 +97,22 @@ export default async function MaintenancePage({
   const params = await searchParams
   const t = await getTranslations('maintenance')
 
-  const [{ data: trucksData }, { data: remindersData, error: remindersError }, { data: logsData }] = await Promise.all([
+  const [{ data: vehiclesData }, { data: remindersData, error: remindersError }, { data: logsData }] = await Promise.all([
     supabase
-      .from('trucks')
-      .select('id, truck_number, nickname')
+      .from('vehicles')
+      .select('id, vehicle_number, nickname')
       .eq('carrier_org_id', profile.org_id)
       .eq('is_active', true)
-      .order('truck_number'),
+      .order('vehicle_number'),
     supabase
       .from('maintenance_reminders')
-      .select('id, truck_id, reminder_type, trigger_miles, trigger_months, last_service_date, last_odometer, next_due_date, next_due_miles, is_active, trucks(id, truck_number, nickname)')
+      .select('id, vehicle_id, reminder_type, trigger_miles, trigger_months, last_service_date, last_odometer, next_due_date, next_due_miles, is_active, vehicles(id, vehicle_number, nickname)')
       .eq('carrier_org_id', profile.org_id)
       .eq('is_active', true)
       .order('next_due_date', { ascending: true, nullsFirst: false }),
     supabase
       .from('service_logs')
-      .select('id, truck_id, service_type, service_date, odometer, cost, shop_name, notes, trucks(truck_number, nickname)')
+      .select('id, vehicle_id, service_type, service_date, odometer, cost, shop_name, notes, vehicles(vehicle_number, nickname)')
       .eq('carrier_org_id', profile.org_id)
       .order('service_date', { ascending: false })
       .limit(20),
@@ -120,17 +120,17 @@ export default async function MaintenancePage({
 
   if (remindersError) console.error('[maintenance] reminders query failed:', remindersError.message)
 
-  const trucks = (trucksData ?? []) as Truck[]
+  const vehicles = (vehiclesData ?? []) as Vehicle[]
   const reminders = (remindersData ?? []) as unknown as Reminder[]
   const logs = (logsData ?? []) as unknown as ServiceLog[]
 
-  // Group reminders by truck so each truck gets its own card, in truck order
-  // (including trucks with zero reminders, so an owner notices the gap).
-  const remindersByTruck = new Map<number, Reminder[]>()
+  // Group reminders by vehicle so each vehicle gets its own card, in vehicle
+  // order (including vehicles with zero reminders, so an owner notices the gap).
+  const remindersByVehicle = new Map<number, Reminder[]>()
   for (const r of reminders) {
-    const list = remindersByTruck.get(r.truck_id) ?? []
+    const list = remindersByVehicle.get(r.vehicle_id) ?? []
     list.push(r)
-    remindersByTruck.set(r.truck_id, list)
+    remindersByVehicle.set(r.vehicle_id, list)
   }
 
   const overdueCount = reminders.filter(r => computeStatus(r.next_due_date) === 'overdue').length
@@ -149,7 +149,7 @@ export default async function MaintenancePage({
                 : t('summaryOk')}
           </p>
         </div>
-        {canManage && <LogServiceButton trucks={trucks} reminders={reminders} />}
+        {canManage && <LogServiceButton vehicles={vehicles} reminders={reminders} />}
       </div>
 
       {params.logged && (
@@ -159,23 +159,23 @@ export default async function MaintenancePage({
         </div>
       )}
 
-      {trucks.length === 0 ? (
+      {vehicles.length === 0 ? (
         <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
           <span className="material-symbols-outlined text-slate-600 text-4xl">build</span>
           <p className="text-slate-500 text-sm mt-3">{t('noTrucksYet')}</p>
         </div>
       ) : (
         <div className="space-y-4 mb-8">
-          {trucks.map((truck) => {
-            const truckReminders = remindersByTruck.get(truck.id) ?? []
+          {vehicles.map((vehicle) => {
+            const vehicleReminders = remindersByVehicle.get(vehicle.id) ?? []
             return (
-              <div key={truck.id} className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+              <div key={vehicle.id} className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
                 <div className="px-5 py-3.5 border-b border-white/5 flex items-center gap-2">
                   <span className="material-symbols-outlined text-slate-500 text-[18px]">fire_truck</span>
-                  <span className="text-white font-medium">{truck.truck_number}</span>
-                  {truck.nickname && <span className="text-slate-500 text-sm">— {truck.nickname}</span>}
+                  <span className="text-white font-medium">{vehicle.vehicle_number}</span>
+                  {vehicle.nickname && <span className="text-slate-500 text-sm">— {vehicle.nickname}</span>}
                 </div>
-                {truckReminders.length === 0 ? (
+                {vehicleReminders.length === 0 ? (
                   <div className="px-5 py-4 text-slate-500 text-sm">{t('noRemindersForTruck')}</div>
                 ) : (
                   <table className="w-full text-sm">
@@ -188,7 +188,7 @@ export default async function MaintenancePage({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                      {truckReminders.map((r) => {
+                      {vehicleReminders.map((r) => {
                         const status = computeStatus(r.next_due_date)
                         const nextDue = [
                           r.next_due_date ? formatDate(r.next_due_date, profile) : null,
@@ -241,7 +241,7 @@ export default async function MaintenancePage({
                 <tr key={log.id} className="hover:bg-white/[0.07] transition-colors duration-150">
                   <td className="px-5 py-3 text-slate-300">{formatDate(log.service_date, profile)}</td>
                   <td className="px-4 py-3 text-white font-medium">
-                    {log.trucks?.truck_number ?? '—'}{log.trucks?.nickname ? ` — ${log.trucks.nickname}` : ''}
+                    {log.vehicles?.vehicle_number ?? '—'}{log.vehicles?.nickname ? ` — ${log.vehicles.nickname}` : ''}
                   </td>
                   <td className="px-4 py-3 text-slate-300">{log.service_type}</td>
                   <td className="px-4 py-3 text-slate-400">{log.shop_name ?? '—'}</td>

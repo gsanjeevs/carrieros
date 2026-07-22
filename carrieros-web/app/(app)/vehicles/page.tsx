@@ -1,12 +1,12 @@
-// app/(app)/trucks/page.tsx
+// app/(app)/vehicles/page.tsx
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
-import AddTruckButton from './AddTruckButton'
+import AddVehicleButton from './AddVehicleButton'
 
-type Truck = {
+type Vehicle = {
   id: number
-  truck_number: string | null
+  vehicle_number: string | null
   nickname: string | null
   year: number | null
   make: string | null
@@ -16,7 +16,7 @@ type Truck = {
   is_active: boolean | null
 }
 
-export default async function TrucksPage({
+export default async function VehiclesPage({
   searchParams,
 }: {
   searchParams: Promise<{ created?: string }>
@@ -35,18 +35,18 @@ export default async function TrucksPage({
   const justCreated = params.created
   const canManage = ['owner', 'solo'].includes(profile?.role ?? '')
 
-  const t = await getTranslations('trucks')
+  const t = await getTranslations('vehicles')
 
-  let trucks: Truck[] = []
+  let vehicles: Vehicle[] = []
 
   if (profile?.org_id) {
     const { data } = await supabase
-      .from('trucks')
-      .select('id, truck_number, nickname, year, make, model, license_plate, license_state, is_active')
+      .from('vehicles')
+      .select('id, vehicle_number, nickname, year, make, model, license_plate, license_state, is_active')
       .eq('carrier_org_id', profile.org_id)
       .eq('is_active', true)
-      .order('truck_number')
-    trucks = data ?? []
+      .order('vehicle_number')
+    vehicles = data ?? []
   }
 
   return (
@@ -54,9 +54,9 @@ export default async function TrucksPage({
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-white">{t('title')}</h1>
-          <p className="text-slate-400 text-sm mt-1">{t('truckCount', { count: trucks.length })}</p>
+          <p className="text-slate-400 text-sm mt-1">{t('truckCount', { count: vehicles.length })}</p>
         </div>
-        {canManage && <AddTruckButton />}
+        {canManage && <AddVehicleButton />}
       </div>
 
       {justCreated && (
@@ -66,11 +66,11 @@ export default async function TrucksPage({
         </div>
       )}
 
-      {trucks.length === 0 ? (
+      {vehicles.length === 0 ? (
         <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
           <span className="material-symbols-outlined text-slate-600 text-4xl">fire_truck</span>
           <p className="text-slate-500 text-sm mt-3">{t('noTrucksYet')}</p>
-          {canManage && <AddTruckButton variant="empty" />}
+          {canManage && <AddVehicleButton variant="empty" />}
         </div>
       ) : (
         <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
@@ -84,14 +84,14 @@ export default async function TrucksPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {trucks.map((truck) => {
-                const ymm = [truck.year, truck.make, truck.model].filter(Boolean).join(' ')
-                const plate = [truck.license_plate, truck.license_state].filter(Boolean).join(' / ')
+              {vehicles.map((vehicle) => {
+                const ymm = [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(' ')
+                const plate = [vehicle.license_plate, vehicle.license_state].filter(Boolean).join(' / ')
 
                 return (
-                  <tr key={truck.id} className="hover:bg-white/[0.07] transition-colors duration-150">
-                    <td className="px-5 py-3.5 text-white font-medium">{truck.truck_number}</td>
-                    <td className="px-4 py-3.5 text-slate-300">{truck.nickname ?? '—'}</td>
+                  <tr key={vehicle.id} className="hover:bg-white/[0.07] transition-colors duration-150">
+                    <td className="px-5 py-3.5 text-white font-medium">{vehicle.vehicle_number}</td>
+                    <td className="px-4 py-3.5 text-slate-300">{vehicle.nickname ?? '—'}</td>
                     <td className="px-4 py-3.5 text-slate-400">{ymm || '—'}</td>
                     <td className="px-4 py-3.5 text-slate-400">{plate || '—'}</td>
                   </tr>

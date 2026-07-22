@@ -36,7 +36,7 @@ const NAV_SECTIONS: NavSection[] = [
     sectionKey: 'fleet',
     items: [
       { labelKey: 'drivers',     href: '/drivers',     icon: 'person',     roles: ['owner','solo','dispatcher'] },
-      { labelKey: 'trucks',      href: '/trucks',      icon: 'fire_truck', roles: ['owner','solo'] },
+      { labelKey: 'vehicles',    href: '/vehicles',    icon: 'fire_truck', roles: ['owner','solo'] },
       { labelKey: 'maintenance', href: '/maintenance', icon: 'build',      roles: ['owner','solo','dispatcher'] },
     ],
   },

@@ -13,7 +13,7 @@ import { supabase } from '@/lib/supabase';
 export type Submitter = {
   carrierOrgId: number;
   driverId: number | null;
-  defaultTruckId: number | null;
+  defaultVehicleId: number | null;
   role: string;
 };
 
@@ -27,14 +27,14 @@ export async function resolveSubmitter(userId: string): Promise<Submitter | null
   if (profile?.role === 'driver') {
     const { data: driver } = await supabase
       .from('drivers')
-      .select('id, carrier_org_id, default_truck_id')
+      .select('id, carrier_org_id, default_vehicle_id')
       .eq('profile_id', userId)
       .single();
     if (!driver) return null;
     return {
       carrierOrgId: driver.carrier_org_id,
       driverId: driver.id,
-      defaultTruckId: driver.default_truck_id,
+      defaultVehicleId: driver.default_vehicle_id,
       role: 'driver',
     };
   }
@@ -44,7 +44,7 @@ export async function resolveSubmitter(userId: string): Promise<Submitter | null
   return {
     carrierOrgId: profile.org_id,
     driverId: null,
-    defaultTruckId: null,
+    defaultVehicleId: null,
     role: profile.role ?? 'solo',
   };
 }

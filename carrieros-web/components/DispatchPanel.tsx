@@ -1,13 +1,13 @@
 'use client'
 // components/DispatchPanel.tsx
-// Assign driver/truck and advance load status. Owner/solo/dispatcher only.
+// Assign driver/vehicle and advance load status. Owner/solo/dispatcher only.
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
 interface Driver { id: number; driver_number: string; profiles: { first_name: string; last_name: string } | null }
-interface Truck  { id: number; truck_number: string; nickname: string }
+interface Vehicle { id: number; vehicle_number: string; nickname: string }
 
 const NEXT_STATUS: Record<string, string> = {
   draft:      'scheduled',
@@ -32,14 +32,14 @@ const STATUS_ACTION_KEY: Record<string, string> = {
 }
 
 export default function DispatchPanel({
-  loadId, loadNumber, currentStatus, currentDriverId, currentTruckId, orgId,
+  loadId, loadNumber, currentStatus, currentDriverId, currentVehicleId, orgId,
 }: {
-  loadId:          number
-  loadNumber:      string
-  currentStatus:   string
-  currentDriverId: number | null
-  currentTruckId:  number | null
-  orgId:           number
+  loadId:           number
+  loadNumber:       string
+  currentStatus:    string
+  currentDriverId:  number | null
+  currentVehicleId: number | null
+  orgId:            number
 }) {
   const router = useRouter()
   const t = useTranslations('loads')
@@ -56,15 +56,15 @@ export default function DispatchPanel({
   }
 
   const [drivers, setDrivers] = useState<Driver[]>([])
-  const [trucks,  setTrucks]  = useState<Truck[]>([])
+  const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [driverId, setDriverId] = useState<string>(currentDriverId?.toString() ?? '')
-  const [truckId,  setTruckId]  = useState<string>(currentTruckId?.toString()  ?? '')
+  const [vehicleId, setVehicleId] = useState<string>(currentVehicleId?.toString() ?? '')
   const [saving,   setSaving]   = useState(false)
   const [error,    setError]    = useState('')
 
   useEffect(() => {
     fetch('/api/drivers').then(r => r.json()).then(setDrivers).catch(() => {})
-    fetch('/api/trucks').then(r => r.json()).then(setTrucks).catch(() => {})
+    fetch('/api/vehicles').then(r => r.json()).then(setVehicles).catch(() => {})
   }, [])
 
   async function save(newStatus?: string) {
@@ -75,8 +75,8 @@ export default function DispatchPanel({
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          driver_id: driverId ? Number(driverId) : null,
-          truck_id:  truckId  ? Number(truckId)  : null,
+          driver_id:  driverId  ? Number(driverId)  : null,
+          vehicle_id: vehicleId ? Number(vehicleId) : null,
           status:    newStatus ?? currentStatus,
         }),
       })
@@ -113,10 +113,10 @@ export default function DispatchPanel({
 
       <div>
         <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">{t('assignTruck')}</label>
-        <select className={selectCls} value={truckId} onChange={e => setTruckId(e.target.value)}>
+        <select className={selectCls} value={vehicleId} onChange={e => setVehicleId(e.target.value)}>
           <option value="">— {t('unassigned')} —</option>
-          {trucks.map(tr => (
-            <option key={tr.id} value={tr.id}>{tr.truck_number} · {tr.nickname}</option>
+          {vehicles.map(v => (
+            <option key={v.id} value={v.id}>{v.vehicle_number} · {v.nickname}</option>
           ))}
         </select>
       </div>

@@ -27,14 +27,15 @@
     "CANNOT_REMOVE_SELF": "No puedes eliminar tu propia cuenta.",
     "LAST_OWNER": "Tu empresa debe conservar al menos un propietario.",
     "MANAGE_DRIVER_ELSEWHERE": "Administra las cuentas de conductores desde la página Conductores.",
-    "EMAIL_SEND_FAILED": "No pudimos enviar el correo de la factura. Inténtalo de nuevo."
+    "EMAIL_SEND_FAILED": "No pudimos enviar el correo de la factura. Inténtalo de nuevo.",
+    "TIER_UPGRADE_REQUIRED": "Esto requiere una actualización al plan Growth o superior."
   },
   "nav": {
     "dashboard": "Panel",
     "loads": "Cargas",
     "dispatch": "Despacho",
     "drivers": "Conductores",
-    "trucks": "Camiones",
+    "vehicles": "Camiones",
     "customers": "Clientes",
     "invoices": "Facturas",
     "maintenance": "Mantenimiento",
@@ -178,7 +179,7 @@
     "sendingInvite": "Enviando invitación…",
     "noDefaultTruck": "Sin camión predeterminado"
   },
-  "trucks": {
+  "vehicles": {
     "title": "Camiones",
     "truckCount": "{count} camiones",
     "addTruck": "Agregar Camión",
@@ -348,7 +349,17 @@
     "addPaymentMethod": "Agregar método de pago",
     "replacePaymentMethod": "Reemplazar método de pago",
     "addingPaymentMethod": "Agregando…",
-    "addFailed": "No se pudo agregar el método de pago. Inténtalo de nuevo."
+    "addFailed": "No se pudo agregar el método de pago. Inténtalo de nuevo.",
+    "fleetUsage": "Uso de la flota",
+    "trucksUsed": "{count} de {included} camiones incluidos en uso",
+    "overageFee": "+{count} camiones adicionales · +${fee}/mes",
+    "comparePlans": "Comparar planes",
+    "includedTrucks": "{count} camiones incluidos",
+    "currentPlanBadge": "Plan actual",
+    "upgrade": "Mejorar plan",
+    "downgrade": "Bajar de plan",
+    "changingPlan": "Actualizando…",
+    "changeTierFailed": "No se pudo cambiar tu plan. Inténtalo de nuevo."
   },
   "customers": {
     "title": "Clientes",

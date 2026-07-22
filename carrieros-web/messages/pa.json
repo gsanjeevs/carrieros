@@ -27,14 +27,15 @@
     "CANNOT_REMOVE_SELF": "ਤੁਸੀਂ ਆਪਣਾ ਖੁਦ ਦਾ ਖਾਤਾ ਨਹੀਂ ਹਟਾ ਸਕਦੇ।",
     "LAST_OWNER": "ਤੁਹਾਡੀ ਕੰਪਨੀ ਕੋਲ ਘੱਟੋ-ਘੱਟ ਇੱਕ ਮਾਲਕ ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ।",
     "MANAGE_DRIVER_ELSEWHERE": "ਡਰਾਈਵਰ ਖਾਤੇ ਡਰਾਈਵਰ ਪੰਨੇ ਤੋਂ ਪ੍ਰਬੰਧਿਤ ਕਰੋ।",
-    "EMAIL_SEND_FAILED": "ਅਸੀਂ ਉਹ ਇਨਵੌਇਸ ਈਮੇਲ ਨਹੀਂ ਭੇਜ ਸਕੇ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
+    "EMAIL_SEND_FAILED": "ਅਸੀਂ ਉਹ ਇਨਵੌਇਸ ਈਮੇਲ ਨਹੀਂ ਭੇਜ ਸਕੇ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "TIER_UPGRADE_REQUIRED": "ਇਸ ਲਈ Growth ਪਲਾਨ ਜਾਂ ਇਸ ਤੋਂ ਉੱਚੇ ਪਲਾਨ ਵਿੱਚ ਅੱਪਗ੍ਰੇਡ ਦੀ ਲੋੜ ਹੈ।"
   },
   "nav": {
     "dashboard": "ਡੈਸ਼ਬੋਰਡ",
     "loads": "ਲੋਡ",
     "dispatch": "ਡਿਸਪੈਚ",
     "drivers": "ਡਰਾਈਵਰ",
-    "trucks": "ਟਰੱਕ",
+    "vehicles": "ਟਰੱਕ",
     "customers": "ਗਾਹਕ",
     "invoices": "ਇਨਵੌਇਸ",
     "maintenance": "ਰੱਖ-ਰਖਾਅ",
@@ -178,7 +179,7 @@
     "sendingInvite": "ਸੱਦਾ ਭੇਜਿਆ ਜਾ ਰਿਹਾ ਹੈ…",
     "noDefaultTruck": "ਕੋਈ ਮੂਲ ਟਰੱਕ ਨਹੀਂ"
   },
-  "trucks": {
+  "vehicles": {
     "title": "ਟਰੱਕ",
     "truckCount": "{count} ਟਰੱਕ",
     "addTruck": "ਟਰੱਕ ਸ਼ਾਮਲ ਕਰੋ",
@@ -348,7 +349,17 @@
     "addPaymentMethod": "ਭੁਗਤਾਨ ਤਰੀਕਾ ਸ਼ਾਮਲ ਕਰੋ",
     "replacePaymentMethod": "ਭੁਗਤਾਨ ਤਰੀਕਾ ਬਦਲੋ",
     "addingPaymentMethod": "ਸ਼ਾਮਲ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…",
-    "addFailed": "ਭੁਗਤਾਨ ਤਰੀਕਾ ਸ਼ਾਮਲ ਨਹੀਂ ਹੋ ਸਕਿਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
+    "addFailed": "ਭੁਗਤਾਨ ਤਰੀਕਾ ਸ਼ਾਮਲ ਨਹੀਂ ਹੋ ਸਕਿਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "fleetUsage": "ਫਲੀਟ ਵਰਤੋਂ",
+    "trucksUsed": "{included} ਵਿੱਚੋਂ {count} ਸ਼ਾਮਲ ਟਰੱਕ ਵਰਤੋਂ ਵਿੱਚ",
+    "overageFee": "+{count} ਵਾਧੂ ਟਰੱਕ · +${fee}/ਮਹੀਨਾ",
+    "comparePlans": "ਪਲਾਨ ਤੁਲਨਾ ਕਰੋ",
+    "includedTrucks": "{count} ਟਰੱਕ ਸ਼ਾਮਲ",
+    "currentPlanBadge": "ਮੌਜੂਦਾ ਪਲਾਨ",
+    "upgrade": "ਅੱਪਗ੍ਰੇਡ ਕਰੋ",
+    "downgrade": "ਡਾਊਨਗ੍ਰੇਡ ਕਰੋ",
+    "changingPlan": "ਅੱਪਡੇਟ ਹੋ ਰਿਹਾ ਹੈ…",
+    "changeTierFailed": "ਤੁਹਾਡਾ ਪਲਾਨ ਬਦਲਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
   },
   "customers": {
     "title": "ਗਾਹਕ",

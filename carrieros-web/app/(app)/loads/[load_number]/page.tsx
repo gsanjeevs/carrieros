@@ -75,7 +75,7 @@ export default async function LoadDetailPage({
     .select(`
       *,
       drivers ( id, driver_number, profile_id, profiles ( first_name, last_name ) ),
-      trucks  ( id, truck_number, nickname, make, model, year )
+      vehicles ( id, vehicle_number, nickname, make, model, year )
     `)
     .eq('load_number', load_number)
     .eq('carrier_org_id', profile.org_id)
@@ -161,8 +161,8 @@ export default async function LoadDetailPage({
   const driverName  = load.drivers?.profiles
     ? [load.drivers.profiles.first_name, load.drivers.profiles.last_name].filter(Boolean).join(' ')
     : null
-  const truckLabel  = load.trucks
-    ? `${load.trucks.truck_number ?? ''} ${load.trucks.nickname}`.trim()
+  const vehicleLabel  = load.vehicles
+    ? `${load.vehicles.vehicle_number ?? ''} ${load.vehicles.nickname}`.trim()
     : null
 
   return (
@@ -308,7 +308,7 @@ export default async function LoadDetailPage({
                 <span className="material-symbols-outlined text-slate-500 text-[20px]">local_shipping</span>
                 <div>
                   <p className="text-[10px] text-slate-500 uppercase tracking-wider">{t('truck')}</p>
-                  <p className="text-white text-sm">{truckLabel ?? t('unassigned')}</p>
+                  <p className="text-white text-sm">{vehicleLabel ?? t('unassigned')}</p>
                 </div>
               </div>
             </div>
@@ -319,7 +319,7 @@ export default async function LoadDetailPage({
                 loadNumber={load.load_number}
                 currentStatus={load.status ?? 'draft'}
                 currentDriverId={load.driver_id}
-                currentTruckId={load.truck_id}
+                currentVehicleId={load.vehicle_id}
                 orgId={profile.org_id}
               />
             )}

@@ -1,5 +1,5 @@
-// app/api/trucks/route.ts
-import { generateTruckNumber } from '@/lib/generate-number'
+// app/api/vehicles/route.ts
+import { generateVehicleNumber } from '@/lib/generate-number'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 
@@ -17,11 +17,11 @@ export async function GET(request: NextRequest) {
   if (!profile?.org_id) return NextResponse.json([])
 
   const { data } = await supabase
-    .from('trucks')
-    .select('id, truck_number, nickname, year, make, model, license_plate, license_state, is_active')
+    .from('vehicles')
+    .select('id, vehicle_number, nickname, year, make, model, license_plate, license_state, is_active')
     .eq('carrier_org_id', profile.org_id)
     .eq('is_active', true)
-    .order('truck_number')
+    .order('vehicle_number')
 
   return NextResponse.json(data ?? [])
 }
@@ -45,13 +45,24 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json()
 
-  const truck_number = await generateTruckNumber(supabase, profile.org_id)
+  const vehicle_number = await generateVehicleNumber(supabase, profile.org_id)
+
+  // Placeholder default until the real vehicle-type picker ships (Phase 3D UI work).
+  const { data: vehicleType } = await supabase
+    .from('vehicle_types')
+    .select('id')
+    .eq('code', 'semi')
+    .single()
+
+  if (!vehicleType?.id)
+    return apiError('SERVER_ERROR', 'Default vehicle type not found', 500)
 
   const { data, error } = await supabase
-    .from('trucks')
+    .from('vehicles')
     .insert({
       carrier_org_id:    profile.org_id,
-      truck_number,
+      vehicle_number,
+      vehicle_type_id: vehicleType.id,
       nickname:      body.nickname,
       year:          body.year          ?? null,
       make:          body.make          ?? null,
@@ -60,7 +71,7 @@ export async function POST(request: NextRequest) {
       license_plate: body.license_plate ?? null,
       license_state: body.license_state ?? null,
     })
-    .select('truck_number, nickname')
+    .select('vehicle_number, nickname')
     .single()
 
   if (error) return apiError('SERVER_ERROR', error.message, 500)

@@ -13,15 +13,15 @@ import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { toDate } from '@/lib/format-datetime'
 
-type Truck = {
+type Vehicle = {
   id: number
-  truck_number: string | null
+  vehicle_number: string | null
   nickname: string | null
 }
 
 type Reminder = {
   id: number
-  truck_id: number
+  vehicle_id: number
   reminder_type: string
   trigger_miles: number | null
   trigger_months: number | null
@@ -48,7 +48,7 @@ function addMonths(dateStr: string, months: number): string {
 const NEW_REMINDER = '__new__'
 const NO_REMINDER = ''
 
-export default function LogServiceButton({ trucks, reminders }: { trucks: Truck[]; reminders: Reminder[] }) {
+export default function LogServiceButton({ vehicles, reminders }: { vehicles: Vehicle[]; reminders: Reminder[] }) {
   const router = useRouter()
   const t = useTranslations('maintenance')
   const tCommon = useTranslations('common')
@@ -58,7 +58,7 @@ export default function LogServiceButton({ trucks, reminders }: { trucks: Truck[
   const [error, setError] = useState('')
 
   const emptyForm = {
-    truck_id: trucks[0]?.id ? String(trucks[0].id) : '',
+    vehicle_id: vehicles[0]?.id ? String(vehicles[0].id) : '',
     reminder_id: NO_REMINDER as string,
     new_reminder_type: '',
     new_trigger_miles: '',
@@ -81,8 +81,8 @@ export default function LogServiceButton({ trucks, reminders }: { trucks: Truck[
     setForm(emptyForm)
   }
 
-  const truckReminders = reminders.filter(r => String(r.truck_id) === form.truck_id)
-  const selectedReminder = truckReminders.find(r => String(r.id) === form.reminder_id)
+  const vehicleReminders = reminders.filter(r => String(r.vehicle_id) === form.vehicle_id)
+  const selectedReminder = vehicleReminders.find(r => String(r.id) === form.reminder_id)
 
   async function submit() {
     setLoading(true)
@@ -90,8 +90,8 @@ export default function LogServiceButton({ trucks, reminders }: { trucks: Truck[
     const supabase = createClient()
 
     try {
-      const truckId = Number(form.truck_id)
-      if (!truckId) throw new Error(t('selectTruckRequired'))
+      const vehicleId = Number(form.vehicle_id)
+      if (!vehicleId) throw new Error(t('selectTruckRequired'))
 
       const serviceType = form.reminder_id === NEW_REMINDER
         ? form.new_reminder_type.trim()
@@ -115,7 +115,7 @@ export default function LogServiceButton({ trucks, reminders }: { trucks: Truck[
       const { error: insertError } = await supabase
         .from('service_logs')
         .insert({
-          truck_id: truckId,
+          vehicle_id: vehicleId,
           carrier_org_id: profile.org_id,
           service_type: serviceType,
           service_date: form.service_date,
@@ -136,7 +136,7 @@ export default function LogServiceButton({ trucks, reminders }: { trucks: Truck[
         const { error: reminderError } = await supabase
           .from('maintenance_reminders')
           .insert({
-            truck_id: truckId,
+            vehicle_id: vehicleId,
             carrier_org_id: profile.org_id,
             reminder_type: serviceType,
             trigger_miles: triggerMiles,
@@ -166,10 +166,10 @@ export default function LogServiceButton({ trucks, reminders }: { trucks: Truck[
         if (reminderError) throw new Error(reminderError.message)
       }
 
-      const truck = trucks.find(tr => tr.id === truckId)
+      const vehicle = vehicles.find(v => v.id === vehicleId)
       setOpen(false)
       setForm(emptyForm)
-      router.push(`/maintenance?logged=${encodeURIComponent(truck?.truck_number ?? '')}`)
+      router.push(`/maintenance?logged=${encodeURIComponent(vehicle?.vehicle_number ?? '')}`)
       router.refresh()
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : tCommon('somethingWentWrong'))
@@ -201,11 +201,11 @@ export default function LogServiceButton({ trucks, reminders }: { trucks: Truck[
             <div className="space-y-4">
               <div>
                 <label className={labelCls}>{t('truck')} *</label>
-                <select className={inputCls} value={form.truck_id}
-                  onChange={e => setForm(f => ({ ...f, truck_id: e.target.value, reminder_id: NO_REMINDER }))}>
-                  {trucks.map(truck => (
-                    <option key={truck.id} value={truck.id}>
-                      {truck.truck_number}{truck.nickname ? ` — ${truck.nickname}` : ''}
+                <select className={inputCls} value={form.vehicle_id}
+                  onChange={e => setForm(f => ({ ...f, vehicle_id: e.target.value, reminder_id: NO_REMINDER }))}>
+                  {vehicles.map(vehicle => (
+                    <option key={vehicle.id} value={vehicle.id}>
+                      {vehicle.vehicle_number}{vehicle.nickname ? ` — ${vehicle.nickname}` : ''}
                     </option>
                   ))}
                 </select>
@@ -215,7 +215,7 @@ export default function LogServiceButton({ trucks, reminders }: { trucks: Truck[
                 <label className={labelCls}>{t('whichReminder')}</label>
                 <select className={inputCls} value={form.reminder_id} onChange={e => set('reminder_id', e.target.value)}>
                   <option value={NO_REMINDER}>{t('generalServiceNoReminder')}</option>
-                  {truckReminders.map(r => (
+                  {vehicleReminders.map(r => (
                     <option key={r.id} value={r.id}>{r.reminder_type}</option>
                   ))}
                   <option value={NEW_REMINDER}>{t('createNewReminder')}</option>
@@ -273,7 +273,7 @@ export default function LogServiceButton({ trucks, reminders }: { trucks: Truck[
                 </div>
                 <div>
                   <label className={labelCls}>{t('shop')}</label>
-                  <input className={inputCls} placeholder="Joe's Truck Repair"
+                  <input className={inputCls} placeholder="Joe's Vehicle Repair"
                     value={form.shop_name} onChange={e => set('shop_name', e.target.value)} />
                 </div>
               </div>
@@ -300,7 +300,7 @@ export default function LogServiceButton({ trucks, reminders }: { trucks: Truck[
                 </button>
                 <button
                   onClick={submit}
-                  disabled={loading || !form.truck_id}
+                  disabled={loading || !form.vehicle_id}
                   className="flex-2 flex-grow py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-[#f97316]/50"
                 >
                   {loading ? t('logging') : t('logService')}

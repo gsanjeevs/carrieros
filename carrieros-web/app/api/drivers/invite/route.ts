@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     return apiError('FORBIDDEN', 'Only owner/solo can invite drivers', 403)
 
   const body = await request.json()
-  const { email, phone, first_name, last_name, default_truck_id } = body
+  const { email, phone, first_name, last_name, default_vehicle_id } = body
 
   if (!email || typeof email !== 'string')
     return apiError('VALIDATION_ERROR', 'email is required', 400)
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
       carrier_org_id:    profile.org_id,
       profile_id:        newUserId,
       driver_number,
-      default_truck_id:  default_truck_id ?? null,
+      default_vehicle_id:  default_vehicle_id ?? null,
       invite_status:     'pending',
     })
     .select('driver_number, invite_status')

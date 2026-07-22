@@ -7,16 +7,16 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
-type Truck = {
+type Vehicle = {
   id: number
-  truck_number: string | null
+  vehicle_number: string | null
   nickname: string | null
 }
 
 const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 transition'
 const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
 
-export default function InviteDriverButton({ trucks, variant }: { trucks: Truck[]; variant?: 'empty' }) {
+export default function InviteDriverButton({ vehicles, variant }: { vehicles: Vehicle[]; variant?: 'empty' }) {
   const router = useRouter()
   const t = useTranslations('drivers')
   const tCommon = useTranslations('common')
@@ -39,7 +39,7 @@ export default function InviteDriverButton({ trucks, variant }: { trucks: Truck[
     phone: '',
     first_name: '',
     last_name: '',
-    default_truck_id: '',
+    default_vehicle_id: '',
   })
 
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
@@ -48,7 +48,7 @@ export default function InviteDriverButton({ trucks, variant }: { trucks: Truck[
     if (loading) return
     setOpen(false)
     setError('')
-    setForm({ email: '', phone: '', first_name: '', last_name: '', default_truck_id: '' })
+    setForm({ email: '', phone: '', first_name: '', last_name: '', default_vehicle_id: '' })
   }
 
   async function submit() {
@@ -63,14 +63,14 @@ export default function InviteDriverButton({ trucks, variant }: { trucks: Truck[
           phone: form.phone.trim() || undefined,
           first_name: form.first_name.trim() || undefined,
           last_name: form.last_name.trim() || undefined,
-          default_truck_id: form.default_truck_id ? Number(form.default_truck_id) : undefined,
+          default_vehicle_id: form.default_vehicle_id ? Number(form.default_vehicle_id) : undefined,
         }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(friendly(json.error_code))
 
       setOpen(false)
-      setForm({ email: '', phone: '', first_name: '', last_name: '', default_truck_id: '' })
+      setForm({ email: '', phone: '', first_name: '', last_name: '', default_vehicle_id: '' })
       router.push(`/drivers?invited=${json.driver_number}`)
       router.refresh()
     } catch (e: unknown) {
@@ -143,11 +143,11 @@ export default function InviteDriverButton({ trucks, variant }: { trucks: Truck[
 
               <div>
                 <label className={labelCls}>{t('truckOptional')}</label>
-                <select className={inputCls} value={form.default_truck_id} onChange={e => set('default_truck_id', e.target.value)}>
+                <select className={inputCls} value={form.default_vehicle_id} onChange={e => set('default_vehicle_id', e.target.value)}>
                   <option value="">{t('noDefaultTruck')}</option>
-                  {trucks.map(t => (
-                    <option key={t.id} value={t.id}>
-                      {t.truck_number}{t.nickname ? ` — ${t.nickname}` : ''}
+                  {vehicles.map(vehicle => (
+                    <option key={vehicle.id} value={vehicle.id}>
+                      {vehicle.vehicle_number}{vehicle.nickname ? ` — ${vehicle.nickname}` : ''}
                     </option>
                   ))}
                 </select>

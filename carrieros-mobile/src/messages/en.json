@@ -48,7 +48,7 @@
     "preTripHeading": "Pre-Trip Inspection",
     "postTripHeading": "Post-Trip Inspection",
     "subheading": "Tap any area to log a defect",
-    "noTruckWarning": "No truck on file for this load — the inspection will be saved without one. Ask your dispatcher to assign a truck.",
+    "noVehicleWarning": "No truck on file for this load — the inspection will be saved without one. Ask your dispatcher to assign a truck.",
     "areas": {
       "brakes": "Brakes",
       "lights": "Lights",

@@ -1,7 +1,7 @@
 'use client'
-// app/(app)/trucks/AddTruckButton.tsx
-// Opens a modal form that calls POST /api/trucks, then refreshes the trucks
-// list with a success banner (?created=<truck_number>).
+// app/(app)/vehicles/AddVehicleButton.tsx
+// Opens a modal form that calls POST /api/vehicles, then refreshes the vehicles
+// list with a success banner (?created=<vehicle_number>).
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -17,9 +17,9 @@ const US_STATES = [
 const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 transition'
 const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
 
-export default function AddTruckButton({ variant }: { variant?: 'empty' }) {
+export default function AddVehicleButton({ variant }: { variant?: 'empty' }) {
   const router = useRouter()
-  const t = useTranslations('trucks')
+  const t = useTranslations('vehicles')
   const tCommon = useTranslations('common')
   const tErrors = useTranslations('errors')
 
@@ -58,7 +58,7 @@ export default function AddTruckButton({ variant }: { variant?: 'empty' }) {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch('/api/trucks', {
+      const res = await fetch('/api/vehicles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -76,7 +76,7 @@ export default function AddTruckButton({ variant }: { variant?: 'empty' }) {
 
       setOpen(false)
       setForm({ nickname: '', year: '', make: '', model: '', vin: '', license_plate: '', license_state: '' })
-      router.push(`/trucks?created=${json.truck_number}`)
+      router.push(`/vehicles?created=${json.vehicle_number}`)
       router.refresh()
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : tCommon('somethingWentWrong'))

@@ -48,7 +48,7 @@
     "preTripHeading": "Inspección Antes del Viaje",
     "postTripHeading": "Inspección Después del Viaje",
     "subheading": "Toca cualquier área para registrar un defecto",
-    "noTruckWarning": "No hay camión registrado para esta carga — la inspección se guardará sin uno. Pide a tu despachador que asigne un camión.",
+    "noVehicleWarning": "No hay camión registrado para esta carga — la inspección se guardará sin uno. Pide a tu despachador que asigne un camión.",
     "areas": {
       "brakes": "Frenos",
       "lights": "Luces",

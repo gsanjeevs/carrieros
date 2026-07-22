@@ -49,12 +49,12 @@ export default async function DashboardPage() {
     Object.entries(STATUS_COLOR).map(([key, color]) => [key, { label: tLoads(`status_${key}`), color }])
   )
 
-  const [loadsRes, trucksRes, driversRes, invoicesRes, recentLoadsRes] = await Promise.all([
+  const [loadsRes, vehiclesRes, driversRes, invoicesRes, recentLoadsRes] = await Promise.all([
     orgId
       ? supabase.from('loads').select('id, status', { count: 'exact' }).eq('carrier_org_id', orgId)
       : Promise.resolve({ count: 0, data: [] }),
     orgId
-      ? supabase.from('trucks').select('id', { count: 'exact' }).eq('carrier_org_id', orgId).eq('is_active', true)
+      ? supabase.from('vehicles').select('id', { count: 'exact' }).eq('carrier_org_id', orgId).eq('is_active', true)
       : Promise.resolve({ count: 0 }),
     orgId
       ? supabase.from('drivers').select('id', { count: 'exact' }).eq('carrier_org_id', orgId).eq('is_active', true)
@@ -81,7 +81,7 @@ export default async function DashboardPage() {
 
   const kpis: KpiCard[] = [
     { label: t('activeLoads'),    value: activeLoads,            sub: t('totalLoads', { count: loadsRes.count ?? 0 }),   icon: 'local_shipping', color: '#f97316' },
-    { label: t('trucks'),         value: trucksRes.count ?? 0,   sub: t('activeFleet'),                                  icon: 'fire_truck',     color: '#1abc9c' },
+    { label: t('trucks'),         value: vehiclesRes.count ?? 0,   sub: t('activeFleet'),                                  icon: 'fire_truck',     color: '#1abc9c' },
     { label: t('drivers'),        value: driversRes.count ?? 0,  sub: t('active'),                                       icon: 'person',         color: '#3b82f6' },
     { label: t('unpaidInvoices'), value: invoicesRes.count ?? 0, sub: t('awaitingPayment'),                              icon: 'receipt_long',   color: '#d97706' },
   ]

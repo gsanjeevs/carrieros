@@ -27,14 +27,15 @@
     "CANNOT_REMOVE_SELF": "آپ اپنا اکاؤنٹ خود نہیں ہٹا سکتے۔",
     "LAST_OWNER": "آپ کی کمپنی میں کم از کم ایک مالک ہونا ضروری ہے۔",
     "MANAGE_DRIVER_ELSEWHERE": "ڈرائیور اکاؤنٹس ڈرائیورز کے صفحے سے منظم کریں۔",
-    "EMAIL_SEND_FAILED": "ہم وہ انوائس ای میل نہیں بھیج سکے۔ براہ کرم دوبارہ کوشش کریں۔"
+    "EMAIL_SEND_FAILED": "ہم وہ انوائس ای میل نہیں بھیج سکے۔ براہ کرم دوبارہ کوشش کریں۔",
+    "TIER_UPGRADE_REQUIRED": "اس کے لیے Growth پلان یا اس سے اوپر کے پلان میں اپ گریڈ درکار ہے۔"
   },
   "nav": {
     "dashboard": "ڈیش بورڈ",
     "loads": "لوڈز",
     "dispatch": "ڈسپیچ",
     "drivers": "ڈرائیورز",
-    "trucks": "ٹرکس",
+    "vehicles": "ٹرکس",
     "customers": "گاہک",
     "invoices": "انوائسز",
     "maintenance": "دیکھ بھال",
@@ -178,7 +179,7 @@
     "sendingInvite": "دعوت بھیجی جا رہی ہے…",
     "noDefaultTruck": "کوئی طے شدہ ٹرک نہیں"
   },
-  "trucks": {
+  "vehicles": {
     "title": "ٹرکس",
     "truckCount": "{count} ٹرکس",
     "addTruck": "ٹرک شامل کریں",
@@ -348,7 +349,17 @@
     "addPaymentMethod": "ادائیگی کا طریقہ شامل کریں",
     "replacePaymentMethod": "ادائیگی کا طریقہ تبدیل کریں",
     "addingPaymentMethod": "شامل کیا جا رہا ہے…",
-    "addFailed": "ادائیگی کا طریقہ شامل نہیں ہو سکا۔ دوبارہ کوشش کریں۔"
+    "addFailed": "ادائیگی کا طریقہ شامل نہیں ہو سکا۔ دوبارہ کوشش کریں۔",
+    "fleetUsage": "فلیٹ کا استعمال",
+    "trucksUsed": "{included} میں سے {count} شامل ٹرک زیرِ استعمال",
+    "overageFee": "+{count} اضافی ٹرک · +${fee}/ماہ",
+    "comparePlans": "پلانز کا موازنہ کریں",
+    "includedTrucks": "{count} ٹرک شامل",
+    "currentPlanBadge": "موجودہ پلان",
+    "upgrade": "اپ گریڈ کریں",
+    "downgrade": "ڈاؤن گریڈ کریں",
+    "changingPlan": "اپ ڈیٹ ہو رہا ہے…",
+    "changeTierFailed": "آپ کا پلان تبدیل نہیں ہو سکا۔ دوبارہ کوشش کریں۔"
   },
   "customers": {
     "title": "کسٹمرز",

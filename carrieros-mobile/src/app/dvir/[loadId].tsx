@@ -80,7 +80,7 @@ export default function DVIRScreen() {
   );
   const [odometer, setOdometer] = useState('');
   const [certified, setCertified] = useState(false);
-  const [noTruckWarning, setNoTruckWarning] = useState(false);
+  const [noVehicleWarning, setNoVehicleWarning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
@@ -93,19 +93,19 @@ export default function DVIRScreen() {
   // driver-vs-solo branch. See that file for why solo has no `drivers` row.
 
   useEffect(() => {
-    // Just a heads-up if no truck can be resolved — doesn't block submit,
-    // truck_id is nullable on dvir_inspections.
-    async function checkTruck() {
+    // Just a heads-up if no vehicle can be resolved — doesn't block submit,
+    // vehicle_id is nullable on dvir_inspections.
+    async function checkVehicle() {
       if (!session?.user.id) return;
       const submitter = await resolveSubmitter(session.user.id);
       const { data: load } = await supabase
         .from('loads_driver_view')
-        .select('truck_id')
+        .select('vehicle_id')
         .eq('id', Number(loadId))
         .single();
-      if (!load?.truck_id && !submitter?.defaultTruckId) setNoTruckWarning(true);
+      if (!load?.vehicle_id && !submitter?.defaultVehicleId) setNoVehicleWarning(true);
     }
-    checkTruck();
+    checkVehicle();
   }, [session?.user.id, loadId]);
 
   function toggleDefect(key: AreaKey) {
@@ -195,18 +195,18 @@ export default function DVIRScreen() {
 
     const { data: load } = await supabase
       .from('loads_driver_view')
-      .select('truck_id')
+      .select('vehicle_id')
       .eq('id', Number(loadId))
       .single();
 
-    const truckId = load?.truck_id ?? submitter.defaultTruckId ?? null;
+    const vehicleId = load?.vehicle_id ?? submitter.defaultVehicleId ?? null;
     const condition = defectAreas.length > 0 ? 'defects_noted' : 'satisfactory';
 
     const { data: inspection, error: inspectionErr } = await supabase
       .from('dvir_inspections')
       .insert({
         carrier_org_id: submitter.carrierOrgId,
-        truck_id: truckId,
+        vehicle_id: vehicleId,
         load_id: Number(loadId),
         driver_id: submitter.driverId,
         type,
@@ -303,9 +303,9 @@ export default function DVIRScreen() {
             {t('dvir.subheading')}
           </ThemedText>
 
-          {noTruckWarning && (
+          {noVehicleWarning && (
             <ThemedText type="small" style={styles.warning}>
-              {t('dvir.noTruckWarning')}
+              {t('dvir.noVehicleWarning')}
             </ThemedText>
           )}
 

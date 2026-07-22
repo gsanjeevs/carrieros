@@ -8,13 +8,13 @@ import { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase'
 
 type Client = SupabaseClient<Database>
-type Entity = 'load' | 'customer' | 'driver' | 'truck' | 'invoice'
+type Entity = 'load' | 'customer' | 'driver' | 'vehicle' | 'invoice'
 
 const PREFIX: Record<Entity, string> = {
   load:     'L',
   customer: 'C',
   driver:   'D',
-  truck:    'T',
+  vehicle:  'T',
   invoice:  'INV',
 }
 
@@ -35,5 +35,5 @@ async function nextVal(client: Client, companyId: number, entity: Entity): Promi
 export const generateLoadNumber     = (c: Client, cid: number) => nextVal(c, cid, 'load')
 export const generateCustomerNumber = (c: Client, cid: number) => nextVal(c, cid, 'customer')
 export const generateDriverNumber   = (c: Client, cid: number) => nextVal(c, cid, 'driver')
-export const generateTruckNumber    = (c: Client, cid: number) => nextVal(c, cid, 'truck')
+export const generateVehicleNumber  = (c: Client, cid: number) => nextVal(c, cid, 'vehicle')
 export const generateInvoiceNumber  = (c: Client, cid: number) => nextVal(c, cid, 'invoice')

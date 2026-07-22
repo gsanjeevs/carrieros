@@ -14,16 +14,16 @@ type Driver = {
   id: number
   driver_number: string
   invite_status: string
-  default_truck_id: number | null
+  default_vehicle_id: number | null
   cdl_expiry: string | null
   med_cert_expiry: string | null
   is_active: boolean
   profiles: { first_name: string | null; last_name: string | null; phone: string | null } | null
 }
 
-type Truck = {
+type Vehicle = {
   id: number
-  truck_number: string | null
+  vehicle_number: string | null
   nickname: string | null
 }
 
@@ -54,25 +54,25 @@ export default async function DriversPage({
   )
 
   let drivers: Driver[] = []
-  let trucks: Truck[] = []
+  let vehicles: Vehicle[] = []
 
   if (profile?.org_id) {
     const { data } = await supabase
       .from('drivers')
-      .select('id, driver_number, invite_status, default_truck_id, cdl_expiry, med_cert_expiry, is_active, profiles(first_name, last_name, phone)')
+      .select('id, driver_number, invite_status, default_vehicle_id, cdl_expiry, med_cert_expiry, is_active, profiles(first_name, last_name, phone)')
       .eq('carrier_org_id', profile.org_id)
       .eq('is_active', true)
       .order('driver_number')
     drivers = (data ?? []) as unknown as Driver[]
 
     if (canManage) {
-      const { data: truckData } = await supabase
-        .from('trucks')
-        .select('id, truck_number, nickname')
+      const { data: vehicleData } = await supabase
+        .from('vehicles')
+        .select('id, vehicle_number, nickname')
         .eq('carrier_org_id', profile.org_id)
         .eq('is_active', true)
-        .order('truck_number')
-      trucks = truckData ?? []
+        .order('vehicle_number')
+      vehicles = vehicleData ?? []
     }
   }
 
@@ -83,7 +83,7 @@ export default async function DriversPage({
           <h1 className="text-2xl font-semibold text-white">{t('title')}</h1>
           <p className="text-slate-400 text-sm mt-1">{t('driverCount', { count: drivers.length })}</p>
         </div>
-        {canManage && <InviteDriverButton trucks={trucks} />}
+        {canManage && <InviteDriverButton vehicles={vehicles} />}
       </div>
 
       {justInvited && (
@@ -97,7 +97,7 @@ export default async function DriversPage({
         <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
           <span className="material-symbols-outlined text-slate-600 text-4xl">person</span>
           <p className="text-slate-500 text-sm mt-3">{t('noDriversYet')}</p>
-          {canManage && <InviteDriverButton trucks={trucks} variant="empty" />}
+          {canManage && <InviteDriverButton vehicles={vehicles} variant="empty" />}
         </div>
       ) : (
         <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
