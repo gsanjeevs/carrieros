@@ -108,7 +108,9 @@
     "stepLabel_vehicle": "مرحلہ 3 از 6 — گاڑی",
     "stepLabel_customer": "مرحلہ 4 از 6 — کسٹمر",
     "stepLabel_billing": "مرحلہ 5 از 6 — بلنگ",
-    "stepLabel_completion": "مرحلہ 6 از 6 — مکمل"
+    "stepLabel_completion": "مرحلہ 6 از 6 — مکمل",
+    "streetAddress": "گلی کا پتہ",
+    "zip": "زپ / پوسٹل کوڈ"
   },
   "dashboard": {
     "title": "فلیٹ کا جائزہ",

@@ -108,7 +108,9 @@
     "stepLabel_vehicle": "Step 3 of 6 — Vehicle",
     "stepLabel_customer": "Step 4 of 6 — Customer",
     "stepLabel_billing": "Step 5 of 6 — Billing",
-    "stepLabel_completion": "Step 6 of 6 — Done"
+    "stepLabel_completion": "Step 6 of 6 — Done",
+    "streetAddress": "Street address",
+    "zip": "ZIP / Postal code"
   },
   "dashboard": {
     "title": "Fleet Overview",

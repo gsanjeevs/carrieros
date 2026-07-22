@@ -43,9 +43,11 @@ export default function OnboardingPage() {
     company_name: '',
     mc_number:    '',
     dot_number:   '',
+    address:      '',
     country:      'US',
     state:        '',
     city:         '',
+    zip:          '',
     // Profile
     first_name:   '',
     last_name:    '',
@@ -136,6 +138,12 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
+              <div>
+                <label className={labelCls}>{t('streetAddress')}</label>
+                <input className={inputCls} placeholder="1200 Freight Way"
+                  value={form.address} onChange={e => set('address', e.target.value)} />
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={labelCls}>{t('country')} *</label>
@@ -154,10 +162,17 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
-              <div>
-                <label className={labelCls}>{t('city')}</label>
-                <input className={inputCls} placeholder="Los Angeles"
-                  value={form.city} onChange={e => set('city', e.target.value)} />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelCls}>{t('city')}</label>
+                  <input className={inputCls} placeholder="Los Angeles"
+                    value={form.city} onChange={e => set('city', e.target.value)} />
+                </div>
+                <div>
+                  <label className={labelCls}>{t('zip')}</label>
+                  <input className={inputCls} placeholder="90001"
+                    value={form.zip} onChange={e => set('zip', e.target.value)} />
+                </div>
               </div>
 
               <button

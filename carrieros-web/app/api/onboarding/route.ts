@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     return apiError('ALREADY_ONBOARDED', 'Already onboarded', 409)
 
   const body = await request.json()
-  const { company_name, mc_number, dot_number, country, state, city, first_name, last_name, role } = body
+  const { company_name, mc_number, dot_number, address, country, state, city, zip, first_name, last_name, role } = body
 
   if (!company_name || !state || !first_name || !last_name)
     return apiError('VALIDATION_ERROR', 'Missing required fields', 400)
@@ -73,7 +73,16 @@ export async function POST(request: NextRequest) {
   // 1. Create organization
   const { data: org, error: orgErr } = await admin
     .from('organizations')
-    .insert({ type: 'carrier', name: company_name, city: city ?? null, state, country: country ?? 'US', currency })
+    .insert({
+      type: 'carrier',
+      name: company_name,
+      address: address ?? null,
+      city: city ?? null,
+      state,
+      zip: zip ?? null,
+      country: country ?? 'US',
+      currency,
+    })
     .select('id')
     .single()
 

@@ -108,7 +108,9 @@
     "stepLabel_vehicle": "Paso 3 de 6 — Vehículo",
     "stepLabel_customer": "Paso 4 de 6 — Cliente",
     "stepLabel_billing": "Paso 5 de 6 — Facturación",
-    "stepLabel_completion": "Paso 6 de 6 — Listo"
+    "stepLabel_completion": "Paso 6 de 6 — Listo",
+    "streetAddress": "Dirección",
+    "zip": "Código postal"
   },
   "dashboard": {
     "title": "Resumen de la Flota",

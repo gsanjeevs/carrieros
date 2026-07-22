@@ -108,7 +108,9 @@
     "stepLabel_vehicle": "ਕਦਮ 3 ਵਿੱਚੋਂ 6 — ਵਾਹਨ",
     "stepLabel_customer": "ਕਦਮ 4 ਵਿੱਚੋਂ 6 — ਗਾਹਕ",
     "stepLabel_billing": "ਕਦਮ 5 ਵਿੱਚੋਂ 6 — ਬਿਲਿੰਗ",
-    "stepLabel_completion": "ਕਦਮ 6 ਵਿੱਚੋਂ 6 — ਪੂਰਾ"
+    "stepLabel_completion": "ਕਦਮ 6 ਵਿੱਚੋਂ 6 — ਪੂਰਾ",
+    "streetAddress": "ਗਲੀ ਦਾ ਪਤਾ",
+    "zip": "ਜ਼ਿਪ / ਪੋਸਟਲ ਕੋਡ"
   },
   "dashboard": {
     "title": "ਫਲੀਟ ਸੰਖੇਪ ਜਾਣਕਾਰੀ",
