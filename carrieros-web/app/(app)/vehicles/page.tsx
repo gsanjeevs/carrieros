@@ -7,6 +7,7 @@ import AddVehicleButton from './AddVehicleButton'
 import { VEHICLE_TYPE_ICONS } from '@/components/icons/vehicle-types'
 import ExceptionChip from '@/components/ExceptionChip'
 import { getExceptions } from '@/lib/exceptions'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 type Vehicle = {
   id: number
@@ -33,11 +34,7 @@ export default async function VehiclesPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   const params = await searchParams
   const justCreated = params.created

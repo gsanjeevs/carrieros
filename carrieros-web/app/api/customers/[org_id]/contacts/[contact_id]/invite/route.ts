@@ -11,6 +11,7 @@
 // to anything, per Phase 3H's whole reason for existing).
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 const INVITABLE_PORTAL_ROLES = ['customer_admin', 'customer_viewer'] as const
 
@@ -23,11 +24,7 @@ export async function POST(
   const { supabase, user } = ctx
   const { org_id, contact_id } = await params
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) return apiError('NOT_ONBOARDED', 'No company', 400)
   if (!['owner', 'solo', 'dispatcher'].includes(profile.role))

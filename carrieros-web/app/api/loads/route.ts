@@ -2,6 +2,7 @@
 import { generateLoadNumber } from '@/lib/generate-number'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 // The request body is untrusted JSON, so every field is narrowed to the
 // column's actual type before it reaches the insert. Absent/empty means null;
@@ -32,11 +33,7 @@ export async function POST(request: NextRequest) {
   if (isErrorResponse(ctx)) return ctx
   const { supabase, user } = ctx
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) {
     return apiError('NOT_ONBOARDED', 'No organization found for this user', 400)

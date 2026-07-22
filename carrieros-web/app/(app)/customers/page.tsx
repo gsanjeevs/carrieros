@@ -12,6 +12,7 @@ import Link from 'next/link'
 import AddCustomerButton from './AddCustomerButton'
 import ExceptionChip from '@/components/ExceptionChip'
 import { getExceptions } from '@/lib/exceptions'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 const VIEW_ROLES   = ['owner', 'solo', 'dispatcher', 'finance']
 const MANAGE_ROLES = ['owner', 'solo', 'dispatcher']
@@ -46,11 +47,7 @@ export default async function CustomersPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) redirect('/onboarding')
   if (!VIEW_ROLES.includes(profile.role)) redirect('/dashboard')

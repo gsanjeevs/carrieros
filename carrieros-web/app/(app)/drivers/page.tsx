@@ -9,6 +9,7 @@ import { getExceptions } from '@/lib/exceptions'
 import { inviteStatusVariant, type InviteStatus } from '@/lib/domain/invite-status'
 import { cdlGlowStatus } from '@/lib/domain/driver-compliance'
 import StatusBadge from '@/components/ui/StatusBadge'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 type Driver = {
   id: number
@@ -40,11 +41,7 @@ export default async function DriversPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   const params = await searchParams
   const justInvited = params.invited

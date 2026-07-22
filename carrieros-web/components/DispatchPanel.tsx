@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
-interface Driver { id: number; driver_number: string; default_vehicle_id: number | null; profiles: { first_name: string; last_name: string } | null }
+interface Driver { id: number; driver_number: string; default_vehicle_id: number | null; first_name: string | null; last_name: string | null }
 interface Vehicle { id: number; vehicle_number: string; nickname: string }
 
 const NEXT_STATUS: Record<string, string> = {
@@ -93,8 +93,8 @@ export default function DispatchPanel({
   }
 
   function driverInitials(d: Driver): string {
-    const name = d.profiles
-      ? [d.profiles.first_name, d.profiles.last_name].filter(Boolean).join(' ')
+    const name = (d.first_name || d.last_name)
+      ? [d.first_name, d.last_name].filter(Boolean).join(' ')
       : d.driver_number
     const initials = name
       .split(' ')
@@ -145,8 +145,8 @@ export default function DispatchPanel({
             <span className="text-white text-xs font-medium">— {t('unassigned')} —</span>
           </button>
           {drivers.map(d => {
-            const name = d.profiles
-              ? [d.profiles.first_name, d.profiles.last_name].filter(Boolean).join(' ')
+            const name = (d.first_name || d.last_name)
+              ? [d.first_name, d.last_name].filter(Boolean).join(' ')
               : d.driver_number
             const isSelected = driverId === d.id.toString()
             return (

@@ -15,6 +15,7 @@ import { sendEmail } from '@/lib/send-email'
 import { formatMoney } from '@/lib/format-money'
 import { revalidatePath } from 'next/cache'
 import { INVOICE_ROLES } from '@/lib/roles-policy'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 export type ActionResult =
   | { ok: true; invoice_number?: string; warning_code?: string }
@@ -33,11 +34,7 @@ async function billingContext(): Promise<BillingContext> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error_code: 'AUTH_REQUIRED' as const }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) return { error_code: 'NOT_ONBOARDED' as const }
   if (!INVOICE_ROLES.includes(profile.role)) return { error_code: 'FORBIDDEN' as const }

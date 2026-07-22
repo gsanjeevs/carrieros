@@ -19,6 +19,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { INVOICE_ROLES } from '@/lib/roles-policy'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 /** The one thing a real integration replaces. */
 export interface FactoringNotification {
@@ -67,11 +68,7 @@ export async function POST(
   if (isErrorResponse(ctx)) return ctx
   const { supabase, user } = ctx
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) return apiError('NOT_ONBOARDED', 'No organization', 400)
   if (!INVOICE_ROLES.includes(profile.role))

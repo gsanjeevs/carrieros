@@ -22,17 +22,14 @@ import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { createStripeCustomer } from '@/lib/stripe'
 import { SUBSCRIPTION_ROLES } from '@/lib/roles-policy'
 import { logError, logEvent } from '@/lib/observability'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 export async function POST(request: NextRequest) {
   const ctx = await getAuthedContext(request)
   if (isErrorResponse(ctx)) return ctx
   const { supabase, user } = ctx
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) return apiError('NOT_ONBOARDED', 'No organization', 400)
   if (!SUBSCRIPTION_ROLES.includes(profile.role))

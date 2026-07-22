@@ -17,6 +17,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'
 import { hasFeature } from '@/lib/entitlements'
 import { logError } from '@/lib/observability'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 const ASSIGNABLE_ROLES = ['dispatcher', 'finance', 'owner'] as const
 const ADMIN_ROLES = ['owner', 'solo']
@@ -30,11 +31,7 @@ async function resolve(request: NextRequest, targetId: string) {
   if (isErrorResponse(ctx)) return { error: ctx }
   const { supabase, user } = ctx
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id)
     return { error: apiError('NOT_ONBOARDED', 'No organization found for this user', 400) }

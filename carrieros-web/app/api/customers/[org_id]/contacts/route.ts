@@ -7,6 +7,7 @@
 // own routes per R3b).
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 export async function GET(
   request: NextRequest,
@@ -25,7 +26,21 @@ export async function GET(
     .order('created_at')
 
   if (error) return apiError('SERVER_ERROR', error.message, 500)
-  return NextResponse.json(data ?? [])
+
+  // Rule C (docs/architecture-principles.md) — explicit DTO, even though
+  // this is a 1:1 mapping today.
+  const contacts = (data ?? []).map((c) => ({
+    id: c.id,
+    name: c.name,
+    email: c.email,
+    phone: c.phone,
+    title: c.title,
+    is_primary: c.is_primary,
+    portal_profile_id: c.portal_profile_id,
+    created_at: c.created_at,
+  }))
+
+  return NextResponse.json(contacts)
 }
 
 export async function POST(
@@ -37,11 +52,7 @@ export async function POST(
   const { supabase, user } = ctx
   const { org_id } = await params
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) return apiError('NOT_ONBOARDED', 'No company', 400)
   if (!['owner', 'solo', 'dispatcher'].includes(profile.role))

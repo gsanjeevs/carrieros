@@ -6,17 +6,14 @@
 // supabase.rpc(), with zero Next.js layer needed there.
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 export async function GET(request: NextRequest) {
   const ctx = await getAuthedContext(request)
   if (isErrorResponse(ctx)) return ctx
   const { supabase, user } = ctx
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) return NextResponse.json([])
 
@@ -34,7 +31,24 @@ export async function GET(request: NextRequest) {
     return apiError('SERVER_ERROR', error.message, 500)
   }
 
-  return NextResponse.json(data ?? [])
+  // Rule C (docs/architecture-principles.md) — the raw row's
+  // `organizations!customer_details_org_id_fkey` key is a PostgREST
+  // relationship-embed artifact, not a wire contract any consumer should
+  // have to know about. Flatten into a plain DTO instead.
+  const customers = (data ?? []).map((c) => ({
+    org_id: c.org_id,
+    customer_number: c.customer_number,
+    contact_name: c.contact_name,
+    tags: c.tags,
+    notes: c.notes,
+    name: c.organizations?.name ?? null,
+    email: c.organizations?.email ?? null,
+    phone: c.organizations?.phone ?? null,
+    city: c.organizations?.city ?? null,
+    state: c.organizations?.state ?? null,
+  }))
+
+  return NextResponse.json(customers)
 }
 
 export async function POST(request: NextRequest) {

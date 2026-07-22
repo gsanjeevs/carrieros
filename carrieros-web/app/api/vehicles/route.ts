@@ -2,17 +2,14 @@
 import { generateVehicleNumber } from '@/lib/generate-number'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 export async function GET(request: NextRequest) {
   const ctx = await getAuthedContext(request)
   if (isErrorResponse(ctx)) return ctx
   const { supabase, user } = ctx
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) return NextResponse.json([])
 
@@ -23,7 +20,22 @@ export async function GET(request: NextRequest) {
     .eq('is_active', true)
     .order('vehicle_number')
 
-  return NextResponse.json(data ?? [])
+  // Rule C (docs/architecture-principles.md) — explicit DTO construction,
+  // even though this is a 1:1 field mapping today: a future column
+  // add/rename to `vehicles` changes only this line, not every consumer.
+  const vehicles = (data ?? []).map((v) => ({
+    id: v.id,
+    vehicle_number: v.vehicle_number,
+    nickname: v.nickname,
+    year: v.year,
+    make: v.make,
+    model: v.model,
+    license_plate: v.license_plate,
+    license_state: v.license_state,
+    is_active: v.is_active,
+  }))
+
+  return NextResponse.json(vehicles)
 }
 
 export async function POST(request: NextRequest) {
@@ -31,11 +43,7 @@ export async function POST(request: NextRequest) {
   if (isErrorResponse(ctx)) return ctx
   const { supabase, user } = ctx
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id)
     return apiError('NOT_ONBOARDED', 'No company', 400)
