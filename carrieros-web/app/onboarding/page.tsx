@@ -1,11 +1,20 @@
 'use client'
 // app/onboarding/page.tsx
 // Shown to any authenticated user who has no org_id yet.
-// Creates organizations + carrier_details + profiles in one API call.
+//
+// Six steps: company -> profile -> vehicle -> customer -> billing ->
+// completion. org_id/carrier_details/profiles are created via POST
+// /api/onboarding right after the 'profile' step submits (same call as
+// before this rebuild) — every step after that already has org_id available,
+// since org creation was always the last thing the original 2-step flow did
+// before this rebuild extended it forward rather than reordering anything.
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import AddVehicleStep from './steps/AddVehicleStep'
+import AddCustomerStep from './steps/AddCustomerStep'
+import BillingStep from './steps/BillingStep'
+import CompletionStep from './steps/CompletionStep'
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
@@ -15,13 +24,19 @@ const US_STATES = [
 ]
 const CA_PROVINCES = ['AB','BC','MB','NB','NL','NS','NT','NU','ON','PE','QC','SK','YT']
 
+const STEPS = ['company', 'profile', 'vehicle', 'customer', 'billing', 'completion'] as const
+type Step = (typeof STEPS)[number]
+
 export default function OnboardingPage() {
-  const router = useRouter()
   const t = useTranslations('onboarding')
   const tCommon = useTranslations('common')
-  const [step, setStep] = useState<'company' | 'profile'>('company')
+  const [step, setStep] = useState<Step>('company')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const [addedVehicle, setAddedVehicle] = useState(false)
+  const [addedCustomer, setAddedCustomer] = useState(false)
+  const [addedPaymentMethod, setAddedPaymentMethod] = useState(false)
 
   const [form, setForm] = useState({
     // Company
@@ -41,7 +56,7 @@ export default function OnboardingPage() {
 
   const regions = form.country === 'CA' ? CA_PROVINCES : US_STATES
 
-  async function submit() {
+  async function submitOrg() {
     setLoading(true)
     setError('')
     try {
@@ -52,15 +67,18 @@ export default function OnboardingPage() {
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? t('setupFailed'))
-      router.push('/dashboard')
+      setStep('vehicle')
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : tCommon('somethingWentWrong'))
+    } finally {
       setLoading(false)
     }
   }
 
   const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-[#f97316] transition'
   const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
+
+  const stepIndex = STEPS.indexOf(step)
 
   return (
     <div className="min-h-screen bg-[#0f1923] flex items-center justify-center p-6">
@@ -75,22 +93,23 @@ export default function OnboardingPage() {
           <p className="text-slate-400 text-sm">{t('heading')}</p>
         </div>
 
-        {/* Steps */}
-        <div className="flex items-center gap-3 mb-8">
-          {(['company', 'profile'] as const).map((s, i) => (
-            <div key={s} className="flex items-center gap-2 flex-1">
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition ${
-                step === s ? 'bg-[#f97316] text-white' :
-                (s === 'profile' && step === 'profile') || (s === 'company' && step !== 'company')
-                  ? 'bg-[#f97316]/30 text-[#f97316]' : 'bg-white/10 text-slate-500'
-              }`}>{i + 1}</div>
-              <span className={`text-xs ${step === s ? 'text-white' : 'text-slate-500'}`}>
-                {s === 'company' ? t('stepCompany') : t('stepProfile')}
-              </span>
-              {i === 0 && <div className="flex-1 h-px bg-white/10 mx-1" />}
+        {/* Step dots — six steps is too many for the original per-step-label
+            layout without crowding, so this is a slim progress bar (dot per
+            step, connecting line, no per-dot label) rather than the original
+            2-step design. */}
+        <div className="flex items-center gap-2 mb-8 px-1">
+          {STEPS.map((s, i) => (
+            <div key={s} className="flex items-center flex-1 last:flex-none">
+              <div className={`w-2.5 h-2.5 rounded-full shrink-0 transition ${
+                i < stepIndex ? 'bg-[#f97316]' : i === stepIndex ? 'bg-[#f97316] ring-4 ring-[#f97316]/20' : 'bg-white/10'
+              }`} />
+              {i < STEPS.length - 1 && (
+                <div className={`flex-1 h-px mx-1.5 transition ${i < stepIndex ? 'bg-[#f97316]/40' : 'bg-white/10'}`} />
+              )}
             </div>
           ))}
         </div>
+        <p className="text-center text-xs text-slate-500 -mt-6 mb-8">{t(`stepLabel_${step}` as never)}</p>
 
         <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
 
@@ -185,19 +204,40 @@ export default function OnboardingPage() {
               <div className="flex gap-3 mt-2">
                 <button
                   onClick={() => setStep('company')}
-                  className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 text-white font-medium rounded-lg transition text-sm"
+                  disabled={loading}
+                  className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm"
                 >
                   {tCommon('back')}
                 </button>
                 <button
-                  onClick={submit}
+                  onClick={submitOrg}
                   disabled={loading || !form.first_name || !form.last_name}
                   className="flex-2 flex-grow py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm"
                 >
-                  {loading ? t('settingUp') : t('launch')}
+                  {loading ? t('settingUp') : t('continue')}
                 </button>
               </div>
             </div>
+          )}
+
+          {step === 'vehicle' && (
+            <AddVehicleStep onNext={(added) => { setAddedVehicle(added); setStep('customer') }} />
+          )}
+
+          {step === 'customer' && (
+            <AddCustomerStep onNext={(added) => { setAddedCustomer(added); setStep('billing') }} />
+          )}
+
+          {step === 'billing' && (
+            <BillingStep onNext={(added) => { setAddedPaymentMethod(added); setStep('completion') }} />
+          )}
+
+          {step === 'completion' && (
+            <CompletionStep
+              addedVehicle={addedVehicle}
+              addedCustomer={addedCustomer}
+              addedPaymentMethod={addedPaymentMethod}
+            />
           )}
         </div>
       </div>
