@@ -96,6 +96,67 @@ export type Database = {
           },
         ]
       }
+      customer_contacts: {
+        Row: {
+          carrier_org_id: number
+          created_at: string | null
+          email: string | null
+          id: number
+          is_primary: boolean
+          name: string
+          org_id: number
+          phone: string | null
+          portal_profile_id: string | null
+          title: string | null
+        }
+        Insert: {
+          carrier_org_id: number
+          created_at?: string | null
+          email?: string | null
+          id?: number
+          is_primary?: boolean
+          name: string
+          org_id: number
+          phone?: string | null
+          portal_profile_id?: string | null
+          title?: string | null
+        }
+        Update: {
+          carrier_org_id?: number
+          created_at?: string | null
+          email?: string | null
+          id?: number
+          is_primary?: boolean
+          name?: string
+          org_id?: number
+          phone?: string | null
+          portal_profile_id?: string | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_contacts_carrier_org_id_fkey"
+            columns: ["carrier_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_contacts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_contacts_portal_profile_id_fkey"
+            columns: ["portal_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_details: {
         Row: {
           carrier_org_id: number
@@ -1486,6 +1547,7 @@ export type Database = {
           date_format: string | null
           first_name: string | null
           id: string
+          is_active: boolean
           last_name: string | null
           org_id: number
           phone: string | null
@@ -1501,6 +1563,7 @@ export type Database = {
           date_format?: string | null
           first_name?: string | null
           id: string
+          is_active?: boolean
           last_name?: string | null
           org_id: number
           phone?: string | null
@@ -1516,6 +1579,7 @@ export type Database = {
           date_format?: string | null
           first_name?: string | null
           id?: string
+          is_active?: boolean
           last_name?: string | null
           org_id?: number
           phone?: string | null

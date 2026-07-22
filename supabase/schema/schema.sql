@@ -304,8 +304,54 @@ CREATE TABLE profiles (
   -- Driver photo (2026-07-21, decisions.md S10) -- mobile-captured only, web
   -- is display-only (signed URL). Same `documents` bucket path convention.
   avatar_path        TEXT,
+  -- Deactivate, never delete (2026-07-21 standing directive) -- removing a
+  -- team member or revoking a customer portal contact's access sets this
+  -- false rather than deleting the row, preserving history on everything
+  -- that FKs to profiles. my_org_id()/my_role() below both filter on this,
+  -- so a deactivated user transparently loses access through every RLS
+  -- policy that calls those helpers -- but NOT through the handful of older
+  -- policies that subquery profiles directly instead of via the helpers
+  -- (see the comment on customer_loads_select/customer_invoices_select in
+  -- SECTION 8 for the two that matter for portal contacts specifically;
+  -- owner_solo_loads_all/dispatcher_*/finance_*/driver_own_loads_select/
+  -- billing_invoices_all are the same pre-existing pattern and are NOT
+  -- covered by this column yet -- flag if "deactivate a team member" is
+  -- ever built for those roles, not just portal contacts).
+  is_active          BOOLEAN NOT NULL DEFAULT true,
   created_at         TIMESTAMPTZ DEFAULT now()
 );
+
+-- Customer contacts (Phase 3H, 2026-07-22) -- a customer is one organization
+-- with one or more contacts; some contacts may also have portal login (see
+-- customer_admin/customer_viewer in profiles.role's CHECK list, which were
+-- real values with real RLS policies for a long time before anything ever
+-- created a profile with either role -- this table + the invite route close
+-- that gap). `customer_details.contact_name` stays as the lightweight "who
+-- do we talk to" quick-add field on the customer create/onboarding forms;
+-- this table is the real, manageable contact list on the customer detail
+-- page. Defined here (after profiles, not up near customer_details in
+-- SECTION 1) because portal_profile_id FKs into profiles -- placing it any
+-- earlier repeats the exact ordering bug this project has hit before
+-- (org_sequences/has_feature() needing my_org_id() defined first).
+CREATE TABLE customer_contacts (
+  id                 BIGSERIAL PRIMARY KEY,
+  org_id             BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  carrier_org_id     BIGINT NOT NULL REFERENCES organizations(id),
+  name               TEXT NOT NULL,
+  email              TEXT,
+  phone              TEXT,
+  title              TEXT,  -- free text ("AP", "Dispatch") -- not this app's
+                             -- own role enum, same reasoning as vehicles.dimensions
+  is_primary         BOOLEAN NOT NULL DEFAULT false,
+  -- NULL = contact on file, no portal login. Set = this contact can also log
+  -- in, via the profiles row this points to. Revoking access deactivates
+  -- that profile (is_active = false) and nulls this column -- never deletes
+  -- the contact row or the profile row (2026-07-21 deactivate-not-delete
+  -- directive). More than one contact per customer can have portal access.
+  portal_profile_id  UUID REFERENCES profiles(id),
+  created_at         TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX idx_customer_contacts_org ON customer_contacts(org_id);
 
 -- ────────────────────────────────────────────────────────────
 -- SECTION 3: CARRIER ENTITIES
@@ -948,6 +994,9 @@ GRANT EXECUTE ON FUNCTION get_public_tracking_events(TEXT) TO anon;
 -- profiles AND profiles' own policy needs data from that same table — a
 -- direct subquery cycle in that case throws "infinite recursion detected in
 -- policy for relation" (hit between profiles <-> customer_details).
+-- Both return NULL for a deactivated profile (is_active = false), which
+-- denies every policy built on these two helpers -- see the is_active
+-- comment on the profiles table for what this does and doesn't cover.
 CREATE OR REPLACE FUNCTION my_org_id()
 RETURNS BIGINT
 LANGUAGE sql
@@ -955,7 +1004,7 @@ SECURITY DEFINER
 STABLE
 SET search_path = public
 AS $$
-  SELECT org_id FROM profiles WHERE id = auth.uid()
+  SELECT org_id FROM profiles WHERE id = auth.uid() AND is_active = true
 $$;
 
 CREATE OR REPLACE FUNCTION my_role()
@@ -965,7 +1014,7 @@ SECURITY DEFINER
 STABLE
 SET search_path = public
 AS $$
-  SELECT role FROM profiles WHERE id = auth.uid()
+  SELECT role FROM profiles WHERE id = auth.uid() AND is_active = true
 $$;
 
 -- Tier entitlements gate (2026-07-21, decisions.md S11) — real, RLS-usable
@@ -1157,6 +1206,21 @@ CREATE POLICY "carrier_customer_write" ON customer_details FOR ALL USING (
   carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher')
 );
 
+-- CUSTOMER CONTACTS (Phase 3H) -- carrier staff manage the list; a portal
+-- contact can read (not write) their own row, matching this app's existing
+-- "portal roles are read-only" convention (customer_loads_select/
+-- customer_invoices_select are both SELECT-only for the same reason).
+ALTER TABLE customer_contacts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "carrier_customer_contacts_select" ON customer_contacts FOR SELECT USING (
+  carrier_org_id = my_org_id()
+);
+CREATE POLICY "carrier_customer_contacts_write" ON customer_contacts FOR ALL USING (
+  carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher')
+);
+CREATE POLICY "portal_contact_own_row_select" ON customer_contacts FOR SELECT USING (
+  portal_profile_id = auth.uid()
+);
+
 -- PROFILES
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "same_org_profiles_select" ON profiles FOR SELECT USING (
@@ -1223,9 +1287,14 @@ CREATE POLICY "driver_own_loads_select" ON loads FOR SELECT USING (
 CREATE POLICY "driver_loads_update_status" ON loads FOR UPDATE USING (
   driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid())
 ) WITH CHECK (true);
+-- Explicit is_active check (2026-07-21, Phase 3H) -- this policy predates
+-- my_org_id()/my_role() and subqueries profiles directly, so patching those
+-- two helpers for deactivated-portal-contact revocation doesn't reach it on
+-- its own; added here by hand since this is exactly the policy that gates
+-- what a revoked customer_contacts.portal_profile_id can still see.
 CREATE POLICY "customer_loads_select" ON loads FOR SELECT USING (
-  customer_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('customer_admin','customer_viewer')
+  customer_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid() AND is_active = true)
+  AND (SELECT role FROM profiles WHERE id = auth.uid() AND is_active = true) IN ('customer_admin','customer_viewer')
 );
 -- REMOVED 2026-07-20 (audit finding): this had no token equality check at
 -- all -- USING (tracking_token IS NOT NULL) -- inert only because `anon` has
@@ -1242,9 +1311,10 @@ CREATE POLICY "billing_invoices_all" ON invoices FOR ALL USING (
   carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
   AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo','finance')
 );
+-- Explicit is_active check, same reasoning as customer_loads_select above.
 CREATE POLICY "customer_invoices_select" ON invoices FOR SELECT USING (
-  customer_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('customer_admin','customer_viewer')
+  customer_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid() AND is_active = true)
+  AND (SELECT role FROM profiles WHERE id = auth.uid() AND is_active = true) IN ('customer_admin','customer_viewer')
 );
 
 -- FUEL STOPS & LOAD EXPENSES (Phase 7B, 2026-07-21) -- finance is read-only,

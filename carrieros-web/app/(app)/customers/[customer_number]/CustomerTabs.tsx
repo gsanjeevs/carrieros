@@ -8,7 +8,7 @@
 import { useState, type ReactNode } from 'react'
 import { useTranslations } from 'next-intl'
 
-export type CustomerTabKey = 'overview' | 'loads' | 'exceptions' | 'invoices'
+export type CustomerTabKey = 'overview' | 'loads' | 'exceptions' | 'invoices' | 'contacts'
 
 export default function CustomerTabs({
   tabs,

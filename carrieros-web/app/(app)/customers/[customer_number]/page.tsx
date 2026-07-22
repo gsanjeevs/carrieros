@@ -16,6 +16,7 @@ import { formatDate } from '@/lib/format-datetime'
 import { formatMoney } from '@/lib/format-money'
 import { hasFeature } from '@/lib/entitlements'
 import CustomerTabs from './CustomerTabs'
+import CustomerContacts from '@/components/CustomerContacts'
 
 const VIEW_ROLES = ['owner', 'solo', 'dispatcher', 'finance']
 const BILLING_ROLES = ['owner', 'solo', 'finance']
@@ -200,6 +201,17 @@ export default async function CustomerDetailPage({
       .order('created_at', { ascending: false })
     invoices = invoicesData ?? []
   }
+
+  // Contacts (Phase 3H) — one org, many contacts, some with portal login.
+  const canManageContacts = ['owner', 'solo', 'dispatcher'].includes(profile.role)
+  const { data: contactsData } = await supabase
+    .from('customer_contacts')
+    .select('id, name, email, phone, title, is_primary, portal_profile_id')
+    .eq('org_id', org?.id ?? -1)
+    .eq('carrier_org_id', profile.org_id)
+    .order('is_primary', { ascending: false })
+    .order('created_at')
+  const contacts = contactsData ?? []
 
   const cityState = [org?.city, org?.state].filter(Boolean).join(', ')
   const addressLine = [org?.address, cityState, org?.zip].filter(Boolean).join(', ')
@@ -402,6 +414,16 @@ export default async function CustomerDetailPage({
           { key: 'loads', content: loadsTab },
           { key: 'exceptions', content: exceptionsTab },
           { key: 'invoices', content: invoicesTab },
+          {
+            key: 'contacts',
+            content: (
+              <CustomerContacts
+                orgId={org?.id ?? -1}
+                canManage={canManageContacts}
+                initialContacts={contacts}
+              />
+            ),
+          },
         ]}
       />
     </div>
