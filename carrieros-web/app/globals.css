@@ -78,6 +78,66 @@
   --shadow-glow-danger: 0 0 6px rgba(225, 29, 72, 0.6);
 }
 
+/* ── Layer 3 — Semantic tokens (docs/design/carrieros-design-system.md §1.2) ──
+   Meaning-carrying names generated from the Layer 1/2 palette above, per
+   theme. Components should reference these (bg-surface-card, text-text-pri,
+   etc.) instead of the raw palette/interim classes (bg-white/5, text-white)
+   noted as "interim" in that doc's §1.3 — this block is what makes those
+   semantic classes real. Purely additive: does not alter any existing
+   --color-navy/--color-brand-orange/etc. value or any rule above/below it. */
+
+/* ── Semantic tokens — light mode (default) ───────────── */
+:root {
+  --color-surface-page:     #f4f6f9;
+  --color-surface-card:     #ffffff;
+  --color-surface-subtle:   #f8fafc;
+  --color-surface-input:    #ffffff;
+  --color-border:           #e5e8ef;
+  --color-divider:          #f1f3f8;
+  --color-text-primary:     #0f1923;
+  --color-text-secondary:   #8898aa;
+  --color-text-muted:       #6b7a8f;
+  --color-text-disabled:    #aaaaaa;
+  --color-card-overlay:     rgba(0,0,0,0.04);
+  --color-card-hover:       rgba(0,0,0,0.03);
+  --shadow-card:            0 1px 6px rgba(0,0,0,0.06);
+  --shadow-hover:           0 4px 16px rgba(0,0,0,0.10);
+  --shadow-modal:           0 8px 40px rgba(0,0,0,0.14);
+}
+
+/* ── Semantic tokens — dark mode override ─────────────── */
+.dark {
+  --color-surface-page:     #0f1923;
+  --color-surface-card:     rgba(255,255,255,0.05);
+  --color-surface-subtle:   rgba(255,255,255,0.03);
+  --color-surface-input:    rgba(255,255,255,0.05);
+  --color-border:           rgba(255,255,255,0.08);
+  --color-divider:          rgba(255,255,255,0.07);
+  --color-text-primary:     #ffffff;
+  --color-text-secondary:   #8898aa;
+  --color-text-muted:       #4b5a6e;
+  --color-text-disabled:    #4b5a6e;
+  --color-card-overlay:     rgba(255,255,255,0.05);
+  --color-card-hover:       rgba(255,255,255,0.07);
+  --shadow-card:            0 2px 8px rgba(0,0,0,0.35);
+  --shadow-hover:           0 8px 24px rgba(0,0,0,0.50);
+  --shadow-modal:           0 20px 60px rgba(0,0,0,0.60);
+}
+
+/* Register the semantic names above as real Tailwind utilities
+   (bg-surface-page, text-text-pri, border-border-ui, etc.). */
+@theme {
+  --color-surface-page:   var(--color-surface-page);
+  --color-surface-card:   var(--color-surface-card);
+  --color-surface-subtle: var(--color-surface-subtle);
+  --color-surface-input:  var(--color-surface-input);
+  --color-border-ui:      var(--color-border);
+  --color-divider-ui:     var(--color-divider);
+  --color-text-pri:       var(--color-text-primary);
+  --color-text-sec:       var(--color-text-secondary);
+  --color-text-mut:       var(--color-text-muted);
+}
+
 /* Subtle dot-grid texture every mockup uses behind the whole app shell
    (docs/design/mockups/*.html: `radial-gradient(rgba(255,255,255,.018) 1px,
    transparent 1px)` at 28px), plus a ::before full-viewport layer so every
