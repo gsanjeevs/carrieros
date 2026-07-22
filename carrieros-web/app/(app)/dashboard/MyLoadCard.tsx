@@ -5,7 +5,8 @@
 // via the drivers.profile_id -> loads.driver_id chain (same pattern as
 // app/(app)/loads/page.tsx's driver-scoping query).
 import Link from 'next/link'
-import { STATUS_COLOR } from '@/lib/domain/load-status'
+import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
+import StatusBadge from '@/components/ui/StatusBadge'
 
 export interface MyLoad {
   load_number: string
@@ -43,7 +44,7 @@ export default function MyLoadCard({
     [load.pickup_city, load.pickup_state].filter(Boolean).join(', ') +
     ' → ' +
     [load.delivery_city, load.delivery_state].filter(Boolean).join(', ')
-  const badgeColor = (load.status ? STATUS_COLOR[load.status] : null) ?? STATUS_COLOR.draft
+  const statusKey = (load.status ?? 'draft') as LoadStatus
 
   return (
     <Link
@@ -52,9 +53,9 @@ export default function MyLoadCard({
     >
       <div className="flex items-center justify-between mb-2">
         <span className="text-slate-400 text-xs font-medium uppercase tracking-wide">{title}</span>
-        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${badgeColor}`}>
-          {statusLabel(load.status ?? 'draft')}
-        </span>
+        <StatusBadge variant={loadStatusVariant(statusKey)} size="sm">
+          {statusLabel(statusKey)}
+        </StatusBadge>
       </div>
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">

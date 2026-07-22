@@ -9,7 +9,8 @@ import LoadDocuments, { type DocType, type LoadDocument } from '@/components/Loa
 import { formatDateTime, toDate } from '@/lib/format-datetime'
 import { formatMoney } from '@/lib/format-money'
 import CreateInvoiceButton from './CreateInvoiceButton'
-import { STATUS_COLOR } from '@/lib/domain/load-status'
+import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
+import StatusBadge from '@/components/ui/StatusBadge'
 
 const STATUS_FLOW_KEYS = [
   { key: 'draft',      icon: 'draft' },
@@ -169,9 +170,9 @@ export default async function LoadDetailPage({
             <span className="material-symbols-outlined text-[20px]">arrow_back</span>
           </Link>
           <h1 className="text-2xl font-semibold text-white">{load.load_number}</h1>
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${STATUS_COLOR[load.status ?? 'draft'] ?? STATUS_COLOR.draft}`}>
+          <StatusBadge variant={loadStatusVariant((load.status ?? 'draft') as LoadStatus)}>
             {load.status ? t(`status_${load.status}` as never) : t('status_draft' as never)}
-          </span>
+          </StatusBadge>
         </div>
 
         {/* Route strip */}

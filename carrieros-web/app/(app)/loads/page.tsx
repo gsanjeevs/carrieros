@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { formatMoney } from '@/lib/format-money'
 import { toDate } from '@/lib/format-datetime'
-import { STATUS_COLOR } from '@/lib/domain/load-status'
+import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
+import StatusBadge from '@/components/ui/StatusBadge'
 
 type LoadGroupKey = 'needs_dispatch' | 'in_progress' | 'completed' | 'cancelled'
 
@@ -38,9 +39,7 @@ export default async function LoadsPage({
   const t = await getTranslations('loads')
   const locale = await getLocale()
 
-  const STATUS_BADGE: Record<string, { label: string; color: string }> = Object.fromEntries(
-    Object.entries(STATUS_COLOR).map(([key, color]) => [key, { label: t(`status_${key}`), color }])
-  )
+  const statusLabel = (status: string) => t(`status_${status}` as never)
 
   let query = supabase
     .from('loads')
@@ -150,7 +149,7 @@ export default async function LoadsPage({
                   </h2>
                   <div className="space-y-2">
                     {groupLoads.map((load) => {
-                      const badge = (load.status ? STATUS_BADGE[load.status] : null) ?? STATUS_BADGE.draft
+                      const statusKey = (load.status ?? 'draft') as LoadStatus
                       const route =
                         [load.pickup_city, load.pickup_state].filter(Boolean).join(', ') +
                         ' → ' +
@@ -168,8 +167,10 @@ export default async function LoadsPage({
                             >
                               {load.load_number}
                             </Link>
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${badge.color}`}>
-                              {badge.label}
+                            <span className="shrink-0">
+                              <StatusBadge variant={loadStatusVariant(statusKey)} size="sm">
+                                {statusLabel(statusKey)}
+                              </StatusBadge>
                             </span>
                             <span className="text-slate-300 text-sm truncate">{route}</span>
                           </div>

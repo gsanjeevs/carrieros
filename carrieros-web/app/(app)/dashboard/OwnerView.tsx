@@ -7,7 +7,8 @@ import Link from 'next/link'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { formatMoney } from '@/lib/format-money'
 import ExceptionsBanner from './ExceptionsBanner'
-import { STATUS_COLOR } from '@/lib/domain/load-status'
+import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
+import StatusBadge from '@/components/ui/StatusBadge'
 
 interface KpiCard {
   label: string
@@ -35,21 +36,12 @@ interface BreakdownCard {
 // within this window (including already-expired, i.e. a negative day count).
 const COMPLIANCE_DUE_SOON_DAYS = 30
 
-// Was: a local copy of loads/page.tsx's STATUS_COLOR. Now sourced from
-// lib/domain/load-status.ts (docs/architecture-principles.md Rule A) —
-// re-exported here since DispatcherView.tsx already imports it from this
-// file; new call sites should import directly from lib/domain/load-status.
-export { STATUS_COLOR }
-
 export default async function OwnerView({ orgId, embedded = false }: { orgId: number | undefined; embedded?: boolean }) {
   const supabase = await createClient()
   const t = await getTranslations('dashboard')
   const tLoads = await getTranslations('loads')
   const locale = await getLocale()
-
-  const STATUS_BADGE: Record<string, { label: string; color: string }> = Object.fromEntries(
-    Object.entries(STATUS_COLOR).map(([key, color]) => [key, { label: tLoads(`status_${key}`), color }])
-  )
+  const statusLabel = (status: string) => tLoads(`status_${status}` as never)
 
   // Current-calendar-month bounds for Revenue MTD. Plain JS Date math is fine
   // here (server component, no user-facing date_format needed) — cf.
@@ -254,7 +246,7 @@ export default async function OwnerView({ orgId, embedded = false }: { orgId: nu
         ) : (
           <div className="divide-y divide-white/5">
             {recentLoads.map((load) => {
-              const badge = (load.status ? STATUS_BADGE[load.status] : null) ?? STATUS_BADGE.draft
+              const statusKey = (load.status ?? 'draft') as LoadStatus
               const route =
                 [load.pickup_city, load.pickup_state].filter(Boolean).join(', ') +
                 ' → ' +
@@ -268,9 +260,9 @@ export default async function OwnerView({ orgId, embedded = false }: { orgId: nu
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <span className="text-white font-medium">{load.load_number}</span>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${badge.color}`}>
-                      {badge.label}
-                    </span>
+                    <StatusBadge variant={loadStatusVariant(statusKey)} size="sm">
+                      {statusLabel(statusKey)}
+                    </StatusBadge>
                   </div>
                   <div className="flex items-center gap-4 min-w-0">
                     <span className="text-slate-400 text-sm max-w-[160px] truncate">{load.customer_name_raw ?? '—'}</span>

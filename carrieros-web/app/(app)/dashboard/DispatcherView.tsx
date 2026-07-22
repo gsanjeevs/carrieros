@@ -6,17 +6,15 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
-import { STATUS_COLOR } from './OwnerView'
+import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
+import StatusBadge from '@/components/ui/StatusBadge'
 import ExceptionsBanner from './ExceptionsBanner'
 
 export default async function DispatcherView({ orgId }: { orgId: number | undefined }) {
   const supabase = await createClient()
   const t = await getTranslations('dashboard')
   const tLoads = await getTranslations('loads')
-
-  const STATUS_BADGE: Record<string, { label: string; color: string }> = Object.fromEntries(
-    Object.entries(STATUS_COLOR).map(([key, color]) => [key, { label: tLoads(`status_${key}`), color }])
-  )
+  const statusLabel = (status: string) => tLoads(`status_${status}` as never)
 
   const [loadsRes, recentLoadsRes, fleetStatusRes] = await Promise.all([
     orgId
@@ -106,7 +104,7 @@ export default async function DispatcherView({ orgId }: { orgId: number | undefi
         ) : (
           <div className="divide-y divide-white/5">
             {recentLoads.map((load) => {
-              const badge = (load.status ? STATUS_BADGE[load.status] : null) ?? STATUS_BADGE.draft
+              const statusKey = (load.status ?? 'draft') as LoadStatus
               const route =
                 [load.pickup_city, load.pickup_state].filter(Boolean).join(', ') +
                 ' → ' +
@@ -120,9 +118,9 @@ export default async function DispatcherView({ orgId }: { orgId: number | undefi
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <span className="text-white font-medium">{load.load_number}</span>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${badge.color}`}>
-                      {badge.label}
-                    </span>
+                    <StatusBadge variant={loadStatusVariant(statusKey)} size="sm">
+                      {statusLabel(statusKey)}
+                    </StatusBadge>
                   </div>
                   <div className="flex items-center gap-4 min-w-0">
                     <span className="text-slate-400 text-sm max-w-[160px] truncate">{load.customer_name_raw ?? '—'}</span>
