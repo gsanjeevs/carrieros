@@ -53,35 +53,101 @@ export const StatusColors = {
 } as const;
 
 // Load status -> pill {bg, text}, matching carrieros-web's per-status hues
-// (app/(app)/loads/page.tsx STATUS_COLOR) via design-tokens.md's badge pairs.
-export const LOAD_STATUS_PILL: Record<string, { bg: string; text: string }> = {
-  draft: { bg: StatusColors.grayLight, text: StatusColors.gray },
-  scheduled: { bg: StatusColors.infoLight, text: StatusColors.info },
-  dispatched: { bg: StatusColors.orangeLight, text: StatusColors.orangeDark },
-  picked_up: { bg: StatusColors.warningLight, text: StatusColors.warningDark },
-  in_transit: { bg: StatusColors.tealLight, text: StatusColors.tealDark },
-  delivered: { bg: StatusColors.successLight, text: StatusColors.successDark },
-  invoiced: { bg: StatusColors.purpleLight, text: StatusColors.purple },
-  paid: { bg: StatusColors.successLight, text: StatusColors.successDark },
-};
+// (carrieros-web/lib/domain/load-status.ts) via design-tokens.md's badge
+// pairs. Rule A of docs/architecture-principles.md, mirrored here per that
+// doc's "mirror the module in both apps for now" note (no shared TS package
+// between web and mobile today) — built from an exhaustive switch so a new
+// loads.status CHECK value with no matching case here is a compile error,
+// not a silent fallback.
+//
+// Fixed a real bug while doing this (2026-07-22): this map had no
+// `cancelled` entry (added to loads.status by Phase 3A), so a cancelled
+// load's pill silently fell back to `.draft`'s gray — displaying as if the
+// load were still a draft, not cancelled. An exhaustive switch makes this
+// exact class of bug a compile error going forward.
+type LoadStatus =
+  | 'draft' | 'scheduled' | 'dispatched' | 'picked_up' | 'in_transit'
+  | 'delivered' | 'invoiced' | 'paid' | 'cancelled';
+
+function loadStatusPill(status: LoadStatus): { bg: string; text: string } {
+  switch (status) {
+    case 'draft': return { bg: StatusColors.grayLight, text: StatusColors.gray };
+    case 'scheduled': return { bg: StatusColors.infoLight, text: StatusColors.info };
+    case 'dispatched': return { bg: StatusColors.orangeLight, text: StatusColors.orangeDark };
+    case 'picked_up': return { bg: StatusColors.warningLight, text: StatusColors.warningDark };
+    case 'in_transit': return { bg: StatusColors.tealLight, text: StatusColors.tealDark };
+    case 'delivered': return { bg: StatusColors.successLight, text: StatusColors.successDark };
+    case 'invoiced': return { bg: StatusColors.purpleLight, text: StatusColors.purple };
+    case 'paid': return { bg: StatusColors.successLight, text: StatusColors.successDark };
+    case 'cancelled': return { bg: StatusColors.dangerLight, text: StatusColors.dangerDark };
+    default: {
+      const _exhaustive: never = status;
+      return _exhaustive;
+    }
+  }
+}
+
+const LOAD_STATUSES: readonly LoadStatus[] = [
+  'draft', 'scheduled', 'dispatched', 'picked_up', 'in_transit',
+  'delivered', 'invoiced', 'paid', 'cancelled',
+];
+
+// Record-based lookup preserved for existing call sites
+// (`LOAD_STATUS_PILL[status] ?? LOAD_STATUS_PILL.draft`) — indexed by an
+// arbitrary/possibly-invalid string off a DB row typed as `string`, same
+// fallback-to-draft treatment as before this fix, just now impossible to
+// silently miss a real status value.
+export const LOAD_STATUS_PILL: Record<string, { bg: string; text: string }> = Object.fromEntries(
+  LOAD_STATUSES.map((s) => [s, loadStatusPill(s)])
+);
 
 // Vehicle status -> pill {bg, text}, same pastel-bg/dark-text convention as
 // LOAD_STATUS_PILL above. Used by the Fleet tab and Home's fleet-status
-// summary (Owner/Solo/Dispatcher).
-export const VEHICLE_STATUS_PILL: Record<string, { bg: string; text: string }> = {
-  active: { bg: StatusColors.successLight, text: StatusColors.successDark },
-  idle: { bg: StatusColors.grayLight, text: StatusColors.gray },
-  in_shop: { bg: StatusColors.warningLight, text: StatusColors.warningDark },
-};
+// summary (Owner/Solo/Dispatcher). Mirrors
+// carrieros-web/lib/domain/vehicle-status.ts.
+type VehicleStatus = 'active' | 'idle' | 'in_shop';
+
+function vehicleStatusPill(status: VehicleStatus): { bg: string; text: string } {
+  switch (status) {
+    case 'active': return { bg: StatusColors.successLight, text: StatusColors.successDark };
+    case 'idle': return { bg: StatusColors.grayLight, text: StatusColors.gray };
+    case 'in_shop': return { bg: StatusColors.warningLight, text: StatusColors.warningDark };
+    default: {
+      const _exhaustive: never = status;
+      return _exhaustive;
+    }
+  }
+}
+
+const VEHICLE_STATUSES: readonly VehicleStatus[] = ['active', 'idle', 'in_shop'];
+
+export const VEHICLE_STATUS_PILL: Record<string, { bg: string; text: string }> = Object.fromEntries(
+  VEHICLE_STATUSES.map((s) => [s, vehicleStatusPill(s)])
+);
 
 // Invoice status -> pill {bg, text}, same convention. Used by the Invoices
-// tab and Finance's Home content.
-export const INVOICE_STATUS_PILL: Record<string, { bg: string; text: string }> = {
-  draft: { bg: StatusColors.grayLight, text: StatusColors.gray },
-  sent: { bg: StatusColors.infoLight, text: StatusColors.info },
-  paid: { bg: StatusColors.successLight, text: StatusColors.successDark },
-  overdue: { bg: StatusColors.dangerLight, text: StatusColors.dangerDark },
-};
+// tab and Finance's Home content. Mirrors
+// carrieros-web/lib/domain/invoice-status.ts.
+type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue';
+
+function invoiceStatusPill(status: InvoiceStatus): { bg: string; text: string } {
+  switch (status) {
+    case 'draft': return { bg: StatusColors.grayLight, text: StatusColors.gray };
+    case 'sent': return { bg: StatusColors.infoLight, text: StatusColors.info };
+    case 'paid': return { bg: StatusColors.successLight, text: StatusColors.successDark };
+    case 'overdue': return { bg: StatusColors.dangerLight, text: StatusColors.dangerDark };
+    default: {
+      const _exhaustive: never = status;
+      return _exhaustive;
+    }
+  }
+}
+
+const INVOICE_STATUSES: readonly InvoiceStatus[] = ['draft', 'sent', 'paid', 'overdue'];
+
+export const INVOICE_STATUS_PILL: Record<string, { bg: string; text: string }> = Object.fromEntries(
+  INVOICE_STATUSES.map((s) => [s, invoiceStatusPill(s)])
+);
 
 // get_exceptions() tier -> pill {bg, text}, same pastel-bg/dark-text
 // convention as the pills above, and the same today=danger/this_week=warning/
