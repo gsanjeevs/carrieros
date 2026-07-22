@@ -12,6 +12,7 @@
 // refuses the 'driver' and 'solo' roles outright so the two can't drift.
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'
+import { hasFeature } from '@/lib/entitlements'
 
 // Deliberately excludes 'driver' (has its own flow on /drivers, which also
 // creates the drivers row) and 'solo' (owner+driver combined — only ever set
@@ -41,6 +42,21 @@ export async function POST(request: NextRequest) {
 
   if (!INVITABLE_ROLES.includes(role))
     return apiError('VALIDATION_ERROR', `role must be one of ${INVITABLE_ROLES.join(', ')}`, 400)
+
+  // Added 2026-07-21: BRD §9 puts Dispatcher/Finance at Growth+ (Owner/Solo
+  // are all-tier) -- this was previously unenforced anywhere, confirmed by
+  // reading this file directly. has_feature() is the same RLS-usable gate
+  // Phase 6 will use; called here via RPC in the caller's own session.
+  if (role === 'dispatcher' || role === 'finance') {
+    const entitled = await hasFeature(supabase, 'dispatcher_finance_roles')
+    if (!entitled) {
+      return apiError(
+        'TIER_UPGRADE_REQUIRED',
+        'Dispatcher and Finance roles require the Growth plan or above',
+        403
+      )
+    }
+  }
 
   const admin = createAdminClient()
   const origin = new URL(request.url).origin

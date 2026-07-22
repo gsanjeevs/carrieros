@@ -14,6 +14,7 @@ import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { formatDate } from '@/lib/format-datetime'
 import AddPaymentMethodButton from './AddPaymentMethodButton'
+import UpgradeTierButton from './UpgradeTierButton'
 
 const TIER_PRICE: Record<string, string> = {
   starter: '$49/mo',
@@ -46,6 +47,27 @@ export default async function BillingPage() {
 
   const tier = details?.tier ?? 'starter'
   const hasPaymentMethod = Boolean(details?.stripe_customer_id)
+
+  // Fleet usage vs. this tier's included-truck allowance (2026-07-21 —
+  // BR-9's "trucks included + per-additional-truck" model existed only as
+  // unused columns on `tiers` until now; this is informational, not a hard
+  // block, matching the metered-billing model the BRD actually describes).
+  const { count: vehicleCount } = await supabase
+    .from('vehicles')
+    .select('*', { count: 'exact', head: true })
+    .eq('carrier_org_id', profile.org_id)
+    .eq('is_active', true)
+
+  const { data: allTiers } = await supabase
+    .from('tiers')
+    .select('code, label, rank, monthly_price, included_trucks, price_per_additional_truck')
+    .order('rank')
+
+  const currentTierRow = allTiers?.find((r) => r.code === tier)
+  const includedTrucks = currentTierRow?.included_trucks ?? 0
+  const overageCount = Math.max(0, (vehicleCount ?? 0) - includedTrucks)
+  const overageFee = overageCount * Number(currentTierRow?.price_per_additional_truck ?? 0)
+  const currentRank = currentTierRow?.rank ?? 1
 
   const trialDaysLeft = details?.trial_ends_at
     ? Math.max(
@@ -118,6 +140,47 @@ export default async function BillingPage() {
             </div>
             <AddPaymentMethodButton hasPaymentMethod={hasPaymentMethod} />
           </div>
+        </div>
+
+        {/* Fleet usage vs. included trucks (2026-07-21) */}
+        <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">{t('fleetUsage')}</p>
+          <p className="text-white text-sm">
+            {t('trucksUsed', { count: vehicleCount ?? 0, included: includedTrucks })}
+          </p>
+          {overageCount > 0 && (
+            <p className="text-amber-300 text-sm mt-1">
+              {t('overageFee', { count: overageCount, fee: overageFee.toFixed(2) })}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Tier comparison + upgrade/downgrade (2026-07-21) */}
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold text-white mb-3">{t('comparePlans')}</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {allTiers?.map((row) => (
+            <div
+              key={row.code}
+              className={`rounded-xl border p-4 flex flex-col gap-2 ${
+                row.code === tier
+                  ? 'border-brand-orange bg-brand-orange/10'
+                  : 'border-white/8 bg-white/5'
+              }`}
+            >
+              <p className="text-white text-sm font-semibold">{t(`tier_${row.code}` as never)}</p>
+              <p className="text-slate-400 text-xs">{TIER_PRICE[row.code] ?? ''}</p>
+              <p className="text-slate-500 text-xs">
+                {t('includedTrucks', { count: row.included_trucks })}
+              </p>
+              <UpgradeTierButton
+                tierCode={row.code}
+                isCurrent={row.code === tier}
+                isDowngrade={row.rank < currentRank}
+              />
+            </div>
+          ))}
         </div>
       </div>
     </div>

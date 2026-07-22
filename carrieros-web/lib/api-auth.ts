@@ -31,6 +31,7 @@ export type ErrorCode =
   | 'CANNOT_REMOVE_SELF'
   | 'LAST_OWNER'
   | 'MANAGE_DRIVER_ELSEWHERE'
+  | 'TIER_UPGRADE_REQUIRED'
   | 'SERVER_ERROR'
 
 // message is an English fallback for logs/devs only — never render it

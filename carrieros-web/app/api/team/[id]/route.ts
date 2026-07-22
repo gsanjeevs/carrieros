@@ -15,6 +15,7 @@
 //      would leave the account with no one able to administer it.
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'
+import { hasFeature } from '@/lib/entitlements'
 
 const ASSIGNABLE_ROLES = ['dispatcher', 'finance', 'owner'] as const
 const ADMIN_ROLES = ['owner', 'solo']
@@ -52,7 +53,7 @@ async function resolve(request: NextRequest, targetId: string) {
   if (!target || target.org_id !== profile.org_id)
     return { error: apiError('NOT_FOUND', 'No such team member', 404) }
 
-  return { admin, callerId: user.id, orgId: profile.org_id, target }
+  return { admin, supabase, callerId: user.id, orgId: profile.org_id, target }
 }
 
 // Count of remaining admins if `excludingId` stopped being one.
@@ -72,13 +73,30 @@ export async function PATCH(request: NextRequest, { params }: Ctx) {
   const { id } = await params
   const r = await resolve(request, id)
   if (r.error) return r.error
-  const { admin, callerId, orgId, target } = r
+  const { admin, supabase, callerId, orgId, target } = r
 
   const body = await request.json()
   const role = body?.role
 
   if (!ASSIGNABLE_ROLES.includes(role))
     return apiError('VALIDATION_ERROR', `role must be one of ${ASSIGNABLE_ROLES.join(', ')}`, 400)
+
+  // Added 2026-07-21: same gate as app/api/team/invite/route.ts — BRD §9 puts
+  // Dispatcher/Finance at Growth+. This route re-roles an EXISTING member, a
+  // second path to the same escalation the invite route already guarded;
+  // found by reading this file directly during a tier-coverage re-audit.
+  // Uses the CALLER's own session client (not `admin`, which has no JWT/
+  // auth.uid() context and would make my_org_id() resolve to null).
+  if (role === 'dispatcher' || role === 'finance') {
+    const entitled = await hasFeature(supabase, 'dispatcher_finance_roles')
+    if (!entitled) {
+      return apiError(
+        'TIER_UPGRADE_REQUIRED',
+        'Dispatcher and Finance roles require the Growth plan or above',
+        403
+      )
+    }
+  }
 
   // Drivers (and solos, who also drive) have a `drivers` row keyed to their
   // profile. Re-roling them here would strand it; /drivers owns that.

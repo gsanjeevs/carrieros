@@ -252,7 +252,29 @@ CREATE TABLE features (
 INSERT INTO features (key, label, min_tier, display_order) VALUES
   ('full_exceptions_inbox','Full Exceptions Inbox','growth',1),
   ('exception_history','Exception History Timelines','growth',2),
-  ('customer_health_score','Customer Health Score','growth',3);
+  ('customer_health_score','Customer Health Score','growth',3),
+  -- Added 2026-07-21: BRD §9's role table puts Dispatcher/Finance at Growth+,
+  -- but nothing enforced it until this pass -- app/api/team/invite/route.ts
+  -- now checks this before allowing either role to be invited.
+  ('dispatcher_finance_roles','Dispatcher & Finance Roles','growth',4);
+
+-- Phase 7F (2026-07-21): Growth/Pro backend scaffold's feature gates. Seeded
+-- now (unlike mockups 17-21's originally-deferred rows) since these features
+-- are being scaffolded in this same phase -- fuel_stops logging itself,
+-- load creation/dispatch, and DVIR/compliance stay ungated (all-tier,
+-- safety/operational per the BRD's own stated principle); only the
+-- analytics/reporting LAYER on top is gated.
+INSERT INTO features (key, label, min_tier, display_order) VALUES
+  ('driver_chat','Driver In-App Chat','growth',5),
+  ('ifta_mileage_log','IFTA Mileage Log','growth',6),
+  ('driver_settlements','Driver Settlements','growth',7),
+  ('desktop_command_center','Desktop Command Center','growth',8),
+  ('load_expenses','Load Expense Tracking','growth',9),
+  ('quickbooks_export','QuickBooks Export','growth',10),
+  ('ifta_tax_hub','Full IFTA Tax Reporting','pro',11),
+  ('fuel_analytics','Fuel Card Integration & Analytics','pro',12),
+  ('settlement_ach','ACH Settlement Payments','pro',13),
+  ('driver_performance_analytics','Driver Performance & Lane Analytics','pro',14);
 
 -- ────────────────────────────────────────────────────────────
 -- SECTION 2: PROFILES — ALL users in the system
@@ -428,6 +450,151 @@ CREATE TABLE invoices (
 -- One invoice per load — a double-billed load is the kind of error a carrier
 -- only finds out about when the customer complains.
 CREATE UNIQUE INDEX invoices_load_unique ON invoices(load_id) WHERE load_id IS NOT NULL;
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 3b: GROWTH/PRO BACKEND SCAFFOLD (2026-07-21, Phase 7)
+-- Data model + RLS only, per the user's "data model first, then API
+-- contracts, business logic later" directive. Business-logic bodies (fuel
+-- cost validation, IFTA tax filing, settlement PDF/ACH) are deferred —
+-- see Phase 7's plan notes. Nothing here may hardcode a non-localizable
+-- string; DB `label`/enum columns are English dev-fallback only, same rule
+-- as roles/vehicle_types (S9/S8) — real UI renders via message-catalog keys.
+-- ────────────────────────────────────────────────────────────
+
+-- 7B: fuel logging (all-tier) + load expenses (Growth+, gated at the app/UI
+-- layer via has_feature('load_expenses') — RLS itself doesn't need to know
+-- about tiers, same reasoning as every other has_feature() consumer).
+CREATE TABLE fuel_stops (
+  id                BIGSERIAL PRIMARY KEY,
+  carrier_org_id    BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  vehicle_id        BIGINT REFERENCES vehicles(id),
+  driver_id         BIGINT REFERENCES drivers(id),
+  load_id           BIGINT REFERENCES loads(id),   -- nullable: a fuel stop can be standalone
+  state             TEXT NOT NULL,
+  station           TEXT,
+  stop_date         DATE NOT NULL,
+  gallons           NUMERIC NOT NULL,
+  price_per_gallon  NUMERIC,
+  total_cost        NUMERIC NOT NULL,   -- validated server-side, never trust the client's math
+  odometer          INT,
+  receipt_path      TEXT,               -- same documents-bucket convention as T11
+  logged_by         UUID REFERENCES profiles(id),
+  created_at        TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE load_expenses (
+  id             BIGSERIAL PRIMARY KEY,
+  carrier_org_id BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  load_id        BIGINT NOT NULL REFERENCES loads(id) ON DELETE CASCADE,
+  expense_type   TEXT NOT NULL,   -- 'toll'|'lumper'|'scale'|'other' -- exact set TBD at UI time
+  amount         NUMERIC NOT NULL,
+  note           TEXT,
+  logged_by      UUID REFERENCES profiles(id),
+  created_at     TIMESTAMPTZ DEFAULT now()
+);
+
+-- 7C: IFTA (BR-22/BR-23) -- Growth+ for the mileage log, Pro+ for tax
+-- computation/filing export.
+CREATE TABLE ifta_state_crossings (
+  id             BIGSERIAL PRIMARY KEY,
+  carrier_org_id BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  vehicle_id     BIGINT REFERENCES vehicles(id),
+  driver_id      BIGINT REFERENCES drivers(id),
+  load_id        BIGINT REFERENCES loads(id),
+  state          TEXT NOT NULL,
+  crossed_at     TIMESTAMPTZ NOT NULL,
+  lat            NUMERIC,   -- nullable when source = 'manual'
+  lng            NUMERIC,
+  odometer_est   INT,
+  -- Manual-entry override rule (BR-22): saving manual rows for a load DELETEs
+  -- all source='gps' rows for that load first -- never mixed. Business logic
+  -- (deferred, see replace_ifta_crossings() in Phase 7G's contract table),
+  -- but this single discriminator column is what makes that swap a plain
+  -- DELETE+INSERT rather than a merge.
+  source         TEXT NOT NULL CHECK (source IN ('gps','manual')),
+  created_at     TIMESTAMPTZ DEFAULT now()
+);
+
+-- Global reference data (like tiers/vehicle_classifications) -- NOT
+-- org-scoped, no app-write policy. Deliberately unseeded: real IFTA rates
+-- need a real quarterly data source (published state tax-authority tables),
+-- not researched/approximated -- flag before go-live in any IFTA region.
+CREATE TABLE ifta_tax_rates (
+  id              BIGSERIAL PRIMARY KEY,
+  state           TEXT NOT NULL,
+  quarter         TEXT NOT NULL,   -- 'YYYY-Qn'
+  rate_per_gallon NUMERIC NOT NULL,
+  UNIQUE (state, quarter)
+);
+
+-- 7D: driver chat (BRD FR-15.1-15.3, Growth+ only -- mockup-19's "90 days on
+-- Starter" copy is stale, confirmed with the user 2026-07-21).
+CREATE TABLE driver_messages (
+  id                BIGSERIAL PRIMARY KEY,
+  carrier_org_id    BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  load_id           BIGINT NOT NULL REFERENCES loads(id) ON DELETE CASCADE,   -- strictly per-load
+  sender_id         UUID REFERENCES profiles(id),   -- NULL = system message
+  body              TEXT NOT NULL,
+  -- Defaults to sender's own profiles.preferred_language at send time (app
+  -- layer, not a DB default -- the sender is only known at insert time).
+  original_language TEXT,
+  sent_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
+  read_at           TIMESTAMPTZ   -- NULL = unread
+);
+
+CREATE TABLE driver_message_translations (
+  id              BIGSERIAL PRIMARY KEY,
+  message_id      BIGINT NOT NULL REFERENCES driver_messages(id) ON DELETE CASCADE,
+  target_language TEXT NOT NULL,
+  translated_body TEXT NOT NULL,
+  translated_at   TIMESTAMPTZ DEFAULT now(),
+  UNIQUE (message_id, target_language)   -- multiple readers sharing a target
+                                          -- language reuse the same cached row
+);
+
+-- 7E: driver settlements (BRD FR-116, Growth+ calc/PDF, Pro+ ACH).
+-- pay_method/rate_value are SNAPSHOTTED per settlement (confirmed with the
+-- user 2026-07-21) -- a later change to a driver's default settlement_type
+-- never rewrites past settlement history.
+ALTER TABLE drivers ADD COLUMN settlement_type TEXT CHECK (settlement_type IN (
+  'percent_of_rate','per_mile','flat_per_load'
+));   -- the driver's current DEFAULT method; nullable (not every driver is
+      -- settled this way, e.g. W2 employees -- out of scope, don't force a value)
+
+CREATE TABLE driver_settlements (
+  id                 BIGSERIAL PRIMARY KEY,
+  carrier_org_id     BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  driver_id          BIGINT REFERENCES drivers(id),
+  load_id            BIGINT REFERENCES loads(id),   -- nullable: settlements can
+                                                      -- be a period-level aggregate
+  pay_method         TEXT NOT NULL CHECK (pay_method IN (
+    'percent_of_rate','per_mile','flat_per_load'
+  )),
+  gross_revenue      NUMERIC NOT NULL,
+  net_pay            NUMERIC NOT NULL,
+  loads_count        INT,
+  rate_value         NUMERIC,   -- the % or $/mile actually applied, snapshotted
+  advance_amount     NUMERIC DEFAULT 0,
+  payment_status     TEXT NOT NULL DEFAULT 'pending' CHECK (payment_status IN (
+    'pending','sent','cleared'
+  )),
+  period_start       DATE,
+  period_end         DATE,
+  pdf_statement_path TEXT,
+  created_by         UUID REFERENCES profiles(id),
+  created_at         TIMESTAMPTZ DEFAULT now()
+);
+
+-- Forward-compatible deductions/garnishments (BRD's own OQ-11c marks this
+-- unresolved for MVP) -- a child line-item table so a real garnishment rule
+-- added later doesn't force a migration.
+CREATE TABLE settlement_deductions (
+  id             BIGSERIAL PRIMARY KEY,
+  settlement_id  BIGINT NOT NULL REFERENCES driver_settlements(id) ON DELETE CASCADE,
+  deduction_type TEXT NOT NULL,   -- 'advance'|'garnishment'|'other' -- exact set TBD
+  amount         NUMERIC NOT NULL,
+  note           TEXT
+);
 
 -- ────────────────────────────────────────────────────────────
 -- SECTION 4: COMPLIANCE & MAINTENANCE
@@ -692,6 +859,17 @@ CREATE INDEX idx_vehicle_docs_vehicle   ON vehicle_documents(vehicle_id);
 CREATE INDEX idx_org_docs               ON org_documents(org_id);
 CREATE INDEX idx_driver_docs_driver     ON driver_documents(driver_id);
 CREATE INDEX idx_exception_events_entity ON exception_events(entity_type, entity_id);
+CREATE INDEX idx_fuel_stops_carrier       ON fuel_stops(carrier_org_id);
+CREATE INDEX idx_fuel_stops_vehicle       ON fuel_stops(vehicle_id);
+CREATE INDEX idx_fuel_stops_load          ON fuel_stops(load_id);
+CREATE INDEX idx_load_expenses_load       ON load_expenses(load_id);
+CREATE INDEX idx_ifta_crossings_carrier   ON ifta_state_crossings(carrier_org_id);
+CREATE INDEX idx_ifta_crossings_load      ON ifta_state_crossings(load_id);
+CREATE INDEX idx_driver_messages_load     ON driver_messages(load_id);
+CREATE INDEX idx_driver_message_translations_message ON driver_message_translations(message_id);
+CREATE INDEX idx_driver_settlements_carrier ON driver_settlements(carrier_org_id);
+CREATE INDEX idx_driver_settlements_driver  ON driver_settlements(driver_id);
+CREATE INDEX idx_settlement_deductions_settlement ON settlement_deductions(settlement_id);
 
 CREATE UNIQUE INDEX idx_customer_number ON customer_details(carrier_org_id, customer_number) WHERE customer_number IS NOT NULL;
 CREATE UNIQUE INDEX idx_driver_number   ON drivers(carrier_org_id, driver_number)            WHERE driver_number   IS NOT NULL;
@@ -808,6 +986,97 @@ RETURNS BOOLEAN LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
 $$;
 GRANT EXECUTE ON FUNCTION has_feature TO authenticated;
 
+-- Added 2026-07-21 -- the user's explicit architecture directive: which
+-- menus/actions are enabled must be driven ENTIRELY by the features/tiers
+-- data model, never by hardcoded tier-string checks or a feature list baked
+-- into app code. has_feature() only answers "is this ONE key unlocked?" --
+-- every UI surface that wants to conditionally render a menu/action would
+-- otherwise need its own per-item round trip with a hardcoded key. This
+-- companion function returns the FULL set of feature keys the caller's org
+-- currently has, in one call, so nav/menu-building code can fetch it once
+-- and render entirely from data (`entitlements.has('driver_chat')`) rather
+-- than re-deriving tier logic per component. Same rank-comparison logic as
+-- has_feature(), just against every features row instead of one.
+CREATE OR REPLACE FUNCTION get_my_entitlements()
+RETURNS TABLE(key TEXT)
+LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public AS $$
+  SELECT f.key
+  FROM features f
+  WHERE (SELECT rank FROM tiers WHERE code = (
+           SELECT tier FROM carrier_details WHERE org_id = my_org_id()
+         ))
+        >=
+        (SELECT rank FROM tiers WHERE code = f.min_tier);
+$$;
+GRANT EXECUTE ON FUNCTION get_my_entitlements TO authenticated;
+
+-- Phase 7C (2026-07-21) -- IFTA functions, defined here for the same reason
+-- as has_feature(): they call my_org_id(), so they must come after it.
+-- check_ifta_completeness() implements BR-22's 60% GPS-completeness
+-- threshold; called wherever a load transitions to 'delivered' (business
+-- logic deferred to that call site, not implemented here yet).
+CREATE OR REPLACE FUNCTION check_ifta_completeness(p_load_id BIGINT)
+RETURNS BOOLEAN LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
+  SELECT COALESCE(
+    (SELECT SUM(odometer_est) FROM ifta_state_crossings WHERE load_id = p_load_id), 0
+  ) >= 0.6 * COALESCE((SELECT total_miles FROM loads WHERE id = p_load_id), 0);
+$$;
+GRANT EXECUTE ON FUNCTION check_ifta_completeness TO authenticated;
+
+-- Growth+ (miles by state, no tax math).
+CREATE OR REPLACE FUNCTION get_ifta_quarterly_summary(p_carrier_org_id BIGINT, p_quarter TEXT)
+RETURNS TABLE(state TEXT, total_miles NUMERIC) LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
+  SELECT c.state, SUM(c.odometer_est)::NUMERIC
+  FROM ifta_state_crossings c
+  WHERE c.carrier_org_id = p_carrier_org_id
+    AND p_carrier_org_id = my_org_id()
+    AND to_char(c.crossed_at, '"Q"Q') = split_part(p_quarter, '-', 2)
+    AND to_char(c.crossed_at, 'YYYY') = split_part(p_quarter, '-', 1)
+  GROUP BY c.state;
+$$;
+GRANT EXECUTE ON FUNCTION get_ifta_quarterly_summary TO authenticated;
+
+-- Pro+ only -- caller must check has_feature('ifta_tax_hub') before relying
+-- on these numbers; the function computes correctly regardless of tier
+-- (enforcement lives at the API-route/page level, not by lying about the
+-- math here). Implements the exact net-tax-due formula confirmed identically
+-- across three mockups:
+--   net_tax_due = (miles_in_state / total_miles * total_fuel_used * state_rate)
+--                 - (fuel_purchased_in_state * state_rate)
+CREATE OR REPLACE FUNCTION get_ifta_tax_summary(p_carrier_org_id BIGINT, p_quarter TEXT)
+RETURNS TABLE(state TEXT, miles_in_state NUMERIC, net_tax_due NUMERIC) LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_total_miles NUMERIC;
+  v_total_fuel  NUMERIC;
+BEGIN
+  IF p_carrier_org_id != my_org_id() THEN
+    RETURN;
+  END IF;
+
+  SELECT SUM(c.odometer_est) INTO v_total_miles
+  FROM ifta_state_crossings c WHERE c.carrier_org_id = p_carrier_org_id;
+
+  SELECT SUM(f.gallons) INTO v_total_fuel
+  FROM fuel_stops f WHERE f.carrier_org_id = p_carrier_org_id;
+
+  RETURN QUERY
+  SELECT
+    c.state,
+    SUM(c.odometer_est)::NUMERIC AS miles_in_state,
+    (
+      (SUM(c.odometer_est) / NULLIF(v_total_miles, 0)) * COALESCE(v_total_fuel, 0) *
+        COALESCE((SELECT rate_per_gallon FROM ifta_tax_rates WHERE ifta_tax_rates.state = c.state AND quarter = p_quarter), 0)
+      -
+      COALESCE((SELECT SUM(f2.gallons) FROM fuel_stops f2 WHERE f2.carrier_org_id = p_carrier_org_id AND f2.state = c.state), 0)
+        * COALESCE((SELECT rate_per_gallon FROM ifta_tax_rates WHERE ifta_tax_rates.state = c.state AND quarter = p_quarter), 0)
+    )::NUMERIC AS net_tax_due
+  FROM ifta_state_crossings c
+  WHERE c.carrier_org_id = p_carrier_org_id
+  GROUP BY c.state;
+END;
+$$;
+GRANT EXECUTE ON FUNCTION get_ifta_tax_summary TO authenticated;
+
 -- GLOBAL MASTER DATA — read-only reference tables, no org scoping, no
 -- app-writable policy (closed sets, changed only via schema.sql + redeploy).
 ALTER TABLE vehicle_types ENABLE ROW LEVEL SECURITY;
@@ -830,6 +1099,9 @@ CREATE POLICY "tiers_select" ON tiers FOR SELECT TO authenticated USING (true);
 
 ALTER TABLE features ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "features_select" ON features FOR SELECT TO authenticated USING (true);
+
+ALTER TABLE ifta_tax_rates ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "ifta_tax_rates_select" ON ifta_tax_rates FOR SELECT TO authenticated USING (true);
 
 -- ORGANIZATIONS
 ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
@@ -968,6 +1240,79 @@ CREATE POLICY "customer_invoices_select" ON invoices FOR SELECT USING (
   AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('customer_admin','customer_viewer')
 );
 
+-- FUEL STOPS & LOAD EXPENSES (Phase 7B, 2026-07-21) -- finance is read-only,
+-- same rate-confidentiality precedent as elsewhere (no insert/edit for them).
+ALTER TABLE fuel_stops ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "carrier_fuel_stops_select" ON fuel_stops FOR SELECT TO authenticated USING (
+  carrier_org_id = my_org_id()
+);
+CREATE POLICY "driver_fuel_stops_insert" ON fuel_stops FOR INSERT TO authenticated WITH CHECK (
+  carrier_org_id = my_org_id() AND driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid())
+);
+CREATE POLICY "owner_solo_dispatcher_fuel_stops_all" ON fuel_stops FOR ALL TO authenticated USING (
+  carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher')
+);
+
+ALTER TABLE load_expenses ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "carrier_load_expenses_select" ON load_expenses FOR SELECT TO authenticated USING (
+  carrier_org_id = my_org_id()
+);
+CREATE POLICY "owner_solo_dispatcher_load_expenses_all" ON load_expenses FOR ALL TO authenticated USING (
+  carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher')
+);
+
+-- IFTA (Phase 7C, 2026-07-21)
+ALTER TABLE ifta_state_crossings ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "carrier_ifta_crossings_select" ON ifta_state_crossings FOR SELECT TO authenticated USING (
+  carrier_org_id = my_org_id()
+);
+CREATE POLICY "driver_ifta_crossings_insert" ON ifta_state_crossings FOR INSERT TO authenticated WITH CHECK (
+  carrier_org_id = my_org_id() AND driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid())
+);
+CREATE POLICY "owner_solo_dispatcher_ifta_crossings_all" ON ifta_state_crossings FOR ALL TO authenticated USING (
+  carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher')
+);
+
+-- DRIVER MESSAGES (Phase 7D, 2026-07-21) -- Finance gets ZERO access per
+-- BR-2/FR-119, not even SELECT -- no policy below grants finance anything.
+ALTER TABLE driver_messages ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "driver_own_thread_messages" ON driver_messages FOR ALL TO authenticated USING (
+  load_id IN (SELECT id FROM loads WHERE driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid()))
+) WITH CHECK (
+  load_id IN (SELECT id FROM loads WHERE driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid()))
+);
+CREATE POLICY "owner_solo_dispatcher_messages_all" ON driver_messages FOR ALL TO authenticated USING (
+  carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher')
+);
+
+ALTER TABLE driver_message_translations ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "same_org_message_translations_select" ON driver_message_translations FOR SELECT TO authenticated USING (
+  message_id IN (SELECT id FROM driver_messages WHERE carrier_org_id = my_org_id())
+);
+
+-- DRIVER SETTLEMENTS (Phase 7E, 2026-07-21) -- driver sees only their own;
+-- dispatcher has NO access (financial, outside dispatcher's scope per the
+-- role table).
+ALTER TABLE driver_settlements ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "driver_own_settlements_select" ON driver_settlements FOR SELECT TO authenticated USING (
+  driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid())
+);
+CREATE POLICY "owner_solo_finance_settlements_all" ON driver_settlements FOR ALL TO authenticated USING (
+  carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','finance')
+);
+
+ALTER TABLE settlement_deductions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "same_org_settlement_deductions_select" ON settlement_deductions FOR SELECT TO authenticated USING (
+  settlement_id IN (
+    SELECT ds.id FROM driver_settlements ds
+    WHERE ds.carrier_org_id = my_org_id()
+       OR ds.driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid())
+  )
+);
+CREATE POLICY "owner_solo_finance_settlement_deductions_all" ON settlement_deductions FOR ALL TO authenticated USING (
+  settlement_id IN (SELECT id FROM driver_settlements WHERE carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','finance'))
+);
+
 -- Opportunistic overdue-invoice housekeeping. There is no cron/job scheduler
 -- in this project yet, so this is called from the /invoices list page's
 -- server component on every load (see app/(app)/invoices/page.tsx) as a
@@ -995,6 +1340,222 @@ BEGIN
 END;
 $$;
 GRANT EXECUTE ON FUNCTION mark_overdue_invoices() TO authenticated;
+
+-- Phase 6 foundation (management-by-exception, decisions.md P2 amendment/S11):
+-- get_exceptions() is the live, ungated exception-DETECTION query -- per the
+-- P2 amendment, detection stays visible at every tier; only a future UI's
+-- truncated-vs-full inbox presentation is tier-gated, so no has_feature()
+-- check belongs inside this function. Distinct from exception_events (SECTION
+-- 3), which is the permanent write-log of what already fired; this is "what's
+-- active right now," computed fresh from source tables on every call.
+--
+-- entity_type/title/detail follow the same "DB label is never rendered
+-- directly" rule as roles.label/vehicle_types.label (S9) -- title/detail here
+-- are English dev-fallback only; real UI renders via message-catalog t() keys
+-- keyed off exception_type, not these strings.
+--
+-- tier thresholds (today = overdue/expired; this_week = due within 7 days;
+-- upcoming = due within a longer, per-type horizon) are per-branch below --
+-- see each branch's comment for why its horizon was chosen.
+--
+-- NOTE on driver_documents: deliberately NOT a source here. Its expiry_date is
+-- the scan's own informational date -- the schema comment on driver_documents
+-- (SECTION 3) is explicit that drivers.cdl_expiry/med_cert_expiry are the
+-- authoritative fields this system reads, so the cdl_expiring/med_cert_expiring
+-- branches below read those columns directly, not driver_documents.
+--
+-- NOTE on maintenance_reminders: only next_due_date-based rows are included.
+-- next_due_miles exists but there is no live current-odometer feed anywhere
+-- in the schema to compare it against (vehicles has no odometer column;
+-- service_logs/dvir_inspections/fuel_stops odometer readings are point-in-time
+-- logs, not a maintained "current mileage"), so a mileage-only reminder with
+-- next_due_date IS NULL cannot be tiered from available data and is skipped
+-- rather than guessed at.
+--
+-- NOTE on org_documents' entity_type: exception_events.entity_type's CHECK
+-- list (driver/vehicle/customer/invoice/load) has no 'organization' value,
+-- and org_documents.org_id here is always the caller's OWN carrier org (per
+-- its RLS policy: org_id = caller's profiles.org_id) -- not a customer org.
+-- 'customer' is used as the closest available stand-in for "an
+-- organizations-table row" since that's the only entity_type backed by the
+-- organizations table. Revisit if entity_type's CHECK list ever grows an
+-- 'organization' value.
+CREATE OR REPLACE FUNCTION get_exceptions()
+RETURNS TABLE(
+  entity_type    TEXT,
+  entity_id      BIGINT,
+  exception_type TEXT,
+  tier           TEXT,
+  title          TEXT,
+  detail         TEXT,
+  due_at         TIMESTAMPTZ
+)
+LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public AS $$
+
+  -- 1) INVOICES: overdue, or about to become overdue. No "upcoming" tier --
+  -- an invoice not yet due within a week isn't an exception yet.
+  SELECT
+    'invoice'::TEXT,
+    i.id,
+    'invoice_overdue'::TEXT,
+    CASE WHEN i.due_date < CURRENT_DATE THEN 'today' ELSE 'this_week' END,
+    'Invoice overdue'::TEXT,
+    'Invoice ' || i.invoice_number || ' for $' || i.amount || ' due ' || to_char(i.due_date, 'Mon DD, YYYY'),
+    i.due_date::TIMESTAMPTZ
+  FROM invoices i
+  WHERE i.carrier_org_id = my_org_id()
+    AND i.status IN ('sent', 'overdue')
+    AND i.due_date IS NOT NULL
+    AND i.due_date <= CURRENT_DATE + INTERVAL '7 days'
+
+  UNION ALL
+
+  -- 2) ORG DOCUMENTS: carrier's own compliance docs (COI, MC authority, UCR,
+  -- etc.) -- these are typically annual filings, so the "upcoming" horizon
+  -- is the widest of the doc branches (180 days, per the UCR-style hint).
+  SELECT
+    'customer'::TEXT,
+    od.org_id,
+    CASE WHEN od.expiry_date < CURRENT_DATE THEN 'doc_expired' ELSE 'doc_expiring' END,
+    CASE
+      WHEN od.expiry_date < CURRENT_DATE THEN 'today'
+      WHEN od.expiry_date <= CURRENT_DATE + INTERVAL '7 days' THEN 'this_week'
+      ELSE 'upcoming'
+    END,
+    CASE WHEN od.expiry_date < CURRENT_DATE THEN 'Compliance document expired' ELSE 'Compliance document expiring' END,
+    COALESCE(od.label, od.doc_type) || ' expires ' || to_char(od.expiry_date, 'Mon DD, YYYY'),
+    od.expiry_date::TIMESTAMPTZ
+  FROM org_documents od
+  WHERE od.org_id = my_org_id()
+    AND od.expiry_date IS NOT NULL
+    AND od.expiry_date <= CURRENT_DATE + INTERVAL '180 days'
+
+  UNION ALL
+
+  -- 3) VEHICLE DOCUMENTS: registration/insurance/DOT authority/annual
+  -- inspection -- a middle horizon (60 days) between CDL (30) and the
+  -- UCR-style org docs (180); these are typically renewed annually but
+  -- carriers plan for them further ahead than a driver's own CDL.
+  SELECT
+    'vehicle'::TEXT,
+    vd.vehicle_id,
+    CASE WHEN vd.expiry_date < CURRENT_DATE THEN 'doc_expired' ELSE 'doc_expiring' END,
+    CASE
+      WHEN vd.expiry_date < CURRENT_DATE THEN 'today'
+      WHEN vd.expiry_date <= CURRENT_DATE + INTERVAL '7 days' THEN 'this_week'
+      ELSE 'upcoming'
+    END,
+    CASE WHEN vd.expiry_date < CURRENT_DATE THEN 'Vehicle document expired' ELSE 'Vehicle document expiring' END,
+    v.nickname || ': ' || COALESCE(vd.label, vd.doc_type) || ' expires ' || to_char(vd.expiry_date, 'Mon DD, YYYY'),
+    vd.expiry_date::TIMESTAMPTZ
+  FROM vehicle_documents vd
+  JOIN vehicles v ON v.id = vd.vehicle_id
+  WHERE vd.carrier_org_id = my_org_id()
+    AND vd.expiry_date IS NOT NULL
+    AND vd.expiry_date <= CURRENT_DATE + INTERVAL '60 days'
+
+  UNION ALL
+
+  -- 4) DRIVER CDL EXPIRY: authoritative structured field (drivers.cdl_expiry),
+  -- not driver_documents -- see function-level note above. 30-day horizon
+  -- per the CDL-specific hint.
+  SELECT
+    'driver'::TEXT,
+    d.id,
+    'cdl_expiring'::TEXT,
+    CASE
+      WHEN d.cdl_expiry < CURRENT_DATE THEN 'today'
+      WHEN d.cdl_expiry <= CURRENT_DATE + INTERVAL '7 days' THEN 'this_week'
+      ELSE 'upcoming'
+    END,
+    'CDL expiring'::TEXT,
+    trim(COALESCE(p.first_name, '') || ' ' || COALESCE(p.last_name, '')) || '''s CDL expires ' || to_char(d.cdl_expiry, 'Mon DD, YYYY'),
+    d.cdl_expiry::TIMESTAMPTZ
+  FROM drivers d
+  JOIN profiles p ON p.id = d.profile_id
+  WHERE d.carrier_org_id = my_org_id()
+    AND d.cdl_expiry IS NOT NULL
+    AND d.cdl_expiry <= CURRENT_DATE + INTERVAL '30 days'
+
+  UNION ALL
+
+  -- 5) DRIVER MEDICAL CERT EXPIRY: same authoritative-field reasoning as CDL
+  -- above, same 30-day horizon (DOT physicals are typically flagged on a
+  -- similarly short runway).
+  SELECT
+    'driver'::TEXT,
+    d.id,
+    'med_cert_expiring'::TEXT,
+    CASE
+      WHEN d.med_cert_expiry < CURRENT_DATE THEN 'today'
+      WHEN d.med_cert_expiry <= CURRENT_DATE + INTERVAL '7 days' THEN 'this_week'
+      ELSE 'upcoming'
+    END,
+    'Medical certificate expiring'::TEXT,
+    trim(COALESCE(p.first_name, '') || ' ' || COALESCE(p.last_name, '')) || '''s medical certificate expires ' || to_char(d.med_cert_expiry, 'Mon DD, YYYY'),
+    d.med_cert_expiry::TIMESTAMPTZ
+  FROM drivers d
+  JOIN profiles p ON p.id = d.profile_id
+  WHERE d.carrier_org_id = my_org_id()
+    AND d.med_cert_expiry IS NOT NULL
+    AND d.med_cert_expiry <= CURRENT_DATE + INTERVAL '30 days'
+
+  UNION ALL
+
+  -- 6) POD MISSING: a load marked delivered with no matching 'pod'-type
+  -- document row. No natural due date to look forward to (delivery already
+  -- happened), so tiering instead reflects how overdue the paperwork is: a
+  -- 2-day grace period after delivery before this escalates from
+  -- 'this_week' to 'today'. due_at is the delivery date (when the POD
+  -- should have been captured), falling back to updated_at if delivery_date
+  -- was never recorded.
+  SELECT
+    'load'::TEXT,
+    l.id,
+    'pod_missing'::TEXT,
+    CASE
+      WHEN l.delivery_date IS NULL OR l.delivery_date <= CURRENT_DATE - INTERVAL '2 days' THEN 'today'
+      ELSE 'this_week'
+    END,
+    'POD missing'::TEXT,
+    'Load ' || l.load_number || ' delivered without a proof of delivery',
+    COALESCE(l.delivery_date::TIMESTAMPTZ, l.updated_at)
+  FROM loads l
+  WHERE l.carrier_org_id = my_org_id()
+    AND l.status = 'delivered'
+    AND NOT EXISTS (
+      SELECT 1 FROM documents doc WHERE doc.load_id = l.id AND doc.type = 'pod'
+    )
+
+  UNION ALL
+
+  -- 7) MAINTENANCE DUE: date-based reminders only -- see function-level note
+  -- on next_due_miles above. entity_type is 'vehicle' (the reminder is about
+  -- the vehicle, not a standalone entity of its own). 30-day horizon, same
+  -- reasoning as CDL: maintenance intervals are usually planned on a
+  -- similarly short runway, not an annual one.
+  SELECT
+    'vehicle'::TEXT,
+    mr.vehicle_id,
+    'maintenance_due'::TEXT,
+    CASE
+      WHEN mr.next_due_date < CURRENT_DATE THEN 'today'
+      WHEN mr.next_due_date <= CURRENT_DATE + INTERVAL '7 days' THEN 'this_week'
+      ELSE 'upcoming'
+    END,
+    'Maintenance due'::TEXT,
+    v.nickname || ': ' || mr.reminder_type || ' due ' || to_char(mr.next_due_date, 'Mon DD, YYYY'),
+    mr.next_due_date::TIMESTAMPTZ
+  FROM maintenance_reminders mr
+  JOIN vehicles v ON v.id = mr.vehicle_id
+  WHERE mr.carrier_org_id = my_org_id()
+    AND mr.is_active = true
+    AND mr.next_due_date IS NOT NULL
+    AND mr.next_due_date <= CURRENT_DATE + INTERVAL '30 days'
+
+$$;
+
+GRANT EXECUTE ON FUNCTION get_exceptions() TO authenticated;
 
 -- DRIVERS
 ALTER TABLE drivers ENABLE ROW LEVEL SECURITY;
@@ -1248,6 +1809,27 @@ CREATE POLICY "member_deletes_orphan_docs" ON storage.objects FOR DELETE TO auth
          AND NOT EXISTS (
            SELECT 1 FROM public.documents d WHERE d.storage_path = storage.objects.name
          ));
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 8c: BASE TABLE GRANTS
+-- ────────────────────────────────────────────────────────────
+-- Real bug found and fixed 2026-07-21: RLS policies alone are not enough —
+-- Postgres requires the base object privilege (GRANT) before a role even
+-- reaches the RLS layer. Every table added this session (vehicle_types,
+-- vehicle_classifications, vehicle_type_classifications, roles, languages,
+-- tiers, features, driver_documents) had a correct `USING (true)` or
+-- org-scoped SELECT policy, but `authenticated` had no base SELECT grant at
+-- all — confirmed via `\dp`, which showed `authenticated=Dxtm` (missing
+-- a/r/w) instead of the `arwdDxtm` every earlier table has. The query didn't
+-- error, it silently returned zero rows, which is exactly the kind of thing
+-- that looks like an empty state rather than a bug. This one blanket
+-- statement makes a fresh `schema.sql` replay/`db reset` self-sufficient,
+-- replacing the previously undocumented "manually run GRANT statements"
+-- step (`README.md` referenced grants "noted at the top of it" that, as of
+-- this fix, do not actually exist anywhere in the file or the repo — pure
+-- tribal knowledge until now).
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO authenticated, service_role;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated, service_role;
 
 -- ────────────────────────────────────────────────────────────
 -- SECTION 9: TRIGGERS

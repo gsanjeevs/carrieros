@@ -255,6 +255,193 @@ export type Database = {
           },
         ]
       }
+      driver_message_translations: {
+        Row: {
+          id: number
+          message_id: number
+          target_language: string
+          translated_at: string | null
+          translated_body: string
+        }
+        Insert: {
+          id?: number
+          message_id: number
+          target_language: string
+          translated_at?: string | null
+          translated_body: string
+        }
+        Update: {
+          id?: number
+          message_id?: number
+          target_language?: string
+          translated_at?: string | null
+          translated_body?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_message_translations_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "driver_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      driver_messages: {
+        Row: {
+          body: string
+          carrier_org_id: number
+          id: number
+          load_id: number
+          original_language: string | null
+          read_at: string | null
+          sender_id: string | null
+          sent_at: string
+        }
+        Insert: {
+          body: string
+          carrier_org_id: number
+          id?: number
+          load_id: number
+          original_language?: string | null
+          read_at?: string | null
+          sender_id?: string | null
+          sent_at?: string
+        }
+        Update: {
+          body?: string
+          carrier_org_id?: number
+          id?: number
+          load_id?: number
+          original_language?: string | null
+          read_at?: string | null
+          sender_id?: string | null
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_messages_carrier_org_id_fkey"
+            columns: ["carrier_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_messages_load_id_fkey"
+            columns: ["load_id"]
+            isOneToOne: false
+            referencedRelation: "loads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_messages_load_id_fkey"
+            columns: ["load_id"]
+            isOneToOne: false
+            referencedRelation: "loads_driver_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      driver_settlements: {
+        Row: {
+          advance_amount: number | null
+          carrier_org_id: number
+          created_at: string | null
+          created_by: string | null
+          driver_id: number | null
+          gross_revenue: number
+          id: number
+          load_id: number | null
+          loads_count: number | null
+          net_pay: number
+          pay_method: string
+          payment_status: string
+          pdf_statement_path: string | null
+          period_end: string | null
+          period_start: string | null
+          rate_value: number | null
+        }
+        Insert: {
+          advance_amount?: number | null
+          carrier_org_id: number
+          created_at?: string | null
+          created_by?: string | null
+          driver_id?: number | null
+          gross_revenue: number
+          id?: number
+          load_id?: number | null
+          loads_count?: number | null
+          net_pay: number
+          pay_method: string
+          payment_status?: string
+          pdf_statement_path?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          rate_value?: number | null
+        }
+        Update: {
+          advance_amount?: number | null
+          carrier_org_id?: number
+          created_at?: string | null
+          created_by?: string | null
+          driver_id?: number | null
+          gross_revenue?: number
+          id?: number
+          load_id?: number | null
+          loads_count?: number | null
+          net_pay?: number
+          pay_method?: string
+          payment_status?: string
+          pdf_statement_path?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          rate_value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_settlements_carrier_org_id_fkey"
+            columns: ["carrier_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_settlements_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_settlements_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_settlements_load_id_fkey"
+            columns: ["load_id"]
+            isOneToOne: false
+            referencedRelation: "loads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_settlements_load_id_fkey"
+            columns: ["load_id"]
+            isOneToOne: false
+            referencedRelation: "loads_driver_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       drivers: {
         Row: {
           carrier_org_id: number
@@ -274,6 +461,7 @@ export type Database = {
           is_active: boolean | null
           med_cert_expiry: string | null
           profile_id: string
+          settlement_type: string | null
         }
         Insert: {
           carrier_org_id: number
@@ -293,6 +481,7 @@ export type Database = {
           is_active?: boolean | null
           med_cert_expiry?: string | null
           profile_id: string
+          settlement_type?: string | null
         }
         Update: {
           carrier_org_id?: number
@@ -312,6 +501,7 @@ export type Database = {
           is_active?: boolean | null
           med_cert_expiry?: string | null
           profile_id?: string
+          settlement_type?: string | null
         }
         Relationships: [
           {
@@ -482,6 +672,205 @@ export type Database = {
           },
         ]
       }
+      fuel_stops: {
+        Row: {
+          carrier_org_id: number
+          created_at: string | null
+          driver_id: number | null
+          gallons: number
+          id: number
+          load_id: number | null
+          logged_by: string | null
+          odometer: number | null
+          price_per_gallon: number | null
+          receipt_path: string | null
+          state: string
+          station: string | null
+          stop_date: string
+          total_cost: number
+          vehicle_id: number | null
+        }
+        Insert: {
+          carrier_org_id: number
+          created_at?: string | null
+          driver_id?: number | null
+          gallons: number
+          id?: number
+          load_id?: number | null
+          logged_by?: string | null
+          odometer?: number | null
+          price_per_gallon?: number | null
+          receipt_path?: string | null
+          state: string
+          station?: string | null
+          stop_date: string
+          total_cost: number
+          vehicle_id?: number | null
+        }
+        Update: {
+          carrier_org_id?: number
+          created_at?: string | null
+          driver_id?: number | null
+          gallons?: number
+          id?: number
+          load_id?: number | null
+          logged_by?: string | null
+          odometer?: number | null
+          price_per_gallon?: number | null
+          receipt_path?: string | null
+          state?: string
+          station?: string | null
+          stop_date?: string
+          total_cost?: number
+          vehicle_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fuel_stops_carrier_org_id_fkey"
+            columns: ["carrier_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_stops_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_stops_load_id_fkey"
+            columns: ["load_id"]
+            isOneToOne: false
+            referencedRelation: "loads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_stops_load_id_fkey"
+            columns: ["load_id"]
+            isOneToOne: false
+            referencedRelation: "loads_driver_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_stops_logged_by_fkey"
+            columns: ["logged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_stops_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ifta_state_crossings: {
+        Row: {
+          carrier_org_id: number
+          created_at: string | null
+          crossed_at: string
+          driver_id: number | null
+          id: number
+          lat: number | null
+          lng: number | null
+          load_id: number | null
+          odometer_est: number | null
+          source: string
+          state: string
+          vehicle_id: number | null
+        }
+        Insert: {
+          carrier_org_id: number
+          created_at?: string | null
+          crossed_at: string
+          driver_id?: number | null
+          id?: number
+          lat?: number | null
+          lng?: number | null
+          load_id?: number | null
+          odometer_est?: number | null
+          source: string
+          state: string
+          vehicle_id?: number | null
+        }
+        Update: {
+          carrier_org_id?: number
+          created_at?: string | null
+          crossed_at?: string
+          driver_id?: number | null
+          id?: number
+          lat?: number | null
+          lng?: number | null
+          load_id?: number | null
+          odometer_est?: number | null
+          source?: string
+          state?: string
+          vehicle_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ifta_state_crossings_carrier_org_id_fkey"
+            columns: ["carrier_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ifta_state_crossings_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ifta_state_crossings_load_id_fkey"
+            columns: ["load_id"]
+            isOneToOne: false
+            referencedRelation: "loads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ifta_state_crossings_load_id_fkey"
+            columns: ["load_id"]
+            isOneToOne: false
+            referencedRelation: "loads_driver_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ifta_state_crossings_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ifta_tax_rates: {
+        Row: {
+          id: number
+          quarter: string
+          rate_per_gallon: number
+          state: string
+        }
+        Insert: {
+          id?: number
+          quarter: string
+          rate_per_gallon: number
+          state: string
+        }
+        Update: {
+          id?: number
+          quarter?: string
+          rate_per_gallon?: number
+          state?: string
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           amount: number
@@ -643,6 +1032,68 @@ export type Database = {
             columns: ["load_id"]
             isOneToOne: false
             referencedRelation: "loads_driver_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      load_expenses: {
+        Row: {
+          amount: number
+          carrier_org_id: number
+          created_at: string | null
+          expense_type: string
+          id: number
+          load_id: number
+          logged_by: string | null
+          note: string | null
+        }
+        Insert: {
+          amount: number
+          carrier_org_id: number
+          created_at?: string | null
+          expense_type: string
+          id?: number
+          load_id: number
+          logged_by?: string | null
+          note?: string | null
+        }
+        Update: {
+          amount?: number
+          carrier_org_id?: number
+          created_at?: string | null
+          expense_type?: string
+          id?: number
+          load_id?: number
+          logged_by?: string | null
+          note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "load_expenses_carrier_org_id_fkey"
+            columns: ["carrier_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "load_expenses_load_id_fkey"
+            columns: ["load_id"]
+            isOneToOne: false
+            referencedRelation: "loads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "load_expenses_load_id_fkey"
+            columns: ["load_id"]
+            isOneToOne: false
+            referencedRelation: "loads_driver_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "load_expenses_logged_by_fkey"
+            columns: ["logged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1131,6 +1582,38 @@ export type Database = {
           },
         ]
       }
+      settlement_deductions: {
+        Row: {
+          amount: number
+          deduction_type: string
+          id: number
+          note: string | null
+          settlement_id: number
+        }
+        Insert: {
+          amount: number
+          deduction_type: string
+          id?: number
+          note?: string | null
+          settlement_id: number
+        }
+        Update: {
+          amount?: number
+          deduction_type?: string
+          id?: number
+          note?: string | null
+          settlement_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "settlement_deductions_settlement_id_fkey"
+            columns: ["settlement_id"]
+            isOneToOne: false
+            referencedRelation: "driver_settlements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tiers: {
         Row: {
           code: string
@@ -1437,8 +1920,8 @@ export type Database = {
           status: string | null
           total_miles: number | null
           tracking_token: string | null
-          truck_id: number | null
           updated_at: string | null
+          vehicle_id: number | null
           weight_lbs: number | null
         }
         Insert: {
@@ -1473,8 +1956,8 @@ export type Database = {
           status?: string | null
           total_miles?: number | null
           tracking_token?: string | null
-          truck_id?: number | null
           updated_at?: string | null
+          vehicle_id?: number | null
           weight_lbs?: number | null
         }
         Update: {
@@ -1509,8 +1992,8 @@ export type Database = {
           status?: string | null
           total_miles?: number | null
           tracking_token?: string | null
-          truck_id?: number | null
           updated_at?: string | null
+          vehicle_id?: number | null
           weight_lbs?: number | null
         }
         Relationships: [
@@ -1537,7 +2020,7 @@ export type Database = {
           },
           {
             foreignKeyName: "loads_truck_id_fkey"
-            columns: ["truck_id"]
+            columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
             referencedColumns: ["id"]
@@ -1546,6 +2029,7 @@ export type Database = {
       }
     }
     Functions: {
+      check_ifta_completeness: { Args: { p_load_id: number }; Returns: boolean }
       create_customer_org: {
         Args: {
           p_address?: string
@@ -1574,6 +2058,39 @@ export type Database = {
           p_org: number
         }
         Returns: boolean
+      }
+      get_exceptions: {
+        Args: never
+        Returns: {
+          detail: string
+          due_at: string
+          entity_id: number
+          entity_type: string
+          exception_type: string
+          tier: string
+          title: string
+        }[]
+      }
+      get_ifta_quarterly_summary: {
+        Args: { p_carrier_org_id: number; p_quarter: string }
+        Returns: {
+          state: string
+          total_miles: number
+        }[]
+      }
+      get_ifta_tax_summary: {
+        Args: { p_carrier_org_id: number; p_quarter: string }
+        Returns: {
+          miles_in_state: number
+          net_tax_due: number
+          state: string
+        }[]
+      }
+      get_my_entitlements: {
+        Args: never
+        Returns: {
+          key: string
+        }[]
       }
       get_public_tracking: {
         Args: { p_token: string }

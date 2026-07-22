@@ -64,12 +64,24 @@ docker exec -i supabase_db_carrieros psql -U postgres -d schema_test -v ON_ERROR
 docker exec supabase_db_carrieros psql -U postgres -d postgres -c "drop database schema_test;"
 ```
 
-As of 2026-07-20 a clean replay yields 0 errors, 18 tables, 59 policies.
+As of 2026-07-21 (post-Phase 7B-7F) a clean replay yields 0 errors, 35 tables, 80 policies.
 
 ## After every `supabase db reset`
 
-Re-run this file, then the GRANT statements noted at the top of it. Local
-Supabase does not auto-grant table privileges to `authenticated`/`service_role`.
+Re-run this file — that's it. `schema.sql` now ends with a blanket
+`GRANT ... ON ALL TABLES IN SCHEMA public TO authenticated, service_role`
+(SECTION 8c), so it's self-sufficient on a fresh reset.
+
+**History (2026-07-21):** this used to say "then the GRANT statements noted
+at the top of it" — but no such statements ever actually existed anywhere in
+this file or the repo; it was tribal knowledge for a manual step someone ran
+once, undocumented. That silently bit a fresh batch of tables added
+2026-07-21 (`vehicle_types`, `tiers`, `features`, etc.): their RLS policies
+were correct, but `authenticated` had no base SELECT grant at all, so queries
+returned zero rows with no error — indistinguishable from an empty table
+until traced with `\dp`. SECTION 8c's blanket GRANT closes this permanently;
+a future new table just needs `ENABLE ROW LEVEL SECURITY` + its policy, the
+base grant is already covered.
 
 ## The Zoho copy
 
