@@ -12,7 +12,7 @@ import { formatDate, formatDateTime, toDate } from '@/lib/format-datetime'
 import { formatMoney } from '@/lib/format-money'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import { vehicleStatusVariant, type VehicleStatus } from '@/lib/domain/vehicle-status'
-import StatusBadge, { type StatusBadgeVariant } from '@/components/ui/StatusBadge'
+import { Card, CardHeader, CardBody, KpiTile, StatusBadge, type StatusBadgeVariant, Table, TableHeaderCell, TableRow, TableCell, ProgressBar, EmptyState } from '@/components/ui'
 
 type MaintStatus = 'overdue' | 'dueSoon' | 'ok' | 'noDate'
 
@@ -44,15 +44,17 @@ function subtractMonths(dateStr: string, months: number): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-type MaintProgress = { pct: number; status: MaintStatus } | null
+type MaintProgress = { pct: number; status: Exclude<MaintStatus, 'noDate'> } | null
 
 function computeMaintProgress(r: {
   next_due_date: string | null
   last_service_date: string | null
   trigger_months: number | null
 }): MaintProgress {
-  const status = computeMaintStatus(r.next_due_date)
   if (!r.next_due_date) return null
+  // computeMaintStatus can only return 'noDate' when next_due_date is null,
+  // already excluded above — safe to narrow.
+  const status = computeMaintStatus(r.next_due_date) as Exclude<MaintStatus, 'noDate'>
   const baseline = r.last_service_date
     ?? (r.trigger_months ? subtractMonths(r.next_due_date, r.trigger_months) : null)
   if (!baseline) return null
@@ -65,18 +67,17 @@ function computeMaintProgress(r: {
   return { pct: Math.min(1, Math.max(0, pct)), status }
 }
 
-const PROGRESS_BAR_COLOR: Record<MaintStatus, string> = {
-  overdue: 'bg-red-500',
-  dueSoon: 'bg-amber-500',
-  ok:      'bg-[#16a34a]',
-  noDate:  'bg-slate-600',
+const PROGRESS_BAR_VARIANT: Record<Exclude<MaintStatus, 'noDate'>, 'success' | 'warning' | 'danger'> = {
+  overdue: 'danger',
+  dueSoon: 'warning',
+  ok:      'success',
 }
 
 function InfoRow({ label, value }: { label: string; value: string | number | null | undefined }) {
   return (
-    <div className="flex justify-between items-start py-2.5 border-b border-white/5 last:border-0">
-      <span className="text-slate-500 text-sm">{label}</span>
-      <span className="text-white text-sm text-right ml-4">{value ?? '—'}</span>
+    <div className="flex justify-between items-start py-2.5 border-b border-divider-ui last:border-0">
+      <span className="text-text-sec text-sm">{label}</span>
+      <span className="text-text-pri text-sm text-right ml-4">{value ?? '—'}</span>
     </div>
   )
 }
@@ -243,17 +244,19 @@ export default async function VehicleDetailPage({
   const detailsTab = (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 space-y-6">
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-          <h2 className="text-white font-medium text-sm mb-3">{t('vehicleDetails')}</h2>
-          <InfoRow label={t('nickname')} value={vehicle.nickname} />
-          <InfoRow label={t('yearMakeModel')} value={ymm || null} />
-          <InfoRow label={t('vin')} value={vehicle.vin} />
-          <InfoRow label={t('licensePlate')} value={[vehicle.license_plate, vehicle.license_state].filter(Boolean).join(' / ') || null} />
-          <InfoRow label={t('type')} value={vt ? t(`type_${vt.code}` as never) : null} />
-          <InfoRow label={t('cabType')} value={vehicle.cab_type ? t(`cabType_${vehicle.cab_type}` as never) : null} />
-          <InfoRow label={t('color')} value={vehicle.color} />
-          <InfoRow label={t('dimensions')} value={vehicle.dimensions} />
-        </div>
+        <Card>
+          <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('vehicleDetails')}</h2></CardHeader>
+          <CardBody>
+            <InfoRow label={t('nickname')} value={vehicle.nickname} />
+            <InfoRow label={t('yearMakeModel')} value={ymm || null} />
+            <InfoRow label={t('vin')} value={vehicle.vin} />
+            <InfoRow label={t('licensePlate')} value={[vehicle.license_plate, vehicle.license_state].filter(Boolean).join(' / ') || null} />
+            <InfoRow label={t('type')} value={vt ? t(`type_${vt.code}` as never) : null} />
+            <InfoRow label={t('cabType')} value={vehicle.cab_type ? t(`cabType_${vehicle.cab_type}` as never) : null} />
+            <InfoRow label={t('color')} value={vehicle.color} />
+            <InfoRow label={t('dimensions')} value={vehicle.dimensions} />
+          </CardBody>
+        </Card>
 
         <VehicleDocuments
           documents={documents}
@@ -266,14 +269,16 @@ export default async function VehicleDetailPage({
       </div>
 
       <div className="space-y-6">
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark flex flex-col items-center text-center">
-          {TypeIcon
-            ? <TypeIcon className="w-16 h-16 text-slate-400 mb-3" />
-            : <span className="material-symbols-outlined text-slate-600 text-5xl mb-3">fire_truck</span>}
-          <StatusBadge variant={vehicleStatusVariant((vehicle.status ?? 'active') as VehicleStatus)}>
-            {t(`vstatus_${vehicle.status ?? 'active'}` as never)}
-          </StatusBadge>
-        </div>
+        <Card>
+          <CardBody className="flex flex-col items-center text-center">
+            {TypeIcon
+              ? <TypeIcon className="w-16 h-16 text-text-sec mb-3" />
+              : <span className="material-symbols-outlined text-text-mut text-5xl mb-3">fire_truck</span>}
+            <StatusBadge variant={vehicleStatusVariant((vehicle.status ?? 'active') as VehicleStatus)}>
+              {t(`vstatus_${vehicle.status ?? 'active'}` as never)}
+            </StatusBadge>
+          </CardBody>
+        </Card>
       </div>
     </div>
   )
@@ -281,95 +286,85 @@ export default async function VehicleDetailPage({
   const loadHistoryTab = (
     <div className="space-y-6">
       <div className={`grid grid-cols-2 ${showRate ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-4`}>
-        <div className="bg-white/5 border border-white/8 rounded-xl p-4 shadow-card-dark">
-          <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">{t('statTotalLoads')}</p>
-          <p className="text-2xl font-semibold text-white">{totalLoads}</p>
-        </div>
+        <KpiTile label={t('statTotalLoads')} value={totalLoads} />
         {showRate && (
-          <div className="bg-white/5 border border-white/8 rounded-xl p-4 shadow-card-dark">
-            <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">{t('statRevenue')}</p>
-            <p className="text-2xl font-semibold text-brand-orange">{formatMoney(totalRevenue, carrierOrg?.currency ?? 'USD', locale)}</p>
-          </div>
+          <Card>
+            <CardBody>
+              <p className="text-[10px] font-bold tracking-[0.08em] uppercase text-text-sec mb-2">{t('statRevenue')}</p>
+              <p className="text-[26px] font-extrabold tracking-tight text-brand-orange leading-none">{formatMoney(totalRevenue, carrierOrg?.currency ?? 'USD', locale)}</p>
+            </CardBody>
+          </Card>
         )}
-        <div className="bg-white/5 border border-white/8 rounded-xl p-4 shadow-card-dark">
-          <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">{t('statMiles')}</p>
-          <p className="text-2xl font-semibold text-white">{totalMiles.toLocaleString()}</p>
-        </div>
+        <KpiTile label={t('statMiles')} value={totalMiles.toLocaleString()} />
         {showRate && (
-          <div className="bg-white/5 border border-white/8 rounded-xl p-4 shadow-card-dark">
-            <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">{t('statAvgPerLoad')}</p>
-            <p className="text-2xl font-semibold text-white">{formatMoney(avgPerLoad, carrierOrg?.currency ?? 'USD', locale)}</p>
-          </div>
+          <KpiTile label={t('statAvgPerLoad')} value={formatMoney(avgPerLoad, carrierOrg?.currency ?? 'USD', locale)} />
         )}
       </div>
 
       {loads.length === 0 ? (
-        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-card-dark">
-          <span className="material-symbols-outlined text-slate-600 text-4xl">local_shipping</span>
-          <p className="text-slate-500 text-sm mt-3">{t('noLoadsYet')}</p>
-        </div>
+        <Card>
+          <EmptyState icon="local_shipping" title={t('noLoadsYet')} />
+        </Card>
       ) : (
-        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
-          <table className="w-full text-sm">
+        <Card>
+          <Table>
             <thead>
-              <tr className="border-b border-white/5">
-                <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('colLoad')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('colStatus')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('colRoute')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('colDate')}</th>
-                {showRate && <th className="text-right px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('colRate')}</th>}
+              <tr>
+                <TableHeaderCell>{t('colLoad')}</TableHeaderCell>
+                <TableHeaderCell>{t('colStatus')}</TableHeaderCell>
+                <TableHeaderCell>{t('colRoute')}</TableHeaderCell>
+                <TableHeaderCell>{t('colDate')}</TableHeaderCell>
+                {showRate && <TableHeaderCell numeric>{t('colRate')}</TableHeaderCell>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody>
               {loads.map((l) => (
-                <tr key={l.id} className="hover:bg-white/[0.07] transition-colors duration-150">
-                  <td className="px-5 py-3">
-                    <Link href={`/loads/${l.load_number}`} className="text-white font-medium hover:text-[#f97316] transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
+                <TableRow key={l.id}>
+                  <TableCell className="font-medium text-text-pri">
+                    <Link href={`/loads/${l.load_number}`} className="hover:text-brand-orange transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
                       {l.load_number}
                     </Link>
-                  </td>
-                  <td className="px-4 py-3">
+                  </TableCell>
+                  <TableCell>
                     <StatusBadge variant={loadStatusVariant((l.status ?? 'draft') as LoadStatus)} size="sm">
                       {tLoads(`status_${l.status ?? 'draft'}` as never)}
                     </StatusBadge>
-                  </td>
-                  <td className="px-4 py-3 text-slate-300">
+                  </TableCell>
+                  <TableCell>
                     {[l.pickup_city, l.pickup_state].filter(Boolean).join(', ')} → {[l.delivery_city, l.delivery_state].filter(Boolean).join(', ')}
-                  </td>
-                  <td className="px-4 py-3 text-slate-400">{l.delivery_date ? formatDate(l.delivery_date, profile) : '—'}</td>
+                  </TableCell>
+                  <TableCell>{l.delivery_date ? formatDate(l.delivery_date, profile) : '—'}</TableCell>
                   {showRate && (
-                    <td className="px-5 py-3 text-right text-white font-medium">
+                    <TableCell numeric className="font-medium text-text-pri">
                       {formatMoney(l.rate, carrierOrg?.currency ?? 'USD', locale)}
-                    </td>
+                    </TableCell>
                   )}
-                </tr>
+                </TableRow>
               ))}
             </tbody>
-          </table>
-        </div>
+          </Table>
+        </Card>
       )}
     </div>
   )
 
   const maintenanceTab = (
     <div className="space-y-6">
-      <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
-        <div className="px-5 py-3.5 border-b border-white/5">
-          <h2 className="text-white font-medium text-sm">{t('reminders')}</h2>
-        </div>
+      <Card>
+        <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('reminders')}</h2></CardHeader>
         {reminders.length === 0 ? (
-          <div className="px-5 py-4 text-slate-500 text-sm">{t('noRemindersForTruck')}</div>
+          <div className="px-5 py-4 text-text-sec text-sm">{t('noRemindersForTruck')}</div>
         ) : (
-          <table className="w-full text-sm">
+          <Table>
             <thead>
-              <tr className="border-b border-white/5">
-                <th className="text-left px-5 py-2.5 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('reminderType')}</th>
-                <th className="text-left px-4 py-2.5 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('lastService')}</th>
-                <th className="text-left px-4 py-2.5 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('nextDue')}</th>
-                <th className="text-right px-5 py-2.5 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('status')}</th>
+              <tr>
+                <TableHeaderCell>{t('reminderType')}</TableHeaderCell>
+                <TableHeaderCell>{t('lastService')}</TableHeaderCell>
+                <TableHeaderCell>{t('nextDue')}</TableHeaderCell>
+                <TableHeaderCell numeric>{t('status')}</TableHeaderCell>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody>
               {reminders.map((r) => {
                 const status = computeMaintStatus(r.next_due_date)
                 const progress = computeMaintProgress(r)
@@ -379,76 +374,74 @@ export default async function VehicleDetailPage({
                   r.next_due_miles ? t('milesValue', { miles: r.next_due_miles.toLocaleString() }) : null,
                 ].filter(Boolean).join(' · ') || '—'
                 return (
-                  <tr key={r.id} className="hover:bg-white/[0.07] transition-colors duration-150">
-                    <td className="px-5 py-3 text-white font-medium">
+                  <TableRow key={r.id}>
+                    <TableCell className="font-medium text-text-pri">
                       <div className="flex items-center gap-2.5">
-                        <Icon className="w-4 h-4 shrink-0 text-slate-400" />
+                        <Icon className="w-4 h-4 shrink-0 text-text-sec" />
                         {r.reminder_type}
                       </div>
-                    </td>
-                    <td className="px-4 py-3 text-slate-400">
+                    </TableCell>
+                    <TableCell>
                       {r.last_service_date ? formatDate(r.last_service_date, profile) : t('never')}
-                    </td>
-                    <td className="px-4 py-3 text-slate-300">
+                    </TableCell>
+                    <TableCell>
                       <div>{nextDue}</div>
                       {progress && (
-                        <div className="mt-1.5 h-1.5 w-24 rounded-full bg-white/10 overflow-hidden" role="progressbar" aria-valuenow={Math.round(progress.pct * 100)} aria-valuemin={0} aria-valuemax={100}>
-                          <div className={`h-full rounded-full transition-[width] ${PROGRESS_BAR_COLOR[progress.status]}`} style={{ width: `${Math.round(progress.pct * 100)}%` }} />
+                        <div className="mt-1.5 w-24">
+                          <ProgressBar value={Math.round(progress.pct * 100)} variant={PROGRESS_BAR_VARIANT[progress.status]} thin />
                         </div>
                       )}
-                    </td>
-                    <td className="px-5 py-3 text-right">
+                    </TableCell>
+                    <TableCell numeric>
                       <StatusBadge variant={MAINT_STATUS_VARIANT[status]} size="sm">
                         {t(`mstatus_${status}`)}
                       </StatusBadge>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 )
               })}
             </tbody>
-          </table>
+          </Table>
         )}
-      </div>
+      </Card>
 
-      <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
-        <div className="px-5 py-3.5 border-b border-white/5">
-          <h2 className="text-white font-medium text-sm">{t('serviceHistory')}</h2>
-        </div>
+      <Card>
+        <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('serviceHistory')}</h2></CardHeader>
         {serviceLogsWithReceipt.length === 0 ? (
-          <div className="px-5 py-4 text-slate-500 text-sm">{t('noServiceLogsYet')}</div>
+          <div className="px-5 py-4 text-text-sec text-sm">{t('noServiceLogsYet')}</div>
         ) : (
-          <table className="w-full text-sm">
+          <Table>
             <thead>
-              <tr className="border-b border-white/5">
-                <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('date')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('serviceType')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('shop')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('odometer')}</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('cost')}</th>
-                <th className="text-right px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('receipt')}</th>
+              <tr>
+                <TableHeaderCell>{t('date')}</TableHeaderCell>
+                <TableHeaderCell>{t('serviceType')}</TableHeaderCell>
+                <TableHeaderCell>{t('shop')}</TableHeaderCell>
+                <TableHeaderCell>{t('odometer')}</TableHeaderCell>
+                <TableHeaderCell numeric>{t('cost')}</TableHeaderCell>
+                <TableHeaderCell numeric>{t('receipt')}</TableHeaderCell>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody>
               {serviceLogsWithReceipt.map((log) => (
-                <tr key={log.id} className="hover:bg-white/[0.07] transition-colors duration-150">
-                  <td className="px-5 py-3 text-slate-300">{formatDate(log.service_date, profile)}</td>
-                  <td className="px-4 py-3 text-white font-medium">{log.service_type}</td>
-                  <td className="px-4 py-3 text-slate-400">{log.shop_name ?? '—'}</td>
-                  <td className="px-4 py-3 text-slate-400">{log.odometer ? log.odometer.toLocaleString() : '—'}</td>
-                  <td className="px-4 py-3 text-right text-white font-medium">{log.cost != null ? formatMoney(log.cost, carrierOrg?.currency ?? 'USD', locale) : '—'}</td>
-                  <td className="px-5 py-3 text-right">
+                <TableRow key={log.id}>
+                  <TableCell>{formatDate(log.service_date, profile)}</TableCell>
+                  <TableCell className="font-medium text-text-pri">{log.service_type}</TableCell>
+                  <TableCell>{log.shop_name ?? '—'}</TableCell>
+                  <TableCell>{log.odometer ? log.odometer.toLocaleString() : '—'}</TableCell>
+                  <TableCell numeric className="font-medium text-text-pri">{log.cost != null ? formatMoney(log.cost, carrierOrg?.currency ?? 'USD', locale) : '—'}</TableCell>
+                  <TableCell numeric>
                     {log.receiptUrl ? (
                       <a href={log.receiptUrl} target="_blank" rel="noreferrer" className="text-[#f97316] hover:underline text-xs font-medium">
                         {t('viewReceipt')}
                       </a>
                     ) : '—'}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
             </tbody>
-          </table>
+          </Table>
         )}
-      </div>
+      </Card>
     </div>
   )
 
@@ -465,14 +458,11 @@ export default async function VehicleDetailPage({
   )
 
   const dvirsTab = (
-    <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
+    <Card>
       {dvirs.length === 0 ? (
-        <div className="px-5 py-16 text-center">
-          <span className="material-symbols-outlined text-slate-600 text-4xl">fact_check</span>
-          <p className="text-slate-500 text-sm mt-3">{t('noDvirsYet')}</p>
-        </div>
+        <EmptyState icon="fact_check" title={t('noDvirsYet')} />
       ) : (
-        <div className="divide-y divide-white/5">
+        <div className="divide-y divide-divider-ui">
           {dvirs.map((d) => {
             const driverName = d.drivers?.profiles
               ? [d.drivers.profiles.first_name, d.drivers.profiles.last_name].filter(Boolean).join(' ')
@@ -489,23 +479,23 @@ export default async function VehicleDetailPage({
                       {t(d.type === 'pre_trip' ? 'dvirPreTrip' : 'dvirPostTrip')}
                     </span>
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                      hasDefects ? 'bg-amber-500/20 text-amber-400' : 'bg-[#16a34a]/20 text-[#16a34a]'
+                      hasDefects ? 'bg-warning/20 text-warning' : 'bg-success/20 text-success'
                     }`}>
                       {hasDefects ? t('dvirDefectsNoted') : t('dvirSatisfactory')}
                     </span>
                   </div>
-                  <span className="text-slate-500 text-xs">{formatDateTime(d.submitted_at, profile)}</span>
+                  <span className="text-text-sec text-xs">{formatDateTime(d.submitted_at, profile)}</span>
                 </div>
-                <div className="flex items-center gap-4 mt-2 text-xs text-slate-400">
+                <div className="flex items-center gap-4 mt-2 text-xs text-text-mut">
                   {driverName && <span>{driverName}</span>}
                   {d.odometer != null && <span>{d.odometer.toLocaleString()} mi</span>}
                 </div>
                 {hasDefects && defects.length > 0 && (
                   <ul className="mt-2 space-y-1">
                     {defects.map((def) => (
-                      <li key={def.id} className="text-slate-400 text-xs flex items-center gap-2">
-                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${def.severity === 'major' ? 'bg-red-500' : 'bg-amber-500'}`} />
-                        <span className="text-slate-300">{def.area}</span>
+                      <li key={def.id} className="text-text-mut text-xs flex items-center gap-2">
+                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${def.severity === 'major' ? 'bg-danger' : 'bg-warning'}`} />
+                        <span className="text-text-sec">{def.area}</span>
                         {def.description && <span>— {def.description}</span>}
                       </li>
                     ))}
@@ -516,22 +506,22 @@ export default async function VehicleDetailPage({
           })}
         </div>
       )}
-    </div>
+    </Card>
   )
 
   return (
     <div className="p-8 max-w-5xl mx-auto">
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-1">
-          <Link href="/vehicles" className="text-slate-500 hover:text-white transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
+          <Link href="/vehicles" className="text-text-sec hover:text-text-pri transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
             <span className="material-symbols-outlined text-[20px]">arrow_back</span>
           </Link>
-          <h1 className="text-2xl font-semibold text-white">{label}</h1>
+          <h1 className="text-2xl font-semibold text-text-pri">{label}</h1>
           <StatusBadge variant={vehicleStatusVariant((vehicle.status ?? 'active') as VehicleStatus)}>
             {t(`vstatus_${vehicle.status ?? 'active'}` as never)}
           </StatusBadge>
         </div>
-        <p className="text-slate-400 text-sm ml-9">{ymm || vt ? [ymm, vt ? t(`type_${vt.code}` as never) : null].filter(Boolean).join(' · ') : ''}</p>
+        <p className="text-text-sec text-sm ml-9">{ymm || vt ? [ymm, vt ? t(`type_${vt.code}` as never) : null].filter(Boolean).join(' · ') : ''}</p>
       </div>
 
       <VehicleTabs

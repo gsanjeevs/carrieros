@@ -8,6 +8,7 @@ import { VEHICLE_TYPE_ICONS } from '@/components/icons/vehicle-types'
 import ExceptionChip from '@/components/ExceptionChip'
 import { getExceptions } from '@/lib/exceptions'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { Card, EmptyState, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
 
 type Vehicle = {
   id: number
@@ -73,40 +74,41 @@ export default async function VehiclesPage({
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">{t('title')}</h1>
-          <p className="text-slate-400 text-sm mt-1">{t('truckCount', { count: vehicles.length })}</p>
+          <h1 className="text-2xl font-semibold text-text-pri">{t('title')}</h1>
+          <p className="text-text-sec text-sm mt-1">{t('truckCount', { count: vehicles.length })}</p>
         </div>
         {canManage && <AddVehicleButton />}
       </div>
 
       {justCreated && (
-        <div className="mb-6 flex items-center gap-3 rounded-lg bg-[#16a34a]/10 border border-[#16a34a]/20 px-4 py-3">
-          <span className="material-symbols-outlined text-[#16a34a] text-[18px]">check_circle</span>
-          <p className="text-[#16a34a] text-sm">{t('addedSuccess', { nickname: justCreated })}</p>
+        <div className="mb-6 flex items-center gap-3 rounded-lg bg-success/10 border border-success/20 px-4 py-3">
+          <span className="material-symbols-outlined text-success text-[18px]">check_circle</span>
+          <p className="text-success text-sm">{t('addedSuccess', { nickname: justCreated })}</p>
         </div>
       )}
 
       {vehicles.length === 0 ? (
-        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-card-dark">
-          <span className="material-symbols-outlined text-slate-600 text-4xl">fire_truck</span>
-          <p className="text-slate-500 text-sm mt-3">{t('noTrucksYet')}</p>
-          {canManage && <AddVehicleButton variant="empty" />}
-        </div>
+        <Card>
+          <div className="flex flex-col items-center pb-8">
+            <EmptyState icon="fire_truck" title={t('noTrucksYet')} />
+            {canManage && <AddVehicleButton variant="empty" />}
+          </div>
+        </Card>
       ) : (
-        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
-          <table className="w-full text-sm">
+        <Card>
+          <Table>
             <thead>
-              <tr className="border-b border-white/5">
-                <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('truckNumber')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('type')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('nickname')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('yearMakeModel')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('plate')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('details')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide"></th>
+              <tr>
+                <TableHeaderCell>{t('truckNumber')}</TableHeaderCell>
+                <TableHeaderCell>{t('type')}</TableHeaderCell>
+                <TableHeaderCell>{t('nickname')}</TableHeaderCell>
+                <TableHeaderCell>{t('yearMakeModel')}</TableHeaderCell>
+                <TableHeaderCell>{t('plate')}</TableHeaderCell>
+                <TableHeaderCell>{t('details')}</TableHeaderCell>
+                <TableHeaderCell></TableHeaderCell>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody>
               {vehicles.map((vehicle) => {
                 const ymm = [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(' ')
                 const plate = [vehicle.license_plate, vehicle.license_state].filter(Boolean).join(' / ')
@@ -116,36 +118,36 @@ export default async function VehiclesPage({
                 const topException = topExceptionByVehicle.get(vehicle.id)
 
                 return (
-                  <tr key={vehicle.id} className="hover:bg-white/[0.07] transition-colors duration-150">
-                    <td className="px-5 py-3.5 text-white font-medium">
+                  <TableRow key={vehicle.id}>
+                    <TableCell className="font-medium text-text-pri">
                       {vehicle.vehicle_number ? (
                         <Link
                           href={`/vehicles/${vehicle.vehicle_number}`}
-                          className="hover:text-[#f97316] transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+                          className="hover:text-brand-orange transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
                         >
                           {vehicle.vehicle_number}
                         </Link>
                       ) : '—'}
-                    </td>
-                    <td className="px-4 py-3.5 text-slate-300">
+                    </TableCell>
+                    <TableCell>
                       {vt ? (
                         <span className="inline-flex items-center gap-2">
-                          {Icon && <Icon className="w-5 h-5 text-slate-400" />}
-                          <span className="text-slate-300 text-sm">{t(`type_${vt.code}` as never)}</span>
+                          {Icon && <Icon className="w-5 h-5 text-text-sec" />}
+                          <span className="text-text-sec text-sm">{t(`type_${vt.code}` as never)}</span>
                         </span>
                       ) : '—'}
-                    </td>
-                    <td className="px-4 py-3.5 text-slate-300">{vehicle.nickname ?? '—'}</td>
-                    <td className="px-4 py-3.5 text-slate-400">{ymm || '—'}</td>
-                    <td className="px-4 py-3.5 text-slate-400">{plate || '—'}</td>
-                    <td className="px-4 py-3.5 text-slate-500 text-xs">{details || '—'}</td>
-                    <td className="px-4 py-3.5">{topException && <ExceptionChip item={topException} />}</td>
-                  </tr>
+                    </TableCell>
+                    <TableCell>{vehicle.nickname ?? '—'}</TableCell>
+                    <TableCell>{ymm || '—'}</TableCell>
+                    <TableCell>{plate || '—'}</TableCell>
+                    <TableCell className="text-xs">{details || '—'}</TableCell>
+                    <TableCell>{topException && <ExceptionChip item={topException} />}</TableCell>
+                  </TableRow>
                 )
               })}
             </tbody>
-          </table>
-        </div>
+          </Table>
+        </Card>
       )}
     </div>
   )
