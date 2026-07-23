@@ -10,6 +10,9 @@ const ROLE_HOME: Record<string, string> = {
   dispatcher: '/dispatch',
   finance:    '/finance',
   driver:     '/my-loads',
+  sx_owner:   '/admin',
+  sx_finance: '/admin',
+  sx_support: '/admin',
 }
 
 // Routes that require a specific minimum role
@@ -20,6 +23,13 @@ const ROLE_ROUTES: { prefix: string; allowed: string[] }[] = [
   { prefix: '/my-loads', allowed: ['owner', 'solo', 'driver'] },
   { prefix: '/drivers',  allowed: ['owner', 'solo', 'dispatcher'] },
   { prefix: '/team',     allowed: ['owner', 'solo'] },
+  // ShipmentX platform staff only — see lib/admin-auth.ts's SX_ROLES.
+  // Symmetric with /team above: any non-sx_* role hitting /admin bounces
+  // to their own tenant home, and (unlisted here, but implied) an sx_*
+  // role hitting any tenant-only prefix above simply fails that prefix's
+  // allowlist and bounces to /admin — no tenant data is exposed either way
+  // since RLS scopes sx_* profiles to the platform org regardless.
+  { prefix: '/admin',    allowed: ['sx_owner', 'sx_finance', 'sx_support'] },
 ]
 
 // Public routes — no auth required
