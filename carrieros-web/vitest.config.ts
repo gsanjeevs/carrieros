@@ -11,6 +11,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     setupFiles: ['./tests/setup.ts'],
+    globalSetup: ['./tests/global-teardown.ts'],
     testTimeout: 20_000,
     hookTimeout: 20_000,
     // Sequential, not parallel — tests share one local Postgres instance and

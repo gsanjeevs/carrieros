@@ -29,6 +29,9 @@ Not deleted between sessions — reused for manual/browser testing.
 - `demo@carrieros.dev` / `Demo123!` — owner, "Sierra Freight Co" (org 12),
   trucks T-1/T-2, driver D-1 Mike Rodriguez, loads L-1/L-2/L-3.
 - `mike.driver@carrieros.dev` / `Demo123!` — driver on the same org.
+- `info@shipmentx.com` / `Demo123!` — sx_owner (ShipmentX platform staff),
+  for testing the `/admin` SuperAdmin UI. Org is ShipmentX's own
+  `type='platform'` row, separate from any carrier tenant.
 
 After browser-testing changes their language/units/date/time prefs, run
 `./scripts/reset-demo.sh` to put them back to defaults rather than resetting

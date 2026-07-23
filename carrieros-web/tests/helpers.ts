@@ -124,27 +124,81 @@ export async function cleanupTestUser(admin: SupabaseClient<Database>, userId: s
   await admin.auth.admin.deleteUser(userId).catch(() => {})
 }
 
+// Full dependency graph pulled directly from pg_constraint (not guessed) —
+// see tests/global-teardown.ts's header comment for the query used. Every
+// table below has at least one "no action" (non-cascading) FK back to
+// organizations, drivers, loads, or profiles that blocks deletion unless
+// cleared first, in this order: org/driver/load-scoped rows that block
+// `drivers`/`loads` themselves, then `drivers`/`loads`, then any remaining
+// profiles(id) references, then `profiles`, then `organizations`.
+const ORG_SCOPED_BLOCKERS = ['dvir_inspections', 'ifta_state_crossings', 'driver_settlements', 'fuel_stops'] as const
+
+// Every profiles(id) FK below is "no action" — none cascade. A live row in
+// any of them blocks deleting the profile, which in turn blocks deleting
+// the organization.
+const PROFILE_REFERENCING_TABLES: { table: string; col: string }[] = [
+  { table: 'drivers', col: 'profile_id' },
+  { table: 'load_events', col: 'created_by' },
+  { table: 'documents', col: 'uploaded_by' },
+  { table: 'customer_contacts', col: 'portal_profile_id' },
+  { table: 'service_logs', col: 'logged_by' },
+  { table: 'vehicle_documents', col: 'uploaded_by' },
+  { table: 'org_documents', col: 'uploaded_by' },
+  { table: 'driver_documents', col: 'uploaded_by' },
+  { table: 'fuel_stops', col: 'logged_by' },
+  { table: 'load_expenses', col: 'logged_by' },
+  { table: 'driver_messages', col: 'sender_id' },
+  { table: 'driver_settlements', col: 'created_by' },
+  { table: 'admin_notes', col: 'admin_id' },
+  { table: 'admin_events', col: 'admin_id' },
+  { table: 'org_flag_overrides', col: 'set_by' },
+]
+
 export async function cleanupTestOrg(admin: SupabaseClient<Database>, orgId: number) {
-  // Order matters — found two real FK blockers the hard way, not guessed:
-  // 1. `drivers.profile_id` has NO cascade from profiles -> drivers first.
-  // 2. `load_events.created_by` ALSO has no cascade from profiles, so a
-  //    profile that ever PATCHed a load's status (which logs a load_event)
-  //    can't be deleted while those events exist. `load_events.load_id`
-  //    DOES cascade from loads, so deleting this org's loads directly
-  //    (before deleting profiles) clears load_events as a side effect.
-  // Only once profiles are gone is `organizations` safe to delete (which
-  // cascades whatever's left: vehicles/invoices/carrier_details/etc).
-  // NOTE: other profiles(id)-referencing "actor" columns exist elsewhere
-  // (admin_notes.admin_id, admin_events.admin_id, org_flag_overrides.set_by)
-  // — not hit by this test suite's current scope (regular tenant users,
-  // not ShipmentX admins), but the same class of bug if that changes.
+  // dvir_inspections/ifta_state_crossings/driver_settlements/fuel_stops all
+  // have "no action" FKs to drivers AND loads (confirmed via pg_constraint)
+  // — left in place, they block deleting this org's drivers/loads below.
+  for (const table of ORG_SCOPED_BLOCKERS) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (admin.from(table as any).delete().eq('carrier_org_id', orgId) as any)
+  }
+  // invoices_load_id_fkey / invoices_customer_org_id_fkey are both "no
+  // action" — clear both directions (this org as carrier is cascade-safe,
+  // but as the *customer* on someone else's invoice it isn't).
+  await admin.from('invoices').delete().eq('carrier_org_id', orgId)
+  await admin.from('invoices').delete().eq('customer_org_id', orgId)
+  // documents_carrier_org_id_fkey / customer_contacts' two FKs are also "no
+  // action" from organizations.
+  await admin.from('documents').delete().eq('carrier_org_id', orgId)
+  await admin.from('customer_contacts').delete().eq('carrier_org_id', orgId)
+  await admin.from('customer_contacts').delete().eq('org_id', orgId)
+  // customer_details.carrier_org_id has NO cascade (only org_id does) — a
+  // 'customer'-type org can be referenced by another org's row via
+  // carrier_org_id, which blocks deleting the referenced org otherwise.
+  await admin.from('customer_details').delete().eq('org_id', orgId)
+  await admin.from('customer_details').delete().eq('carrier_org_id', orgId)
+
   await admin.from('drivers').delete().eq('carrier_org_id', orgId)
+  // loads_customer_org_id_fkey is "no action" — this org can appear as the
+  // *customer* on another carrier's load, not just as the carrier itself.
   await admin.from('loads').delete().eq('carrier_org_id', orgId)
+  await admin.from('loads').delete().eq('customer_org_id', orgId)
 
   const { data: remainingProfiles } = await admin.from('profiles').select('id').eq('org_id', orgId)
+  const profileIds = (remainingProfiles ?? []).map((p) => p.id)
+  if (profileIds.length > 0) {
+    for (const { table, col } of PROFILE_REFERENCING_TABLES) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (admin.from(table as any).delete().in(col, profileIds) as any)
+    }
+  }
   for (const p of remainingProfiles ?? []) {
     await admin.auth.admin.deleteUser(p.id).catch(() => {})
   }
+  // Delete the profiles row directly too — a profile whose auth user was
+  // already removed (e.g. a prior partial cleanup) would otherwise survive
+  // deleteUser's no-op and block the organizations delete below.
+  await admin.from('profiles').delete().eq('org_id', orgId)
   const { error: orgDeleteErr } = await admin.from('organizations').delete().eq('id', orgId)
   if (orgDeleteErr) {
     // Surface cleanup failures loudly instead of silently leaving test data
