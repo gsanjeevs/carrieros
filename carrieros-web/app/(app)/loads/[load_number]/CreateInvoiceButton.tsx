@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { createInvoiceForLoad } from '@/app/(app)/invoices/actions'
+import { Card, CardHeader, CardBody, Button } from '@/components/ui'
 
 interface Props {
   loadId: number
@@ -35,17 +36,19 @@ export default function CreateInvoiceButton({
 
   if (existingInvoiceNumber) {
     return (
-      <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-        <h2 className="text-white font-medium text-sm mb-3">{t('billing')}</h2>
-        <p className="text-slate-400 text-sm mb-3">{t('loadAlreadyInvoiced')}</p>
-        <Link
-          href={`/invoices/${existingInvoiceNumber}`}
-          className="w-full flex items-center justify-center gap-2 py-2.5 bg-white/5 hover:bg-white/10 text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-        >
-          <span className="material-symbols-outlined text-[18px]">receipt_long</span>
-          {existingInvoiceNumber}
-        </Link>
-      </div>
+      <Card>
+        <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('billing')}</h2></CardHeader>
+        <CardBody>
+          <p className="text-text-sec text-sm mb-3">{t('loadAlreadyInvoiced')}</p>
+          <Link
+            href={`/invoices/${existingInvoiceNumber}`}
+            className="w-full flex items-center justify-center gap-2 py-2.5 bg-surface-subtle hover:bg-surface-subtle/70 text-text-pri text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+          >
+            <span className="material-symbols-outlined text-[18px]">receipt_long</span>
+            {existingInvoiceNumber}
+          </Link>
+        </CardBody>
+      </Card>
     )
   }
 
@@ -67,25 +70,23 @@ export default function CreateInvoiceButton({
   }
 
   return (
-    <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-      <h2 className="text-white font-medium text-sm mb-3">{t('billing')}</h2>
-      <p className="text-slate-400 text-sm mb-1">
-        {t('createInvoicePrefill', { amount: amountLabel, customer: customerName ?? '—' })}
-      </p>
-      <p className="text-slate-500 text-xs mb-3">{t('createInvoiceNetTerms')}</p>
-      <button
-        onClick={create}
-        disabled={pending}
-        className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-      >
-        <span className="material-symbols-outlined text-[18px]">receipt_long</span>
-        {pending ? t('creating') : t('createInvoice')}
-      </button>
-      {error && (
-        <div className="mt-3 rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2.5 text-red-400 text-xs">
-          {error}
-        </div>
-      )}
-    </div>
+    <Card>
+      <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('billing')}</h2></CardHeader>
+      <CardBody>
+        <p className="text-text-sec text-sm mb-1">
+          {t('createInvoicePrefill', { amount: amountLabel, customer: customerName ?? '—' })}
+        </p>
+        <p className="text-text-mut text-xs mb-3">{t('createInvoiceNetTerms')}</p>
+        <Button onClick={create} disabled={pending} loading={pending} className="w-full py-2.5">
+          <span className="material-symbols-outlined text-[18px]">receipt_long</span>
+          {pending ? t('creating') : t('createInvoice')}
+        </Button>
+        {error && (
+          <div className="mt-3 rounded-lg bg-danger/10 border border-danger/20 px-3 py-2.5 text-danger text-xs">
+            {error}
+          </div>
+        )}
+      </CardBody>
+    </Card>
   )
 }

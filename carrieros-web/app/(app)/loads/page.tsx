@@ -6,7 +6,7 @@ import { getTranslations, getLocale } from 'next-intl/server'
 import { formatMoney } from '@/lib/format-money'
 import { toDate } from '@/lib/format-datetime'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
-import StatusBadge from '@/components/ui/StatusBadge'
+import { Card, EmptyState, Input, StatusBadge } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { INVOICE_ROLES } from '@/lib/roles-policy'
 
@@ -15,7 +15,7 @@ type LoadGroupKey = 'needs_dispatch' | 'in_progress' | 'completed' | 'cancelled'
 const GROUPS: { key: LoadGroupKey; statuses: string[]; labelKey: string; accent: string }[] = [
   { key: 'needs_dispatch', statuses: ['draft', 'scheduled'], labelKey: 'groupNeedsDispatch', accent: 'border-l-[3px] border-l-[#f97316]' },
   { key: 'in_progress', statuses: ['dispatched', 'picked_up', 'in_transit'], labelKey: 'groupInProgress', accent: 'border-l-[3px] border-l-blue-500/60' },
-  { key: 'completed', statuses: ['delivered', 'invoiced', 'paid'], labelKey: 'groupCompleted', accent: 'border-l-[3px] border-l-white/10' },
+  { key: 'completed', statuses: ['delivered', 'invoiced', 'paid'], labelKey: 'groupCompleted', accent: 'border-l-[3px] border-l-border-ui' },
   { key: 'cancelled', statuses: ['cancelled'], labelKey: 'groupCancelled', accent: 'border-l-[3px] border-l-rose-500/40' },
   { key: 'declined', statuses: ['declined'], labelKey: 'groupDeclined', accent: 'border-l-[3px] border-l-rose-500/40' },
 ]
@@ -76,12 +76,12 @@ export default async function LoadsPage({
         <div className="flex items-center gap-3">
           {showRate && (
             <form action="/api/loads/export" method="get" className="flex items-center gap-2">
-              <input type="date" name="from" aria-label={t('exportFrom')} className="bg-white/5 border border-white/10 rounded-lg px-2.5 py-2 text-white text-xs focus:outline-none focus:ring-2 focus:ring-brand-orange/50" />
-              <span className="text-slate-500 text-xs">–</span>
-              <input type="date" name="to" aria-label={t('exportTo')} className="bg-white/5 border border-white/10 rounded-lg px-2.5 py-2 text-white text-xs focus:outline-none focus:ring-2 focus:ring-brand-orange/50" />
+              <Input type="date" name="from" size="sm" aria-label={t('exportFrom')} />
+              <span className="text-text-sec text-xs">–</span>
+              <Input type="date" name="to" size="sm" aria-label={t('exportTo')} />
               <button
                 type="submit"
-                className="flex items-center gap-1.5 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/8 text-white text-xs font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+                className="flex items-center gap-1.5 px-3 py-2 bg-surface-subtle hover:bg-surface-subtle/70 border border-border-ui text-text-pri text-xs font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
                 title={t('exportCsvHelp')}
               >
                 <span className="material-symbols-outlined text-[16px]">download</span>
@@ -107,17 +107,18 @@ export default async function LoadsPage({
       )}
 
       {!loads || (loads.length === 0 && !activeGroup) ? (
-        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-card-dark">
-          <span className="material-symbols-outlined text-slate-600 text-4xl">local_shipping</span>
-          <p className="text-slate-500 text-sm mt-3">{t('noLoadsYet')}</p>
-          <Link
-            href="/loads/new"
-            className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-          >
-            <span className="material-symbols-outlined text-[16px]">add</span>
-            {t('createFirstLoad')}
-          </Link>
-        </div>
+        <Card>
+          <div className="flex flex-col items-center pb-8">
+            <EmptyState icon="local_shipping" title={t('noLoadsYet')} />
+            <Link
+              href="/loads/new"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+            >
+              <span className="material-symbols-outlined text-[16px]">add</span>
+              {t('createFirstLoad')}
+            </Link>
+          </div>
+        </Card>
       ) : (
         <>
           <div className="flex flex-wrap items-center gap-2 mb-6">
@@ -126,7 +127,7 @@ export default async function LoadsPage({
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
                 !activeGroup
                   ? 'bg-[#f97316] text-white'
-                  : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200'
+                  : 'bg-surface-subtle text-text-sec hover:bg-surface-subtle/70 hover:text-text-pri'
               }`}
             >
               {t('filterAll')}
@@ -138,7 +139,7 @@ export default async function LoadsPage({
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
                   activeGroup?.key === group.key
                     ? 'bg-[#f97316] text-white'
-                    : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200'
+                    : 'bg-surface-subtle text-text-sec hover:bg-surface-subtle/70 hover:text-text-pri'
                 }`}
               >
                 {t(group.labelKey)}
@@ -147,10 +148,9 @@ export default async function LoadsPage({
           </div>
 
           {loads.length === 0 && activeGroup && (
-            <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-card-dark">
-              <span className="material-symbols-outlined text-slate-600 text-4xl">local_shipping</span>
-              <p className="text-slate-500 text-sm mt-3">{t('noLoadsInGroup')}</p>
-            </div>
+            <Card>
+              <EmptyState icon="local_shipping" title={t('noLoadsInGroup')} />
+            </Card>
           )}
 
           <div className="space-y-8">
@@ -160,7 +160,7 @@ export default async function LoadsPage({
 
               return (
                 <div key={group.key}>
-                  <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
+                  <h2 className="text-xs font-semibold text-text-sec uppercase tracking-wide mb-3">
                     {t(group.labelKey)} ({groupLoads.length})
                   </h2>
                   <div className="space-y-2">
@@ -172,49 +172,40 @@ export default async function LoadsPage({
                         [load.delivery_city, load.delivery_state].filter(Boolean).join(', ')
 
                       return (
-                        <div
-                          key={load.id}
-                          className={`bg-white/5 border border-white/8 ${group.accent} rounded-xl px-5 py-4 shadow-card-dark hover:bg-white/[0.07] transition-colors duration-150 flex items-center justify-between gap-4`}
-                        >
-                          <div className="flex items-center gap-4 min-w-0 flex-1">
-                            <Link
-                              href={`/loads/${load.load_number}`}
-                              className="text-white font-medium hover:text-[#f97316] transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50 shrink-0"
-                            >
-                              {load.load_number}
-                            </Link>
-                            <span className="shrink-0">
-                              <StatusBadge variant={loadStatusVariant(statusKey)} size="sm">
-                                {statusLabel(statusKey)}
-                              </StatusBadge>
-                            </span>
-                            <span className="text-slate-300 text-sm truncate">{route}</span>
-                          </div>
-
-                          <div className="flex items-center gap-6 shrink-0">
-                            <span className="text-slate-400 text-sm hidden sm:inline">
-                              {load.pickup_date
-                                ? toDate(load.pickup_date).toLocaleDateString(locale, { month: 'short', day: 'numeric' })
-                                : '—'}
-                            </span>
-                            <span className="text-slate-400 text-sm max-w-[160px] truncate hidden md:inline">
-                              {load.customer_name_raw ?? '—'}
-                            </span>
-                            {showRate && (
-                              <span className="text-white font-medium text-sm">
-                                {formatMoney(load.rate, 'USD', locale)}
+                        <Link key={load.id} href={`/loads/${load.load_number}`} className="block">
+                          <Card variant="interactive" className={`${group.accent} px-5 py-4 flex items-center justify-between gap-4`}>
+                            <div className="flex items-center gap-4 min-w-0 flex-1">
+                              <span className="text-text-pri font-medium shrink-0">{load.load_number}</span>
+                              <span className="shrink-0">
+                                <StatusBadge variant={loadStatusVariant(statusKey)} size="sm">
+                                  {statusLabel(statusKey)}
+                                </StatusBadge>
                               </span>
-                            )}
-                            {group.key === 'needs_dispatch' && (
-                              <Link
-                                href={`/loads/${load.load_number}`}
-                                className="flex items-center gap-1 px-3 py-1.5 bg-[#f97316]/10 hover:bg-[#f97316]/20 text-[#f97316] text-xs font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-                              >
-                                {t('dispatchAction')}
-                              </Link>
-                            )}
-                          </div>
-                        </div>
+                              <span className="text-text-sec text-sm truncate">{route}</span>
+                            </div>
+
+                            <div className="flex items-center gap-6 shrink-0">
+                              <span className="text-text-mut text-sm hidden sm:inline">
+                                {load.pickup_date
+                                  ? toDate(load.pickup_date).toLocaleDateString(locale, { month: 'short', day: 'numeric' })
+                                  : '—'}
+                              </span>
+                              <span className="text-text-mut text-sm max-w-[160px] truncate hidden md:inline">
+                                {load.customer_name_raw ?? '—'}
+                              </span>
+                              {showRate && (
+                                <span className="text-text-pri font-medium text-sm">
+                                  {formatMoney(load.rate, 'USD', locale)}
+                                </span>
+                              )}
+                              {group.key === 'needs_dispatch' && (
+                                <span className="flex items-center gap-1 px-3 py-1.5 bg-[#f97316]/10 text-[#f97316] text-xs font-semibold rounded-lg">
+                                  {t('dispatchAction')}
+                                </span>
+                              )}
+                            </div>
+                          </Card>
+                        </Link>
                       )
                     })}
                   </div>

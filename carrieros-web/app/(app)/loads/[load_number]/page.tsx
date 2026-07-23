@@ -14,7 +14,7 @@ import { formatDateTime, toDate } from '@/lib/format-datetime'
 import { formatMoney } from '@/lib/format-money'
 import CreateInvoiceButton from './CreateInvoiceButton'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
-import StatusBadge from '@/components/ui/StatusBadge'
+import { Card, CardHeader, CardBody, StatusBadge } from '@/components/ui'
 
 const STATUS_FLOW_KEYS = [
   { key: 'draft',      icon: 'draft' },
@@ -34,9 +34,9 @@ function fmt(date: string | null, locale: string) {
 
 function InfoRow({ label, value }: { label: string; value: string | number | null | undefined }) {
   return (
-    <div className="flex justify-between items-start py-2.5 border-b border-white/5 last:border-0">
-      <span className="text-slate-500 text-sm">{label}</span>
-      <span className="text-white text-sm text-right ml-4">{value ?? '—'}</span>
+    <div className="flex justify-between items-start py-2.5 border-b border-divider-ui last:border-0">
+      <span className="text-text-sec text-sm">{label}</span>
+      <span className="text-text-pri text-sm text-right ml-4">{value ?? '—'}</span>
     </div>
   )
 }
@@ -61,6 +61,7 @@ export default async function LoadDetailPage({
   if (!profile?.org_id) redirect('/onboarding')
 
   const t = await getTranslations('loads')
+  const now = new Date()
   const locale = await getLocale()
 
   const STATUS_FLOW = STATUS_FLOW_KEYS.map((s) => ({ ...s, label: t(`status_${s.key}`) }))
@@ -197,10 +198,10 @@ export default async function LoadDetailPage({
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-3">
-          <Link href="/loads" className="text-slate-500 hover:text-white transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
+          <Link href="/loads" className="text-text-sec hover:text-text-pri transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
             <span className="material-symbols-outlined text-[20px]">arrow_back</span>
           </Link>
-          <h1 className="text-2xl font-semibold text-white">{load.load_number}</h1>
+          <h1 className="text-2xl font-semibold text-text-pri">{load.load_number}</h1>
           <StatusBadge variant={loadStatusVariant((load.status ?? 'draft') as LoadStatus)}>
             {load.status ? t(`status_${load.status}` as never) : t('status_draft' as never)}
           </StatusBadge>
@@ -210,16 +211,16 @@ export default async function LoadDetailPage({
         <div className="flex items-center gap-3 ml-9">
           <div className="flex items-center gap-2 min-w-0">
             <span className="w-2 h-2 rounded-full bg-[#f97316] shrink-0" />
-            <span className="text-white text-sm font-medium truncate">
+            <span className="text-text-pri text-sm font-medium truncate">
               {[load.pickup_city, load.pickup_state].filter(Boolean).join(', ') || '—'}
             </span>
           </div>
           <div className="flex-1 h-px bg-white/10 min-w-[24px] max-w-[80px]" />
-          <span className="material-symbols-outlined text-slate-600 text-[16px] -mx-1 shrink-0">arrow_forward</span>
+          <span className="material-symbols-outlined text-text-mut text-[16px] -mx-1 shrink-0">arrow_forward</span>
           <div className="flex-1 h-px bg-white/10 min-w-[24px] max-w-[80px]" />
           <div className="flex items-center gap-2 min-w-0">
             <span className="w-2 h-2 rounded-full bg-[#1abc9c] shrink-0" />
-            <span className="text-white text-sm font-medium truncate">
+            <span className="text-text-pri text-sm font-medium truncate">
               {[load.delivery_city, load.delivery_state].filter(Boolean).join(', ') || '—'}
             </span>
           </div>
@@ -228,12 +229,14 @@ export default async function LoadDetailPage({
 
       {/* Hero rate card */}
       {showRate && (
-        <div className="bg-white/5 border border-white/8 rounded-xl p-6 mb-6 shadow-card-dark flex flex-col items-center text-center">
-          <p className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold mb-1">{t('rateHero')}</p>
-          <p className="text-4xl font-extrabold text-brand-orange">
-            {load.rate != null ? formatMoney(load.rate, carrierOrg?.currency ?? 'USD', locale) : '—'}
-          </p>
-        </div>
+        <Card className="mb-6">
+          <CardBody className="flex flex-col items-center text-center">
+            <p className="text-[11px] uppercase tracking-wider text-text-sec font-semibold mb-1">{t('rateHero')}</p>
+            <p className="text-4xl font-extrabold text-brand-orange">
+              {load.rate != null ? formatMoney(load.rate, carrierOrg?.currency ?? 'USD', locale) : '—'}
+            </p>
+          </CardBody>
+        </Card>
       )}
 
       {/* Action grid */}
@@ -242,7 +245,8 @@ export default async function LoadDetailPage({
       </div>
 
       {/* Status timeline */}
-      <div className="bg-white/5 border border-white/8 rounded-xl p-5 mb-6 shadow-card-dark">
+      <Card className="mb-6">
+        <CardBody>
         <div className={`flex items-center gap-0 overflow-x-auto ${(isCancelled || isDeclined) ? 'opacity-40 grayscale' : ''}`}>
           {STATUS_FLOW.map((s, i) => {
             const done    = !isCancelled && !isDeclined && i < currentIdx
@@ -252,14 +256,14 @@ export default async function LoadDetailPage({
                 <div className="flex flex-col items-center gap-1 shrink-0">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center transition ${
                     current ? 'bg-[#f97316] ring-2 ring-[#f97316]/30' :
-                    done    ? 'bg-[#f97316]/20' : 'bg-white/5'
+                    done    ? 'bg-[#f97316]/20' : 'bg-surface-subtle'
                   }`}>
                     <span className={`material-symbols-outlined text-[16px] ${
-                      current ? 'text-white' : done ? 'text-[#f97316]' : 'text-slate-600'
+                      current ? 'text-white' : done ? 'text-[#f97316]' : 'text-text-mut'
                     }`}>{s.icon}</span>
                   </div>
                   <span className={`text-[10px] font-medium whitespace-nowrap ${
-                    current ? 'text-[#f97316]' : done ? 'text-slate-400' : 'text-slate-600'
+                    current ? 'text-[#f97316]' : done ? 'text-text-sec' : 'text-text-mut'
                   }`}>{s.label}</span>
                 </div>
                 {i < STATUS_FLOW.length - 1 && (
@@ -270,7 +274,7 @@ export default async function LoadDetailPage({
           })}
         </div>
         {isCancelled && (
-          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-white/8">
+          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-divider-ui">
             <span className="material-symbols-outlined text-[18px] text-rose-400">cancel</span>
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400">
               {t('cancelledEndState')}
@@ -278,14 +282,15 @@ export default async function LoadDetailPage({
           </div>
         )}
         {isDeclined && (
-          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-white/8">
+          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-divider-ui">
             <span className="material-symbols-outlined text-[18px] text-rose-400">block</span>
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400">
               {t('declinedEndState')}
             </span>
           </div>
         )}
-      </div>
+        </CardBody>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
@@ -293,33 +298,37 @@ export default async function LoadDetailPage({
         <div className="lg:col-span-2 space-y-6">
 
           {/* Route */}
-          <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-            <h2 className="text-white font-medium text-sm mb-4">{t('route')}</h2>
+          <Card>
+            <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('route')}</h2></CardHeader>
+            <CardBody>
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <p className="text-[10px] uppercase tracking-wider text-[#f97316] font-semibold mb-2">{t('pickup')}</p>
-                <p className="text-white text-sm font-medium">{load.pickup_address ?? '—'}</p>
-                <p className="text-slate-400 text-sm">{[load.pickup_city, load.pickup_state, load.pickup_zip].filter(Boolean).join(', ')}</p>
-                <p className="text-slate-500 text-xs mt-2">{fmt(load.pickup_date, locale)}{load.pickup_time ? ` · ${load.pickup_time}` : ''}</p>
+                <p className="text-text-pri text-sm font-medium">{load.pickup_address ?? '—'}</p>
+                <p className="text-text-sec text-sm">{[load.pickup_city, load.pickup_state, load.pickup_zip].filter(Boolean).join(', ')}</p>
+                <p className="text-text-mut text-xs mt-2">{fmt(load.pickup_date, locale)}{load.pickup_time ? ` · ${load.pickup_time}` : ''}</p>
               </div>
               <div>
                 <p className="text-[10px] uppercase tracking-wider text-[#1abc9c] font-semibold mb-2">{t('delivery')}</p>
-                <p className="text-white text-sm font-medium">{load.delivery_address ?? '—'}</p>
-                <p className="text-slate-400 text-sm">{[load.delivery_city, load.delivery_state, load.delivery_zip].filter(Boolean).join(', ')}</p>
-                <p className="text-slate-500 text-xs mt-2">{fmt(load.delivery_date, locale)}{load.delivery_time ? ` · ${load.delivery_time}` : ''}</p>
+                <p className="text-text-pri text-sm font-medium">{load.delivery_address ?? '—'}</p>
+                <p className="text-text-sec text-sm">{[load.delivery_city, load.delivery_state, load.delivery_zip].filter(Boolean).join(', ')}</p>
+                <p className="text-text-mut text-xs mt-2">{fmt(load.delivery_date, locale)}{load.delivery_time ? ` · ${load.delivery_time}` : ''}</p>
               </div>
             </div>
-          </div>
+            </CardBody>
+          </Card>
 
           {/* Load info */}
-          <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-            <h2 className="text-white font-medium text-sm mb-3">{t('loadDetails')}</h2>
+          <Card>
+            <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('loadDetails')}</h2></CardHeader>
+            <CardBody>
             <InfoRow label={t('customer')}  value={customerName ?? load.customer_name_raw} />
             <InfoRow label={t('commodity')} value={load.commodity} />
             <InfoRow label={t('weight')}    value={load.weight_lbs ? `${Number(load.weight_lbs).toLocaleString()} lbs` : null} />
             <InfoRow label={t('miles')}     value={load.total_miles ? `${load.total_miles} mi` : null} />
             <InfoRow label={t('intake')}    value={load.intake_method} />
-          </div>
+            </CardBody>
+          </Card>
 
           {/* Documents */}
           <div id="documents">
@@ -359,10 +368,11 @@ export default async function LoadDetailPage({
           )}
 
           {/* Timeline */}
-          <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-            <h2 className="text-white font-medium text-sm mb-4">{t('activity')}</h2>
+          <Card>
+            <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('activity')}</h2></CardHeader>
+            <CardBody>
             {!events || events.length === 0 ? (
-              <p className="text-slate-500 text-sm">{t('noActivityYet')}</p>
+              <p className="text-text-sec text-sm">{t('noActivityYet')}</p>
             ) : (
               <div className="space-y-3">
                 {events.map((e) => {
@@ -373,10 +383,10 @@ export default async function LoadDetailPage({
                     <div key={e.id} className="flex gap-3">
                       <div className="w-1.5 h-1.5 rounded-full bg-[#f97316] mt-2 shrink-0" />
                       <div>
-                        <p className="text-white text-sm">{e.event_type.replace(/_/g, ' ')}</p>
-                        {e.note && <p className="text-slate-400 text-xs mt-0.5">{e.note}</p>}
-                        <p className="text-slate-600 text-xs mt-0.5">
-                          {actor} · {new Date(e.created_at ?? Date.now()).toLocaleString(locale, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                        <p className="text-text-pri text-sm">{e.event_type.replace(/_/g, ' ')}</p>
+                        {e.note && <p className="text-text-sec text-xs mt-0.5">{e.note}</p>}
+                        <p className="text-text-mut text-xs mt-0.5">
+                          {actor} · {new Date(e.created_at ?? now).toLocaleString(locale, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                         </p>
                       </div>
                     </div>
@@ -384,26 +394,28 @@ export default async function LoadDetailPage({
                 })}
               </div>
             )}
-          </div>
+            </CardBody>
+          </Card>
         </div>
 
         {/* Right: Dispatch panel */}
         <div className="space-y-6">
-          <div id="assignment" className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark scroll-mt-6">
-            <h2 className="text-white font-medium text-sm mb-4">{t('assignment')}</h2>
+          <Card id="assignment" className="scroll-mt-6">
+            <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('assignment')}</h2></CardHeader>
+            <CardBody>
             <div className="space-y-3 mb-4">
               <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-slate-500 text-[20px]">person</span>
+                <span className="material-symbols-outlined text-text-sec text-[20px]">person</span>
                 <div>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider">{t('driver')}</p>
-                  <p className="text-white text-sm">{driverName ?? t('unassigned')}</p>
+                  <p className="text-[10px] text-text-sec uppercase tracking-wider">{t('driver')}</p>
+                  <p className="text-text-pri text-sm">{driverName ?? t('unassigned')}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-slate-500 text-[20px]">local_shipping</span>
+                <span className="material-symbols-outlined text-text-sec text-[20px]">local_shipping</span>
                 <div>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider">{t('truck')}</p>
-                  <p className="text-white text-sm">{vehicleLabel ?? t('unassigned')}</p>
+                  <p className="text-[10px] text-text-sec uppercase tracking-wider">{t('truck')}</p>
+                  <p className="text-text-pri text-sm">{vehicleLabel ?? t('unassigned')}</p>
                 </div>
               </div>
             </div>
@@ -418,7 +430,8 @@ export default async function LoadDetailPage({
                 orgId={profile.org_id}
               />
             )}
-          </div>
+            </CardBody>
+          </Card>
 
           {canBill && (
             <CreateInvoiceButton
