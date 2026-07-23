@@ -13,7 +13,7 @@ import { formatDate } from '@/lib/format-datetime'
 import { formatMoney } from '@/lib/format-money'
 import { hasFeature } from '@/lib/entitlements'
 import { settlementStatusVariant, type SettlementStatus } from '@/lib/domain/settlement-status'
-import StatusBadge from '@/components/ui/StatusBadge'
+import { Card, StatusBadge, Table, TableHeaderCell, TableRow, TableCell, EmptyState } from '@/components/ui'
 import RunSettlementButton from './RunSettlementButton'
 import SendAchButton from './SendAchButton'
 
@@ -46,11 +46,10 @@ export default async function SettlementsPage() {
   if (isStaff && !entitled) {
     return (
       <div className="p-8">
-        <h1 className="text-2xl font-semibold text-white mb-4">{t('title')}</h1>
-        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-card-dark">
-          <span className="material-symbols-outlined text-slate-600 text-4xl">payments</span>
-          <p className="text-slate-400 text-sm mt-3">{t('upgradeRequired')}</p>
-        </div>
+        <h1 className="text-2xl font-semibold text-text-pri mb-4">{t('title')}</h1>
+        <Card>
+          <EmptyState icon="payments" title={t('upgradeRequired')} />
+        </Card>
       </div>
     )
   }
@@ -83,71 +82,70 @@ export default async function SettlementsPage() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">{t('title')}</h1>
-          <p className="text-slate-400 text-sm mt-1">{t('settlementCount', { count: settlements.length })}</p>
+          <h1 className="text-2xl font-semibold text-text-pri">{t('title')}</h1>
+          <p className="text-text-sec text-sm mt-1">{t('settlementCount', { count: settlements.length })}</p>
         </div>
         {isStaff && <RunSettlementButton drivers={driversForForm} />}
       </div>
 
       {settlements.length === 0 ? (
-        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-card-dark">
-          <span className="material-symbols-outlined text-slate-600 text-4xl">payments</span>
-          <p className="text-slate-500 text-sm mt-3">{t('noSettlementsYet')}</p>
-        </div>
+        <Card>
+          <EmptyState icon="payments" title={t('noSettlementsYet')} />
+        </Card>
       ) : (
-        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
-          <table className="w-full text-sm">
+        <Card>
+          <Table>
             <thead>
-              <tr className="border-b border-white/5">
-                {isStaff && <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('colDriver')}</th>}
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('colPeriod')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('colMethod')}</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('colGross')}</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('colNet')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('colStatus')}</th>
-                {isStaff && <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide"></th>}
+              <tr>
+                {isStaff && <TableHeaderCell>{t('colDriver')}</TableHeaderCell>}
+                <TableHeaderCell>{t('colPeriod')}</TableHeaderCell>
+                <TableHeaderCell>{t('colMethod')}</TableHeaderCell>
+                <TableHeaderCell numeric>{t('colGross')}</TableHeaderCell>
+                <TableHeaderCell numeric>{t('colNet')}</TableHeaderCell>
+                <TableHeaderCell>{t('colStatus')}</TableHeaderCell>
+                {isStaff && <TableHeaderCell></TableHeaderCell>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody>
               {settlements.map((s) => {
                 const driverName = s.drivers
                   ? [s.drivers.profiles?.first_name, s.drivers.profiles?.last_name].filter(Boolean).join(' ') || s.drivers.driver_number
                   : '—'
                 const status = (s.payment_status ?? 'pending') as SettlementStatus
                 return (
-                  <tr key={s.id} className="hover:bg-white/[0.07] transition-colors duration-150">
-                    {isStaff && <td className="px-5 py-3.5 text-white font-medium">{driverName}</td>}
-                    <td className="px-4 py-3.5 text-slate-300">
+                  <TableRow key={s.id}>
+                    {isStaff && <TableCell className="font-medium text-text-pri">{driverName}</TableCell>}
+                    <TableCell>
                       {s.period_start && s.period_end
                         ? `${formatDate(s.period_start, profile)} – ${formatDate(s.period_end, profile)}`
                         : '—'}
-                    </td>
-                    <td className="px-4 py-3.5 text-slate-400">
+                    </TableCell>
+                    <TableCell>
                       {t(`payMethod_${s.pay_method}` as never)}
                       {s.rate_value != null && s.pay_method === 'percent_of_rate' && ` (${s.rate_value}%)`}
                       {s.rate_value != null && s.pay_method === 'per_mile' && ` ($${s.rate_value}/mi)`}
                       {s.rate_value != null && s.pay_method === 'flat_per_load' && ` ($${s.rate_value}/load)`}
-                    </td>
-                    <td className="px-4 py-3.5 text-right text-slate-300">{formatMoney(s.gross_revenue, 'USD', locale)}</td>
-                    <td className="px-4 py-3.5 text-right text-white font-medium">{formatMoney(s.net_pay, 'USD', locale)}</td>
-                    <td className="px-4 py-3.5">
+                    </TableCell>
+                    <TableCell numeric>{formatMoney(s.gross_revenue, 'USD', locale)}</TableCell>
+                    <TableCell numeric className="font-medium text-text-pri">{formatMoney(s.net_pay, 'USD', locale)}</TableCell>
+                    <TableCell>
                       <StatusBadge variant={settlementStatusVariant(status)} size="sm">
                         {t(`status_${status}`)}
                       </StatusBadge>
-                    </td>
+                    </TableCell>
                     {isStaff && (
-                      <td className="px-4 py-3.5">
+                      <TableCell>
                         {status === 'pending' && (
                           <SendAchButton settlementId={s.id} entitled={achEntitled} />
                         )}
-                      </td>
+                      </TableCell>
                     )}
-                  </tr>
+                  </TableRow>
                 )
               })}
             </tbody>
-          </table>
-        </div>
+          </Table>
+        </Card>
       )}
     </div>
   )

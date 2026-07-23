@@ -8,6 +8,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { Button, Input, Modal } from '@/components/ui'
 
 interface DriverOption {
   id: number
@@ -70,84 +71,78 @@ export default function RunSettlementButton({ drivers }: { drivers: DriverOption
     }
   }
 
-  const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#f97316] transition'
-  const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
+  const labelCls = 'block text-xs font-medium text-text-sec mb-1.5'
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-      >
+      <Button onClick={() => setOpen(true)}>
         <span className="material-symbols-outlined text-[18px]">add</span>
         {t('runSettlement')}
-      </button>
+      </Button>
 
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
-          <div className="w-full max-w-md bg-[#0f1923] border border-white/10 rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-white font-semibold text-lg">{t('runSettlement')}</h2>
-              <button onClick={close} className="text-slate-500 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 rounded">
-                <span className="material-symbols-outlined text-[20px]">close</span>
-              </button>
+      <Modal
+        open={open}
+        onClose={close}
+        title={t('runSettlement')}
+        className="max-h-[90vh] overflow-y-auto"
+        footer={
+          configuredDrivers.length === 0 ? (
+            <Button variant="secondary" size="sm" onClick={close}>
+              {tCommon('cancel')}
+            </Button>
+          ) : (
+            <>
+              <Button variant="secondary" size="sm" onClick={close} disabled={loading}>
+                {tCommon('cancel')}
+              </Button>
+              <Button
+                size="sm"
+                onClick={submit}
+                disabled={loading || !driverId || !periodStart || !periodEnd || !!selectedNotConfigured}
+                loading={loading}
+              >
+                {loading ? t('running') : t('runSettlement')}
+              </Button>
+            </>
+          )
+        }
+      >
+        {configuredDrivers.length === 0 ? (
+          <p className="text-text-sec text-sm">{t('noDriversConfigured')}</p>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <label className={labelCls}>{t('driver')}</label>
+              <Input as="select" value={driverId} onChange={(e) => setDriverId(e.target.value)}>
+                <option value="">{tCommon('selectPlaceholder')}</option>
+                {drivers.map((d) => (
+                  <option key={d.id} value={d.id} disabled={!(d.settlementType && d.settlementRate != null)}>
+                    {d.label}{!(d.settlementType && d.settlementRate != null) ? ` (${t('notConfigured')})` : ''}
+                  </option>
+                ))}
+              </Input>
+              {selectedNotConfigured && <p className="text-warning text-xs mt-1.5">{t('driverNotConfiguredHint')}</p>}
             </div>
 
-            {configuredDrivers.length === 0 ? (
-              <p className="text-slate-400 text-sm">{t('noDriversConfigured')}</p>
-            ) : (
-              <div className="space-y-4">
-                <div>
-                  <label className={labelCls}>{t('driver')}</label>
-                  <select className={inputCls} value={driverId} onChange={(e) => setDriverId(e.target.value)}>
-                    <option value="">{tCommon('selectPlaceholder')}</option>
-                    {drivers.map((d) => (
-                      <option key={d.id} value={d.id} disabled={!(d.settlementType && d.settlementRate != null)}>
-                        {d.label}{!(d.settlementType && d.settlementRate != null) ? ` (${t('notConfigured')})` : ''}
-                      </option>
-                    ))}
-                  </select>
-                  {selectedNotConfigured && <p className="text-amber-400 text-xs mt-1.5">{t('driverNotConfiguredHint')}</p>}
-                </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={labelCls}>{t('periodStart')}</label>
+                <Input type="date" value={periodStart} onChange={(e) => setPeriodStart(e.target.value)} />
+              </div>
+              <div>
+                <label className={labelCls}>{t('periodEnd')}</label>
+                <Input type="date" value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} />
+              </div>
+            </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className={labelCls}>{t('periodStart')}</label>
-                    <input type="date" className={inputCls} value={periodStart} onChange={(e) => setPeriodStart(e.target.value)} />
-                  </div>
-                  <div>
-                    <label className={labelCls}>{t('periodEnd')}</label>
-                    <input type="date" className={inputCls} value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} />
-                  </div>
-                </div>
-
-                {error && (
-                  <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-red-400 text-sm">
-                    {error}
-                  </div>
-                )}
-
-                <div className="flex gap-3 mt-2">
-                  <button
-                    onClick={close}
-                    disabled={loading}
-                    className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-                  >
-                    {tCommon('cancel')}
-                  </button>
-                  <button
-                    onClick={submit}
-                    disabled={loading || !driverId || !periodStart || !periodEnd || !!selectedNotConfigured}
-                    className="flex-2 flex-grow py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-                  >
-                    {loading ? t('running') : t('runSettlement')}
-                  </button>
-                </div>
+            {error && (
+              <div className="rounded-lg bg-danger/10 border border-danger/20 px-4 py-3 text-danger text-sm">
+                {error}
               </div>
             )}
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
     </>
   )
 }
