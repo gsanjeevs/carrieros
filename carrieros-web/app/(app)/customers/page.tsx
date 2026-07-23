@@ -10,6 +10,7 @@ import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import AddCustomerButton from './AddCustomerButton'
+import BulkImportCustomers from '@/components/BulkImportCustomers'
 import ExceptionChip from '@/components/ExceptionChip'
 import { getExceptions } from '@/lib/exceptions'
 import { getProfileForUser } from '@/lib/queries/profiles'
@@ -120,7 +121,12 @@ export default async function CustomersPage({
           <h1 className="text-2xl font-semibold text-white">{t('title')}</h1>
           <p className="text-slate-400 text-sm mt-1">{t('customerCount', { count: customers.length })}</p>
         </div>
-        {canManage && <AddCustomerButton />}
+        {canManage && (
+          <div className="flex items-center gap-3">
+            <BulkImportCustomers existingCustomers={customers.map((c) => ({ name: c.organizations?.name ?? null }))} />
+            <AddCustomerButton />
+          </div>
+        )}
       </div>
 
       {params.created && (

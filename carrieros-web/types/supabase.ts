@@ -2338,6 +2338,15 @@ export type Database = {
       }
     }
     Functions: {
+      bulk_import_customers: {
+        Args: { p_rows: Json }
+        Returns: {
+          customer_number: string
+          org_id: number
+          row_action: string
+          row_name: string
+        }[]
+      }
       check_ifta_completeness: { Args: { p_load_id: number }; Returns: boolean }
       create_customer_org: {
         Args: {

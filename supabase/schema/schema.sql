@@ -974,6 +974,108 @@ BEGIN
 END;
 $$;
 
+-- Bulk customer import (PRD: "Bulk customer import via CSV or XLS... Max 50
+-- customers per import for MVP"). Client parses the CSV and sends parsed
+-- rows as JSONB, each with an explicit per-row `action` decided in the
+-- preview step ('create' default, or 'skip'/'overwrite' when the client's
+-- own duplicate check found a name match) — the function trusts that
+-- decision rather than re-deciding server-side, so what the user saw in the
+-- preview is exactly what happens. Duplicate matching (case-insensitive
+-- name, scoped to the caller's own customers) still happens here too,
+-- purely as a safety net against a stale preview (e.g. two browser tabs) --
+-- an 'overwrite' against a name that no longer matches any existing
+-- customer silently falls back to 'create' rather than erroring the whole
+-- batch.
+CREATE OR REPLACE FUNCTION bulk_import_customers(p_rows JSONB)
+RETURNS TABLE(row_name TEXT, row_action TEXT, customer_number TEXT, org_id BIGINT)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_caller_org_id   BIGINT := my_org_id();
+  v_caller_role     TEXT   := my_role();
+  v_row             JSONB;
+  v_name            TEXT;
+  v_requested_action TEXT;
+  v_existing_org_id BIGINT;
+  v_new_org_id      BIGINT;
+  v_customer_number TEXT;
+BEGIN
+  IF v_caller_org_id IS NULL THEN
+    RAISE EXCEPTION 'NO_ORGANIZATION';
+  END IF;
+
+  IF v_caller_role NOT IN ('owner','solo','dispatcher') THEN
+    RAISE EXCEPTION 'FORBIDDEN';
+  END IF;
+
+  IF p_rows IS NULL OR jsonb_typeof(p_rows) != 'array' THEN
+    RAISE EXCEPTION 'VALIDATION_ERROR: rows must be an array';
+  END IF;
+
+  IF jsonb_array_length(p_rows) = 0 OR jsonb_array_length(p_rows) > 50 THEN
+    RAISE EXCEPTION 'VALIDATION_ERROR: 1-50 rows per import';
+  END IF;
+
+  FOR v_row IN SELECT * FROM jsonb_array_elements(p_rows) LOOP
+    v_name := trim(COALESCE(v_row->>'name', ''));
+
+    IF length(v_name) = 0 THEN
+      row_name := v_row->>'name'; row_action := 'skipped_missing_name';
+      customer_number := NULL; org_id := NULL;
+      RETURN NEXT;
+      CONTINUE;
+    END IF;
+
+    SELECT o.id INTO v_existing_org_id
+    FROM organizations o
+    JOIN customer_details cd ON cd.org_id = o.id
+    WHERE cd.carrier_org_id = v_caller_org_id AND lower(o.name) = lower(v_name)
+    LIMIT 1;
+
+    v_requested_action := COALESCE(v_row->>'action', 'create');
+
+    IF v_existing_org_id IS NOT NULL AND v_requested_action = 'skip' THEN
+      row_name := v_name; row_action := 'skipped_duplicate';
+      org_id := v_existing_org_id; customer_number := NULL;
+      RETURN NEXT;
+      CONTINUE;
+    END IF;
+
+    IF v_existing_org_id IS NOT NULL AND v_requested_action = 'overwrite' THEN
+      UPDATE organizations SET
+        phone = COALESCE(NULLIF(trim(v_row->>'phone'), ''), phone),
+        email = COALESCE(NULLIF(trim(v_row->>'email'), ''), email)
+      WHERE id = v_existing_org_id;
+
+      UPDATE customer_details SET
+        contact_name = COALESCE(NULLIF(trim(v_row->>'contact_name'), ''), contact_name)
+      WHERE org_id = v_existing_org_id
+      RETURNING customer_details.customer_number INTO v_customer_number;
+
+      row_name := v_name; row_action := 'overwritten';
+      org_id := v_existing_org_id; customer_number := v_customer_number;
+      RETURN NEXT;
+      CONTINUE;
+    END IF;
+
+    INSERT INTO organizations (type, name, phone, email)
+    VALUES ('customer', v_name, NULLIF(trim(v_row->>'phone'), ''), NULLIF(trim(v_row->>'email'), ''))
+    RETURNING id INTO v_new_org_id;
+
+    v_customer_number := 'C-' || next_entity_val(v_caller_org_id, 'customer');
+
+    INSERT INTO customer_details (org_id, carrier_org_id, customer_number, contact_name)
+    VALUES (v_new_org_id, v_caller_org_id, v_customer_number, NULLIF(trim(v_row->>'contact_name'), ''));
+
+    row_name := v_name; row_action := 'created';
+    org_id := v_new_org_id; customer_number := v_customer_number;
+    RETURN NEXT;
+  END LOOP;
+END;
+$$;
+
 -- ────────────────────────────────────────────────────────────
 -- SECTION 6: DRIVER-SAFE VIEW
 -- ────────────────────────────────────────────────────────────
