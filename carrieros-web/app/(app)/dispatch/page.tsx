@@ -12,7 +12,7 @@ import { getTranslations, getLocale } from 'next-intl/server'
 import DispatchMapClient from './DispatchMapClient'
 import { hasFeature } from '@/lib/entitlements'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
-import StatusBadge from '@/components/ui/StatusBadge'
+import { Card, CardHeader, StatusBadge, EmptyState } from '@/components/ui'
 import type { DispatchMapLoad } from '@/components/DispatchMap'
 
 const VIEW_ROLES = ['owner', 'solo', 'dispatcher']
@@ -40,11 +40,10 @@ export default async function DispatchPage() {
   if (!entitled) {
     return (
       <div className="p-8">
-        <h1 className="text-2xl font-semibold text-white mb-4">{t('title')}</h1>
-        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-card-dark">
-          <span className="material-symbols-outlined text-slate-600 text-4xl">map</span>
-          <p className="text-slate-400 text-sm mt-3">{t('upgradeRequired')}</p>
-        </div>
+        <h1 className="text-2xl font-semibold text-text-pri mb-4">{t('title')}</h1>
+        <Card>
+          <EmptyState icon="map" title={t('upgradeRequired')} />
+        </Card>
       </div>
     )
   }
@@ -82,35 +81,33 @@ export default async function DispatchPage() {
   return (
     <div className="p-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-white">{t('title')}</h1>
-        <p className="text-slate-400 text-sm mt-1">{t('subtitle', { count: mapLoads.length })}</p>
+        <h1 className="text-2xl font-semibold text-text-pri">{t('title')}</h1>
+        <p className="text-text-sec text-sm mt-1">{t('subtitle', { count: mapLoads.length })}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <DispatchMapClient loads={mapLoads} locale={locale} />
           {mapLoads.length === 0 && (
-            <p className="text-slate-500 text-xs mt-2">{t('noActiveLocations')}</p>
+            <p className="text-text-mut text-xs mt-2">{t('noActiveLocations')}</p>
           )}
         </div>
 
-        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark self-start">
-          <div className="px-5 py-3.5 border-b border-white/5">
-            <h2 className="text-white font-medium text-sm">{t('queueTitle')}</h2>
-          </div>
+        <Card className="self-start">
+          <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('queueTitle')}</h2></CardHeader>
           {queue.length === 0 ? (
-            <div className="px-5 py-4 text-slate-500 text-sm">{t('noQueue')}</div>
+            <div className="px-5 py-4 text-text-sec text-sm">{t('noQueue')}</div>
           ) : (
-            <div className="divide-y divide-white/5">
+            <div className="divide-y divide-divider-ui">
               {queue.map((l) => (
                 <Link
                   key={l.id}
                   href={`/loads/${l.load_number}`}
-                  className="flex items-center justify-between px-5 py-3 hover:bg-white/[0.07] transition-colors duration-150"
+                  className="flex items-center justify-between px-5 py-3 hover:bg-surface-subtle transition-colors duration-150"
                 >
                   <div className="min-w-0">
-                    <p className="text-white text-sm font-medium truncate">{l.load_number}</p>
-                    <p className="text-slate-500 text-xs truncate">{l.customer_name_raw ?? '—'}</p>
+                    <p className="text-text-pri text-sm font-medium truncate">{l.load_number}</p>
+                    <p className="text-text-mut text-xs truncate">{l.customer_name_raw ?? '—'}</p>
                   </div>
                   <StatusBadge variant={loadStatusVariant((l.status ?? 'draft') as LoadStatus)} size="sm">
                     {tLoads(`status_${l.status ?? 'draft'}` as never)}
@@ -119,7 +116,7 @@ export default async function DispatchPage() {
               ))}
             </div>
           )}
-        </div>
+        </Card>
       </div>
     </div>
   )

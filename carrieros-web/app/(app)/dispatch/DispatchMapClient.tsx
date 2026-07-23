@@ -8,8 +8,8 @@ import type { DispatchMapLoad } from '@/components/DispatchMap'
 const DispatchMap = dynamic(() => import('@/components/DispatchMap'), {
   ssr: false,
   loading: () => (
-    <div className="h-[480px] w-full rounded-xl bg-white/5 border border-white/8 flex items-center justify-center">
-      <span className="text-slate-500 text-sm">Loading map…</span>
+    <div className="h-[480px] w-full rounded-xl bg-surface-card border border-border-ui flex items-center justify-center">
+      <span className="text-text-sec text-sm">Loading map…</span>
     </div>
   ),
 })
