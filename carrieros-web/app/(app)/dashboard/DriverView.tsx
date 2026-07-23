@@ -5,6 +5,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getTranslations } from 'next-intl/server'
 import MyLoadCard, { type MyLoad } from './MyLoadCard'
+import { Card } from '@/components/ui'
 
 const COMPLIANCE_DUE_SOON_DAYS = 30
 const ACTIVE_STATUSES = ['dispatched', 'picked_up', 'in_transit']
@@ -60,18 +61,18 @@ export default async function DriverView({ userId }: { userId: string }) {
         statusLabel={(status) => tLoads(`status_${status}`)}
       />
 
-      <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
+      <Card className="p-5">
         <div className="flex items-start justify-between mb-3">
-          <span className="text-slate-400 text-sm font-medium">{t('driverCompliance')}</span>
+          <span className="text-text-sec text-sm font-medium">{t('driverCompliance')}</span>
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#3b82f620' }}>
             <span className="material-symbols-outlined text-[18px]" style={{ color: '#3b82f6' }}>person</span>
           </div>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full" style={{ backgroundColor: complianceColor }} />
-          <span className="text-white text-sm font-medium">{complianceLabel}</span>
+          <span className="text-text-pri text-sm font-medium">{complianceLabel}</span>
         </div>
-      </div>
+      </Card>
     </div>
   )
 }

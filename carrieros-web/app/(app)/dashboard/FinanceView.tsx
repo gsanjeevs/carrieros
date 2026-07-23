@@ -5,6 +5,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { formatMoney } from '@/lib/format-money'
+import { Card, CardHeader, KpiTile, EmptyState } from '@/components/ui'
 
 export default async function FinanceView({ orgId }: { orgId: number | undefined }) {
   const supabase = await createClient()
@@ -86,69 +87,49 @@ export default async function FinanceView({ orgId }: { orgId: number | undefined
   return (
     <div className="p-8">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-          <div className="flex items-start justify-between mb-3">
-            <span className="text-slate-400 text-sm font-medium">{t('revenueThisMonth')}</span>
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#16a34a20' }}>
-              <span className="material-symbols-outlined text-[18px]" style={{ color: '#16a34a' }}>payments</span>
-            </div>
-          </div>
-          <p className="text-3xl font-extrabold text-white tracking-tight">{formatMoney(revenueMtd, 'USD', locale)}</p>
-          <p className="text-slate-500 text-xs mt-1">{t('revenueThisMonthSub')}</p>
-        </div>
-
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-          <div className="flex items-start justify-between mb-3">
-            <span className="text-slate-400 text-sm font-medium">{t('outstandingInvoices')}</span>
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#d9770620' }}>
-              <span className="material-symbols-outlined text-[18px]" style={{ color: '#d97706' }}>receipt_long</span>
-            </div>
-          </div>
-          <p className="text-3xl font-extrabold text-white tracking-tight">{formatMoney(outstandingAmount, 'USD', locale)}</p>
-          <p className="text-slate-500 text-xs mt-1">{t('outstandingInvoicesSub', { count: outstandingInvoices.length })}</p>
-        </div>
-
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-          <div className="flex items-start justify-between mb-3">
-            <span className="text-slate-400 text-sm font-medium">{t('avgRatePerLoad')}</span>
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#3b82f620' }}>
-              <span className="material-symbols-outlined text-[18px]" style={{ color: '#3b82f6' }}>trending_up</span>
-            </div>
-          </div>
-          <p className="text-3xl font-extrabold text-white tracking-tight">{formatMoney(avgRate, 'USD', locale)}</p>
-          <p className="text-slate-500 text-xs mt-1">{t('avgRatePerLoadSub', { count: rateRows.length })}</p>
-        </div>
+        <KpiTile
+          label={t('revenueThisMonth')}
+          value={formatMoney(revenueMtd, 'USD', locale)}
+          helperText={t('revenueThisMonthSub')}
+        />
+        <KpiTile
+          label={t('outstandingInvoices')}
+          value={formatMoney(outstandingAmount, 'USD', locale)}
+          helperText={t('outstandingInvoicesSub', { count: outstandingInvoices.length })}
+        />
+        <KpiTile
+          label={t('avgRatePerLoad')}
+          value={formatMoney(avgRate, 'USD', locale)}
+          helperText={t('avgRatePerLoadSub', { count: rateRows.length })}
+        />
       </div>
 
-      <div className="bg-white/5 border border-white/8 rounded-xl shadow-card-dark">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
-          <h2 className="text-white font-medium text-sm">{t('invoiceAging')}</h2>
+      <Card>
+        <CardHeader>
+          <h2 className="text-text-pri font-medium text-sm">{t('invoiceAging')}</h2>
           {oldestDueDate && (
-            <span className="text-slate-500 text-xs">
+            <span className="text-text-mut text-xs">
               {t('agingOldest', { date: new Date(oldestDueDate).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' }) })}
             </span>
           )}
-        </div>
+        </CardHeader>
         {outstandingInvoices.length === 0 ? (
-          <div className="px-5 py-12 text-center">
-            <span className="material-symbols-outlined text-slate-600 text-4xl">receipt_long</span>
-            <p className="text-slate-500 text-sm mt-3">{t('agingNoneOutstanding')}</p>
-          </div>
+          <EmptyState icon="receipt_long" title={t('agingNoneOutstanding')} />
         ) : (
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-divider-ui">
             {agingRows.map((row) => (
               <div key={row.label} className="flex items-center justify-between px-5 py-3.5">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: row.color }} />
-                  <span className="text-slate-300 text-sm">{row.label}</span>
-                  <span className="text-slate-500 text-xs">({row.count})</span>
+                  <span className="text-text-sec text-sm">{row.label}</span>
+                  <span className="text-text-mut text-xs">({row.count})</span>
                 </div>
-                <span className="text-white text-sm font-medium">{formatMoney(row.amount, 'USD', locale)}</span>
+                <span className="text-text-pri text-sm font-medium">{formatMoney(row.amount, 'USD', locale)}</span>
               </div>
             ))}
           </div>
         )}
-      </div>
+      </Card>
     </div>
   )
 }

@@ -9,6 +9,7 @@ import { formatMoney } from '@/lib/format-money'
 import ExceptionsBanner from './ExceptionsBanner'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import StatusBadge from '@/components/ui/StatusBadge'
+import { Card, CardHeader, CardBody, KpiTile } from '@/components/ui'
 
 interface KpiCard {
   label: string
@@ -193,59 +194,50 @@ export default async function OwnerView({ orgId, embedded = false }: { orgId: nu
       <ExceptionsBanner orgId={orgId} />
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
         {kpis.map((kpi) => (
-          <div key={kpi.label} className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-            <div className="flex items-start justify-between mb-3">
-              <span className="text-slate-400 text-sm font-medium">{kpi.label}</span>
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${kpi.color}20` }}>
-                <span className="material-symbols-outlined text-[18px]" style={{ color: kpi.color }}>{kpi.icon}</span>
-              </div>
-            </div>
-            <p className="text-3xl font-extrabold text-white tracking-tight">{kpi.value}</p>
-            {kpi.sub && <p className="text-slate-500 text-xs mt-1">{kpi.sub}</p>}
-          </div>
+          <KpiTile key={kpi.label} label={kpi.label} value={kpi.value} helperText={kpi.sub} />
         ))}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         {breakdowns.map((card) => (
-          <div key={card.label} className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
+          <Card key={card.label} className="p-5">
             <div className="flex items-start justify-between mb-3">
-              <span className="text-slate-400 text-sm font-medium">{card.label}</span>
+              <span className="text-text-sec text-sm font-medium">{card.label}</span>
               <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${card.color}20` }}>
                 <span className="material-symbols-outlined text-[18px]" style={{ color: card.color }}>{card.icon}</span>
               </div>
             </div>
             <div className="flex items-baseline gap-2 mb-3">
-              <p className="text-3xl font-extrabold text-white tracking-tight">{card.primary.value}</p>
-              <span className="text-slate-500 text-xs">{card.primary.label}</span>
+              <p className="text-3xl font-extrabold text-text-pri tracking-tight">{card.primary.value}</p>
+              <span className="text-text-mut text-xs">{card.primary.label}</span>
             </div>
             <div className="flex items-center gap-4">
               {card.stats.map((stat) => (
                 <div key={stat.label} className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: stat.color }} />
-                  <span className="text-slate-300 text-xs">{stat.value} {stat.label}</span>
+                  <span className="text-text-sec text-xs">{stat.value} {stat.label}</span>
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
         ))}
       </div>
 
-      <div className="bg-white/5 border border-white/8 rounded-xl shadow-card-dark">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
-          <h2 className="text-white font-medium text-sm">{t('recentLoads')}</h2>
-          <a href="/loads" className="text-[#f97316] text-xs hover:underline rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">{t('viewAll')}</a>
-        </div>
+      <Card>
+        <CardHeader>
+          <h2 className="text-text-pri font-medium text-sm">{t('recentLoads')}</h2>
+          <Link href="/loads" className="text-brand-orange text-xs hover:underline rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">{t('viewAll')}</Link>
+        </CardHeader>
         {recentLoads.length === 0 ? (
-          <div className="px-5 py-12 text-center">
-            <span className="material-symbols-outlined text-slate-600 text-4xl">local_shipping</span>
-            <p className="text-slate-500 text-sm mt-3">{t('noLoadsYet')}</p>
-            <a href="/loads/new" className="inline-block mt-4 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
+          <CardBody className="py-12 text-center">
+            <span className="material-symbols-outlined text-text-mut text-4xl">local_shipping</span>
+            <p className="text-text-mut text-sm mt-3">{t('noLoadsYet')}</p>
+            <Link href="/loads/new" className="inline-block mt-4 px-4 py-2 bg-brand-orange hover:bg-brand-orange/90 text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
               {t('createFirstLoad')}
-            </a>
-          </div>
+            </Link>
+          </CardBody>
         ) : (
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-divider-ui">
             {recentLoads.map((load) => {
               const statusKey = (load.status ?? 'draft') as LoadStatus
               const route =
@@ -257,24 +249,24 @@ export default async function OwnerView({ orgId, embedded = false }: { orgId: nu
                 <Link
                   key={load.id}
                   href={`/loads/${load.load_number}`}
-                  className="flex items-center justify-between px-5 py-3.5 hover:bg-white/[0.07] hover:shadow-hover-dark transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+                  className="flex items-center justify-between px-5 py-3.5 hover:bg-surface-subtle transition-colors focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <span className="text-white font-medium">{load.load_number}</span>
+                    <span className="text-text-pri font-medium">{load.load_number}</span>
                     <StatusBadge variant={loadStatusVariant(statusKey)} size="sm">
                       {statusLabel(statusKey)}
                     </StatusBadge>
                   </div>
                   <div className="flex items-center gap-4 min-w-0">
-                    <span className="text-slate-400 text-sm max-w-[160px] truncate">{load.customer_name_raw ?? '—'}</span>
-                    <span className="text-slate-300 text-sm max-w-[220px] truncate hidden sm:inline">{route}</span>
+                    <span className="text-text-sec text-sm max-w-[160px] truncate">{load.customer_name_raw ?? '—'}</span>
+                    <span className="text-text-sec text-sm max-w-[220px] truncate hidden sm:inline">{route}</span>
                   </div>
                 </Link>
               )
             })}
           </div>
         )}
-      </div>
+      </Card>
     </div>
   )
 }

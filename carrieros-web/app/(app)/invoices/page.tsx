@@ -8,15 +8,10 @@ import { getTranslations, getLocale } from 'next-intl/server'
 import { formatDate } from '@/lib/format-datetime'
 import { formatMoney } from '@/lib/format-money'
 import { INVOICE_ROLES } from '@/lib/roles-policy'
+import { invoiceStatusVariant, type InvoiceStatus } from '@/lib/domain/invoice-status'
+import { Card, EmptyState, StatusBadge, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
 
 const STATUSES = ['draft', 'sent', 'paid', 'overdue'] as const
-
-const STATUS_COLOR: Record<string, string> = {
-  draft:   'bg-slate-500/20 text-slate-400',
-  sent:    'bg-blue-500/20 text-blue-400',
-  paid:    'bg-[#16a34a]/20 text-[#16a34a]',
-  overdue: 'bg-red-500/20 text-red-400',
-}
 
 export default async function InvoicesPage({
   searchParams,
@@ -114,83 +109,77 @@ export default async function InvoicesPage({
       </div>
 
       {!invoices || invoices.length === 0 ? (
-        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-card-dark">
-          <span className="material-symbols-outlined text-slate-600 text-4xl">receipt_long</span>
-          <p className="text-slate-500 text-sm mt-3">
-            {activeStatus ? t('noInvoicesForFilter') : t('noInvoicesYet')}
-          </p>
-          <p className="text-slate-600 text-xs mt-2">{t('createFromLoadHint')}</p>
-          <Link
-            href="/loads"
-            className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-          >
-            <span className="material-symbols-outlined text-[16px]">local_shipping</span>
-            {t('goToLoads')}
-          </Link>
-        </div>
+        <Card>
+          <EmptyState
+            icon="receipt_long"
+            title={activeStatus ? t('noInvoicesForFilter') : t('noInvoicesYet')}
+            description={t('createFromLoadHint')}
+          />
+          <div className="flex justify-center pb-8 -mt-2">
+            <Link
+              href="/loads"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+            >
+              <span className="material-symbols-outlined text-[16px]">local_shipping</span>
+              {t('goToLoads')}
+            </Link>
+          </div>
+        </Card>
       ) : (
-        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
-          <table className="w-full text-sm">
+        <Card>
+          <Table>
             <thead>
-              <tr className="border-b border-white/5">
-                <Th>{t('invoiceNumber')}</Th>
-                <Th>{t('customer')}</Th>
-                <Th>{t('load')}</Th>
-                <Th>{t('status')}</Th>
-                <Th>{t('dueDate')}</Th>
-                <Th>{t('paymentMethod')}</Th>
-                <Th align="right">{t('amount')}</Th>
+              <tr>
+                <TableHeaderCell>{t('invoiceNumber')}</TableHeaderCell>
+                <TableHeaderCell>{t('customer')}</TableHeaderCell>
+                <TableHeaderCell>{t('load')}</TableHeaderCell>
+                <TableHeaderCell>{t('status')}</TableHeaderCell>
+                <TableHeaderCell>{t('dueDate')}</TableHeaderCell>
+                <TableHeaderCell>{t('paymentMethod')}</TableHeaderCell>
+                <TableHeaderCell numeric>{t('amount')}</TableHeaderCell>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody>
               {invoices.map((inv) => (
-                <tr key={inv.id} className="hover:bg-white/[0.07] transition-colors duration-150">
-                  <td className="px-5 py-3.5">
+                <TableRow key={inv.id}>
+                  <TableCell>
                     <Link
                       href={`/invoices/${inv.invoice_number}`}
-                      className="text-white font-medium hover:text-[#f97316] transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+                      className="text-text-pri font-medium hover:text-brand-orange transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
                     >
                       {inv.invoice_number}
                     </Link>
-                  </td>
-                  <td className="px-4 py-3.5 text-slate-300 max-w-[180px] truncate">
+                  </TableCell>
+                  <TableCell className="max-w-[180px] truncate">
                     {inv.organizations?.name ?? inv.loads?.customer_name_raw ?? '—'}
-                  </td>
-                  <td className="px-4 py-3.5 text-slate-400">
+                  </TableCell>
+                  <TableCell>
                     {inv.loads?.load_number ? (
                       <Link
                         href={`/loads/${inv.loads.load_number}`}
-                        className="hover:text-[#f97316] transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+                        className="hover:text-brand-orange transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
                       >
                         {inv.loads.load_number}
                       </Link>
                     ) : '—'}
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLOR[inv.status ?? 'draft'] ?? STATUS_COLOR.draft}`}>
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge variant={invoiceStatusVariant((inv.status ?? 'draft') as InvoiceStatus)}>
                       {t(`status_${inv.status ?? 'draft'}`)}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3.5 text-slate-400">{formatDate(inv.due_date, profile)}</td>
-                  <td className="px-4 py-3.5 text-slate-400">{t(`method_${inv.payment_method}`)}</td>
-                  <td className="px-5 py-3.5 text-right text-white font-medium">
+                    </StatusBadge>
+                  </TableCell>
+                  <TableCell>{formatDate(inv.due_date, profile)}</TableCell>
+                  <TableCell>{t(`method_${inv.payment_method}`)}</TableCell>
+                  <TableCell numeric className="font-medium">
                     {formatMoney(inv.amount, currency, locale)}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
             </tbody>
-          </table>
-        </div>
+          </Table>
+        </Card>
       )}
     </div>
-  )
-}
-
-function Th({ children, align = 'left' }: { children: React.ReactNode; align?: 'left' | 'right' }) {
-  return (
-    <th className={`${align === 'right' ? 'text-right px-5' : 'text-left px-4'} py-3 text-xs font-medium text-slate-500 uppercase tracking-wide first:px-5`}>
-      {children}
-    </th>
   )
 }
 
@@ -201,7 +190,7 @@ function FilterChip({ href, label, active }: { href: string; label: string; acti
       className={`px-3 py-1.5 rounded-lg text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
         active
           ? 'bg-[#f97316]/15 text-[#f97316] border border-[#f97316]/30'
-          : 'bg-white/5 text-slate-400 border border-white/8 hover:text-white hover:bg-white/10'
+          : 'bg-surface-card text-text-sec border border-border-ui hover:text-text-pri hover:bg-surface-subtle'
       }`}
     >
       {label}

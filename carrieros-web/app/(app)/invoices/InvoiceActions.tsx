@@ -16,9 +16,8 @@ import {
   setInvoicePaymentMethod,
   type ActionResult,
 } from './actions'
+import { Card, CardHeader, CardBody, Button, Input } from '@/components/ui'
 
-const inputCls =
-  'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 transition'
 const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
 
 interface Props {
@@ -121,122 +120,133 @@ export default function InvoiceActions({
   return (
     <>
       {/* Status actions */}
-      <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-        <h2 className="text-white font-medium text-sm mb-4">{t('actions')}</h2>
-
-        <div className="space-y-2.5">
-          <button
+      <Card>
+        <CardHeader>
+          <h2 className="text-text-pri font-medium text-sm">{t('actions')}</h2>
+        </CardHeader>
+        <CardBody className="space-y-2.5">
+          <Button
+            variant="primary"
             onClick={() => run(() => markInvoiceSent(invoiceId))}
             disabled={busy || status === 'paid'}
-            className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+            className="w-full py-2.5 text-sm"
           >
             <span className="material-symbols-outlined text-[18px]">outgoing_mail</span>
             {t('markSent')}
-          </button>
+          </Button>
 
-          <button
+          <Button
+            variant="success"
             onClick={() => run(() => markInvoicePaid(invoiceId))}
             disabled={busy || status === 'paid'}
-            className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#16a34a] hover:bg-[#15803d] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+            className="w-full py-2.5 text-sm"
           >
             <span className="material-symbols-outlined text-[18px]">paid</span>
             {t('markPaid')}
-          </button>
-        </div>
+          </Button>
 
-        {/* This really does email the customer now (lib/send-email.ts, real
-            SMTP send). Say so plainly, and be honest that it only reaches
-            whoever's email is on file for the customer. */}
-        <p className="text-slate-500 text-xs mt-3 leading-relaxed">{t('markSentHelp')}</p>
+          {/* This really does email the customer now (lib/send-email.ts, real
+              SMTP send). Say so plainly, and be honest that it only reaches
+              whoever's email is on file for the customer. */}
+          <p className="text-text-mut text-xs mt-1 leading-relaxed">{t('markSentHelp')}</p>
 
-        {warning && (
-          <div className="mt-3 rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-2.5 text-amber-400 text-xs">
-            {warning}
-          </div>
-        )}
-
-        {error && (
-          <div className="mt-3 rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2.5 text-red-400 text-xs">
-            {error}
-          </div>
-        )}
-      </div>
-
-      {/* Payment method */}
-      <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-        <h2 className="text-white font-medium text-sm mb-4">{t('paymentMethod')}</h2>
-        <label className={labelCls}>{t('collectVia')}</label>
-        <select
-          className={inputCls}
-          value={method}
-          disabled={busy}
-          onChange={(e) => changeMethod(e.target.value)}
-        >
-          <option value="other">{t('method_other')}</option>
-          <option value="stripe">{t('method_stripe')}</option>
-          <option value="factoring">{t('method_factoring')}</option>
-        </select>
-
-        {method === 'stripe' && (
-          /* Stripe is not implemented — no keys, no payment link. Show that
-             plainly instead of a dead "Pay now" button. */
-          <div className="mt-3 flex gap-2 rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-2.5">
-            <span className="material-symbols-outlined text-amber-400 text-[16px]">info</span>
-            <p className="text-amber-400 text-xs leading-relaxed">{t('stripeNotConfigured')}</p>
-          </div>
-        )}
-
-        {method === 'other' && (
-          <p className="text-slate-500 text-xs mt-3 leading-relaxed">{t('otherMethodHelp')}</p>
-        )}
-      </div>
-
-      {/* Factoring — only meaningful when this invoice is collected that way */}
-      {method === 'factoring' && (
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-          <h2 className="text-white font-medium text-sm mb-4">{t('factoring')}</h2>
-
-          {factoredAtLabel && (
-            <div className="mb-4 rounded-lg bg-[#1abc9c]/10 border border-[#1abc9c]/20 px-3 py-2.5">
-              <p className="text-[#1abc9c] text-xs">
-                {t('factoredOn', { date: factoredAtLabel, company: factoringCompany ?? '—' })}
-              </p>
+          {warning && (
+            <div className="mt-3 rounded-lg bg-warning/10 border border-warning/20 px-3 py-2.5 text-warning text-xs">
+              {warning}
             </div>
           )}
 
-          <div className="space-y-3">
-            <div>
-              <label className={labelCls}>{t('factoringCompany')} *</label>
-              <input
-                className={inputCls}
-                placeholder="TriumphPay"
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-              />
+          {error && (
+            <div className="mt-3 rounded-lg bg-danger/10 border border-danger/20 px-3 py-2.5 text-danger text-xs">
+              {error}
             </div>
-            <div>
-              <label className={labelCls}>{t('factoringReference')}</label>
-              <input
-                className={inputCls}
-                placeholder="REF-12345"
-                value={reference}
-                onChange={(e) => setReference(e.target.value)}
-              />
+          )}
+        </CardBody>
+      </Card>
+
+      {/* Payment method */}
+      <Card>
+        <CardHeader>
+          <h2 className="text-text-pri font-medium text-sm">{t('paymentMethod')}</h2>
+        </CardHeader>
+        <CardBody>
+          <label className={labelCls}>{t('collectVia')}</label>
+          <Input
+            as="select"
+            value={method}
+            disabled={busy}
+            onChange={(e) => changeMethod(e.target.value)}
+          >
+            <option value="other">{t('method_other')}</option>
+            <option value="stripe">{t('method_stripe')}</option>
+            <option value="factoring">{t('method_factoring')}</option>
+          </Input>
+
+          {method === 'stripe' && (
+            /* Stripe is not implemented — no keys, no payment link. Show that
+               plainly instead of a dead "Pay now" button. */
+            <div className="mt-3 flex gap-2 rounded-lg bg-warning/10 border border-warning/20 px-3 py-2.5">
+              <span className="material-symbols-outlined text-warning text-[16px]">info</span>
+              <p className="text-warning text-xs leading-relaxed">{t('stripeNotConfigured')}</p>
+            </div>
+          )}
+
+          {method === 'other' && (
+            <p className="text-text-mut text-xs mt-3 leading-relaxed">{t('otherMethodHelp')}</p>
+          )}
+        </CardBody>
+      </Card>
+
+      {/* Factoring — only meaningful when this invoice is collected that way */}
+      {method === 'factoring' && (
+        <Card>
+          <CardHeader>
+            <h2 className="text-text-pri font-medium text-sm">{t('factoring')}</h2>
+          </CardHeader>
+          <CardBody>
+            {factoredAtLabel && (
+              <div className="mb-4 rounded-lg bg-[#1abc9c]/10 border border-[#1abc9c]/20 px-3 py-2.5">
+                <p className="text-[#1abc9c] text-xs">
+                  {t('factoredOn', { date: factoredAtLabel, company: factoringCompany ?? '—' })}
+                </p>
+              </div>
+            )}
+
+            <div className="space-y-3">
+              <div>
+                <label className={labelCls}>{t('factoringCompany')} *</label>
+                <Input
+                  placeholder="TriumphPay"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className={labelCls}>{t('factoringReference')}</label>
+                <Input
+                  placeholder="REF-12345"
+                  value={reference}
+                  onChange={(e) => setReference(e.target.value)}
+                />
+              </div>
+
+              {/* Teal factoring accent has no components/ui/Button variant —
+                  kept hand-rolled per the design system's factoring recipe,
+                  not one of the banned ad hoc card/badge patterns. */}
+              <button
+                onClick={sendToFactoring}
+                disabled={busy || !company.trim()}
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#1abc9c] hover:bg-[#16a085] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+              >
+                <span className="material-symbols-outlined text-[18px]">account_balance</span>
+                {factorLoading ? t('sendingToFactoring') : t('sendToFactoring')}
+              </button>
             </div>
 
-            <button
-              onClick={sendToFactoring}
-              disabled={busy || !company.trim()}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#1abc9c] hover:bg-[#16a085] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-            >
-              <span className="material-symbols-outlined text-[18px]">account_balance</span>
-              {factorLoading ? t('sendingToFactoring') : t('sendToFactoring')}
-            </button>
-          </div>
-
-          {/* Honest about the stub: no factoring partner is connected yet. */}
-          <p className="text-slate-500 text-xs mt-3 leading-relaxed">{t('factoringStubHelp')}</p>
-        </div>
+            {/* Honest about the stub: no factoring partner is connected yet. */}
+            <p className="text-text-mut text-xs mt-3 leading-relaxed">{t('factoringStubHelp')}</p>
+          </CardBody>
+        </Card>
       )}
     </>
   )

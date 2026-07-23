@@ -10,10 +10,11 @@ import EditInvoiceCard from '../EditInvoiceCard'
 import { INVOICE_ROLES } from '@/lib/roles-policy'
 import { invoiceStatusVariant, type InvoiceStatus } from '@/lib/domain/invoice-status'
 import StatusBadge from '@/components/ui/StatusBadge'
+import { Card, CardHeader, CardBody, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex justify-between items-start py-2.5 border-b border-white/5 last:border-0">
+    <div className="flex justify-between items-start py-2.5 border-b border-divider-ui last:border-0">
       <span className="text-slate-500 text-sm">{label}</span>
       <span className="text-white text-sm text-right ml-4">{value ?? '—'}</span>
     </div>
@@ -108,7 +109,7 @@ export default async function InvoiceDetailPage({
           </div>
           <a
             href={`/invoices/${invoice.invoice_number}/print`}
-            className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/8 text-white text-xs font-medium rounded-lg transition"
+            className="flex items-center gap-2 px-3 py-2 bg-surface-card hover:bg-surface-subtle border border-border-ui text-text-pri text-xs font-medium rounded-lg transition"
           >
             <span className="material-symbols-outlined text-[16px]">print</span>
             {t('printDownload')}
@@ -121,46 +122,52 @@ export default async function InvoiceDetailPage({
         {/* Left: summary + line items */}
         <div className="lg:col-span-2 space-y-6">
 
-          <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-            <h2 className="text-white font-medium text-sm mb-3">{t('summary')}</h2>
-            <InfoRow label={t('from')} value={org?.name ?? '—'} />
-            <InfoRow label={t('customer')} value={customerName ?? '—'} />
-            <InfoRow
-              label={t('load')}
-              value={
-                invoice.loads?.load_number ? (
-                  <Link href={`/loads/${invoice.loads.load_number}`} className="text-[#f97316] hover:underline rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
-                    {invoice.loads.load_number}
-                  </Link>
-                ) : '—'
-              }
-            />
-            <InfoRow label={t('route')} value={route ?? '—'} />
-            <InfoRow label={t('issued')} value={formatDate(invoice.created_at, profile)} />
-            <InfoRow label={t('dueDate')} value={formatDate(invoice.due_date, profile)} />
-            <InfoRow
-              label={t('sentAt')}
-              value={invoice.sent_at ? formatDateTime(invoice.sent_at, profile) : t('notSentYet')}
-            />
-            <InfoRow
-              label={t('paidAt')}
-              value={invoice.paid_at ? formatDateTime(invoice.paid_at, profile) : t('notPaidYet')}
-            />
-          </div>
+          <Card>
+            <CardHeader>
+              <h2 className="text-white font-medium text-sm">{t('summary')}</h2>
+            </CardHeader>
+            <CardBody>
+              <InfoRow label={t('from')} value={org?.name ?? '—'} />
+              <InfoRow label={t('customer')} value={customerName ?? '—'} />
+              <InfoRow
+                label={t('load')}
+                value={
+                  invoice.loads?.load_number ? (
+                    <Link href={`/loads/${invoice.loads.load_number}`} className="text-[#f97316] hover:underline rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
+                      {invoice.loads.load_number}
+                    </Link>
+                  ) : '—'
+                }
+              />
+              <InfoRow label={t('route')} value={route ?? '—'} />
+              <InfoRow label={t('issued')} value={formatDate(invoice.created_at, profile)} />
+              <InfoRow label={t('dueDate')} value={formatDate(invoice.due_date, profile)} />
+              <InfoRow
+                label={t('sentAt')}
+                value={invoice.sent_at ? formatDateTime(invoice.sent_at, profile) : t('notSentYet')}
+              />
+              <InfoRow
+                label={t('paidAt')}
+                value={invoice.paid_at ? formatDateTime(invoice.paid_at, profile) : t('notPaidYet')}
+              />
+            </CardBody>
+          </Card>
 
           {/* Line items */}
-          <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
-            <h2 className="text-white font-medium text-sm px-5 pt-5 pb-3">{t('lineItems')}</h2>
-            <table className="w-full text-sm">
+          <Card>
+            <CardHeader>
+              <h2 className="text-white font-medium text-sm">{t('lineItems')}</h2>
+            </CardHeader>
+            <Table>
               <thead>
-                <tr className="border-b border-white/5">
-                  <th className="text-left px-5 py-2.5 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('description')}</th>
-                  <th className="text-right px-5 py-2.5 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('amount')}</th>
+                <tr>
+                  <TableHeaderCell>{t('description')}</TableHeaderCell>
+                  <TableHeaderCell numeric>{t('amount')}</TableHeaderCell>
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b border-white/5">
-                  <td className="px-5 py-3.5 text-slate-300">
+                <TableRow>
+                  <TableCell>
                     {invoice.loads?.load_number
                       ? t('lineItemLinehaul', {
                           loadNumber: invoice.loads.load_number,
@@ -170,26 +177,30 @@ export default async function InvoiceDetailPage({
                     {invoice.loads?.commodity && (
                       <span className="block text-slate-500 text-xs mt-0.5">{invoice.loads.commodity}</span>
                     )}
-                  </td>
-                  <td className="px-5 py-3.5 text-right text-white">
+                  </TableCell>
+                  <TableCell numeric>
                     {formatMoney(invoice.amount, currency, locale)}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-5 py-3.5 text-white font-medium">{t('total')}</td>
-                  <td className="px-5 py-3.5 text-right text-white font-semibold">
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">{t('total')}</TableCell>
+                  <TableCell numeric className="font-semibold">
                     {formatMoney(invoice.amount, currency, locale)}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               </tbody>
-            </table>
-          </div>
+            </Table>
+          </Card>
 
           {invoice.notes && (
-            <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-              <h2 className="text-white font-medium text-sm mb-2">{t('notes')}</h2>
-              <p className="text-slate-400 text-sm whitespace-pre-wrap">{invoice.notes}</p>
-            </div>
+            <Card>
+              <CardHeader>
+                <h2 className="text-white font-medium text-sm">{t('notes')}</h2>
+              </CardHeader>
+              <CardBody>
+                <p className="text-slate-400 text-sm whitespace-pre-wrap">{invoice.notes}</p>
+              </CardBody>
+            </Card>
           )}
         </div>
 

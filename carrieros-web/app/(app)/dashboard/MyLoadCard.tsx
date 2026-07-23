@@ -7,6 +7,7 @@
 import Link from 'next/link'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import StatusBadge from '@/components/ui/StatusBadge'
+import { Card } from '@/components/ui'
 
 export interface MyLoad {
   load_number: string
@@ -33,10 +34,10 @@ export default function MyLoadCard({
 }) {
   if (!load) {
     return (
-      <div className="bg-white/5 border border-white/8 rounded-xl shadow-card-dark px-5 py-8 text-center mb-8">
-        <span className="material-symbols-outlined text-slate-600 text-4xl">local_shipping</span>
-        <p className="text-slate-500 text-sm mt-3">{noActiveLoadLabel}</p>
-      </div>
+      <Card className="px-5 py-8 text-center mb-8">
+        <span className="material-symbols-outlined text-text-mut text-4xl">local_shipping</span>
+        <p className="text-text-mut text-sm mt-3">{noActiveLoadLabel}</p>
+      </Card>
     )
   }
 
@@ -49,23 +50,25 @@ export default function MyLoadCard({
   return (
     <Link
       href={`/loads/${load.load_number}`}
-      className={`block bg-white/5 border border-white/8 rounded-xl shadow-card-dark hover:bg-white/[0.07] hover:shadow-hover-dark transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-brand-orange/50 mb-8 ${compact ? 'p-4' : 'p-6'}`}
+      className="block mb-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
     >
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-slate-400 text-xs font-medium uppercase tracking-wide">{title}</span>
-        <StatusBadge variant={loadStatusVariant(statusKey)} size="sm">
-          {statusLabel(statusKey)}
-        </StatusBadge>
-      </div>
-      <div className="flex items-center justify-between gap-4">
-        <div className="min-w-0">
-          <p className={`text-white font-bold tracking-tight ${compact ? 'text-lg' : 'text-2xl'}`}>{load.load_number}</p>
-          <p className="text-slate-300 text-sm truncate">{route}</p>
+      <Card className={`hover:bg-surface-subtle transition-colors ${compact ? 'p-4' : 'p-6'}`}>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-text-sec text-xs font-medium uppercase tracking-wide">{title}</span>
+          <StatusBadge variant={loadStatusVariant(statusKey)} size="sm">
+            {statusLabel(statusKey)}
+          </StatusBadge>
         </div>
-        {load.customer_name_raw && (
-          <span className="text-slate-400 text-sm max-w-[160px] truncate hidden sm:inline">{load.customer_name_raw}</span>
-        )}
-      </div>
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <p className={`text-text-pri font-bold tracking-tight ${compact ? 'text-lg' : 'text-2xl'}`}>{load.load_number}</p>
+            <p className="text-text-sec text-sm truncate">{route}</p>
+          </div>
+          {load.customer_name_raw && (
+            <span className="text-text-sec text-sm max-w-[160px] truncate hidden sm:inline">{load.customer_name_raw}</span>
+          )}
+        </div>
+      </Card>
     </Link>
   )
 }
