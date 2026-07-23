@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { hasFeature } from '@/lib/entitlements'
 import { getExceptions, TIER_ORDER, TIER_COLOR, type ExceptionItem, type ExceptionTier } from '@/lib/exceptions'
+import { Card } from '@/components/ui'
 
 const EXCEPTION_ROLES = ['owner', 'solo', 'dispatcher']
 
@@ -48,29 +49,31 @@ export default async function ExceptionsPage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-semibold text-white">{t('title')}</h1>
-      <p className="text-slate-400 text-sm mt-1">{t('subtitle')}</p>
+      <h1 className="text-2xl font-semibold text-text-pri">{t('title')}</h1>
+      <p className="text-text-sec text-sm mt-1">{t('subtitle')}</p>
 
       {total === 0 ? (
-        <div className="mt-8 bg-white/5 border border-white/8 rounded-xl px-5 py-14 text-center shadow-card-dark">
-          <span className="material-symbols-outlined text-success text-4xl">check_circle</span>
-          <p className="text-white font-medium mt-3">{t('allClear')}</p>
-          <p className="text-slate-500 text-sm mt-1">{t('allClearSub')}</p>
-        </div>
+        <Card className="mt-8">
+          <div className="flex flex-col items-center justify-center text-center px-6 py-14">
+            <span className="material-symbols-outlined text-success text-4xl">check_circle</span>
+            <p className="text-text-pri font-medium mt-3">{t('allClear')}</p>
+            <p className="text-text-sec text-sm mt-1">{t('allClearSub')}</p>
+          </div>
+        </Card>
       ) : (
         <div className="mt-8 space-y-8">
           {grouped.map((group) => (
             <div key={group.tier}>
               {entitled && (
-                <h2 className="text-slate-300 text-sm font-semibold uppercase tracking-wide mb-3">
+                <h2 className="text-text-sec text-sm font-semibold uppercase tracking-wide mb-3">
                   {tierLabel[group.tier as ExceptionTier]}
                 </h2>
               )}
-              <div className="bg-white/5 border border-white/8 rounded-xl divide-y divide-white/5 shadow-card-dark overflow-hidden">
+              <Card className="divide-y divide-divider-ui">
                 {group.items.map((item, idx) => (
                   <ExceptionRow key={`${item.entity_type}-${item.entity_id}-${item.exception_type}-${idx}`} item={item} t={t} />
                 ))}
-              </div>
+              </Card>
             </div>
           ))}
 
@@ -108,8 +111,8 @@ function ExceptionRow({ item, t }: { item: ExceptionItem; t: Awaited<ReturnType<
           <span className={`material-symbols-outlined text-[18px] ${color.text}`}>{item.icon}</span>
         </div>
         <div className="min-w-0">
-          <p className="text-white text-sm font-medium">{item.title}</p>
-          <p className="text-slate-400 text-xs mt-0.5 truncate">{item.detail}</p>
+          <p className="text-text-pri text-sm font-medium">{item.title}</p>
+          <p className="text-text-sec text-xs mt-0.5 truncate">{item.detail}</p>
         </div>
       </div>
       {item.href && ctaLabel && (
