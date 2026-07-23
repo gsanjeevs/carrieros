@@ -48,6 +48,13 @@ const ERROR_SURFACES = [
   "app/(app)/loads/**/*.tsx",
   "app/(app)/customers/**/*.tsx",
   "app/(app)/vehicles/**/*.tsx",
+  "app/(app)/maintenance/**/*.tsx",
+  "app/(app)/team/**/*.tsx",
+  "app/(app)/billing/**/*.tsx",
+  "app/(app)/settlements/**/*.tsx",
+  "app/(app)/dispatch/**/*.tsx",
+  "app/(app)/exceptions/**/*.tsx",
+  "app/(app)/settings/**/*.tsx",
 ];
 const uiComponentPatternGuardError = {
   files: ERROR_SURFACES,
