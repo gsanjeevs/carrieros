@@ -45,6 +45,21 @@ export interface AuthAdminProvider {
 
   deleteUser(userId: string): Promise<{ error: AuthAdminError | null }>
 
+  // Phone-only invite path (team invite, PRD: "invite by phone number or
+  // email"). Creates the auth.users row with a confirmed phone and no
+  // password — actually notifying the invitee (SMS) is a demo-mode seam,
+  // same philosophy as lib/stripe.ts's createStripeCustomer(): no SMS
+  // provider (Twilio/etc) is configured in this project, so the identity/
+  // data model is real and complete, but no text message is actually sent.
+  // See app/api/team/invite/route.ts's sendPhoneInviteSms() stub.
+  createUserWithPhone(
+    phone: string,
+    opts?: { data?: Record<string, unknown> }
+  ): Promise<{
+    data: { user: AuthAdminUser } | null
+    error: AuthAdminError | null
+  }>
+
   generateMagicLink(
     email: string,
     opts?: { redirectTo?: string }

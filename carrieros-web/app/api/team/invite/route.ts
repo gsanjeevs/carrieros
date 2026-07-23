@@ -22,6 +22,20 @@ import { createAuthAdminProvider } from '@/lib/auth-admin'
 // at onboarding, decision P3).
 export const INVITABLE_ROLES = ['dispatcher', 'finance', 'owner'] as const
 
+// DEMO-MODE SEAM (2026-07-22, same philosophy as lib/stripe.ts's
+// createStripeCustomer() and app/api/settlements/[id]/send-ach/route.ts's
+// sendAchTransfer()): no SMS provider (Twilio or equivalent) is configured
+// in this project. This does not send a text message — it logs what would
+// be sent, so the phone-invite data model (auth.users row with a confirmed
+// phone, no password) is real and complete, and a real provider can drop in
+// behind this function without changing anything else in the route.
+function sendPhoneInviteSms(params: { phone: string; role: string }): void {
+  console.log(
+    '[team-invite:sms-stub] no SMS provider is configured — no text was sent.',
+    JSON.stringify(params)
+  )
+}
+
 export async function POST(request: NextRequest) {
   const ctx = await getAuthedContext(request)
   if (isErrorResponse(ctx)) return ctx
@@ -34,10 +48,13 @@ export async function POST(request: NextRequest) {
     return apiError('FORBIDDEN', 'Only owner/solo can invite team members', 403)
 
   const body = await request.json()
-  const { email, first_name, last_name, role } = body
+  const { email, phone, first_name, last_name, role } = body
 
-  if (!email || typeof email !== 'string' || !email.includes('@'))
-    return apiError('VALIDATION_ERROR', 'A valid email is required', 400)
+  const hasEmail = typeof email === 'string' && email.trim().includes('@')
+  const hasPhone = typeof phone === 'string' && /^\+?[0-9]{7,15}$/.test(phone.trim())
+
+  if (!hasEmail && !hasPhone)
+    return apiError('VALIDATION_ERROR', 'A valid email or phone number is required', 400)
 
   if (!INVITABLE_ROLES.includes(role))
     return apiError('VALIDATION_ERROR', `role must be one of ${INVITABLE_ROLES.join(', ')}`, 400)
@@ -61,26 +78,34 @@ export async function POST(request: NextRequest) {
   const authAdmin = createAuthAdminProvider(admin)
   const origin = new URL(request.url).origin
 
-  // 1. Send the magic-link invite (creates the auth.users row).
-  const { data: inviteData, error: inviteErr } = await authAdmin.inviteUserByEmail(
-    email.trim(),
-    {
-      data: { org_id: profile.org_id, role },
-      redirectTo: `${origin}/auth/callback`,
-    }
-  )
+  // 1. Create the identity via whichever contact method was given. Email is
+  // the fully-working path (real magic-link delivery); phone-only creates a
+  // real auth.users row with a confirmed phone but does not send a real SMS
+  // — see sendPhoneInviteSms()'s comment.
+  const { data: inviteData, error: inviteErr } = hasEmail
+    ? await authAdmin.inviteUserByEmail(email.trim(), {
+        data: { org_id: profile.org_id, role },
+        redirectTo: `${origin}/auth/callback`,
+      })
+    : await authAdmin.createUserWithPhone(phone.trim(), {
+        data: { org_id: profile.org_id, role },
+      })
 
   if (inviteErr || !inviteData?.user) {
     // Supabase returns 422 "A user with this email address has already been
     // registered" — a routine, user-fixable case, not a 500.
     const msg = inviteErr?.message ?? ''
     if (inviteErr?.status === 422 || /already/i.test(msg))
-      return apiError('EMAIL_EXISTS', msg || 'That email is already registered', 409)
+      return apiError(hasEmail ? 'EMAIL_EXISTS' : 'PHONE_EXISTS', msg || 'That contact is already registered', 409)
     logError({ route: 'api/team/invite', userId: user.id, orgId: profile.org_id }, inviteErr)
     return apiError('SERVER_ERROR', msg || 'Failed to send invite', 500)
   }
 
   const newUserId = inviteData.user.id
+
+  if (hasPhone && !hasEmail) {
+    sendPhoneInviteSms({ phone: phone.trim(), role })
+  }
 
   // 2. Create the profile row immediately (bypasses RLS via the admin client —
   // the invitee has no session yet to satisfy own_profile_insert).
@@ -92,6 +117,7 @@ export async function POST(request: NextRequest) {
     role,
     first_name: typeof first_name === 'string' ? first_name.trim() || null : null,
     last_name:  typeof last_name === 'string' ? last_name.trim() || null : null,
+    phone:      hasPhone ? phone.trim() : null,
   })
 
   if (profileErr) {
@@ -104,5 +130,8 @@ export async function POST(request: NextRequest) {
     return apiError('SERVER_ERROR', profileErr.message, 500)
   }
 
-  return NextResponse.json({ id: newUserId, email: email.trim(), role }, { status: 201 })
+  return NextResponse.json(
+    { id: newUserId, email: hasEmail ? email.trim() : null, phone: hasPhone ? phone.trim() : null, role },
+    { status: 201 }
+  )
 }

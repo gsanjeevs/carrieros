@@ -48,6 +48,17 @@ export class SupabaseAuthAdminProvider implements AuthAdminProvider {
     return { error: toAuthAdminError(error) }
   }
 
+  async createUserWithPhone(phone: string, opts?: { data?: Record<string, unknown> }) {
+    const { data, error } = await this.admin.auth.admin.createUser({
+      phone,
+      phone_confirm: true,
+      user_metadata: opts?.data,
+    })
+    if (error || !data?.user) return { data: null, error: toAuthAdminError(error) ?? { message: 'createUser failed' } }
+    const user: AuthAdminUser = { id: data.user.id, email: data.user.email ?? null, lastSignInAt: data.user.last_sign_in_at ?? null }
+    return { data: { user }, error: null }
+  }
+
   async generateMagicLink(email: string, opts?: { redirectTo?: string }) {
     const { data, error } = await this.admin.auth.admin.generateLink({
       type: 'magiclink',

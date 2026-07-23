@@ -39,6 +39,7 @@ export type ErrorCode =
   | 'EMAIL_SEND_FAILED'
   // Team management (app/api/team/*)
   | 'EMAIL_EXISTS'
+  | 'PHONE_EXISTS'
   | 'SELF_ROLE_CHANGE'
   | 'CANNOT_REMOVE_SELF'
   | 'LAST_OWNER'

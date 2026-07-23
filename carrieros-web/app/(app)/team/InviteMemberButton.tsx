@@ -25,9 +25,10 @@ export default function InviteMemberButton() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const empty = { email: '', first_name: '', last_name: '', role: 'dispatcher' }
+  const empty = { email: '', phone: '', first_name: '', last_name: '', role: 'dispatcher' }
   const [form, setForm] = useState(empty)
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }))
+  const [contactMethod, setContactMethod] = useState<'email' | 'phone'>('email')
 
   // `errors` messages are keyed by error_code — never render a raw API string.
   function friendly(code?: string) {
@@ -43,6 +44,7 @@ export default function InviteMemberButton() {
     setOpen(false)
     setError('')
     setForm(empty)
+    setContactMethod('email')
   }
 
   async function submit() {
@@ -53,7 +55,8 @@ export default function InviteMemberButton() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: form.email.trim(),
+          email: contactMethod === 'email' ? form.email.trim() : undefined,
+          phone: contactMethod === 'phone' ? form.phone.trim() : undefined,
           first_name: form.first_name.trim() || undefined,
           last_name: form.last_name.trim() || undefined,
           role: form.role,
@@ -94,14 +97,50 @@ export default function InviteMemberButton() {
 
             <div className="space-y-4">
               <div>
-                <label className={labelCls}>{t('email')} *</label>
-                <input
-                  className={inputCls}
-                  type="email"
-                  placeholder="dispatcher@example.com"
-                  value={form.email}
-                  onChange={(e) => set('email', e.target.value)}
-                />
+                <div className="flex gap-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => setContactMethod('email')}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
+                      contactMethod === 'email' ? 'bg-[#f97316] text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10'
+                    }`}
+                  >
+                    {t('inviteByEmail')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setContactMethod('phone')}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
+                      contactMethod === 'phone' ? 'bg-[#f97316] text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10'
+                    }`}
+                  >
+                    {t('inviteByPhone')}
+                  </button>
+                </div>
+                {contactMethod === 'email' ? (
+                  <>
+                    <label className={labelCls}>{t('email')} *</label>
+                    <input
+                      className={inputCls}
+                      type="email"
+                      placeholder="dispatcher@example.com"
+                      value={form.email}
+                      onChange={(e) => set('email', e.target.value)}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <label className={labelCls}>{t('phone')} *</label>
+                    <input
+                      className={inputCls}
+                      type="tel"
+                      placeholder="+15551234567"
+                      value={form.phone}
+                      onChange={(e) => set('phone', e.target.value)}
+                    />
+                    <p className="text-xs text-slate-500 mt-1.5">{t('phoneInviteNote')}</p>
+                  </>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -150,7 +189,7 @@ export default function InviteMemberButton() {
                 </button>
                 <button
                   onClick={submit}
-                  disabled={loading || !form.email}
+                  disabled={loading || (contactMethod === 'email' ? !form.email : !form.phone)}
                   className="flex-2 flex-grow py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
                 >
                   {loading ? t('sendingInvite') : t('sendInvite')}
