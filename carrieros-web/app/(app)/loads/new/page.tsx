@@ -1,7 +1,31 @@
 // app/loads/new/page.tsx
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { intakeEmailForOrg } from '@/lib/domain/intake-email'
+import CopyIntakeEmailButton from './CopyIntakeEmailButton'
 
-export default function NewLoadPage() {
+export default async function NewLoadPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('org_id')
+    .eq('id', user.id)
+    .single()
+
+  let intakeEmail: string | null = null
+  if (profile?.org_id) {
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('name')
+      .eq('id', profile.org_id)
+      .maybeSingle()
+    if (org?.name) intakeEmail = intakeEmailForOrg(profile.org_id, org.name)
+  }
+
   return (
     <div className="p-8 max-w-2xl mx-auto">
 
@@ -63,6 +87,27 @@ export default function NewLoadPage() {
           </div>
           <span className="material-symbols-outlined text-slate-600 group-hover:text-slate-400 text-[20px] mt-0.5 transition-colors">chevron_right</span>
         </Link>
+
+        {/* Forward by email — not a clickable tile (nothing happens in-app),
+            just the address to give brokers or set up as a forwarding
+            target. See lib/domain/intake-email.ts for why this is generated,
+            not stored, and app/api/intake/email/route.ts for the webhook
+            that consumes it. */}
+        {intakeEmail && (
+          <div className="flex items-start gap-4 p-5 bg-white/5 border border-white/8 rounded-xl shadow-card-dark">
+            <div className="w-10 h-10 rounded-lg bg-sky-500/15 flex items-center justify-center flex-shrink-0">
+              <span className="material-symbols-outlined text-sky-400 text-[20px]">forward_to_inbox</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-white font-medium text-sm">Forward by email</p>
+              <p className="text-slate-400 text-sm mt-0.5">Forward a rate confirmation to this address and it's extracted automatically</p>
+              <div className="flex items-center gap-2 mt-2">
+                <code className="text-slate-300 text-xs bg-black/20 px-2 py-1 rounded truncate">{intakeEmail}</code>
+                <CopyIntakeEmailButton email={intakeEmail} />
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>
