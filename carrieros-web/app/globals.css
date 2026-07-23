@@ -166,3 +166,21 @@ body::before {
      behind everything, painted just above body's own background color. */
   z-index: -1;
 }
+
+/* Print support (added for the invoice print/"Download PDF" page,
+   docs/feature-completeness-audit.md's #3 gap) — hides the app chrome
+   (sidebar) and un-clips the scrollable main content so printing any
+   authenticated page produces just its content, not the dark shell. The
+   `<aside>` selector is safe app-wide: Sidebar.tsx is the only <aside> in
+   the app (confirmed via grep before adding this). */
+@media print {
+  aside {
+    display: none !important;
+  }
+  main {
+    overflow: visible !important;
+  }
+  body::before {
+    display: none !important;
+  }
+}

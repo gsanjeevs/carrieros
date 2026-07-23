@@ -243,6 +243,60 @@ export async function markInvoicePaid(invoiceId: number): Promise<ActionResult> 
   return { ok: true, invoice_number: data.invoice_number }
 }
 
+/**
+ * Edits an invoice's amount/due_date/notes before it's sent (audit's #3
+ * gap, docs/feature-completeness-audit.md: "Review + edit invoice before
+ * sending — Missing"). Deliberately draft-only: once an invoice has been
+ * emailed to a customer (status 'sent'/'paid'/'overdue'), silently
+ * rewriting the amount behind their back is exactly the kind of billing
+ * surprise this restriction exists to prevent — see PRD edge case #11
+ * ("invoice sent, then rate corrected — must re-issue"), which implies a
+ * correction after sending is a new/re-issued invoice, not a silent edit.
+ */
+export async function updateInvoiceDraft(
+  invoiceId: number,
+  fields: { amount: number; due_date: string | null; notes: string | null }
+): Promise<ActionResult> {
+  const ctx = await billingContext()
+  if ('error_code' in ctx) return { ok: false, error_code: ctx.error_code }
+  const { supabase, orgId } = ctx
+
+  if (!Number.isFinite(fields.amount) || fields.amount <= 0) {
+    return { ok: false, error_code: 'VALIDATION_ERROR' }
+  }
+
+  const { data: current, error: readError } = await supabase
+    .from('invoices')
+    .select('status')
+    .eq('id', invoiceId)
+    .eq('carrier_org_id', orgId)
+    .maybeSingle()
+
+  if (readError) return { ok: false, error_code: 'SERVER_ERROR' }
+  if (!current) return { ok: false, error_code: 'NOT_FOUND' }
+  if (current.status !== 'draft') return { ok: false, error_code: 'VALIDATION_ERROR' }
+
+  const { data, error } = await supabase
+    .from('invoices')
+    .update({
+      amount: fields.amount,
+      due_date: fields.due_date || null,
+      notes: fields.notes || null,
+    })
+    .eq('id', invoiceId)
+    .eq('carrier_org_id', orgId)
+    .eq('status', 'draft')
+    .select('invoice_number')
+    .maybeSingle()
+
+  if (error) return { ok: false, error_code: 'SERVER_ERROR' }
+  if (!data) return { ok: false, error_code: 'NOT_FOUND' }
+
+  revalidatePath('/invoices')
+  revalidatePath(`/invoices/${data.invoice_number}`)
+  return { ok: true, invoice_number: data.invoice_number }
+}
+
 /** Changes how this invoice is meant to be collected (decision R1). */
 export async function setInvoicePaymentMethod(
   invoiceId: number,

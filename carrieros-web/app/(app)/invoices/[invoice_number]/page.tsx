@@ -6,14 +6,10 @@ import { getTranslations, getLocale } from 'next-intl/server'
 import { formatDate, formatDateTime } from '@/lib/format-datetime'
 import { formatMoney } from '@/lib/format-money'
 import InvoiceActions from '../InvoiceActions'
+import EditInvoiceCard from '../EditInvoiceCard'
 import { INVOICE_ROLES } from '@/lib/roles-policy'
-
-const STATUS_COLOR: Record<string, string> = {
-  draft:   'bg-slate-500/20 text-slate-400',
-  sent:    'bg-blue-500/20 text-blue-400',
-  paid:    'bg-[#16a34a]/20 text-[#16a34a]',
-  overdue: 'bg-red-500/20 text-red-400',
-}
+import { invoiceStatusVariant, type InvoiceStatus } from '@/lib/domain/invoice-status'
+import StatusBadge from '@/components/ui/StatusBadge'
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -97,17 +93,26 @@ export default async function InvoiceDetailPage({
               <span className="material-symbols-outlined text-[20px]">arrow_back</span>
             </Link>
             <h1 className="text-2xl font-semibold text-white">{invoice.invoice_number}</h1>
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${STATUS_COLOR[invoice.status ?? 'draft'] ?? STATUS_COLOR.draft}`}>
+            <StatusBadge variant={invoiceStatusVariant((invoice.status ?? 'draft') as InvoiceStatus)}>
               {t(`status_${invoice.status ?? 'draft'}`)}
-            </span>
+            </StatusBadge>
           </div>
           <p className="text-slate-400 text-sm ml-9">
             {t('billedTo', { customer: customerName ?? '—' })}
           </p>
         </div>
-        <div className="text-right">
-          <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">{t('amountDue')}</p>
-          <p className="text-2xl font-semibold text-white">{formatMoney(invoice.amount, currency, locale)}</p>
+        <div className="flex items-start gap-4">
+          <div className="text-right">
+            <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">{t('amountDue')}</p>
+            <p className="text-2xl font-semibold text-white">{formatMoney(invoice.amount, currency, locale)}</p>
+          </div>
+          <a
+            href={`/invoices/${invoice.invoice_number}/print`}
+            className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/8 text-white text-xs font-medium rounded-lg transition"
+          >
+            <span className="material-symbols-outlined text-[16px]">print</span>
+            {t('printDownload')}
+          </a>
         </div>
       </div>
 
@@ -190,6 +195,13 @@ export default async function InvoiceDetailPage({
 
         {/* Right: actions */}
         <div className="space-y-6">
+          <EditInvoiceCard
+            invoiceId={invoice.id}
+            status={invoice.status ?? 'draft'}
+            initialAmount={Number(invoice.amount)}
+            initialDueDate={invoice.due_date}
+            initialNotes={invoice.notes}
+          />
           <InvoiceActions
             invoiceId={invoice.id}
             status={invoice.status ?? 'draft'}
