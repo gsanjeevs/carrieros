@@ -17,10 +17,17 @@ const DEFAULT_SMTP_HOST = '127.0.0.1'
 const DEFAULT_SMTP_PORT = 54325
 const DEFAULT_SMTP_FROM = 'CarrierOS <no-reply@carrieros.local>'
 
+export interface SendEmailAttachment {
+  filename: string
+  content: Buffer
+  contentType?: string
+}
+
 export interface SendEmailArgs {
   to: string
   subject: string
   html: string
+  attachments?: SendEmailAttachment[]
 }
 
 export interface SendEmailResult {
@@ -28,7 +35,7 @@ export interface SendEmailResult {
   error?: string
 }
 
-export async function sendEmail({ to, subject, html }: SendEmailArgs): Promise<SendEmailResult> {
+export async function sendEmail({ to, subject, html, attachments }: SendEmailArgs): Promise<SendEmailResult> {
   const host = process.env.SMTP_HOST || DEFAULT_SMTP_HOST
   const port = Number(process.env.SMTP_PORT || DEFAULT_SMTP_PORT)
   const user = process.env.SMTP_USER
@@ -46,7 +53,7 @@ export async function sendEmail({ to, subject, html }: SendEmailArgs): Promise<S
       auth: user && pass ? { user, pass } : undefined,
     })
 
-    await transport.sendMail({ from, to, subject, html })
+    await transport.sendMail({ from, to, subject, html, attachments })
     return { ok: true }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown SMTP error'

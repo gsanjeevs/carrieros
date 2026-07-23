@@ -254,7 +254,13 @@
     "actionCancelUnavailable": "Esta carga ya llegó a un estado final.",
     "rateHero": "Tarifa",
     "cancelledEndState": "Cancelada",
-    "declinedEndState": "Rechazada"
+    "declinedEndState": "Rechazada",
+    "sendToCustomer": "Enviar al Cliente",
+    "recipientEmail": "Correo del destinatario",
+    "selectDocuments": "Documentos a enviar",
+    "sendDocuments": "Enviar Documentos",
+    "sendingDocuments": "Enviando…",
+    "documentsSentSuccess": "{count, plural, one {# documento enviado} other {# documentos enviados}} a {email}."
   },
   "drivers": {
     "title": "Conductores",

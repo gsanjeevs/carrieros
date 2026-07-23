@@ -16,4 +16,8 @@ export interface StorageProvider {
   uploadFile(path: string, file: File | Blob, contentType?: string): Promise<void>
   getSignedUrl(path: string, expiresInSeconds: number): Promise<string>
   remove(paths: string[]): Promise<void>
+  // Added for send-documents-to-customer (app/api/loads/[id]/send-documents)
+  // — the first real need for server-side file bytes, not just a signed
+  // URL, since an emailed attachment needs the actual content.
+  download(path: string): Promise<Blob>
 }

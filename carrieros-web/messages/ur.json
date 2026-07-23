@@ -254,7 +254,13 @@
     "actionCancelUnavailable": "یہ لوڈ پہلے ہی حتمی حالت تک پہنچ چکا ہے۔",
     "rateHero": "ریٹ",
     "cancelledEndState": "منسوخ شدہ",
-    "declinedEndState": "مسترد شدہ"
+    "declinedEndState": "مسترد شدہ",
+    "sendToCustomer": "کسٹمر کو بھیجیں",
+    "recipientEmail": "وصول کنندہ کی ای میل",
+    "selectDocuments": "بھیجنے کے لیے دستاویزات",
+    "sendDocuments": "دستاویزات بھیجیں",
+    "sendingDocuments": "بھیجا جا رہا ہے…",
+    "documentsSentSuccess": "{email} کو {count, plural, one {# دستاویز} other {# دستاویزات}} بھیج دی گئیں۔"
   },
   "drivers": {
     "title": "ڈرائیورز",

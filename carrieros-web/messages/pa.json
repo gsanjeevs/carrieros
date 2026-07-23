@@ -254,7 +254,13 @@
     "actionCancelUnavailable": "ਇਹ ਲੋਡ ਪਹਿਲਾਂ ਹੀ ਅੰਤਿਮ ਸਥਿਤੀ 'ਤੇ ਪਹੁੰਚ ਚੁੱਕਾ ਹੈ।",
     "rateHero": "ਰੇਟ",
     "cancelledEndState": "ਰੱਦ ਕੀਤਾ",
-    "declinedEndState": "ਅਸਵੀਕਾਰ ਕੀਤਾ"
+    "declinedEndState": "ਅਸਵੀਕਾਰ ਕੀਤਾ",
+    "sendToCustomer": "ਗਾਹਕ ਨੂੰ ਭੇਜੋ",
+    "recipientEmail": "ਪ੍ਰਾਪਤਕਰਤਾ ਈਮੇਲ",
+    "selectDocuments": "ਭੇਜਣ ਲਈ ਦਸਤਾਵੇਜ਼",
+    "sendDocuments": "ਦਸਤਾਵੇਜ਼ ਭੇਜੋ",
+    "sendingDocuments": "ਭੇਜਿਆ ਜਾ ਰਿਹਾ ਹੈ…",
+    "documentsSentSuccess": "{email} ਨੂੰ {count, plural, one {# ਦਸਤਾਵੇਜ਼} other {# ਦਸਤਾਵੇਜ਼}} ਭੇਜੇ ਗਏ।"
   },
   "drivers": {
     "title": "ਡਰਾਈਵਰ",

@@ -254,7 +254,13 @@
     "actionCancelUnavailable": "This load has already reached a final status.",
     "rateHero": "Rate",
     "cancelledEndState": "Cancelled",
-    "declinedEndState": "Declined"
+    "declinedEndState": "Declined",
+    "sendToCustomer": "Send to Customer",
+    "recipientEmail": "Recipient email",
+    "selectDocuments": "Documents to send",
+    "sendDocuments": "Send Documents",
+    "sendingDocuments": "Sending…",
+    "documentsSentSuccess": "Sent {count, plural, one {# document} other {# documents}} to {email}."
   },
   "drivers": {
     "title": "Drivers",

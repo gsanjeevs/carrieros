@@ -6,6 +6,7 @@ import { getTranslations, getLocale } from 'next-intl/server'
 import DispatchPanel from '@/components/DispatchPanel'
 import LoadActionGrid from '@/components/LoadActionGrid'
 import LoadDocuments, { type DocType, type LoadDocument } from '@/components/LoadDocuments'
+import SendDocumentsButton from '@/components/SendDocumentsButton'
 import { formatDateTime, toDate } from '@/lib/format-datetime'
 import { formatMoney } from '@/lib/format-money'
 import CreateInvoiceButton from './CreateInvoiceButton'
@@ -75,15 +76,17 @@ export default async function LoadDetailPage({
 
   if (!load) notFound()
 
-  // Fetch customer name if linked
+  // Fetch customer name/email if linked
   let customerName: string | null = null
+  let customerEmail: string | null = null
   if (load.customer_org_id) {
     const { data: org } = await supabase
       .from('organizations')
-      .select('name')
+      .select('name, email')
       .eq('id', load.customer_org_id)
       .single()
     customerName = org?.name ?? null
+    customerEmail = org?.email ?? null
   }
 
   // Fetch load events
@@ -301,6 +304,15 @@ export default async function LoadDetailPage({
             canUpload={canUploadDoc}
             canDelete={canDeleteDoc}
           />
+          {canUploadDoc && (
+            <div className="mt-3 flex justify-end">
+              <SendDocumentsButton
+                loadId={load.id}
+                documents={documents.map((d) => ({ id: d.id, type: d.type, fileName: d.fileName }))}
+                customerEmail={customerEmail}
+              />
+            </div>
+          )}
           </div>
 
           {/* Timeline */}

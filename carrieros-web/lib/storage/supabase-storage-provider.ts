@@ -35,4 +35,10 @@ export class SupabaseStorageProvider implements StorageProvider {
     const { error } = await this.supabase.storage.from(this.bucket).remove(paths)
     if (error) throw error
   }
+
+  async download(path: string): Promise<Blob> {
+    const { data, error } = await this.supabase.storage.from(this.bucket).download(path)
+    if (error || !data) throw error ?? new Error('download returned no data')
+    return data
+  }
 }
