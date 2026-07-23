@@ -19,7 +19,7 @@ import CustomerTabs from './CustomerTabs'
 import CustomerContacts from '@/components/CustomerContacts'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import { invoiceStatusVariant, type InvoiceStatus } from '@/lib/domain/invoice-status'
-import StatusBadge from '@/components/ui/StatusBadge'
+import { Card, CardHeader, CardBody, KpiTile, StatusBadge, Table, TableHeaderCell, TableRow, TableCell, EmptyState } from '@/components/ui'
 
 import { INVOICE_ROLES } from '@/lib/roles-policy'
 
@@ -68,27 +68,17 @@ function HealthScoreRing({ score }: { score: number }) {
 
 function LockedTeaser({ icon, message }: { icon: string; message: string }) {
   return (
-    <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-8 text-center shadow-card-dark">
-      <span className="material-symbols-outlined text-slate-600 text-3xl">{icon}</span>
-      <p className="text-slate-400 text-sm mt-3">{message}</p>
-    </div>
+    <Card>
+      <EmptyState icon={icon} title={message} />
+    </Card>
   )
 }
 
 function InfoRow({ label, value }: { label: string; value: string | number | null | undefined }) {
   return (
-    <div className="flex justify-between items-start py-2.5 border-b border-white/5 last:border-0">
-      <span className="text-slate-500 text-sm">{label}</span>
-      <span className="text-white text-sm text-right ml-4">{value ?? '—'}</span>
-    </div>
-  )
-}
-
-function StatCard({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="bg-white/5 border border-white/8 rounded-xl p-4 shadow-card-dark">
-      <p className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold mb-1">{label}</p>
-      <p className="text-xl font-bold text-white">{value}</p>
+    <div className="flex justify-between items-start py-2.5 border-b border-divider-ui last:border-0">
+      <span className="text-text-sec text-sm">{label}</span>
+      <span className="text-text-pri text-sm text-right ml-4">{value ?? '—'}</span>
     </div>
   )
 }
@@ -204,192 +194,199 @@ export default async function CustomerDetailPage({
   const overviewTab = (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 space-y-6">
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-          <h2 className="text-white font-medium text-sm mb-3">{t('detailInfo')}</h2>
-          <InfoRow label={t('contact')} value={customer.contact_name} />
-          <InfoRow label={t('phoneEmail')} value={[org?.phone, org?.email].filter(Boolean).join(' · ') || null} />
-          <InfoRow label={t('address')} value={addressLine || null} />
-        </div>
+        <Card>
+          <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('detailInfo')}</h2></CardHeader>
+          <CardBody>
+            <InfoRow label={t('contact')} value={customer.contact_name} />
+            <InfoRow label={t('phoneEmail')} value={[org?.phone, org?.email].filter(Boolean).join(' · ') || null} />
+            <InfoRow label={t('address')} value={addressLine || null} />
+          </CardBody>
+        </Card>
 
         {customer.tags && customer.tags.length > 0 && (
-          <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-            <h2 className="text-white font-medium text-sm mb-3">{t('tags')}</h2>
-            <div className="flex flex-wrap gap-1.5">
-              {customer.tags.map((tag) => (
-                <span key={tag} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#f97316]/15 text-[#f97316]">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
+          <Card>
+            <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('tags')}</h2></CardHeader>
+            <CardBody>
+              <div className="flex flex-wrap gap-1.5">
+                {customer.tags.map((tag) => (
+                  <span key={tag} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#f97316]/15 text-[#f97316]">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </CardBody>
+          </Card>
         )}
 
         {customer.notes && (
-          <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-            <h2 className="text-white font-medium text-sm mb-3">{t('notes')}</h2>
-            <p className="text-slate-300 text-sm whitespace-pre-wrap">{customer.notes}</p>
-          </div>
+          <Card>
+            <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('notes')}</h2></CardHeader>
+            <CardBody>
+              <p className="text-text-sec text-sm whitespace-pre-wrap">{customer.notes}</p>
+            </CardBody>
+          </Card>
         )}
       </div>
 
       <div className="space-y-6">
         <div className={`grid ${canSeeRevenue ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
-          <StatCard label={t('detailTotalLoads')} value={loads.length} />
-          {canSeeRevenue && <StatCard label={t('detailTotalRevenue')} value={formatMoney(totalRevenue, currency, locale)} />}
-          <StatCard label={t('detailVehiclesUsed')} value={vehiclesUsed} />
-          <StatCard label={t('detailDriversUsed')} value={driversUsed} />
+          <KpiTile label={t('detailTotalLoads')} value={loads.length} />
+          {canSeeRevenue && <KpiTile label={t('detailTotalRevenue')} value={formatMoney(totalRevenue, currency, locale)} />}
+          <KpiTile label={t('detailVehiclesUsed')} value={vehiclesUsed} />
+          <KpiTile label={t('detailDriversUsed')} value={driversUsed} />
         </div>
 
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark flex flex-col items-center text-center">
-          <h2 className="text-white font-medium text-sm mb-4 self-start">{t('detailHealthScore')}</h2>
-          {canSeeHealthScore ? (
-            healthScore != null ? (
-              <>
-                <HealthScoreRing score={healthScore} />
-                <p className="text-slate-500 text-xs mt-3">{t('detailHealthScoreHint')}</p>
-              </>
+        <Card>
+          <CardBody className="flex flex-col items-center text-center">
+            <h2 className="text-text-pri font-medium text-sm mb-4 self-start">{t('detailHealthScore')}</h2>
+            {canSeeHealthScore ? (
+              healthScore != null ? (
+                <>
+                  <HealthScoreRing score={healthScore} />
+                  <p className="text-text-mut text-xs mt-3">{t('detailHealthScoreHint')}</p>
+                </>
+              ) : (
+                <p className="text-text-mut text-sm py-4">—</p>
+              )
             ) : (
-              <p className="text-slate-500 text-sm py-4">—</p>
-            )
-          ) : (
-            <div className="w-full">
-              <span className="material-symbols-outlined text-slate-600 text-3xl">lock</span>
-              <p className="text-slate-400 text-sm mt-3">{t('detailHealthScoreLocked')}</p>
-            </div>
-          )}
-        </div>
+              <div className="w-full">
+                <span className="material-symbols-outlined text-text-mut text-3xl">lock</span>
+                <p className="text-text-sec text-sm mt-3">{t('detailHealthScoreLocked')}</p>
+              </div>
+            )}
+          </CardBody>
+        </Card>
       </div>
     </div>
   )
 
   const loadsTab = loads.length === 0 ? (
-    <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-card-dark">
-      <span className="material-symbols-outlined text-slate-600 text-4xl">local_shipping</span>
-      <p className="text-slate-500 text-sm mt-3">{t('detailNoLoads')}</p>
-    </div>
+    <Card>
+      <EmptyState icon="local_shipping" title={t('detailNoLoads')} />
+    </Card>
   ) : (
-    <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
-      <table className="w-full text-sm">
+    <Card>
+      <Table>
         <thead>
-          <tr className="border-b border-white/5">
-            <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('detailLoadNumber')}</th>
-            <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('detailStatus')}</th>
-            <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('detailRoute')}</th>
-            <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('detailDate')}</th>
+          <tr>
+            <TableHeaderCell>{t('detailLoadNumber')}</TableHeaderCell>
+            <TableHeaderCell>{t('detailStatus')}</TableHeaderCell>
+            <TableHeaderCell>{t('detailRoute')}</TableHeaderCell>
+            <TableHeaderCell>{t('detailDate')}</TableHeaderCell>
           </tr>
         </thead>
-        <tbody className="divide-y divide-white/5">
+        <tbody>
           {loads.map((l) => (
-            <tr key={l.id} className="hover:bg-white/[0.07] transition-colors duration-150">
-              <td className="px-5 py-3.5">
+            <TableRow key={l.id}>
+              <TableCell className="font-medium text-text-pri">
                 <Link
                   href={`/loads/${l.load_number}`}
-                  className="text-white font-medium hover:text-[#f97316] transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+                  className="hover:text-brand-orange transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
                 >
                   {l.load_number}
                 </Link>
-              </td>
-              <td className="px-4 py-3.5">
+              </TableCell>
+              <TableCell>
                 <StatusBadge variant={loadStatusVariant((l.status ?? 'draft') as LoadStatus)}>
                   {tLoads(`status_${l.status ?? 'draft'}` as never)}
                 </StatusBadge>
-              </td>
-              <td className="px-4 py-3.5 text-slate-300">
+              </TableCell>
+              <TableCell>
                 {[l.pickup_city, l.pickup_state].filter(Boolean).join(', ') || '—'}
                 {' → '}
                 {[l.delivery_city, l.delivery_state].filter(Boolean).join(', ') || '—'}
-              </td>
-              <td className="px-4 py-3.5 text-slate-400">{formatDate(l.pickup_date, profile)}</td>
-            </tr>
+              </TableCell>
+              <TableCell>{formatDate(l.pickup_date, profile)}</TableCell>
+            </TableRow>
           ))}
         </tbody>
-      </table>
-    </div>
+      </Table>
+    </Card>
   )
 
   const exceptionsTab = !canSeeExceptions ? (
     <LockedTeaser icon="lock" message={t('detailExceptionsLocked')} />
   ) : exceptions.length === 0 ? (
-    <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-card-dark">
-      <span className="material-symbols-outlined text-slate-600 text-4xl">check_circle</span>
-      <p className="text-slate-500 text-sm mt-3">{t('detailNoExceptions')}</p>
-    </div>
+    <Card>
+      <EmptyState icon="check_circle" title={t('detailNoExceptions')} />
+    </Card>
   ) : (
-    <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
+    <Card>
+      <CardBody>
       <div className="space-y-4">
         {exceptions.map((e) => (
           <div key={e.id} className="flex gap-3">
             <div className={`w-1.5 h-1.5 rounded-full mt-2 shrink-0 ${e.severity === 'urgent' ? 'bg-rose-400' : e.severity === 'warning' ? 'bg-amber-400' : 'bg-blue-400'}`} />
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <p className="text-white text-sm font-medium">{e.title}</p>
+                <p className="text-text-pri text-sm font-medium">{e.title}</p>
                 {e.severity && (
                   <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${SEVERITY_COLOR[e.severity] ?? SEVERITY_COLOR.info}`}>
                     {e.severity}
                   </span>
                 )}
               </div>
-              {e.detail && <p className="text-slate-400 text-xs mt-0.5">{e.detail}</p>}
-              <p className="text-slate-600 text-xs mt-0.5">{formatDate(e.occurred_at, profile)}</p>
+              {e.detail && <p className="text-text-sec text-xs mt-0.5">{e.detail}</p>}
+              <p className="text-text-mut text-xs mt-0.5">{formatDate(e.occurred_at, profile)}</p>
             </div>
           </div>
         ))}
       </div>
-    </div>
+      </CardBody>
+    </Card>
   )
 
   const invoicesTab = !canBill ? (
     <LockedTeaser icon="lock" message={t('detailInvoicesRestricted')} />
   ) : invoices.length === 0 ? (
-    <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-card-dark">
-      <span className="material-symbols-outlined text-slate-600 text-4xl">receipt_long</span>
-      <p className="text-slate-500 text-sm mt-3">{t('detailNoInvoices')}</p>
-    </div>
+    <Card>
+      <EmptyState icon="receipt_long" title={t('detailNoInvoices')} />
+    </Card>
   ) : (
-    <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
-      <table className="w-full text-sm">
+    <Card>
+      <Table>
         <thead>
-          <tr className="border-b border-white/5">
-            <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('detailInvoiceNumber')}</th>
-            <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('detailStatus')}</th>
-            <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('detailDueDate')}</th>
-            <th className="text-right px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('detailAmount')}</th>
+          <tr>
+            <TableHeaderCell>{t('detailInvoiceNumber')}</TableHeaderCell>
+            <TableHeaderCell>{t('detailStatus')}</TableHeaderCell>
+            <TableHeaderCell>{t('detailDueDate')}</TableHeaderCell>
+            <TableHeaderCell numeric>{t('detailAmount')}</TableHeaderCell>
           </tr>
         </thead>
-        <tbody className="divide-y divide-white/5">
+        <tbody>
           {invoices.map((inv) => (
-            <tr key={inv.id} className="hover:bg-white/[0.07] transition-colors duration-150">
-              <td className="px-5 py-3.5">
+            <TableRow key={inv.id}>
+              <TableCell className="font-medium text-text-pri">
                 <Link
                   href={`/invoices/${inv.invoice_number}`}
-                  className="text-white font-medium hover:text-[#f97316] transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+                  className="hover:text-brand-orange transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
                 >
                   {inv.invoice_number}
                 </Link>
-              </td>
-              <td className="px-4 py-3.5">
+              </TableCell>
+              <TableCell>
                 <StatusBadge variant={invoiceStatusVariant((inv.status ?? 'draft') as InvoiceStatus)}>
                   {tInvoices(`status_${inv.status ?? 'draft'}` as never)}
                 </StatusBadge>
-              </td>
-              <td className="px-4 py-3.5 text-slate-400">{formatDate(inv.due_date, profile)}</td>
-              <td className="px-5 py-3.5 text-right text-white font-medium">{formatMoney(inv.amount, currency, locale)}</td>
-            </tr>
+              </TableCell>
+              <TableCell>{formatDate(inv.due_date, profile)}</TableCell>
+              <TableCell numeric className="font-medium text-text-pri">{formatMoney(inv.amount, currency, locale)}</TableCell>
+            </TableRow>
           ))}
         </tbody>
-      </table>
-    </div>
+      </Table>
+    </Card>
   )
 
   return (
     <div className="p-8 max-w-5xl mx-auto">
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-1">
-          <Link href="/customers" className="text-slate-500 hover:text-white transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
+          <Link href="/customers" className="text-text-sec hover:text-text-pri transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
             <span className="material-symbols-outlined text-[20px]">arrow_back</span>
           </Link>
-          <h1 className="text-2xl font-semibold text-white">{org?.name ?? '—'}</h1>
-          <span className="text-slate-500 text-sm">{customer.customer_number}</span>
+          <h1 className="text-2xl font-semibold text-text-pri">{org?.name ?? '—'}</h1>
+          <span className="text-text-sec text-sm">{customer.customer_number}</span>
         </div>
       </div>
 

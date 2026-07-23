@@ -15,6 +15,7 @@ import ExceptionChip from '@/components/ExceptionChip'
 import { getExceptions } from '@/lib/exceptions'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { createStorageProvider } from '@/lib/storage'
+import { Avatar, Card, EmptyState, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
 
 const VIEW_ROLES   = ['owner', 'solo', 'dispatcher', 'finance']
 const MANAGE_ROLES = ['owner', 'solo', 'dispatcher']
@@ -118,8 +119,8 @@ export default async function CustomersPage({
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">{t('title')}</h1>
-          <p className="text-slate-400 text-sm mt-1">{t('customerCount', { count: customers.length })}</p>
+          <h1 className="text-2xl font-semibold text-text-pri">{t('title')}</h1>
+          <p className="text-text-sec text-sm mt-1">{t('customerCount', { count: customers.length })}</p>
         </div>
         {canManage && (
           <div className="flex items-center gap-3">
@@ -130,33 +131,34 @@ export default async function CustomersPage({
       </div>
 
       {params.created && (
-        <div className="mb-6 flex items-center gap-3 rounded-lg bg-[#16a34a]/10 border border-[#16a34a]/20 px-4 py-3 shadow-card-dark">
-          <span className="material-symbols-outlined text-[#16a34a] text-[18px]">check_circle</span>
-          <p className="text-[#16a34a] text-sm">{t('addedSuccess', { name: params.created })}</p>
+        <div className="mb-6 flex items-center gap-3 rounded-lg bg-success/10 border border-success/20 px-4 py-3">
+          <span className="material-symbols-outlined text-success text-[18px]">check_circle</span>
+          <p className="text-success text-sm">{t('addedSuccess', { name: params.created })}</p>
         </div>
       )}
 
       {customers.length === 0 ? (
-        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-card-dark">
-          <span className="material-symbols-outlined text-slate-600 text-4xl">business</span>
-          <p className="text-slate-500 text-sm mt-3">{t('noCustomersYet')}</p>
-          {canManage && <AddCustomerButton variant="empty" />}
-        </div>
+        <Card>
+          <div className="flex flex-col items-center pb-8">
+            <EmptyState icon="business" title={t('noCustomersYet')} />
+            {canManage && <AddCustomerButton variant="empty" />}
+          </div>
+        </Card>
       ) : (
-        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
-          <table className="w-full text-sm">
+        <Card>
+          <Table>
             <thead>
-              <tr className="border-b border-white/5">
-                <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('customerNumber')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('name')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('contact')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('phoneEmail')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('tags')}</th>
-                <th className="text-right px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('loads')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide"></th>
+              <tr>
+                <TableHeaderCell>{t('customerNumber')}</TableHeaderCell>
+                <TableHeaderCell>{t('name')}</TableHeaderCell>
+                <TableHeaderCell>{t('contact')}</TableHeaderCell>
+                <TableHeaderCell>{t('phoneEmail')}</TableHeaderCell>
+                <TableHeaderCell>{t('tags')}</TableHeaderCell>
+                <TableHeaderCell numeric>{t('loads')}</TableHeaderCell>
+                <TableHeaderCell></TableHeaderCell>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody>
               {customers.map((c) => {
                 const org = c.organizations
                 const phoneEmail = [org?.phone, org?.email].filter(Boolean).join(' · ')
@@ -169,32 +171,30 @@ export default async function CustomersPage({
                       // eslint-disable-next-line @next/next/no-img-element -- signed, expiring Supabase Storage URL, not a static asset next/image can cache
                       <img src={logoUrl} alt="" className="w-8 h-8 rounded-full object-cover shrink-0 bg-white/10" />
                     ) : (
-                      <span className="w-8 h-8 rounded-full bg-white/10 text-slate-300 text-xs font-semibold flex items-center justify-center shrink-0">
-                        {initialsFor(org?.name)}
-                      </span>
+                      <Avatar initials={initialsFor(org?.name)} />
                     )}
                     <div className="min-w-0">
-                      <div className="text-white font-medium truncate">{org?.name ?? '—'}</div>
-                      {cityState && <div className="text-slate-500 text-xs mt-0.5">{cityState}</div>}
+                      <div className="text-text-pri font-medium truncate">{org?.name ?? '—'}</div>
+                      {cityState && <div className="text-text-mut text-xs mt-0.5">{cityState}</div>}
                     </div>
                   </div>
                 )
                 return (
-                  <tr key={c.org_id} className="hover:bg-white/[0.07] transition-colors duration-150">
-                    <td className="px-5 py-3.5 text-white font-medium">
+                  <TableRow key={c.org_id}>
+                    <TableCell className="font-medium text-text-pri">
                       {c.customer_number ? (
                         <Link
                           href={`/customers/${c.customer_number}`}
-                          className="hover:text-[#f97316] transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+                          className="hover:text-brand-orange transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
                         >
                           {c.customer_number}
                         </Link>
                       ) : '—'}
-                    </td>
-                    <td className="px-4 py-3.5">{nameCell}</td>
-                    <td className="px-4 py-3.5 text-slate-300">{c.contact_name ?? '—'}</td>
-                    <td className="px-4 py-3.5 text-slate-400">{phoneEmail || '—'}</td>
-                    <td className="px-4 py-3.5">
+                    </TableCell>
+                    <TableCell>{nameCell}</TableCell>
+                    <TableCell>{c.contact_name ?? '—'}</TableCell>
+                    <TableCell>{phoneEmail || '—'}</TableCell>
+                    <TableCell>
                       {c.tags && c.tags.length > 0 ? (
                         <div className="flex flex-wrap gap-1.5">
                           {c.tags.map((tag) => (
@@ -204,17 +204,17 @@ export default async function CustomersPage({
                           ))}
                         </div>
                       ) : (
-                        <span className="text-slate-500">—</span>
+                        <span className="text-text-mut">—</span>
                       )}
-                    </td>
-                    <td className="px-5 py-3.5 text-right text-slate-300">{loadCounts.get(c.org_id) ?? 0}</td>
-                    <td className="px-4 py-3.5">{topException && <ExceptionChip item={topException} />}</td>
-                  </tr>
+                    </TableCell>
+                    <TableCell numeric>{loadCounts.get(c.org_id) ?? 0}</TableCell>
+                    <TableCell>{topException && <ExceptionChip item={topException} />}</TableCell>
+                  </TableRow>
                 )
               })}
             </tbody>
-          </table>
-        </div>
+          </Table>
+        </Card>
       )}
     </div>
   )

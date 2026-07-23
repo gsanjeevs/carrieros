@@ -20,7 +20,7 @@ export default function CustomerTabs({
 
   return (
     <div>
-      <div className="flex items-center gap-1 border-b border-white/8 mb-6 overflow-x-auto" role="tablist">
+      <div className="flex items-center gap-1 border-b border-border-ui mb-6 overflow-x-auto" role="tablist">
         {tabs.map((tab) => (
           <button
             key={tab.key}
