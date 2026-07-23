@@ -150,8 +150,9 @@ export default async function LoadDetailPage({
   const canDeleteDoc = ['owner', 'solo'].includes(profile.role)
 
   const isCancelled = load.status === 'cancelled'
+  const isDeclined  = load.status === 'declined'
   const currentIdx  = STATUS_FLOW.findIndex(s => s.key === load.status)
-  const TERMINAL_STATUSES = ['delivered', 'invoiced', 'paid', 'cancelled']
+  const TERMINAL_STATUSES = ['delivered', 'invoiced', 'paid', 'cancelled', 'declined']
   const canCancelLoad = !TERMINAL_STATUSES.includes(load.status ?? 'draft')
   const driverName  = load.drivers?.profiles
     ? [load.drivers.profiles.first_name, load.drivers.profiles.last_name].filter(Boolean).join(' ')
@@ -212,10 +213,10 @@ export default async function LoadDetailPage({
 
       {/* Status timeline */}
       <div className="bg-white/5 border border-white/8 rounded-xl p-5 mb-6 shadow-card-dark">
-        <div className={`flex items-center gap-0 overflow-x-auto ${isCancelled ? 'opacity-40 grayscale' : ''}`}>
+        <div className={`flex items-center gap-0 overflow-x-auto ${(isCancelled || isDeclined) ? 'opacity-40 grayscale' : ''}`}>
           {STATUS_FLOW.map((s, i) => {
-            const done    = !isCancelled && i < currentIdx
-            const current = !isCancelled && i === currentIdx
+            const done    = !isCancelled && !isDeclined && i < currentIdx
+            const current = !isCancelled && !isDeclined && i === currentIdx
             return (
               <div key={s.key} className="flex items-center flex-1 min-w-0">
                 <div className="flex flex-col items-center gap-1 shrink-0">
@@ -243,6 +244,14 @@ export default async function LoadDetailPage({
             <span className="material-symbols-outlined text-[18px] text-rose-400">cancel</span>
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400">
               {t('cancelledEndState')}
+            </span>
+          </div>
+        )}
+        {isDeclined && (
+          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-white/8">
+            <span className="material-symbols-outlined text-[18px] text-rose-400">block</span>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400">
+              {t('declinedEndState')}
             </span>
           </div>
         )}

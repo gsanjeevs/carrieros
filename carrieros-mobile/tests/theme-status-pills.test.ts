@@ -18,7 +18,7 @@ import { LOAD_STATUS_PILL, VEHICLE_STATUS_PILL, INVOICE_STATUS_PILL } from '@/co
 
 const LOAD_STATUSES = [
   'draft', 'scheduled', 'dispatched', 'picked_up', 'in_transit',
-  'delivered', 'invoiced', 'paid', 'cancelled',
+  'delivered', 'invoiced', 'paid', 'cancelled', 'declined',
 ];
 const VEHICLE_STATUSES = ['active', 'idle', 'in_shop'];
 const INVOICE_STATUSES = ['draft', 'sent', 'paid', 'overdue'];

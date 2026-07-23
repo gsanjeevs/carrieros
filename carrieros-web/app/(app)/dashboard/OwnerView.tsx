@@ -94,14 +94,15 @@ export default async function OwnerView({ orgId, embedded = false }: { orgId: nu
           .eq('carrier_org_id', orgId)
           .in('status', ['sent', 'overdue'])
       : Promise.resolve({ data: [], count: 0 }),
-    // Avg rate/load: exclude cancelled loads — a cancelled load's rate was
-    // never actually earned, so including it would understate the average.
+    // Avg rate/load: exclude cancelled/declined loads — neither one's rate
+    // was ever actually earned, so including either would understate the
+    // average.
     orgId
       ? supabase
           .from('loads')
           .select('rate')
           .eq('carrier_org_id', orgId)
-          .neq('status', 'cancelled')
+          .not('status', 'in', '(cancelled,declined)')
           .not('rate', 'is', null)
       : Promise.resolve({ data: [] }),
     orgId

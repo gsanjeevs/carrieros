@@ -183,6 +183,7 @@
     "groupInProgress": "جاری ہے",
     "groupCompleted": "مکمل",
     "groupCancelled": "منسوخ شدہ",
+    "groupDeclined": "مسترد شدہ",
     "dispatchAction": "ڈسپیچ →",
     "loadNumber": "لوڈ #",
     "status": "حیثیت",
@@ -200,6 +201,7 @@
     "status_invoiced": "انوائس ہو گیا",
     "status_paid": "ادا شدہ",
     "status_cancelled": "منسوخ شدہ",
+    "status_declined": "مسترد شدہ",
     "commodity": "سامان",
     "weight": "وزن",
     "miles": "میل",
@@ -235,6 +237,8 @@
     "actionMarkDelivered": "ڈیلیور شدہ نشان زد کریں",
     "actionCancelLoad": "لوڈ منسوخ کریں",
     "confirmCancelLoad": "کیا اس لوڈ کو منسوخ کرنا ہے؟ اسے واپس نہیں لیا جا سکتا۔",
+    "actionDeclineLoad": "لوڈ مسترد کریں",
+    "confirmDeclineLoad": "کیا اس لوڈ کو مسترد کرنا ہے؟ اگر آپ اپنا ارادہ بدلتے ہیں تو بروکر کو نئی ریٹ کنفرمیشن کی ضرورت ہوگی۔ اسے واپس نہیں لیا جا سکتا۔",
     "actionShareTracking": "ٹریکنگ شیئر کریں",
     "actionCopied": "کاپی ہو گیا!",
     "actionRateConfirmation": "ریٹ کی تصدیق",
@@ -242,7 +246,8 @@
     "actionEditLoadSoon": "جلد آ رہا ہے",
     "actionCancelUnavailable": "یہ لوڈ پہلے ہی حتمی حالت تک پہنچ چکا ہے۔",
     "rateHero": "ریٹ",
-    "cancelledEndState": "منسوخ شدہ"
+    "cancelledEndState": "منسوخ شدہ",
+    "declinedEndState": "مسترد شدہ"
   },
   "drivers": {
     "title": "ڈرائیورز",

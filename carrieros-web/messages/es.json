@@ -183,6 +183,7 @@
     "groupInProgress": "En curso",
     "groupCompleted": "Completadas",
     "groupCancelled": "Canceladas",
+    "groupDeclined": "Rechazadas",
     "dispatchAction": "Despachar →",
     "loadNumber": "Carga #",
     "status": "Estado",
@@ -200,6 +201,7 @@
     "status_invoiced": "Facturada",
     "status_paid": "Pagada",
     "status_cancelled": "Cancelada",
+    "status_declined": "Rechazada",
     "commodity": "Mercancía",
     "weight": "Peso",
     "miles": "Millas",
@@ -235,6 +237,8 @@
     "actionMarkDelivered": "Marcar Entregada",
     "actionCancelLoad": "Cancelar Carga",
     "confirmCancelLoad": "¿Cancelar esta carga? Esta acción no se puede deshacer.",
+    "actionDeclineLoad": "Rechazar Carga",
+    "confirmDeclineLoad": "¿Rechazar esta carga? El corredor necesitará una nueva confirmación de tarifa si cambia de opinión. Esta acción no se puede deshacer.",
     "actionShareTracking": "Compartir Seguimiento",
     "actionCopied": "¡Copiado!",
     "actionRateConfirmation": "Confirmación de Tarifa",
@@ -242,7 +246,8 @@
     "actionEditLoadSoon": "Próximamente",
     "actionCancelUnavailable": "Esta carga ya llegó a un estado final.",
     "rateHero": "Tarifa",
-    "cancelledEndState": "Cancelada"
+    "cancelledEndState": "Cancelada",
+    "declinedEndState": "Rechazada"
   },
   "drivers": {
     "title": "Conductores",

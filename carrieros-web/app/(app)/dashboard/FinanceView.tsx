@@ -32,12 +32,14 @@ export default async function FinanceView({ orgId }: { orgId: number | undefined
           .eq('carrier_org_id', orgId)
           .in('status', ['sent', 'overdue'])
       : Promise.resolve({ data: [] }),
+    // Avg rate/load: exclude cancelled/declined loads — neither one's rate
+    // was ever actually earned.
     orgId
       ? supabase
           .from('loads')
           .select('rate')
           .eq('carrier_org_id', orgId)
-          .neq('status', 'cancelled')
+          .not('status', 'in', '(cancelled,declined)')
           .not('rate', 'is', null)
       : Promise.resolve({ data: [] }),
   ])

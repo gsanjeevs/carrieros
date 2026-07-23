@@ -24,7 +24,8 @@
       "delivered": "Delivered",
       "invoiced": "Invoiced",
       "paid": "Paid",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "declined": "Declined"
     }
   },
   "loadDetail": {

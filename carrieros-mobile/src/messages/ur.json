@@ -24,7 +24,8 @@
       "delivered": "ڈیلیور کیا گیا",
       "invoiced": "انوائس شدہ",
       "paid": "ادا شدہ",
-      "cancelled": "منسوخ شدہ"
+      "cancelled": "منسوخ شدہ",
+      "declined": "مسترد شدہ"
     }
   },
   "loadDetail": {

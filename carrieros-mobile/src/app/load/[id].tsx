@@ -58,6 +58,7 @@ const STATUS_KEYS = [
   'invoiced',
   'paid',
   'cancelled',
+  'declined',
 ] as const;
 
 // Forward progression a driver (or dispatcher/owner) can trigger from this

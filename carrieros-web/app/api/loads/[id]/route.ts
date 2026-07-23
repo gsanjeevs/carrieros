@@ -5,7 +5,7 @@ import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { hasFeature } from '@/lib/entitlements'
 import { getProfileForUser } from '@/lib/queries/profiles'
 
-const VALID_STATUSES = ['draft','scheduled','dispatched','picked_up','in_transit','delivered','invoiced','paid','cancelled']
+const VALID_STATUSES = ['draft','scheduled','dispatched','picked_up','in_transit','delivered','invoiced','paid','cancelled','declined']
 
 export async function PATCH(
   request: NextRequest,

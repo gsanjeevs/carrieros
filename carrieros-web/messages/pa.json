@@ -183,6 +183,7 @@
     "groupInProgress": "ਜਾਰੀ ਹੈ",
     "groupCompleted": "ਪੂਰਾ ਹੋਇਆ",
     "groupCancelled": "ਰੱਦ ਕੀਤਾ",
+    "groupDeclined": "ਅਸਵੀਕਾਰ ਕੀਤਾ",
     "dispatchAction": "ਡਿਸਪੈਚ →",
     "loadNumber": "ਲੋਡ #",
     "status": "ਸਥਿਤੀ",
@@ -200,6 +201,7 @@
     "status_invoiced": "ਇਨਵੌਇਸ ਹੋਇਆ",
     "status_paid": "ਭੁਗਤਾਨ ਹੋਇਆ",
     "status_cancelled": "ਰੱਦ ਕੀਤਾ",
+    "status_declined": "ਅਸਵੀਕਾਰ ਕੀਤਾ",
     "commodity": "ਸਮਾਨ",
     "weight": "ਭਾਰ",
     "miles": "ਮੀਲ",
@@ -235,6 +237,8 @@
     "actionMarkDelivered": "ਡਿਲੀਵਰ ਹੋਇਆ ਵਜੋਂ ਚਿੰਨ੍ਹਿਤ ਕਰੋ",
     "actionCancelLoad": "ਲੋਡ ਰੱਦ ਕਰੋ",
     "confirmCancelLoad": "ਕੀ ਇਸ ਲੋਡ ਨੂੰ ਰੱਦ ਕਰਨਾ ਹੈ? ਇਹ ਵਾਪਸ ਨਹੀਂ ਲਿਆ ਜਾ ਸਕਦਾ।",
+    "actionDeclineLoad": "ਲੋਡ ਅਸਵੀਕਾਰ ਕਰੋ",
+    "confirmDeclineLoad": "ਕੀ ਇਸ ਲੋਡ ਨੂੰ ਅਸਵੀਕਾਰ ਕਰਨਾ ਹੈ? ਜੇ ਤੁਸੀਂ ਆਪਣਾ ਮਨ ਬਦਲਦੇ ਹੋ ਤਾਂ ਬ੍ਰੋਕਰ ਨੂੰ ਨਵੀਂ ਰੇਟ ਪੁਸ਼ਟੀ ਦੀ ਲੋੜ ਪਵੇਗੀ। ਇਹ ਵਾਪਸ ਨਹੀਂ ਲਿਆ ਜਾ ਸਕਦਾ।",
     "actionShareTracking": "ਟ੍ਰੈਕਿੰਗ ਸਾਂਝੀ ਕਰੋ",
     "actionCopied": "ਕਾਪੀ ਹੋ ਗਿਆ!",
     "actionRateConfirmation": "ਰੇਟ ਪੁਸ਼ਟੀ",
@@ -242,7 +246,8 @@
     "actionEditLoadSoon": "ਜਲਦੀ ਆ ਰਿਹਾ ਹੈ",
     "actionCancelUnavailable": "ਇਹ ਲੋਡ ਪਹਿਲਾਂ ਹੀ ਅੰਤਿਮ ਸਥਿਤੀ 'ਤੇ ਪਹੁੰਚ ਚੁੱਕਾ ਹੈ।",
     "rateHero": "ਰੇਟ",
-    "cancelledEndState": "ਰੱਦ ਕੀਤਾ"
+    "cancelledEndState": "ਰੱਦ ਕੀਤਾ",
+    "declinedEndState": "ਅਸਵੀਕਾਰ ਕੀਤਾ"
   },
   "drivers": {
     "title": "ਡਰਾਈਵਰ",

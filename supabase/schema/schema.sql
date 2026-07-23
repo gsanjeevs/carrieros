@@ -465,8 +465,13 @@ CREATE TABLE loads (
   commodity         TEXT,
   weight_lbs        INT,
   rate              NUMERIC(10,2),
+  -- 'declined' added 2026-07-22 (docs/feature-completeness-audit.md's #2
+  -- gap, PRD story "As Sam, I want to accept or decline a load"): distinct
+  -- from 'cancelled' on purpose — PRD edge case #8 explicitly separates
+  -- "cancel an ACCEPTED load" from decline, which only ever applies to a
+  -- still-'draft' (pre-acceptance) load. See components/DispatchPanel.tsx.
   status            TEXT DEFAULT 'draft' CHECK (status IN (
-    'draft','scheduled','dispatched','picked_up','in_transit','delivered','invoiced','paid','cancelled'
+    'draft','scheduled','dispatched','picked_up','in_transit','delivered','invoiced','paid','cancelled','declined'
   )),
   intake_method     TEXT CHECK (intake_method IN ('email','pdf','paste','manual')),
   raw_intake_text   TEXT,

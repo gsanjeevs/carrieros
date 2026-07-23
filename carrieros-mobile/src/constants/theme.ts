@@ -67,7 +67,7 @@ export const StatusColors = {
 // exact class of bug a compile error going forward.
 type LoadStatus =
   | 'draft' | 'scheduled' | 'dispatched' | 'picked_up' | 'in_transit'
-  | 'delivered' | 'invoiced' | 'paid' | 'cancelled';
+  | 'delivered' | 'invoiced' | 'paid' | 'cancelled' | 'declined';
 
 function loadStatusPill(status: LoadStatus): { bg: string; text: string } {
   switch (status) {
@@ -80,6 +80,7 @@ function loadStatusPill(status: LoadStatus): { bg: string; text: string } {
     case 'invoiced': return { bg: StatusColors.purpleLight, text: StatusColors.purple };
     case 'paid': return { bg: StatusColors.successLight, text: StatusColors.successDark };
     case 'cancelled': return { bg: StatusColors.dangerLight, text: StatusColors.dangerDark };
+    case 'declined': return { bg: StatusColors.dangerLight, text: StatusColors.dangerDark };
     default: {
       const _exhaustive: never = status;
       return _exhaustive;
@@ -89,7 +90,7 @@ function loadStatusPill(status: LoadStatus): { bg: string; text: string } {
 
 const LOAD_STATUSES: readonly LoadStatus[] = [
   'draft', 'scheduled', 'dispatched', 'picked_up', 'in_transit',
-  'delivered', 'invoiced', 'paid', 'cancelled',
+  'delivered', 'invoiced', 'paid', 'cancelled', 'declined',
 ];
 
 // Record-based lookup preserved for existing call sites

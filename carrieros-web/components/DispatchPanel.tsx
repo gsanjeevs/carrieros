@@ -121,12 +121,22 @@ export default function DispatchPanel({
   const cardUnselectedCls = 'border-white/10 bg-white/5 hover:bg-white/10'
   const nextStatus = NEXT_STATUS[currentStatus]
   const actionKey = STATUS_ACTION_KEY[currentStatus]
-  const TERMINAL_STATUSES = ['delivered', 'invoiced', 'paid', 'cancelled']
-  const canCancel = !TERMINAL_STATUSES.includes(currentStatus)
+  const TERMINAL_STATUSES = ['delivered', 'invoiced', 'paid', 'cancelled', 'declined']
+  // 'Cancel' and 'Decline' are deliberately distinct actions (PRD edge case
+  // #8 separates "cancel an ACCEPTED load" from decline, which only applies
+  // pre-acceptance) — cancel is for a load that's already past 'draft';
+  // decline is the draft-only counterpart, see declineLoad() below.
+  const canCancel = !TERMINAL_STATUSES.includes(currentStatus) && currentStatus !== 'draft'
+  const canDecline = currentStatus === 'draft'
 
   function cancelLoad() {
     if (!window.confirm(t('confirmCancelLoad'))) return
     save('cancelled')
+  }
+
+  function declineLoad() {
+    if (!window.confirm(t('confirmDeclineLoad'))) return
+    save('declined')
   }
 
   return (
@@ -230,6 +240,15 @@ export default function DispatchPanel({
             className="flex-1 py-2 bg-transparent border border-red-500/30 text-red-400 hover:bg-red-500/10 text-sm font-medium rounded-lg transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-red-500/40"
           >
             {t('actionCancelLoad')}
+          </button>
+        )}
+        {canDecline && (
+          <button
+            onClick={declineLoad}
+            disabled={saving}
+            className="flex-1 py-2 bg-transparent border border-red-500/30 text-red-400 hover:bg-red-500/10 text-sm font-medium rounded-lg transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-red-500/40"
+          >
+            {t('actionDeclineLoad')}
           </button>
         )}
       </div>

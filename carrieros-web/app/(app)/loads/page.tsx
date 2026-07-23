@@ -9,13 +9,14 @@ import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import StatusBadge from '@/components/ui/StatusBadge'
 import { getProfileForUser } from '@/lib/queries/profiles'
 
-type LoadGroupKey = 'needs_dispatch' | 'in_progress' | 'completed' | 'cancelled'
+type LoadGroupKey = 'needs_dispatch' | 'in_progress' | 'completed' | 'cancelled' | 'declined'
 
 const GROUPS: { key: LoadGroupKey; statuses: string[]; labelKey: string; accent: string }[] = [
   { key: 'needs_dispatch', statuses: ['draft', 'scheduled'], labelKey: 'groupNeedsDispatch', accent: 'border-l-[3px] border-l-[#f97316]' },
   { key: 'in_progress', statuses: ['dispatched', 'picked_up', 'in_transit'], labelKey: 'groupInProgress', accent: 'border-l-[3px] border-l-blue-500/60' },
   { key: 'completed', statuses: ['delivered', 'invoiced', 'paid'], labelKey: 'groupCompleted', accent: 'border-l-[3px] border-l-white/10' },
   { key: 'cancelled', statuses: ['cancelled'], labelKey: 'groupCancelled', accent: 'border-l-[3px] border-l-rose-500/40' },
+  { key: 'declined', statuses: ['declined'], labelKey: 'groupDeclined', accent: 'border-l-[3px] border-l-rose-500/40' },
 ]
 
 export default async function LoadsPage({

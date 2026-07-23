@@ -29,6 +29,7 @@ export type LoadStatus =
   | 'invoiced'
   | 'paid'
   | 'cancelled'
+  | 'declined'
 
 export const LOAD_STATUSES: readonly LoadStatus[] = [
   'draft',
@@ -40,6 +41,7 @@ export const LOAD_STATUSES: readonly LoadStatus[] = [
   'invoiced',
   'paid',
   'cancelled',
+  'declined',
 ]
 
 export function loadStatusColor(status: LoadStatus): string {
@@ -61,6 +63,8 @@ export function loadStatusColor(status: LoadStatus): string {
     case 'paid':
       return 'bg-[#16a34a]/20 text-[#16a34a]'
     case 'cancelled':
+      return 'bg-rose-500/10 text-rose-400'
+    case 'declined':
       return 'bg-rose-500/10 text-rose-400'
     default: {
       // Compile-time exhaustiveness check — a new LOAD_STATUS value with no
@@ -109,6 +113,8 @@ export function loadStatusVariant(status: LoadStatus): StatusBadgeVariant {
     case 'paid':
       return 'success'
     case 'cancelled':
+      return 'danger'
+    case 'declined':
       return 'danger'
     default: {
       const _exhaustive: never = status

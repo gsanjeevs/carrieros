@@ -183,6 +183,7 @@
     "groupInProgress": "In Progress",
     "groupCompleted": "Completed",
     "groupCancelled": "Cancelled",
+    "groupDeclined": "Declined",
     "dispatchAction": "Dispatch →",
     "loadNumber": "Load #",
     "status": "Status",
@@ -200,6 +201,7 @@
     "status_invoiced": "Invoiced",
     "status_paid": "Paid",
     "status_cancelled": "Cancelled",
+    "status_declined": "Declined",
     "commodity": "Commodity",
     "weight": "Weight",
     "miles": "Miles",
@@ -235,6 +237,8 @@
     "actionMarkDelivered": "Mark Delivered",
     "actionCancelLoad": "Cancel Load",
     "confirmCancelLoad": "Cancel this load? This cannot be undone.",
+    "actionDeclineLoad": "Decline Load",
+    "confirmDeclineLoad": "Decline this load? The broker will need a new rate confirmation if you change your mind. This cannot be undone.",
     "actionShareTracking": "Share Tracking",
     "actionCopied": "Copied!",
     "actionRateConfirmation": "Rate Confirmation",
@@ -242,7 +246,8 @@
     "actionEditLoadSoon": "Coming soon",
     "actionCancelUnavailable": "This load has already reached a final status.",
     "rateHero": "Rate",
-    "cancelledEndState": "Cancelled"
+    "cancelledEndState": "Cancelled",
+    "declinedEndState": "Declined"
   },
   "drivers": {
     "title": "Drivers",

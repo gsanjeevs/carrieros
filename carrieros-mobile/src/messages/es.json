@@ -24,7 +24,8 @@
       "delivered": "Entregada",
       "invoiced": "Facturada",
       "paid": "Pagada",
-      "cancelled": "Cancelada"
+      "cancelled": "Cancelada",
+      "declined": "Rechazada"
     }
   },
   "loadDetail": {
