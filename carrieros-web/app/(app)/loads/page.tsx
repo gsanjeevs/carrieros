@@ -8,6 +8,7 @@ import { toDate } from '@/lib/format-datetime'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import StatusBadge from '@/components/ui/StatusBadge'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { INVOICE_ROLES } from '@/lib/roles-policy'
 
 type LoadGroupKey = 'needs_dispatch' | 'in_progress' | 'completed' | 'cancelled' | 'declined'
 
@@ -63,7 +64,7 @@ export default async function LoadsPage({
   }
 
   const { data: loads } = await query
-  const showRate = ['owner', 'solo', 'finance'].includes(profile?.role ?? '')
+  const showRate = INVOICE_ROLES.includes(profile?.role ?? '')
 
   return (
     <div className="p-8">
@@ -72,13 +73,30 @@ export default async function LoadsPage({
           <h1 className="text-2xl font-semibold text-white">{t('title')}</h1>
           <p className="text-slate-400 text-sm mt-1">{t('loadCount', { count: loads?.length ?? 0 })}</p>
         </div>
-        <Link
-          href="/loads/new"
-          className="flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-        >
-          <span className="material-symbols-outlined text-[18px]">add</span>
-          {t('addLoad')}
-        </Link>
+        <div className="flex items-center gap-3">
+          {showRate && (
+            <form action="/api/loads/export" method="get" className="flex items-center gap-2">
+              <input type="date" name="from" aria-label={t('exportFrom')} className="bg-white/5 border border-white/10 rounded-lg px-2.5 py-2 text-white text-xs focus:outline-none focus:ring-2 focus:ring-brand-orange/50" />
+              <span className="text-slate-500 text-xs">–</span>
+              <input type="date" name="to" aria-label={t('exportTo')} className="bg-white/5 border border-white/10 rounded-lg px-2.5 py-2 text-white text-xs focus:outline-none focus:ring-2 focus:ring-brand-orange/50" />
+              <button
+                type="submit"
+                className="flex items-center gap-1.5 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/8 text-white text-xs font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+                title={t('exportCsvHelp')}
+              >
+                <span className="material-symbols-outlined text-[16px]">download</span>
+                {t('exportCsv')}
+              </button>
+            </form>
+          )}
+          <Link
+            href="/loads/new"
+            className="flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+          >
+            <span className="material-symbols-outlined text-[18px]">add</span>
+            {t('addLoad')}
+          </Link>
+        </div>
       </div>
 
       {justCreated && (
