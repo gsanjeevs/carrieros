@@ -9,6 +9,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { Input, Modal } from '@/components/ui'
 
 const ROLES = ['dispatcher', 'finance', 'owner'] as const
 
@@ -72,58 +73,46 @@ export default function MemberActions({
   return (
     <div className="flex flex-col items-end gap-1.5">
       <div className="flex items-center justify-end gap-2">
-        <select
+        <Input
+          as="select"
           aria-label={t('changeRole')}
           disabled={busy}
           value={role}
           onChange={(e) => changeRole(e.target.value)}
-          className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-white text-xs focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 disabled:opacity-40"
+          className="w-auto"
         >
           {ROLES.map((r) => (
             <option key={r} value={r}>{t(`role_${r}` as never)}</option>
           ))}
-        </select>
+        </Input>
         <button
           onClick={() => { setError(''); setConfirming(true) }}
           disabled={busy}
-          className="text-slate-500 hover:text-red-400 disabled:opacity-40 transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+          className="text-text-sec hover:text-danger disabled:opacity-40 transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
           title={t('remove')}
         >
           <span className="material-symbols-outlined text-[18px] leading-none align-middle">person_remove</span>
         </button>
       </div>
 
-      {error && <p className="text-red-400 text-xs max-w-[16rem] text-right">{error}</p>}
+      {error && <p className="text-danger text-xs max-w-[16rem] text-right">{error}</p>}
 
-      {confirming && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
-          <div className="w-full max-w-sm bg-[#0f1923] border border-white/10 rounded-2xl p-6 text-left shadow-modal-dark">
-            <h2 className="text-white font-semibold text-base mb-2">{t('removeTitle')}</h2>
-            <p className="text-slate-400 text-sm mb-5">{t('removeConfirm', { name })}</p>
-            {error && (
-              <div className="mb-4 rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-red-400 text-sm">
-                {error}
-              </div>
-            )}
-            <div className="flex gap-3">
-              <button
-                onClick={() => { if (!busy) { setConfirming(false); setError('') } }}
-                disabled={busy}
-                className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-              >
-                {tCommon('cancel')}
-              </button>
-              <button
-                onClick={remove}
-                disabled={busy}
-                className="flex-1 py-2.5 bg-red-500/90 hover:bg-red-500 disabled:opacity-40 text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-              >
-                {busy ? tCommon('loading') : t('remove')}
-              </button>
-            </div>
+      <Modal
+        open={confirming}
+        onClose={() => { if (!busy) { setConfirming(false); setError('') } }}
+        size="sm"
+        title={t('removeTitle')}
+        variant="confirm-destructive"
+        onConfirm={remove}
+        confirmLabel={busy ? tCommon('loading') : t('remove')}
+      >
+        <p className="text-text-sec text-sm">{t('removeConfirm', { name })}</p>
+        {error && (
+          <div className="mt-4 rounded-lg bg-danger/10 border border-danger/20 px-4 py-3 text-danger text-sm">
+            {error}
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
     </div>
   )
 }

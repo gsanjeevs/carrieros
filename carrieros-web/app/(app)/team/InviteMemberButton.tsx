@@ -10,11 +10,11 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import { Button, Input, Modal, SegmentedControl } from '@/components/ui'
 
 const ROLES = ['dispatcher', 'finance', 'owner'] as const
 
-const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 transition'
-const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
+const labelCls = 'block text-xs font-medium text-text-sec mb-1.5'
 
 export default function InviteMemberButton() {
   const router = useRouter()
@@ -77,128 +77,103 @@ export default function InviteMemberButton() {
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-      >
+      <Button onClick={() => setOpen(true)}>
         <span className="material-symbols-outlined text-[18px]">add</span>
         {t('inviteMember')}
-      </button>
+      </Button>
 
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
-          <div className="w-full max-w-md bg-[#0f1923] border border-white/10 rounded-2xl p-6 shadow-modal-dark">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-white font-semibold text-lg">{t('inviteMember')}</h2>
-              <button onClick={close} className="text-slate-500 hover:text-white transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
-                <span className="material-symbols-outlined text-[20px]">close</span>
-              </button>
+      <Modal
+        open={open}
+        onClose={close}
+        title={t('inviteMember')}
+        footer={
+          <>
+            <Button variant="secondary" size="sm" onClick={close} disabled={loading}>
+              {tCommon('cancel')}
+            </Button>
+            <Button
+              size="sm"
+              onClick={submit}
+              disabled={loading || (contactMethod === 'email' ? !form.email : !form.phone)}
+              loading={loading}
+            >
+              {loading ? t('sendingInvite') : t('sendInvite')}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <SegmentedControl
+              className="mb-2"
+              items={[
+                { value: 'email', label: t('inviteByEmail') },
+                { value: 'phone', label: t('inviteByPhone') },
+              ]}
+              value={contactMethod}
+              onChange={(v) => setContactMethod(v as 'email' | 'phone')}
+            />
+            {contactMethod === 'email' ? (
+              <>
+                <label className={labelCls}>{t('email')} *</label>
+                <Input
+                  type="email"
+                  placeholder="dispatcher@example.com"
+                  value={form.email}
+                  onChange={(e) => set('email', e.target.value)}
+                />
+              </>
+            ) : (
+              <>
+                <label className={labelCls}>{t('phone')} *</label>
+                <Input
+                  type="tel"
+                  placeholder="+15551234567"
+                  value={form.phone}
+                  onChange={(e) => set('phone', e.target.value)}
+                />
+                <p className="text-xs text-text-mut mt-1.5">{t('phoneInviteNote')}</p>
+              </>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>{t('firstName')}</label>
+              <Input placeholder="Jane"
+                value={form.first_name} onChange={(e) => set('first_name', e.target.value)} />
             </div>
-
-            <div className="space-y-4">
-              <div>
-                <div className="flex gap-2 mb-2">
-                  <button
-                    type="button"
-                    onClick={() => setContactMethod('email')}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
-                      contactMethod === 'email' ? 'bg-[#f97316] text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10'
-                    }`}
-                  >
-                    {t('inviteByEmail')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setContactMethod('phone')}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
-                      contactMethod === 'phone' ? 'bg-[#f97316] text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10'
-                    }`}
-                  >
-                    {t('inviteByPhone')}
-                  </button>
-                </div>
-                {contactMethod === 'email' ? (
-                  <>
-                    <label className={labelCls}>{t('email')} *</label>
-                    <input
-                      className={inputCls}
-                      type="email"
-                      placeholder="dispatcher@example.com"
-                      value={form.email}
-                      onChange={(e) => set('email', e.target.value)}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <label className={labelCls}>{t('phone')} *</label>
-                    <input
-                      className={inputCls}
-                      type="tel"
-                      placeholder="+15551234567"
-                      value={form.phone}
-                      onChange={(e) => set('phone', e.target.value)}
-                    />
-                    <p className="text-xs text-slate-500 mt-1.5">{t('phoneInviteNote')}</p>
-                  </>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={labelCls}>{t('firstName')}</label>
-                  <input className={inputCls} placeholder="Jane"
-                    value={form.first_name} onChange={(e) => set('first_name', e.target.value)} />
-                </div>
-                <div>
-                  <label className={labelCls}>{t('lastName')}</label>
-                  <input className={inputCls} placeholder="Doe"
-                    value={form.last_name} onChange={(e) => set('last_name', e.target.value)} />
-                </div>
-              </div>
-
-              <div>
-                <label className={labelCls}>{t('role')} *</label>
-                <select className={inputCls} value={form.role} onChange={(e) => set('role', e.target.value)}>
-                  {ROLES.map((r) => (
-                    <option key={r} value={r}>{t(`role_${r}` as never)}</option>
-                  ))}
-                </select>
-                <p className="text-xs text-slate-500 mt-1.5">{t(`roleHelp_${form.role}` as never)}</p>
-              </div>
-
-              <p className="text-xs text-slate-500">
-                {t('driverRoleNote')}{' '}
-                <Link href="/drivers" className="text-[#f97316] hover:underline rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
-                  {t('driversHintLink')}
-                </Link>
-              </p>
-
-              {error && (
-                <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-red-400 text-sm">
-                  {error}
-                </div>
-              )}
-
-              <div className="flex gap-3 mt-2">
-                <button
-                  onClick={close}
-                  disabled={loading}
-                  className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-                >
-                  {tCommon('cancel')}
-                </button>
-                <button
-                  onClick={submit}
-                  disabled={loading || (contactMethod === 'email' ? !form.email : !form.phone)}
-                  className="flex-2 flex-grow py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-                >
-                  {loading ? t('sendingInvite') : t('sendInvite')}
-                </button>
-              </div>
+            <div>
+              <label className={labelCls}>{t('lastName')}</label>
+              <Input placeholder="Doe"
+                value={form.last_name} onChange={(e) => set('last_name', e.target.value)} />
             </div>
           </div>
+
+          <div>
+            <label className={labelCls}>{t('role')} *</label>
+            <Input as="select" value={form.role} onChange={(e) => set('role', e.target.value)}>
+              {ROLES.map((r) => (
+                <option key={r} value={r}>{t(`role_${r}` as never)}</option>
+              ))}
+            </Input>
+            <p className="text-xs text-text-mut mt-1.5">{t(`roleHelp_${form.role}` as never)}</p>
+          </div>
+
+          <p className="text-xs text-text-mut">
+            {t('driverRoleNote')}{' '}
+            <Link href="/drivers" className="text-brand-orange hover:underline rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
+              {t('driversHintLink')}
+            </Link>
+          </p>
+
+          {error && (
+            <div className="rounded-lg bg-danger/10 border border-danger/20 px-4 py-3 text-danger text-sm">
+              {error}
+            </div>
+          )}
         </div>
-      )}
+      </Modal>
     </>
   )
 }

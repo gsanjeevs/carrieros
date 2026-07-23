@@ -15,13 +15,14 @@ import { createAuthAdminProvider } from '@/lib/auth-admin'
 import { formatDate } from '@/lib/format-datetime'
 import InviteMemberButton from './InviteMemberButton'
 import MemberActions from './MemberActions'
+import { Card, StatusBadge, type StatusBadgeVariant, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
 
-const ROLE_COLOR: Record<string, string> = {
-  owner:      'bg-[#f97316]/20 text-[#f97316]',
-  solo:       'bg-[#f97316]/20 text-[#f97316]',
-  dispatcher: 'bg-sky-500/20 text-sky-400',
-  finance:    'bg-violet-500/20 text-violet-400',
-  driver:     'bg-slate-500/20 text-slate-400',
+const ROLE_VARIANT: Record<string, StatusBadgeVariant> = {
+  owner:      'brand',
+  solo:       'brand',
+  dispatcher: 'info',
+  finance:    'purple',
+  driver:     'neutral',
 }
 
 export default async function TeamPage() {
@@ -70,67 +71,65 @@ export default async function TeamPage() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">{t('title')}</h1>
-          <p className="text-slate-400 text-sm mt-1">{t('memberCount', { count: rows.length })}</p>
+          <h1 className="text-2xl font-semibold text-text-pri">{t('title')}</h1>
+          <p className="text-text-sec text-sm mt-1">{t('memberCount', { count: rows.length })}</p>
         </div>
         <InviteMemberButton />
       </div>
 
-      <div className="mb-6 flex items-start gap-3 rounded-lg bg-white/5 border border-white/8 px-4 py-3 shadow-card-dark">
-        <span className="material-symbols-outlined text-slate-500 text-[18px]">info</span>
-        <p className="text-slate-400 text-sm">
+      <div className="mb-6 flex items-start gap-3 rounded-lg bg-surface-subtle border border-border-ui px-4 py-3">
+        <span className="material-symbols-outlined text-text-sec text-[18px]">info</span>
+        <p className="text-text-sec text-sm">
           {t('driversHint')}{' '}
-          <Link href="/drivers" className="text-[#f97316] hover:underline rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
+          <Link href="/drivers" className="text-brand-orange hover:underline rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
             {t('driversHintLink')}
           </Link>
         </p>
       </div>
 
-      <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
-        <table className="w-full text-sm">
+      <Card>
+        <Table>
           <thead>
-            <tr className="border-b border-white/5">
-              <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('name')}</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('email')}</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('role')}</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('status')}</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('joined')}</th>
-              <th className="px-4 py-3" />
+            <tr>
+              <TableHeaderCell>{t('name')}</TableHeaderCell>
+              <TableHeaderCell>{t('email')}</TableHeaderCell>
+              <TableHeaderCell>{t('role')}</TableHeaderCell>
+              <TableHeaderCell>{t('status')}</TableHeaderCell>
+              <TableHeaderCell>{t('joined')}</TableHeaderCell>
+              <TableHeaderCell></TableHeaderCell>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5">
+          <tbody>
             {rows.map((m) => {
               const name = [m.first_name, m.last_name].filter(Boolean).join(' ') || '—'
               const isSelf = m.id === user.id
               return (
-                <tr key={m.id} className="hover:bg-white/[0.07] transition-colors duration-150">
-                  <td className="px-5 py-3.5 text-white font-medium">
+                <TableRow key={m.id}>
+                  <TableCell className="font-medium text-text-pri">
                     {name}
-                    {isSelf && <span className="ml-2 text-xs text-slate-500">{t('you')}</span>}
-                  </td>
-                  <td className="px-4 py-3.5 text-slate-400">{m.email ?? '—'}</td>
-                  <td className="px-4 py-3.5">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${ROLE_COLOR[m.role] ?? ROLE_COLOR.driver}`}>
+                    {isSelf && <span className="ml-2 text-xs text-text-sec">{t('you')}</span>}
+                  </TableCell>
+                  <TableCell>{m.email ?? '—'}</TableCell>
+                  <TableCell>
+                    <StatusBadge variant={ROLE_VARIANT[m.role] ?? ROLE_VARIANT.driver} size="sm">
                       {t(`role_${m.role}` as never)}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                      m.accepted ? 'bg-[#16a34a]/20 text-[#16a34a]' : 'bg-amber-500/20 text-amber-400'
-                    }`}>
+                    </StatusBadge>
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge variant={m.accepted ? 'success' : 'warning'} size="sm">
                       {m.accepted ? t('statusActive') : t('statusPending')}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3.5 text-slate-400">
+                    </StatusBadge>
+                  </TableCell>
+                  <TableCell>
                     {formatDate(m.created_at, profile)}
-                  </td>
-                  <td className="px-4 py-3.5 text-right">
+                  </TableCell>
+                  <TableCell className="text-right">
                     {isSelf ? (
                       // Invariant 1: a user may never change their own role.
                       // Enforced in /api/team/[id]; not offered here either.
-                      <span className="text-xs text-slate-600">{t('cannotEditSelf')}</span>
+                      <span className="text-xs text-text-mut">{t('cannotEditSelf')}</span>
                     ) : isDriverRole(m.role) ? (
-                      <Link href="/drivers" className="text-xs text-slate-500 hover:text-[#f97316] transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
+                      <Link href="/drivers" className="text-xs text-text-sec hover:text-brand-orange transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
                         {t('manageOnDrivers')}
                       </Link>
                     ) : (
@@ -140,13 +139,13 @@ export default async function TeamPage() {
                         name={name === '—' ? (m.email ?? '') : name}
                       />
                     )}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )
             })}
           </tbody>
-        </table>
-      </div>
+        </Table>
+      </Card>
     </div>
   )
 }
