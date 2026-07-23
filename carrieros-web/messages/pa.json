@@ -270,7 +270,17 @@
     "chatDriver": "ਡਰਾਈਵਰ",
     "chatSystem": "ਸਿਸਟਮ",
     "chatTranslate": "ਅਨੁਵਾਦ ਕਰੋ",
-    "chatTranslating": "ਅਨੁਵਾਦ ਹੋ ਰਿਹਾ ਹੈ…"
+    "chatTranslating": "ਅਨੁਵਾਦ ਹੋ ਰਿਹਾ ਹੈ…",
+    "iftaTitle": "IFTA ਮੀਲੇਜ ਲੌਗ",
+    "iftaLogCrossing": "ਕ੍ਰਾਸਿੰਗ ਲੌਗ ਕਰੋ",
+    "iftaNoCrossings": "ਅਜੇ ਕੋਈ ਰਾਜ ਕ੍ਰਾਸਿੰਗ ਲੌਗ ਨਹੀਂ ਹੋਈ।",
+    "iftaState": "ਰਾਜ",
+    "iftaOdometer": "ਕ੍ਰਾਸਿੰਗ ਵੇਲੇ ਓਡੋਮੀਟਰ",
+    "iftaValidationError": "ਰਾਜ ਅਤੇ ਮਿਤੀ/ਸਮਾਂ ਲੋੜੀਂਦੇ ਹਨ।",
+    "iftaSaveFailed": "ਉਹ ਕ੍ਰਾਸਿੰਗ ਸੇਵ ਨਹੀਂ ਹੋ ਸਕੀ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "iftaCancel": "ਰੱਦ ਕਰੋ",
+    "iftaSave": "ਸੇਵ ਕਰੋ",
+    "iftaSaving": "ਸੇਵ ਹੋ ਰਿਹਾ ਹੈ…"
   },
   "drivers": {
     "title": "ਡਰਾਈਵਰ",

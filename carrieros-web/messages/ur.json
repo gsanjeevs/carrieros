@@ -270,7 +270,17 @@
     "chatDriver": "ڈرائیور",
     "chatSystem": "سسٹم",
     "chatTranslate": "ترجمہ کریں",
-    "chatTranslating": "ترجمہ ہو رہا ہے…"
+    "chatTranslating": "ترجمہ ہو رہا ہے…",
+    "iftaTitle": "IFTA مائلیج لاگ",
+    "iftaLogCrossing": "کراسنگ درج کریں",
+    "iftaNoCrossings": "ابھی تک کوئی ریاستی کراسنگ درج نہیں ہوئی۔",
+    "iftaState": "ریاست",
+    "iftaOdometer": "کراسنگ پر اوڈومیٹر",
+    "iftaValidationError": "ریاست اور تاریخ/وقت ضروری ہیں۔",
+    "iftaSaveFailed": "وہ کراسنگ محفوظ نہیں ہو سکی۔ براہ کرم دوبارہ کوشش کریں۔",
+    "iftaCancel": "منسوخ کریں",
+    "iftaSave": "محفوظ کریں",
+    "iftaSaving": "محفوظ ہو رہا ہے…"
   },
   "drivers": {
     "title": "ڈرائیورز",

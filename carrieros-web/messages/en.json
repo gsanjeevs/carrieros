@@ -270,7 +270,17 @@
     "chatDriver": "Driver",
     "chatSystem": "System",
     "chatTranslate": "Translate",
-    "chatTranslating": "Translating…"
+    "chatTranslating": "Translating…",
+    "iftaTitle": "IFTA Mileage Log",
+    "iftaLogCrossing": "Log Crossing",
+    "iftaNoCrossings": "No state crossings logged yet.",
+    "iftaState": "State",
+    "iftaOdometer": "Odometer at crossing",
+    "iftaValidationError": "State and date/time are required.",
+    "iftaSaveFailed": "Couldn't save that crossing. Please try again.",
+    "iftaCancel": "Cancel",
+    "iftaSave": "Save",
+    "iftaSaving": "Saving…"
   },
   "drivers": {
     "title": "Drivers",

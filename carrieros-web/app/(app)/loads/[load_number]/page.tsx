@@ -8,6 +8,7 @@ import LoadActionGrid from '@/components/LoadActionGrid'
 import LoadDocuments, { type DocType, type LoadDocument } from '@/components/LoadDocuments'
 import SendDocumentsButton from '@/components/SendDocumentsButton'
 import DriverMessageThread from '@/components/DriverMessageThread'
+import IftaCrossingsSection, { type IftaCrossingRow } from '@/components/IftaCrossingsSection'
 import { hasFeature } from '@/lib/entitlements'
 import { formatDateTime, toDate } from '@/lib/format-datetime'
 import { formatMoney } from '@/lib/format-money'
@@ -158,6 +159,25 @@ export default async function LoadDetailPage({
   // access checks use.
   const canChat = ['owner', 'solo', 'dispatcher', 'driver'].includes(profile.role)
   const chatEntitled = canChat && (await hasFeature(supabase, 'driver_chat'))
+
+  // IFTA mileage log (audit gap #13 cluster): same role set as fuel stops
+  // (owner/solo/dispatcher manage; driver logs their own via RLS).
+  const canIfta = ['owner', 'solo', 'dispatcher', 'driver'].includes(profile.role)
+  const iftaEntitled = canIfta && (await hasFeature(supabase, 'ifta_mileage_log'))
+  let iftaCrossings: IftaCrossingRow[] = []
+  if (iftaEntitled) {
+    const { data: crossingsData } = await supabase
+      .from('ifta_state_crossings')
+      .select('id, state, crossed_at, odometer_est')
+      .eq('load_id', load.id)
+      .order('crossed_at', { ascending: true })
+    iftaCrossings = (crossingsData ?? []).map((c) => ({
+      id: c.id,
+      state: c.state,
+      crossedAt: c.crossed_at,
+      odometerEst: c.odometer_est,
+    }))
+  }
 
   const isCancelled = load.status === 'cancelled'
   const isDeclined  = load.status === 'declined'
@@ -325,6 +345,17 @@ export default async function LoadDetailPage({
           {/* Driver chat */}
           {chatEntitled && (
             <DriverMessageThread loadId={load.id} currentUserId={user.id} locale={locale} />
+          )}
+
+          {/* IFTA mileage log */}
+          {iftaEntitled && (
+            <IftaCrossingsSection
+              loadId={load.id}
+              orgId={profile.org_id}
+              crossings={iftaCrossings}
+              canManage={['owner', 'solo', 'dispatcher', 'driver'].includes(profile.role)}
+              locale={locale}
+            />
           )}
 
           {/* Timeline */}

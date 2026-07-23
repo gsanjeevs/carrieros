@@ -270,7 +270,17 @@
     "chatDriver": "Conductor",
     "chatSystem": "Sistema",
     "chatTranslate": "Traducir",
-    "chatTranslating": "Traduciendo…"
+    "chatTranslating": "Traduciendo…",
+    "iftaTitle": "Registro de Millas IFTA",
+    "iftaLogCrossing": "Registrar Cruce",
+    "iftaNoCrossings": "Aún no hay cruces de estado registrados.",
+    "iftaState": "Estado",
+    "iftaOdometer": "Odómetro en el cruce",
+    "iftaValidationError": "El estado y la fecha/hora son obligatorios.",
+    "iftaSaveFailed": "No se pudo guardar ese cruce. Inténtalo de nuevo.",
+    "iftaCancel": "Cancelar",
+    "iftaSave": "Guardar",
+    "iftaSaving": "Guardando…"
   },
   "drivers": {
     "title": "Conductores",
