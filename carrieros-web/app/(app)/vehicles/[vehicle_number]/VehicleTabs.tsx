@@ -7,7 +7,7 @@
 import { useState, type ReactNode } from 'react'
 import { useTranslations } from 'next-intl'
 
-export type VehicleTabKey = 'details' | 'loadHistory' | 'maintenance' | 'dvirs'
+export type VehicleTabKey = 'details' | 'loadHistory' | 'maintenance' | 'fuel' | 'dvirs'
 
 export default function VehicleTabs({
   tabs,

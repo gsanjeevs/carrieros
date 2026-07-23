@@ -4,6 +4,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getTranslations, getLocale } from 'next-intl/server'
 import VehicleTabs from './VehicleTabs'
+import FuelStopsSection, { type FuelStopRow } from '@/components/FuelStopsSection'
 import VehicleDocuments, { type VehicleDocType, type VehicleDocument } from '@/components/VehicleDocuments'
 import { VEHICLE_TYPE_ICONS } from '@/components/icons/vehicle-types'
 import { MAINTENANCE_ICONS } from '@/components/icons/maintenance'
@@ -199,6 +200,31 @@ export default async function VehicleDetailPage({
       return { ...log, receiptUrl: signed?.signedUrl ?? null }
     })
   )
+
+  // ─── Fuel stops ─── (audit gap #13 cluster: ungated on all tiers, see
+  // schema.sql's own comment on fuel_stops — only fuel_analytics on top
+  // of this raw log is Pro+.)
+  const { data: fuelStopsData } = await supabase
+    .from('fuel_stops')
+    .select('id, state, station, stop_date, gallons, price_per_gallon, total_cost, odometer, drivers(profiles(first_name, last_name))')
+    .eq('vehicle_id', vehicle.id)
+    .order('stop_date', { ascending: false })
+
+  const fuelStops: FuelStopRow[] = (fuelStopsData ?? []).map((f) => ({
+    id: f.id,
+    state: f.state,
+    station: f.station,
+    stopDate: f.stop_date,
+    gallons: Number(f.gallons),
+    pricePerGallon: f.price_per_gallon != null ? Number(f.price_per_gallon) : null,
+    totalCost: Number(f.total_cost),
+    odometer: f.odometer,
+    driverName: f.drivers?.profiles
+      ? [f.drivers.profiles.first_name, f.drivers.profiles.last_name].filter(Boolean).join(' ') || null
+      : null,
+  }))
+
+  const canLogFuel = ['owner', 'solo', 'dispatcher'].includes(profile.role)
 
   // ─── DVIRs ───
   const { data: dvirData } = await supabase
@@ -426,6 +452,18 @@ export default async function VehicleDetailPage({
     </div>
   )
 
+  const fuelTab = (
+    <FuelStopsSection
+      fuelStops={fuelStops}
+      vehicleId={vehicle.id}
+      orgId={profile.org_id}
+      userId={user.id}
+      canLog={canLogFuel}
+      currency={carrierOrg?.currency ?? 'USD'}
+      locale={locale}
+    />
+  )
+
   const dvirsTab = (
     <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
       {dvirs.length === 0 ? (
@@ -501,6 +539,7 @@ export default async function VehicleDetailPage({
           { key: 'details', content: detailsTab },
           { key: 'loadHistory', content: loadHistoryTab },
           { key: 'maintenance', content: maintenanceTab },
+          { key: 'fuel', content: fuelTab },
           { key: 'dvirs', content: dvirsTab },
         ]}
       />
