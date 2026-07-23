@@ -638,6 +638,14 @@
     "loadLabel": "Load",
     "poweredBy": "Powered by CarrierOS"
   },
+  "dispatch": {
+    "title": "Dispatch",
+    "subtitle": "{count, plural, =0 {No active loads on the map} one {# active load on the map} other {# active loads on the map}}",
+    "upgradeRequired": "The live dispatch map requires the Growth plan or above.",
+    "noActiveLocations": "No active loads have a shared location yet.",
+    "queueTitle": "Needs Dispatch",
+    "noQueue": "Nothing waiting to be dispatched."
+  },
   "settings": {
     "title": "Profile settings",
     "subtitle": "These preferences are personal to your account.",

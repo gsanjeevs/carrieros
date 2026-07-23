@@ -638,6 +638,14 @@
     "loadLabel": "Carga",
     "poweredBy": "Con tecnología de CarrierOS"
   },
+  "dispatch": {
+    "title": "Despacho",
+    "subtitle": "{count, plural, =0 {Sin cargas activas en el mapa} one {# carga activa en el mapa} other {# cargas activas en el mapa}}",
+    "upgradeRequired": "El mapa de despacho en vivo requiere el plan Growth o superior.",
+    "noActiveLocations": "Ninguna carga activa ha compartido su ubicación todavía.",
+    "queueTitle": "Necesita Despacho",
+    "noQueue": "No hay nada esperando ser despachado."
+  },
   "settings": {
     "title": "Configuración de perfil",
     "subtitle": "Estas preferencias son personales de tu cuenta.",
