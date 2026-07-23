@@ -88,5 +88,8 @@ export async function POST(request: NextRequest) {
     return apiError('SERVER_ERROR', `[step2] ${driverErr.message}`, 500)
   }
 
-  return NextResponse.json(driver, { status: 201 })
+  return NextResponse.json(
+    { driver_number: driver.driver_number, invite_status: driver.invite_status },
+    { status: 201 }
+  )
 }

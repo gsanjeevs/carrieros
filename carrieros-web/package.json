@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "check:architecture": "node scripts/check-architecture.mjs",
+    "verify:compliance": "eslint && tsc --noEmit && node scripts/check-architecture.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:extraction": "vitest run --config vitest.extraction.config.ts"

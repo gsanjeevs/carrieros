@@ -84,5 +84,8 @@ export async function POST(request: NextRequest) {
   }
 
   const row = Array.isArray(data) ? data[0] : data
-  return NextResponse.json(row, { status: 201 })
+  return NextResponse.json(
+    { org_id: row.org_id, name: row.name, customer_number: row.customer_number },
+    { status: 201 }
+  )
 }

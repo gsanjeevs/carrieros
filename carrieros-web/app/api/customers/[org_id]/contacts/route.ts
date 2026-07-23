@@ -77,5 +77,17 @@ export async function POST(
     .single()
 
   if (error) return apiError('SERVER_ERROR', error.message, 500)
-  return NextResponse.json(data, { status: 201 })
+  return NextResponse.json(
+    {
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      title: data.title,
+      is_primary: data.is_primary,
+      portal_profile_id: data.portal_profile_id,
+      created_at: data.created_at,
+    },
+    { status: 201 }
+  )
 }

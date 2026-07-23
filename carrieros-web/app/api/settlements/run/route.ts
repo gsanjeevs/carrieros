@@ -148,5 +148,5 @@ export async function POST(request: NextRequest) {
 
   if (insertError) return apiError('SERVER_ERROR', insertError.message, 500)
 
-  return NextResponse.json(settlement)
+  return NextResponse.json({ id: settlement.id, payment_status: settlement.payment_status })
 }

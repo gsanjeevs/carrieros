@@ -95,5 +95,5 @@ export async function POST(
     driverId: settlement.driver_id,
   })
 
-  return NextResponse.json(updated)
+  return NextResponse.json({ id: updated.id, payment_status: updated.payment_status })
 }

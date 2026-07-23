@@ -60,5 +60,5 @@ export async function POST(request: NextRequest) {
   }
 
   logEvent({ route: 'api/billing/change-tier', userId: user.id, orgId: profile.org_id }, { to_tier: tier })
-  return NextResponse.json(updated)
+  return NextResponse.json({ tier: updated.tier })
 }

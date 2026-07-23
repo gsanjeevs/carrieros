@@ -62,5 +62,11 @@ export async function POST(request: NextRequest) {
   logEvent({ route: 'api/billing/add-payment-method', userId: user.id, orgId: profile.org_id }, {
     card_brand: result.card_brand,
   })
-  return NextResponse.json(updated)
+  return NextResponse.json({
+    stripe_customer_id: updated.stripe_customer_id,
+    card_brand: updated.card_brand,
+    card_last4: updated.card_last4,
+    billing_status: updated.billing_status,
+    trial_ends_at: updated.trial_ends_at,
+  })
 }

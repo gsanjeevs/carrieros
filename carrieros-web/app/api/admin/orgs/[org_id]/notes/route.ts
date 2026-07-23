@@ -35,5 +35,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     metadata: { note_id: note.id },
   })
 
-  return NextResponse.json(note, { status: 201 })
+  return NextResponse.json(
+    { id: note.id, body: note.body, admin_id: note.admin_id, created_at: note.created_at },
+    { status: 201 }
+  )
 }

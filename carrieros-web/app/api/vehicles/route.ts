@@ -81,5 +81,8 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (error) return apiError('SERVER_ERROR', error.message, 500)
-  return NextResponse.json(data, { status: 201 })
+  return NextResponse.json(
+    { vehicle_number: data.vehicle_number, nickname: data.nickname },
+    { status: 201 }
+  )
 }

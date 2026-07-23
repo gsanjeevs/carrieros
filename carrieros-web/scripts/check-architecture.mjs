@@ -28,8 +28,10 @@ function filesMatching(dir, exts) {
 }
 
 const violations = []
+const warnings = []
 
-function checkPattern({ label, dirs, exts, forbiddenPattern, message, exclude }) {
+function checkPattern({ label, dirs, exts, forbiddenPattern, message, exclude, severity = 'error' }) {
+  const sink = severity === 'warn' ? warnings : violations
   for (const dir of dirs) {
     for (const file of filesMatching(dir, exts)) {
       if (exclude && exclude.some((e) => file.startsWith(e))) continue
@@ -37,7 +39,7 @@ function checkPattern({ label, dirs, exts, forbiddenPattern, message, exclude })
       const lines = content.split('\n')
       lines.forEach((line, i) => {
         if (forbiddenPattern.test(line)) {
-          violations.push(`[${label}] ${file}:${i + 1}: ${line.trim()}\n  → ${message}`)
+          sink.push(`[${label}] ${file}:${i + 1}: ${line.trim()}\n  → ${message}`)
         }
       })
     }
@@ -85,11 +87,37 @@ checkPattern({
   message: 'Use lib/auth-admin/AuthAdminProvider instead of calling supabase.auth.admin.* directly. See architecture-principles.md Rule G.',
 })
 
+// Rule B — hot-table query encapsulation. `lib/queries/profiles.ts` is the
+// only module that exists so far; `loads`/`drivers` still have dozens of ad
+// hoc `.from()` call sites (86 combined, found while scoping this check) —
+// too large to gate as zero-violation today, so this is `warn`-only:
+// visible, trackable in the design-system changelog over time, but doesn't
+// block a commit. Once a table gets its own lib/queries/<table>.ts and call
+// sites migrate, tighten this to `error` for that table the same way
+// ERROR_SURFACES tightens the UI lint guard.
+for (const table of ['profiles', 'loads', 'drivers']) {
+  checkPattern({
+    label: `query-encapsulation-${table}`,
+    dirs: ['app', 'lib'],
+    exts: ['ts', 'tsx'],
+    exclude: ['lib/queries'],
+    forbiddenPattern: new RegExp(`\\.from\\(['"]${table}['"]\\)`),
+    message: `Prefer a shared lib/queries/${table}.ts function over an ad hoc .from('${table}') call site. See architecture-principles.md Rule B. (warn-only — not yet a hard gate, see script comment.)`,
+    severity: 'warn',
+  })
+}
+
 if (violations.length > 0) {
   console.error(`\n✗ Architecture check failed (${violations.length} violation(s)):\n`)
   console.error(violations.join('\n\n'))
   console.error('')
   process.exit(1)
+}
+
+if (warnings.length > 0) {
+  console.log(`\n⚠ Architecture check: ${warnings.length} warning(s) (non-blocking, Rule B query-encapsulation debt):`)
+  console.log(warnings.join('\n\n'))
+  console.log('')
 }
 
 console.log('✓ Architecture check passed (decoupling + provider-boundary rules)')
