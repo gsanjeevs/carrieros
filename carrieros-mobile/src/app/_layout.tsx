@@ -5,6 +5,7 @@ import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { useSession } from '@/hooks/use-session';
+import { useRegisterPushToken } from '@/hooks/use-register-push-token';
 import { LocaleProvider } from '@/hooks/use-locale';
 
 SplashScreen.preventAutoHideAsync();
@@ -16,6 +17,7 @@ SplashScreen.preventAutoHideAsync();
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { session, loading } = useSession();
   const pathname = usePathname();
+  useRegisterPushToken();
 
   useEffect(() => {
     if (!loading) SplashScreen.hideAsync();

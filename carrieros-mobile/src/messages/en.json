@@ -44,7 +44,11 @@
     "postTripDvir": "Post-Trip DVIR",
     "actionPickedUp": "Mark Picked Up",
     "actionStartTransit": "Start Transit",
-    "actionDelivered": "Mark Delivered"
+    "actionDelivered": "Mark Delivered",
+    "shareLocation": "Share Location",
+    "shareLocationOn": "Sharing your live location with dispatch",
+    "shareLocationOff": "Not sharing — turn on to let dispatch see your live location",
+    "locationPermissionDenied": "Location permission denied. Enable it in your device settings to share your location."
   },
   "dvir": {
     "preTripHeading": "Pre-Trip Inspection",

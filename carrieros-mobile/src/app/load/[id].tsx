@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { PodSection } from '@/components/pod-section';
+import { ShareLocationSection } from '@/components/share-location-section';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
@@ -70,6 +71,11 @@ const NEXT_STATUS: Record<string, { next: string; actionLabelKey: string }> = {
   picked_up: { next: 'in_transit', actionLabelKey: 'loadDetail.actionStartTransit' },
   in_transit: { next: 'delivered', actionLabelKey: 'loadDetail.actionDelivered' },
 };
+
+// Matches (tabs)/my-load.tsx's own ACTIVE_LOAD_STATUSES — the window during
+// which sharing GPS or logging a POD/DVIR makes sense for a load a driver
+// is actually out on.
+const ACTIVE_LOAD_STATUSES: readonly string[] = ['dispatched', 'picked_up', 'in_transit'];
 
 const DETAIL_COLS =
   'id, load_number, status, customer_name_raw, pickup_address, pickup_city, pickup_state, ' +
@@ -253,6 +259,10 @@ export default function LoadDetailScreen() {
                 </Pressable>
               </ThemedView>
             </ThemedView>
+          )}
+
+          {(role === 'driver' || role === 'solo') && ACTIVE_LOAD_STATUSES.includes(load.status) && (
+            <ShareLocationSection loadId={load.id} />
           )}
 
           {(role === 'driver' || role === 'solo') && <PodSection loadId={load.id} />}

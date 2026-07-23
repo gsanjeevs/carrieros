@@ -348,6 +348,12 @@ CREATE TABLE profiles (
   -- covered by this column yet -- flag if "deactivate a team member" is
   -- ever built for those roles, not just portal contacts).
   is_active          BOOLEAN NOT NULL DEFAULT true,
+  -- Expo push token (2026-07-23) -- one per user, most-recent-device-wins
+  -- (not a multi-device list; a user reinstalling/switching phones just
+  -- overwrites it, matching this project's "no history needed" defaults
+  -- elsewhere). Set by the mobile app after notification permission is
+  -- granted; read by lib/send-push.ts when a load is dispatched to a driver.
+  push_token         TEXT,
   created_at         TIMESTAMPTZ DEFAULT now()
 );
 

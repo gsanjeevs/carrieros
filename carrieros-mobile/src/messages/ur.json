@@ -44,7 +44,11 @@
     "postTripDvir": "پوسٹ ٹرپ DVIR",
     "actionPickedUp": "اٹھایا گیا کے طور پر نشان زد کریں",
     "actionStartTransit": "سفر شروع کریں",
-    "actionDelivered": "ڈیلیور شدہ کے طور پر نشان زد کریں"
+    "actionDelivered": "ڈیلیور شدہ کے طور پر نشان زد کریں",
+    "shareLocation": "مقام شیئر کریں",
+    "shareLocationOn": "ڈسپیچ کے ساتھ آپ کا لائیو مقام شیئر کیا جا رہا ہے",
+    "shareLocationOff": "شیئر نہیں کیا جا رہا — ڈسپیچ کو اپنا لائیو مقام دکھانے کے لیے آن کریں",
+    "locationPermissionDenied": "مقام کی اجازت مسترد کر دی گئی۔ اپنا مقام شیئر کرنے کے لیے اپنی ڈیوائس کی ترتیبات میں اسے فعال کریں۔"
   },
   "dvir": {
     "preTripHeading": "پری ٹرپ معائنہ",

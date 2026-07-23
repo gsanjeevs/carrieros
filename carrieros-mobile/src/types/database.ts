@@ -1750,6 +1750,7 @@ export type Database = {
           org_id: number
           phone: string | null
           preferred_language: string | null
+          push_token: string | null
           role: string
           time_format: string | null
           timezone: string | null
@@ -1766,6 +1767,7 @@ export type Database = {
           org_id: number
           phone?: string | null
           preferred_language?: string | null
+          push_token?: string | null
           role: string
           time_format?: string | null
           timezone?: string | null
@@ -1782,6 +1784,7 @@ export type Database = {
           org_id?: number
           phone?: string | null
           preferred_language?: string | null
+          push_token?: string | null
           role?: string
           time_format?: string | null
           timezone?: string | null

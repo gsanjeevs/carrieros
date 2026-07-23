@@ -44,7 +44,11 @@
     "postTripDvir": "DVIR Después del Viaje",
     "actionPickedUp": "Marcar como Recogida",
     "actionStartTransit": "Iniciar Tránsito",
-    "actionDelivered": "Marcar como Entregada"
+    "actionDelivered": "Marcar como Entregada",
+    "shareLocation": "Compartir Ubicación",
+    "shareLocationOn": "Compartiendo tu ubicación en vivo con despacho",
+    "shareLocationOff": "No compartiendo — actívalo para que despacho vea tu ubicación en vivo",
+    "locationPermissionDenied": "Permiso de ubicación denegado. Actívalo en la configuración de tu dispositivo para compartir tu ubicación."
   },
   "dvir": {
     "preTripHeading": "Inspección Antes del Viaje",
