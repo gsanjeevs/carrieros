@@ -260,7 +260,17 @@
     "selectDocuments": "Documents to send",
     "sendDocuments": "Send Documents",
     "sendingDocuments": "Sending…",
-    "documentsSentSuccess": "Sent {count, plural, one {# document} other {# documents}} to {email}."
+    "documentsSentSuccess": "Sent {count, plural, one {# document} other {# documents}} to {email}.",
+    "chatTitle": "Messages",
+    "chatNoMessages": "No messages yet.",
+    "chatPlaceholder": "Type a message…",
+    "chatSend": "Send",
+    "chatSendFailed": "Couldn't send that message. Please try again.",
+    "chatUpgradeRequired": "Driver messaging requires the Growth plan or above.",
+    "chatDriver": "Driver",
+    "chatSystem": "System",
+    "chatTranslate": "Translate",
+    "chatTranslating": "Translating…"
   },
   "drivers": {
     "title": "Drivers",

@@ -7,6 +7,8 @@ import DispatchPanel from '@/components/DispatchPanel'
 import LoadActionGrid from '@/components/LoadActionGrid'
 import LoadDocuments, { type DocType, type LoadDocument } from '@/components/LoadDocuments'
 import SendDocumentsButton from '@/components/SendDocumentsButton'
+import DriverMessageThread from '@/components/DriverMessageThread'
+import { hasFeature } from '@/lib/entitlements'
 import { formatDateTime, toDate } from '@/lib/format-datetime'
 import { formatMoney } from '@/lib/format-money'
 import CreateInvoiceButton from './CreateInvoiceButton'
@@ -151,6 +153,11 @@ export default async function LoadDetailPage({
   const canDispatch = ['owner', 'solo', 'dispatcher'].includes(profile.role)
   const canUploadDoc = ['owner', 'solo', 'dispatcher'].includes(profile.role)
   const canDeleteDoc = ['owner', 'solo'].includes(profile.role)
+  // Driver chat (audit gap #13): finance gets none of it, by design (BR-2/
+  // FR-119) — matches the same role set the API routes' own explicit
+  // access checks use.
+  const canChat = ['owner', 'solo', 'dispatcher', 'driver'].includes(profile.role)
+  const chatEntitled = canChat && (await hasFeature(supabase, 'driver_chat'))
 
   const isCancelled = load.status === 'cancelled'
   const isDeclined  = load.status === 'declined'
@@ -314,6 +321,11 @@ export default async function LoadDetailPage({
             </div>
           )}
           </div>
+
+          {/* Driver chat */}
+          {chatEntitled && (
+            <DriverMessageThread loadId={load.id} currentUserId={user.id} locale={locale} />
+          )}
 
           {/* Timeline */}
           <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">

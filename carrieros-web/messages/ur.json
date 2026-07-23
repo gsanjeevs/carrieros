@@ -260,7 +260,17 @@
     "selectDocuments": "بھیجنے کے لیے دستاویزات",
     "sendDocuments": "دستاویزات بھیجیں",
     "sendingDocuments": "بھیجا جا رہا ہے…",
-    "documentsSentSuccess": "{email} کو {count, plural, one {# دستاویز} other {# دستاویزات}} بھیج دی گئیں۔"
+    "documentsSentSuccess": "{email} کو {count, plural, one {# دستاویز} other {# دستاویزات}} بھیج دی گئیں۔",
+    "chatTitle": "پیغامات",
+    "chatNoMessages": "ابھی تک کوئی پیغام نہیں۔",
+    "chatPlaceholder": "ایک پیغام لکھیں…",
+    "chatSend": "بھیجیں",
+    "chatSendFailed": "پیغام نہیں بھیجا جا سکا۔ براہ کرم دوبارہ کوشش کریں۔",
+    "chatUpgradeRequired": "ڈرائیور میسجنگ کے لیے Growth پلان یا اس سے اوپر درکار ہے۔",
+    "chatDriver": "ڈرائیور",
+    "chatSystem": "سسٹم",
+    "chatTranslate": "ترجمہ کریں",
+    "chatTranslating": "ترجمہ ہو رہا ہے…"
   },
   "drivers": {
     "title": "ڈرائیورز",

@@ -260,7 +260,17 @@
     "selectDocuments": "Documentos a enviar",
     "sendDocuments": "Enviar Documentos",
     "sendingDocuments": "Enviando…",
-    "documentsSentSuccess": "{count, plural, one {# documento enviado} other {# documentos enviados}} a {email}."
+    "documentsSentSuccess": "{count, plural, one {# documento enviado} other {# documentos enviados}} a {email}.",
+    "chatTitle": "Mensajes",
+    "chatNoMessages": "Aún no hay mensajes.",
+    "chatPlaceholder": "Escribe un mensaje…",
+    "chatSend": "Enviar",
+    "chatSendFailed": "No se pudo enviar el mensaje. Inténtalo de nuevo.",
+    "chatUpgradeRequired": "La mensajería con conductores requiere el plan Growth o superior.",
+    "chatDriver": "Conductor",
+    "chatSystem": "Sistema",
+    "chatTranslate": "Traducir",
+    "chatTranslating": "Traduciendo…"
   },
   "drivers": {
     "title": "Conductores",

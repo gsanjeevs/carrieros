@@ -9,6 +9,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { PodSection } from '@/components/pod-section';
 import { ShareLocationSection } from '@/components/share-location-section';
+import { DriverChatSection } from '@/components/driver-chat-section';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
@@ -95,6 +96,7 @@ export default function LoadDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [advancing, setAdvancing] = useState(false);
   const [error, setError] = useState('');
+  const [chatEntitled, setChatEntitled] = useState(false);
 
   const fetchAll = useCallback(async () => {
     if (!session?.user.id || !id) return;
@@ -107,6 +109,9 @@ export default function LoadDetailScreen() {
 
     const currentRole = (profile?.role ?? 'solo') as Role;
     setRole(currentRole);
+
+    const { data: entitled } = await supabase.rpc('has_feature', { feature_key: 'driver_chat' });
+    setChatEntitled(entitled === true);
 
     const { data: loadData, error: loadErr } =
       currentRole === 'driver'
@@ -266,6 +271,10 @@ export default function LoadDetailScreen() {
           )}
 
           {(role === 'driver' || role === 'solo') && <PodSection loadId={load.id} />}
+
+          {chatEntitled && (role === 'driver' || role === 'solo' || role === 'dispatcher') && (
+            <DriverChatSection loadId={load.id} />
+          )}
 
           {events.length > 0 && (
             <ThemedView type="backgroundElement" style={styles.section}>

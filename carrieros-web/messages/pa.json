@@ -260,7 +260,17 @@
     "selectDocuments": "ਭੇਜਣ ਲਈ ਦਸਤਾਵੇਜ਼",
     "sendDocuments": "ਦਸਤਾਵੇਜ਼ ਭੇਜੋ",
     "sendingDocuments": "ਭੇਜਿਆ ਜਾ ਰਿਹਾ ਹੈ…",
-    "documentsSentSuccess": "{email} ਨੂੰ {count, plural, one {# ਦਸਤਾਵੇਜ਼} other {# ਦਸਤਾਵੇਜ਼}} ਭੇਜੇ ਗਏ।"
+    "documentsSentSuccess": "{email} ਨੂੰ {count, plural, one {# ਦਸਤਾਵੇਜ਼} other {# ਦਸਤਾਵੇਜ਼}} ਭੇਜੇ ਗਏ।",
+    "chatTitle": "ਸੁਨੇਹੇ",
+    "chatNoMessages": "ਅਜੇ ਕੋਈ ਸੁਨੇਹਾ ਨਹੀਂ।",
+    "chatPlaceholder": "ਇੱਕ ਸੁਨੇਹਾ ਲਿਖੋ…",
+    "chatSend": "ਭੇਜੋ",
+    "chatSendFailed": "ਸੁਨੇਹਾ ਭੇਜਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "chatUpgradeRequired": "ਡਰਾਈਵਰ ਮੈਸੇਜਿੰਗ ਲਈ Growth ਪਲਾਨ ਜਾਂ ਵੱਧ ਦੀ ਲੋੜ ਹੈ।",
+    "chatDriver": "ਡਰਾਈਵਰ",
+    "chatSystem": "ਸਿਸਟਮ",
+    "chatTranslate": "ਅਨੁਵਾਦ ਕਰੋ",
+    "chatTranslating": "ਅਨੁਵਾਦ ਹੋ ਰਿਹਾ ਹੈ…"
   },
   "drivers": {
     "title": "ਡਰਾਈਵਰ",

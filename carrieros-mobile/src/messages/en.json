@@ -50,6 +50,15 @@
     "shareLocationOff": "Not sharing — turn on to let dispatch see your live location",
     "locationPermissionDenied": "Location permission denied. Enable it in your device settings to share your location."
   },
+  "chat": {
+    "title": "Messages",
+    "noMessages": "No messages yet.",
+    "placeholder": "Type a message…",
+    "send": "Send",
+    "sendFailed": "Couldn't send that message. Please try again.",
+    "upgradeRequired": "Driver messaging requires the Growth plan or above.",
+    "translate": "Translate"
+  },
   "dvir": {
     "preTripHeading": "Pre-Trip Inspection",
     "postTripHeading": "Post-Trip Inspection",
