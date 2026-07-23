@@ -1484,6 +1484,17 @@ ALTER TABLE driver_message_translations ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "same_org_message_translations_select" ON driver_message_translations FOR SELECT TO authenticated USING (
   message_id IN (SELECT id FROM driver_messages WHERE carrier_org_id = my_org_id())
 );
+-- Found missing while adding test coverage (2026-07-22): only a SELECT
+-- policy existed, so app/api/driver-messages/[id]/translate/route.ts's own
+-- insert (using the caller's RLS-scoped session, not the admin client) 500'd
+-- for every real caller — the translate feature was completely broken
+-- end-to-end, not just untested. Same org-scoping shape as the SELECT
+-- policy; the route's own explicit role/assigned-driver check (mirroring
+-- app/api/team/[id]/route.ts's convention) is the finer-grained gate, RLS is
+-- the backstop.
+CREATE POLICY "same_org_message_translations_insert" ON driver_message_translations FOR INSERT TO authenticated WITH CHECK (
+  message_id IN (SELECT id FROM driver_messages WHERE carrier_org_id = my_org_id())
+);
 
 -- DRIVER SETTLEMENTS (Phase 7E, 2026-07-21) -- driver sees only their own;
 -- dispatcher has NO access (financial, outside dispatcher's scope per the

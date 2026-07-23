@@ -23,9 +23,15 @@ export function adminClient(): SupabaseClient<Database> {
 }
 
 let orgCounter = 0
+// Date.now() alone collides across test FILES running in parallel (vitest's
+// fileParallelism) — two files can both call this in the same millisecond
+// with the same per-file counter value, producing the same email and a
+// GoTrue 500 (duplicate key on users_email_partial_key). A short random
+// component makes that collision astronomically unlikely without changing
+// the human-readable timestamp prefix.
 function uniqueSuffix() {
   orgCounter += 1
-  return `${Date.now()}_${orgCounter}`
+  return `${Date.now()}_${orgCounter}_${Math.random().toString(36).slice(2, 8)}`
 }
 
 export interface TestOrg {
