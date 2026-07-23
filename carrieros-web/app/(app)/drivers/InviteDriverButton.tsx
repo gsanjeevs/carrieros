@@ -6,6 +6,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { Button, Input, Modal } from '@/components/ui'
 
 type Vehicle = {
   id: number
@@ -13,8 +14,7 @@ type Vehicle = {
   nickname: string | null
 }
 
-const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 transition'
-const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
+const labelCls = 'block text-xs font-medium text-text-sec mb-1.5'
 
 export default function InviteDriverButton({ vehicles, variant }: { vehicles: Vehicle[]; variant?: 'empty' }) {
   const router = useRouter()
@@ -83,102 +83,81 @@ export default function InviteDriverButton({ vehicles, variant }: { vehicles: Ve
   return (
     <>
       {variant === 'empty' ? (
-        <button
-          onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-        >
+        <Button onClick={() => setOpen(true)} className="mt-4">
           <span className="material-symbols-outlined text-[16px]">add</span>
           {t('inviteFirstDriver')}
-        </button>
+        </Button>
       ) : (
-        <button
-          onClick={() => setOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-        >
+        <Button onClick={() => setOpen(true)}>
           <span className="material-symbols-outlined text-[18px]">add</span>
           {t('inviteDriver')}
-        </button>
+        </Button>
       )}
 
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
-          <div className="w-full max-w-md bg-[#0f1923] border border-white/10 rounded-2xl p-6 shadow-modal-dark">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-white font-semibold text-lg">{t('inviteDriver')}</h2>
-              <button onClick={close} className="text-slate-500 hover:text-white transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
-                <span className="material-symbols-outlined text-[20px]">close</span>
-              </button>
+      <Modal
+        open={open}
+        onClose={close}
+        title={t('inviteDriver')}
+        footer={
+          <>
+            <Button variant="secondary" size="sm" onClick={close} disabled={loading}>
+              {tCommon('cancel')}
+            </Button>
+            <Button size="sm" onClick={submit} disabled={loading || !form.email} loading={loading}>
+              {loading ? t('sendingInvite') : t('sendInvite')}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label className={labelCls}>{t('email')} *</label>
+            <Input
+              type="email"
+              placeholder="driver@example.com"
+              value={form.email}
+              onChange={e => set('email', e.target.value)}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>{t('firstName')}</label>
+              <Input placeholder="John"
+                value={form.first_name} onChange={e => set('first_name', e.target.value)} />
             </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className={labelCls}>{t('email')} *</label>
-                <input
-                  className={inputCls}
-                  type="email"
-                  placeholder="driver@example.com"
-                  value={form.email}
-                  onChange={e => set('email', e.target.value)}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={labelCls}>{t('firstName')}</label>
-                  <input className={inputCls} placeholder="John"
-                    value={form.first_name} onChange={e => set('first_name', e.target.value)} />
-                </div>
-                <div>
-                  <label className={labelCls}>{t('lastName')}</label>
-                  <input className={inputCls} placeholder="Smith"
-                    value={form.last_name} onChange={e => set('last_name', e.target.value)} />
-                </div>
-              </div>
-
-              <div>
-                <label className={labelCls}>{t('phone')}</label>
-                <input className={inputCls} placeholder="(555) 123-4567"
-                  value={form.phone} onChange={e => set('phone', e.target.value)} />
-              </div>
-
-              <div>
-                <label className={labelCls}>{t('truckOptional')}</label>
-                <select className={inputCls} value={form.default_vehicle_id} onChange={e => set('default_vehicle_id', e.target.value)}>
-                  <option value="">{t('noDefaultTruck')}</option>
-                  {vehicles.map(vehicle => (
-                    <option key={vehicle.id} value={vehicle.id}>
-                      {vehicle.vehicle_number}{vehicle.nickname ? ` — ${vehicle.nickname}` : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {error && (
-                <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-red-400 text-sm">
-                  {error}
-                </div>
-              )}
-
-              <div className="flex gap-3 mt-2">
-                <button
-                  onClick={close}
-                  disabled={loading}
-                  className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-                >
-                  {tCommon('cancel')}
-                </button>
-                <button
-                  onClick={submit}
-                  disabled={loading || !form.email}
-                  className="flex-2 flex-grow py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-                >
-                  {loading ? t('sendingInvite') : t('sendInvite')}
-                </button>
-              </div>
+            <div>
+              <label className={labelCls}>{t('lastName')}</label>
+              <Input placeholder="Smith"
+                value={form.last_name} onChange={e => set('last_name', e.target.value)} />
             </div>
           </div>
+
+          <div>
+            <label className={labelCls}>{t('phone')}</label>
+            <Input placeholder="(555) 123-4567"
+              value={form.phone} onChange={e => set('phone', e.target.value)} />
+          </div>
+
+          <div>
+            <label className={labelCls}>{t('truckOptional')}</label>
+            <Input as="select" value={form.default_vehicle_id} onChange={e => set('default_vehicle_id', e.target.value)}>
+              <option value="">{t('noDefaultTruck')}</option>
+              {vehicles.map(vehicle => (
+                <option key={vehicle.id} value={vehicle.id}>
+                  {vehicle.vehicle_number}{vehicle.nickname ? ` — ${vehicle.nickname}` : ''}
+                </option>
+              ))}
+            </Input>
+          </div>
+
+          {error && (
+            <div className="rounded-lg bg-danger/10 border border-danger/20 px-4 py-3 text-danger text-sm">
+              {error}
+            </div>
+          )}
         </div>
-      )}
+      </Modal>
     </>
   )
 }

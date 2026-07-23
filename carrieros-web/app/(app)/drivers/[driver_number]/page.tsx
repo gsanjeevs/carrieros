@@ -11,13 +11,13 @@ import { formatMoney } from '@/lib/format-money'
 import { inviteStatusVariant, type InviteStatus } from '@/lib/domain/invite-status'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import { cdlGlowStatus } from '@/lib/domain/driver-compliance'
-import StatusBadge from '@/components/ui/StatusBadge'
+import { Card, CardHeader, CardBody, KpiTile, StatusBadge, Table, TableHeaderCell, TableRow, TableCell, EmptyState } from '@/components/ui'
 
 function InfoRow({ label, value }: { label: string; value: string | number | null | undefined }) {
   return (
-    <div className="flex justify-between items-start py-2.5 border-b border-white/5 last:border-0">
-      <span className="text-slate-500 text-sm">{label}</span>
-      <span className="text-white text-sm text-right ml-4">{value ?? '—'}</span>
+    <div className="flex justify-between items-start py-2.5 border-b border-divider-ui last:border-0">
+      <span className="text-text-sec text-sm">{label}</span>
+      <span className="text-text-pri text-sm text-right ml-4">{value ?? '—'}</span>
     </div>
   )
 }
@@ -156,28 +156,32 @@ export default async function DriverDetailPage({
   const profileTab = (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 space-y-6">
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-          <h2 className="text-white font-medium text-sm mb-3">{t('driverDetails')}</h2>
-          <InfoRow label={t('driverNumber')} value={driver.driver_number} />
-          <InfoRow label={t('phone')} value={driver.profiles?.phone} />
-          <InfoRow label={t('defaultTruck')} value={vehicleLabel ?? t('noDefaultTruck')} />
-        </div>
+        <Card>
+          <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('driverDetails')}</h2></CardHeader>
+          <CardBody>
+            <InfoRow label={t('driverNumber')} value={driver.driver_number} />
+            <InfoRow label={t('phone')} value={driver.profiles?.phone} />
+            <InfoRow label={t('defaultTruck')} value={vehicleLabel ?? t('noDefaultTruck')} />
+          </CardBody>
+        </Card>
 
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-          <h2 className="text-white font-medium text-sm mb-3">{t('emergencyContact')}</h2>
-          {driver.emergency_contact_name || driver.emergency_contact_phone ? (
-            <>
-              <InfoRow label={t('emergencyContactName')} value={driver.emergency_contact_name} />
-              <InfoRow label={t('emergencyContactPhone')} value={driver.emergency_contact_phone} />
-              <InfoRow
-                label={t('emergencyContactRelation')}
-                value={driver.emergency_contact_relation}
-              />
-            </>
-          ) : (
-            <p className="text-slate-500 text-sm">{t('noEmergencyContact')}</p>
-          )}
-        </div>
+        <Card>
+          <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('emergencyContact')}</h2></CardHeader>
+          <CardBody>
+            {driver.emergency_contact_name || driver.emergency_contact_phone ? (
+              <>
+                <InfoRow label={t('emergencyContactName')} value={driver.emergency_contact_name} />
+                <InfoRow label={t('emergencyContactPhone')} value={driver.emergency_contact_phone} />
+                <InfoRow
+                  label={t('emergencyContactRelation')}
+                  value={driver.emergency_contact_relation}
+                />
+              </>
+            ) : (
+              <p className="text-text-sec text-sm">{t('noEmergencyContact')}</p>
+            )}
+          </CardBody>
+        </Card>
 
         {canManage && (
           <DriverPayConfig
@@ -189,26 +193,29 @@ export default async function DriverDetailPage({
       </div>
 
       <div className="space-y-6">
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark flex flex-col items-center text-center">
-          {avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={avatarUrl} alt={driverName} className="w-16 h-16 rounded-full object-cover mb-3" />
-          ) : (
-            <div className="w-16 h-16 rounded-full bg-navy-light flex items-center justify-center mb-3">
-              <span className="text-avatar-text text-lg font-semibold">{initials}</span>
-            </div>
-          )}
-          <p className="text-white text-sm font-medium">{driverName}</p>
-          <span className="mt-2">
-            <StatusBadge variant={inviteStatusVariant(inviteStatus)}>
-              {t(`inviteStatus_${driver.invite_status}` as never)}
-            </StatusBadge>
-          </span>
-        </div>
+        <Card>
+          <CardBody className="flex flex-col items-center text-center">
+            {avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={avatarUrl} alt={driverName} className="w-16 h-16 rounded-full object-cover mb-3" />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-navy-light flex items-center justify-center mb-3">
+                <span className="text-avatar-text text-lg font-semibold">{initials}</span>
+              </div>
+            )}
+            <p className="text-text-pri text-sm font-medium">{driverName}</p>
+            <span className="mt-2">
+              <StatusBadge variant={inviteStatusVariant(inviteStatus)}>
+                {t(`inviteStatus_${driver.invite_status}` as never)}
+              </StatusBadge>
+            </span>
+          </CardBody>
+        </Card>
 
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-          <h2 className="text-white font-medium text-sm mb-3">{t('cdlAndMedical')}</h2>
-          <div className="inline-flex flex-col gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 w-full">
+        <Card>
+          <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('cdlAndMedical')}</h2></CardHeader>
+          <CardBody>
+          <div className="inline-flex flex-col gap-1.5 rounded-lg border border-border-ui bg-white/[0.03] px-3 py-2 w-full">
             <div className="flex items-center justify-between gap-2">
               <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-400 text-2xs font-semibold tracking-wide">
                 {driver.cdl_class ? t('cdlClass', { class: driver.cdl_class }) : t('cdlClassUnknown')}
@@ -244,7 +251,8 @@ export default async function DriverDetailPage({
           <div className="mt-3">
             <InfoRow label={t('medCertExpiry')} value={driver.med_cert_expiry ? formatDate(driver.med_cert_expiry, profile) : null} />
           </div>
-        </div>
+          </CardBody>
+        </Card>
       </div>
     </div>
   )
@@ -263,85 +271,74 @@ export default async function DriverDetailPage({
   const loadsTab = (
     <div className="space-y-6">
       <div className={`grid grid-cols-2 ${showRate ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-4`}>
-        <div className="bg-white/5 border border-white/8 rounded-xl p-4 shadow-card-dark">
-          <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">{t('statTotalLoads')}</p>
-          <p className="text-2xl font-semibold text-white">{totalLoads}</p>
-        </div>
+        <KpiTile label={t('statTotalLoads')} value={totalLoads} />
         {showRate && (
-          <div className="bg-white/5 border border-white/8 rounded-xl p-4 shadow-card-dark">
-            <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">{t('statRevenue')}</p>
-            <p className="text-2xl font-semibold text-brand-orange">{formatMoney(totalRevenue, carrierOrg?.currency ?? 'USD', locale)}</p>
-          </div>
+          <Card>
+            <CardBody>
+              <p className="text-[10px] font-bold tracking-[0.08em] uppercase text-text-sec mb-2">{t('statRevenue')}</p>
+              <p className="text-[26px] font-extrabold tracking-tight text-brand-orange leading-none">{formatMoney(totalRevenue, carrierOrg?.currency ?? 'USD', locale)}</p>
+            </CardBody>
+          </Card>
         )}
-        <div className="bg-white/5 border border-white/8 rounded-xl p-4 shadow-card-dark">
-          <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">{t('statMiles')}</p>
-          <p className="text-2xl font-semibold text-white">{totalMiles.toLocaleString()}</p>
-        </div>
+        <KpiTile label={t('statMiles')} value={totalMiles.toLocaleString()} />
         {showRate && (
-          <div className="bg-white/5 border border-white/8 rounded-xl p-4 shadow-card-dark">
-            <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">{t('statAvgPerLoad')}</p>
-            <p className="text-2xl font-semibold text-white">{formatMoney(avgPerLoad, carrierOrg?.currency ?? 'USD', locale)}</p>
-          </div>
+          <KpiTile label={t('statAvgPerLoad')} value={formatMoney(avgPerLoad, carrierOrg?.currency ?? 'USD', locale)} />
         )}
       </div>
 
       {loads.length === 0 ? (
-        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-card-dark">
-          <span className="material-symbols-outlined text-slate-600 text-4xl">local_shipping</span>
-          <p className="text-slate-500 text-sm mt-3">{t('noLoadsYet')}</p>
-        </div>
+        <Card>
+          <EmptyState icon="local_shipping" title={t('noLoadsYet')} />
+        </Card>
       ) : (
-        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
-          <table className="w-full text-sm">
+        <Card>
+          <Table>
             <thead>
-              <tr className="border-b border-white/5">
-                <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('colLoad')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('colStatus')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('colRoute')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('colDate')}</th>
-                {showRate && <th className="text-right px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('colRate')}</th>}
+              <tr>
+                <TableHeaderCell>{t('colLoad')}</TableHeaderCell>
+                <TableHeaderCell>{t('colStatus')}</TableHeaderCell>
+                <TableHeaderCell>{t('colRoute')}</TableHeaderCell>
+                <TableHeaderCell>{t('colDate')}</TableHeaderCell>
+                {showRate && <TableHeaderCell numeric>{t('colRate')}</TableHeaderCell>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody>
               {loads.map((l) => (
-                <tr key={l.id} className="hover:bg-white/[0.07] transition-colors duration-150">
-                  <td className="px-5 py-3">
-                    <Link href={`/loads/${l.load_number}`} className="text-white font-medium hover:text-[#f97316] transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
+                <TableRow key={l.id}>
+                  <TableCell className="font-medium text-text-pri">
+                    <Link href={`/loads/${l.load_number}`} className="hover:text-brand-orange transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
                       {l.load_number}
                     </Link>
-                  </td>
-                  <td className="px-4 py-3">
+                  </TableCell>
+                  <TableCell>
                     <StatusBadge variant={loadStatusVariant((l.status ?? 'draft') as LoadStatus)} size="sm">
                       {l.status ?? 'draft'}
                     </StatusBadge>
-                  </td>
-                  <td className="px-4 py-3 text-slate-300">
+                  </TableCell>
+                  <TableCell>
                     {[l.pickup_city, l.pickup_state].filter(Boolean).join(', ')} → {[l.delivery_city, l.delivery_state].filter(Boolean).join(', ')}
-                  </td>
-                  <td className="px-4 py-3 text-slate-400">{l.delivery_date ? formatDate(l.delivery_date, profile) : '—'}</td>
+                  </TableCell>
+                  <TableCell>{l.delivery_date ? formatDate(l.delivery_date, profile) : '—'}</TableCell>
                   {showRate && (
-                    <td className="px-5 py-3 text-right text-white font-medium">
+                    <TableCell numeric className="font-medium text-text-pri">
                       {formatMoney(l.rate, carrierOrg?.currency ?? 'USD', locale)}
-                    </td>
+                    </TableCell>
                   )}
-                </tr>
+                </TableRow>
               ))}
             </tbody>
-          </table>
-        </div>
+          </Table>
+        </Card>
       )}
     </div>
   )
 
   const dvirsTab = (
-    <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
+    <Card>
       {dvirs.length === 0 ? (
-        <div className="px-5 py-16 text-center">
-          <span className="material-symbols-outlined text-slate-600 text-4xl">fact_check</span>
-          <p className="text-slate-500 text-sm mt-3">{t('noDvirsYet')}</p>
-        </div>
+        <EmptyState icon="fact_check" title={t('noDvirsYet')} />
       ) : (
-        <div className="divide-y divide-white/5">
+        <div className="divide-y divide-divider-ui">
           {dvirs.map((d) => {
             const vehicleTag = d.vehicles
               ? `${d.vehicles.vehicle_number ?? ''}${d.vehicles.nickname ? ` — ${d.vehicles.nickname}` : ''}`.trim()
@@ -358,23 +355,23 @@ export default async function DriverDetailPage({
                       {t(d.type === 'pre_trip' ? 'dvirPreTrip' : 'dvirPostTrip')}
                     </span>
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                      hasDefects ? 'bg-amber-500/20 text-amber-400' : 'bg-[#16a34a]/20 text-[#16a34a]'
+                      hasDefects ? 'bg-warning/20 text-warning' : 'bg-success/20 text-success'
                     }`}>
                       {hasDefects ? t('dvirDefectsNoted') : t('dvirSatisfactory')}
                     </span>
                   </div>
-                  <span className="text-slate-500 text-xs">{formatDateTime(d.submitted_at, profile)}</span>
+                  <span className="text-text-sec text-xs">{formatDateTime(d.submitted_at, profile)}</span>
                 </div>
-                <div className="flex items-center gap-4 mt-2 text-xs text-slate-400">
+                <div className="flex items-center gap-4 mt-2 text-xs text-text-mut">
                   {vehicleTag && <span>{vehicleTag}</span>}
                   {d.odometer != null && <span>{d.odometer.toLocaleString()} mi</span>}
                 </div>
                 {hasDefects && defects.length > 0 && (
                   <ul className="mt-2 space-y-1">
                     {defects.map((def) => (
-                      <li key={def.id} className="text-slate-400 text-xs flex items-center gap-2">
-                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${def.severity === 'major' ? 'bg-red-500' : 'bg-amber-500'}`} />
-                        <span className="text-slate-300">{def.area}</span>
+                      <li key={def.id} className="text-text-mut text-xs flex items-center gap-2">
+                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${def.severity === 'major' ? 'bg-danger' : 'bg-warning'}`} />
+                        <span className="text-text-sec">{def.area}</span>
                         {def.description && <span>— {def.description}</span>}
                       </li>
                     ))}
@@ -385,7 +382,7 @@ export default async function DriverDetailPage({
           })}
         </div>
       )}
-    </div>
+    </Card>
   )
 
   return (

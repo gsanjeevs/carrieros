@@ -8,7 +8,7 @@ import ExceptionChip from '@/components/ExceptionChip'
 import { getExceptions } from '@/lib/exceptions'
 import { inviteStatusVariant, type InviteStatus } from '@/lib/domain/invite-status'
 import { cdlGlowStatus } from '@/lib/domain/driver-compliance'
-import StatusBadge from '@/components/ui/StatusBadge'
+import { Card, EmptyState, StatusBadge, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
 
 type Driver = {
@@ -91,40 +91,41 @@ export default async function DriversPage({
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">{t('title')}</h1>
-          <p className="text-slate-400 text-sm mt-1">{t('driverCount', { count: drivers.length })}</p>
+          <h1 className="text-2xl font-semibold text-text-pri">{t('title')}</h1>
+          <p className="text-text-sec text-sm mt-1">{t('driverCount', { count: drivers.length })}</p>
         </div>
         {canManage && <InviteDriverButton vehicles={vehicles} />}
       </div>
 
       {justInvited && (
-        <div className="mb-6 flex items-center gap-3 rounded-lg bg-[#16a34a]/10 border border-[#16a34a]/20 px-4 py-3">
-          <span className="material-symbols-outlined text-[#16a34a] text-[18px]">check_circle</span>
-          <p className="text-[#16a34a] text-sm">{t('invitedSuccess', { driverNumber: justInvited })}</p>
+        <div className="mb-6 flex items-center gap-3 rounded-lg bg-success/10 border border-success/20 px-4 py-3">
+          <span className="material-symbols-outlined text-success text-[18px]">check_circle</span>
+          <p className="text-success text-sm">{t('invitedSuccess', { driverNumber: justInvited })}</p>
         </div>
       )}
 
       {drivers.length === 0 ? (
-        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-card-dark">
-          <span className="material-symbols-outlined text-slate-600 text-4xl">person</span>
-          <p className="text-slate-500 text-sm mt-3">{t('noDriversYet')}</p>
-          {canManage && <InviteDriverButton vehicles={vehicles} variant="empty" />}
-        </div>
+        <Card>
+          <div className="flex flex-col items-center pb-8">
+            <EmptyState icon="person" title={t('noDriversYet')} />
+            {canManage && <InviteDriverButton vehicles={vehicles} variant="empty" />}
+          </div>
+        </Card>
       ) : (
-        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
-          <table className="w-full text-sm">
+        <Card>
+          <Table>
             <thead>
-              <tr className="border-b border-white/5">
-                <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('driverNumber')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('name')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('status')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('phone')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('cdlExpiry')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('medCertExpiry')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide"></th>
+              <tr>
+                <TableHeaderCell>{t('driverNumber')}</TableHeaderCell>
+                <TableHeaderCell>{t('name')}</TableHeaderCell>
+                <TableHeaderCell>{t('status')}</TableHeaderCell>
+                <TableHeaderCell>{t('phone')}</TableHeaderCell>
+                <TableHeaderCell>{t('cdlExpiry')}</TableHeaderCell>
+                <TableHeaderCell>{t('medCertExpiry')}</TableHeaderCell>
+                <TableHeaderCell></TableHeaderCell>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody>
               {drivers.map((driver) => {
                 const inviteStatus = (driver.invite_status || 'pending') as InviteStatus
                 const name = [driver.profiles?.first_name, driver.profiles?.last_name].filter(Boolean).join(' ') || '—'
@@ -137,24 +138,24 @@ export default async function DriversPage({
                 const topException = topExceptionByDriver.get(driver.id)
 
                 return (
-                  <tr key={driver.id} className="hover:bg-white/[0.07] transition-colors duration-150">
-                    <td className="px-5 py-3.5 text-white font-medium">
+                  <TableRow key={driver.id}>
+                    <TableCell className="font-medium text-text-pri">
                       <Link
                         href={`/drivers/${driver.driver_number}`}
-                        className="hover:text-[#f97316] transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+                        className="hover:text-brand-orange transition-colors rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
                       >
                         {driver.driver_number}
                       </Link>
-                    </td>
-                    <td className="px-4 py-3.5 text-slate-300">{name}</td>
-                    <td className="px-4 py-3.5">
+                    </TableCell>
+                    <TableCell>{name}</TableCell>
+                    <TableCell>
                       <StatusBadge variant={inviteStatusVariant(inviteStatus)} size="sm">
                         {t(`inviteStatus_${inviteStatus}`)}
                       </StatusBadge>
-                    </td>
-                    <td className="px-4 py-3.5 text-slate-400">{driver.profiles?.phone ?? '—'}</td>
-                    <td className="px-4 py-3.5">
-                      <div className="inline-flex flex-col gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 min-w-[148px]">
+                    </TableCell>
+                    <TableCell>{driver.profiles?.phone ?? '—'}</TableCell>
+                    <TableCell>
+                      <div className="inline-flex flex-col gap-1.5 rounded-lg border border-border-ui bg-white/[0.03] px-3 py-2 min-w-[148px]">
                         <div className="flex items-center justify-between gap-2">
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-400 text-2xs font-semibold tracking-wide">
                             {driver.cdl_class ? t('cdlClass', { class: driver.cdl_class }) : t('cdlClassUnknown')}
@@ -187,19 +188,19 @@ export default async function DriversPage({
                           </div>
                         )}
                       </div>
-                    </td>
-                    <td className="px-4 py-3.5 text-slate-400">
+                    </TableCell>
+                    <TableCell>
                       {driver.med_cert_expiry
                         ? new Date(driver.med_cert_expiry).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })
                         : '—'}
-                    </td>
-                    <td className="px-4 py-3.5">{topException && <ExceptionChip item={topException} />}</td>
-                  </tr>
+                    </TableCell>
+                    <TableCell>{topException && <ExceptionChip item={topException} />}</TableCell>
+                  </TableRow>
                 )
               })}
             </tbody>
-          </table>
-        </div>
+          </Table>
+        </Card>
       )}
     </div>
   )
