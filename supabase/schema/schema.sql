@@ -642,6 +642,13 @@ ALTER TABLE drivers ADD COLUMN settlement_type TEXT CHECK (settlement_type IN (
 ));   -- the driver's current DEFAULT method; nullable (not every driver is
       -- settled this way, e.g. W2 employees -- out of scope, don't force a value)
 
+-- The numeric rate paired with settlement_type (the % for percent_of_rate,
+-- $/mile for per_mile, $/load for flat_per_load). Added 2026-07-22 — the
+-- original settlement_type column shipped with nothing to actually compute
+-- pay from, which is why app/api/settlements/run/route.ts's real math was
+-- deferred to a placeholder (sum of loads.rate) instead of applying a rate.
+ALTER TABLE drivers ADD COLUMN settlement_rate NUMERIC;
+
 CREATE TABLE driver_settlements (
   id                 BIGSERIAL PRIMARY KEY,
   carrier_org_id     BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,

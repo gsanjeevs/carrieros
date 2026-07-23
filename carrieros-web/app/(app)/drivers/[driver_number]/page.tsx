@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { getTranslations, getLocale } from 'next-intl/server'
 import DriverTabs from './DriverTabs'
 import DriverDocuments, { type DriverDocType, type DriverDocument } from '@/components/DriverDocuments'
+import DriverPayConfig from '@/components/DriverPayConfig'
 import { formatDate, formatDateTime } from '@/lib/format-datetime'
 import { formatMoney } from '@/lib/format-money'
 import { inviteStatusVariant, type InviteStatus } from '@/lib/domain/invite-status'
@@ -177,6 +178,14 @@ export default async function DriverDetailPage({
             <p className="text-slate-500 text-sm">{t('noEmergencyContact')}</p>
           )}
         </div>
+
+        {canManage && (
+          <DriverPayConfig
+            driverId={driver.id}
+            settlementType={driver.settlement_type as 'percent_of_rate' | 'per_mile' | 'flat_per_load' | null}
+            settlementRate={driver.settlement_rate != null ? Number(driver.settlement_rate) : null}
+          />
+        )}
       </div>
 
       <div className="space-y-6">

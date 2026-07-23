@@ -1,10 +1,10 @@
 // tests/settlements.test.ts
 // Gate 0->1 coverage gap closed (docs/production-gates.md) — driver
-// settlement creation/ACH role+tier gating and the placeholder pay
-// calculation (app/api/settlements/run/route.ts explicitly documents this
-// as demo-scaffold math: sum of loads.rate in the period, no deduction/
-// rate-type math yet — this test asserts that documented behavior, not a
-// real payroll calculation).
+// settlement creation/ACH role+tier gating and the real pay-rate
+// calculation (app/api/settlements/run/route.ts: gross_revenue is always
+// the summed loads.rate for the period; net_pay applies the driver's
+// settlement_type/settlement_rate — percent_of_rate, per_mile, or
+// flat_per_load).
 //
 // NOTE: IFTA-completeness (check_ifta_completeness()) is a separate,
 // unrelated feature — it's wired into app/api/loads/[id]/route.ts's PATCH
@@ -44,6 +44,7 @@ describe('POST /api/settlements/run', () => {
         driver_number: `ST-${Date.now()}`,
         invite_status: 'accepted',
         settlement_type: 'percent_of_rate',
+        settlement_rate: 10,
       })
       .select('id')
       .single()
@@ -80,7 +81,59 @@ describe('POST /api/settlements/run', () => {
     expect(body.error_code).toBe('VALIDATION_ERROR')
   })
 
-  it('happy path: gross_revenue/net_pay match the sum of the driver\'s delivered-period load rates exactly', async () => {
+  it('rejects a driver with settlement_type but no settlement_rate configured', async () => {
+    const noRateUser = await createTestUser(admin, org.orgId, 'driver')
+    const { data: noRateDriver } = await admin
+      .from('drivers')
+      .insert({ carrier_org_id: org.orgId, profile_id: noRateUser.userId, driver_number: `ST-NORATE-${Date.now()}`, invite_status: 'accepted', settlement_type: 'per_mile' })
+      .select('id')
+      .single()
+
+    const res = await apiFetch('/api/settlements/run', ownerSession.accessToken, {
+      method: 'POST',
+      body: JSON.stringify({ driver_id: noRateDriver!.id, period_start: '2026-07-01', period_end: '2026-07-15' }),
+    })
+    expect(res.status).toBe(400)
+    const body = await res.json()
+    expect(body.error_code).toBe('VALIDATION_ERROR')
+  })
+
+  it('per_mile: net_pay = total delivered-period miles * settlement_rate', async () => {
+    const perMileUser = await createTestUser(admin, org.orgId, 'driver')
+    const { data: perMileDriver } = await admin
+      .from('drivers')
+      .insert({ carrier_org_id: org.orgId, profile_id: perMileUser.userId, driver_number: `ST-MILE-${Date.now()}`, invite_status: 'accepted', settlement_type: 'per_mile', settlement_rate: 0.6 })
+      .select('id')
+      .single()
+
+    await admin.from('loads').insert({
+      carrier_org_id: org.orgId,
+      driver_id: perMileDriver!.id,
+      load_number: `ST-MILE-L-${Date.now()}`,
+      status: 'delivered',
+      rate: 1000,
+      total_miles: 500,
+      delivery_date: '2026-07-05',
+    })
+
+    const res = await apiFetch('/api/settlements/run', ownerSession.accessToken, {
+      method: 'POST',
+      body: JSON.stringify({ driver_id: perMileDriver!.id, period_start: '2026-07-01', period_end: '2026-07-15' }),
+    })
+    expect(res.status).toBe(200)
+    const body = await res.json()
+
+    const { data: settlement } = await admin
+      .from('driver_settlements')
+      .select('gross_revenue, net_pay, rate_value')
+      .eq('id', body.id)
+      .single()
+    expect(Number(settlement?.gross_revenue)).toBe(1000)
+    expect(Number(settlement?.net_pay)).toBe(300) // 500 mi * $0.60
+    expect(Number(settlement?.rate_value)).toBe(0.6)
+  })
+
+  it('happy path (percent_of_rate): gross_revenue is the summed load rate, net_pay applies the driver\'s settlement_rate', async () => {
     const loadRows = [
       { rate: 1000, delivery_date: '2026-07-05' },
       { rate: 1500, delivery_date: '2026-07-10' },
@@ -110,13 +163,14 @@ describe('POST /api/settlements/run', () => {
 
     const { data: settlement } = await admin
       .from('driver_settlements')
-      .select('gross_revenue, net_pay, loads_count, payment_status')
+      .select('gross_revenue, net_pay, loads_count, payment_status, rate_value')
       .eq('id', body.id)
       .single()
     expect(Number(settlement?.gross_revenue)).toBe(2500)
-    expect(Number(settlement?.net_pay)).toBe(2500)
+    expect(Number(settlement?.net_pay)).toBe(250) // 2500 * 10%
     expect(settlement?.loads_count).toBe(2)
     expect(settlement?.payment_status).toBe('pending')
+    expect(Number(settlement?.rate_value)).toBe(10)
   })
 })
 

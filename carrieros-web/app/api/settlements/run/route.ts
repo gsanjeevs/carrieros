@@ -8,17 +8,19 @@
 //
 // Gated Growth+ via the `driver_settlements` feature (has_feature RPC).
 //
-// DEMO-MODE SEAM (2026-07-21, same philosophy as lib/stripe.ts's
-// createStripeCustomer() and app/api/invoices/[id]/factor/route.ts's
-// notifyFactor()): the real settlement calculation — gross revenue
-// attribution across the period, applying the driver's actual pay rate,
-// deductions, and PDF statement generation — is real business logic this
-// round explicitly does not implement. What's built here is the route
-// shape (auth, role gate, tier gate, validation, the DB write, the
-// error_code contract) so a future pass can replace only the math below
-// without touching anything else. The gross/net figures written today are
-// a clearly-labeled placeholder: the sum of `loads.rate` for the driver in
-// the period, with no deduction or rate-type math applied yet.
+// Real pay-rate math (2026-07-22): gross_revenue is always the sum of
+// loads.rate for the driver/period (what the carrier billed for that
+// work); net_pay applies the driver's settlement_type/settlement_rate —
+// percent_of_rate: gross * (rate/100); per_mile: sum(total_miles) * rate;
+// flat_per_load: loads_count * rate. rate_value is snapshotted onto the
+// settlement row so a later change to the driver's default rate never
+// rewrites past settlement history. Deductions (advances, garnishments)
+// remain unimplemented per the BRD's own OQ-11c ("unresolved for MVP") —
+// settlement_deductions exists as a table for a future pass, not wired
+// here. PDF statement generation is also still deferred (no
+// pdf_statement_path is written) — the print/PDF pattern used for
+// invoices (app/(app)/invoices/[invoice_number]/print/) is the intended
+// model for that follow-up.
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
@@ -74,7 +76,7 @@ export async function POST(request: NextRequest) {
   // configured settlement_type while we're at it.
   const { data: driver, error: driverError } = await supabase
     .from('drivers')
-    .select('id, carrier_org_id, settlement_type')
+    .select('id, carrier_org_id, settlement_type, settlement_rate')
     .eq('id', driverId)
     .eq('carrier_org_id', profile.org_id)
     .maybeSingle()
@@ -89,14 +91,17 @@ export async function POST(request: NextRequest) {
       400
     )
   }
+  if (driver.settlement_rate == null) {
+    return apiError(
+      'VALIDATION_ERROR',
+      'Driver has no settlement_rate configured',
+      400
+    )
+  }
 
-  // PLACEHOLDER MATH: sum of loads.rate for this driver/period as a rough
-  // stand-in for real gross-revenue attribution. Real math (applying the
-  // driver's actual per-mile/percent/flat rate, deductions, advances) is a
-  // future pass — this round only wires the row shape.
   const { data: loads, error: loadsError } = await supabase
     .from('loads')
-    .select('id, rate')
+    .select('id, rate, total_miles')
     .eq('carrier_org_id', profile.org_id)
     .eq('driver_id', driverId)
     .gte('delivery_date', periodStart)
@@ -104,10 +109,20 @@ export async function POST(request: NextRequest) {
 
   if (loadsError) return apiError('SERVER_ERROR', loadsError.message, 500)
 
+  const loadsCount = loads?.length ?? 0
   const grossRevenue = (loads ?? []).reduce((sum, l) => sum + Number(l.rate ?? 0), 0)
-  // net_pay === gross_revenue placeholder: no deduction/rate-type math
-  // applied yet, deliberately — see file-level comment.
-  const netPay = grossRevenue
+  const rateValue = Number(driver.settlement_rate)
+
+  let netPay: number
+  if (driver.settlement_type === 'percent_of_rate') {
+    netPay = grossRevenue * (rateValue / 100)
+  } else if (driver.settlement_type === 'per_mile') {
+    const totalMiles = (loads ?? []).reduce((sum, l) => sum + Number(l.total_miles ?? 0), 0)
+    netPay = totalMiles * rateValue
+  } else {
+    // flat_per_load
+    netPay = loadsCount * rateValue
+  }
 
   const { data: settlement, error: insertError } = await supabase
     .from('driver_settlements')
@@ -115,12 +130,10 @@ export async function POST(request: NextRequest) {
       carrier_org_id: profile.org_id,
       driver_id: driver.id,
       pay_method: driver.settlement_type,
-      // rate_value has no source yet — drivers only stores settlement_type
-      // today, not a numeric rate. Left null until that field exists.
-      rate_value: null,
+      rate_value: rateValue,
       gross_revenue: grossRevenue,
       net_pay: netPay,
-      loads_count: loads?.length ?? 0,
+      loads_count: loadsCount,
       payment_status: 'pending',
       period_start: periodStart,
       period_end: periodEnd,

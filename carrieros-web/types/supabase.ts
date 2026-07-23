@@ -650,6 +650,7 @@ export type Database = {
           is_active: boolean | null
           med_cert_expiry: string | null
           profile_id: string
+          settlement_rate: number | null
           settlement_type: string | null
         }
         Insert: {
@@ -670,6 +671,7 @@ export type Database = {
           is_active?: boolean | null
           med_cert_expiry?: string | null
           profile_id: string
+          settlement_rate?: number | null
           settlement_type?: string | null
         }
         Update: {
@@ -690,6 +692,7 @@ export type Database = {
           is_active?: boolean | null
           med_cert_expiry?: string | null
           profile_id?: string
+          settlement_rate?: number | null
           settlement_type?: string | null
         }
         Relationships: [
