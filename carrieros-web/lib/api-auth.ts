@@ -6,6 +6,18 @@
 // Use this instead of raw createClient() in any API route that must be
 // reachable from both clients. Routes that only ever run inside a browser
 // (Server Components, Server Actions) can keep using createClient() directly.
+//
+// This is also the AuthProvider.getCurrentUser seam of docs/architecture-
+// principles.md Rule G (the provider-adapter pattern) — a future non-
+// Supabase auth swap only needs to change this one function's internals.
+// It's already close to zero-leakage in practice: every one of the ~46
+// call sites across the API surface only ever reads `.user.id` off the
+// returned context, never any other Supabase-specific User field, so no
+// interface change was needed to formalize this — the seam already exists,
+// this comment just makes it explicit. See lib/storage/ and lib/auth-admin/
+// for the same pattern applied where an interface *was* worth adding
+// (storage and privileged admin operations, where the provider surface
+// genuinely differs across clouds).
 
 import { createClient as createServerClient, createAdminClient } from '@/lib/supabase/server'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'

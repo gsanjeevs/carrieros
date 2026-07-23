@@ -13,6 +13,7 @@ import AddCustomerButton from './AddCustomerButton'
 import ExceptionChip from '@/components/ExceptionChip'
 import { getExceptions } from '@/lib/exceptions'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { createStorageProvider } from '@/lib/storage'
 
 const VIEW_ROLES   = ['owner', 'solo', 'dispatcher', 'finance']
 const MANAGE_ROLES = ['owner', 'solo', 'dispatcher']
@@ -103,11 +104,12 @@ export default async function CustomersPage({
     .filter((p): p is string => !!p)
   const signedLogoUrls = new Map<string, string>()
   if (logoPaths.length > 0) {
-    const results = await Promise.all(
-      logoPaths.map((path) => supabase.storage.from('documents').createSignedUrl(path, 60 * 60))
+    const storage = createStorageProvider(supabase)
+    const results = await Promise.allSettled(
+      logoPaths.map((path) => storage.getSignedUrl(path, 60 * 60))
     )
     results.forEach((res, i) => {
-      if (res.data?.signedUrl) signedLogoUrls.set(logoPaths[i], res.data.signedUrl)
+      if (res.status === 'fulfilled') signedLogoUrls.set(logoPaths[i], res.value)
     })
   }
 

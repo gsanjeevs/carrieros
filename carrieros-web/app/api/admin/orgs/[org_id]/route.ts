@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isErrorResponse, apiError } from '@/lib/api-auth'
 import { requireAdminRole } from '@/lib/admin-auth'
+import { createAuthAdminProvider } from '@/lib/auth-admin'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ org_id: string }> }) {
   const ctx = await requireAdminRole(request)
@@ -55,9 +56,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     .filter(l => l.status === 'delivered' && !invoicedLoadIds.has(l.id))
     .reduce((sum, l) => sum + (l.rate ?? 0), 0)
 
-  const { data: userList } = await admin.auth.admin.listUsers()
+  const { data: userList } = await createAuthAdminProvider(admin).listUsers()
   const emailByUserId = new Map(userList?.users.map(u => [u.id, u.email]) ?? [])
-  const lastSignInByUserId = new Map(userList?.users.map(u => [u.id, u.last_sign_in_at]) ?? [])
+  const lastSignInByUserId = new Map(userList?.users.map(u => [u.id, u.lastSignInAt]) ?? [])
 
   const users = (profiles ?? []).map(p => ({
     id: p.id,

@@ -11,6 +11,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { createAuthAdminProvider } from '@/lib/auth-admin'
 import { formatDate } from '@/lib/format-datetime'
 import InviteMemberButton from './InviteMemberButton'
 import MemberActions from './MemberActions'
@@ -48,7 +49,7 @@ export default async function TeamPage() {
   // auth.users lookup: email + whether the magic link has ever been used.
   // Micro-carrier orgs are 1–10 people (decision P1), so one page is ample.
   const admin = createAdminClient()
-  const { data: authList } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 })
+  const { data: authList } = await createAuthAdminProvider(admin).listUsers({ page: 1, perPage: 1000 })
   const authById = new Map((authList?.users ?? []).map((u) => [u.id, u]))
 
   const rows = (members ?? []).map((m) => {
@@ -59,7 +60,7 @@ export default async function TeamPage() {
       // "active" = has actually signed in at least once. Supabase sets
       // last_sign_in_at only on a real session, so an unopened invite stays
       // pending even though the auth.users row already exists.
-      accepted: Boolean(au?.last_sign_in_at),
+      accepted: Boolean(au?.lastSignInAt),
     }
   })
 

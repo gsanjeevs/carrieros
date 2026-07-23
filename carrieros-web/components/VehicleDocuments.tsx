@@ -11,6 +11,7 @@ import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
+import { createStorageProvider } from '@/lib/storage'
 
 export type VehicleDocType = 'registration' | 'insurance_cert' | 'dot_authority' | 'annual_inspection' | 'other'
 
@@ -83,13 +84,12 @@ export default function VehicleDocuments({
 
     setBusy(true)
     const supabase = createClient()
+    const storage = createStorageProvider(supabase)
     const path = `${orgId}/vehicles/${vehicleId}/${Date.now()}-${sanitize(file.name)}`
 
-    const { error: upErr } = await supabase.storage
-      .from('documents')
-      .upload(path, file, { contentType: file.type || undefined, upsert: false })
-
-    if (upErr) {
+    try {
+      await storage.uploadFile(path, file, file.type)
+    } catch {
       setBusy(false)
       setError(t('docUploadFailed'))
       return
@@ -106,7 +106,7 @@ export default function VehicleDocuments({
 
     if (insErr) {
       // Clean up the orphaned object so storage doesn't drift from the table.
-      await supabase.storage.from('documents').remove([path])
+      await storage.remove([path]).catch(() => {})
       setBusy(false)
       setError(t('docUploadFailed'))
       return
@@ -125,8 +125,9 @@ export default function VehicleDocuments({
     setDeletingId(doc.id)
     const supabase = createClient()
 
-    const { error: rmErr } = await supabase.storage.from('documents').remove([doc.storagePath])
-    if (rmErr) {
+    try {
+      await createStorageProvider(supabase).remove([doc.storagePath])
+    } catch {
       setDeletingId(null)
       setError(t('docDeleteFailed'))
       return

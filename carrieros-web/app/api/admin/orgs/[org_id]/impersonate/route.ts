@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isErrorResponse, apiError } from '@/lib/api-auth'
 import { requireAdminRole } from '@/lib/admin-auth'
+import { createAuthAdminProvider } from '@/lib/auth-admin'
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ org_id: string }> }) {
   const ctx = await requireAdminRole(request, ['sx_owner', 'sx_support'])
@@ -29,14 +30,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
   if (!owner) return apiError('NOT_FOUND', 'No owner/solo profile found for this org', 404)
 
-  const { data: userList } = await admin.auth.admin.listUsers()
+  const authAdmin = createAuthAdminProvider(admin)
+  const { data: userList } = await authAdmin.listUsers()
   const ownerEmail = userList?.users.find(u => u.id === owner.id)?.email
   if (!ownerEmail) return apiError('NOT_FOUND', 'No auth account found for this org owner', 404)
 
-  const { data: link, error: linkErr } = await admin.auth.admin.generateLink({
-    type: 'magiclink',
-    email: ownerEmail,
-  })
+  const { data: link, error: linkErr } = await authAdmin.generateMagicLink(ownerEmail)
 
   if (linkErr || !link) {
     console.error('[admin/orgs/:id/impersonate] generateLink:', linkErr)
@@ -50,5 +49,5 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     metadata: { impersonated_profile_id: owner.id },
   })
 
-  return NextResponse.json({ magic_link: link.properties.action_link })
+  return NextResponse.json({ magic_link: link.actionLink })
 }

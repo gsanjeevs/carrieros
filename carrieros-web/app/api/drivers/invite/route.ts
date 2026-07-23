@@ -15,6 +15,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'
 import { generateDriverNumber } from '@/lib/generate-number'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { createAuthAdminProvider } from '@/lib/auth-admin'
 
 export async function POST(request: NextRequest) {
   const ctx = await getAuthedContext(request)
@@ -37,12 +38,12 @@ export async function POST(request: NextRequest) {
   const origin = new URL(request.url).origin
 
   // 1. Send the magic-link invite (creates the auth.users row).
-  const { data: inviteData, error: inviteErr } = await admin.auth.admin.inviteUserByEmail(email, {
+  const { data: inviteData, error: inviteErr } = await createAuthAdminProvider(admin).inviteUserByEmail(email, {
     data: { org_id: profile.org_id, role: 'driver' },
     redirectTo: `${origin}/auth/callback`,
   })
 
-  if (inviteErr || !inviteData.user) {
+  if (inviteErr || !inviteData?.user) {
     console.error('[drivers/invite] invite:', inviteErr)
     return apiError('SERVER_ERROR', inviteErr?.message ?? 'Failed to send invite', 500)
   }

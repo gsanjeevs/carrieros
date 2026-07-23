@@ -18,6 +18,7 @@ import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '
 import { hasFeature } from '@/lib/entitlements'
 import { logError } from '@/lib/observability'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { createAuthAdminProvider } from '@/lib/auth-admin'
 
 const ASSIGNABLE_ROLES = ['dispatcher', 'finance', 'owner'] as const
 const ADMIN_ROLES = ['owner', 'solo']
@@ -146,7 +147,7 @@ export async function DELETE(request: NextRequest, { params }: Ctx) {
 
   // profiles.id REFERENCES auth.users(id) ON DELETE CASCADE, so removing the
   // auth user removes the profile too — one call, no orphan window.
-  const { error } = await admin.auth.admin.deleteUser(target.id)
+  const { error } = await createAuthAdminProvider(admin).deleteUser(target.id)
   if (error) {
     logError({ route: 'api/team/:id', userId: callerId, orgId }, error, { action: 'delete', targetId: target.id })
     return apiError('SERVER_ERROR', error.message, 500)

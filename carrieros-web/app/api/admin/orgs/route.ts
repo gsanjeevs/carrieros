@@ -14,6 +14,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isErrorResponse, apiError } from '@/lib/api-auth'
 import { requireAdminRole } from '@/lib/admin-auth'
+import { createAuthAdminProvider } from '@/lib/auth-admin'
 
 function loginRecencyScore(lastSignInAt: string | null | undefined): number {
   if (!lastSignInAt) return 0
@@ -69,8 +70,8 @@ export async function GET(request: NextRequest) {
 
   // last_sign_in_at isn't in a public table — pull it from the Admin Auth
   // API once and join in memory (dev-scale org counts; fine for now).
-  const { data: userList } = await admin.auth.admin.listUsers()
-  const lastSignInByUserId = new Map(userList?.users.map(u => [u.id, u.last_sign_in_at]) ?? [])
+  const { data: userList } = await createAuthAdminProvider(admin).listUsers()
+  const lastSignInByUserId = new Map(userList?.users.map(u => [u.id, u.lastSignInAt]) ?? [])
 
   const orgIdToLastSignIn = new Map<number, string | null>()
   for (const p of profiles ?? []) {

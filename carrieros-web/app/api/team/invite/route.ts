@@ -15,6 +15,7 @@ import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '
 import { hasFeature } from '@/lib/entitlements'
 import { logError } from '@/lib/observability'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { createAuthAdminProvider } from '@/lib/auth-admin'
 
 // Deliberately excludes 'driver' (has its own flow on /drivers, which also
 // creates the drivers row) and 'solo' (owner+driver combined — only ever set
@@ -57,10 +58,11 @@ export async function POST(request: NextRequest) {
   }
 
   const admin = createAdminClient()
+  const authAdmin = createAuthAdminProvider(admin)
   const origin = new URL(request.url).origin
 
   // 1. Send the magic-link invite (creates the auth.users row).
-  const { data: inviteData, error: inviteErr } = await admin.auth.admin.inviteUserByEmail(
+  const { data: inviteData, error: inviteErr } = await authAdmin.inviteUserByEmail(
     email.trim(),
     {
       data: { org_id: profile.org_id, role },
@@ -98,7 +100,7 @@ export async function POST(request: NextRequest) {
     logError({ route: 'api/team/invite', userId: user.id, orgId: profile.org_id }, profileErr, {
       rolled_back_auth_user: newUserId,
     })
-    await admin.auth.admin.deleteUser(newUserId).catch(() => {})
+    await authAdmin.deleteUser(newUserId).catch(() => {})
     return apiError('SERVER_ERROR', profileErr.message, 500)
   }
 

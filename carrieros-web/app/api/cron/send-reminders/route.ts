@@ -21,6 +21,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/send-email'
+import { createAuthAdminProvider } from '@/lib/auth-admin'
 
 function isAuthorized(request: NextRequest): boolean {
   const secret = process.env.CRON_SECRET
@@ -41,6 +42,7 @@ export async function POST(request: NextRequest) {
   }
 
   const admin = createAdminClient()
+  const authAdmin = createAuthAdminProvider(admin)
 
   // 1) Run the detection + write pass. Returns the count of NEW
   // exception_events rows created this call (already dedup'd against the
@@ -112,7 +114,7 @@ export async function POST(request: NextRequest) {
     `.trim()
 
     for (const recipient of recipients) {
-      const { data: userData, error: userError } = await admin.auth.admin.getUserById(recipient.id)
+      const { data: userData, error: userError } = await authAdmin.getUserById(recipient.id)
       const email = userData?.user?.email
       if (userError || !email) {
         emailsFailed += 1

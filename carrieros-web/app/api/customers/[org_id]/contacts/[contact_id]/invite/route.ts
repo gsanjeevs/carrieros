@@ -12,6 +12,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { createAuthAdminProvider } from '@/lib/auth-admin'
 
 const INVITABLE_PORTAL_ROLES = ['customer_admin', 'customer_viewer'] as const
 
@@ -48,6 +49,7 @@ export async function POST(
     return apiError('VALIDATION_ERROR', `role must be one of ${INVITABLE_PORTAL_ROLES.join(', ')}`, 400)
 
   const admin = createAdminClient()
+  const authAdmin = createAuthAdminProvider(admin)
   const origin = new URL(request.url).origin
 
   // 1. Send the magic-link invite (creates the auth.users row). The invited
@@ -55,7 +57,7 @@ export async function POST(
   //    that's what makes customer_loads_select/customer_invoices_select scope
   //    them to only their own org's data.
   const [firstName, ...rest] = contact.name.trim().split(' ')
-  const { data: inviteData, error: inviteErr } = await admin.auth.admin.inviteUserByEmail(
+  const { data: inviteData, error: inviteErr } = await authAdmin.inviteUserByEmail(
     contact.email.trim(),
     {
       data: { org_id: contact.org_id, role },
@@ -85,7 +87,7 @@ export async function POST(
 
   if (profileErr) {
     console.error('[customers/contacts/invite] profile:', profileErr)
-    await admin.auth.admin.deleteUser(newUserId).catch(() => {})
+    await authAdmin.deleteUser(newUserId).catch(() => {})
     return apiError('SERVER_ERROR', profileErr.message, 500)
   }
 
