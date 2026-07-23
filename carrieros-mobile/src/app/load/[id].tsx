@@ -16,6 +16,8 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
+import { useOfflineSync } from '@/hooks/use-offline-sync';
+import { enqueueUpdate } from '@/lib/offline-queue';
 import { supabase } from '@/lib/supabase';
 
 const ORANGE = '#f97316';
@@ -89,6 +91,7 @@ export default function LoadDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { session } = useSession();
   const { t } = useLocale();
+  const { isOnline, refreshQueueLength } = useOfflineSync();
 
   const [role, setRole] = useState<Role | null>(null);
   const [load, setLoad] = useState<LoadDetail | null>(null);
@@ -144,6 +147,23 @@ export default function LoadDetailScreen() {
 
     setAdvancing(true);
     setError('');
+
+    // Offline mode (audit gap #13 cluster, last item): a driver marking a
+    // load delivered with no signal must not lose the action. When we
+    // already know we're offline, skip the network call entirely (it would
+    // just hang/fail) — queue it, apply the status change optimistically
+    // in local state, and let use-offline-sync.ts's flush replay it once
+    // connectivity returns.
+    if (!isOnline) {
+      await enqueueUpdate(
+        { table: 'loads', match: { id: load.id }, patch: { status: step.next } },
+        new Date().toISOString()
+      );
+      await refreshQueueLength();
+      setLoad({ ...load, status: step.next });
+      setAdvancing(false);
+      return;
+    }
 
     // Update the base `loads` table directly (not the view) — the RLS
     // policy that permits this is defined on `loads`. No .select() chained,

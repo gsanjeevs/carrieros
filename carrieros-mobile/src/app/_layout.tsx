@@ -7,6 +7,7 @@ import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { useSession } from '@/hooks/use-session';
 import { useRegisterPushToken } from '@/hooks/use-register-push-token';
 import { LocaleProvider } from '@/hooks/use-locale';
+import { OfflineBanner } from '@/components/offline-banner';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -27,7 +28,12 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   if (!session && pathname !== '/login') return <Redirect href="/login" />;
   if (session && pathname === '/login') return <Redirect href="/" />;
 
-  return children;
+  return (
+    <>
+      {session && <OfflineBanner />}
+      {children}
+    </>
+  );
 }
 
 export default function RootLayout() {

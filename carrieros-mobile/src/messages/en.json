@@ -50,6 +50,11 @@
     "shareLocationOff": "Not sharing — turn on to let dispatch see your live location",
     "locationPermissionDenied": "Location permission denied. Enable it in your device settings to share your location."
   },
+  "offline": {
+    "offline": "You're offline. Changes will sync automatically.",
+    "offlineWithQueue": "You're offline. {count, plural, one {# change} other {# changes}} will sync when you're back online.",
+    "syncing": "Back online — syncing {count, plural, one {# change} other {# changes}}…"
+  },
   "chat": {
     "title": "Messages",
     "noMessages": "No messages yet.",

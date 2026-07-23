@@ -50,6 +50,11 @@
     "shareLocationOff": "No compartiendo — actívalo para que despacho vea tu ubicación en vivo",
     "locationPermissionDenied": "Permiso de ubicación denegado. Actívalo en la configuración de tu dispositivo para compartir tu ubicación."
   },
+  "offline": {
+    "offline": "Estás sin conexión. Los cambios se sincronizarán automáticamente.",
+    "offlineWithQueue": "Estás sin conexión. {count, plural, one {# cambio} other {# cambios}} se sincronizarán cuando vuelvas a estar en línea.",
+    "syncing": "De vuelta en línea — sincronizando {count, plural, one {# cambio} other {# cambios}}…"
+  },
   "chat": {
     "title": "Mensajes",
     "noMessages": "Aún no hay mensajes.",
