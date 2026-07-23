@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { toDate } from '@/lib/format-datetime'
+import { Button, Input, Modal } from '@/components/ui'
 
 type Vehicle = {
   id: number
@@ -27,8 +28,7 @@ type Reminder = {
   trigger_months: number | null
 }
 
-const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-[#f97316] transition'
-const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
+const labelCls = 'block text-xs font-medium text-text-sec mb-1.5'
 
 function todayISO() {
   const d = new Date()
@@ -180,136 +180,120 @@ export default function LogServiceButton({ vehicles, reminders }: { vehicles: Ve
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-      >
+      <Button onClick={() => setOpen(true)}>
         <span className="material-symbols-outlined text-[18px]">add</span>
         {t('logService')}
-      </button>
+      </Button>
 
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
-          <div className="w-full max-w-md bg-[#0f1923] border border-white/10 rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-white font-semibold text-lg">{t('logService')}</h2>
-              <button onClick={close} className="text-slate-500 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 rounded">
-                <span className="material-symbols-outlined text-[20px]">close</span>
-              </button>
+      <Modal
+        open={open}
+        onClose={close}
+        title={t('logService')}
+        className="max-h-[90vh] overflow-y-auto"
+        footer={
+          <>
+            <Button variant="secondary" size="sm" onClick={close} disabled={loading}>
+              {tCommon('cancel')}
+            </Button>
+            <Button size="sm" onClick={submit} disabled={loading || !form.vehicle_id} loading={loading}>
+              {loading ? t('logging') : t('logService')}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label className={labelCls}>{t('truck')} *</label>
+            <Input as="select" value={form.vehicle_id}
+              onChange={e => setForm(f => ({ ...f, vehicle_id: e.target.value, reminder_id: NO_REMINDER }))}>
+              {vehicles.map(vehicle => (
+                <option key={vehicle.id} value={vehicle.id}>
+                  {vehicle.vehicle_number}{vehicle.nickname ? ` — ${vehicle.nickname}` : ''}
+                </option>
+              ))}
+            </Input>
+          </div>
+
+          <div>
+            <label className={labelCls}>{t('whichReminder')}</label>
+            <Input as="select" value={form.reminder_id} onChange={e => set('reminder_id', e.target.value)}>
+              <option value={NO_REMINDER}>{t('generalServiceNoReminder')}</option>
+              {vehicleReminders.map(r => (
+                <option key={r.id} value={r.id}>{r.reminder_type}</option>
+              ))}
+              <option value={NEW_REMINDER}>{t('createNewReminder')}</option>
+            </Input>
+          </div>
+
+          {form.reminder_id === NEW_REMINDER && (
+            <div className="space-y-3 pl-3 border-l-2 border-border-ui">
+              <div>
+                <label className={labelCls}>{t('reminderType')} *</label>
+                <Input placeholder={t('reminderTypeExample')}
+                  value={form.new_reminder_type} onChange={e => set('new_reminder_type', e.target.value)} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelCls}>{t('triggerMiles')}</label>
+                  <Input inputMode="numeric" placeholder="10000"
+                    value={form.new_trigger_miles} onChange={e => set('new_trigger_miles', e.target.value)} />
+                </div>
+                <div>
+                  <label className={labelCls}>{t('triggerMonths')}</label>
+                  <Input inputMode="numeric" placeholder="6"
+                    value={form.new_trigger_months} onChange={e => set('new_trigger_months', e.target.value)} />
+                </div>
+              </div>
             </div>
+          )}
 
-            <div className="space-y-4">
-              <div>
-                <label className={labelCls}>{t('truck')} *</label>
-                <select className={inputCls} value={form.vehicle_id}
-                  onChange={e => setForm(f => ({ ...f, vehicle_id: e.target.value, reminder_id: NO_REMINDER }))}>
-                  {vehicles.map(vehicle => (
-                    <option key={vehicle.id} value={vehicle.id}>
-                      {vehicle.vehicle_number}{vehicle.nickname ? ` — ${vehicle.nickname}` : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
+          {form.reminder_id === NO_REMINDER && (
+            <div>
+              <label className={labelCls}>{t('serviceType')} *</label>
+              <Input placeholder={t('serviceTypePlaceholder')}
+                value={form.service_type} onChange={e => set('service_type', e.target.value)} />
+            </div>
+          )}
 
-              <div>
-                <label className={labelCls}>{t('whichReminder')}</label>
-                <select className={inputCls} value={form.reminder_id} onChange={e => set('reminder_id', e.target.value)}>
-                  <option value={NO_REMINDER}>{t('generalServiceNoReminder')}</option>
-                  {vehicleReminders.map(r => (
-                    <option key={r.id} value={r.id}>{r.reminder_type}</option>
-                  ))}
-                  <option value={NEW_REMINDER}>{t('createNewReminder')}</option>
-                </select>
-              </div>
-
-              {form.reminder_id === NEW_REMINDER && (
-                <div className="space-y-3 pl-3 border-l-2 border-white/10">
-                  <div>
-                    <label className={labelCls}>{t('reminderType')} *</label>
-                    <input className={inputCls} placeholder={t('reminderTypeExample')}
-                      value={form.new_reminder_type} onChange={e => set('new_reminder_type', e.target.value)} />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className={labelCls}>{t('triggerMiles')}</label>
-                      <input className={inputCls} inputMode="numeric" placeholder="10000"
-                        value={form.new_trigger_miles} onChange={e => set('new_trigger_miles', e.target.value)} />
-                    </div>
-                    <div>
-                      <label className={labelCls}>{t('triggerMonths')}</label>
-                      <input className={inputCls} inputMode="numeric" placeholder="6"
-                        value={form.new_trigger_months} onChange={e => set('new_trigger_months', e.target.value)} />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {form.reminder_id === NO_REMINDER && (
-                <div>
-                  <label className={labelCls}>{t('serviceType')} *</label>
-                  <input className={inputCls} placeholder={t('serviceTypePlaceholder')}
-                    value={form.service_type} onChange={e => set('service_type', e.target.value)} />
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={labelCls}>{t('serviceDate')} *</label>
-                  <input className={inputCls} type="date"
-                    value={form.service_date} onChange={e => set('service_date', e.target.value)} />
-                </div>
-                <div>
-                  <label className={labelCls}>{t('odometer')}</label>
-                  <input className={inputCls} inputMode="numeric" placeholder="142450"
-                    value={form.odometer} onChange={e => set('odometer', e.target.value)} />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={labelCls}>{t('cost')}</label>
-                  <input className={inputCls} inputMode="decimal" placeholder="189.99"
-                    value={form.cost} onChange={e => set('cost', e.target.value)} />
-                </div>
-                <div>
-                  <label className={labelCls}>{t('shop')}</label>
-                  <input className={inputCls} placeholder="Joe's Vehicle Repair"
-                    value={form.shop_name} onChange={e => set('shop_name', e.target.value)} />
-                </div>
-              </div>
-
-              <div>
-                <label className={labelCls}>{t('notes')}</label>
-                <textarea className={inputCls + ' resize-none'} rows={2}
-                  value={form.notes} onChange={e => set('notes', e.target.value)} />
-              </div>
-
-              {error && (
-                <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-red-400 text-sm">
-                  {error}
-                </div>
-              )}
-
-              <div className="flex gap-3 mt-2">
-                <button
-                  onClick={close}
-                  disabled={loading}
-                  className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-                >
-                  {tCommon('cancel')}
-                </button>
-                <button
-                  onClick={submit}
-                  disabled={loading || !form.vehicle_id}
-                  className="flex-2 flex-grow py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-                >
-                  {loading ? t('logging') : t('logService')}
-                </button>
-              </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>{t('serviceDate')} *</label>
+              <Input type="date"
+                value={form.service_date} onChange={e => set('service_date', e.target.value)} />
+            </div>
+            <div>
+              <label className={labelCls}>{t('odometer')}</label>
+              <Input inputMode="numeric" placeholder="142450"
+                value={form.odometer} onChange={e => set('odometer', e.target.value)} />
             </div>
           </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>{t('cost')}</label>
+              <Input inputMode="decimal" placeholder="189.99"
+                value={form.cost} onChange={e => set('cost', e.target.value)} />
+            </div>
+            <div>
+              <label className={labelCls}>{t('shop')}</label>
+              <Input placeholder="Joe's Vehicle Repair"
+                value={form.shop_name} onChange={e => set('shop_name', e.target.value)} />
+            </div>
+          </div>
+
+          <div>
+            <label className={labelCls}>{t('notes')}</label>
+            <Input as="textarea" className="resize-none" rows={2}
+              value={form.notes} onChange={e => set('notes', e.target.value)} />
+          </div>
+
+          {error && (
+            <div className="rounded-lg bg-danger/10 border border-danger/20 px-4 py-3 text-danger text-sm">
+              {error}
+            </div>
+          )}
         </div>
-      )}
+      </Modal>
     </>
   )
 }

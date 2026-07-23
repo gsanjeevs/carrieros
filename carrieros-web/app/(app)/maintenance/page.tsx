@@ -20,6 +20,7 @@ import { getTranslations } from 'next-intl/server'
 import { formatDate, toDate } from '@/lib/format-datetime'
 import LogServiceButton from './LogServiceButton'
 import { getMaintenanceIcon } from '@/components/icons/maintenance'
+import { Card, CardHeader, StatusBadge, type StatusBadgeVariant, Table, TableHeaderCell, TableRow, TableCell, ProgressBar, EmptyState } from '@/components/ui'
 
 const VIEW_ROLES   = ['owner', 'solo', 'dispatcher']
 const MANAGE_ROLES = ['owner', 'solo']
@@ -69,11 +70,11 @@ function computeStatus(nextDueDate: string | null): Status {
   return 'ok'
 }
 
-const STATUS_COLOR: Record<Status, string> = {
-  overdue: 'bg-red-500/20 text-red-400',
-  dueSoon: 'bg-amber-500/20 text-amber-400',
-  ok:      'bg-[#16a34a]/20 text-[#16a34a]',
-  noDate:  'bg-slate-500/20 text-slate-400',
+const STATUS_VARIANT: Record<Status, StatusBadgeVariant> = {
+  overdue: 'danger',
+  dueSoon: 'warning',
+  ok:      'success',
+  noDate:  'neutral',
 }
 
 // date-only equivalent of LogServiceButton's addMonths, run in reverse — used
@@ -86,7 +87,7 @@ function subtractMonths(dateStr: string, months: number): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-type Progress = { pct: number; status: Status } | null
+type Progress = { pct: number; status: Exclude<Status, 'noDate'> } | null
 
 // Progress toward a reminder's due date, as a 0–1 fraction of the interval
 // between when the clock started (last_service_date, or — if that's
@@ -100,8 +101,10 @@ type Progress = { pct: number; status: Status } | null
 // are only point-in-time snapshots from past services). So mileage-based
 // reminders fall back to the plain status chip instead of a fabricated bar.
 function computeProgress(r: Reminder): Progress {
-  const status = computeStatus(r.next_due_date)
   if (!r.next_due_date) return null
+  // computeStatus can only return 'noDate' when next_due_date is null,
+  // already excluded above — safe to narrow.
+  const status = computeStatus(r.next_due_date) as Exclude<Status, 'noDate'>
 
   const baseline = r.last_service_date
     ?? (r.trigger_months ? subtractMonths(r.next_due_date, r.trigger_months) : null)
@@ -117,11 +120,10 @@ function computeProgress(r: Reminder): Progress {
   return { pct: Math.min(1, Math.max(0, pct)), status }
 }
 
-const PROGRESS_BAR_COLOR: Record<Status, string> = {
-  overdue: 'bg-red-500',
-  dueSoon: 'bg-amber-500',
-  ok:      'bg-[#16a34a]',
-  noDate:  'bg-slate-600',
+const PROGRESS_BAR_VARIANT: Record<Exclude<Status, 'noDate'>, 'success' | 'warning' | 'danger'> = {
+  overdue: 'danger',
+  dueSoon: 'warning',
+  ok:      'success',
 }
 
 export default async function MaintenancePage({
@@ -189,8 +191,8 @@ export default async function MaintenancePage({
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">{t('title')}</h1>
-          <p className="text-slate-400 text-sm mt-1">
+          <h1 className="text-2xl font-semibold text-text-pri">{t('title')}</h1>
+          <p className="text-text-sec text-sm mt-1">
             {overdueCount > 0
               ? t('summaryOverdue', { overdue: overdueCount, dueSoon: dueSoonCount })
               : dueSoonCount > 0
@@ -202,41 +204,42 @@ export default async function MaintenancePage({
       </div>
 
       {params.logged && (
-        <div className="mb-6 flex items-center gap-3 rounded-lg bg-[#16a34a]/10 border border-[#16a34a]/20 px-4 py-3 shadow-card-dark">
-          <span className="material-symbols-outlined text-[#16a34a] text-[18px]">check_circle</span>
-          <p className="text-[#16a34a] text-sm">{t('loggedSuccess', { truck: params.logged })}</p>
+        <div className="mb-6 flex items-center gap-3 rounded-lg bg-success/10 border border-success/20 px-4 py-3">
+          <span className="material-symbols-outlined text-success text-[18px]">check_circle</span>
+          <p className="text-success text-sm">{t('loggedSuccess', { truck: params.logged })}</p>
         </div>
       )}
 
       {vehicles.length === 0 ? (
-        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-card-dark">
-          <span className="material-symbols-outlined text-slate-600 text-4xl">build</span>
-          <p className="text-slate-500 text-sm mt-3">{t('noTrucksYet')}</p>
-        </div>
+        <Card>
+          <EmptyState icon="build" title={t('noTrucksYet')} />
+        </Card>
       ) : (
         <div className="space-y-4 mb-8">
           {vehicles.map((vehicle) => {
             const vehicleReminders = remindersByVehicle.get(vehicle.id) ?? []
             return (
-              <div key={vehicle.id} className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
-                <div className="px-5 py-3.5 border-b border-white/5 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-slate-500 text-[18px]">fire_truck</span>
-                  <span className="text-white font-medium">{vehicle.vehicle_number}</span>
-                  {vehicle.nickname && <span className="text-slate-500 text-sm">— {vehicle.nickname}</span>}
-                </div>
+              <Card key={vehicle.id}>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-text-sec text-[18px]">fire_truck</span>
+                    <span className="text-text-pri font-medium">{vehicle.vehicle_number}</span>
+                    {vehicle.nickname && <span className="text-text-sec text-sm">— {vehicle.nickname}</span>}
+                  </div>
+                </CardHeader>
                 {vehicleReminders.length === 0 ? (
-                  <div className="px-5 py-4 text-slate-500 text-sm">{t('noRemindersForTruck')}</div>
+                  <div className="px-5 py-4 text-text-sec text-sm">{t('noRemindersForTruck')}</div>
                 ) : (
-                  <table className="w-full text-sm">
+                  <Table>
                     <thead>
-                      <tr className="border-b border-white/5">
-                        <th className="text-left px-5 py-2.5 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('reminderType')}</th>
-                        <th className="text-left px-4 py-2.5 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('lastService')}</th>
-                        <th className="text-left px-4 py-2.5 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('nextDue')}</th>
-                        <th className="text-right px-5 py-2.5 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('status')}</th>
+                      <tr>
+                        <TableHeaderCell>{t('reminderType')}</TableHeaderCell>
+                        <TableHeaderCell>{t('lastService')}</TableHeaderCell>
+                        <TableHeaderCell>{t('nextDue')}</TableHeaderCell>
+                        <TableHeaderCell numeric>{t('status')}</TableHeaderCell>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5">
+                    <tbody>
                       {vehicleReminders.map((r) => {
                         const status = computeStatus(r.next_due_date)
                         const progress = computeProgress(r)
@@ -246,87 +249,77 @@ export default async function MaintenancePage({
                         ].filter(Boolean).join(' · ') || '—'
                         const Icon = getMaintenanceIcon(r.reminder_type)
                         return (
-                          <tr key={r.id} className="hover:bg-white/[0.07] transition-colors duration-150">
-                            <td className="px-5 py-3 text-white font-medium">
+                          <TableRow key={r.id}>
+                            <TableCell className="font-medium text-text-pri">
                               <div className="flex items-center gap-2.5">
-                                <Icon className="w-4 h-4 shrink-0 text-slate-400" />
+                                <Icon className="w-4 h-4 shrink-0 text-text-sec" />
                                 {r.reminder_type}
                               </div>
-                            </td>
-                            <td className="px-4 py-3 text-slate-400">
+                            </TableCell>
+                            <TableCell>
                               {r.last_service_date ? formatDate(r.last_service_date, profile) : t('never')}
-                            </td>
-                            <td className="px-4 py-3 text-slate-300">
+                            </TableCell>
+                            <TableCell>
                               <div>{nextDue}</div>
                               {progress && (
-                                <div
-                                  className="mt-1.5 h-1.5 w-24 rounded-full bg-white/10 overflow-hidden"
-                                  role="progressbar"
-                                  aria-valuenow={Math.round(progress.pct * 100)}
-                                  aria-valuemin={0}
-                                  aria-valuemax={100}
-                                  aria-label={t('dueProgress')}
-                                >
-                                  <div
-                                    className={`h-full rounded-full transition-[width] ${PROGRESS_BAR_COLOR[progress.status]}`}
-                                    style={{ width: `${Math.round(progress.pct * 100)}%` }}
-                                  />
+                                <div className="mt-1.5 w-24">
+                                  <ProgressBar value={Math.round(progress.pct * 100)} variant={PROGRESS_BAR_VARIANT[progress.status]} thin label={t('dueProgress')} />
                                 </div>
                               )}
-                            </td>
-                            <td className="px-5 py-3 text-right">
-                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLOR[status]}`}>
+                            </TableCell>
+                            <TableCell numeric>
+                              <StatusBadge variant={STATUS_VARIANT[status]} size="sm">
                                 {t(`status_${status}`)}
-                              </span>
-                            </td>
-                          </tr>
+                              </StatusBadge>
+                            </TableCell>
+                          </TableRow>
                         )
                       })}
                     </tbody>
-                  </table>
+                  </Table>
                 )}
-              </div>
+              </Card>
             )
           })}
         </div>
       )}
 
-      <h2 className="text-white font-semibold text-lg mb-3">{t('recentServiceLogs')}</h2>
+      <h2 className="text-text-pri font-semibold text-lg mb-3">{t('recentServiceLogs')}</h2>
       {logs.length === 0 ? (
-        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-10 text-center shadow-card-dark">
-          <p className="text-slate-500 text-sm">{t('noServiceLogsYet')}</p>
-        </div>
+        <Card>
+          <EmptyState title={t('noServiceLogsYet')} />
+        </Card>
       ) : (
-        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
-          <table className="w-full text-sm">
+        <Card>
+          <Table>
             <thead>
-              <tr className="border-b border-white/5">
-                <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('date')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('truck')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('serviceType')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('shop')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('odometer')}</th>
-                <th className="text-right px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('cost')}</th>
+              <tr>
+                <TableHeaderCell>{t('date')}</TableHeaderCell>
+                <TableHeaderCell>{t('truck')}</TableHeaderCell>
+                <TableHeaderCell>{t('serviceType')}</TableHeaderCell>
+                <TableHeaderCell>{t('shop')}</TableHeaderCell>
+                <TableHeaderCell>{t('odometer')}</TableHeaderCell>
+                <TableHeaderCell numeric>{t('cost')}</TableHeaderCell>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody>
               {logs.map((log) => (
-                <tr key={log.id} className="hover:bg-white/[0.07] transition-colors duration-150">
-                  <td className="px-5 py-3 text-slate-300">{formatDate(log.service_date, profile)}</td>
-                  <td className="px-4 py-3 text-white font-medium">
+                <TableRow key={log.id}>
+                  <TableCell>{formatDate(log.service_date, profile)}</TableCell>
+                  <TableCell className="font-medium text-text-pri">
                     {log.vehicles?.vehicle_number ?? '—'}{log.vehicles?.nickname ? ` — ${log.vehicles.nickname}` : ''}
-                  </td>
-                  <td className="px-4 py-3 text-slate-300">{log.service_type}</td>
-                  <td className="px-4 py-3 text-slate-400">{log.shop_name ?? '—'}</td>
-                  <td className="px-4 py-3 text-slate-400">{log.odometer ? log.odometer.toLocaleString() : '—'}</td>
-                  <td className="px-5 py-3 text-right text-white font-medium">
+                  </TableCell>
+                  <TableCell>{log.service_type}</TableCell>
+                  <TableCell>{log.shop_name ?? '—'}</TableCell>
+                  <TableCell>{log.odometer ? log.odometer.toLocaleString() : '—'}</TableCell>
+                  <TableCell numeric className="font-medium text-text-pri">
                     {log.cost != null ? `$${Number(log.cost).toFixed(2)}` : '—'}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
             </tbody>
-          </table>
-        </div>
+          </Table>
+        </Card>
       )}
     </div>
   )
