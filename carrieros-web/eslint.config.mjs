@@ -40,7 +40,15 @@ const uiComponentPatternGuardWarn = {
 
 // Surfaces confirmed fully migrated onto components/ui/* — violations here
 // are regressions, not pre-existing debt, so they fail the build.
-const ERROR_SURFACES = ["app/(admin)/**/*.tsx"];
+const ERROR_SURFACES = [
+  "app/(admin)/**/*.tsx",
+  "app/(app)/dashboard/**/*.tsx",
+  "app/(app)/invoices/**/*.tsx",
+  "app/(app)/drivers/**/*.tsx",
+  "app/(app)/loads/**/*.tsx",
+  "app/(app)/customers/**/*.tsx",
+  "app/(app)/vehicles/**/*.tsx",
+];
 const uiComponentPatternGuardError = {
   files: ERROR_SURFACES,
   rules: { "no-restricted-syntax": cardPatternRule("error").slice(1) },
