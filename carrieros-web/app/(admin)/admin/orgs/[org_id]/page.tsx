@@ -4,8 +4,12 @@
 // checklist, users, recent loads, notes) plus the notes/tier/trial/
 // grace-period/impersonate action routes, all of which already existed
 // except trial and grace-period (added this pass).
+//
+// Uses components/ui/* (Card/CardHeader/CardBody/KpiTile/Button/Input) per
+// docs/design/carrieros-design-system.md §5 rather than hand-rolled Tailwind.
 import { useEffect, useState, use as usePromise } from 'react'
 import Link from 'next/link'
+import { Card, CardHeader, CardBody, KpiTile, Button, Input } from '@/components/ui'
 
 interface OrgDetail {
   org: { id: number; name: string; created_at: string }
@@ -116,181 +120,167 @@ export default function OrgDetailPage({ params }: { params: Promise<{ org_id: st
     load()
   }
 
-  if (error) return <div className="p-8 text-red-400 text-sm">{error}</div>
-  if (!data) return <div className="p-8 text-slate-400 text-sm">Loading…</div>
+  if (error) return <div className="p-8 text-danger text-sm">{error}</div>
+  if (!data) return <div className="p-8 text-text-sec text-sm">Loading…</div>
 
   const cd = data.carrier_details
-  const cardCls = 'bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark'
 
   return (
     <div className="p-8 max-w-5xl mx-auto">
-      <Link href="/admin/health" className="text-slate-400 text-sm hover:text-white flex items-center gap-1.5 mb-4">
+      <Link href="/admin/health" className="text-text-sec text-sm hover:text-text-pri flex items-center gap-1.5 mb-4">
         <span className="material-symbols-outlined text-[16px]">arrow_back</span>
         Back to Customer Health
       </Link>
 
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">{data.org.name}</h1>
-          <p className="text-slate-400 text-sm mt-1">
+          <h1 className="text-2xl font-semibold text-text-pri">{data.org.name}</h1>
+          <p className="text-text-sec text-sm mt-1">
             {cd?.tier ?? '—'} · {cd?.billing_status ?? '—'}
             {cd?.trial_ends_at && ` · trial ends ${new Date(cd.trial_ends_at).toLocaleDateString()}`}
           </p>
         </div>
-        <button
-          onClick={impersonate}
-          disabled={busyAction === 'impersonate'}
-          className="px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition"
-        >
-          {busyAction === 'impersonate' ? 'Generating…' : 'Impersonate Owner'}
-        </button>
+        <Button onClick={impersonate} loading={busyAction === 'impersonate'}>
+          Impersonate Owner
+        </Button>
       </div>
 
       {impersonateLink && (
-        <div className="mb-6 rounded-lg bg-[#f97316]/10 border border-[#f97316]/20 px-4 py-3">
-          <p className="text-[#f97316] text-xs mb-1">Magic link (single use):</p>
-          <code className="text-slate-300 text-xs break-all">{impersonateLink}</code>
+        <div className="mb-6 rounded-lg bg-brand-orange/10 border border-brand-orange/20 px-4 py-3">
+          <p className="text-brand-orange text-xs mb-1">Magic link (single use):</p>
+          <code className="text-text-sec text-xs break-all">{impersonateLink}</code>
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <div className={cardCls}>
-            <h2 className="text-white font-medium text-sm mb-3">KPIs</h2>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">Loads / 30d</p>
-                <p className="text-xl font-semibold text-white">{data.kpis.loads_this_month}</p>
+          <Card>
+            <CardHeader>
+              <h2 className="text-text-pri font-medium text-sm">KPIs</h2>
+            </CardHeader>
+            <CardBody>
+              <div className="grid grid-cols-3 gap-4">
+                <KpiTile label="Loads / 30d" value={data.kpis.loads_this_month} />
+                <KpiTile label="Uninvoiced Revenue" value={`$${data.kpis.uninvoiced_revenue.toLocaleString()}`} />
+                <KpiTile label="Last Active" value={data.kpis.last_active ? new Date(data.kpis.last_active).toLocaleDateString() : 'Never'} />
               </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">Uninvoiced Revenue</p>
-                <p className="text-xl font-semibold text-white">${data.kpis.uninvoiced_revenue.toLocaleString()}</p>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">Last Active</p>
-                <p className="text-sm text-slate-300 mt-1.5">{data.kpis.last_active ? new Date(data.kpis.last_active).toLocaleDateString() : 'Never'}</p>
-              </div>
-            </div>
-          </div>
+            </CardBody>
+          </Card>
 
-          <div className={cardCls}>
-            <h2 className="text-white font-medium text-sm mb-3">Adoption</h2>
-            <div className="grid grid-cols-2 gap-2">
-              {Object.entries(data.adoption).map(([key, done]) => (
-                <div key={key} className="flex items-center gap-2">
-                  <span className={`material-symbols-outlined text-[18px] ${done ? 'text-[#16a34a]' : 'text-slate-600'}`}>
-                    {done ? 'check_circle' : 'radio_button_unchecked'}
-                  </span>
-                  <span className={`text-sm ${done ? 'text-slate-300' : 'text-slate-500'}`}>{ADOPTION_LABELS[key] ?? key}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <Card>
+            <CardHeader>
+              <h2 className="text-text-pri font-medium text-sm">Adoption</h2>
+            </CardHeader>
+            <CardBody>
+              <div className="grid grid-cols-2 gap-2">
+                {Object.entries(data.adoption).map(([key, done]) => (
+                  <div key={key} className="flex items-center gap-2">
+                    <span className={`material-symbols-outlined text-[18px] ${done ? 'text-success' : 'text-text-mut'}`}>
+                      {done ? 'check_circle' : 'radio_button_unchecked'}
+                    </span>
+                    <span className={`text-sm ${done ? 'text-text-sec' : 'text-text-mut'}`}>{ADOPTION_LABELS[key] ?? key}</span>
+                  </div>
+                ))}
+              </div>
+            </CardBody>
+          </Card>
 
-          <div className={cardCls}>
-            <h2 className="text-white font-medium text-sm mb-3">Users ({data.users.length})</h2>
-            <div className="divide-y divide-white/5">
+          <Card>
+            <CardHeader>
+              <h2 className="text-text-pri font-medium text-sm">Users ({data.users.length})</h2>
+            </CardHeader>
+            <div className="divide-y divide-divider-ui">
               {data.users.map((u) => (
-                <div key={u.id} className="py-2 flex items-center justify-between text-sm">
-                  <span className="text-white">{u.name ?? u.email ?? u.id}</span>
-                  <span className="text-slate-500 text-xs capitalize">{u.role}</span>
+                <div key={u.id} className="px-5 py-2.5 flex items-center justify-between text-sm">
+                  <span className="text-text-pri">{u.name ?? u.email ?? u.id}</span>
+                  <span className="text-text-mut text-xs capitalize">{u.role}</span>
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
 
-          <div className={cardCls}>
-            <h2 className="text-white font-medium text-sm mb-3">Recent Loads</h2>
+          <Card>
+            <CardHeader>
+              <h2 className="text-text-pri font-medium text-sm">Recent Loads</h2>
+            </CardHeader>
             {data.recent_loads.length === 0 ? (
-              <p className="text-slate-500 text-sm">No loads yet.</p>
+              <CardBody>
+                <p className="text-text-mut text-sm">No loads yet.</p>
+              </CardBody>
             ) : (
-              <div className="divide-y divide-white/5">
+              <div className="divide-y divide-divider-ui">
                 {data.recent_loads.slice(0, 10).map((l) => (
-                  <div key={l.id} className="py-2 flex items-center justify-between text-sm">
-                    <span className="text-slate-300 capitalize">{l.status ?? '—'}</span>
-                    <span className="text-white">${(l.rate ?? 0).toLocaleString()}</span>
-                    <span className="text-slate-500 text-xs">{new Date(l.created_at).toLocaleDateString()}</span>
+                  <div key={l.id} className="px-5 py-2.5 flex items-center justify-between text-sm">
+                    <span className="text-text-sec capitalize">{l.status ?? '—'}</span>
+                    <span className="text-text-pri">${(l.rate ?? 0).toLocaleString()}</span>
+                    <span className="text-text-mut text-xs">{new Date(l.created_at).toLocaleDateString()}</span>
                   </div>
                 ))}
               </div>
             )}
-          </div>
+          </Card>
         </div>
 
         <div className="space-y-6">
-          <div className={cardCls}>
-            <h2 className="text-white font-medium text-sm mb-3">Tier</h2>
-            <select
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
-              value={cd?.tier ?? ''}
-              onChange={(e) => changeTier(e.target.value)}
-              disabled={savingTier}
-            >
-              {TIERS.map((t) => (
-                <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
-              ))}
-            </select>
-          </div>
+          <Card>
+            <CardBody>
+              <h2 className="text-text-pri font-medium text-sm mb-3">Tier</h2>
+              <Input as="select" value={cd?.tier ?? ''} onChange={(e) => changeTier(e.target.value)} disabled={savingTier}>
+                {TIERS.map((t) => (
+                  <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
+                ))}
+              </Input>
+            </CardBody>
+          </Card>
 
-          <div className={cardCls}>
-            <h2 className="text-white font-medium text-sm mb-3">Trial &amp; Grace Period</h2>
-            <button
-              onClick={extendTrial}
-              disabled={busyAction === 'trial'}
-              className="w-full mb-2 py-2 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white text-sm font-medium rounded-lg transition"
-            >
-              {busyAction === 'trial' ? 'Extending…' : 'Extend Trial +7 days'}
-            </button>
-            <p className="text-slate-500 text-xs mb-2">
-              Grace period: {cd?.grace_period_until ? new Date(cd.grace_period_until).toLocaleDateString() : 'None'}
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setGracePeriod(7)}
-                disabled={busyAction === 'grace'}
-                className="flex-1 py-2 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white text-xs font-medium rounded-lg transition"
-              >
-                Set 7d
-              </button>
-              <button
-                onClick={() => setGracePeriod(null)}
-                disabled={busyAction === 'grace'}
-                className="flex-1 py-2 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white text-xs font-medium rounded-lg transition"
-              >
-                Clear
-              </button>
-            </div>
-          </div>
+          <Card>
+            <CardBody>
+              <h2 className="text-text-pri font-medium text-sm mb-3">Trial &amp; Grace Period</h2>
+              <Button variant="secondary" className="w-full mb-2" onClick={extendTrial} loading={busyAction === 'trial'}>
+                Extend Trial +7 days
+              </Button>
+              <p className="text-text-mut text-xs mb-2">
+                Grace period: {cd?.grace_period_until ? new Date(cd.grace_period_until).toLocaleDateString() : 'None'}
+              </p>
+              <div className="flex gap-2">
+                <Button variant="secondary" size="sm" className="flex-1" onClick={() => setGracePeriod(7)} loading={busyAction === 'grace'}>
+                  Set 7d
+                </Button>
+                <Button variant="secondary" size="sm" className="flex-1" onClick={() => setGracePeriod(null)} loading={busyAction === 'grace'}>
+                  Clear
+                </Button>
+              </div>
+            </CardBody>
+          </Card>
 
-          <div className={cardCls}>
-            <h2 className="text-white font-medium text-sm mb-3">Notes</h2>
-            <div className="space-y-2 mb-3 max-h-60 overflow-y-auto">
-              {data.notes.length === 0 ? (
-                <p className="text-slate-500 text-sm">No notes yet.</p>
-              ) : (
-                data.notes.map((n) => (
-                  <div key={n.id} className="bg-white/5 rounded-lg px-3 py-2">
-                    <p className="text-slate-300 text-sm">{n.body}</p>
-                    <p className="text-slate-500 text-[10px] mt-1">{new Date(n.created_at).toLocaleString()}</p>
-                  </div>
-                ))
-              )}
-            </div>
-            <textarea
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm resize-none mb-2"
-              rows={2}
-              placeholder="Add a note…"
-              value={noteDraft}
-              onChange={(e) => setNoteDraft(e.target.value)}
-            />
-            <button
-              onClick={addNote}
-              disabled={savingNote || !noteDraft.trim()}
-              className="w-full py-2 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition"
-            >
-              {savingNote ? 'Saving…' : 'Add Note'}
-            </button>
-          </div>
+          <Card>
+            <CardBody>
+              <h2 className="text-text-pri font-medium text-sm mb-3">Notes</h2>
+              <div className="space-y-2 mb-3 max-h-60 overflow-y-auto">
+                {data.notes.length === 0 ? (
+                  <p className="text-text-mut text-sm">No notes yet.</p>
+                ) : (
+                  data.notes.map((n) => (
+                    <div key={n.id} className="bg-surface-subtle rounded-lg px-3 py-2">
+                      <p className="text-text-sec text-sm">{n.body}</p>
+                      <p className="text-text-mut text-[10px] mt-1">{new Date(n.created_at).toLocaleString()}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+              <Input
+                as="textarea"
+                rows={2}
+                placeholder="Add a note…"
+                value={noteDraft}
+                onChange={(e) => setNoteDraft(e.target.value)}
+                className="resize-none mb-2"
+              />
+              <Button className="w-full" onClick={addNote} disabled={!noteDraft.trim()} loading={savingNote}>
+                Add Note
+              </Button>
+            </CardBody>
+          </Card>
         </div>
       </div>
     </div>

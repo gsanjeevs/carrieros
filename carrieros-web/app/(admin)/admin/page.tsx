@@ -10,8 +10,15 @@
 // no such column/table exists (mockup-23's own severity spec is
 // implemented as a client-side classification of data the orgs route
 // already returns, not new schema).
+//
+// Uses components/ui/* (Card/KpiTile/StatusBadge/Button/EmptyState) and the
+// canonical Triage pattern / severity color mapping from
+// docs/design/carrieros-design-system.md §6.2/§6.3, rather than hand-rolled
+// Tailwind — this page's own first draft got that wrong (raw hex borders,
+// no component reuse); fixed per that doc's own recipe.
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { Card, KpiTile, StatusBadge, Button, EmptyState } from '@/components/ui'
 
 interface Org {
   org_id: number
@@ -41,11 +48,13 @@ function urgencyOf(org: Org): Urgency {
   return 'low'
 }
 
-const URGENCY_STYLE: Record<Urgency, { border: string; label: string; badge: string }> = {
-  critical: { border: 'border-l-red-500', label: 'Critical', badge: 'bg-red-500/15 text-red-400' },
-  high:     { border: 'border-l-orange-500', label: 'High', badge: 'bg-orange-500/15 text-orange-400' },
-  medium:   { border: 'border-l-amber-500', label: 'Medium', badge: 'bg-amber-500/15 text-amber-400' },
-  low:      { border: 'border-l-blue-500', label: 'Low', badge: 'bg-blue-500/15 text-blue-400' },
+// §6.2/§6.3: Critical → danger/border-l-danger, High → brand/border-l-brand-orange
+// (urgent-but-not-broken), Medium → warning/border-l-warning, Low → info/border-l-info.
+const URGENCY_STYLE: Record<Urgency, { border: string; label: string; badgeVariant: 'danger' | 'brand' | 'warning' | 'info' }> = {
+  critical: { border: 'border-l-danger', label: 'Critical', badgeVariant: 'danger' },
+  high:     { border: 'border-l-brand-orange', label: 'High', badgeVariant: 'brand' },
+  medium:   { border: 'border-l-warning', label: 'Medium', badgeVariant: 'warning' },
+  low:      { border: 'border-l-info', label: 'Low', badgeVariant: 'info' },
 }
 
 export default function TriageQueuePage() {
@@ -79,8 +88,8 @@ export default function TriageQueuePage() {
     load()
   }
 
-  if (error) return <div className="p-8 text-red-400 text-sm">{error}</div>
-  if (!orgs) return <div className="p-8 text-slate-400 text-sm">Loading…</div>
+  if (error) return <div className="p-8 text-danger text-sm">{error}</div>
+  if (!orgs) return <div className="p-8 text-text-sec text-sm">Loading…</div>
 
   const flagged = orgs
     .map((o) => ({ ...o, urgency: urgencyOf(o) }))
@@ -96,62 +105,53 @@ export default function TriageQueuePage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-semibold text-white mb-1">Triage Queue</h1>
-      <p className="text-slate-400 text-sm mb-6">Organizations needing attention, most urgent first.</p>
+      <h1 className="text-2xl font-semibold text-text-pri mb-1">Triage Queue</h1>
+      <p className="text-text-sec text-sm mb-6">Organizations needing attention, most urgent first.</p>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        {[
-          { label: 'Total Orgs', value: kpis.total },
-          { label: 'Past Due', value: kpis.pastDue },
-          { label: 'Trials Ending ≤7d', value: kpis.trialsEndingSoon },
-          { label: 'At Risk (health<40)', value: kpis.atRisk },
-        ].map((k) => (
-          <div key={k.label} className="bg-white/5 border border-white/8 rounded-xl p-4 shadow-card-dark">
-            <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">{k.label}</p>
-            <p className="text-2xl font-semibold text-white">{k.value}</p>
-          </div>
-        ))}
+        <KpiTile label="Total Orgs" value={kpis.total} />
+        <KpiTile label="Past Due" value={kpis.pastDue} />
+        <KpiTile label="Trials Ending ≤7d" value={kpis.trialsEndingSoon} />
+        <KpiTile label="At Risk (health<40)" value={kpis.atRisk} />
       </div>
 
       {flagged.length === 0 ? (
-        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-card-dark">
-          <span className="material-symbols-outlined text-slate-600 text-4xl">check_circle</span>
-          <p className="text-slate-400 text-sm mt-3">Nothing needs attention right now.</p>
-        </div>
+        <Card>
+          <EmptyState icon="check_circle" title="Nothing needs attention right now." />
+        </Card>
       ) : (
         <div className="space-y-2">
           {flagged.map((o) => {
             const style = URGENCY_STYLE[o.urgency]
             const trialDays = daysUntil(o.trial_ends_at)
             return (
-              <div key={o.org_id} className={`bg-white/5 border border-white/8 border-l-[3px] ${style.border} rounded-xl px-5 py-4 shadow-card-dark flex items-center justify-between gap-4`}>
+              <Card key={o.org_id} className={`border-l-[3px] ${style.border} px-5 py-4 flex items-center justify-between gap-4`}>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <Link href={`/admin/orgs/${o.org_id}`} className="text-white font-medium hover:text-[#f97316] transition-colors">
+                    <Link href={`/admin/orgs/${o.org_id}`} className="text-text-pri font-medium hover:text-brand-orange transition-colors">
                       {o.name}
                     </Link>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${style.badge}`}>{style.label}</span>
+                    <StatusBadge variant={style.badgeVariant} size="sm">{style.label}</StatusBadge>
                   </div>
-                  <p className="text-slate-500 text-xs mt-0.5">
+                  <p className="text-text-mut text-xs mt-0.5">
                     {o.tier ?? '—'} · health {o.health_score} · {o.billing_status ?? '—'}
                     {o.billing_status === 'trialing' && trialDays !== null && ` · trial ends in ${trialDays}d`}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {o.billing_status === 'trialing' && (
-                    <button
-                      onClick={() => extendTrial(o.org_id)}
-                      disabled={extending === o.org_id}
-                      className="px-3 py-1.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white text-xs font-medium rounded-lg transition"
-                    >
-                      {extending === o.org_id ? 'Extending…' : 'Extend Trial +7d'}
-                    </button>
+                    <Button variant="secondary" size="sm" onClick={() => extendTrial(o.org_id)} loading={extending === o.org_id}>
+                      Extend Trial +7d
+                    </Button>
                   )}
-                  <Link href={`/admin/orgs/${o.org_id}`} className="px-3 py-1.5 bg-[#f97316]/10 hover:bg-[#f97316]/20 text-[#f97316] text-xs font-semibold rounded-lg transition">
+                  <Link
+                    href={`/admin/orgs/${o.org_id}`}
+                    className="inline-flex items-center justify-center rounded-md font-semibold transition-colors px-2 py-1 text-[11px] bg-brand-orange text-white hover:bg-brand-orange/90"
+                  >
                     View
                   </Link>
                 </div>
-              </div>
+              </Card>
             )
           })}
         </div>

@@ -3,8 +3,12 @@
 // #14). GET /api/admin/orgs already returns health_score sorted worst-
 // first, exactly matching mockup-23's default sort — this page is a thin
 // table + filter chips over that response.
+//
+// Uses components/ui/* (Card/Table/ProgressBar) per docs/design/
+// carrieros-design-system.md §5 rather than hand-rolled Tailwind.
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { Card, Table, TableHeaderCell, TableRow, TableCell, ProgressBar } from '@/components/ui'
 
 interface Org {
   org_id: number
@@ -18,10 +22,10 @@ interface Org {
   health_score: number
 }
 
-function healthColor(score: number): string {
-  if (score >= 70) return 'bg-[#16a34a]'
-  if (score >= 40) return 'bg-amber-500'
-  return 'bg-red-500'
+function healthVariant(score: number): 'success' | 'warning' | 'danger' {
+  if (score >= 70) return 'success'
+  if (score >= 40) return 'warning'
+  return 'danger'
 }
 
 const TIER_FILTERS = ['all', 'starter', 'growth', 'pro', 'enterprise'] as const
@@ -47,13 +51,13 @@ export default function CustomerHealthPage() {
     return orgs.filter((o) => o.tier === tierFilter)
   }, [orgs, tierFilter])
 
-  if (error) return <div className="p-8 text-red-400 text-sm">{error}</div>
-  if (!orgs) return <div className="p-8 text-slate-400 text-sm">Loading…</div>
+  if (error) return <div className="p-8 text-danger text-sm">{error}</div>
+  if (!orgs) return <div className="p-8 text-text-sec text-sm">Loading…</div>
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-semibold text-white mb-1">Customer Health</h1>
-      <p className="text-slate-400 text-sm mb-6">{orgs.length} organizations, sorted worst-health-first.</p>
+      <h1 className="text-2xl font-semibold text-text-pri mb-1">Customer Health</h1>
+      <p className="text-text-sec text-sm mb-6">{orgs.length} organizations, sorted worst-health-first.</p>
 
       <div className="flex items-center gap-2 mb-4">
         {TIER_FILTERS.map((t) => (
@@ -61,7 +65,7 @@ export default function CustomerHealthPage() {
             key={t}
             onClick={() => setTierFilter(t)}
             className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
-              tierFilter === t ? 'bg-[#f97316] text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10'
+              tierFilter === t ? 'bg-brand-orange text-white' : 'bg-surface-subtle text-text-sec hover:bg-surface-subtle/70'
             }`}
           >
             {t === 'all' ? 'All' : t.charAt(0).toUpperCase() + t.slice(1)}
@@ -69,41 +73,41 @@ export default function CustomerHealthPage() {
         ))}
       </div>
 
-      <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
-        <table className="w-full text-sm">
+      <Card>
+        <Table>
           <thead>
-            <tr className="border-b border-white/5">
-              <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Org</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Tier</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Billing</th>
-              <th className="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Loads/30d</th>
-              <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Health</th>
+            <tr>
+              <TableHeaderCell>Org</TableHeaderCell>
+              <TableHeaderCell>Tier</TableHeaderCell>
+              <TableHeaderCell>Billing</TableHeaderCell>
+              <TableHeaderCell numeric>Loads/30d</TableHeaderCell>
+              <TableHeaderCell>Health</TableHeaderCell>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5">
+          <tbody>
             {filtered.map((o) => (
-              <tr key={o.org_id} className="hover:bg-white/[0.07] transition-colors duration-150">
-                <td className="px-5 py-3">
-                  <Link href={`/admin/orgs/${o.org_id}`} className="text-white font-medium hover:text-[#f97316] transition-colors">
+              <TableRow key={o.org_id}>
+                <TableCell>
+                  <Link href={`/admin/orgs/${o.org_id}`} className="text-text-pri font-medium hover:text-brand-orange transition-colors">
                     {o.name}
                   </Link>
-                </td>
-                <td className="px-4 py-3 text-slate-300 capitalize">{o.tier ?? '—'}</td>
-                <td className="px-4 py-3 text-slate-400 capitalize">{o.billing_status ?? '—'}</td>
-                <td className="px-4 py-3 text-right text-slate-300">{o.loads_this_month}</td>
-                <td className="px-5 py-3">
+                </TableCell>
+                <TableCell className="capitalize">{o.tier ?? '—'}</TableCell>
+                <TableCell className="capitalize">{o.billing_status ?? '—'}</TableCell>
+                <TableCell numeric>{o.loads_this_month}</TableCell>
+                <TableCell>
                   <div className="flex items-center gap-2">
-                    <div className="w-16 h-1.5 rounded-full bg-white/10 overflow-hidden">
-                      <div className={`h-full rounded-full ${healthColor(o.health_score)}`} style={{ width: `${o.health_score}%` }} />
+                    <div className="w-16">
+                      <ProgressBar value={o.health_score} variant={healthVariant(o.health_score)} thin label={`Health score ${o.health_score}`} />
                     </div>
-                    <span className="text-slate-300 text-xs w-6">{o.health_score}</span>
+                    <span className="text-text-sec text-xs w-6">{o.health_score}</span>
                   </div>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
           </tbody>
-        </table>
-      </div>
+        </Table>
+      </Card>
     </div>
   )
 }

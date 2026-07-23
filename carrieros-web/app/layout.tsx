@@ -28,7 +28,15 @@ export default async function RootLayout({
   const fontLink = LOCALE_FONT_LINKS[locale];
 
   return (
-    <html lang={locale} dir={dir} className="h-full antialiased">
+    // `dark` is hardcoded, not read from a `profiles.theme_preference`
+    // toggle — no such column/settings UI exists yet (docs/design/
+    // carrieros-design-system.md §1.4 describes that mechanism but it was
+    // never built; every page today hardcodes dark literal colors directly
+    // rather than the semantic tokens this class activates). Forcing `dark`
+    // here has zero effect on those legacy pages and is required for
+    // `components/ui/*` (which do use the semantic tokens) to render
+    // correctly against the rest of the app's actual (dark) look.
+    <html lang={locale} dir={dir} className="h-full antialiased dark">
       <head>
         <link
           rel="stylesheet"

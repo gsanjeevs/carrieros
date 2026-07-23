@@ -4,7 +4,11 @@
 // admin_events only logs admin-INITIATED actions (notes, tier/trial/
 // grace-period changes, flag overrides, impersonation), not a full
 // cross-tenant audit trail (no login/load/billing event logging exists).
+//
+// Uses components/ui/* (Card/Table/EmptyState) per docs/design/
+// carrieros-design-system.md §5 rather than hand-rolled Tailwind.
 import { useEffect, useState } from 'react'
+import { Card, Table, TableHeaderCell, TableRow, TableCell, EmptyState } from '@/components/ui'
 
 interface AuditEvent {
   id: number
@@ -38,46 +42,46 @@ export default function AuditPage() {
       .catch(() => setError('Could not load audit events.'))
   }, [])
 
-  if (error) return <div className="p-8 text-red-400 text-sm">{error}</div>
-  if (!events) return <div className="p-8 text-slate-400 text-sm">Loading…</div>
+  if (error) return <div className="p-8 text-danger text-sm">{error}</div>
+  if (!events) return <div className="p-8 text-text-sec text-sm">Loading…</div>
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-semibold text-white mb-1">Audit &amp; Activity</h1>
-      <p className="text-slate-400 text-sm mb-6">
+      <h1 className="text-2xl font-semibold text-text-pri mb-1">Audit &amp; Activity</h1>
+      <p className="text-text-sec text-sm mb-6">
         Admin-initiated actions only — not a full cross-tenant audit trail (no login/load/billing event logging exists yet).
       </p>
 
-      <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
+      <Card>
         {events.length === 0 ? (
-          <div className="px-5 py-16 text-center text-slate-500 text-sm">No admin actions logged yet.</div>
+          <EmptyState icon="history" title="No admin actions logged yet." />
         ) : (
-          <table className="w-full text-sm">
+          <Table>
             <thead>
-              <tr className="border-b border-white/5">
-                <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Action</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Org</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Admin</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Details</th>
-                <th className="text-right px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">When</th>
+              <tr>
+                <TableHeaderCell>Action</TableHeaderCell>
+                <TableHeaderCell>Org</TableHeaderCell>
+                <TableHeaderCell>Admin</TableHeaderCell>
+                <TableHeaderCell>Details</TableHeaderCell>
+                <TableHeaderCell numeric>When</TableHeaderCell>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody>
               {events.map((e) => (
-                <tr key={e.id} className="hover:bg-white/[0.07] transition-colors duration-150">
-                  <td className="px-5 py-3 text-white font-medium">{EVENT_LABELS[e.event_type] ?? e.event_type}</td>
-                  <td className="px-4 py-3 text-slate-300">{e.org_name ?? '—'}</td>
-                  <td className="px-4 py-3 text-slate-400">{e.admin_name ?? '—'}</td>
-                  <td className="px-4 py-3 text-slate-500 text-xs font-mono truncate max-w-[240px]">
+                <TableRow key={e.id}>
+                  <TableCell className="font-medium text-text-pri">{EVENT_LABELS[e.event_type] ?? e.event_type}</TableCell>
+                  <TableCell>{e.org_name ?? '—'}</TableCell>
+                  <TableCell className="text-text-sec">{e.admin_name ?? '—'}</TableCell>
+                  <TableCell className="text-text-mut font-mono truncate max-w-[240px]">
                     {e.metadata ? JSON.stringify(e.metadata) : '—'}
-                  </td>
-                  <td className="px-5 py-3 text-right text-slate-400 text-xs">{new Date(e.created_at).toLocaleString()}</td>
-                </tr>
+                  </TableCell>
+                  <TableCell numeric className="text-text-sec">{new Date(e.created_at).toLocaleString()}</TableCell>
+                </TableRow>
               ))}
             </tbody>
-          </table>
+          </Table>
         )}
-      </div>
+      </Card>
     </div>
   )
 }

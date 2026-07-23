@@ -23,6 +23,17 @@ const ROLE_ROUTES: { prefix: string; allowed: string[] }[] = [
   { prefix: '/my-loads', allowed: ['owner', 'solo', 'driver'] },
   { prefix: '/drivers',  allowed: ['owner', 'solo', 'dispatcher'] },
   { prefix: '/team',     allowed: ['owner', 'solo'] },
+  // /dashboard itself has no per-tenant-role guard (dashboard/page.tsx
+  // branches internally per role, per task #49's fallback fix) — but it was
+  // never guarded against sx_* roles landing there at all. Since
+  // signInWithEmail (app/login/actions.ts) always redirects to /dashboard
+  // and relies on this middleware to bounce non-tenant roles onward, an
+  // sx_* login without this entry fell through with no matching prefix and
+  // landed on dashboard/page.tsx's "no dashboard view built for this role"
+  // placeholder instead of /admin — found via this session's admin-UI
+  // browser verification, not a security issue (no cross-org data exposed)
+  // but a real broken-landing-page regression.
+  { prefix: '/dashboard', allowed: ['owner', 'solo', 'driver', 'dispatcher', 'finance'] },
   // ShipmentX platform staff only — see lib/admin-auth.ts's SX_ROLES.
   // Symmetric with /team above: any non-sx_* role hitting /admin bounces
   // to their own tenant home, and (unlisted here, but implied) an sx_*

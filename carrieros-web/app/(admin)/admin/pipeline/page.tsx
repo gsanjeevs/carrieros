@@ -3,8 +3,12 @@
 // GET /api/admin/pipeline — see that route's own header comment: no
 // `sales_pipeline` table exists, so this is computed directly from
 // carrier_details/loads/drivers, not a dedicated pipeline data model.
+//
+// Uses components/ui/* (Card/CardHeader/Button/StatusBadge/EmptyState) per
+// docs/design/carrieros-design-system.md §5 rather than hand-rolled Tailwind.
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { Card, CardHeader, Button, StatusBadge, EmptyState } from '@/components/ui'
 
 interface TrialOrg {
   org_id: number
@@ -57,65 +61,65 @@ export default function PipelinePage() {
     load()
   }
 
-  if (error) return <div className="p-8 text-red-400 text-sm">{error}</div>
-  if (!trialing || !candidates) return <div className="p-8 text-slate-400 text-sm">Loading…</div>
+  if (error) return <div className="p-8 text-danger text-sm">{error}</div>
+  if (!trialing || !candidates) return <div className="p-8 text-text-sec text-sm">Loading…</div>
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-semibold text-white mb-1">Sales Pipeline</h1>
-      <p className="text-slate-400 text-sm mb-6">Trials ending soon, and Starter orgs that look ready to upgrade.</p>
+      <h1 className="text-2xl font-semibold text-text-pri mb-1">Sales Pipeline</h1>
+      <p className="text-text-sec text-sm mb-6">Trials ending soon, and Starter orgs that look ready to upgrade.</p>
 
-      <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark mb-6">
-        <div className="px-5 py-3.5 border-b border-white/5">
-          <h2 className="text-white font-medium text-sm">Trials ({trialing.length})</h2>
-        </div>
+      <Card className="mb-6">
+        <CardHeader>
+          <h2 className="text-text-pri font-medium text-sm">Trials ({trialing.length})</h2>
+        </CardHeader>
         {trialing.length === 0 ? (
-          <div className="px-5 py-8 text-center text-slate-500 text-sm">No orgs currently trialing.</div>
+          <EmptyState icon="trending_up" title="No orgs currently trialing." />
         ) : (
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-divider-ui">
             {trialing.map((o) => {
               const days = daysLeft(o.trial_ends_at)
               return (
                 <div key={o.org_id} className="flex items-center justify-between px-5 py-3">
-                  <Link href={`/admin/orgs/${o.org_id}`} className="text-white text-sm font-medium hover:text-[#f97316] transition-colors">
+                  <Link href={`/admin/orgs/${o.org_id}`} className="text-text-pri text-sm font-medium hover:text-brand-orange transition-colors">
                     {o.org_name}
                   </Link>
-                  <span className={`text-xs ${days !== null && days <= 7 ? 'text-amber-400' : 'text-slate-400'}`}>
-                    {days !== null ? `${days}d left` : '—'}
-                  </span>
-                  <button
-                    onClick={() => extendTrial(o.org_id)}
-                    disabled={extending === o.org_id}
-                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white text-xs font-medium rounded-lg transition"
-                  >
-                    {extending === o.org_id ? 'Extending…' : 'Extend +7d'}
-                  </button>
+                  {days !== null && days <= 7 ? (
+                    <StatusBadge variant="warning" size="sm">{days}d left</StatusBadge>
+                  ) : (
+                    <span className="text-text-sec text-xs">{days !== null ? `${days}d left` : '—'}</span>
+                  )}
+                  <Button variant="secondary" size="sm" onClick={() => extendTrial(o.org_id)} loading={extending === o.org_id}>
+                    Extend +7d
+                  </Button>
                 </div>
               )
             })}
           </div>
         )}
-      </div>
+      </Card>
 
-      <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
-        <div className="px-5 py-3.5 border-b border-white/5">
-          <h2 className="text-white font-medium text-sm">Upgrade Candidates ({candidates.length})</h2>
-          <p className="text-slate-500 text-xs mt-0.5">Starter orgs with ≥8 loads in 30 days or more than one active driver.</p>
-        </div>
+      <Card>
+        <CardHeader>
+          <div>
+            <h2 className="text-text-pri font-medium text-sm">Upgrade Candidates ({candidates.length})</h2>
+            <p className="text-text-mut text-xs mt-0.5">Starter orgs with ≥8 loads in 30 days or more than one active driver.</p>
+          </div>
+        </CardHeader>
         {candidates.length === 0 ? (
-          <div className="px-5 py-8 text-center text-slate-500 text-sm">No Starter orgs currently look ready to upgrade.</div>
+          <EmptyState icon="trending_up" title="No Starter orgs currently look ready to upgrade." />
         ) : (
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-divider-ui">
             {candidates.map((c) => (
-              <Link key={c.org_id} href={`/admin/orgs/${c.org_id}`} className="flex items-center justify-between px-5 py-3 hover:bg-white/[0.07] transition-colors">
-                <span className="text-white text-sm font-medium">{c.org_name}</span>
-                <span className="text-slate-400 text-xs">{c.loads_last_30d} loads/30d</span>
-                <span className="text-slate-400 text-xs">{c.active_drivers} drivers</span>
+              <Link key={c.org_id} href={`/admin/orgs/${c.org_id}`} className="flex items-center justify-between px-5 py-3 hover:bg-surface-subtle transition-colors">
+                <span className="text-text-pri text-sm font-medium">{c.org_name}</span>
+                <span className="text-text-sec text-xs">{c.loads_last_30d} loads/30d</span>
+                <span className="text-text-sec text-xs">{c.active_drivers} drivers</span>
               </Link>
             ))}
           </div>
         )}
-      </div>
+      </Card>
     </div>
   )
 }

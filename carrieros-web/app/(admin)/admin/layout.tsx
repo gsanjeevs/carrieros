@@ -33,7 +33,7 @@ export default async function AdminLayout({
   const name = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || user.email || 'Admin'
 
   return (
-    <div className="flex h-screen bg-[#0f1923] overflow-hidden">
+    <div className="flex h-screen bg-surface-page overflow-hidden">
       <AdminSidebar role={profile.role} userName={name} />
       <main className="flex-1 overflow-y-auto">
         {children}
