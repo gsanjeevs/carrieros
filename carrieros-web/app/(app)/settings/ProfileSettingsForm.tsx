@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
+import { Button, Input } from '@/components/ui'
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -30,8 +31,7 @@ interface Current {
   time_format: string
 }
 
-const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
-const selectCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 transition'
+const labelCls = 'block text-xs font-medium text-text-sec mb-1.5'
 
 export default function ProfileSettingsForm({
   userId,
@@ -85,19 +85,19 @@ export default function ProfileSettingsForm({
 
       <div>
         <label className={labelCls}>{t('language')}</label>
-        <select
-          className={selectCls}
+        <Input
+          as="select"
           value={form.preferred_language}
           onChange={(e) => setForm(f => ({ ...f, preferred_language: e.target.value }))}
         >
           {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
-        </select>
+        </Input>
       </div>
 
       <div>
         <label className={labelCls}>{t('units')}</label>
-        <select
-          className={selectCls}
+        <Input
+          as="select"
           value={form.uom_system ?? ''}
           onChange={(e) => setForm(f => ({ ...f, uom_system: (e.target.value || null) as Uom | null }))}
         >
@@ -106,47 +106,43 @@ export default function ProfileSettingsForm({
           </option>
           <option value="imperial">{t('unitsImperial')}</option>
           <option value="metric">{t('unitsMetric')}</option>
-        </select>
+        </Input>
       </div>
 
       <div>
         <label className={labelCls}>{t('dateFormat')}</label>
-        <select
-          className={selectCls}
+        <Input
+          as="select"
           value={form.date_format}
           onChange={(e) => setForm(f => ({ ...f, date_format: e.target.value }))}
         >
           {Object.entries(DATE_FORMAT_EXAMPLES).map(([code, example]) => (
             <option key={code} value={code}>{code} (e.g. {example})</option>
           ))}
-        </select>
+        </Input>
       </div>
 
       <div>
         <label className={labelCls}>{t('timeFormat')}</label>
-        <select
-          className={selectCls}
+        <Input
+          as="select"
           value={form.time_format}
           onChange={(e) => setForm(f => ({ ...f, time_format: e.target.value }))}
         >
           <option value="12h">{t('time12h')}</option>
           <option value="24h">{t('time24h')}</option>
-        </select>
+        </Input>
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-red-400 text-sm">
+        <div className="rounded-lg bg-danger/10 border border-danger/20 px-4 py-3 text-danger text-sm">
           {error}
         </div>
       )}
 
-      <button
-        onClick={save}
-        disabled={saving}
-        className="px-5 py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-      >
+      <Button onClick={save} disabled={saving} loading={saving}>
         {saving ? t('saving') : saved ? t('saved') : t('saveChanges')}
-      </button>
+      </Button>
 
     </div>
   )

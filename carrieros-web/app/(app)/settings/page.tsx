@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import ProfileSettingsForm from './ProfileSettingsForm'
+import { Card, CardBody } from '@/components/ui'
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -33,21 +34,23 @@ export default async function SettingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
-      <h1 className="text-white text-xl font-semibold mb-1">{t('title')}</h1>
-      <p className="text-slate-400 text-sm mb-8">{t('subtitle')}</p>
+      <h1 className="text-text-pri text-xl font-semibold mb-1">{t('title')}</h1>
+      <p className="text-text-sec text-sm mb-8">{t('subtitle')}</p>
 
-      <div className="bg-white/5 border border-white/8 rounded-xl shadow-card-dark p-6">
-        <ProfileSettingsForm
-          userId={user.id}
-          current={{
-            preferred_language: profile?.preferred_language ?? 'en',
-            uom_system: (profile?.uom_system as 'imperial' | 'metric' | null) ?? null,
-            date_format: profile?.date_format ?? 'MM/DD/YYYY',
-            time_format: profile?.time_format ?? '12h',
-          }}
-          orgDefaultUom={orgDefaultUom}
-        />
-      </div>
+      <Card>
+        <CardBody>
+          <ProfileSettingsForm
+            userId={user.id}
+            current={{
+              preferred_language: profile?.preferred_language ?? 'en',
+              uom_system: (profile?.uom_system as 'imperial' | 'metric' | null) ?? null,
+              date_format: profile?.date_format ?? 'MM/DD/YYYY',
+              time_format: profile?.time_format ?? '12h',
+            }}
+            orgDefaultUom={orgDefaultUom}
+          />
+        </CardBody>
+      </Card>
     </div>
   )
 }
