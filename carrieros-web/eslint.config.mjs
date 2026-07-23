@@ -2,42 +2,55 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 
-// Ad-hoc-Tailwind-card pattern guard, scoped to app/(admin)/** — see
-// docs/design/carrieros-design-system.md §5/§9 and this project's own
-// SuperAdmin UI, whose first draft used exactly these literal patterns
-// (bg-white/5, shadow-card-dark, border-white/8) instead of the real
-// components/ui/* library (Card/KpiTile/StatusBadge/Table/Button) that
+// Hand-rolled-Tailwind-card/badge pattern guard — see
+// docs/design/carrieros-design-system.md §5/§9. This project's own
+// SuperAdmin UI (Phase 8) shipped its first draft with exactly these literal
+// patterns (bg-white/5, shadow-card-dark, border-white/8) instead of the
+// real components/ui/* library (Card/KpiTile/StatusBadge/Table/Button) that
 // exists specifically to prevent this. The doc alone didn't stop that
-// regression, so this catches it mechanically for this route group going
-// forward. NOT applied repo-wide: the pre-existing tenant app (`app/(app)/`)
-// uses these same literals pervasively and migrating all of it is a much
-// larger, separate effort (see that doc's §11 changelog) — this guard only
-// locks in the standard for new/small surfaces, starting with `/admin`.
-const adminCardPatternGuard = {
-  files: ["app/(admin)/**/*.tsx"],
-  rules: {
-    "no-restricted-syntax": [
-      "error",
-      {
-        selector:
-          "JSXAttribute[name.name='className'] Literal[value=/shadow-card-dark|bg-white\\/(5|7)|border-white\\/(5|8|10)/]",
-        message:
-          "Use components/ui/* (Card/KpiTile/StatusBadge/Table/Button) instead of hand-rolled card/badge Tailwind classes in app/(admin)/** — see docs/design/carrieros-design-system.md §5.",
-      },
-      {
-        selector:
-          "JSXAttribute[name.name='className'] TemplateElement[value.raw=/shadow-card-dark|bg-white\\/(5|7)|border-white\\/(5|8|10)/]",
-        message:
-          "Use components/ui/* (Card/KpiTile/StatusBadge/Table/Button) instead of hand-rolled card/badge Tailwind classes in app/(admin)/** — see docs/design/carrieros-design-system.md §5.",
-      },
-    ],
-  },
+// regression — see MEMORY feedback_design_system_enforcement — so this
+// catches it mechanically.
+//
+// Ratchet strategy: "warn" repo-wide so the pre-existing debt in
+// app/(app)/** (which uses these literals pervasively — near-zero
+// components/ui/* adoption there, see architecture-principles.md) is visible
+// without breaking the build; "error" for surfaces already fully migrated.
+// As a surface gets migrated, add its glob to ERROR_SURFACES below to lock
+// the regression out permanently instead of leaving it at warn forever.
+const CARD_PATTERN_SELECTOR_LITERAL =
+  "JSXAttribute[name.name='className'] Literal[value=/shadow-card-dark|bg-white\\/(5|7)|border-white\\/(5|8|10)/]";
+const CARD_PATTERN_SELECTOR_TEMPLATE =
+  "JSXAttribute[name.name='className'] TemplateElement[value.raw=/shadow-card-dark|bg-white\\/(5|7)|border-white\\/(5|8|10)/]";
+const CARD_PATTERN_MESSAGE =
+  "Use components/ui/* (Card/KpiTile/StatusBadge/Table/Button) instead of hand-rolled card/badge Tailwind classes — see docs/design/carrieros-design-system.md §5.";
+
+function cardPatternRule(severity) {
+  return [
+    "no-restricted-syntax",
+    severity,
+    { selector: CARD_PATTERN_SELECTOR_LITERAL, message: CARD_PATTERN_MESSAGE },
+    { selector: CARD_PATTERN_SELECTOR_TEMPLATE, message: CARD_PATTERN_MESSAGE },
+  ];
+}
+
+const uiComponentPatternGuardWarn = {
+  files: ["app/**/*.tsx"],
+  rules: { "no-restricted-syntax": cardPatternRule("warn").slice(1) },
+};
+
+// Surfaces confirmed fully migrated onto components/ui/* — violations here
+// are regressions, not pre-existing debt, so they fail the build.
+const ERROR_SURFACES = ["app/(admin)/**/*.tsx"];
+const uiComponentPatternGuardError = {
+  files: ERROR_SURFACES,
+  rules: { "no-restricted-syntax": cardPatternRule("error").slice(1) },
 };
 
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  adminCardPatternGuard,
+  uiComponentPatternGuardWarn,
+  uiComponentPatternGuardError,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

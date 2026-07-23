@@ -73,6 +73,47 @@ React-Native-Web, which renders deeply nested non-semantic `<div>`s).
   For a plain HTML `<form>`, `document.querySelector('form').requestSubmit()`
   is simpler and more reliable than clicking the submit button.
 
+## Gated checks (enforcement, not just documentation)
+There is no CI in this repo — git hooks are the actual enforcement mechanism
+for `docs/architecture-principles.md` (Rules A-G, decoupling) and
+`docs/design/carrieros-design-system.md` (component-library adoption). A doc
+alone did not stop a real regression once already (SuperAdmin UI's first
+draft bypassed `components/ui/*` — see `docs/design/carrieros-design-system.md`
+§11, 2026-07-23), so new mechanical guards were added rather than relying on
+the doc being re-read every time.
+
+**One-time setup per clone** (hooks live in the versioned `scripts/git-hooks/`,
+not `.git/hooks/`, so they survive a fresh clone but still need this pointed
+at once):
+```bash
+git config core.hooksPath scripts/git-hooks
+```
+
+- **`scripts/git-hooks/pre-commit`** — on any staged `carrieros-web/**/*.{ts,tsx}`:
+  `eslint` (includes the UI-component-pattern guard below), `tsc --noEmit`,
+  and `carrieros-web/scripts/check-architecture.mjs` (static grep — no DB —
+  enforcing Rule B/D "business/query logic must not import React/Next.js/
+  components" and Rule G "call sites must go through `lib/storage`/
+  `lib/auth-admin`, not the raw Supabase SDK"). Mobile TS files get
+  `tsc --noEmit` only. Fast (no DB), so it runs on every commit.
+- **`scripts/git-hooks/pre-push`** — runs each app's full test suite
+  (DB-backed, slower) if that app changed since `main`. Gated at push, not
+  commit, since that's when code actually leaves the machine.
+- **`carrieros-web/eslint.config.mjs`'s `no-restricted-syntax` UI guard** —
+  flags hand-rolled card/badge Tailwind (`bg-white/5`, `shadow-card-dark`,
+  `border-white/8`, etc.) instead of `components/ui/*`. Ratcheted: `warn`
+  repo-wide (surfaces the pre-existing debt in `app/(app)/**` without
+  breaking the build) and `error` for surfaces already fully migrated,
+  listed in that file's `ERROR_SURFACES` array (currently `app/(admin)/**`
+  only). When you finish migrating another surface onto `components/ui/*`,
+  add its glob to `ERROR_SURFACES` so the regression is locked out for good
+  instead of sitting at `warn` forever.
+
+**When building a new module**: run `npm run check:architecture` and
+`npx eslint` yourself before considering the work done, don't rely solely on
+the commit hook to catch it after the fact — the hook is the backstop, not
+the primary check.
+
 ## Speeding up multi-surface work
 When a task spans independent surfaces (e.g. i18n on web + i18n on mobile,
 or a fix needed in both apps), dispatch one background `Agent` per surface

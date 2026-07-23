@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Versioned git hook — see scripts/git-hooks/pre-commit and CLAUDE.md "Gated
+# checks". Runs the DB-backed test suites, which is too slow for every
+# commit — gated at push time instead, since that's the point code actually
+# leaves the machine.
+set -euo pipefail
+
+CHANGED_SINCE_MAIN=$(git diff --name-only main...HEAD 2>/dev/null || true)
+
+if echo "$CHANGED_SINCE_MAIN" | grep -qE '^carrieros-web/'; then
+  echo "→ carrieros-web: full test suite"
+  (cd carrieros-web && npm test)
+fi
+
+if echo "$CHANGED_SINCE_MAIN" | grep -qE '^carrieros-mobile/'; then
+  echo "→ carrieros-mobile: full test suite"
+  (cd carrieros-mobile && npm test)
+fi
+
+echo "✓ pre-push checks passed"

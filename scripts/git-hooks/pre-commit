@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Versioned git hook (see CLAUDE.md "Gated checks" — enable once per clone with
+# `git config core.hooksPath scripts/git-hooks`). This repo has no CI, so this
+# hook is the actual enforcement mechanism for docs/architecture-principles.md
+# and docs/design/carrieros-design-system.md, not just documentation.
+#
+# Fast checks only (no DB) — full test suite runs in pre-push instead, so
+# commits stay quick.
+set -euo pipefail
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACM)
+
+WEB_FILES=$(echo "$STAGED" | grep -E '^carrieros-web/.*\.(ts|tsx)$' || true)
+if [ -n "$WEB_FILES" ]; then
+  echo "→ carrieros-web: eslint"
+  (cd carrieros-web && npx eslint $(echo "$WEB_FILES" | sed 's|^carrieros-web/||'))
+
+  echo "→ carrieros-web: tsc --noEmit"
+  (cd carrieros-web && npx tsc --noEmit)
+
+  echo "→ carrieros-web: architecture check (Rule B/D/G decoupling)"
+  (cd carrieros-web && node scripts/check-architecture.mjs)
+fi
+
+MOBILE_FILES=$(echo "$STAGED" | grep -E '^carrieros-mobile/.*\.(ts|tsx)$' || true)
+if [ -n "$MOBILE_FILES" ]; then
+  echo "→ carrieros-mobile: tsc --noEmit"
+  (cd carrieros-mobile && npx tsc --noEmit)
+fi
+
+echo "✓ pre-commit checks passed"
