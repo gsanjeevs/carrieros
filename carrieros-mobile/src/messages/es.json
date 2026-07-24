@@ -73,8 +73,14 @@
   },
   "offline": {
     "offline": "Estás sin conexión. Los cambios se sincronizarán automáticamente.",
-    "offlineWithQueue": "Estás sin conexión. {count, plural, one {# cambio} other {# cambios}} se sincronizarán cuando vuelvas a estar en línea.",
-    "syncing": "De vuelta en línea — sincronizando {count, plural, one {# cambio} other {# cambios}}…"
+    "offlineWithQueue": {
+      "one": "Estás sin conexión. %{count} cambio se sincronizará cuando vuelvas a estar en línea.",
+      "other": "Estás sin conexión. %{count} cambios se sincronizarán cuando vuelvas a estar en línea."
+    },
+    "syncing": {
+      "one": "De vuelta en línea — sincronizando %{count} cambio…",
+      "other": "De vuelta en línea — sincronizando %{count} cambios…"
+    }
   },
   "chat": {
     "title": "Mensajes",

@@ -73,8 +73,14 @@
   },
   "offline": {
     "offline": "You're offline. Changes will sync automatically.",
-    "offlineWithQueue": "You're offline. {count, plural, one {# change} other {# changes}} will sync when you're back online.",
-    "syncing": "Back online — syncing {count, plural, one {# change} other {# changes}}…"
+    "offlineWithQueue": {
+      "one": "You're offline. %{count} change will sync when you're back online.",
+      "other": "You're offline. %{count} changes will sync when you're back online."
+    },
+    "syncing": {
+      "one": "Back online — syncing %{count} change…",
+      "other": "Back online — syncing %{count} changes…"
+    }
   },
   "chat": {
     "title": "Messages",
