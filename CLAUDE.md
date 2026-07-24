@@ -104,15 +104,28 @@ git config core.hooksPath scripts/git-hooks
   `border-white/8`, etc.) instead of `components/ui/*`. Ratcheted: `warn`
   repo-wide (surfaces the pre-existing debt in `app/(app)/**` without
   breaking the build) and `error` for surfaces already fully migrated,
-  listed in that file's `ERROR_SURFACES` array (currently `app/(admin)/**`
-  only). When you finish migrating another surface onto `components/ui/*`,
-  add its glob to `ERROR_SURFACES` so the regression is locked out for good
-  instead of sitting at `warn` forever.
+  listed in that file's `ERROR_SURFACES` array. When you finish migrating
+  another surface onto `components/ui/*`, add its glob to `ERROR_SURFACES` so
+  the regression is locked out for good instead of sitting at `warn` forever.
+- **`check-architecture.mjs`'s Rule B checks** (hot-table query
+  encapsulation — `profiles`/`loads`/`drivers` should go through
+  `lib/queries/*.ts`, not ad hoc `.from()` calls) run at `warn`, not `error`
+  — the debt is too large (dozens of call sites) to gate as zero-violation
+  yet. Same ratchet posture as the UI guard: build a table's `lib/queries/`
+  module, migrate its call sites, then tighten that table's check to `error`.
 
-**When building a new module**: run `npm run check:architecture` and
-`npx eslint` yourself before considering the work done, don't rely solely on
-the commit hook to catch it after the fact — the hook is the backstop, not
-the primary check.
+**Standing audit cadence** (this repo has no CI and no wall-clock cron for
+this — it's a session-driven workflow, so the habit has to be explicit):
+- Run `npm run verify:compliance` (bundles `eslint` full-repo + `tsc --noEmit`
+  + `check:architecture`) before marking any new UI/data module "done," and
+  before any status update to `docs/production-gates.md`/`docs/resume.md` —
+  don't rely solely on the commit hook catching it reactively after staging.
+- Each time a surface finishes migrating onto `components/ui/*`, add its glob
+  to `ERROR_SURFACES` (above) — that's what actually ratchets the standard
+  forward, not just running the check.
+- Track the `no-restricted-syntax` warn-count as a trend line in
+  `docs/design/carrieros-design-system.md` §11's changelog after each wave —
+  makes stalled progress or backsliding visible instead of silent.
 
 ## Speeding up multi-surface work
 When a task spans independent surfaces (e.g. i18n on web + i18n on mobile,
