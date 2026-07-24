@@ -101,9 +101,16 @@ export default function MyLoadsScreen() {
     // slightly-off-white page behind them for the shadow to read.
     <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="title" style={styles.heading}>
-          {role === 'driver' ? t('loads.titleDriver') : t('loads.titleOffice')}
-        </ThemedText>
+        <ThemedView style={styles.headerRow} type="background">
+          <ThemedText type="title" style={styles.heading}>
+            {role === 'driver' ? t('loads.titleDriver') : t('loads.titleOffice')}
+          </ThemedText>
+          {(role === 'owner' || role === 'solo' || role === 'dispatcher') && (
+            <Pressable onPress={() => router.push('/load/new')} style={styles.newLoadButton}>
+              <ThemedText type="smallBold" style={{ color: '#ffffff' }}>{t('loadNew.newLoadAction')}</ThemedText>
+            </Pressable>
+          )}
+        </ThemedView>
 
         <FlatList
           data={loads}
@@ -166,7 +173,9 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   safeArea: { flex: 1, paddingHorizontal: Spacing.three },
-  heading: { fontSize: 24, marginBottom: Spacing.three },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.three },
+  heading: { fontSize: 24 },
+  newLoadButton: { backgroundColor: '#f97316', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 8 },
   listContent: { gap: Spacing.two, paddingBottom: Spacing.four },
   empty: { textAlign: 'center', marginTop: Spacing.five },
   signOut: { alignItems: 'center', paddingVertical: Spacing.four, marginTop: Spacing.three },

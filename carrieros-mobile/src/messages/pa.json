@@ -40,6 +40,10 @@
     "commodity": "ਸਮਾਨ",
     "weight": "ਭਾਰ",
     "miles": "ਮੀਲ",
+    "unitLbs": "ਪੌਂਡ",
+    "unitKg": "ਕਿਲੋਗ੍ਰਾਮ",
+    "unitMi": "ਮੀਲ",
+    "unitKm": "ਕਿਲੋਮੀਟਰ",
     "preTripDvir": "ਪ੍ਰੀ-ਟ੍ਰਿਪ DVIR",
     "postTripDvir": "ਪੋਸਟ-ਟ੍ਰਿਪ DVIR",
     "actionPickedUp": "ਚੁੱਕਿਆ ਗਿਆ ਵਜੋਂ ਨਿਸ਼ਾਨਬੱਧ ਕਰੋ",
@@ -48,7 +52,24 @@
     "shareLocation": "ਟਿਕਾਣਾ ਸਾਂਝਾ ਕਰੋ",
     "shareLocationOn": "ਡਿਸਪੈਚ ਨਾਲ ਤੁਹਾਡਾ ਲਾਈਵ ਟਿਕਾਣਾ ਸਾਂਝਾ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ",
     "shareLocationOff": "ਸਾਂਝਾ ਨਹੀਂ ਕੀਤਾ ਜਾ ਰਿਹਾ — ਡਿਸਪੈਚ ਨੂੰ ਤੁਹਾਡਾ ਲਾਈਵ ਟਿਕਾਣਾ ਦੇਖਣ ਦੇਣ ਲਈ ਚਾਲੂ ਕਰੋ",
-    "locationPermissionDenied": "ਟਿਕਾਣਾ ਇਜਾਜ਼ਤ ਤੋਂ ਇਨਕਾਰ ਕੀਤਾ ਗਿਆ। ਆਪਣਾ ਟਿਕਾਣਾ ਸਾਂਝਾ ਕਰਨ ਲਈ ਆਪਣੀ ਡਿਵਾਈਸ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਇਸਨੂੰ ਚਾਲੂ ਕਰੋ।"
+    "locationPermissionDenied": "ਟਿਕਾਣਾ ਇਜਾਜ਼ਤ ਤੋਂ ਇਨਕਾਰ ਕੀਤਾ ਗਿਆ। ਆਪਣਾ ਟਿਕਾਣਾ ਸਾਂਝਾ ਕਰਨ ਲਈ ਆਪਣੀ ਡਿਵਾਈਸ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਇਸਨੂੰ ਚਾਲੂ ਕਰੋ।",
+    "sectionAssignment": "ਨਿਯੁਕਤੀ",
+    "assignDriver": "ਡਰਾਈਵਰ",
+    "assignVehicle": "ਵਾਹਨ",
+    "unassigned": "— ਨਿਯੁਕਤ ਨਹੀਂ —",
+    "saveAssignment": "ਨਿਯੁਕਤੀ ਸੰਭਾਲੋ",
+    "assignError": "ਨਿਯੁਕਤੀ ਅੱਪਡੇਟ ਨਹੀਂ ਹੋ ਸਕੀ — ਹੋ ਸਕਦਾ ਹੈ ਤੁਹਾਡੇ ਕੋਲ ਇਜਾਜ਼ਤ ਨਾ ਹੋਵੇ।"
+  },
+  "loadNew": {
+    "heading": "ਨਵਾਂ ਲੋਡ",
+    "newLoadAction": "+ ਨਵਾਂ ਲੋਡ",
+    "customer": "ਗਾਹਕ",
+    "city": "ਸ਼ਹਿਰ",
+    "state": "ਰਾਜ",
+    "date": "ਮਿਤੀ",
+    "rate": "ਰੇਟ",
+    "submit": "ਲੋਡ ਬਣਾਓ",
+    "errorCreateFailed": "ਲੋਡ ਨਹੀਂ ਬਣ ਸਕਿਆ। ਲੋੜੀਂਦੇ ਖੇਤਰਾਂ ਦੀ ਜਾਂਚ ਕਰੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
   },
   "offline": {
     "offline": "ਤੁਸੀਂ ਆਫਲਾਈਨ ਹੋ। ਬਦਲਾਅ ਆਪਣੇ ਆਪ ਸਿੰਕ ਹੋ ਜਾਣਗੇ।",
@@ -124,7 +145,8 @@
     "dateFormatSection": "ਮਿਤੀ ਫਾਰਮੈਟ",
     "timeFormatSection": "ਸਮਾਂ ਫਾਰਮੈਟ",
     "time12h": "12-ਘੰਟੇ (2:30 PM)",
-    "time24h": "24-ਘੰਟੇ (14:30)"
+    "time24h": "24-ਘੰਟੇ (14:30)",
+    "businessSection": "ਕਾਰੋਬਾਰ"
   },
   "tabs": {
     "home": "ਹੋਮ",
@@ -218,6 +240,61 @@
   "history": {
     "title": "ਇਤਿਹਾਸ",
     "empty": "ਹਾਲੇ ਕੋਈ ਪੁਰਾਣਾ ਲੋਡ ਨਹੀਂ।"
+  },
+  "vehicleDetail": {
+    "notFound": "ਵਾਹਨ ਨਹੀਂ ਮਿਲਿਆ।",
+    "logService": "ਸਰਵਿਸ ਦਰਜ ਕਰੋ",
+    "whichReminder": "ਇਹ ਕਿਸ ਰੀਮਾਈਂਡਰ ਲਈ ਹੈ?",
+    "generalServiceNoReminder": "ਆਮ ਸਰਵਿਸ (ਕੋਈ ਰੀਮਾਈਂਡਰ ਨਹੀਂ)",
+    "serviceType": "ਸਰਵਿਸ ਦੀ ਕਿਸਮ",
+    "serviceTypePlaceholder": "ਜਿਵੇਂ ਕਿ ਤੇਲ ਬਦਲਣਾ",
+    "serviceTypeRequired": "ਸਰਵਿਸ ਦੀ ਕਿਸਮ ਦਰਜ ਕਰੋ।",
+    "serviceDate": "ਸਰਵਿਸ ਦੀ ਮਿਤੀ",
+    "odometer": "ਓਡੋਮੀਟਰ",
+    "cost": "ਲਾਗਤ",
+    "shop": "ਦੁਕਾਨ",
+    "notes": "ਨੋਟਸ",
+    "cancel": "ਰੱਦ ਕਰੋ",
+    "serviceHistory": "ਸਰਵਿਸ ਇਤਿਹਾਸ",
+    "noServiceHistory": "ਅਜੇ ਕੋਈ ਸਰਵਿਸ ਦਰਜ ਨਹੀਂ ਕੀਤੀ ਗਈ।",
+    "logServiceFailed": "ਇਹ ਸਰਵਿਸ ਦਰਜ ਨਹੀਂ ਹੋ ਸਕੀ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
+  },
+  "team": {
+    "title": "ਟੀਮ",
+    "loadError": "ਟੀਮ ਦੀ ਸੂਚੀ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀ।",
+    "empty": "ਅਜੇ ਕੋਈ ਟੀਮ ਮੈਂਬਰ ਨਹੀਂ।",
+    "role_owner": "ਮਾਲਕ",
+    "role_solo": "ਸੋਲੋ",
+    "role_dispatcher": "ਡਿਸਪੈਚਰ",
+    "role_finance": "ਵਿੱਤ",
+    "role_driver": "ਡਰਾਈਵਰ",
+    "statusActive": "ਸਰਗਰਮ",
+    "statusPending": "ਬਾਕੀ"
+  },
+  "billing": {
+    "title": "ਬਿਲਿੰਗ",
+    "currentPlan": "ਮੌਜੂਦਾ ਯੋਜਨਾ",
+    "tier_starter": "Starter",
+    "tier_growth": "Growth",
+    "tier_pro": "Pro",
+    "tier_enterprise": "Enterprise",
+    "trialStatus": "ਟ੍ਰਾਇਲ ਸਥਿਤੀ",
+    "trialDaysLeft": { "one": "%{count} ਦਿਨ ਬਾਕੀ", "other": "%{count} ਦਿਨ ਬਾਕੀ" },
+    "trialEnded": "ਟ੍ਰਾਇਲ ਖਤਮ ਹੋ ਗਿਆ",
+    "paymentMethod": "ਭੁਗਤਾਨ ਦਾ ਤਰੀਕਾ",
+    "cardOnFile": "%{brand} — ਆਖਰੀ ਅੰਕ %{last4}",
+    "noPaymentMethod": "ਕੋਈ ਭੁਗਤਾਨ ਤਰੀਕਾ ਦਰਜ ਨਹੀਂ",
+    "fleetUsage": "ਫਲੀਟ ਵਰਤੋਂ",
+    "trucksUsed": "%{included} ਵਿੱਚੋਂ %{count} ਟਰੱਕ ਸ਼ਾਮਲ",
+    "overageFee": "%{count} ਵਾਧੂ — $%{fee}/ਮਹੀਨਾ ਵਾਧੂ ਖਰਚਾ"
+  },
+  "settlements": {
+    "title": "ਸੈਟਲਮੈਂਟ",
+    "upgradeRequired": "ਡਰਾਈਵਰ ਸੈਟਲਮੈਂਟਾਂ ਲਈ Growth ਯੋਜਨਾ ਜਾਂ ਇਸ ਤੋਂ ਉੱਪਰ ਦੀ ਲੋੜ ਹੈ।",
+    "empty": "ਅਜੇ ਕੋਈ ਸੈਟਲਮੈਂਟ ਨਹੀਂ।",
+    "status_pending": "ਬਾਕੀ",
+    "status_sent": "ਭੇਜੀ ਗਈ",
+    "status_cleared": "ਕਲੀਅਰ ਹੋਈ"
   },
   "pod": {
     "sectionTitle": "ਡਿਲਿਵਰੀ ਦਾ ਸਬੂਤ",

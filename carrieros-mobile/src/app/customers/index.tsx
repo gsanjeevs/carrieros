@@ -1,7 +1,11 @@
-// src/app/(tabs)/fleet.tsx
-// "Fleet" tab (Owner/Solo/Dispatcher) — read-only vehicle list. Vehicle
-// creation/editing stays web-only (existing documented decision), so this
-// screen has no add/edit UI.
+// src/app/customers/index.tsx
+// Customers access for Owner/Solo — pushed from the More screen
+// (src/components/settings-content.tsx), not a native tab. Owner/Solo are
+// already at 5 tabs (Home, Loads, Alerts, Fleet, More); a 6th tab would
+// trigger iOS's native tab-bar overflow ("More") and collide with this
+// app's own More tab, so this reuses (tabs)/customers.tsx's read — same
+// customer_details/organizations query, same carrier_customer_select RLS
+// scoping — via a stack route instead.
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,7 +14,7 @@ import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { ExceptionChip } from '@/components/exception-chip';
-import { Spacing, StatusColors, VEHICLE_STATUS_PILL } from '@/constants/theme';
+import { Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
@@ -18,18 +22,17 @@ import { fetchExceptions, topExceptionByEntity, type ExceptionRow } from '@/lib/
 
 const PAGE_BACKGROUND = StatusColors.grayLight;
 
-type VehicleRow = {
-  id: number;
-  vehicle_number: string | null;
-  nickname: string;
-  status: string;
+type CustomerRow = {
+  org_id: number;
+  contact_name: string | null;
+  organizations: { name: string; phone: string | null; email: string | null } | null;
 };
 
-export default function FleetScreen() {
+export default function CustomersScreen() {
   const theme = useTheme();
   const router = useRouter();
   const { t } = useLocale();
-  const [vehicles, setVehicles] = useState<VehicleRow[]>([]);
+  const [customers, setCustomers] = useState<CustomerRow[]>([]);
   const [exceptions, setExceptions] = useState<ExceptionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -37,17 +40,16 @@ export default function FleetScreen() {
   const load = useCallback(async () => {
     const [{ data }, exceptionRows] = await Promise.all([
       supabase
-        .from('vehicles')
-        .select('id, vehicle_number, nickname, status')
-        .eq('is_active', true)
-        .order('vehicle_number', { ascending: true }),
+        .from('customer_details')
+        .select('org_id, contact_name, organizations(name, phone, email)')
+        .order('org_id', { ascending: true }),
       fetchExceptions(),
     ]);
-    setVehicles((data as VehicleRow[] | null) ?? []);
+    setCustomers((data as unknown as CustomerRow[] | null) ?? []);
     setExceptions(exceptionRows);
   }, []);
 
-  const topExceptionByVehicle = topExceptionByEntity(exceptions, 'vehicle');
+  const topExceptionByCustomer = topExceptionByEntity(exceptions, 'customer');
 
   useEffect(() => {
     load().finally(() => setLoading(false));
@@ -70,46 +72,31 @@ export default function FleetScreen() {
   return (
     <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="title" style={styles.heading}>{t('fleet.title')}</ThemedText>
+        <Pressable onPress={() => router.back()} style={styles.backLink}>
+          <ThemedText type="link" themeColor="textSecondary">{t('common.back')}</ThemedText>
+        </Pressable>
+        <ThemedText type="title" style={styles.heading}>{t('customers.title')}</ThemedText>
         <FlatList
-          data={vehicles}
-          keyExtractor={(item) => String(item.id)}
+          data={customers}
+          keyExtractor={(item) => String(item.org_id)}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
             <ThemedText type="small" themeColor="textSecondary" style={styles.empty}>
-              {t('fleet.empty')}
+              {t('customers.empty')}
             </ThemedText>
           }
           renderItem={({ item }) => {
-            const pill = VEHICLE_STATUS_PILL[item.status] ?? VEHICLE_STATUS_PILL.idle;
-            const statusLabel =
-              item.status === 'active'
-                ? t('home.statusActive')
-                : item.status === 'in_shop'
-                  ? t('home.statusInShop')
-                  : t('home.statusIdle');
+            const contact = item.organizations?.phone ?? item.organizations?.email;
+            const topException = topExceptionByCustomer.get(item.org_id);
             return (
-              <Pressable
-                style={[styles.card, { backgroundColor: theme.background }, styles.cardShadow]}
-                onPress={() => router.push({ pathname: '/vehicle/[id]', params: { id: String(item.id) } })}
-              >
-                <ThemedView style={styles.cardHeader} type="background">
-                  <ThemedText type="smallBold">{item.nickname}</ThemedText>
-                  <ThemedView style={[styles.statusPill, { backgroundColor: pill.bg }]}>
-                    <ThemedText type="small" style={[styles.statusPillText, { color: pill.text }]}>
-                      {statusLabel}
-                    </ThemedText>
-                  </ThemedView>
-                </ThemedView>
-                {item.vehicle_number ? (
-                  <ThemedText type="small" themeColor="textSecondary">{item.vehicle_number}</ThemedText>
-                ) : null}
-                {(() => {
-                  const topException = topExceptionByVehicle.get(item.id);
-                  return topException ? <ExceptionChip item={topException} /> : null;
-                })()}
-              </Pressable>
+              <ThemedView style={[styles.card, { backgroundColor: theme.background }, styles.cardShadow]}>
+                <ThemedText type="smallBold">{item.organizations?.name ?? t('common.unknownCustomer')}</ThemedText>
+                <ThemedText type="small" themeColor="textSecondary">
+                  {contact ?? t('customers.noContact')}
+                </ThemedText>
+                {topException ? <ExceptionChip item={topException} /> : null}
+              </ThemedView>
             );
           }}
         />
@@ -122,6 +109,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   safeArea: { flex: 1, paddingHorizontal: Spacing.three },
+  backLink: { paddingVertical: Spacing.two },
   heading: { fontSize: 24, marginBottom: Spacing.three },
   listContent: { gap: Spacing.two, paddingBottom: Spacing.four },
   empty: { textAlign: 'center', marginTop: Spacing.five },
@@ -133,7 +121,4 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  statusPill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
-  statusPillText: { fontWeight: '700' },
 });

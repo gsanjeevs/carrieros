@@ -19,6 +19,7 @@ import { useLocale } from '@/hooks/use-locale';
 import { useOfflineSync } from '@/hooks/use-offline-sync';
 import { enqueueUpdate } from '@/lib/offline-queue';
 import { supabase } from '@/lib/supabase';
+import { apiFetch } from '@/lib/api';
 
 const ORANGE = '#f97316';
 
@@ -42,7 +43,12 @@ type LoadDetail = {
   commodity: string | null;
   weight_lbs: number | null;
   total_miles: number | null;
+  driver_id: number | null;
+  vehicle_id: number | null;
 };
+
+type DriverOption = { id: number; driver_number: string; first_name: string | null; last_name: string | null };
+type VehicleOption = { id: number; vehicle_number: string; nickname: string };
 
 type LoadEvent = {
   id: number;
@@ -83,14 +89,17 @@ const ACTIVE_LOAD_STATUSES: readonly string[] = ['dispatched', 'picked_up', 'in_
 const DETAIL_COLS =
   'id, load_number, status, customer_name_raw, pickup_address, pickup_city, pickup_state, ' +
   'pickup_date, pickup_time, delivery_address, delivery_city, delivery_state, delivery_date, ' +
-  'delivery_time, commodity, weight_lbs, total_miles';
+  'delivery_time, commodity, weight_lbs, total_miles, driver_id, vehicle_id';
+
+const LBS_PER_KG = 0.453592;
+const MILES_PER_KM = 1.60934;
 
 export default function LoadDetailScreen() {
   const theme = useTheme();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { session } = useSession();
-  const { t } = useLocale();
+  const { t, prefs } = useLocale();
   const { isOnline, refreshQueueLength } = useOfflineSync();
 
   const [role, setRole] = useState<Role | null>(null);
@@ -100,6 +109,13 @@ export default function LoadDetailScreen() {
   const [advancing, setAdvancing] = useState(false);
   const [error, setError] = useState('');
   const [chatEntitled, setChatEntitled] = useState(false);
+
+  const [drivers, setDrivers] = useState<DriverOption[]>([]);
+  const [vehicles, setVehicles] = useState<VehicleOption[]>([]);
+  const [assignDriverId, setAssignDriverId] = useState<number | null>(null);
+  const [assignVehicleId, setAssignVehicleId] = useState<number | null>(null);
+  const [assigning, setAssigning] = useState(false);
+  const [assignError, setAssignError] = useState('');
 
   const fetchAll = useCallback(async () => {
     if (!session?.user.id || !id) return;
@@ -124,7 +140,10 @@ export default function LoadDetailScreen() {
     if (loadErr) {
       setError(t('loadDetail.loadAccessError'));
     } else {
-      setLoad(loadData as unknown as LoadDetail);
+      const detail = loadData as unknown as LoadDetail;
+      setLoad(detail);
+      setAssignDriverId(detail.driver_id);
+      setAssignVehicleId(detail.vehicle_id);
     }
 
     const { data: eventData } = await supabase
@@ -134,7 +153,38 @@ export default function LoadDetailScreen() {
       .order('created_at', { ascending: true });
 
     setEvents(eventData ?? []);
+
+    // Assignment pickers are office-side only — skip the extra fetches for
+    // drivers, who can never see this section.
+    if (['owner', 'solo', 'dispatcher'].includes(currentRole)) {
+      const [driversRes, vehiclesRes] = await Promise.all([
+        apiFetch('/api/drivers'),
+        apiFetch('/api/vehicles'),
+      ]);
+      if (driversRes.ok) setDrivers(await driversRes.json());
+      if (vehiclesRes.ok) setVehicles(await vehiclesRes.json());
+    }
   }, [session?.user.id, id]);
+
+  async function saveAssignment() {
+    if (!load) return;
+    setAssigning(true);
+    setAssignError('');
+
+    const res = await apiFetch(`/api/loads/${load.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ driver_id: assignDriverId, vehicle_id: assignVehicleId }),
+    });
+
+    if (!res.ok) {
+      setAssignError(t('loadDetail.assignError'));
+      setAssigning(false);
+      return;
+    }
+
+    setAssigning(false);
+    await fetchAll();
+  }
 
   useEffect(() => {
     fetchAll().finally(() => setLoading(false));
@@ -262,9 +312,109 @@ export default function LoadDetailScreen() {
           <ThemedView type="backgroundElement" style={styles.section}>
             <SectionLabel text={t('loadDetail.sectionDetails')} />
             <DetailRow label={t('loadDetail.commodity')} value={load.commodity ?? '—'} />
-            <DetailRow label={t('loadDetail.weight')} value={load.weight_lbs ? `${load.weight_lbs.toLocaleString()} lbs` : '—'} />
-            <DetailRow label={t('loadDetail.miles')} value={load.total_miles ? `${load.total_miles} mi` : '—'} />
+            <DetailRow
+              label={t('loadDetail.weight')}
+              value={
+                load.weight_lbs
+                  ? prefs.uomSystem === 'metric'
+                    ? `${Math.round(load.weight_lbs * LBS_PER_KG).toLocaleString()} ${t('loadDetail.unitKg')}`
+                    : `${load.weight_lbs.toLocaleString()} ${t('loadDetail.unitLbs')}`
+                  : '—'
+              }
+            />
+            <DetailRow
+              label={t('loadDetail.miles')}
+              value={
+                load.total_miles
+                  ? prefs.uomSystem === 'metric'
+                    ? `${Math.round(load.total_miles * MILES_PER_KM)} ${t('loadDetail.unitKm')}`
+                    : `${load.total_miles} ${t('loadDetail.unitMi')}`
+                  : '—'
+              }
+            />
           </ThemedView>
+
+          {(role === 'owner' || role === 'solo' || role === 'dispatcher') && (
+            <ThemedView type="backgroundElement" style={styles.section}>
+              <SectionLabel text={t('loadDetail.sectionAssignment')} />
+              <ThemedText type="small" themeColor="textSecondary" style={{ marginBottom: 4 }}>
+                {t('loadDetail.assignDriver')}
+              </ThemedText>
+              <ThemedView style={styles.assignRow}>
+                <Pressable
+                  onPress={() => setAssignDriverId(null)}
+                  style={[
+                    styles.assignChip,
+                    { borderColor: assignDriverId === null ? ORANGE : theme.backgroundSelected },
+                  ]}
+                >
+                  <ThemedText type="small">{t('loadDetail.unassigned')}</ThemedText>
+                </Pressable>
+                {drivers.map((d) => {
+                  const name = d.first_name || d.last_name
+                    ? [d.first_name, d.last_name].filter(Boolean).join(' ')
+                    : d.driver_number;
+                  return (
+                    <Pressable
+                      key={d.id}
+                      onPress={() => setAssignDriverId(d.id)}
+                      style={[
+                        styles.assignChip,
+                        { borderColor: assignDriverId === d.id ? ORANGE : theme.backgroundSelected },
+                      ]}
+                    >
+                      <ThemedText type="small">{name}</ThemedText>
+                    </Pressable>
+                  );
+                })}
+              </ThemedView>
+
+              <ThemedText type="small" themeColor="textSecondary" style={{ marginTop: Spacing.two, marginBottom: 4 }}>
+                {t('loadDetail.assignVehicle')}
+              </ThemedText>
+              <ThemedView style={styles.assignRow}>
+                <Pressable
+                  onPress={() => setAssignVehicleId(null)}
+                  style={[
+                    styles.assignChip,
+                    { borderColor: assignVehicleId === null ? ORANGE : theme.backgroundSelected },
+                  ]}
+                >
+                  <ThemedText type="small">{t('loadDetail.unassigned')}</ThemedText>
+                </Pressable>
+                {vehicles.map((v) => (
+                  <Pressable
+                    key={v.id}
+                    onPress={() => setAssignVehicleId(v.id)}
+                    style={[
+                      styles.assignChip,
+                      { borderColor: assignVehicleId === v.id ? ORANGE : theme.backgroundSelected },
+                    ]}
+                  >
+                    <ThemedText type="small">{v.nickname || v.vehicle_number}</ThemedText>
+                  </Pressable>
+                ))}
+              </ThemedView>
+
+              {assignError ? <ThemedText type="small" style={styles.error}>{assignError}</ThemedText> : null}
+
+              <Pressable
+                onPress={saveAssignment}
+                disabled={assigning || (assignDriverId === load.driver_id && assignVehicleId === load.vehicle_id)}
+                style={[
+                  styles.assignSaveButton,
+                  (assigning || (assignDriverId === load.driver_id && assignVehicleId === load.vehicle_id)) &&
+                    styles.actionButtonDisabled,
+                ]}
+              >
+                {assigning ? (
+                  <ActivityIndicator color="#ffffff" />
+                ) : (
+                  <ThemedText type="smallBold" style={{ color: '#ffffff' }}>{t('loadDetail.saveAssignment')}</ThemedText>
+                )}
+              </Pressable>
+            </ThemedView>
+          )}
 
           {(role === 'driver' || role === 'solo') && (
             <ThemedView type="backgroundElement" style={styles.section}>
@@ -371,6 +521,15 @@ const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 1,
     borderColor: ORANGE,
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  assignRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, backgroundColor: 'transparent' },
+  assignChip: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
+  assignSaveButton: {
+    marginTop: Spacing.three,
+    backgroundColor: ORANGE,
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: 'center',

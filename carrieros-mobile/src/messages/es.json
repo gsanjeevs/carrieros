@@ -40,6 +40,10 @@
     "commodity": "Mercancía",
     "weight": "Peso",
     "miles": "Millas",
+    "unitLbs": "lb",
+    "unitKg": "kg",
+    "unitMi": "mi",
+    "unitKm": "km",
     "preTripDvir": "DVIR Antes del Viaje",
     "postTripDvir": "DVIR Después del Viaje",
     "actionPickedUp": "Marcar como Recogida",
@@ -48,7 +52,24 @@
     "shareLocation": "Compartir Ubicación",
     "shareLocationOn": "Compartiendo tu ubicación en vivo con despacho",
     "shareLocationOff": "No compartiendo — actívalo para que despacho vea tu ubicación en vivo",
-    "locationPermissionDenied": "Permiso de ubicación denegado. Actívalo en la configuración de tu dispositivo para compartir tu ubicación."
+    "locationPermissionDenied": "Permiso de ubicación denegado. Actívalo en la configuración de tu dispositivo para compartir tu ubicación.",
+    "sectionAssignment": "Asignación",
+    "assignDriver": "Conductor",
+    "assignVehicle": "Vehículo",
+    "unassigned": "— Sin asignar —",
+    "saveAssignment": "Guardar Asignación",
+    "assignError": "No se pudo actualizar la asignación — es posible que no tengas permiso."
+  },
+  "loadNew": {
+    "heading": "Nueva Carga",
+    "newLoadAction": "+ Nueva Carga",
+    "customer": "Cliente",
+    "city": "Ciudad",
+    "state": "Estado",
+    "date": "Fecha",
+    "rate": "Tarifa",
+    "submit": "Crear Carga",
+    "errorCreateFailed": "No se pudo crear la carga. Verifica los campos requeridos e inténtalo de nuevo."
   },
   "offline": {
     "offline": "Estás sin conexión. Los cambios se sincronizarán automáticamente.",
@@ -124,7 +145,8 @@
     "dateFormatSection": "Formato de fecha",
     "timeFormatSection": "Formato de hora",
     "time12h": "12 horas (2:30 PM)",
-    "time24h": "24 horas (14:30)"
+    "time24h": "24 horas (14:30)",
+    "businessSection": "Negocio"
   },
   "tabs": {
     "home": "Inicio",
@@ -218,6 +240,61 @@
   "history": {
     "title": "Historial",
     "empty": "Aún no hay cargas pasadas."
+  },
+  "vehicleDetail": {
+    "notFound": "Vehículo no encontrado.",
+    "logService": "Registrar Servicio",
+    "whichReminder": "¿Para qué recordatorio es este servicio?",
+    "generalServiceNoReminder": "Servicio general (sin recordatorio)",
+    "serviceType": "Tipo de Servicio",
+    "serviceTypePlaceholder": "ej. Cambio de aceite",
+    "serviceTypeRequired": "Ingresa un tipo de servicio.",
+    "serviceDate": "Fecha del Servicio",
+    "odometer": "Odómetro",
+    "cost": "Costo",
+    "shop": "Taller",
+    "notes": "Notas",
+    "cancel": "Cancelar",
+    "serviceHistory": "Historial de Servicio",
+    "noServiceHistory": "Aún no hay servicios registrados.",
+    "logServiceFailed": "No se pudo registrar este servicio. Inténtalo de nuevo."
+  },
+  "team": {
+    "title": "Equipo",
+    "loadError": "No se pudo cargar la lista del equipo.",
+    "empty": "Aún no hay miembros del equipo.",
+    "role_owner": "Propietario",
+    "role_solo": "Individual",
+    "role_dispatcher": "Despachador",
+    "role_finance": "Finanzas",
+    "role_driver": "Conductor",
+    "statusActive": "Activo",
+    "statusPending": "Pendiente"
+  },
+  "billing": {
+    "title": "Facturación",
+    "currentPlan": "Plan Actual",
+    "tier_starter": "Starter",
+    "tier_growth": "Growth",
+    "tier_pro": "Pro",
+    "tier_enterprise": "Enterprise",
+    "trialStatus": "Estado de Prueba",
+    "trialDaysLeft": { "one": "Queda %{count} día", "other": "Quedan %{count} días" },
+    "trialEnded": "Período de prueba terminado",
+    "paymentMethod": "Método de Pago",
+    "cardOnFile": "%{brand} terminada en %{last4}",
+    "noPaymentMethod": "No hay ningún método de pago registrado",
+    "fleetUsage": "Uso de la Flota",
+    "trucksUsed": "%{count} de %{included} camiones incluidos",
+    "overageFee": "%{count} de más — $%{fee}/mes de excedente"
+  },
+  "settlements": {
+    "title": "Liquidaciones",
+    "upgradeRequired": "Las liquidaciones de conductores requieren el plan Growth o superior.",
+    "empty": "Aún no hay liquidaciones.",
+    "status_pending": "Pendiente",
+    "status_sent": "Enviada",
+    "status_cleared": "Liquidada"
   },
   "pod": {
     "sectionTitle": "Comprobante de entrega",

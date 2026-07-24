@@ -40,6 +40,10 @@
     "commodity": "سامان",
     "weight": "وزن",
     "miles": "میل",
+    "unitLbs": "پاؤنڈ",
+    "unitKg": "کلوگرام",
+    "unitMi": "میل",
+    "unitKm": "کلومیٹر",
     "preTripDvir": "پری ٹرپ DVIR",
     "postTripDvir": "پوسٹ ٹرپ DVIR",
     "actionPickedUp": "اٹھایا گیا کے طور پر نشان زد کریں",
@@ -48,7 +52,24 @@
     "shareLocation": "مقام شیئر کریں",
     "shareLocationOn": "ڈسپیچ کے ساتھ آپ کا لائیو مقام شیئر کیا جا رہا ہے",
     "shareLocationOff": "شیئر نہیں کیا جا رہا — ڈسپیچ کو اپنا لائیو مقام دکھانے کے لیے آن کریں",
-    "locationPermissionDenied": "مقام کی اجازت مسترد کر دی گئی۔ اپنا مقام شیئر کرنے کے لیے اپنی ڈیوائس کی ترتیبات میں اسے فعال کریں۔"
+    "locationPermissionDenied": "مقام کی اجازت مسترد کر دی گئی۔ اپنا مقام شیئر کرنے کے لیے اپنی ڈیوائس کی ترتیبات میں اسے فعال کریں۔",
+    "sectionAssignment": "تفویض",
+    "assignDriver": "ڈرائیور",
+    "assignVehicle": "گاڑی",
+    "unassigned": "— غیر تفویض شدہ —",
+    "saveAssignment": "تفویض محفوظ کریں",
+    "assignError": "تفویض اپ ڈیٹ نہیں ہو سکی — ممکن ہے آپ کے پاس اجازت نہ ہو۔"
+  },
+  "loadNew": {
+    "heading": "نیا لوڈ",
+    "newLoadAction": "+ نیا لوڈ",
+    "customer": "گاہک",
+    "city": "شہر",
+    "state": "ریاست",
+    "date": "تاریخ",
+    "rate": "ریٹ",
+    "submit": "لوڈ بنائیں",
+    "errorCreateFailed": "لوڈ نہیں بن سکا۔ ضروری خانوں کی جانچ کریں اور دوبارہ کوشش کریں۔"
   },
   "offline": {
     "offline": "آپ آف لائن ہیں۔ تبدیلیاں خودکار طور پر سنک ہو جائیں گی۔",
@@ -124,7 +145,8 @@
     "dateFormatSection": "تاریخ کی شکل",
     "timeFormatSection": "وقت کی شکل",
     "time12h": "12 گھنٹے (2:30 PM)",
-    "time24h": "24 گھنٹے (14:30)"
+    "time24h": "24 گھنٹے (14:30)",
+    "businessSection": "کاروبار"
   },
   "tabs": {
     "home": "ہوم",
@@ -218,6 +240,61 @@
   "history": {
     "title": "تاریخ",
     "empty": "ابھی تک کوئی پرانا لوڈ نہیں۔"
+  },
+  "vehicleDetail": {
+    "notFound": "گاڑی نہیں ملی۔",
+    "logService": "سروس درج کریں",
+    "whichReminder": "یہ کس ریمائنڈر کے لیے ہے؟",
+    "generalServiceNoReminder": "عمومی سروس (کوئی ریمائنڈر نہیں)",
+    "serviceType": "سروس کی قسم",
+    "serviceTypePlaceholder": "مثلاً تیل کی تبدیلی",
+    "serviceTypeRequired": "سروس کی قسم درج کریں۔",
+    "serviceDate": "سروس کی تاریخ",
+    "odometer": "اوڈومیٹر",
+    "cost": "لاگت",
+    "shop": "دکان",
+    "notes": "نوٹس",
+    "cancel": "منسوخ کریں",
+    "serviceHistory": "سروس کی تاریخ",
+    "noServiceHistory": "ابھی تک کوئی سروس درج نہیں کی گئی۔",
+    "logServiceFailed": "یہ سروس درج نہیں ہو سکی۔ دوبارہ کوشش کریں۔"
+  },
+  "team": {
+    "title": "ٹیم",
+    "loadError": "ٹیم کی فہرست لوڈ نہیں ہو سکی۔",
+    "empty": "ابھی تک کوئی ٹیم ممبر نہیں۔",
+    "role_owner": "مالک",
+    "role_solo": "سولو",
+    "role_dispatcher": "ڈسپیچر",
+    "role_finance": "فنانس",
+    "role_driver": "ڈرائیور",
+    "statusActive": "فعال",
+    "statusPending": "زیر التواء"
+  },
+  "billing": {
+    "title": "بلنگ",
+    "currentPlan": "موجودہ پلان",
+    "tier_starter": "Starter",
+    "tier_growth": "Growth",
+    "tier_pro": "Pro",
+    "tier_enterprise": "Enterprise",
+    "trialStatus": "ٹرائل کی حیثیت",
+    "trialDaysLeft": { "one": "%{count} دن باقی", "other": "%{count} دن باقی" },
+    "trialEnded": "ٹرائل ختم ہو گیا",
+    "paymentMethod": "ادائیگی کا طریقہ",
+    "cardOnFile": "%{brand} — آخری ہندسے %{last4}",
+    "noPaymentMethod": "کوئی ادائیگی کا طریقہ درج نہیں",
+    "fleetUsage": "فلیٹ کا استعمال",
+    "trucksUsed": "%{included} میں سے %{count} ٹرک شامل",
+    "overageFee": "%{count} اضافی — $%{fee}/ماہ اضافی چارج"
+  },
+  "settlements": {
+    "title": "سیٹلمنٹس",
+    "upgradeRequired": "ڈرائیور سیٹلمنٹس کے لیے Growth پلان یا اس سے اوپر درکار ہے۔",
+    "empty": "ابھی تک کوئی سیٹلمنٹ نہیں۔",
+    "status_pending": "زیر التواء",
+    "status_sent": "بھیجی گئی",
+    "status_cleared": "کلیئر شدہ"
   },
   "pod": {
     "sectionTitle": "ثبوتِ ترسیل",

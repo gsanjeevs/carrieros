@@ -46,6 +46,19 @@ const ROLE_ROUTES: { prefix: string; allowed: string[] }[] = [
 // Public routes — no auth required
 const PUBLIC_PREFIXES = ['/login', '/auth', '/track', '/onboarding']
 
+// carrieros-mobile's apiFetch() (src/lib/api.ts) is a cross-origin caller
+// when running as Expo web (localhost:8081 -> :3000) — native iOS/Android
+// builds aren't subject to CORS, but the web preview is a real browser and
+// needs the preflight (OPTIONS) handled and the actual response to carry
+// Access-Control-Allow-Origin, or every apiFetch call fails with "Failed to
+// fetch" before lib/api-auth.ts's Bearer-token check ever runs. Page routes
+// are untouched — same-origin requests ignore these headers entirely.
+const CORS_HEADERS = {
+  'Access-Control-Allow-Methods': 'GET,POST,PATCH,PUT,DELETE,OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Max-Age': '86400',
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const isPublic = PUBLIC_PREFIXES.some((p) => pathname.startsWith(p))
@@ -57,7 +70,23 @@ export async function proxy(request: NextRequest) {
   // session check below only reads cookies, so it must not gate /api/*
   // requests — otherwise every Bearer-token request from mobile gets
   // redirected to /login before the route handler ever runs.
-  if (isApiRoute) return NextResponse.next({ request })
+  if (isApiRoute) {
+    const origin = request.headers.get('origin') ?? '*'
+
+    if (request.method === 'OPTIONS') {
+      return new NextResponse(null, {
+        status: 204,
+        headers: { 'Access-Control-Allow-Origin': origin, ...CORS_HEADERS },
+      })
+    }
+
+    const apiResponse = NextResponse.next({ request })
+    apiResponse.headers.set('Access-Control-Allow-Origin', origin)
+    for (const [key, value] of Object.entries(CORS_HEADERS)) {
+      apiResponse.headers.set(key, value)
+    }
+    return apiResponse
+  }
 
   let response = NextResponse.next({ request })
 

@@ -40,6 +40,10 @@
     "commodity": "Commodity",
     "weight": "Weight",
     "miles": "Miles",
+    "unitLbs": "lbs",
+    "unitKg": "kg",
+    "unitMi": "mi",
+    "unitKm": "km",
     "preTripDvir": "Pre-Trip DVIR",
     "postTripDvir": "Post-Trip DVIR",
     "actionPickedUp": "Mark Picked Up",
@@ -48,7 +52,24 @@
     "shareLocation": "Share Location",
     "shareLocationOn": "Sharing your live location with dispatch",
     "shareLocationOff": "Not sharing — turn on to let dispatch see your live location",
-    "locationPermissionDenied": "Location permission denied. Enable it in your device settings to share your location."
+    "locationPermissionDenied": "Location permission denied. Enable it in your device settings to share your location.",
+    "sectionAssignment": "Assignment",
+    "assignDriver": "Driver",
+    "assignVehicle": "Vehicle",
+    "unassigned": "— Unassigned —",
+    "saveAssignment": "Save Assignment",
+    "assignError": "Could not update the assignment — you may not have permission."
+  },
+  "loadNew": {
+    "heading": "New Load",
+    "newLoadAction": "+ New Load",
+    "customer": "Customer",
+    "city": "City",
+    "state": "State",
+    "date": "Date",
+    "rate": "Rate",
+    "submit": "Create Load",
+    "errorCreateFailed": "Could not create the load. Check the required fields and try again."
   },
   "offline": {
     "offline": "You're offline. Changes will sync automatically.",
@@ -124,7 +145,8 @@
     "dateFormatSection": "Date format",
     "timeFormatSection": "Time format",
     "time12h": "12-hour (2:30 PM)",
-    "time24h": "24-hour (14:30)"
+    "time24h": "24-hour (14:30)",
+    "businessSection": "Business"
   },
   "tabs": {
     "home": "Home",
@@ -218,6 +240,61 @@
   "history": {
     "title": "History",
     "empty": "No past loads yet."
+  },
+  "vehicleDetail": {
+    "notFound": "Vehicle not found.",
+    "logService": "Log Service",
+    "whichReminder": "Which reminder is this for?",
+    "generalServiceNoReminder": "General service (no reminder)",
+    "serviceType": "Service Type",
+    "serviceTypePlaceholder": "e.g. Oil Change",
+    "serviceTypeRequired": "Enter a service type.",
+    "serviceDate": "Service Date",
+    "odometer": "Odometer",
+    "cost": "Cost",
+    "shop": "Shop",
+    "notes": "Notes",
+    "cancel": "Cancel",
+    "serviceHistory": "Service History",
+    "noServiceHistory": "No service logged yet.",
+    "logServiceFailed": "Could not log this service. Try again."
+  },
+  "team": {
+    "title": "Team",
+    "loadError": "Could not load the team roster.",
+    "empty": "No team members yet.",
+    "role_owner": "Owner",
+    "role_solo": "Solo",
+    "role_dispatcher": "Dispatcher",
+    "role_finance": "Finance",
+    "role_driver": "Driver",
+    "statusActive": "Active",
+    "statusPending": "Pending"
+  },
+  "billing": {
+    "title": "Billing",
+    "currentPlan": "Current Plan",
+    "tier_starter": "Starter",
+    "tier_growth": "Growth",
+    "tier_pro": "Pro",
+    "tier_enterprise": "Enterprise",
+    "trialStatus": "Trial Status",
+    "trialDaysLeft": { "one": "%{count} day left", "other": "%{count} days left" },
+    "trialEnded": "Trial ended",
+    "paymentMethod": "Payment Method",
+    "cardOnFile": "%{brand} ending in %{last4}",
+    "noPaymentMethod": "No payment method on file",
+    "fleetUsage": "Fleet Usage",
+    "trucksUsed": "%{count} of %{included} trucks included",
+    "overageFee": "%{count} over — $%{fee}/mo overage"
+  },
+  "settlements": {
+    "title": "Settlements",
+    "upgradeRequired": "Driver settlements require the Growth plan or above.",
+    "empty": "No settlements yet.",
+    "status_pending": "Pending",
+    "status_sent": "Sent",
+    "status_cleared": "Cleared"
   },
   "pod": {
     "sectionTitle": "Proof of Delivery",

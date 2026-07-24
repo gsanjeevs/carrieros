@@ -8,12 +8,14 @@
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale, type DateFormat, type TimeFormat, type Uom } from '@/hooks/use-locale';
+import { useProfileRole } from '@/hooks/use-profile-role';
 import { SUPPORTED_LOCALES, type Locale } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
 
@@ -37,8 +39,13 @@ type OptionKey = string;
 export function SettingsContent() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const router = useRouter();
   const { locale, setLocale, t, prefs, setUomSystem, setDateFormat, setTimeFormat } = useLocale();
+  const { role } = useProfileRole();
   const [saving, setSaving] = useState<OptionKey | null>(null);
+
+  const isOwnerSolo = role === 'owner' || role === 'solo';
+  const canSeeSettlements = role != null && role !== 'dispatcher';
 
   async function withSaving(key: OptionKey, run: () => Promise<void>) {
     if (saving) return;
@@ -78,6 +85,18 @@ export function SettingsContent() {
         ) : selected ? (
           <ThemedText type="smallBold" style={{ color: ORANGE }}>✓</ThemedText>
         ) : null}
+      </Pressable>
+    );
+  }
+
+  function LinkRow({ label, onPress }: { label: string; onPress: () => void }) {
+    return (
+      <Pressable
+        onPress={onPress}
+        style={[styles.option, { borderColor: theme.backgroundSelected, backgroundColor: theme.backgroundElement }]}
+      >
+        <ThemedText type="default">{label}</ThemedText>
+        <ThemedText type="smallBold" themeColor="textSecondary">{'›'}</ThemedText>
       </Pressable>
     );
   }
@@ -169,6 +188,26 @@ export function SettingsContent() {
             />
           ))}
         </ThemedView>
+
+        {(isOwnerSolo || canSeeSettlements) && (
+          <>
+            <ThemedText type="default" style={[styles.sectionHeading, styles.sectionHeadingText]}>{t('settings.businessSection')}</ThemedText>
+            <ThemedView style={styles.options}>
+              {isOwnerSolo && (
+                <LinkRow label={t('tabs.customers')} onPress={() => router.push('/customers')} />
+              )}
+              {isOwnerSolo && (
+                <LinkRow label={t('team.title')} onPress={() => router.push('/team')} />
+              )}
+              {isOwnerSolo && (
+                <LinkRow label={t('billing.title')} onPress={() => router.push('/billing')} />
+              )}
+              {canSeeSettlements && (
+                <LinkRow label={t('settlements.title')} onPress={() => router.push('/settlements')} />
+              )}
+            </ThemedView>
+          </>
+        )}
 
         <Pressable onPress={() => supabase.auth.signOut()} style={styles.signOut}>
           <ThemedText type="link" themeColor="textSecondary">{t('loads.signOut')}</ThemedText>
