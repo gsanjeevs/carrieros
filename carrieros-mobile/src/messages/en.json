@@ -1,7 +1,8 @@
 {
   "common": {
     "back": "← Back",
-    "unknownCustomer": "Unknown customer"
+    "unknownCustomer": "Unknown customer",
+    "cancel": "Cancel"
   },
   "login": {
     "subtitle": "Sign in to your account",
@@ -58,7 +59,43 @@
     "assignVehicle": "Vehicle",
     "unassigned": "— Unassigned —",
     "saveAssignment": "Save Assignment",
-    "assignError": "Could not update the assignment — you may not have permission."
+    "assignError": "Could not update the assignment — you may not have permission.",
+    "reportProblem": "Report a Problem / Delay",
+    "reportProblemTitle": "What's going on?",
+    "reportProblemNotePlaceholder": "Add details (optional)",
+    "reportProblemSubmit": "Send to Dispatch",
+    "reportProblemSent": "Reported — your dispatcher has been notified.",
+    "reportProblemError": "Could not send this report — you may not have permission.",
+    "problemReason": {
+      "breakdown": "Vehicle breakdown",
+      "traffic": "Traffic",
+      "weather": "Weather",
+      "accident": "Accident",
+      "customer_issue": "Customer / dock issue",
+      "other": "Other"
+    },
+    "sectionFuel": "Fuel",
+    "addFuelStop": "+ Add Fuel Stop",
+    "noFuelStopsYet": "No fuel stops logged yet.",
+    "fuelTotalCost": "Total Cost",
+    "fuelGallons": "Gallons",
+    "fuelStops": "Stops",
+    "fuelStatePlaceholder": "ST",
+    "fuelStation": "Station",
+    "fuelPricePerGallon": "Price/gal",
+    "fuelComputedTotal": "Total: %{amount}",
+    "fuelValidationError": "Enter a state and gallons amount.",
+    "fuelSaveFailed": "Could not save this fuel stop — you may not have permission.",
+    "fuelSave": "Save",
+    "sectionIfta": "IFTA Mileage",
+    "iftaTrackingActive": "GPS tracking active — state miles logging",
+    "iftaTrackingPermissionNeeded": "Enable \"Always Allow\" location access in Settings for automatic IFTA mileage tracking.",
+    "iftaNoCrossingsYet": "No state crossings logged yet.",
+    "iftaManualTag": "manual",
+    "iftaFallbackWarning": "GPS data looks incomplete for this trip. Enter your miles per state so IFTA mileage is accurate.",
+    "iftaAddState": "+ Add another state",
+    "iftaSaveFallback": "Save State Mileage",
+    "iftaTripTotal": "Trip total: %{miles} mi"
   },
   "loadNew": {
     "heading": "New Load",
@@ -69,7 +106,21 @@
     "date": "Date",
     "rate": "Rate",
     "submit": "Create Load",
-    "errorCreateFailed": "Could not create the load. Check the required fields and try again."
+    "errorCreateFailed": "Could not create the load. Check the required fields and try again.",
+    "scanAction": "Scan Document",
+    "scanHeading": "Scan Rate Confirmation",
+    "scanSubheading": "Take a photo of a rate confirmation or BOL and we'll fill in the load details.",
+    "scanTakePhoto": "Take Photo",
+    "scanChooseFromLibrary": "Choose from Library",
+    "scanExtracting": "Reading document…",
+    "scanErrorExtractFailed": "Could not read this document. Try a clearer photo or enter the load manually.",
+    "scanReviewHeading": "Review Extracted Load",
+    "scanReviewSubheading": "Check the details below — edit anything that looks off.",
+    "scanConfirmCreate": "Confirm & Create Load",
+    "address": "Address",
+    "zip": "ZIP",
+    "time": "Time",
+    "loadNumber": "Load / Reference #"
   },
   "offline": {
     "offline": "You're offline. Changes will sync automatically.",
@@ -118,7 +169,6 @@
     "submit": "Submit Inspection",
     "submitted": "Inspection submitted",
     "backToLoad": "Back to Load",
-    "errorMustCertify": "You must certify this inspection before submitting.",
     "errorMissingDescription": "Add a description for every area flagged as a defect.",
     "errorResolveAccount": "Could not resolve your account for this inspection.",
     "errorSubmitFailed": "Could not submit inspection. Try again.",
@@ -130,7 +180,12 @@
     "errorCameraDenied": "Camera access was denied. Enable camera permission in your device settings to take a photo.",
     "errorLibraryDenied": "Photo library access was denied. Enable photo permission in your device settings to choose a photo.",
     "errorNoImageData": "Could not read the selected image. Please try again.",
-    "photoUploadFailedWarning": "The inspection was saved, but %{count} defect photo(s) could not be uploaded. Those defects were recorded without a photo — report them to your dispatcher."
+    "photoUploadFailedWarning": "The inspection was saved, but %{count} defect photo(s) could not be uploaded. Those defects were recorded without a photo — report them to your dispatcher.",
+    "signatureLabel": "Signature",
+    "signHere": "Sign here",
+    "clearSignature": "Clear",
+    "errorMustSign": "You must sign this inspection before submitting.",
+    "signatureUploadFailedWarning": "The inspection was saved, but the signature could not be uploaded. Contact your dispatcher if a signed copy is required."
   },
   "settings": {
     "title": "Settings",
@@ -200,12 +255,19 @@
   },
   "fleet": {
     "title": "Fleet",
-    "empty": "No vehicles yet."
+    "empty": "No vehicles yet.",
+    "maintenanceLink": "Maintenance"
   },
   "customers": {
     "title": "Customers",
     "empty": "No customers yet.",
-    "noContact": "No contact info on file"
+    "noContact": "No contact info on file",
+    "notFound": "Customer not found.",
+    "loads": "Loads",
+    "revenue": "Revenue",
+    "notes": "Notes",
+    "recentLoads": "Recent Loads",
+    "noLoadsYet": "No loads yet."
   },
   "invoices": {
     "title": "Invoices",
@@ -216,11 +278,34 @@
       "sent": "Sent",
       "paid": "Paid",
       "overdue": "Overdue"
-    }
+    },
+    "notFound": "Invoice not found.",
+    "amount": "Amount",
+    "sentAt": "Sent",
+    "notSentYet": "Not sent yet",
+    "openedAt": "Opened",
+    "notOpenedYet": "Not opened yet",
+    "opened": "Opened",
+    "paidAt": "Paid",
+    "notPaidYet": "Not paid yet",
+    "editDraft": "Edit Draft",
+    "notes": "Notes",
+    "saveDraft": "Save Draft",
+    "saved": "Saved",
+    "markSent": "Mark Sent (Emails Customer)",
+    "markPaid": "Mark Paid",
+    "errorInvalidAmount": "Enter a valid amount.",
+    "errorSaveFailed": "Could not save changes. Try again.",
+    "errorSendFailed": "Could not send this invoice. Try again.",
+    "errorMarkPaidFailed": "Could not mark this invoice paid. Try again."
   },
   "reports": {
     "comingSoon": "Coming soon",
-    "comingSoonDetail": "Reporting isn't available yet — check back in a future update."
+    "comingSoonDetail": "Reporting isn't available yet — check back in a future update.",
+    "iftaTitle": "IFTA Mileage",
+    "iftaQuarter": "Quarter %{quarter}",
+    "iftaTotalMiles": "Total miles",
+    "iftaNoData": "No state mileage logged yet this quarter."
   },
   "myLoadTab": {
     "heading": "My Load",
@@ -234,14 +319,16 @@
     "expired": "Expired",
     "expiringSoon": "Expiring Soon",
     "valid": "Valid",
-    "noExpiry": "Not on file"
+    "noExpiry": "Not on file",
+    "preTripDvirNudge": "Do your pre-trip inspection before you head out"
   },
   "dvirTab": {
     "heading": "DVIR",
     "startPreTrip": "Start Pre-Trip DVIR",
     "startPostTrip": "Start Post-Trip DVIR",
     "noActiveLoad": "DVIR requires an active load.",
-    "noActiveLoadDetail": "Once you have an active load, you can start a pre-trip or post-trip inspection here."
+    "noActiveLoadDetail": "Once you have an active load, you can start a pre-trip or post-trip inspection here.",
+    "viewHistory": "View History"
   },
   "history": {
     "title": "History",
@@ -285,7 +372,10 @@
     "tier_pro": "Pro",
     "tier_enterprise": "Enterprise",
     "trialStatus": "Trial Status",
-    "trialDaysLeft": { "one": "%{count} day left", "other": "%{count} days left" },
+    "trialDaysLeft": {
+      "one": "%{count} day left",
+      "other": "%{count} days left"
+    },
     "trialEnded": "Trial ended",
     "paymentMethod": "Payment Method",
     "cardOnFile": "%{brand} ending in %{last4}",
@@ -315,5 +405,54 @@
     "errorResolveAccount": "Could not resolve your carrier account.",
     "errorUploadFailed": "Upload failed. Check your connection and try again.",
     "errorSaveFailed": "The photo could not be saved to this load. The upload was removed — please try again."
+  },
+  "dvirHistory": {
+    "title": "DVIR History",
+    "empty": "No inspections yet.",
+    "preTrip": "Pre-Trip",
+    "postTrip": "Post-Trip",
+    "satisfactory": "Satisfactory",
+    "defectsNoted": "Defects Noted",
+    "signed": "Signed",
+    "notSigned": "Not signed"
+  },
+  "driverProfile": {
+    "linkLabel": "Driver Info",
+    "title": "Driver Info",
+    "subheading": "Keep your CDL and emergency contact details up to date. Your dispatcher manages expiry dates and employment status.",
+    "completeProfileNudge": "Add your CDL and emergency contact info",
+    "cdlSection": "CDL",
+    "cdlNumber": "CDL Number",
+    "cdlNumberPlaceholder": "e.g. D1234567",
+    "cdlClass": "Class",
+    "cdlState": "Issuing State",
+    "endorsements": "Endorsements",
+    "endorsement_hazmat": "Hazmat",
+    "endorsement_tanker": "Tanker",
+    "endorsement_doubles": "Doubles/Triples",
+    "endorsement_airbrakes": "Air Brakes",
+    "endorsement_passenger": "Passenger",
+    "readOnlyNote": "CDL expiry: %{cdlExpiry} · Med cert expiry: %{medCertExpiry} — ask your dispatcher to update these.",
+    "notOnFile": "not on file",
+    "emergencyContactSection": "Emergency Contact",
+    "emergencyName": "Name",
+    "emergencyPhone": "Phone",
+    "emergencyRelation": "Relationship",
+    "emergencyRelationPlaceholder": "e.g. Spouse",
+    "defaultVehicle": "Default Vehicle",
+    "noDefaultVehicle": "None",
+    "save": "Save",
+    "saved": "Saved",
+    "errorSaveFailed": "Could not save your info. Try again."
+  },
+  "maintenanceOverview": {
+    "title": "Maintenance",
+    "empty": "No active maintenance reminders.",
+    "noDueDate": "No due date set",
+    "milesValue": "%{miles} mi",
+    "status_overdue": "Overdue",
+    "status_dueSoon": "Due Soon",
+    "status_ok": "OK",
+    "status_noDate": "No Date"
   }
 }

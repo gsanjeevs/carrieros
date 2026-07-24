@@ -27,6 +27,14 @@ CREATE TABLE organizations (
   -- Carrier or customer branding logo (added 2026-07-21) -- same `documents`
   -- bucket/path convention as everything else, path {org_id}/logo/{filename}.
   logo_path  TEXT,
+  -- Employer Identification Number (added 2026-07-24, onboarding-gap audit) --
+  -- carrier-only in practice (customer orgs never collect this) but lives on
+  -- `organizations` alongside the rest of the legal/mailing identity fields
+  -- (name/address) rather than carrier_details, which is SaaS-tenant config,
+  -- not legal-entity identity. Free text, not validated against the
+  -- US EIN/CA BN/MX RFC format -- this product operates in three countries
+  -- and each has a different tax-ID shape.
+  ein        TEXT,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -48,6 +56,14 @@ CREATE TABLE carrier_details (
   default_payment_method TEXT NOT NULL DEFAULT 'other'
                          CHECK (default_payment_method IN ('stripe','factoring','other')),
   factoring_company      TEXT,
+  -- Default net-terms window offered to customers on new invoices (added
+  -- 2026-07-24, onboarding-gap audit) -- a starting point for
+  -- invoices.due_date, not itself a due date. No consuming code computes
+  -- due_date from this yet (invoice creation still leaves due_date to be
+  -- set directly); wiring that up is separate follow-on work, out of scope
+  -- for just capturing the carrier's stated default at onboarding.
+  default_net_terms_days INT NOT NULL DEFAULT 30
+                         CHECK (default_net_terms_days IN (7,15,30,45,60)),
   -- Carrier's own subscription billing (demo-mode seam — see lib/stripe.ts).
   -- stripe_customer_id NULL means no payment method on file yet; a
   -- 'demo_cus_...' placeholder once the demo "Add Payment Method" flow runs.
@@ -532,7 +548,13 @@ CREATE TABLE invoices (
                       CHECK (payment_method IN ('stripe','factoring','other')),
   factoring_company   TEXT,
   factoring_reference TEXT,
-  factored_at         TIMESTAMPTZ
+  factored_at         TIMESTAMPTZ,
+  -- Email-open tracking (added 2026-07-24, invoicing-gap audit) -- set once,
+  -- the first time the tracking pixel embedded in the invoice email
+  -- (app/api/invoices/[id]/track/route.ts) is fetched. NULL means "not
+  -- opened yet or opened via a client that blocks remote images" -- this is
+  -- a best-effort signal, not proof the recipient never saw it.
+  opened_at           TIMESTAMPTZ
 );
 -- One invoice per load — a double-billed load is the kind of error a carrier
 -- only finds out about when the customer complains.
@@ -1390,6 +1412,11 @@ GRANT SELECT ON languages TO anon;
 
 ALTER TABLE tiers ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "tiers_select" ON tiers FOR SELECT TO authenticated USING (true);
+-- Public plan picker on the self-serve signup page (unauthenticated) needs to
+-- read tier pricing -- same anon-access shape as languages_select_anon above
+-- (public catalog data, no tenant secrets, so anon SELECT is safe).
+CREATE POLICY "tiers_select_anon" ON tiers FOR SELECT TO anon USING (true);
+GRANT SELECT ON tiers TO anon;
 
 ALTER TABLE features ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "features_select" ON features FOR SELECT TO authenticated USING (true);
@@ -2327,6 +2354,19 @@ CREATE POLICY "carrier_exception_events_select" ON exception_events FOR SELECT T
 CREATE POLICY "owner_solo_exception_events_all" ON exception_events FOR ALL TO authenticated
   USING (carrier_org_id = my_org_id() AND my_role() IN ('owner','solo'))
   WITH CHECK (carrier_org_id = my_org_id() AND my_role() IN ('owner','solo'));
+-- Driver problem/delay reporting (mockup-03 Screen 3's 4th status option,
+-- previously unbuilt) -- a driver may only self-report against their OWN
+-- assigned load, never on behalf of another driver's load or any other
+-- entity_type/event_type (locked to this one shape so this can't become a
+-- backdoor for a driver to write arbitrary exception rows).
+CREATE POLICY "driver_exception_events_insert" ON exception_events FOR INSERT TO authenticated
+  WITH CHECK (
+    carrier_org_id = my_org_id()
+    AND my_role() = 'driver'
+    AND entity_type = 'load'
+    AND event_type = 'driver_reported_problem'
+    AND entity_id IN (SELECT id FROM loads WHERE driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid()))
+  );
 
 -- PLATFORM ADMIN (SHIPMENTX) TABLES (new, 2026-07-22, Phase 8 foundation) --
 -- gated on my_role() alone, no org-membership check needed since only a

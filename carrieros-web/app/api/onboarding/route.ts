@@ -59,10 +59,19 @@ export async function POST(request: NextRequest) {
     return apiError('ALREADY_ONBOARDED', 'Already onboarded', 409)
 
   const body = await request.json()
-  const { company_name, mc_number, dot_number, address, country, state, city, zip, first_name, last_name, role } = body
+  const { company_name, mc_number, dot_number, ein, address, country, state, city, zip, default_net_terms_days, first_name, last_name, role, tier } = body
 
   if (!company_name || !state || !first_name || !last_name)
     return apiError('VALIDATION_ERROR', 'Missing required fields', 400)
+
+  const VALID_NET_TERMS = [7, 15, 30, 45, 60]
+  const resolvedNetTerms = VALID_NET_TERMS.includes(Number(default_net_terms_days)) ? Number(default_net_terms_days) : 30
+
+  // Self-serve signup (app/signup/page.tsx) carries the chosen plan forward
+  // via this field; admin-invited onboarding never sends it, so 'starter'
+  // (carrier_details' own column default) stays the fallback either way.
+  const VALID_TIERS = ['starter', 'growth', 'pro', 'enterprise']
+  const resolvedTier = VALID_TIERS.includes(tier) ? tier : 'starter'
 
   const timezone  = deriveTimezone(country ?? 'US', state)
   const uom       = country === 'CA' ? 'metric' : 'imperial'
@@ -77,6 +86,7 @@ export async function POST(request: NextRequest) {
     .insert({
       type: 'carrier',
       name: company_name,
+      ein: ein || null,
       address: address ?? null,
       city: city ?? null,
       state,
@@ -101,9 +111,10 @@ export async function POST(request: NextRequest) {
       org_id:     orgId,
       mc_number:  mc_number  || null,
       dot_number: dot_number || null,
-      tier:       'starter',
+      tier:       resolvedTier,
       timezone,
       uom_system: uom,
+      default_net_terms_days: resolvedNetTerms,
     })
 
   if (detailErr) {

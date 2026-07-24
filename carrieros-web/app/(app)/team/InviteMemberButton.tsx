@@ -11,6 +11,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { Button, Input, Modal, SegmentedControl } from '@/components/ui'
+import PermissionPreview from '@/components/PermissionPreview'
+import type { InvitableRole } from '@/lib/domain/role-permissions'
 
 const ROLES = ['dispatcher', 'finance', 'owner'] as const
 
@@ -159,6 +161,8 @@ export default function InviteMemberButton() {
             </Input>
             <p className="text-xs text-text-mut mt-1.5">{t(`roleHelp_${form.role}` as never)}</p>
           </div>
+
+          <PermissionPreview role={form.role as InvitableRole} />
 
           <p className="text-xs text-text-mut">
             {t('driverRoleNote')}{' '}

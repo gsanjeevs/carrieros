@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { createStorageProvider } from '@/lib/storage'
+import { Card, CardHeader, CardBody } from '@/components/ui'
 
 export type DocType = 'pod' | 'rate_con' | 'bol' | 'other'
 
@@ -126,9 +127,9 @@ export default function LoadDocuments({
     'bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 transition'
 
   return (
-    <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-white font-medium text-sm">{t('documents')}</h2>
+    <Card>
+      <CardHeader>
+        <h2 className="text-text-pri font-medium text-sm">{t('documents')}</h2>
         {canUpload && (
           <div className="flex items-center gap-2">
             <select
@@ -163,12 +164,12 @@ export default function LoadDocuments({
             </button>
           </div>
         )}
-      </div>
-
+      </CardHeader>
+      <CardBody>
       {error && <p className="text-red-400 text-xs mb-3">{error}</p>}
 
       {documents.length === 0 ? (
-        <p className="text-slate-500 text-sm">{t('noDocumentsYet')}</p>
+        <p className="text-text-mut text-sm">{t('noDocumentsYet')}</p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {documents.map((doc) => (
@@ -225,6 +226,7 @@ export default function LoadDocuments({
           ))}
         </div>
       )}
-    </div>
+      </CardBody>
+    </Card>
   )
 }

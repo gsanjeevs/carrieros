@@ -44,7 +44,7 @@ const ROLE_ROUTES: { prefix: string; allowed: string[] }[] = [
 ]
 
 // Public routes — no auth required
-const PUBLIC_PREFIXES = ['/login', '/auth', '/track', '/onboarding']
+const PUBLIC_PREFIXES = ['/login', '/signup', '/auth', '/track', '/onboarding']
 
 // carrieros-mobile's apiFetch() (src/lib/api.ts) is a cross-origin caller
 // when running as Expo web (localhost:8081 -> :3000) — native iOS/Android

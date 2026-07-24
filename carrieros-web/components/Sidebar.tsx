@@ -44,6 +44,7 @@ const NAV_SECTIONS: NavSection[] = [
   {
     sectionKey: 'billing',
     items: [
+      { labelKey: 'finance', href: '/finance', icon: 'payments', roles: ['owner','solo','finance'] },
       { labelKey: 'invoices', href: '/invoices', icon: 'receipt_long', roles: ['owner','solo','finance'] },
       { labelKey: 'settlements', href: '/settlements', icon: 'payments', roles: ['owner','solo','finance','driver'] },
       { labelKey: 'billing',  href: '/billing',  icon: 'credit_card',  roles: ['owner','solo'] },

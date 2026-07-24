@@ -7,7 +7,10 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { FuelStopsSection } from '@/components/fuel-stops-section';
+import { IftaSection } from '@/components/ifta-section';
 import { PodSection } from '@/components/pod-section';
+import { ReportProblemSection } from '@/components/report-problem-section';
 import { ShareLocationSection } from '@/components/share-location-section';
 import { DriverChatSection } from '@/components/driver-chat-section';
 import { ThemedText } from '@/components/themed-text';
@@ -103,6 +106,7 @@ export default function LoadDetailScreen() {
   const { isOnline, refreshQueueLength } = useOfflineSync();
 
   const [role, setRole] = useState<Role | null>(null);
+  const [orgId, setOrgId] = useState<number | null>(null);
   const [load, setLoad] = useState<LoadDetail | null>(null);
   const [events, setEvents] = useState<LoadEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -122,12 +126,13 @@ export default function LoadDetailScreen() {
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role')
+      .select('role, org_id')
       .eq('id', session.user.id)
       .single();
 
     const currentRole = (profile?.role ?? 'solo') as Role;
     setRole(currentRole);
+    setOrgId(profile?.org_id ?? null);
 
     const { data: entitled } = await supabase.rpc('has_feature', { feature_key: 'driver_chat' });
     setChatEntitled(entitled === true);
@@ -440,7 +445,25 @@ export default function LoadDetailScreen() {
             <ShareLocationSection loadId={load.id} />
           )}
 
+          {(role === 'driver' || role === 'solo') && ACTIVE_LOAD_STATUSES.includes(load.status) && orgId && (
+            <ReportProblemSection loadId={load.id} carrierOrgId={orgId} />
+          )}
+
           {(role === 'driver' || role === 'solo') && <PodSection loadId={load.id} />}
+
+          {(role === 'driver' || role === 'solo') && orgId && (
+            <FuelStopsSection loadId={load.id} vehicleId={load.vehicle_id} carrierOrgId={orgId} />
+          )}
+
+          {(role === 'driver' || role === 'solo') && orgId && (
+            <IftaSection
+              loadId={load.id}
+              vehicleId={load.vehicle_id}
+              carrierOrgId={orgId}
+              loadStatus={load.status}
+              totalMiles={load.total_miles}
+            />
+          )}
 
           {chatEntitled && (role === 'driver' || role === 'solo' || role === 'dispatcher') && (
             <DriverChatSection loadId={load.id} />

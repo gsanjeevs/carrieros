@@ -39,6 +39,7 @@
     "drivers": "ਡਰਾਈਵਰ",
     "vehicles": "ਵਾਹਨ",
     "customers": "ਗਾਹਕ",
+    "finance": "ਵਿੱਤ ਹੱਬ",
     "invoices": "ਇਨਵੌਇਸ",
     "settlements": "ਸੈਟਲਮੈਂਟਾਂ",
     "exceptions": "ਅਪਵਾਦ",
@@ -59,7 +60,9 @@
     "forgotPassword": "ਪਾਸਵਰਡ ਭੁੱਲ ਗਏ?",
     "signIn": "ਸਾਈਨ ਇਨ",
     "needAccess": "ਪਹੁੰਚ ਚਾਹੀਦੀ ਹੈ? ਆਪਣੇ ਪ੍ਰਸ਼ਾਸਕ ਨਾਲ ਸੰਪਰਕ ਕਰੋ",
-    "invalidCredentials": "ਗਲਤ ਈਮੇਲ ਜਾਂ ਪਾਸਵਰਡ"
+    "invalidCredentials": "ਗਲਤ ਈਮੇਲ ਜਾਂ ਪਾਸਵਰਡ",
+    "noAccount": "ਖਾਤਾ ਨਹੀਂ ਹੈ?",
+    "signUpFree": "ਮੁਫ਼ਤ ਸਾਈਨ ਅੱਪ ਕਰੋ"
   },
   "onboarding": {
     "heading": "ਆਓ ਤੁਹਾਡੀ ਕੈਰੀਅਰ ਸੈਟਅਪ ਕਰੀਏ",
@@ -107,14 +110,23 @@
     "emailIntakeComingSoon": "ਈਮੇਲ ਰਾਹੀਂ ਲੋਡ ਪ੍ਰਾਪਤ ਕਰਨਾ ਜਲਦੀ ਆ ਰਿਹਾ ਹੈ।",
     "goToDashboard": "ਡੈਸ਼ਬੋਰਡ ਤੇ ਜਾਓ",
     "addFirstLoad": "ਪਹਿਲਾ ਲੋਡ ਸ਼ਾਮਲ ਕਰੋ",
-    "stepLabel_company": "ਕਦਮ 1 ਵਿੱਚੋਂ 6 — ਕੰਪਨੀ",
-    "stepLabel_profile": "ਕਦਮ 2 ਵਿੱਚੋਂ 6 — ਤੁਹਾਡੀ ਜਾਣਕਾਰੀ",
-    "stepLabel_vehicle": "ਕਦਮ 3 ਵਿੱਚੋਂ 6 — ਵਾਹਨ",
-    "stepLabel_customer": "ਕਦਮ 4 ਵਿੱਚੋਂ 6 — ਗਾਹਕ",
-    "stepLabel_billing": "ਕਦਮ 5 ਵਿੱਚੋਂ 6 — ਬਿਲਿੰਗ",
-    "stepLabel_completion": "ਕਦਮ 6 ਵਿੱਚੋਂ 6 — ਪੂਰਾ",
+    "stepLabel_company": "ਕਦਮ 1 ਵਿੱਚੋਂ 7 — ਕੰਪਨੀ",
+    "stepLabel_profile": "ਕਦਮ 2 ਵਿੱਚੋਂ 7 — ਤੁਹਾਡੀ ਜਾਣਕਾਰੀ",
+    "stepLabel_vehicle": "ਕਦਮ 4 ਵਿੱਚੋਂ 7 — ਵਾਹਨ",
+    "stepLabel_customer": "ਕਦਮ 5 ਵਿੱਚੋਂ 7 — ਗਾਹਕ",
+    "stepLabel_billing": "ਕਦਮ 6 ਵਿੱਚੋਂ 7 — ਬਿਲਿੰਗ",
+    "stepLabel_completion": "ਕਦਮ 7 ਵਿੱਚੋਂ 7 — ਪੂਰਾ",
     "streetAddress": "ਗਲੀ ਦਾ ਪਤਾ",
-    "zip": "ਜ਼ਿਪ / ਪੋਸਟਲ ਕੋਡ"
+    "zip": "ਜ਼ਿਪ / ਪੋਸਟਲ ਕੋਡ",
+    "ein": "EIN (ਮਾਲਕ ਪਛਾਣ ਨੰਬਰ)",
+    "defaultNetTerms": "ਡਿਫਾਲਟ ਭੁਗਤਾਨ ਸ਼ਰਤਾਂ",
+    "netTermsOption": "ਨੈੱਟ {days} ਦਿਨ",
+    "stepLogoTitle": "ਆਪਣੀ ਕੰਪਨੀ ਦਾ ਲੋਗੋ ਸ਼ਾਮਲ ਕਰੋ",
+    "stepLogoSubtitle": "ਇਨਵੌਇਸਾਂ, ਜਨਤਕ ਟਰੈਕਿੰਗ ਪੇਜ ਅਤੇ ਤੁਹਾਡੀ ਗਾਹਕ ਡਾਇਰੈਕਟਰੀ ਵਿੱਚ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ।",
+    "uploadLogo": "ਲੋਗੋ ਅੱਪਲੋਡ ਕਰੋ",
+    "replaceLogo": "ਲੋਗੋ ਬਦਲੋ",
+    "logoUploadFailed": "ਤੁਹਾਡਾ ਲੋਗੋ ਅੱਪਲੋਡ ਨਹੀਂ ਹੋ ਸਕਿਆ। ਤੁਸੀਂ ਬਾਅਦ ਵਿੱਚ ਸੈਟਿੰਗਾਂ ਤੋਂ ਇੱਕ ਸ਼ਾਮਲ ਕਰ ਸਕਦੇ ਹੋ।",
+    "stepLabel_logo": "ਕਦਮ 3 ਵਿੱਚੋਂ 7 — ਲੋਗੋ"
   },
   "dashboard": {
     "title": "ਫਲੀਟ ਸੰਖੇਪ ਜਾਣਕਾਰੀ",
@@ -280,7 +292,12 @@
     "iftaSaveFailed": "ਉਹ ਕ੍ਰਾਸਿੰਗ ਸੇਵ ਨਹੀਂ ਹੋ ਸਕੀ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
     "iftaCancel": "ਰੱਦ ਕਰੋ",
     "iftaSave": "ਸੇਵ ਕਰੋ",
-    "iftaSaving": "ਸੇਵ ਹੋ ਰਿਹਾ ਹੈ…"
+    "iftaSaving": "ਸੇਵ ਹੋ ਰਿਹਾ ਹੈ…",
+    "shareCopyLink": "ਲਿੰਕ ਕਾਪੀ ਕਰੋ",
+    "shareViaSms": "ਟੈਕਸਟ ਰਾਹੀਂ ਸਾਂਝਾ ਕਰੋ",
+    "shareViaEmail": "ਈਮੇਲ ਰਾਹੀਂ ਸਾਂਝਾ ਕਰੋ",
+    "shareMessage": "ਲੋਡ {loadNumber} ਟਰੈਕ ਕਰੋ:",
+    "shareEmailSubject": "ਲੋਡ {loadNumber} ਲਈ ਟਰੈਕਿੰਗ ਲਿੰਕ"
   },
   "drivers": {
     "title": "ਡਰਾਈਵਰ",
@@ -495,7 +512,12 @@
     "fuelSaveFailed": "ਉਹ ਈਂਧਨ ਸਟਾਪ ਸੇਵ ਨਹੀਂ ਹੋ ਸਕਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
     "fuelCancel": "ਰੱਦ ਕਰੋ",
     "fuelSave": "ਸੇਵ ਕਰੋ",
-    "fuelSaving": "ਸੇਵ ਹੋ ਰਿਹਾ ਹੈ…"
+    "fuelSaving": "ਸੇਵ ਹੋ ਰਿਹਾ ਹੈ…",
+    "noDriverAssigned": "ਕੋਈ ਡਰਾਈਵਰ ਨਿਯੁਕਤ ਨਹੀਂ",
+    "uploadPhoto": "ਫੋਟੋ ਅੱਪਲੋਡ ਕਰੋ",
+    "replacePhoto": "ਫੋਟੋ ਬਦਲੋ",
+    "photoUploadFailed": "ਫੋਟੋ ਅੱਪਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "dvirNotSigned": "ਦਸਤਖਤ ਨਹੀਂ"
   },
   "companyDocuments": {
     "title": "ਕੰਪਨੀ ਦਸਤਾਵੇਜ਼",
@@ -590,7 +612,10 @@
     "createInvoicePrefill": "{customer} ਨੂੰ {amount}, ਇਸ ਲੋਡ ਦੇ ਰੇਟ ਮੁਤਾਬਕ।",
     "createInvoiceNetTerms": "30 ਦਿਨਾਂ ਵਿੱਚ ਦੇਣਯੋਗ। ਬਣਾਉਣ ਤੋਂ ਬਾਅਦ ਭੁਗਤਾਨ ਤਰੀਕਾ ਬਦਲ ਸਕਦੇ ਹੋ।",
     "createInvoice": "ਇਨਵੌਇਸ ਬਣਾਓ",
-    "creating": "ਬਣਾਇਆ ਜਾ ਰਿਹਾ ਹੈ…"
+    "creating": "ਬਣਾਇਆ ਜਾ ਰਿਹਾ ਹੈ…",
+    "opened": "ਖੋਲ੍ਹਿਆ ਗਿਆ",
+    "openedAt": "ਖੋਲ੍ਹਿਆ ਗਿਆ",
+    "notOpenedYet": "ਅਜੇ ਨਹੀਂ ਖੋਲ੍ਹਿਆ"
   },
   "settlements": {
     "title": "ਸੈਟਲਮੈਂਟਾਂ",
@@ -644,7 +669,9 @@
     "upgradeRequired": "ਲਾਈਵ ਡਿਸਪੈਚ ਨਕਸ਼ੇ ਲਈ Growth ਪਲਾਨ ਜਾਂ ਵੱਧ ਦੀ ਲੋੜ ਹੈ।",
     "noActiveLocations": "ਅਜੇ ਤੱਕ ਕਿਸੇ ਵੀ ਸਰਗਰਮ ਲੋਡ ਨੇ ਟਿਕਾਣਾ ਸਾਂਝਾ ਨਹੀਂ ਕੀਤਾ।",
     "queueTitle": "ਡਿਸਪੈਚ ਦੀ ਲੋੜ ਹੈ",
-    "noQueue": "ਡਿਸਪੈਚ ਹੋਣ ਦੀ ਉਡੀਕ ਵਿੱਚ ਕੁਝ ਨਹੀਂ।"
+    "noQueue": "ਡਿਸਪੈਚ ਹੋਣ ਦੀ ਉਡੀਕ ਵਿੱਚ ਕੁਝ ਨਹੀਂ।",
+    "dispatchAction": "ਡਿਸਪੈਚ →",
+    "dispatchModalTitle": "{loadNumber} ਡਿਸਪੈਚ ਕਰੋ"
   },
   "settings": {
     "title": "ਪ੍ਰੋਫਾਈਲ ਸੈਟਿੰਗਾਂ",
@@ -701,7 +728,14 @@
     "role_finance": "ਵਿੱਤ",
     "roleHelp_dispatcher": "ਲੋਡ ਸੌਂਪ ਸਕਦਾ ਹੈ, ਡਰਾਈਵਰ ਅਤੇ ਡਿਸਪੈਚ ਸੰਭਾਲ ਸਕਦਾ ਹੈ। ਰੇਟ ਜਾਂ ਇਨਵਾਇਸ ਨਹੀਂ ਵੇਖ ਸਕਦਾ।",
     "roleHelp_finance": "ਇਨਵਾਇਸ, ਰੇਟ ਅਤੇ ਵਿੱਤੀ ਰਿਪੋਰਟਾਂ ਵੇਖ ਸਕਦਾ ਹੈ। ਡਿਸਪੈਚ ਨਹੀਂ ਕਰ ਸਕਦਾ।",
-    "roleHelp_owner": "ਪੂਰੀ ਪਹੁੰਚ, ਟੀਮ ਪ੍ਰਬੰਧਨ ਅਤੇ ਬਿਲਿੰਗ ਸਮੇਤ।"
+    "roleHelp_owner": "ਪੂਰੀ ਪਹੁੰਚ, ਟੀਮ ਪ੍ਰਬੰਧਨ ਅਤੇ ਬਿਲਿੰਗ ਸਮੇਤ।",
+    "permissionPreviewTitle": "ਇਹ ਭੂਮਿਕਾ ਇਹ ਕਰ ਸਕੇਗੀ:",
+    "permissionArea_loadsDispatch": "ਲੋਡ ਬਣਾਓ ਅਤੇ ਭੇਜੋ",
+    "permissionArea_ratesInvoices": "ਦਰਾਂ, ਇਨਵੌਇਸ ਅਤੇ ਵਿੱਤੀ ਰਿਪੋਰਟਾਂ ਵੇਖੋ",
+    "permissionArea_customers": "ਗਾਹਕ ਡਾਇਰੈਕਟਰੀ ਵੇਖੋ",
+    "permissionArea_teamBilling": "ਟੀਮ ਮੈਂਬਰਾਂ ਅਤੇ ਬਿਲਿੰਗ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ",
+    "permissionArea_reports": "ਰਿਪੋਰਟਾਂ ਅਤੇ IFTA ਸੰਖੇਪ ਵੇਖੋ",
+    "permissionArea_driverApp": "ਡਰਾਈਵਰ ਮੋਬਾਈਲ ਐਪ ਵਰਤੋ (ਲੋਡ, DVIR, ਦਸਤਾਵੇਜ਼)"
   },
   "billing": {
     "title": "ਬਿਲਿੰਗ",
@@ -816,7 +850,12 @@
     "contactsRevokeConfirm": "ਕੀ ਇਸ ਸੰਪਰਕ ਦੀ ਪੋਰਟਲ ਪਹੁੰਚ ਰੱਦ ਕਰਨੀ ਹੈ? ਉਹਨਾਂ ਨੂੰ ਸਾਈਨ ਆਊਟ ਕਰ ਦਿੱਤਾ ਜਾਵੇਗਾ ਅਤੇ ਉਹ ਟ੍ਰੈਕਿੰਗ, ਲੋਡ ਜਾਂ ਇਨਵੌਇਸ ਨਹੀਂ ਦੇਖ ਸਕਣਗੇ।",
     "contactsNoEmail": "ਇਸ ਸੰਪਰਕ ਨੂੰ ਸੱਦਾ ਦੇਣ ਤੋਂ ਪਹਿਲਾਂ ਇੱਕ ਈਮੇਲ ਪਤਾ ਸ਼ਾਮਲ ਕਰੋ",
     "contactsAddNew": "ਇੱਕ ਸੰਪਰਕ ਸ਼ਾਮਲ ਕਰੋ",
-    "contactsAdd": "ਸੰਪਰਕ ਸ਼ਾਮਲ ਕਰੋ"
+    "contactsAdd": "ਸੰਪਰਕ ਸ਼ਾਮਲ ਕਰੋ",
+    "revenue": "ਆਮਦਨ",
+    "lastLoad": "ਆਖਰੀ ਲੋਡ",
+    "daysAgo": "{days, plural, =0 {ਅੱਜ} one {# ਦਿਨ ਪਹਿਲਾਂ} other {# ਦਿਨ ਪਹਿਲਾਂ}}",
+    "relationshipsGoingCold": "{count, plural, one {# ਰਿਸ਼ਤਾ ਠੰਡਾ ਹੋ ਰਿਹਾ ਹੈ} other {# ਰਿਸ਼ਤੇ ਠੰਡੇ ਹੋ ਰਹੇ ਹਨ}}",
+    "coldCustomerLine": "{name} — {days} ਦਿਨ"
   },
   "maintenance": {
     "title": "ਰੱਖ-ਰਖਾਅ",
@@ -870,5 +909,70 @@
   },
   "language": {
     "appliesEverywhere": "ਤੁਹਾਡੀ ਭਾਸ਼ਾ ਦੀ ਤਰਜੀਹ ਪੂਰੀ ਐਪ 'ਤੇ ਲਾਗੂ ਹੁੰਦੀ ਹੈ।"
+  },
+  "signup": {
+    "tagline": "ਆਪਣੇ ਫ਼ੋਨ ਤੋਂ ਆਪਣਾ ਟਰੱਕਿੰਗ ਕਾਰੋਬਾਰ ਚਲਾਓ। ਕੋਈ ਸਪ੍ਰੈਡਸ਼ੀਟ ਨਹੀਂ।",
+    "choosePlan": "ਆਪਣੀ ਯੋਜਨਾ ਚੁਣੋ",
+    "trialNotice": "90 ਦਿਨਾਂ ਲਈ ਤੁਹਾਡੇ ਤੋਂ ਕੋਈ ਖਰਚਾ ਨਹੀਂ ਲਿਆ ਜਾਵੇਗਾ। ਕਿਸੇ ਵੀ ਸਮੇਂ ਰੱਦ ਕਰੋ।",
+    "continueBtn": "ਜਾਰੀ ਰੱਖੋ",
+    "mostPopular": "ਸਭ ਤੋਂ ਪ੍ਰਸਿੱਧ",
+    "perMonth": "/ਮਹੀਨਾ",
+    "trucksIncluded": "{count, plural, one {# ਟਰੱਕ ਸ਼ਾਮਲ} other {# ਟਰੱਕ ਸ਼ਾਮਲ}} · +${additional}/ਵਾਧੂ",
+    "alreadyHaveAccount": "ਪਹਿਲਾਂ ਹੀ ਖਾਤਾ ਹੈ?",
+    "signIn": "ਸਾਈਨ ਇਨ",
+    "changePlan": "ਯੋਜਨਾ ਬਦਲੋ",
+    "createAccount": "ਆਪਣਾ ਖਾਤਾ ਬਣਾਓ",
+    "yourName": "ਤੁਹਾਡਾ ਨਾਮ",
+    "email": "ਈਮੇਲ",
+    "password": "ਪਾਸਵਰਡ",
+    "passwordHint": "ਘੱਟੋ-ਘੱਟ 8 ਅੱਖਰ",
+    "createAccountBtn": "ਖਾਤਾ ਬਣਾਓ",
+    "creatingAccount": "ਖਾਤਾ ਬਣ ਰਿਹਾ ਹੈ…",
+    "missingFields": "ਕਿਰਪਾ ਕਰਕੇ ਸਾਰੇ ਖੇਤਰ ਭਰੋ।",
+    "weakPassword": "ਪਾਸਵਰਡ ਘੱਟੋ-ਘੱਟ 8 ਅੱਖਰਾਂ ਦਾ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।",
+    "emailExists": "ਇਸ ਈਮੇਲ ਨਾਲ ਖਾਤਾ ਪਹਿਲਾਂ ਹੀ ਮੌਜੂਦ ਹੈ।",
+    "signupFailed": "ਖਾਤਾ ਬਣਾਉਣ ਵਿੱਚ ਕੁਝ ਗਲਤ ਹੋ ਗਿਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
+  },
+  "finance": {
+    "title": "ਵਿੱਤ ਹੱਬ",
+    "upgradeRequired": "ਵਿੱਤ ਅਤੇ IFTA ਹੱਬ ਲਈ Pro ਵਿੱਚ ਅੱਪਗ੍ਰੇਡ ਕਰੋ",
+    "upgradeRequiredDetail": "ਪੂਰੀ IFTA ਟੈਕਸ ਗਣਨਾ, ਇਨਵੌਇਸ ਪਾਈਪਲਾਈਨ, ਡਰਾਈਵਰ ਸੈਟਲਮੈਂਟ, ਬਾਲਣ ਵਿਸ਼ਲੇਸ਼ਣ, ਅਤੇ ਰੂਟ ਆਮਦਨ — ਸਭ ਇੱਕ ਥਾਂ ਤੇ।",
+    "kpiRevenue": "ਆਮਦਨ (ਭੁਗਤਾਨ ਕੀਤੀ)",
+    "kpiRevenueSub": "ਇਸ ਤਿਮਾਹੀ",
+    "kpiOutstanding": "ਬਕਾਇਆ",
+    "kpiOverdueCount": "{count, plural, one {# ਇਨਵੌਇਸ ਬਕਾਇਆ} other {# ਇਨਵੌਇਸ ਬਕਾਇਆ}}",
+    "kpiRevenuePerMile": "ਆਮਦਨ / ਮੀਲ",
+    "kpiRevenuePerMileSub": "{miles} ਕੁੱਲ ਮੀਲ",
+    "kpiIftaTaxDue": "IFTA ਟੈਕਸ ਬਕਾਇਆ",
+    "kpiIftaTaxDueSub": "ਨੈੱਟ, ਇਸ ਤਿਮਾਹੀ",
+    "iftaBreakdownTitle": "IFTA — ਰਾਜ ਵੇਰਵਾ",
+    "iftaBreakdownSub": "{quarter}",
+    "iftaNoData": "ਇਸ ਤਿਮਾਹੀ ਵਿੱਚ ਅਜੇ ਤੱਕ ਕੋਈ IFTA ਮਾਈਲੇਜ ਦਰਜ ਨਹੀਂ ਕੀਤੀ ਗਈ।",
+    "colState": "ਰਾਜ",
+    "colMiles": "ਮੀਲ",
+    "colNetDue": "ਨੈੱਟ ਬਕਾਇਆ",
+    "invoicePipelineTitle": "ਇਨਵੌਇਸ ਪਾਈਪਲਾਈਨ",
+    "invoicePipelineSub": "{count, plural, one {# ਇਨਵੌਇਸ} other {# ਇਨਵੌਇਸ}}",
+    "noInvoices": "ਅਜੇ ਤੱਕ ਕੋਈ ਇਨਵੌਇਸ ਨਹੀਂ।",
+    "settlementsTitle": "ਡਰਾਈਵਰ ਸੈਟਲਮੈਂਟ",
+    "settlementsSub": "{quarter}",
+    "noSettlements": "ਇਸ ਤਿਮਾਹੀ ਕੋਈ ਸੈਟਲਮੈਂਟ ਨਹੀਂ।",
+    "fuelCostTitle": "ਬਾਲਣ ਲਾਗਤ ਪ੍ਰਤੀ ਮੀਲ — ਡਰਾਈਵਰ ਅਨੁਸਾਰ",
+    "fuelCostSub": "ਫਲੀਟ ਔਸਤ: {avg}/ਮੀਲ",
+    "noFuelData": "ਇਸ ਤਿਮਾਹੀ ਕੋਈ ਬਾਲਣ ਡਾਟਾ ਦਰਜ ਨਹੀਂ ਕੀਤਾ ਗਿਆ।",
+    "laneRevenueTitle": "ਆਮਦਨ ਪ੍ਰਤੀ ਮੀਲ — ਚੋਟੀ ਦੇ ਰੂਟ",
+    "laneRevenueSub": "ਇਸ ਤਿਮਾਹੀ",
+    "colLane": "ਰੂਟ",
+    "colLoads": "ਲੋਡ",
+    "colRatePerMile": "$/ਮੀਲ",
+    "noLaneData": "ਇਸ ਤਿਮਾਹੀ ਕੋਈ ਪੂਰਾ ਰੂਟ ਨਹੀਂ।",
+    "kpiOverdueAmount": "ਬਕਾਇਆ ਰਕਮ",
+    "kpiOverdueAmountSub": "{count} ਬਕਾਇਆ ਇਨਵੌਇਸ",
+    "kpiAvgDaysToPay": "ਔਸਤ ਭੁਗਤਾਨ ਦਿਨ",
+    "kpiAvgDaysToPayValue": "{days} ਦਿਨ",
+    "kpiAvgDaysToPaySub": "{count} ਭੁਗਤਾਨ ਕੀਤੇ ਇਨਵੌਇਸਾਂ ਵਿੱਚੋਂ",
+    "invoiceAgingTitle": "ਇਨਵੌਇਸ ਉਮਰ",
+    "invoiceAgingSub": "ਬਕਾਇਆ ਇਨਵੌਇਸ ਦੇਰੀ ਦੇ ਦਿਨਾਂ ਅਨੁਸਾਰ",
+    "invoiceOpened": "ਖੋਲ੍ਹਿਆ ਗਿਆ"
   }
 }

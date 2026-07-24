@@ -6,6 +6,13 @@
 // round trip to itself. The route keeps the user-session auth check (paste-
 // to-extract is a logged-in action); this function has no auth concept of
 // its own, matching what it actually does (call an LLM, return JSON).
+//
+// extractLoadFromImage (added for the mobile photo-intake gap,
+// app/api/extract-load-image/route.ts) shares this same SYSTEM_PROMPT/
+// SCHEMA/error-classification but is NOT just extractLoadFromText fed OCR
+// text — Anthropic's vision input is a separate message content-block shape
+// (base64 image block, not a text block), so it's its own function rather
+// than a text-extraction step bolted in front of the existing one.
 import Anthropic from '@anthropic-ai/sdk'
 import { logError, logEvent, type LogContext } from '@/lib/observability'
 
@@ -72,6 +79,72 @@ export async function extractLoadFromText(
         {
           role: 'user',
           content: `Extract load data from this rate confirmation. Return JSON matching this schema:\n${SCHEMA}\n\nDocument:\n${text}`,
+        },
+      ],
+    })
+  } catch (err) {
+    const status = err instanceof Anthropic.APIError ? err.status : undefined
+    const failureMode =
+      status === 429 ? 'rate_limited' :
+      status === 401 || status === 403 ? 'auth_error' :
+      status && status >= 500 ? 'provider_outage' :
+      'unknown'
+    logError(logContext, err, { failure_mode: failureMode, status })
+    throw new ExtractionFailedError('Extraction failed. Please try again shortly.', 502)
+  }
+
+  const raw = message.content[0].type === 'text' ? message.content[0].text : ''
+  const cleaned = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
+
+  try {
+    const extracted = JSON.parse(cleaned)
+    logEvent(logContext, {
+      input_tokens: message.usage.input_tokens,
+      output_tokens: message.usage.output_tokens,
+    })
+    return extracted
+  } catch (err) {
+    logError(logContext, err, {
+      failure_mode: 'malformed_model_output',
+      raw_response_length: raw.length,
+    })
+    throw new ExtractionFailedError('Extraction failed. Check your API key and try again.', 500)
+  }
+}
+
+const SUPPORTED_IMAGE_MEDIA_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const
+type SupportedImageMediaType = (typeof SUPPORTED_IMAGE_MEDIA_TYPES)[number]
+
+export function isSupportedImageMediaType(mediaType: string): mediaType is SupportedImageMediaType {
+  return (SUPPORTED_IMAGE_MEDIA_TYPES as readonly string[]).includes(mediaType)
+}
+
+// Mobile's photo-intake path (driver/dispatcher photographs a rate
+// confirmation or BOL) — same prompt/schema/failure classification as
+// extractLoadFromText above, but sent as a vision content block instead of
+// plain text.
+export async function extractLoadFromImage(
+  base64Image: string,
+  mediaType: SupportedImageMediaType,
+  logContext: LogContext
+): Promise<Record<string, unknown>> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new ExtractionFailedError('ANTHROPIC_API_KEY not configured', 500)
+  }
+
+  let message: Anthropic.Message
+  try {
+    message = await client.messages.create({
+      model: 'claude-haiku-4-5',
+      max_tokens: 1024,
+      system: SYSTEM_PROMPT,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64Image } },
+            { type: 'text', text: `Extract load data from this photo of a rate confirmation or BOL. Return JSON matching this schema:\n${SCHEMA}` },
+          ],
         },
       ],
     })

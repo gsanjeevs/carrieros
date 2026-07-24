@@ -1,7 +1,8 @@
 {
   "common": {
     "back": "← ਪਿੱਛੇ",
-    "unknownCustomer": "ਅਣਜਾਣ ਗਾਹਕ"
+    "unknownCustomer": "ਅਣਜਾਣ ਗਾਹਕ",
+    "cancel": "ਰੱਦ ਕਰੋ"
   },
   "login": {
     "subtitle": "ਆਪਣੇ ਖਾਤੇ ਵਿੱਚ ਸਾਈਨ ਇਨ ਕਰੋ",
@@ -58,7 +59,43 @@
     "assignVehicle": "ਵਾਹਨ",
     "unassigned": "— ਨਿਯੁਕਤ ਨਹੀਂ —",
     "saveAssignment": "ਨਿਯੁਕਤੀ ਸੰਭਾਲੋ",
-    "assignError": "ਨਿਯੁਕਤੀ ਅੱਪਡੇਟ ਨਹੀਂ ਹੋ ਸਕੀ — ਹੋ ਸਕਦਾ ਹੈ ਤੁਹਾਡੇ ਕੋਲ ਇਜਾਜ਼ਤ ਨਾ ਹੋਵੇ।"
+    "assignError": "ਨਿਯੁਕਤੀ ਅੱਪਡੇਟ ਨਹੀਂ ਹੋ ਸਕੀ — ਹੋ ਸਕਦਾ ਹੈ ਤੁਹਾਡੇ ਕੋਲ ਇਜਾਜ਼ਤ ਨਾ ਹੋਵੇ।",
+    "reportProblem": "ਸਮੱਸਿਆ / ਦੇਰੀ ਦੀ ਰਿਪੋਰਟ ਕਰੋ",
+    "reportProblemTitle": "ਕੀ ਹੋ ਰਿਹਾ ਹੈ?",
+    "reportProblemNotePlaceholder": "ਵੇਰਵੇ ਸ਼ਾਮਲ ਕਰੋ (ਵਿਕਲਪਿਕ)",
+    "reportProblemSubmit": "ਡਿਸਪੈਚ ਨੂੰ ਭੇਜੋ",
+    "reportProblemSent": "ਰਿਪੋਰਟ ਕੀਤਾ ਗਿਆ — ਤੁਹਾਡੇ ਡਿਸਪੈਚਰ ਨੂੰ ਸੂਚਿਤ ਕਰ ਦਿੱਤਾ ਗਿਆ ਹੈ।",
+    "reportProblemError": "ਇਹ ਰਿਪੋਰਟ ਭੇਜੀ ਨਹੀਂ ਜਾ ਸਕੀ — ਹੋ ਸਕਦਾ ਹੈ ਤੁਹਾਡੇ ਕੋਲ ਇਜਾਜ਼ਤ ਨਾ ਹੋਵੇ।",
+    "problemReason": {
+      "breakdown": "ਵਾਹਨ ਖਰਾਬੀ",
+      "traffic": "ਟ੍ਰੈਫਿਕ",
+      "weather": "ਮੌਸਮ",
+      "accident": "ਦੁਰਘਟਨਾ",
+      "customer_issue": "ਗਾਹਕ / ਡੌਕ ਸਮੱਸਿਆ",
+      "other": "ਹੋਰ"
+    },
+    "sectionFuel": "ਬਾਲਣ",
+    "addFuelStop": "+ ਬਾਲਣ ਸਟਾਪ ਸ਼ਾਮਲ ਕਰੋ",
+    "noFuelStopsYet": "ਅਜੇ ਤੱਕ ਕੋਈ ਬਾਲਣ ਸਟਾਪ ਦਰਜ ਨਹੀਂ ਕੀਤਾ ਗਿਆ।",
+    "fuelTotalCost": "ਕੁੱਲ ਲਾਗਤ",
+    "fuelGallons": "ਗੈਲਨ",
+    "fuelStops": "ਸਟਾਪ",
+    "fuelStatePlaceholder": "ST",
+    "fuelStation": "ਸਟੇਸ਼ਨ",
+    "fuelPricePerGallon": "ਕੀਮਤ/ਗੈਲਨ",
+    "fuelComputedTotal": "ਕੁੱਲ: %{amount}",
+    "fuelValidationError": "ਰਾਜ ਅਤੇ ਗੈਲਨ ਦੀ ਮਾਤਰਾ ਦਰਜ ਕਰੋ।",
+    "fuelSaveFailed": "ਇਹ ਬਾਲਣ ਸਟਾਪ ਸੰਭਾਲਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ — ਹੋ ਸਕਦਾ ਹੈ ਤੁਹਾਡੇ ਕੋਲ ਇਜਾਜ਼ਤ ਨਾ ਹੋਵੇ।",
+    "fuelSave": "ਸੰਭਾਲੋ",
+    "sectionIfta": "IFTA ਮਾਈਲੇਜ",
+    "iftaTrackingActive": "GPS ਟਰੈਕਿੰਗ ਸਰਗਰਮ — ਰਾਜ ਮੀਲ ਲੌਗ ਹੋ ਰਹੇ ਹਨ",
+    "iftaTrackingPermissionNeeded": "ਆਟੋਮੈਟਿਕ IFTA ਮਾਈਲੇਜ ਟਰੈਕਿੰਗ ਲਈ ਸੈਟਿੰਗਾਂ ਵਿੱਚ \"ਹਮੇਸ਼ਾ ਇਜਾਜ਼ਤ ਦਿਓ\" ਟਿਕਾਣਾ ਪਹੁੰਚ ਯੋਗ ਕਰੋ।",
+    "iftaNoCrossingsYet": "ਅਜੇ ਤੱਕ ਕੋਈ ਰਾਜ ਕ੍ਰਾਸਿੰਗ ਦਰਜ ਨਹੀਂ ਕੀਤੀ ਗਈ।",
+    "iftaManualTag": "ਦਸਤੀ",
+    "iftaFallbackWarning": "ਇਸ ਯਾਤਰਾ ਲਈ GPS ਡਾਟਾ ਅਧੂਰਾ ਲੱਗਦਾ ਹੈ। ਸਹੀ IFTA ਮਾਈਲੇਜ ਲਈ ਪ੍ਰਤੀ ਰਾਜ ਆਪਣੇ ਮੀਲ ਦਰਜ ਕਰੋ।",
+    "iftaAddState": "+ ਇੱਕ ਹੋਰ ਰਾਜ ਸ਼ਾਮਲ ਕਰੋ",
+    "iftaSaveFallback": "ਰਾਜ ਮਾਈਲੇਜ ਸੰਭਾਲੋ",
+    "iftaTripTotal": "ਯਾਤਰਾ ਕੁੱਲ: %{miles} ਮੀਲ"
   },
   "loadNew": {
     "heading": "ਨਵਾਂ ਲੋਡ",
@@ -69,7 +106,21 @@
     "date": "ਮਿਤੀ",
     "rate": "ਰੇਟ",
     "submit": "ਲੋਡ ਬਣਾਓ",
-    "errorCreateFailed": "ਲੋਡ ਨਹੀਂ ਬਣ ਸਕਿਆ। ਲੋੜੀਂਦੇ ਖੇਤਰਾਂ ਦੀ ਜਾਂਚ ਕਰੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
+    "errorCreateFailed": "ਲੋਡ ਨਹੀਂ ਬਣ ਸਕਿਆ। ਲੋੜੀਂਦੇ ਖੇਤਰਾਂ ਦੀ ਜਾਂਚ ਕਰੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "scanAction": "ਦਸਤਾਵੇਜ਼ ਸਕੈਨ ਕਰੋ",
+    "scanHeading": "ਰੇਟ ਪੁਸ਼ਟੀਕਰਨ ਸਕੈਨ ਕਰੋ",
+    "scanSubheading": "ਰੇਟ ਪੁਸ਼ਟੀਕਰਨ ਜਾਂ BOL ਦੀ ਫੋਟੋ ਲਓ ਅਤੇ ਅਸੀਂ ਲੋਡ ਵੇਰਵੇ ਭਰ ਦੇਵਾਂਗੇ।",
+    "scanTakePhoto": "ਫੋਟੋ ਲਓ",
+    "scanChooseFromLibrary": "ਲਾਇਬ੍ਰੇਰੀ ਤੋਂ ਚੁਣੋ",
+    "scanExtracting": "ਦਸਤਾਵੇਜ਼ ਪੜ੍ਹਿਆ ਜਾ ਰਿਹਾ ਹੈ…",
+    "scanErrorExtractFailed": "ਇਹ ਦਸਤਾਵੇਜ਼ ਨਹੀਂ ਪੜ੍ਹਿਆ ਜਾ ਸਕਿਆ। ਇੱਕ ਸਾਫ਼ ਫੋਟੋ ਅਜ਼ਮਾਓ ਜਾਂ ਲੋਡ ਹੱਥੀਂ ਦਾਖਲ ਕਰੋ।",
+    "scanReviewHeading": "ਕੱਢੇ ਗਏ ਲੋਡ ਦੀ ਸਮੀਖਿਆ ਕਰੋ",
+    "scanReviewSubheading": "ਹੇਠਾਂ ਵੇਰਵੇ ਜਾਂਚੋ — ਜੋ ਵੀ ਗਲਤ ਲੱਗੇ ਉਸਨੂੰ ਸੋਧੋ।",
+    "scanConfirmCreate": "ਪੁਸ਼ਟੀ ਕਰੋ ਅਤੇ ਲੋਡ ਬਣਾਓ",
+    "address": "ਪਤਾ",
+    "zip": "ZIP",
+    "time": "ਸਮਾਂ",
+    "loadNumber": "ਲੋਡ / ਹਵਾਲਾ #"
   },
   "offline": {
     "offline": "ਤੁਸੀਂ ਆਫਲਾਈਨ ਹੋ। ਬਦਲਾਅ ਆਪਣੇ ਆਪ ਸਿੰਕ ਹੋ ਜਾਣਗੇ।",
@@ -118,7 +169,6 @@
     "submit": "ਨਿਰੀਖਣ ਜਮ੍ਹਾਂ ਕਰੋ",
     "submitted": "ਨਿਰੀਖਣ ਜਮ੍ਹਾਂ ਹੋ ਗਿਆ",
     "backToLoad": "ਲੋਡ ਵੱਲ ਵਾਪਸ",
-    "errorMustCertify": "ਜਮ੍ਹਾਂ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਤੁਹਾਨੂੰ ਇਸ ਨਿਰੀਖਣ ਨੂੰ ਪ੍ਰਮਾਣਿਤ ਕਰਨਾ ਲਾਜ਼ਮੀ ਹੈ।",
     "errorMissingDescription": "ਨੁਕਸ ਵਜੋਂ ਨਿਸ਼ਾਨਬੱਧ ਹਰ ਖੇਤਰ ਲਈ ਵੇਰਵਾ ਸ਼ਾਮਲ ਕਰੋ।",
     "errorResolveAccount": "ਇਸ ਨਿਰੀਖਣ ਲਈ ਤੁਹਾਡਾ ਖਾਤਾ ਹੱਲ ਨਹੀਂ ਹੋ ਸਕਿਆ।",
     "errorSubmitFailed": "ਨਿਰੀਖਣ ਜਮ੍ਹਾਂ ਨਹੀਂ ਹੋ ਸਕਿਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
@@ -130,7 +180,12 @@
     "errorCameraDenied": "ਕੈਮਰੇ ਦੀ ਪਹੁੰਚ ਤੋਂ ਇਨਕਾਰ ਕੀਤਾ ਗਿਆ। ਫੋਟੋ ਖਿੱਚਣ ਲਈ ਆਪਣੀ ਡਿਵਾਈਸ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਕੈਮਰਾ ਇਜਾਜ਼ਤ ਚਾਲੂ ਕਰੋ।",
     "errorLibraryDenied": "ਫੋਟੋ ਲਾਇਬ੍ਰੇਰੀ ਦੀ ਪਹੁੰਚ ਤੋਂ ਇਨਕਾਰ ਕੀਤਾ ਗਿਆ। ਫੋਟੋ ਚੁਣਨ ਲਈ ਆਪਣੀ ਡਿਵਾਈਸ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਫੋਟੋ ਇਜਾਜ਼ਤ ਚਾਲੂ ਕਰੋ।",
     "errorNoImageData": "ਚੁਣੀ ਹੋਈ ਤਸਵੀਰ ਪੜ੍ਹੀ ਨਹੀਂ ਜਾ ਸਕੀ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
-    "photoUploadFailedWarning": "ਨਿਰੀਖਣ ਸੰਭਾਲਿਆ ਗਿਆ, ਪਰ %{count} ਨੁਕਸ ਫੋਟੋ ਅੱਪਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀ(ਆਂ)। ਉਹ ਨੁਕਸ ਬਿਨਾਂ ਫੋਟੋ ਦੇ ਦਰਜ ਕੀਤੇ ਗਏ — ਆਪਣੇ ਡਿਸਪੈਚਰ ਨੂੰ ਸੂਚਿਤ ਕਰੋ।"
+    "photoUploadFailedWarning": "ਨਿਰੀਖਣ ਸੰਭਾਲਿਆ ਗਿਆ, ਪਰ %{count} ਨੁਕਸ ਫੋਟੋ ਅੱਪਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀ(ਆਂ)। ਉਹ ਨੁਕਸ ਬਿਨਾਂ ਫੋਟੋ ਦੇ ਦਰਜ ਕੀਤੇ ਗਏ — ਆਪਣੇ ਡਿਸਪੈਚਰ ਨੂੰ ਸੂਚਿਤ ਕਰੋ।",
+    "signatureLabel": "ਦਸਤਖਤ",
+    "signHere": "ਇੱਥੇ ਦਸਤਖਤ ਕਰੋ",
+    "clearSignature": "ਸਾਫ਼ ਕਰੋ",
+    "errorMustSign": "ਜਮ੍ਹਾਂ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਤੁਹਾਨੂੰ ਇਸ ਨਿਰੀਖਣ 'ਤੇ ਦਸਤਖਤ ਕਰਨੇ ਲਾਜ਼ਮੀ ਹਨ।",
+    "signatureUploadFailedWarning": "ਨਿਰੀਖਣ ਸੰਭਾਲਿਆ ਗਿਆ, ਪਰ ਦਸਤਖਤ ਅੱਪਲੋਡ ਨਹੀਂ ਹੋ ਸਕੇ। ਜੇ ਦਸਤਖਤ ਵਾਲੀ ਕਾਪੀ ਲੋੜੀਂਦੀ ਹੈ ਤਾਂ ਆਪਣੇ ਡਿਸਪੈਚਰ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।"
   },
   "settings": {
     "title": "ਸੈਟਿੰਗਾਂ",
@@ -200,12 +255,19 @@
   },
   "fleet": {
     "title": "ਫਲੀਟ",
-    "empty": "ਹਾਲੇ ਕੋਈ ਵਾਹਨ ਨਹੀਂ।"
+    "empty": "ਹਾਲੇ ਕੋਈ ਵਾਹਨ ਨਹੀਂ।",
+    "maintenanceLink": "ਰੱਖ-ਰਖਾਅ"
   },
   "customers": {
     "title": "ਗਾਹਕ",
     "empty": "ਹਾਲੇ ਕੋਈ ਗਾਹਕ ਨਹੀਂ।",
-    "noContact": "ਕੋਈ ਸੰਪਰਕ ਜਾਣਕਾਰੀ ਨਹੀਂ"
+    "noContact": "ਕੋਈ ਸੰਪਰਕ ਜਾਣਕਾਰੀ ਨਹੀਂ",
+    "notFound": "ਗਾਹਕ ਨਹੀਂ ਮਿਲਿਆ।",
+    "loads": "ਲੋਡ",
+    "revenue": "ਆਮਦਨ",
+    "notes": "ਨੋਟਸ",
+    "recentLoads": "ਹਾਲੀਆ ਲੋਡ",
+    "noLoadsYet": "ਅਜੇ ਤੱਕ ਕੋਈ ਲੋਡ ਨਹੀਂ।"
   },
   "invoices": {
     "title": "ਇਨਵੌਇਸ",
@@ -216,11 +278,34 @@
       "sent": "ਭੇਜਿਆ",
       "paid": "ਭੁਗਤਾਨ ਹੋ ਗਿਆ",
       "overdue": "ਬਕਾਇਆ"
-    }
+    },
+    "notFound": "ਇਨਵੌਇਸ ਨਹੀਂ ਮਿਲਿਆ।",
+    "amount": "ਰਕਮ",
+    "sentAt": "ਭੇਜਿਆ ਗਿਆ",
+    "notSentYet": "ਅਜੇ ਨਹੀਂ ਭੇਜਿਆ",
+    "openedAt": "ਖੋਲ੍ਹਿਆ ਗਿਆ",
+    "notOpenedYet": "ਅਜੇ ਨਹੀਂ ਖੋਲ੍ਹਿਆ",
+    "opened": "ਖੋਲ੍ਹਿਆ ਗਿਆ",
+    "paidAt": "ਭੁਗਤਾਨ ਕੀਤਾ",
+    "notPaidYet": "ਅਜੇ ਭੁਗਤਾਨ ਨਹੀਂ ਹੋਇਆ",
+    "editDraft": "ਡਰਾਫਟ ਸੋਧੋ",
+    "notes": "ਨੋਟਸ",
+    "saveDraft": "ਡਰਾਫਟ ਸੰਭਾਲੋ",
+    "saved": "ਸੰਭਾਲਿਆ ਗਿਆ",
+    "markSent": "ਭੇਜਿਆ ਵਜੋਂ ਚਿੰਨ੍ਹਿਤ ਕਰੋ (ਗਾਹਕ ਨੂੰ ਈਮੇਲ ਭੇਜਦਾ ਹੈ)",
+    "markPaid": "ਭੁਗਤਾਨ ਕੀਤਾ ਵਜੋਂ ਚਿੰਨ੍ਹਿਤ ਕਰੋ",
+    "errorInvalidAmount": "ਇੱਕ ਵੈਧ ਰਕਮ ਦਰਜ ਕਰੋ।",
+    "errorSaveFailed": "ਬਦਲਾਅ ਸੰਭਾਲੇ ਨਹੀਂ ਜਾ ਸਕੇ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "errorSendFailed": "ਇਹ ਇਨਵੌਇਸ ਭੇਜਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "errorMarkPaidFailed": "ਇਸ ਇਨਵੌਇਸ ਨੂੰ ਭੁਗਤਾਨ ਕੀਤਾ ਵਜੋਂ ਚਿੰਨ੍ਹਿਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
   },
   "reports": {
     "comingSoon": "ਜਲਦੀ ਆ ਰਿਹਾ ਹੈ",
-    "comingSoonDetail": "ਰਿਪੋਰਟਿੰਗ ਹਾਲੇ ਉਪਲਬਧ ਨਹੀਂ ਹੈ — ਭਵਿੱਖ ਦੇ ਅੱਪਡੇਟ ਵਿੱਚ ਦੁਬਾਰਾ ਦੇਖੋ।"
+    "comingSoonDetail": "ਰਿਪੋਰਟਿੰਗ ਹਾਲੇ ਉਪਲਬਧ ਨਹੀਂ ਹੈ — ਭਵਿੱਖ ਦੇ ਅੱਪਡੇਟ ਵਿੱਚ ਦੁਬਾਰਾ ਦੇਖੋ।",
+    "iftaTitle": "IFTA ਮਾਈਲੇਜ",
+    "iftaQuarter": "ਤਿਮਾਹੀ %{quarter}",
+    "iftaTotalMiles": "ਕੁੱਲ ਮੀਲ",
+    "iftaNoData": "ਇਸ ਤਿਮਾਹੀ ਵਿੱਚ ਅਜੇ ਤੱਕ ਕੋਈ ਰਾਜ ਮਾਈਲੇਜ ਦਰਜ ਨਹੀਂ ਕੀਤੀ ਗਈ।"
   },
   "myLoadTab": {
     "heading": "ਮੇਰਾ ਲੋਡ",
@@ -234,14 +319,16 @@
     "expired": "ਮਿਆਦ ਪੁੱਗ ਗਈ",
     "expiringSoon": "ਜਲਦੀ ਖਤਮ ਹੋ ਰਹੀ",
     "valid": "ਵੈਧ",
-    "noExpiry": "ਦਰਜ ਨਹੀਂ"
+    "noExpiry": "ਦਰਜ ਨਹੀਂ",
+    "preTripDvirNudge": "ਰਵਾਨਾ ਹੋਣ ਤੋਂ ਪਹਿਲਾਂ ਆਪਣੀ ਸਫ਼ਰ ਤੋਂ ਪਹਿਲਾਂ ਦੀ ਜਾਂਚ ਕਰੋ"
   },
   "dvirTab": {
     "heading": "DVIR",
     "startPreTrip": "ਪ੍ਰੀ-ਟ੍ਰਿਪ DVIR ਸ਼ੁਰੂ ਕਰੋ",
     "startPostTrip": "ਪੋਸਟ-ਟ੍ਰਿਪ DVIR ਸ਼ੁਰੂ ਕਰੋ",
     "noActiveLoad": "DVIR ਲਈ ਇੱਕ ਸਰਗਰਮ ਲੋਡ ਲੋੜੀਂਦਾ ਹੈ।",
-    "noActiveLoadDetail": "ਜਦੋਂ ਤੁਹਾਡੇ ਕੋਲ ਸਰਗਰਮ ਲੋਡ ਹੋਵੇ, ਤਾਂ ਤੁਸੀਂ ਇੱਥੇ ਪ੍ਰੀ-ਟ੍ਰਿਪ ਜਾਂ ਪੋਸਟ-ਟ੍ਰਿਪ ਨਿਰੀਖਣ ਸ਼ੁਰੂ ਕਰ ਸਕਦੇ ਹੋ।"
+    "noActiveLoadDetail": "ਜਦੋਂ ਤੁਹਾਡੇ ਕੋਲ ਸਰਗਰਮ ਲੋਡ ਹੋਵੇ, ਤਾਂ ਤੁਸੀਂ ਇੱਥੇ ਪ੍ਰੀ-ਟ੍ਰਿਪ ਜਾਂ ਪੋਸਟ-ਟ੍ਰਿਪ ਨਿਰੀਖਣ ਸ਼ੁਰੂ ਕਰ ਸਕਦੇ ਹੋ।",
+    "viewHistory": "ਇਤਿਹਾਸ ਵੇਖੋ"
   },
   "history": {
     "title": "ਇਤਿਹਾਸ",
@@ -285,7 +372,10 @@
     "tier_pro": "Pro",
     "tier_enterprise": "Enterprise",
     "trialStatus": "ਟ੍ਰਾਇਲ ਸਥਿਤੀ",
-    "trialDaysLeft": { "one": "%{count} ਦਿਨ ਬਾਕੀ", "other": "%{count} ਦਿਨ ਬਾਕੀ" },
+    "trialDaysLeft": {
+      "one": "%{count} ਦਿਨ ਬਾਕੀ",
+      "other": "%{count} ਦਿਨ ਬਾਕੀ"
+    },
     "trialEnded": "ਟ੍ਰਾਇਲ ਖਤਮ ਹੋ ਗਿਆ",
     "paymentMethod": "ਭੁਗਤਾਨ ਦਾ ਤਰੀਕਾ",
     "cardOnFile": "%{brand} — ਆਖਰੀ ਅੰਕ %{last4}",
@@ -315,5 +405,54 @@
     "errorResolveAccount": "ਤੁਹਾਡਾ ਕੈਰੀਅਰ ਖਾਤਾ ਪਛਾਣਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ।",
     "errorUploadFailed": "ਅੱਪਲੋਡ ਅਸਫਲ ਰਿਹਾ। ਆਪਣਾ ਕਨੈਕਸ਼ਨ ਜਾਂਚੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
     "errorSaveFailed": "ਫੋਟੋ ਇਸ ਲੋਡ ਨਾਲ ਸੰਭਾਲੀ ਨਹੀਂ ਜਾ ਸਕੀ। ਅੱਪਲੋਡ ਹਟਾ ਦਿੱਤਾ ਗਿਆ — ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
+  },
+  "dvirHistory": {
+    "title": "DVIR ਇਤਿਹਾਸ",
+    "empty": "ਅਜੇ ਤੱਕ ਕੋਈ ਨਿਰੀਖਣ ਨਹੀਂ।",
+    "preTrip": "ਸਫ਼ਰ ਤੋਂ ਪਹਿਲਾਂ",
+    "postTrip": "ਸਫ਼ਰ ਤੋਂ ਬਾਅਦ",
+    "satisfactory": "ਤਸੱਲੀਬਖਸ਼",
+    "defectsNoted": "ਖਰਾਬੀਆਂ ਨੋਟ ਕੀਤੀਆਂ",
+    "signed": "ਦਸਤਖਤ ਕੀਤੇ",
+    "notSigned": "ਦਸਤਖਤ ਨਹੀਂ"
+  },
+  "driverProfile": {
+    "linkLabel": "ਡਰਾਈਵਰ ਜਾਣਕਾਰੀ",
+    "title": "ਡਰਾਈਵਰ ਜਾਣਕਾਰੀ",
+    "subheading": "ਆਪਣੀ CDL ਅਤੇ ਐਮਰਜੈਂਸੀ ਸੰਪਰਕ ਜਾਣਕਾਰੀ ਅੱਪਡੇਟ ਰੱਖੋ। ਤੁਹਾਡਾ ਡਿਸਪੈਚਰ ਮਿਆਦ ਪੁੱਗਣ ਦੀਆਂ ਤਾਰੀਖਾਂ ਅਤੇ ਰੁਜ਼ਗਾਰ ਸਥਿਤੀ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਦਾ ਹੈ।",
+    "completeProfileNudge": "ਆਪਣੀ CDL ਅਤੇ ਐਮਰਜੈਂਸੀ ਸੰਪਰਕ ਜਾਣਕਾਰੀ ਸ਼ਾਮਲ ਕਰੋ",
+    "cdlSection": "CDL",
+    "cdlNumber": "CDL ਨੰਬਰ",
+    "cdlNumberPlaceholder": "ਜਿਵੇਂ D1234567",
+    "cdlClass": "ਕਲਾਸ",
+    "cdlState": "ਜਾਰੀ ਕਰਨ ਵਾਲਾ ਰਾਜ",
+    "endorsements": "ਪ੍ਰਵਾਨਗੀਆਂ",
+    "endorsement_hazmat": "ਖ਼ਤਰਨਾਕ ਸਮੱਗਰੀ",
+    "endorsement_tanker": "ਟੈਂਕਰ",
+    "endorsement_doubles": "ਡਬਲ/ਟ੍ਰਿਪਲ",
+    "endorsement_airbrakes": "ਏਅਰ ਬ੍ਰੇਕ",
+    "endorsement_passenger": "ਯਾਤਰੀ",
+    "readOnlyNote": "CDL ਮਿਆਦ ਪੁੱਗਣ: %{cdlExpiry} · ਮੈਡੀਕਲ ਸਰਟੀਫਿਕੇਟ ਮਿਆਦ: %{medCertExpiry} — ਇਹਨਾਂ ਨੂੰ ਅੱਪਡੇਟ ਕਰਨ ਲਈ ਆਪਣੇ ਡਿਸਪੈਚਰ ਨੂੰ ਪੁੱਛੋ।",
+    "notOnFile": "ਫਾਈਲ ਵਿੱਚ ਨਹੀਂ",
+    "emergencyContactSection": "ਐਮਰਜੈਂਸੀ ਸੰਪਰਕ",
+    "emergencyName": "ਨਾਮ",
+    "emergencyPhone": "ਫ਼ੋਨ",
+    "emergencyRelation": "ਰਿਸ਼ਤਾ",
+    "emergencyRelationPlaceholder": "ਜਿਵੇਂ ਜੀਵਨ ਸਾਥੀ",
+    "defaultVehicle": "ਡਿਫਾਲਟ ਵਾਹਨ",
+    "noDefaultVehicle": "ਕੋਈ ਨਹੀਂ",
+    "save": "ਸੰਭਾਲੋ",
+    "saved": "ਸੰਭਾਲਿਆ ਗਿਆ",
+    "errorSaveFailed": "ਤੁਹਾਡੀ ਜਾਣਕਾਰੀ ਸੰਭਾਲੀ ਨਹੀਂ ਜਾ ਸਕੀ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
+  },
+  "maintenanceOverview": {
+    "title": "ਰੱਖ-ਰਖਾਅ",
+    "empty": "ਕੋਈ ਸਰਗਰਮ ਰੱਖ-ਰਖਾਅ ਰਿਮਾਈਂਡਰ ਨਹੀਂ।",
+    "noDueDate": "ਕੋਈ ਬਕਾਇਆ ਤਾਰੀਖ ਸੈੱਟ ਨਹੀਂ",
+    "milesValue": "%{miles} ਮੀਲ",
+    "status_overdue": "ਬਕਾਇਆ",
+    "status_dueSoon": "ਜਲਦੀ ਬਕਾਇਆ",
+    "status_ok": "ਠੀਕ",
+    "status_noDate": "ਕੋਈ ਤਾਰੀਖ ਨਹੀਂ"
   }
 }

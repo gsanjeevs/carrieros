@@ -95,6 +95,9 @@ export default async function LoginPage({ searchParams }: Props) {
         </form>
 
         <p className="mt-6 text-center text-xs text-slate-500">
+          {t('noAccount')} <a href="/signup" className="text-[#f97316] hover:underline">{t('signUpFree')}</a>
+        </p>
+        <p className="mt-2 text-center text-xs text-slate-500">
           <a href="mailto:info@shipmentx.com" className="text-[#f97316] hover:underline">
             {t('needAccess')}
           </a>

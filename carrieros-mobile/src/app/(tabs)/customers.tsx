@@ -5,8 +5,9 @@
 // RLS's carrier_customer_select policy already limits rows to this
 // carrier's own customers, so no client-side org filter is needed.
 import { useCallback, useEffect, useState } from 'react';
-import { FlatList, ActivityIndicator, RefreshControl, StyleSheet } from 'react-native';
+import { FlatList, ActivityIndicator, Pressable, RefreshControl, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -27,6 +28,7 @@ type CustomerRow = {
 
 export default function CustomersScreen() {
   const theme = useTheme();
+  const router = useRouter();
   const { t } = useLocale();
   const [customers, setCustomers] = useState<CustomerRow[]>([]);
   const [exceptions, setExceptions] = useState<ExceptionRow[]>([]);
@@ -34,13 +36,18 @@ export default function CustomersScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
-    const [{ data }, exceptionRows] = await Promise.all([
+    const [{ data, error }, exceptionRows] = await Promise.all([
       supabase
         .from('customer_details')
-        .select('org_id, contact_name, organizations(name, phone, email)')
+        // See src/app/customers/index.tsx's comment — customer_details has
+        // two FKs to organizations, so this embed needs the explicit fkey
+        // hint or PostgREST returns an ambiguous-relationship error that
+        // silently came back here as an empty list.
+        .select('org_id, contact_name, organizations!customer_details_org_id_fkey(name, phone, email)')
         .order('org_id', { ascending: true }),
       fetchExceptions(),
     ]);
+    if (error) console.error('[customers tab] list query failed:', error.message);
     setCustomers((data as unknown as CustomerRow[] | null) ?? []);
     setExceptions(exceptionRows);
   }, []);
@@ -83,13 +90,16 @@ export default function CustomersScreen() {
             const contact = item.organizations?.phone ?? item.organizations?.email;
             const topException = topExceptionByCustomer.get(item.org_id);
             return (
-              <ThemedView style={[styles.card, { backgroundColor: theme.background }, styles.cardShadow]}>
+              <Pressable
+                style={[styles.card, { backgroundColor: theme.background }, styles.cardShadow]}
+                onPress={() => router.push({ pathname: '/customers/[id]', params: { id: String(item.org_id) } })}
+              >
                 <ThemedText type="smallBold">{item.organizations?.name ?? t('common.unknownCustomer')}</ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
                   {contact ?? t('customers.noContact')}
                 </ThemedText>
                 {topException ? <ExceptionChip item={topException} /> : null}
-              </ThemedView>
+              </Pressable>
             );
           }}
         />

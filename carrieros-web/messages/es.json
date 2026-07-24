@@ -39,6 +39,7 @@
     "drivers": "Conductores",
     "vehicles": "Vehículos",
     "customers": "Clientes",
+    "finance": "Centro Financiero",
     "invoices": "Facturas",
     "settlements": "Liquidaciones",
     "exceptions": "Excepciones",
@@ -59,7 +60,9 @@
     "forgotPassword": "¿Olvidaste tu contraseña?",
     "signIn": "Iniciar sesión",
     "needAccess": "¿Necesitas acceso? Contacta a tu administrador",
-    "invalidCredentials": "Correo o contraseña incorrectos"
+    "invalidCredentials": "Correo o contraseña incorrectos",
+    "noAccount": "¿No tienes una cuenta?",
+    "signUpFree": "Regístrate gratis"
   },
   "onboarding": {
     "heading": "Configuremos tu empresa transportista",
@@ -107,14 +110,23 @@
     "emailIntakeComingSoon": "La recepción de cargas por correo electrónico estará disponible pronto.",
     "goToDashboard": "Ir al panel",
     "addFirstLoad": "Agregar primera carga",
-    "stepLabel_company": "Paso 1 de 6 — Empresa",
-    "stepLabel_profile": "Paso 2 de 6 — Tu información",
-    "stepLabel_vehicle": "Paso 3 de 6 — Vehículo",
-    "stepLabel_customer": "Paso 4 de 6 — Cliente",
-    "stepLabel_billing": "Paso 5 de 6 — Facturación",
-    "stepLabel_completion": "Paso 6 de 6 — Listo",
+    "stepLabel_company": "Paso 1 de 7 — Empresa",
+    "stepLabel_profile": "Paso 2 de 7 — Tu información",
+    "stepLabel_vehicle": "Paso 4 de 7 — Vehículo",
+    "stepLabel_customer": "Paso 5 de 7 — Cliente",
+    "stepLabel_billing": "Paso 6 de 7 — Facturación",
+    "stepLabel_completion": "Paso 7 de 7 — Listo",
     "streetAddress": "Dirección",
-    "zip": "Código postal"
+    "zip": "Código postal",
+    "ein": "EIN (Número de Identificación de Empleador)",
+    "defaultNetTerms": "Plazo de pago predeterminado",
+    "netTermsOption": "Neto {days} días",
+    "stepLogoTitle": "Agrega el logo de tu empresa",
+    "stepLogoSubtitle": "Se muestra en facturas, la página pública de seguimiento y tu directorio de clientes.",
+    "uploadLogo": "Subir Logo",
+    "replaceLogo": "Reemplazar Logo",
+    "logoUploadFailed": "No se pudo subir tu logo. Puedes agregar uno más tarde desde Configuración.",
+    "stepLabel_logo": "Paso 3 de 7 — Logo"
   },
   "dashboard": {
     "title": "Resumen de la Flota",
@@ -280,7 +292,12 @@
     "iftaSaveFailed": "No se pudo guardar ese cruce. Inténtalo de nuevo.",
     "iftaCancel": "Cancelar",
     "iftaSave": "Guardar",
-    "iftaSaving": "Guardando…"
+    "iftaSaving": "Guardando…",
+    "shareCopyLink": "Copiar Enlace",
+    "shareViaSms": "Compartir por Mensaje",
+    "shareViaEmail": "Compartir por Correo",
+    "shareMessage": "Rastrea la carga {loadNumber}:",
+    "shareEmailSubject": "Enlace de rastreo para la carga {loadNumber}"
   },
   "drivers": {
     "title": "Conductores",
@@ -495,7 +512,12 @@
     "fuelSaveFailed": "No se pudo guardar esa parada de combustible. Inténtalo de nuevo.",
     "fuelCancel": "Cancelar",
     "fuelSave": "Guardar",
-    "fuelSaving": "Guardando…"
+    "fuelSaving": "Guardando…",
+    "noDriverAssigned": "Sin conductor asignado",
+    "uploadPhoto": "Subir Foto",
+    "replacePhoto": "Reemplazar Foto",
+    "photoUploadFailed": "No se pudo subir la foto. Inténtalo de nuevo.",
+    "dvirNotSigned": "Sin firmar"
   },
   "companyDocuments": {
     "title": "Documentos de la Empresa",
@@ -590,7 +612,10 @@
     "createInvoicePrefill": "{amount} a {customer}, según la tarifa de esta carga.",
     "createInvoiceNetTerms": "Vence en 30 días. Puede cambiar el método de pago después de crearla.",
     "createInvoice": "Crear factura",
-    "creating": "Creando…"
+    "creating": "Creando…",
+    "opened": "Abierta",
+    "openedAt": "Abierta",
+    "notOpenedYet": "Aún no abierta"
   },
   "settlements": {
     "title": "Liquidaciones",
@@ -644,7 +669,9 @@
     "upgradeRequired": "El mapa de despacho en vivo requiere el plan Growth o superior.",
     "noActiveLocations": "Ninguna carga activa ha compartido su ubicación todavía.",
     "queueTitle": "Necesita Despacho",
-    "noQueue": "No hay nada esperando ser despachado."
+    "noQueue": "No hay nada esperando ser despachado.",
+    "dispatchAction": "Despachar →",
+    "dispatchModalTitle": "Despachar {loadNumber}"
   },
   "settings": {
     "title": "Configuración de perfil",
@@ -701,7 +728,14 @@
     "role_finance": "Finanzas",
     "roleHelp_dispatcher": "Puede asignar cargas, administrar conductores y despachar. No ve tarifas ni facturas.",
     "roleHelp_finance": "Puede ver facturas, tarifas e informes financieros. No puede despachar.",
-    "roleHelp_owner": "Acceso total, incluida la gestión del equipo y la facturación."
+    "roleHelp_owner": "Acceso total, incluida la gestión del equipo y la facturación.",
+    "permissionPreviewTitle": "Este rol podrá:",
+    "permissionArea_loadsDispatch": "Crear y despachar cargas",
+    "permissionArea_ratesInvoices": "Ver tarifas, facturas e informes financieros",
+    "permissionArea_customers": "Ver el directorio de clientes",
+    "permissionArea_teamBilling": "Gestionar miembros del equipo y facturación",
+    "permissionArea_reports": "Ver informes y resúmenes de IFTA",
+    "permissionArea_driverApp": "Usar la app móvil del conductor (cargas, DVIR, documentos)"
   },
   "billing": {
     "title": "Facturación",
@@ -816,7 +850,12 @@
     "contactsRevokeConfirm": "¿Revocar el acceso al portal de este contacto? Se cerrará su sesión y ya no podrá ver el seguimiento, las cargas ni las facturas.",
     "contactsNoEmail": "Agrega un correo electrónico antes de invitar a este contacto",
     "contactsAddNew": "Agregar un contacto",
-    "contactsAdd": "Agregar Contacto"
+    "contactsAdd": "Agregar Contacto",
+    "revenue": "Ingresos",
+    "lastLoad": "Última Carga",
+    "daysAgo": "{days, plural, =0 {Hoy} one {hace # día} other {hace # días}}",
+    "relationshipsGoingCold": "{count, plural, one {# relación enfriándose} other {# relaciones enfriándose}}",
+    "coldCustomerLine": "{name} — {days} días"
   },
   "maintenance": {
     "title": "Mantenimiento",
@@ -870,5 +909,70 @@
   },
   "language": {
     "appliesEverywhere": "Tu preferencia de idioma se aplica a toda la aplicación."
+  },
+  "signup": {
+    "tagline": "Administra tu empresa de transporte desde tu teléfono. Sin hojas de cálculo.",
+    "choosePlan": "Elige tu plan",
+    "trialNotice": "No se te cobrará durante 90 días. Cancela cuando quieras.",
+    "continueBtn": "Continuar",
+    "mostPopular": "Más popular",
+    "perMonth": "/mes",
+    "trucksIncluded": "{count, plural, one {# camión incluido} other {# camiones incluidos}} · +${additional}/adicional",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+    "signIn": "Iniciar sesión",
+    "changePlan": "Cambiar plan",
+    "createAccount": "Crea tu cuenta",
+    "yourName": "Tu nombre",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "passwordHint": "Mínimo 8 caracteres",
+    "createAccountBtn": "Crear cuenta",
+    "creatingAccount": "Creando cuenta…",
+    "missingFields": "Por favor completa todos los campos.",
+    "weakPassword": "La contraseña debe tener al menos 8 caracteres.",
+    "emailExists": "Ya existe una cuenta con este correo electrónico.",
+    "signupFailed": "Ocurrió un error al crear tu cuenta. Inténtalo de nuevo."
+  },
+  "finance": {
+    "title": "Centro Financiero",
+    "upgradeRequired": "Actualiza a Pro para el Centro Financiero e IFTA",
+    "upgradeRequiredDetail": "Cálculo completo de impuestos IFTA, flujo de facturas, liquidaciones de conductores, análisis de combustible e ingresos por ruta — todo en un solo lugar.",
+    "kpiRevenue": "Ingresos (Pagados)",
+    "kpiRevenueSub": "Este trimestre",
+    "kpiOutstanding": "Pendiente",
+    "kpiOverdueCount": "{count, plural, one {# factura vencida} other {# facturas vencidas}}",
+    "kpiRevenuePerMile": "Ingresos / Milla",
+    "kpiRevenuePerMileSub": "{miles} millas totales",
+    "kpiIftaTaxDue": "Impuesto IFTA Adeudado",
+    "kpiIftaTaxDueSub": "Neto, este trimestre",
+    "iftaBreakdownTitle": "IFTA — Desglose por Estado",
+    "iftaBreakdownSub": "{quarter}",
+    "iftaNoData": "Aún no se ha registrado millaje IFTA este trimestre.",
+    "colState": "Estado",
+    "colMiles": "Millas",
+    "colNetDue": "Neto Adeudado",
+    "invoicePipelineTitle": "Flujo de Facturas",
+    "invoicePipelineSub": "{count, plural, one {# factura} other {# facturas}}",
+    "noInvoices": "Aún no hay facturas.",
+    "settlementsTitle": "Liquidaciones de Conductores",
+    "settlementsSub": "{quarter}",
+    "noSettlements": "No hay liquidaciones este trimestre.",
+    "fuelCostTitle": "Costo de Combustible por Milla — por Conductor",
+    "fuelCostSub": "Promedio de flota: {avg}/mi",
+    "noFuelData": "No se ha registrado combustible este trimestre.",
+    "laneRevenueTitle": "Ingresos por Milla — Rutas Principales",
+    "laneRevenueSub": "Este trimestre",
+    "colLane": "Ruta",
+    "colLoads": "Cargas",
+    "colRatePerMile": "$/Milla",
+    "noLaneData": "No hay rutas completadas este trimestre.",
+    "kpiOverdueAmount": "Monto Vencido",
+    "kpiOverdueAmountSub": "{count} factura(s) vencida(s)",
+    "kpiAvgDaysToPay": "Días Prom. de Pago",
+    "kpiAvgDaysToPayValue": "{days} días",
+    "kpiAvgDaysToPaySub": "De {count} factura(s) pagada(s)",
+    "invoiceAgingTitle": "Antigüedad de Facturas",
+    "invoiceAgingSub": "Facturas pendientes por días de retraso",
+    "invoiceOpened": "Abierta"
   }
 }

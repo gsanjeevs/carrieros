@@ -39,6 +39,7 @@
     "drivers": "Drivers",
     "vehicles": "Vehicles",
     "customers": "Customers",
+    "finance": "Finance Hub",
     "invoices": "Invoices",
     "settlements": "Settlements",
     "exceptions": "Exceptions",
@@ -59,7 +60,9 @@
     "forgotPassword": "Forgot password?",
     "signIn": "Sign in",
     "needAccess": "Need access? Contact your administrator",
-    "invalidCredentials": "Invalid email or password"
+    "invalidCredentials": "Invalid email or password",
+    "noAccount": "Don't have an account?",
+    "signUpFree": "Sign up free"
   },
   "onboarding": {
     "heading": "Let's get your carrier set up",
@@ -107,14 +110,23 @@
     "emailIntakeComingSoon": "Email-based load intake is coming soon.",
     "goToDashboard": "Go to dashboard",
     "addFirstLoad": "Add first load",
-    "stepLabel_company": "Step 1 of 6 — Company",
-    "stepLabel_profile": "Step 2 of 6 — Your info",
-    "stepLabel_vehicle": "Step 3 of 6 — Vehicle",
-    "stepLabel_customer": "Step 4 of 6 — Customer",
-    "stepLabel_billing": "Step 5 of 6 — Billing",
-    "stepLabel_completion": "Step 6 of 6 — Done",
+    "stepLabel_company": "Step 1 of 7 — Company",
+    "stepLabel_profile": "Step 2 of 7 — Your info",
+    "stepLabel_vehicle": "Step 4 of 7 — Vehicle",
+    "stepLabel_customer": "Step 5 of 7 — Customer",
+    "stepLabel_billing": "Step 6 of 7 — Billing",
+    "stepLabel_completion": "Step 7 of 7 — Done",
     "streetAddress": "Street address",
-    "zip": "ZIP / Postal code"
+    "zip": "ZIP / Postal code",
+    "ein": "EIN (Employer ID Number)",
+    "defaultNetTerms": "Default payment terms",
+    "netTermsOption": "Net {days} days",
+    "stepLogoTitle": "Add your company logo",
+    "stepLogoSubtitle": "Shown on invoices, the public tracking page and your customer directory.",
+    "uploadLogo": "Upload Logo",
+    "replaceLogo": "Replace Logo",
+    "logoUploadFailed": "Could not upload your logo. You can add one later from Settings.",
+    "stepLabel_logo": "Step 3 of 7 — Logo"
   },
   "dashboard": {
     "title": "Fleet Overview",
@@ -280,7 +292,12 @@
     "iftaSaveFailed": "Couldn't save that crossing. Please try again.",
     "iftaCancel": "Cancel",
     "iftaSave": "Save",
-    "iftaSaving": "Saving…"
+    "iftaSaving": "Saving…",
+    "shareCopyLink": "Copy Link",
+    "shareViaSms": "Share via Text",
+    "shareViaEmail": "Share via Email",
+    "shareMessage": "Track load {loadNumber}:",
+    "shareEmailSubject": "Tracking link for load {loadNumber}"
   },
   "drivers": {
     "title": "Drivers",
@@ -495,7 +512,12 @@
     "fuelSaveFailed": "Couldn't save that fuel stop. Please try again.",
     "fuelCancel": "Cancel",
     "fuelSave": "Save",
-    "fuelSaving": "Saving…"
+    "fuelSaving": "Saving…",
+    "noDriverAssigned": "No driver assigned",
+    "uploadPhoto": "Upload Photo",
+    "replacePhoto": "Replace Photo",
+    "photoUploadFailed": "Could not upload the photo. Please try again.",
+    "dvirNotSigned": "Not signed"
   },
   "companyDocuments": {
     "title": "Company Documents",
@@ -590,7 +612,10 @@
     "createInvoicePrefill": "{amount} to {customer}, from this load's rate.",
     "createInvoiceNetTerms": "Due in 30 days. You can change the payment method after it is created.",
     "createInvoice": "Create Invoice",
-    "creating": "Creating…"
+    "creating": "Creating…",
+    "opened": "Opened",
+    "openedAt": "Opened",
+    "notOpenedYet": "Not opened yet"
   },
   "settlements": {
     "title": "Settlements",
@@ -644,7 +669,9 @@
     "upgradeRequired": "The live dispatch map requires the Growth plan or above.",
     "noActiveLocations": "No active loads have a shared location yet.",
     "queueTitle": "Needs Dispatch",
-    "noQueue": "Nothing waiting to be dispatched."
+    "noQueue": "Nothing waiting to be dispatched.",
+    "dispatchAction": "Dispatch →",
+    "dispatchModalTitle": "Dispatch {loadNumber}"
   },
   "settings": {
     "title": "Profile settings",
@@ -701,7 +728,14 @@
     "role_finance": "Finance",
     "roleHelp_dispatcher": "Can assign loads, manage drivers and dispatch. Cannot see rates or invoices.",
     "roleHelp_finance": "Can see invoices, rates and financial reports. Cannot dispatch.",
-    "roleHelp_owner": "Full access, including team management and billing."
+    "roleHelp_owner": "Full access, including team management and billing.",
+    "permissionPreviewTitle": "This role will be able to:",
+    "permissionArea_loadsDispatch": "Create and dispatch loads",
+    "permissionArea_ratesInvoices": "View rates, invoices and financial reports",
+    "permissionArea_customers": "View the customer directory",
+    "permissionArea_teamBilling": "Manage team members and billing",
+    "permissionArea_reports": "View reports and IFTA summaries",
+    "permissionArea_driverApp": "Use the driver mobile app (loads, DVIR, documents)"
   },
   "billing": {
     "title": "Billing",
@@ -816,7 +850,12 @@
     "contactsRevokeConfirm": "Revoke this contact's portal access? They will be signed out and can no longer see tracking, loads, or invoices.",
     "contactsNoEmail": "Add an email address before inviting this contact",
     "contactsAddNew": "Add a contact",
-    "contactsAdd": "Add Contact"
+    "contactsAdd": "Add Contact",
+    "revenue": "Revenue",
+    "lastLoad": "Last Load",
+    "daysAgo": "{days, plural, =0 {Today} one {# day ago} other {# days ago}}",
+    "relationshipsGoingCold": "{count, plural, one {# relationship going cold} other {# relationships going cold}}",
+    "coldCustomerLine": "{name} — {days} days"
   },
   "maintenance": {
     "title": "Maintenance",
@@ -870,5 +909,70 @@
   },
   "language": {
     "appliesEverywhere": "Your language preference applies to the entire app."
+  },
+  "signup": {
+    "tagline": "Run your trucking business from your phone. No spreadsheets.",
+    "choosePlan": "Choose your plan",
+    "trialNotice": "You won't be charged for 90 days. Cancel anytime.",
+    "continueBtn": "Continue",
+    "mostPopular": "Most popular",
+    "perMonth": "/mo",
+    "trucksIncluded": "{count, plural, one {# truck included} other {# trucks included}} · +${additional}/additional",
+    "alreadyHaveAccount": "Already have an account?",
+    "signIn": "Sign in",
+    "changePlan": "Change plan",
+    "createAccount": "Create your account",
+    "yourName": "Your name",
+    "email": "Email address",
+    "password": "Password",
+    "passwordHint": "Min 8 characters",
+    "createAccountBtn": "Create account",
+    "creatingAccount": "Creating account…",
+    "missingFields": "Please fill in all fields.",
+    "weakPassword": "Password must be at least 8 characters.",
+    "emailExists": "An account with this email already exists.",
+    "signupFailed": "Something went wrong creating your account. Please try again."
+  },
+  "finance": {
+    "title": "Finance Hub",
+    "upgradeRequired": "Upgrade to Pro for the Finance & IFTA Hub",
+    "upgradeRequiredDetail": "Full IFTA tax calculation, invoice pipeline, driver settlements, fuel analytics, and lane revenue — all in one place.",
+    "kpiRevenue": "Revenue (Paid)",
+    "kpiRevenueSub": "This quarter",
+    "kpiOutstanding": "Outstanding",
+    "kpiOverdueCount": "{count, plural, one {# invoice overdue} other {# invoices overdue}}",
+    "kpiRevenuePerMile": "Revenue / Mile",
+    "kpiRevenuePerMileSub": "{miles} total miles",
+    "kpiIftaTaxDue": "IFTA Tax Due",
+    "kpiIftaTaxDueSub": "Net, this quarter",
+    "iftaBreakdownTitle": "IFTA — State Breakdown",
+    "iftaBreakdownSub": "{quarter}",
+    "iftaNoData": "No IFTA mileage logged yet this quarter.",
+    "colState": "State",
+    "colMiles": "Miles",
+    "colNetDue": "Net Due",
+    "invoicePipelineTitle": "Invoice Pipeline",
+    "invoicePipelineSub": "{count, plural, one {# invoice} other {# invoices}}",
+    "noInvoices": "No invoices yet.",
+    "settlementsTitle": "Driver Settlements",
+    "settlementsSub": "{quarter}",
+    "noSettlements": "No settlements this quarter.",
+    "fuelCostTitle": "Fuel Cost per Mile — by Driver",
+    "fuelCostSub": "Fleet avg: {avg}/mi",
+    "noFuelData": "No fuel data logged this quarter.",
+    "laneRevenueTitle": "Revenue per Mile — Top Lanes",
+    "laneRevenueSub": "This quarter",
+    "colLane": "Lane",
+    "colLoads": "Loads",
+    "colRatePerMile": "$/Mile",
+    "noLaneData": "No completed lanes this quarter.",
+    "kpiOverdueAmount": "Overdue Amount",
+    "kpiOverdueAmountSub": "{count} overdue invoice(s)",
+    "kpiAvgDaysToPay": "Avg. Days to Pay",
+    "kpiAvgDaysToPayValue": "{days} days",
+    "kpiAvgDaysToPaySub": "Across {count} paid invoice(s)",
+    "invoiceAgingTitle": "Invoice Aging",
+    "invoiceAgingSub": "Outstanding invoices by days past due",
+    "invoiceOpened": "Opened"
   }
 }

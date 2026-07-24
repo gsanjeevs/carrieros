@@ -1,7 +1,8 @@
 {
   "common": {
     "back": "← Atrás",
-    "unknownCustomer": "Cliente desconocido"
+    "unknownCustomer": "Cliente desconocido",
+    "cancel": "Cancelar"
   },
   "login": {
     "subtitle": "Inicia sesión en tu cuenta",
@@ -58,7 +59,43 @@
     "assignVehicle": "Vehículo",
     "unassigned": "— Sin asignar —",
     "saveAssignment": "Guardar Asignación",
-    "assignError": "No se pudo actualizar la asignación — es posible que no tengas permiso."
+    "assignError": "No se pudo actualizar la asignación — es posible que no tengas permiso.",
+    "reportProblem": "Reportar un problema / retraso",
+    "reportProblemTitle": "¿Qué está pasando?",
+    "reportProblemNotePlaceholder": "Agregar detalles (opcional)",
+    "reportProblemSubmit": "Enviar a despacho",
+    "reportProblemSent": "Reportado — se notificó a tu despachador.",
+    "reportProblemError": "No se pudo enviar este reporte — es posible que no tengas permiso.",
+    "problemReason": {
+      "breakdown": "Avería del vehículo",
+      "traffic": "Tráfico",
+      "weather": "Clima",
+      "accident": "Accidente",
+      "customer_issue": "Problema con cliente / muelle",
+      "other": "Otro"
+    },
+    "sectionFuel": "Combustible",
+    "addFuelStop": "+ Agregar parada de combustible",
+    "noFuelStopsYet": "No se han registrado paradas de combustible.",
+    "fuelTotalCost": "Costo total",
+    "fuelGallons": "Galones",
+    "fuelStops": "Paradas",
+    "fuelStatePlaceholder": "ST",
+    "fuelStation": "Estación",
+    "fuelPricePerGallon": "Precio/gal",
+    "fuelComputedTotal": "Total: %{amount}",
+    "fuelValidationError": "Ingresa un estado y la cantidad de galones.",
+    "fuelSaveFailed": "No se pudo guardar esta parada de combustible — es posible que no tengas permiso.",
+    "fuelSave": "Guardar",
+    "sectionIfta": "Millaje IFTA",
+    "iftaTrackingActive": "Rastreo GPS activo — registrando millas por estado",
+    "iftaTrackingPermissionNeeded": "Habilita \"Permitir siempre\" el acceso a la ubicación en Configuración para el registro automático de millaje IFTA.",
+    "iftaNoCrossingsYet": "Aún no se han registrado cruces de estado.",
+    "iftaManualTag": "manual",
+    "iftaFallbackWarning": "Los datos de GPS parecen incompletos para este viaje. Ingresa tus millas por estado para que el millaje IFTA sea preciso.",
+    "iftaAddState": "+ Agregar otro estado",
+    "iftaSaveFallback": "Guardar millaje por estado",
+    "iftaTripTotal": "Total del viaje: %{miles} mi"
   },
   "loadNew": {
     "heading": "Nueva Carga",
@@ -69,7 +106,21 @@
     "date": "Fecha",
     "rate": "Tarifa",
     "submit": "Crear Carga",
-    "errorCreateFailed": "No se pudo crear la carga. Verifica los campos requeridos e inténtalo de nuevo."
+    "errorCreateFailed": "No se pudo crear la carga. Verifica los campos requeridos e inténtalo de nuevo.",
+    "scanAction": "Escanear Documento",
+    "scanHeading": "Escanear Confirmación de Tarifa",
+    "scanSubheading": "Toma una foto de una confirmación de tarifa o BOL y completaremos los detalles de la carga.",
+    "scanTakePhoto": "Tomar Foto",
+    "scanChooseFromLibrary": "Elegir de la Biblioteca",
+    "scanExtracting": "Leyendo documento…",
+    "scanErrorExtractFailed": "No se pudo leer este documento. Intenta con una foto más clara o ingresa la carga manualmente.",
+    "scanReviewHeading": "Revisar Carga Extraída",
+    "scanReviewSubheading": "Revisa los detalles a continuación — edita lo que no se vea correcto.",
+    "scanConfirmCreate": "Confirmar y Crear Carga",
+    "address": "Dirección",
+    "zip": "Código Postal",
+    "time": "Hora",
+    "loadNumber": "Carga / Referencia #"
   },
   "offline": {
     "offline": "Estás sin conexión. Los cambios se sincronizarán automáticamente.",
@@ -118,7 +169,6 @@
     "submit": "Enviar Inspección",
     "submitted": "Inspección enviada",
     "backToLoad": "Volver a la Carga",
-    "errorMustCertify": "Debes certificar esta inspección antes de enviarla.",
     "errorMissingDescription": "Agrega una descripción para cada área marcada como defecto.",
     "errorResolveAccount": "No se pudo identificar tu cuenta para esta inspección.",
     "errorSubmitFailed": "No se pudo enviar la inspección. Inténtalo de nuevo.",
@@ -130,7 +180,12 @@
     "errorCameraDenied": "Se denegó el acceso a la cámara. Habilite el permiso de cámara en los ajustes de su dispositivo para tomar una foto.",
     "errorLibraryDenied": "Se denegó el acceso a la galería. Habilite el permiso de fotos en los ajustes de su dispositivo para elegir una foto.",
     "errorNoImageData": "No se pudo leer la imagen seleccionada. Inténtelo de nuevo.",
-    "photoUploadFailedWarning": "La inspección se guardó, pero %{count} foto(s) de defecto no se pudieron subir. Esos defectos se registraron sin foto — infórmelos a su despachador."
+    "photoUploadFailedWarning": "La inspección se guardó, pero %{count} foto(s) de defecto no se pudieron subir. Esos defectos se registraron sin foto — infórmelos a su despachador.",
+    "signatureLabel": "Firma",
+    "signHere": "Firme aquí",
+    "clearSignature": "Borrar",
+    "errorMustSign": "Debes firmar esta inspección antes de enviarla.",
+    "signatureUploadFailedWarning": "La inspección se guardó, pero la firma no se pudo subir. Contacta a tu despachador si se requiere una copia firmada."
   },
   "settings": {
     "title": "Configuración",
@@ -200,12 +255,19 @@
   },
   "fleet": {
     "title": "Flota",
-    "empty": "Aún no hay vehículos."
+    "empty": "Aún no hay vehículos.",
+    "maintenanceLink": "Mantenimiento"
   },
   "customers": {
     "title": "Clientes",
     "empty": "Aún no hay clientes.",
-    "noContact": "Sin información de contacto"
+    "noContact": "Sin información de contacto",
+    "notFound": "Cliente no encontrado.",
+    "loads": "Cargas",
+    "revenue": "Ingresos",
+    "notes": "Notas",
+    "recentLoads": "Cargas Recientes",
+    "noLoadsYet": "Aún no hay cargas."
   },
   "invoices": {
     "title": "Facturas",
@@ -216,11 +278,34 @@
       "sent": "Enviada",
       "paid": "Pagada",
       "overdue": "Vencida"
-    }
+    },
+    "notFound": "Factura no encontrada.",
+    "amount": "Monto",
+    "sentAt": "Enviada",
+    "notSentYet": "Aún no enviada",
+    "openedAt": "Abierta",
+    "notOpenedYet": "Aún no abierta",
+    "opened": "Abierta",
+    "paidAt": "Pagada",
+    "notPaidYet": "Aún no pagada",
+    "editDraft": "Editar Borrador",
+    "notes": "Notas",
+    "saveDraft": "Guardar Borrador",
+    "saved": "Guardado",
+    "markSent": "Marcar Enviada (Envía Correo al Cliente)",
+    "markPaid": "Marcar Pagada",
+    "errorInvalidAmount": "Ingresa un monto válido.",
+    "errorSaveFailed": "No se pudieron guardar los cambios. Intenta de nuevo.",
+    "errorSendFailed": "No se pudo enviar esta factura. Intenta de nuevo.",
+    "errorMarkPaidFailed": "No se pudo marcar esta factura como pagada. Intenta de nuevo."
   },
   "reports": {
     "comingSoon": "Próximamente",
-    "comingSoonDetail": "Los informes aún no están disponibles — vuelve a consultarlos en una futura actualización."
+    "comingSoonDetail": "Los informes aún no están disponibles — vuelve a consultarlos en una futura actualización.",
+    "iftaTitle": "Millaje IFTA",
+    "iftaQuarter": "Trimestre %{quarter}",
+    "iftaTotalMiles": "Millas totales",
+    "iftaNoData": "Aún no se ha registrado millaje por estado este trimestre."
   },
   "myLoadTab": {
     "heading": "Mi Carga",
@@ -234,14 +319,16 @@
     "expired": "Vencido",
     "expiringSoon": "Por Vencer",
     "valid": "Vigente",
-    "noExpiry": "No registrado"
+    "noExpiry": "No registrado",
+    "preTripDvirNudge": "Haz tu inspección previa al viaje antes de salir"
   },
   "dvirTab": {
     "heading": "DVIR",
     "startPreTrip": "Iniciar DVIR Pre-Viaje",
     "startPostTrip": "Iniciar DVIR Post-Viaje",
     "noActiveLoad": "El DVIR requiere una carga activa.",
-    "noActiveLoadDetail": "Cuando tengas una carga activa, podrás iniciar una inspección pre-viaje o post-viaje aquí."
+    "noActiveLoadDetail": "Cuando tengas una carga activa, podrás iniciar una inspección pre-viaje o post-viaje aquí.",
+    "viewHistory": "Ver historial"
   },
   "history": {
     "title": "Historial",
@@ -285,7 +372,10 @@
     "tier_pro": "Pro",
     "tier_enterprise": "Enterprise",
     "trialStatus": "Estado de Prueba",
-    "trialDaysLeft": { "one": "Queda %{count} día", "other": "Quedan %{count} días" },
+    "trialDaysLeft": {
+      "one": "Queda %{count} día",
+      "other": "Quedan %{count} días"
+    },
     "trialEnded": "Período de prueba terminado",
     "paymentMethod": "Método de Pago",
     "cardOnFile": "%{brand} terminada en %{last4}",
@@ -315,5 +405,54 @@
     "errorResolveAccount": "No se pudo determinar su cuenta de transportista.",
     "errorUploadFailed": "Error al subir. Verifique su conexión e inténtelo de nuevo.",
     "errorSaveFailed": "La foto no se pudo guardar en esta carga. La subida se eliminó; inténtelo de nuevo."
+  },
+  "dvirHistory": {
+    "title": "Historial de DVIR",
+    "empty": "Aún no hay inspecciones.",
+    "preTrip": "Antes del viaje",
+    "postTrip": "Después del viaje",
+    "satisfactory": "Satisfactorio",
+    "defectsNoted": "Defectos anotados",
+    "signed": "Firmado",
+    "notSigned": "Sin firmar"
+  },
+  "driverProfile": {
+    "linkLabel": "Información del Conductor",
+    "title": "Información del Conductor",
+    "subheading": "Mantén actualizados tu licencia CDL y tu contacto de emergencia. Tu despachador administra las fechas de vencimiento y el estado laboral.",
+    "completeProfileNudge": "Agrega tu información de CDL y contacto de emergencia",
+    "cdlSection": "CDL",
+    "cdlNumber": "Número de CDL",
+    "cdlNumberPlaceholder": "p. ej. D1234567",
+    "cdlClass": "Clase",
+    "cdlState": "Estado emisor",
+    "endorsements": "Endosos",
+    "endorsement_hazmat": "Materiales peligrosos",
+    "endorsement_tanker": "Cisterna",
+    "endorsement_doubles": "Dobles/Triples",
+    "endorsement_airbrakes": "Frenos de aire",
+    "endorsement_passenger": "Pasajeros",
+    "readOnlyNote": "Vencimiento de CDL: %{cdlExpiry} · Vencimiento de cert. médico: %{medCertExpiry} — pide a tu despachador que los actualice.",
+    "notOnFile": "no registrado",
+    "emergencyContactSection": "Contacto de Emergencia",
+    "emergencyName": "Nombre",
+    "emergencyPhone": "Teléfono",
+    "emergencyRelation": "Relación",
+    "emergencyRelationPlaceholder": "p. ej. Cónyuge",
+    "defaultVehicle": "Vehículo Predeterminado",
+    "noDefaultVehicle": "Ninguno",
+    "save": "Guardar",
+    "saved": "Guardado",
+    "errorSaveFailed": "No se pudo guardar tu información. Intenta de nuevo."
+  },
+  "maintenanceOverview": {
+    "title": "Mantenimiento",
+    "empty": "No hay recordatorios de mantenimiento activos.",
+    "noDueDate": "Sin fecha de vencimiento",
+    "milesValue": "%{miles} mi",
+    "status_overdue": "Vencido",
+    "status_dueSoon": "Próximo a Vencer",
+    "status_ok": "Al Día",
+    "status_noDate": "Sin Fecha"
   }
 }

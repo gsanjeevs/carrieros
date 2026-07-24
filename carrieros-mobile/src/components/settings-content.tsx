@@ -189,6 +189,15 @@ export function SettingsContent() {
           ))}
         </ThemedView>
 
+        {role === 'driver' && (
+          <>
+            <ThemedText type="default" style={[styles.sectionHeading, styles.sectionHeadingText]}>{t('driverProfile.title')}</ThemedText>
+            <ThemedView style={styles.options}>
+              <LinkRow label={t('driverProfile.linkLabel')} onPress={() => router.push('/driver-profile')} />
+            </ThemedView>
+          </>
+        )}
+
         {(isOwnerSolo || canSeeSettlements) && (
           <>
             <ThemedText type="default" style={[styles.sectionHeading, styles.sectionHeadingText]}>{t('settings.businessSection')}</ThemedText>
@@ -204,6 +213,16 @@ export function SettingsContent() {
               )}
               {canSeeSettlements && (
                 <LinkRow label={t('settlements.title')} onPress={() => router.push('/settlements')} />
+              )}
+              {/* IFTA mileage summary (mockup-20) is Finance's own "Reports"
+                  tab already -- Owner/Solo reach the same content via this
+                  standalone route (app/ifta-report/index.tsx) instead of
+                  widening their 5-tab bar for one report. */}
+              {isOwnerSolo && (
+                <LinkRow label={t('reports.iftaTitle')} onPress={() => router.push('/ifta-report')} />
+              )}
+              {isOwnerSolo && (
+                <LinkRow label={t('dvirHistory.title')} onPress={() => router.push('/dvir-history')} />
               )}
             </ThemedView>
           </>

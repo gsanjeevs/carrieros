@@ -3,7 +3,7 @@
 // creation/editing stays web-only (existing documented decision), so this
 // screen has no add/edit UI.
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet } from 'react-native';
+import { ActivityIndicator, FlatList, Image, Pressable, RefreshControl, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
@@ -23,6 +23,7 @@ type VehicleRow = {
   vehicle_number: string | null;
   nickname: string;
   status: string;
+  photo_path: string | null;
 };
 
 export default function FleetScreen() {
@@ -31,6 +32,7 @@ export default function FleetScreen() {
   const { t } = useLocale();
   const [vehicles, setVehicles] = useState<VehicleRow[]>([]);
   const [exceptions, setExceptions] = useState<ExceptionRow[]>([]);
+  const [photoUrls, setPhotoUrls] = useState<Map<number, string>>(new Map());
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -38,13 +40,30 @@ export default function FleetScreen() {
     const [{ data }, exceptionRows] = await Promise.all([
       supabase
         .from('vehicles')
-        .select('id, vehicle_number, nickname, status')
+        .select('id, vehicle_number, nickname, status, photo_path')
         .eq('is_active', true)
         .order('vehicle_number', { ascending: true }),
       fetchExceptions(),
     ]);
-    setVehicles((data as VehicleRow[] | null) ?? []);
+    const rows = (data as VehicleRow[] | null) ?? [];
+    setVehicles(rows);
     setExceptions(exceptionRows);
+
+    // Photo-driven cards (mockup-22) — resolve a signed URL per vehicle
+    // that actually has one; vehicles with no photo keep the plain card
+    // (no fabricated placeholder image).
+    const withPhoto = rows.filter((v) => v.photo_path);
+    if (withPhoto.length > 0) {
+      const entries = await Promise.all(
+        withPhoto.map(async (v) => {
+          const { data: signed } = await supabase.storage.from('documents').createSignedUrl(v.photo_path!, 3600);
+          return [v.id, signed?.signedUrl] as const;
+        })
+      );
+      setPhotoUrls(new Map(entries.filter((e): e is [number, string] => !!e[1])));
+    } else {
+      setPhotoUrls(new Map());
+    }
   }, []);
 
   const topExceptionByVehicle = topExceptionByEntity(exceptions, 'vehicle');
@@ -70,7 +89,12 @@ export default function FleetScreen() {
   return (
     <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="title" style={styles.heading}>{t('fleet.title')}</ThemedText>
+        <ThemedView style={styles.headerRow} type="background">
+          <ThemedText type="title" style={styles.heading}>{t('fleet.title')}</ThemedText>
+          <Pressable onPress={() => router.push('/maintenance')} style={styles.maintenanceLink}>
+            <ThemedText type="smallBold" style={{ color: '#f97316' }}>{t('fleet.maintenanceLink')}</ThemedText>
+          </Pressable>
+        </ThemedView>
         <FlatList
           data={vehicles}
           keyExtractor={(item) => String(item.id)}
@@ -89,11 +113,13 @@ export default function FleetScreen() {
                 : item.status === 'in_shop'
                   ? t('home.statusInShop')
                   : t('home.statusIdle');
+            const photoUrl = photoUrls.get(item.id);
             return (
               <Pressable
                 style={[styles.card, { backgroundColor: theme.background }, styles.cardShadow]}
                 onPress={() => router.push({ pathname: '/vehicle/[id]', params: { id: String(item.id) } })}
               >
+                {photoUrl && <Image source={{ uri: photoUrl }} style={styles.cardPhoto} resizeMode="cover" />}
                 <ThemedView style={styles.cardHeader} type="background">
                   <ThemedText type="smallBold">{item.nickname}</ThemedText>
                   <ThemedView style={[styles.statusPill, { backgroundColor: pill.bg }]}>
@@ -122,10 +148,13 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   safeArea: { flex: 1, paddingHorizontal: Spacing.three },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   heading: { fontSize: 24, marginBottom: Spacing.three },
+  maintenanceLink: { paddingVertical: Spacing.two },
   listContent: { gap: Spacing.two, paddingBottom: Spacing.four },
   empty: { textAlign: 'center', marginTop: Spacing.five },
-  card: { borderRadius: 16, padding: Spacing.three, gap: 4 },
+  card: { borderRadius: 16, padding: Spacing.three, gap: 4, overflow: 'hidden' },
+  cardPhoto: { width: '100%', height: 110, borderRadius: 10, marginBottom: 4 },
   cardShadow: {
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },

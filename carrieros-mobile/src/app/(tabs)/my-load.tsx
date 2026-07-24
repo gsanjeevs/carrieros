@@ -82,6 +82,7 @@ export default function MyLoadScreen() {
   const [nextLoad, setNextLoad] = useState<LoadRow | null>(null);
   const [cdlExpiry, setCdlExpiry] = useState<string | null>(null);
   const [medCertExpiry, setMedCertExpiry] = useState<string | null>(null);
+  const [needsPreTripDvir, setNeedsPreTripDvir] = useState(false);
 
   const load = useCallback(async () => {
     if (!session?.user.id) return;
@@ -117,6 +118,21 @@ export default function MyLoadScreen() {
 
     setActiveLoad((active as LoadRow | null) ?? null);
     setNextLoad((next as LoadRow | null) ?? null);
+
+    // Pre-trip DVIR nudge (audit gap) — only for a load that hasn't left yet
+    // (dispatched, not already picked_up/in_transit) and only if no pre_trip
+    // inspection has been filed for it yet.
+    if (active && active.status === 'dispatched' && active.id != null) {
+      const { data: existingDvir } = await supabase
+        .from('dvir_inspections')
+        .select('id')
+        .eq('load_id', active.id)
+        .eq('type', 'pre_trip')
+        .maybeSingle();
+      setNeedsPreTripDvir(!existingDvir);
+    } else {
+      setNeedsPreTripDvir(false);
+    }
   }, [session?.user.id]);
 
   useEffect(() => {
@@ -184,6 +200,16 @@ export default function MyLoadScreen() {
             </ThemedView>
           )}
 
+          {needsPreTripDvir && activeLoad && (
+            <Pressable
+              style={styles.dvirNudge}
+              onPress={() => router.push({ pathname: '/dvir/[loadId]', params: { loadId: String(activeLoad.id), type: 'pre_trip' } })}
+            >
+              <ThemedText type="small" style={styles.dvirNudgeText}>{t('myLoadTab.preTripDvirNudge')}</ThemedText>
+              <ThemedText type="smallBold" style={styles.dvirNudgeText}>{'›'}</ThemedText>
+            </Pressable>
+          )}
+
           <ThemedText type="subtitle" style={styles.sectionHeading}>{t('myLoadTab.nextLoad')}</ThemedText>
           {nextLoad ? (
             <Pressable
@@ -207,6 +233,11 @@ export default function MyLoadScreen() {
             <ComplianceChip label={t('myLoadTab.cdl')} status={complianceStatus(cdlExpiry)} t={t} />
             <ComplianceChip label={t('myLoadTab.medCert')} status={complianceStatus(medCertExpiry)} t={t} />
           </ThemedView>
+          {(!cdlExpiry || !medCertExpiry) && (
+            <Pressable onPress={() => router.push('/driver-profile')} style={styles.completeProfileLink}>
+              <ThemedText type="link">{t('driverProfile.completeProfileNudge')}</ThemedText>
+            </Pressable>
+          )}
         </ScrollView>
       </SafeAreaView>
     </ThemedView>
@@ -240,4 +271,18 @@ const styles = StyleSheet.create({
   chipRow: { flexDirection: 'row', gap: Spacing.two, flexWrap: 'wrap' },
   chip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999 },
   chipText: { fontWeight: '700' },
+  completeProfileLink: { marginTop: Spacing.two },
+  dvirNudge: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#f9731622',
+    borderWidth: 1,
+    borderColor: '#f97316',
+    borderRadius: 10,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+    marginTop: Spacing.two,
+  },
+  dvirNudgeText: { color: '#f97316' },
 });

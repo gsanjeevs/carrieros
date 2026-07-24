@@ -241,7 +241,7 @@ export default async function LoadDetailPage({
 
       {/* Action grid */}
       <div className="mb-6">
-        <LoadActionGrid trackingToken={load.tracking_token ?? null} canCancel={canCancelLoad} />
+        <LoadActionGrid trackingToken={load.tracking_token ?? null} loadNumber={load.load_number} canCancel={canCancelLoad} />
       </div>
 
       {/* Status timeline */}

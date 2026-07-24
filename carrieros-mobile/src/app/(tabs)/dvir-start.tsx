@@ -87,6 +87,10 @@ export default function DvirStartScreen() {
             </ThemedText>
           </ThemedView>
         )}
+
+        <Pressable onPress={() => router.push('/dvir-history')} style={styles.historyLink}>
+          <ThemedText type="link">{t('dvirTab.viewHistory')}</ThemedText>
+        </Pressable>
       </SafeAreaView>
     </ThemedView>
   );
@@ -110,4 +114,5 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'center', marginTop: Spacing.six, gap: Spacing.two, paddingHorizontal: Spacing.three },
   emptyTitle: { fontWeight: '700', textAlign: 'center' },
   emptyDetail: { textAlign: 'center' },
+  historyLink: { alignItems: 'center', marginTop: Spacing.four, paddingVertical: Spacing.two },
 });

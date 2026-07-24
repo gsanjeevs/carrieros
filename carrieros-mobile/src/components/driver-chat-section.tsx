@@ -18,7 +18,6 @@ import { supabase } from '@/lib/supabase';
 import { apiFetch } from '@/lib/api';
 
 const ORANGE = '#f97316';
-const POLL_MS = 5000;
 
 type MessageRow = {
   id: number;
@@ -26,6 +25,7 @@ type MessageRow = {
   body: string;
   original_language: string | null;
   sent_at: string;
+  read_at: string | null;
 };
 
 export function DriverChatSection({ loadId }: { loadId: number }) {
@@ -41,17 +41,42 @@ export function DriverChatSection({ loadId }: { loadId: number }) {
   const load = useCallback(async () => {
     const { data } = await supabase
       .from('driver_messages')
-      .select('id, sender_id, body, original_language, sent_at')
+      .select('id, sender_id, body, original_language, sent_at, read_at')
       .eq('load_id', loadId)
       .order('sent_at', { ascending: true });
-    setMessages((data as MessageRow[]) ?? []);
-  }, [loadId]);
+    const rows = (data as MessageRow[]) ?? [];
+    setMessages(rows);
+
+    // Mark-as-read (audit gap: driver_messages.read_at existed but nothing
+    // ever set it) — same rule as web's DriverMessageThread.tsx.
+    const unreadIds = rows.filter((m) => m.sender_id !== session?.user.id && !m.read_at).map((m) => m.id);
+    if (unreadIds.length > 0) {
+      await supabase.from('driver_messages').update({ read_at: new Date().toISOString() }).in('id', unreadIds);
+    }
+  }, [loadId, session?.user.id]);
 
   useEffect(() => {
     load();
-    const interval = setInterval(load, POLL_MS);
-    return () => clearInterval(interval);
-  }, [load]);
+
+    // Polling-gap audit fix (matches web's DriverMessageThread.tsx) — a
+    // Postgres Changes subscription scoped to this load_id, RLS-protected
+    // same as the direct-table read above, instead of a 5s poll interval.
+    const channel = supabase
+      .channel(`driver-messages-load-${loadId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'driver_messages', filter: `load_id=eq.${loadId}` },
+        (payload) => {
+          const row = payload.new as MessageRow;
+          setMessages((prev) => (prev.some((m) => m.id === row.id) ? prev : [...prev, row]));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [load, loadId]);
 
   async function send() {
     if (!draft.trim()) return;
@@ -101,6 +126,15 @@ export function DriverChatSection({ loadId }: { loadId: number }) {
           <ThemedText type="small" themeColor="textSecondary">{t('chat.noMessages')}</ThemedText>
         ) : (
           messages.map((m) => {
+            // sender_id NULL = system message (schema.sql's own column
+            // comment) — centered/muted, not a chat bubble from either side.
+            if (m.sender_id === null) {
+              return (
+                <ThemedView key={m.id} type="background" style={styles.systemMessageRow}>
+                  <ThemedText type="small" themeColor="textSecondary" style={styles.systemMessageText}>{m.body}</ThemedText>
+                </ThemedView>
+              );
+            }
             const isMine = m.sender_id === session?.user.id;
             const showTranslate = m.original_language && m.original_language !== locale;
             return (
@@ -150,6 +184,8 @@ const styles = StyleSheet.create({
   heading: { marginBottom: 2 },
   messageList: { maxHeight: 220 },
   bubbleRow: { flexDirection: 'row', marginVertical: 3 },
+  systemMessageRow: { alignItems: 'center', marginVertical: 3 },
+  systemMessageText: { fontStyle: 'italic' },
   bubble: { maxWidth: '80%', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 8 },
   inputRow: { flexDirection: 'row', gap: Spacing.two, alignItems: 'center' },
   input: {

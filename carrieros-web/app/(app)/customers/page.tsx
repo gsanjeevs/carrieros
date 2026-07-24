@@ -7,7 +7,7 @@
 // (no Add Customer button).
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations, getLocale } from 'next-intl/server'
 import Link from 'next/link'
 import AddCustomerButton from './AddCustomerButton'
 import BulkImportCustomers from '@/components/BulkImportCustomers'
@@ -15,10 +15,18 @@ import ExceptionChip from '@/components/ExceptionChip'
 import { getExceptions } from '@/lib/exceptions'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { createStorageProvider } from '@/lib/storage'
+import { formatMoney } from '@/lib/format-money'
 import { Avatar, Card, EmptyState, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
 
 const VIEW_ROLES   = ['owner', 'solo', 'dispatcher', 'finance']
 const MANAGE_ROLES = ['owner', 'solo', 'dispatcher']
+
+// "Going cold" threshold (mockup-07's relationship-intelligence banner) —
+// no BRD-specified number, so this picks a plain, documented judgment call
+// rather than inventing false precision: 30 days with no load is long
+// enough for a broker relationship to warrant a nudge, short enough not to
+// flag normal load-to-load gaps for an infrequent shipper.
+const COLD_THRESHOLD_DAYS = 30
 
 type Customer = {
   org_id: number
@@ -58,6 +66,7 @@ export default async function CustomersPage({
   const canManage = MANAGE_ROLES.includes(profile.role)
   const params = await searchParams
   const t = await getTranslations('customers')
+  const locale = await getLocale()
 
   const [{ data: customersData, error }, { data: loadsData }, exceptions] = await Promise.all([
     supabase
@@ -65,12 +74,12 @@ export default async function CustomersPage({
       .select('org_id, customer_number, contact_name, tags, notes, organizations!customer_details_org_id_fkey(id, name, email, phone, city, state, logo_path)')
       .eq('carrier_org_id', profile.org_id)
       .order('org_id'),
-    // One cheap query for load counts per customer — a handful of rows at
-    // this scale, grouped in JS rather than issuing one count query per
-    // customer.
+    // One cheap query for load counts/revenue/last-load-date per customer —
+    // a handful of rows at this scale, grouped in JS rather than issuing a
+    // separate aggregate query per customer.
     supabase
       .from('loads')
-      .select('customer_org_id')
+      .select('customer_org_id, rate, created_at')
       .eq('carrier_org_id', profile.org_id)
       .not('customer_org_id', 'is', null),
     getExceptions(supabase, profile.org_id),
@@ -80,10 +89,30 @@ export default async function CustomersPage({
   const customers = (customersData ?? []) as unknown as Customer[]
 
   const loadCounts = new Map<number, number>()
+  const revenueByCustomer = new Map<number, number>()
+  const lastLoadByCustomer = new Map<number, string>()
   for (const l of loadsData ?? []) {
     if (l.customer_org_id == null) continue
     loadCounts.set(l.customer_org_id, (loadCounts.get(l.customer_org_id) ?? 0) + 1)
+    revenueByCustomer.set(l.customer_org_id, (revenueByCustomer.get(l.customer_org_id) ?? 0) + Number(l.rate ?? 0))
+    const existing = lastLoadByCustomer.get(l.customer_org_id)
+    if (l.created_at && (!existing || l.created_at > existing)) {
+      lastLoadByCustomer.set(l.customer_org_id, l.created_at)
+    }
   }
+
+  const now = new Date().getTime()
+  const daysSince = (isoDate: string) => Math.floor((now - new Date(isoDate).getTime()) / 86_400_000)
+  const coldCustomers = customers.filter((c) => {
+    const last = lastLoadByCustomer.get(c.org_id)
+    return last && daysSince(last) >= COLD_THRESHOLD_DAYS
+  })
+
+  // Revenue-descending default sort (mockup-07's "Revenue ▾" default) —
+  // customers with no loads yet sort last, not first.
+  const sortedCustomers = [...customers].sort(
+    (a, b) => (revenueByCustomer.get(b.org_id) ?? 0) - (revenueByCustomer.get(a.org_id) ?? 0)
+  )
 
   // get_exceptions()'s 'customer' entity_type is currently only produced by
   // the carrier's OWN org_documents (see schema.sql's get_exceptions note on
@@ -137,6 +166,19 @@ export default async function CustomersPage({
         </div>
       )}
 
+      {coldCustomers.length > 0 && (
+        <div className="mb-6 flex items-center gap-3 rounded-lg bg-warning/10 border border-warning/20 px-4 py-3">
+          <span className="material-symbols-outlined text-warning text-[18px]">ac_unit</span>
+          <p className="text-warning-dark text-sm">
+            {t('relationshipsGoingCold', { count: coldCustomers.length })}
+            {' — '}
+            {coldCustomers
+              .map((c) => t('coldCustomerLine', { name: c.organizations?.name ?? '—', days: daysSince(lastLoadByCustomer.get(c.org_id)!) }))
+              .join(' · ')}
+          </p>
+        </div>
+      )}
+
       {customers.length === 0 ? (
         <Card>
           <div className="flex flex-col items-center pb-8">
@@ -155,16 +197,20 @@ export default async function CustomersPage({
                 <TableHeaderCell>{t('phoneEmail')}</TableHeaderCell>
                 <TableHeaderCell>{t('tags')}</TableHeaderCell>
                 <TableHeaderCell numeric>{t('loads')}</TableHeaderCell>
+                <TableHeaderCell numeric>{t('revenue')}</TableHeaderCell>
+                <TableHeaderCell>{t('lastLoad')}</TableHeaderCell>
                 <TableHeaderCell></TableHeaderCell>
               </tr>
             </thead>
             <tbody>
-              {customers.map((c) => {
+              {sortedCustomers.map((c) => {
                 const org = c.organizations
                 const phoneEmail = [org?.phone, org?.email].filter(Boolean).join(' · ')
                 const cityState = [org?.city, org?.state].filter(Boolean).join(', ')
                 const logoUrl = org?.logo_path ? signedLogoUrls.get(org.logo_path) : undefined
                 const topException = topExceptionByCustomer.get(c.org_id)
+                const lastLoad = lastLoadByCustomer.get(c.org_id)
+                const isCold = lastLoad ? daysSince(lastLoad) >= COLD_THRESHOLD_DAYS : false
                 const nameCell = (
                   <div className="flex items-center gap-3">
                     {logoUrl ? (
@@ -208,6 +254,16 @@ export default async function CustomersPage({
                       )}
                     </TableCell>
                     <TableCell numeric>{loadCounts.get(c.org_id) ?? 0}</TableCell>
+                    <TableCell numeric>{formatMoney(revenueByCustomer.get(c.org_id) ?? 0, 'USD', locale)}</TableCell>
+                    <TableCell>
+                      {lastLoad ? (
+                        <span className={isCold ? 'text-warning-dark font-medium' : 'text-text-sec'}>
+                          {isCold && '❄️ '}{t('daysAgo', { days: daysSince(lastLoad) })}
+                        </span>
+                      ) : (
+                        <span className="text-text-mut">—</span>
+                      )}
+                    </TableCell>
                     <TableCell>{topException && <ExceptionChip item={topException} />}</TableCell>
                   </TableRow>
                 )

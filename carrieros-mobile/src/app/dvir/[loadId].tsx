@@ -2,10 +2,12 @@
 // Pre/post-trip DVIR (FMCSA 49 CFR 396.11). Standalone pushed screen, same
 // pattern as src/app/load/[id].tsx.
 //
-// Known simplification: no signature-pad library is installed, so this uses
-// a "certify" checkbox in place of a captured signature. dvir_inspections
-// .signature_url stays null. Revisit once a signature capture approach is
-// chosen — don't treat the checkbox as the permanent design.
+// Signature is captured via components/signature-pad.tsx (react-native-svg +
+// react-native-view-shot) and uploaded to the same `documents` bucket as
+// defect photos, then attached to dvir_inspections.signature_url with an
+// UPDATE — the inspection id doesn't exist until after the initial INSERT,
+// mirroring the defect-photo upload sequencing below. This UPDATE is exactly
+// what driver_dvir_modify (schema.sql, 2026-07-20) was added to allow.
 //
 // Defect photos (dvir_defects.photo_path) upload to the PRIVATE `documents`
 // bucket at `{carrier_org_id}/dvir/{inspection_id}/{file}` — storage RLS keys
@@ -20,7 +22,7 @@
 //
 // Blob is deliberately avoided — see src/lib/base64.ts (RN Blob uploads
 // 0 bytes). Same pick/upload approach as src/components/pod-section.tsx.
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -28,6 +30,7 @@ import * as ImagePicker from 'expo-image-picker';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { SignaturePad, type SignaturePadHandle } from '@/components/signature-pad';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
@@ -79,7 +82,8 @@ export default function DVIRScreen() {
     ) as Record<AreaKey, AreaState>
   );
   const [odometer, setOdometer] = useState('');
-  const [certified, setCertified] = useState(false);
+  const [hasSignature, setHasSignature] = useState(false);
+  const signaturePadRef = useRef<SignaturePadHandle>(null);
   const [noVehicleWarning, setNoVehicleWarning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -87,6 +91,7 @@ export default function DVIRScreen() {
   // Non-fatal: photos that failed to upload after the inspection was already
   // saved. Shown on the confirmation screen, not treated as a submit failure.
   const [photoWarningCount, setPhotoWarningCount] = useState(0);
+  const [signatureWarning, setSignatureWarning] = useState(false);
 
   // resolveSubmitter (who's filing this inspection, and under which carrier
   // org) now lives in src/lib/submitter.ts — POD upload needs the same
@@ -170,8 +175,8 @@ export default function DVIRScreen() {
 
   async function submit() {
     if (!session?.user.id || !loadId) return;
-    if (!certified) {
-      setError(t('dvir.errorMustCertify'));
+    if (!hasSignature) {
+      setError(t('dvir.errorMustSign'));
       return;
     }
 
@@ -222,6 +227,32 @@ export default function DVIRScreen() {
       return;
     }
 
+    // Signature upload/attach mirrors the defect-photo pattern below: it can
+    // only happen now that we have an inspection id for the storage path,
+    // and a failure here is non-fatal — the inspection itself is already
+    // recorded, so a warning is shown instead of aborting the submit.
+    let signatureFailed = false;
+    const signatureBase64 = await signaturePadRef.current?.capture();
+    if (signatureBase64) {
+      const path = `${submitter.carrierOrgId}/dvir/${inspection.id}/signature-${Date.now()}.png`;
+      try {
+        const { error: sigUploadErr } = await supabase.storage
+          .from(BUCKET)
+          .upload(path, base64ToArrayBuffer(signatureBase64), { contentType: 'image/png', upsert: false });
+        if (sigUploadErr) {
+          signatureFailed = true;
+        } else {
+          const { error: sigAttachErr } = await supabase
+            .from('dvir_inspections')
+            .update({ signature_url: path })
+            .eq('id', inspection.id);
+          if (sigAttachErr) signatureFailed = true;
+        }
+      } catch {
+        signatureFailed = true;
+      }
+    }
+
     if (defectAreas.length > 0) {
       // Photos can only be uploaded now that we have an inspection id for the
       // path. A failure here is deliberately non-fatal: the defect row is
@@ -268,6 +299,7 @@ export default function DVIRScreen() {
       setPhotoWarningCount(failedPhotos);
     }
 
+    setSignatureWarning(signatureFailed);
     setSubmitting(false);
     setDone(true);
   }
@@ -279,6 +311,11 @@ export default function DVIRScreen() {
         {photoWarningCount > 0 && (
           <ThemedText type="small" style={[styles.warning, styles.doneWarning]}>
             {t('dvir.photoUploadFailedWarning', { count: photoWarningCount })}
+          </ThemedText>
+        )}
+        {signatureWarning && (
+          <ThemedText type="small" style={[styles.warning, styles.doneWarning]}>
+            {t('dvir.signatureUploadFailedWarning')}
           </ThemedText>
         )}
         <Pressable onPress={() => router.back()} style={styles.doneButton}>
@@ -388,17 +425,20 @@ export default function DVIRScreen() {
             />
           </ThemedView>
 
-          <Pressable onPress={() => setCertified((c) => !c)} style={styles.certifyRow}>
-            <ThemedView
-              style={[
-                styles.checkbox,
-                { borderColor: theme.backgroundSelected, backgroundColor: certified ? ORANGE : 'transparent' },
-              ]}
+          <ThemedView type="backgroundElement" style={styles.section}>
+            <ThemedText type="small" themeColor="textSecondary" style={{ marginBottom: Spacing.two }}>
+              {t('dvir.signatureLabel')}
+            </ThemedText>
+            <SignaturePad
+              ref={signaturePadRef}
+              onChange={setHasSignature}
+              clearLabel={t('dvir.clearSignature')}
+              emptyLabel={t('dvir.signHere')}
             />
-            <ThemedText type="small" style={styles.certifyText}>
+            <ThemedText type="small" themeColor="textSecondary" style={{ marginTop: Spacing.two }}>
               {t('dvir.certifyText')}
             </ThemedText>
-          </Pressable>
+          </ThemedView>
 
           {error ? <ThemedText type="small" style={styles.error}>{error}</ThemedText> : null}
 
@@ -448,9 +488,6 @@ const styles = StyleSheet.create({
   severityRow: { flexDirection: 'row', gap: 6, alignItems: 'center' },
   section: { borderRadius: 12, padding: Spacing.three },
   input: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14 },
-  certifyRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, paddingVertical: Spacing.two },
-  checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 2 },
-  certifyText: { flex: 1 },
   error: { color: '#dc2626', marginBottom: Spacing.two },
   submitButton: { backgroundColor: ORANGE, borderRadius: 8, paddingVertical: 14, alignItems: 'center' },
   submitButtonDisabled: { opacity: 0.5 },

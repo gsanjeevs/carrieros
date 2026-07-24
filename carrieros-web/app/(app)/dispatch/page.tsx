@@ -7,12 +7,11 @@
 // queue of loads still needing dispatch.
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { getTranslations, getLocale } from 'next-intl/server'
 import DispatchMapClient from './DispatchMapClient'
+import DispatchQueueRow from './DispatchQueueRow'
 import { hasFeature } from '@/lib/entitlements'
-import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
-import { Card, CardHeader, StatusBadge, EmptyState } from '@/components/ui'
+import { Card, CardHeader, EmptyState } from '@/components/ui'
 import type { DispatchMapLoad } from '@/components/DispatchMap'
 
 const VIEW_ROLES = ['owner', 'solo', 'dispatcher']
@@ -32,7 +31,6 @@ export default async function DispatchPage() {
   if (!VIEW_ROLES.includes(profile.role)) redirect('/dashboard')
 
   const t = await getTranslations('dispatch')
-  const tLoads = await getTranslations('loads')
   const locale = await getLocale()
 
   const entitled = await hasFeature(supabase, 'desktop_command_center')
@@ -70,7 +68,7 @@ export default async function DispatchPage() {
 
   const { data: queueData } = await supabase
     .from('loads')
-    .select('id, load_number, status, pickup_city, pickup_state, customer_name_raw')
+    .select('id, load_number, status, pickup_city, pickup_state, customer_name_raw, driver_id, vehicle_id')
     .eq('carrier_org_id', profile.org_id)
     .in('status', ['draft', 'scheduled'])
     .order('created_at', { ascending: false })
@@ -100,19 +98,16 @@ export default async function DispatchPage() {
           ) : (
             <div className="divide-y divide-divider-ui">
               {queue.map((l) => (
-                <Link
+                <DispatchQueueRow
                   key={l.id}
-                  href={`/loads/${l.load_number}`}
-                  className="flex items-center justify-between px-5 py-3 hover:bg-surface-subtle transition-colors duration-150"
-                >
-                  <div className="min-w-0">
-                    <p className="text-text-pri text-sm font-medium truncate">{l.load_number}</p>
-                    <p className="text-text-mut text-xs truncate">{l.customer_name_raw ?? '—'}</p>
-                  </div>
-                  <StatusBadge variant={loadStatusVariant((l.status ?? 'draft') as LoadStatus)} size="sm">
-                    {tLoads(`status_${l.status ?? 'draft'}` as never)}
-                  </StatusBadge>
-                </Link>
+                  loadId={l.id}
+                  loadNumber={l.load_number}
+                  status={l.status ?? 'draft'}
+                  customerName={l.customer_name_raw}
+                  driverId={l.driver_id}
+                  vehicleId={l.vehicle_id}
+                  orgId={profile.org_id}
+                />
               ))}
             </div>
           )}

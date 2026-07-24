@@ -1,10 +1,11 @@
 // src/app/(tabs)/invoices.tsx
-// "Invoices" tab (Finance) — read-only invoice list. No invoice-detail
-// screen exists in mobile yet (out of scope per the mobile-parity plan), so
-// rows are non-interactive.
+// "Invoices" tab (Finance) — list, now tappable into src/app/invoice/[id].tsx
+// for detail + write actions (mark sent/paid, edit draft) — audit gap fixed,
+// see that screen's header comment for the mobile write-access design.
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, StyleSheet } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -21,10 +22,12 @@ type InvoiceRow = {
   amount: number;
   status: string;
   due_date: string | null;
+  opened_at: string | null;
 };
 
 export default function InvoicesScreen() {
   const theme = useTheme();
+  const router = useRouter();
   const { t } = useLocale();
   const [invoices, setInvoices] = useState<InvoiceRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +36,7 @@ export default function InvoicesScreen() {
   const load = useCallback(async () => {
     const { data } = await supabase
       .from('invoices')
-      .select('id, invoice_number, amount, status, due_date')
+      .select('id, invoice_number, amount, status, due_date, opened_at')
       .order('created_at', { ascending: false });
     setInvoices((data as InvoiceRow[] | null) ?? []);
   }, []);
@@ -73,7 +76,10 @@ export default function InvoicesScreen() {
           renderItem={({ item }) => {
             const pill = INVOICE_STATUS_PILL[item.status] ?? INVOICE_STATUS_PILL.draft;
             return (
-              <ThemedView style={[styles.card, { backgroundColor: theme.background }, styles.cardShadow]}>
+              <Pressable
+                style={[styles.card, { backgroundColor: theme.background }, styles.cardShadow]}
+                onPress={() => router.push({ pathname: '/invoice/[id]', params: { id: String(item.id) } })}
+              >
                 <ThemedView style={styles.cardHeader} type="background">
                   <ThemedText type="smallBold">{item.invoice_number}</ThemedText>
                   <ThemedView style={[styles.statusPill, { backgroundColor: pill.bg }]}>
@@ -85,8 +91,9 @@ export default function InvoicesScreen() {
                 <ThemedText type="small" themeColor="textSecondary">
                   ${Number(item.amount).toLocaleString()}
                   {item.due_date ? `  ·  ${t('invoices.due')} ${item.due_date}` : ''}
+                  {item.opened_at ? `  ·  ${t('invoices.opened')}` : ''}
                 </ThemedText>
-              </ThemedView>
+              </Pressable>
             );
           }}
         />

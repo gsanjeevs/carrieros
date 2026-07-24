@@ -9,8 +9,10 @@
 // since org creation was always the last thing the original 2-step flow did
 // before this rebuild extended it forward rather than reordering anything.
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { useSearchParams } from 'next/navigation'
+import AddLogoStep from './steps/AddLogoStep'
 import AddVehicleStep from './steps/AddVehicleStep'
 import AddCustomerStep from './steps/AddCustomerStep'
 import BillingStep from './steps/BillingStep'
@@ -24,12 +26,26 @@ const US_STATES = [
 ]
 const CA_PROVINCES = ['AB','BC','MB','NB','NL','NS','NT','NU','ON','PE','QC','SK','YT']
 
-const STEPS = ['company', 'profile', 'vehicle', 'customer', 'billing', 'completion'] as const
+const STEPS = ['company', 'profile', 'logo', 'vehicle', 'customer', 'billing', 'completion'] as const
 type Step = (typeof STEPS)[number]
 
+const NET_TERMS_OPTIONS = [7, 15, 30, 45, 60] as const
+
 export default function OnboardingPage() {
+  return (
+    <Suspense fallback={null}>
+      <OnboardingFlow />
+    </Suspense>
+  )
+}
+
+function OnboardingFlow() {
   const t = useTranslations('onboarding')
   const tCommon = useTranslations('common')
+  // Set only when arriving from /signup's plan picker (?tier=starter|growth);
+  // admin-invited onboarding never has this param, so the fetch body's tier
+  // stays undefined and api/onboarding/route.ts falls back to 'starter'.
+  const tierParam = useSearchParams().get('tier')
   const [step, setStep] = useState<Step>('company')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -37,17 +53,20 @@ export default function OnboardingPage() {
   const [addedVehicle, setAddedVehicle] = useState(false)
   const [addedCustomer, setAddedCustomer] = useState(false)
   const [addedPaymentMethod, setAddedPaymentMethod] = useState(false)
+  const [orgId, setOrgId] = useState<number | null>(null)
 
   const [form, setForm] = useState({
     // Company
     company_name: '',
     mc_number:    '',
     dot_number:   '',
+    ein:          '',
     address:      '',
     country:      'US',
     state:        '',
     city:         '',
     zip:          '',
+    default_net_terms_days: '30',
     // Profile
     first_name:   '',
     last_name:    '',
@@ -65,11 +84,12 @@ export default function OnboardingPage() {
       const res = await fetch('/api/onboarding', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(tierParam ? { ...form, tier: tierParam } : form),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? t('setupFailed'))
-      setStep('vehicle')
+      setOrgId(Number(json.org_id))
+      setStep('logo')
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : tCommon('somethingWentWrong'))
     } finally {
@@ -139,6 +159,12 @@ export default function OnboardingPage() {
               </div>
 
               <div>
+                <label className={labelCls}>{t('ein')}</label>
+                <input className={inputCls} placeholder="12-3456789"
+                  value={form.ein} onChange={e => set('ein', e.target.value)} />
+              </div>
+
+              <div>
                 <label className={labelCls}>{t('streetAddress')}</label>
                 <input className={inputCls} placeholder="1200 Freight Way"
                   value={form.address} onChange={e => set('address', e.target.value)} />
@@ -173,6 +199,15 @@ export default function OnboardingPage() {
                   <input className={inputCls} placeholder="90001"
                     value={form.zip} onChange={e => set('zip', e.target.value)} />
                 </div>
+              </div>
+
+              <div>
+                <label className={labelCls}>{t('defaultNetTerms')}</label>
+                <select className={inputCls} value={form.default_net_terms_days} onChange={e => set('default_net_terms_days', e.target.value)}>
+                  {NET_TERMS_OPTIONS.map(days => (
+                    <option key={days} value={days}>{t('netTermsOption', { days })}</option>
+                  ))}
+                </select>
               </div>
 
               <button
@@ -233,6 +268,10 @@ export default function OnboardingPage() {
                 </button>
               </div>
             </div>
+          )}
+
+          {step === 'logo' && orgId != null && (
+            <AddLogoStep orgId={orgId} onNext={() => setStep('vehicle')} />
           )}
 
           {step === 'vehicle' && (

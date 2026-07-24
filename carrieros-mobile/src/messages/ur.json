@@ -1,7 +1,8 @@
 {
   "common": {
     "back": "← پیچھے",
-    "unknownCustomer": "نامعلوم گاہک"
+    "unknownCustomer": "نامعلوم گاہک",
+    "cancel": "منسوخ کریں"
   },
   "login": {
     "subtitle": "اپنے اکاؤنٹ میں سائن ان کریں",
@@ -58,7 +59,43 @@
     "assignVehicle": "گاڑی",
     "unassigned": "— غیر تفویض شدہ —",
     "saveAssignment": "تفویض محفوظ کریں",
-    "assignError": "تفویض اپ ڈیٹ نہیں ہو سکی — ممکن ہے آپ کے پاس اجازت نہ ہو۔"
+    "assignError": "تفویض اپ ڈیٹ نہیں ہو سکی — ممکن ہے آپ کے پاس اجازت نہ ہو۔",
+    "reportProblem": "مسئلہ / تاخیر کی اطلاع دیں",
+    "reportProblemTitle": "کیا ہو رہا ہے؟",
+    "reportProblemNotePlaceholder": "تفصیلات شامل کریں (اختیاری)",
+    "reportProblemSubmit": "ڈسپیچ کو بھیجیں",
+    "reportProblemSent": "اطلاع دے دی گئی — آپ کے ڈسپیچر کو مطلع کر دیا گیا ہے۔",
+    "reportProblemError": "یہ رپورٹ نہیں بھیجی جا سکی — ہو سکتا ہے آپ کو اجازت نہ ہو۔",
+    "problemReason": {
+      "breakdown": "گاڑی کی خرابی",
+      "traffic": "ٹریفک",
+      "weather": "موسم",
+      "accident": "حادثہ",
+      "customer_issue": "کسٹمر / ڈاک مسئلہ",
+      "other": "دیگر"
+    },
+    "sectionFuel": "ایندھن",
+    "addFuelStop": "+ ایندھن اسٹاپ شامل کریں",
+    "noFuelStopsYet": "ابھی تک کوئی ایندھن اسٹاپ درج نہیں ہوا۔",
+    "fuelTotalCost": "کل لاگت",
+    "fuelGallons": "گیلن",
+    "fuelStops": "اسٹاپس",
+    "fuelStatePlaceholder": "ST",
+    "fuelStation": "اسٹیشن",
+    "fuelPricePerGallon": "قیمت/گیلن",
+    "fuelComputedTotal": "کل: %{amount}",
+    "fuelValidationError": "ریاست اور گیلن کی مقدار درج کریں۔",
+    "fuelSaveFailed": "یہ ایندھن اسٹاپ محفوظ نہیں ہو سکا — ہو سکتا ہے آپ کو اجازت نہ ہو۔",
+    "fuelSave": "محفوظ کریں",
+    "sectionIfta": "IFTA مائلیج",
+    "iftaTrackingActive": "GPS ٹریکنگ فعال — ریاستی میل درج ہو رہے ہیں",
+    "iftaTrackingPermissionNeeded": "خودکار IFTA مائلیج ٹریکنگ کے لیے سیٹنگز میں \"ہمیشہ اجازت دیں\" مقام تک رسائی فعال کریں۔",
+    "iftaNoCrossingsYet": "ابھی تک کوئی ریاستی کراسنگ درج نہیں ہوئی۔",
+    "iftaManualTag": "دستی",
+    "iftaFallbackWarning": "اس سفر کے لیے GPS ڈیٹا نامکمل لگتا ہے۔ درست IFTA مائلیج کے لیے فی ریاست اپنے میل درج کریں۔",
+    "iftaAddState": "+ ایک اور ریاست شامل کریں",
+    "iftaSaveFallback": "ریاستی مائلیج محفوظ کریں",
+    "iftaTripTotal": "سفر کل: %{miles} میل"
   },
   "loadNew": {
     "heading": "نیا لوڈ",
@@ -69,7 +106,21 @@
     "date": "تاریخ",
     "rate": "ریٹ",
     "submit": "لوڈ بنائیں",
-    "errorCreateFailed": "لوڈ نہیں بن سکا۔ ضروری خانوں کی جانچ کریں اور دوبارہ کوشش کریں۔"
+    "errorCreateFailed": "لوڈ نہیں بن سکا۔ ضروری خانوں کی جانچ کریں اور دوبارہ کوشش کریں۔",
+    "scanAction": "دستاویز اسکین کریں",
+    "scanHeading": "ریٹ کنفرمیشن اسکین کریں",
+    "scanSubheading": "ریٹ کنفرمیشن یا BOL کی تصویر لیں اور ہم لوڈ کی تفصیلات پر کریں گے۔",
+    "scanTakePhoto": "تصویر لیں",
+    "scanChooseFromLibrary": "لائبریری سے منتخب کریں",
+    "scanExtracting": "دستاویز پڑھی جا رہی ہے…",
+    "scanErrorExtractFailed": "یہ دستاویز نہیں پڑھی جا سکی۔ صاف تصویر آزمائیں یا لوڈ دستی طور پر درج کریں۔",
+    "scanReviewHeading": "نکالے گئے لوڈ کا جائزہ لیں",
+    "scanReviewSubheading": "نیچے تفصیلات چیک کریں — جو کچھ غلط لگے اسے تبدیل کریں۔",
+    "scanConfirmCreate": "تصدیق کریں اور لوڈ بنائیں",
+    "address": "پتہ",
+    "zip": "زپ کوڈ",
+    "time": "وقت",
+    "loadNumber": "لوڈ / حوالہ #"
   },
   "offline": {
     "offline": "آپ آف لائن ہیں۔ تبدیلیاں خودکار طور پر سنک ہو جائیں گی۔",
@@ -118,7 +169,6 @@
     "submit": "معائنہ جمع کروائیں",
     "submitted": "معائنہ جمع ہو گیا",
     "backToLoad": "لوڈ پر واپس جائیں",
-    "errorMustCertify": "جمع کروانے سے پہلے آپ کو اس معائنے کی تصدیق کرنی ہوگی۔",
     "errorMissingDescription": "خرابی کے طور پر نشان زد ہر حصے کے لیے تفصیل شامل کریں۔",
     "errorResolveAccount": "اس معائنے کے لیے آپ کا اکاؤنٹ حل نہیں ہو سکا۔",
     "errorSubmitFailed": "معائنہ جمع نہیں ہو سکا۔ دوبارہ کوشش کریں۔",
@@ -130,7 +180,12 @@
     "errorCameraDenied": "کیمرے تک رسائی مسترد کر دی گئی۔ تصویر لینے کے لیے اپنی ڈیوائس کی ترتیبات میں کیمرے کی اجازت فعال کریں۔",
     "errorLibraryDenied": "تصویری لائبریری تک رسائی مسترد کر دی گئی۔ تصویر منتخب کرنے کے لیے اپنی ڈیوائس کی ترتیبات میں تصاویر کی اجازت فعال کریں۔",
     "errorNoImageData": "منتخب کردہ تصویر پڑھی نہیں جا سکی۔ براہ کرم دوبارہ کوشش کریں۔",
-    "photoUploadFailedWarning": "معائنہ محفوظ ہو گیا، لیکن %{count} خرابی کی تصویر(یں) اپ لوڈ نہ ہو سکیں۔ وہ خرابیاں بغیر تصویر کے درج ہوئیں — اپنے ڈسپیچر کو مطلع کریں۔"
+    "photoUploadFailedWarning": "معائنہ محفوظ ہو گیا، لیکن %{count} خرابی کی تصویر(یں) اپ لوڈ نہ ہو سکیں۔ وہ خرابیاں بغیر تصویر کے درج ہوئیں — اپنے ڈسپیچر کو مطلع کریں۔",
+    "signatureLabel": "دستخط",
+    "signHere": "یہاں دستخط کریں",
+    "clearSignature": "صاف کریں",
+    "errorMustSign": "جمع کروانے سے پہلے آپ کو اس معائنے پر دستخط کرنے ہوں گے۔",
+    "signatureUploadFailedWarning": "معائنہ محفوظ ہو گیا، لیکن دستخط اپ لوڈ نہیں ہو سکے۔ اگر دستخط شدہ کاپی درکار ہو تو اپنے ڈسپیچر سے رابطہ کریں۔"
   },
   "settings": {
     "title": "ترتیبات",
@@ -200,12 +255,19 @@
   },
   "fleet": {
     "title": "فلیٹ",
-    "empty": "ابھی تک کوئی گاڑی نہیں۔"
+    "empty": "ابھی تک کوئی گاڑی نہیں۔",
+    "maintenanceLink": "دیکھ بھال"
   },
   "customers": {
     "title": "کسٹمرز",
     "empty": "ابھی تک کوئی کسٹمر نہیں۔",
-    "noContact": "کوئی رابطہ معلومات دستیاب نہیں"
+    "noContact": "کوئی رابطہ معلومات دستیاب نہیں",
+    "notFound": "کسٹمر نہیں ملا۔",
+    "loads": "لوڈز",
+    "revenue": "آمدنی",
+    "notes": "نوٹس",
+    "recentLoads": "حالیہ لوڈز",
+    "noLoadsYet": "ابھی تک کوئی لوڈ نہیں۔"
   },
   "invoices": {
     "title": "انوائسز",
@@ -216,11 +278,34 @@
       "sent": "بھیج دیا گیا",
       "paid": "ادا شدہ",
       "overdue": "تاخیر شدہ"
-    }
+    },
+    "notFound": "انوائس نہیں ملا۔",
+    "amount": "رقم",
+    "sentAt": "بھیجا گیا",
+    "notSentYet": "ابھی تک نہیں بھیجا گیا",
+    "openedAt": "کھولا گیا",
+    "notOpenedYet": "ابھی تک نہیں کھولا گیا",
+    "opened": "کھولا گیا",
+    "paidAt": "ادا کیا گیا",
+    "notPaidYet": "ابھی تک ادا نہیں کیا گیا",
+    "editDraft": "ڈرافٹ میں ترمیم کریں",
+    "notes": "نوٹس",
+    "saveDraft": "ڈرافٹ محفوظ کریں",
+    "saved": "محفوظ ہو گیا",
+    "markSent": "بھیجا گیا نشان زد کریں (کسٹمر کو ای میل کرتا ہے)",
+    "markPaid": "ادا شدہ نشان زد کریں",
+    "errorInvalidAmount": "ایک درست رقم درج کریں۔",
+    "errorSaveFailed": "تبدیلیاں محفوظ نہیں ہو سکیں۔ دوبارہ کوشش کریں۔",
+    "errorSendFailed": "یہ انوائس نہیں بھیجا جا سکا۔ دوبارہ کوشش کریں۔",
+    "errorMarkPaidFailed": "اس انوائس کو ادا شدہ نشان زد نہیں کیا جا سکا۔ دوبارہ کوشش کریں۔"
   },
   "reports": {
     "comingSoon": "جلد آ رہا ہے",
-    "comingSoonDetail": "رپورٹنگ ابھی دستیاب نہیں ہے — مستقبل کی اپڈیٹ میں دوبارہ چیک کریں۔"
+    "comingSoonDetail": "رپورٹنگ ابھی دستیاب نہیں ہے — مستقبل کی اپڈیٹ میں دوبارہ چیک کریں۔",
+    "iftaTitle": "IFTA مائلیج",
+    "iftaQuarter": "سہ ماہی %{quarter}",
+    "iftaTotalMiles": "کل میل",
+    "iftaNoData": "اس سہ ماہی میں ابھی تک کوئی ریاستی مائلیج درج نہیں ہوئی۔"
   },
   "myLoadTab": {
     "heading": "میرا لوڈ",
@@ -234,14 +319,16 @@
     "expired": "میعاد ختم",
     "expiringSoon": "جلد ختم ہونے والا",
     "valid": "درست",
-    "noExpiry": "درج نہیں"
+    "noExpiry": "درج نہیں",
+    "preTripDvirNudge": "روانہ ہونے سے پہلے اپنا پری ٹرپ معائنہ کریں"
   },
   "dvirTab": {
     "heading": "DVIR",
     "startPreTrip": "پری ٹرپ DVIR شروع کریں",
     "startPostTrip": "پوسٹ ٹرپ DVIR شروع کریں",
     "noActiveLoad": "DVIR کے لیے ایک فعال لوڈ درکار ہے۔",
-    "noActiveLoadDetail": "جب آپ کے پاس فعال لوڈ ہو، تو آپ یہاں پری ٹرپ یا پوسٹ ٹرپ معائنہ شروع کر سکتے ہیں۔"
+    "noActiveLoadDetail": "جب آپ کے پاس فعال لوڈ ہو، تو آپ یہاں پری ٹرپ یا پوسٹ ٹرپ معائنہ شروع کر سکتے ہیں۔",
+    "viewHistory": "ہسٹری دیکھیں"
   },
   "history": {
     "title": "تاریخ",
@@ -285,7 +372,10 @@
     "tier_pro": "Pro",
     "tier_enterprise": "Enterprise",
     "trialStatus": "ٹرائل کی حیثیت",
-    "trialDaysLeft": { "one": "%{count} دن باقی", "other": "%{count} دن باقی" },
+    "trialDaysLeft": {
+      "one": "%{count} دن باقی",
+      "other": "%{count} دن باقی"
+    },
     "trialEnded": "ٹرائل ختم ہو گیا",
     "paymentMethod": "ادائیگی کا طریقہ",
     "cardOnFile": "%{brand} — آخری ہندسے %{last4}",
@@ -315,5 +405,54 @@
     "errorResolveAccount": "آپ کا کیریئر اکاؤنٹ معلوم نہیں کیا جا سکا۔",
     "errorUploadFailed": "اپ لوڈ ناکام ہوا۔ اپنا کنکشن جانچیں اور دوبارہ کوشش کریں۔",
     "errorSaveFailed": "تصویر اس لوڈ کے ساتھ محفوظ نہیں ہو سکی۔ اپ لوڈ ہٹا دیا گیا — براہ کرم دوبارہ کوشش کریں۔"
+  },
+  "dvirHistory": {
+    "title": "DVIR ہسٹری",
+    "empty": "ابھی تک کوئی معائنہ نہیں۔",
+    "preTrip": "سفر سے پہلے",
+    "postTrip": "سفر کے بعد",
+    "satisfactory": "تسلی بخش",
+    "defectsNoted": "خرابیاں درج",
+    "signed": "دستخط شدہ",
+    "notSigned": "دستخط نہیں"
+  },
+  "driverProfile": {
+    "linkLabel": "ڈرائیور کی معلومات",
+    "title": "ڈرائیور کی معلومات",
+    "subheading": "اپنی CDL اور ایمرجنسی رابطہ کی تفصیلات اپ ڈیٹ رکھیں۔ آپ کا ڈسپیچر میعاد ختم ہونے کی تاریخیں اور ملازمت کی حیثیت کا انتظام کرتا ہے۔",
+    "completeProfileNudge": "اپنی CDL اور ایمرجنسی رابطہ کی معلومات شامل کریں",
+    "cdlSection": "CDL",
+    "cdlNumber": "CDL نمبر",
+    "cdlNumberPlaceholder": "مثلاً D1234567",
+    "cdlClass": "کلاس",
+    "cdlState": "جاری کرنے والی ریاست",
+    "endorsements": "توثیقات",
+    "endorsement_hazmat": "خطرناک مواد",
+    "endorsement_tanker": "ٹینکر",
+    "endorsement_doubles": "ڈبل/ٹرپل",
+    "endorsement_airbrakes": "ایئر بریکس",
+    "endorsement_passenger": "مسافر",
+    "readOnlyNote": "CDL میعاد ختم: %{cdlExpiry} · طبی سرٹیفکیٹ میعاد: %{medCertExpiry} — انہیں اپ ڈیٹ کرنے کے لیے اپنے ڈسپیچر سے پوچھیں۔",
+    "notOnFile": "فائل میں نہیں",
+    "emergencyContactSection": "ایمرجنسی رابطہ",
+    "emergencyName": "نام",
+    "emergencyPhone": "فون",
+    "emergencyRelation": "رشتہ",
+    "emergencyRelationPlaceholder": "مثلاً شریک حیات",
+    "defaultVehicle": "ڈیفالٹ گاڑی",
+    "noDefaultVehicle": "کوئی نہیں",
+    "save": "محفوظ کریں",
+    "saved": "محفوظ ہو گیا",
+    "errorSaveFailed": "آپ کی معلومات محفوظ نہیں ہو سکیں۔ دوبارہ کوشش کریں۔"
+  },
+  "maintenanceOverview": {
+    "title": "دیکھ بھال",
+    "empty": "کوئی فعال دیکھ بھال یاد دہانی نہیں۔",
+    "noDueDate": "کوئی مقررہ تاریخ نہیں",
+    "milesValue": "%{miles} میل",
+    "status_overdue": "واجب الادا",
+    "status_dueSoon": "جلد واجب",
+    "status_ok": "ٹھیک",
+    "status_noDate": "کوئی تاریخ نہیں"
   }
 }

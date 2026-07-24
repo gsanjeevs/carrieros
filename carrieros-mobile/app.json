@@ -34,7 +34,17 @@
         }
       ],
       "expo-secure-store",
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "CarrierOS logs which states you drive through while a load is in transit, so your IFTA mileage report is accurate — including while the app is in the background.",
+          "locationWhenInUsePermission": "CarrierOS uses your location to share live status with dispatch and log fuel/mileage stops.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

@@ -59,7 +59,7 @@ export default async function InvoicesPage({
   let query = supabase
     .from('invoices')
     .select(`
-      id, invoice_number, amount, status, due_date, payment_method, customer_org_id,
+      id, invoice_number, amount, status, due_date, payment_method, customer_org_id, opened_at,
       loads ( load_number, customer_name_raw ),
       organizations!invoices_customer_org_id_fkey ( name )
     `)
@@ -164,9 +164,14 @@ export default async function InvoicesPage({
                     ) : '—'}
                   </TableCell>
                   <TableCell>
-                    <StatusBadge variant={invoiceStatusVariant((inv.status ?? 'draft') as InvoiceStatus)}>
-                      {t(`status_${inv.status ?? 'draft'}`)}
-                    </StatusBadge>
+                    <div className="flex items-center gap-1.5">
+                      <StatusBadge variant={invoiceStatusVariant((inv.status ?? 'draft') as InvoiceStatus)}>
+                        {t(`status_${inv.status ?? 'draft'}`)}
+                      </StatusBadge>
+                      {inv.opened_at && (
+                        <span className="material-symbols-outlined text-success text-[16px]" title={t('opened')}>visibility</span>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>{formatDate(inv.due_date, profile)}</TableCell>
                   <TableCell>{t(`method_${inv.payment_method}`)}</TableCell>

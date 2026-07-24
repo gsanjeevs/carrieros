@@ -147,6 +147,10 @@ export default async function InvoiceDetailPage({
                 value={invoice.sent_at ? formatDateTime(invoice.sent_at, profile) : t('notSentYet')}
               />
               <InfoRow
+                label={t('openedAt')}
+                value={invoice.opened_at ? formatDateTime(invoice.opened_at, profile) : t('notOpenedYet')}
+              />
+              <InfoRow
                 label={t('paidAt')}
                 value={invoice.paid_at ? formatDateTime(invoice.paid_at, profile) : t('notPaidYet')}
               />

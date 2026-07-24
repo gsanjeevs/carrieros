@@ -106,9 +106,14 @@ export default function MyLoadsScreen() {
             {role === 'driver' ? t('loads.titleDriver') : t('loads.titleOffice')}
           </ThemedText>
           {(role === 'owner' || role === 'solo' || role === 'dispatcher') && (
-            <Pressable onPress={() => router.push('/load/new')} style={styles.newLoadButton}>
-              <ThemedText type="smallBold" style={{ color: '#ffffff' }}>{t('loadNew.newLoadAction')}</ThemedText>
-            </Pressable>
+            <ThemedView style={styles.newLoadButtonGroup} type="background">
+              <Pressable onPress={() => router.push('/load/new-from-photo')} style={styles.scanButton}>
+                <ThemedText type="smallBold" themeColor="text">{t('loadNew.scanAction')}</ThemedText>
+              </Pressable>
+              <Pressable onPress={() => router.push('/load/new')} style={styles.newLoadButton}>
+                <ThemedText type="smallBold" style={{ color: '#ffffff' }}>{t('loadNew.newLoadAction')}</ThemedText>
+              </Pressable>
+            </ThemedView>
           )}
         </ThemedView>
 
@@ -175,6 +180,8 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, paddingHorizontal: Spacing.three },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.three },
   heading: { fontSize: 24 },
+  newLoadButtonGroup: { flexDirection: 'row', gap: Spacing.two },
+  scanButton: { borderWidth: 1, borderColor: '#f97316', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 8 },
   newLoadButton: { backgroundColor: '#f97316', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 8 },
   listContent: { gap: Spacing.two, paddingBottom: Spacing.four },
   empty: { textAlign: 'center', marginTop: Spacing.five },

@@ -6,6 +6,7 @@ import { getTranslations, getLocale } from 'next-intl/server'
 import VehicleTabs from './VehicleTabs'
 import FuelStopsSection, { type FuelStopRow } from '@/components/FuelStopsSection'
 import VehicleDocuments, { type VehicleDocType, type VehicleDocument } from '@/components/VehicleDocuments'
+import VehiclePhotoUpload from './VehiclePhotoUpload'
 import { VEHICLE_TYPE_ICONS } from '@/components/icons/vehicle-types'
 import { MAINTENANCE_ICONS } from '@/components/icons/maintenance'
 import { formatDate, formatDateTime, toDate } from '@/lib/format-datetime'
@@ -13,6 +14,7 @@ import { formatMoney } from '@/lib/format-money'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import { vehicleStatusVariant, type VehicleStatus } from '@/lib/domain/vehicle-status'
 import { Card, CardHeader, CardBody, KpiTile, StatusBadge, type StatusBadgeVariant, Table, TableHeaderCell, TableRow, TableCell, ProgressBar, EmptyState } from '@/components/ui'
+import { createStorageProvider } from '@/lib/storage'
 
 type MaintStatus = 'overdue' | 'dueSoon' | 'ok' | 'noDate'
 
@@ -122,6 +124,13 @@ export default async function VehicleDetailPage({
   const TypeIcon = vt ? VEHICLE_TYPE_ICONS[vt.code] : undefined
 
   const canManage = ['owner', 'solo'].includes(profile.role)
+
+  const storage = createStorageProvider(supabase)
+
+  let photoUrl: string | null = null
+  if (vehicle.photo_path) {
+    photoUrl = await storage.getSignedUrl(vehicle.photo_path, 60 * 60).catch(() => null)
+  }
   const showRate = ['owner', 'solo', 'finance'].includes(profile.role)
 
   // ─── Documents ───
@@ -230,11 +239,23 @@ export default async function VehicleDetailPage({
   // ─── DVIRs ───
   const { data: dvirData } = await supabase
     .from('dvir_inspections')
-    .select('id, type, condition, odometer, submitted_at, drivers(profiles(first_name, last_name)), dvir_defects(id, area, description, severity)')
+    .select('id, type, condition, odometer, signature_url, submitted_at, drivers(profiles(first_name, last_name)), dvir_defects(id, area, description, severity)')
     .eq('vehicle_id', vehicle.id)
     .order('submitted_at', { ascending: false })
 
   const dvirs = dvirData ?? []
+  const dvirSignatureUrls = new Map<number, string>()
+  const dvirsWithSignature = dvirs.filter((d) => d.signature_url)
+  if (dvirsWithSignature.length > 0) {
+    const results = await Promise.allSettled(
+      dvirsWithSignature.map((d) => storage.getSignedUrl(d.signature_url!, 60 * 60))
+    )
+    results.forEach((res, i) => {
+      if (res.status === 'fulfilled') {
+        dvirSignatureUrls.set(dvirsWithSignature[i].id, res.value)
+      }
+    })
+  }
 
   const ymm = [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(' ')
   const label = vehicle.nickname ? `${vehicle.vehicle_number} — ${vehicle.nickname}` : (vehicle.vehicle_number ?? '')
@@ -490,6 +511,14 @@ export default async function VehicleDetailPage({
                   {driverName && <span>{driverName}</span>}
                   {d.odometer != null && <span>{d.odometer.toLocaleString()} mi</span>}
                 </div>
+                <div className="flex items-center gap-2 mt-2">
+                  {dvirSignatureUrls.has(d.id) ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- signed, expiring Supabase Storage URL, not a static asset next/image can cache
+                    <img src={dvirSignatureUrls.get(d.id)} alt="" className="h-8 bg-white rounded border border-divider-ui px-1" />
+                  ) : (
+                    <span className="text-text-mut text-xs">{t('dvirNotSigned')}</span>
+                  )}
+                </div>
                 {hasDefects && defects.length > 0 && (
                   <ul className="mt-2 space-y-1">
                     {defects.map((def) => (
@@ -522,6 +551,9 @@ export default async function VehicleDetailPage({
           </StatusBadge>
         </div>
         <p className="text-text-sec text-sm ml-9">{ymm || vt ? [ymm, vt ? t(`type_${vt.code}` as never) : null].filter(Boolean).join(' · ') : ''}</p>
+        <div className="ml-9 mt-2">
+          <VehiclePhotoUpload vehicleId={vehicle.id} orgId={profile.org_id} photoUrl={photoUrl} canUpload={canManage} />
+        </div>
       </div>
 
       <VehicleTabs

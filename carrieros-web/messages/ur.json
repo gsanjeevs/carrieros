@@ -39,6 +39,7 @@
     "drivers": "ڈرائیورز",
     "vehicles": "گاڑیاں",
     "customers": "گاہک",
+    "finance": "فنانس حب",
     "invoices": "انوائسز",
     "settlements": "سیٹلمنٹس",
     "exceptions": "استثنائی معاملات",
@@ -59,7 +60,9 @@
     "forgotPassword": "پاسورڈ بھول گئے؟",
     "signIn": "سائن ان",
     "needAccess": "رسائی درکار ہے؟ اپنے منتظم سے رابطہ کریں",
-    "invalidCredentials": "غلط ای میل یا پاسورڈ"
+    "invalidCredentials": "غلط ای میل یا پاسورڈ",
+    "noAccount": "اکاؤنٹ نہیں ہے؟",
+    "signUpFree": "مفت سائن اپ کریں"
   },
   "onboarding": {
     "heading": "آئیے آپ کی کیریئر سیٹ اپ کریں",
@@ -107,14 +110,23 @@
     "emailIntakeComingSoon": "ای میل کے ذریعے لوڈ وصول کرنا جلد آ رہا ہے۔",
     "goToDashboard": "ڈیش بورڈ پر جائیں",
     "addFirstLoad": "پہلا لوڈ شامل کریں",
-    "stepLabel_company": "مرحلہ 1 از 6 — کمپنی",
-    "stepLabel_profile": "مرحلہ 2 از 6 — آپ کی معلومات",
-    "stepLabel_vehicle": "مرحلہ 3 از 6 — گاڑی",
-    "stepLabel_customer": "مرحلہ 4 از 6 — کسٹمر",
-    "stepLabel_billing": "مرحلہ 5 از 6 — بلنگ",
-    "stepLabel_completion": "مرحلہ 6 از 6 — مکمل",
+    "stepLabel_company": "مرحلہ 1 از 7 — کمپنی",
+    "stepLabel_profile": "مرحلہ 2 از 7 — آپ کی معلومات",
+    "stepLabel_vehicle": "مرحلہ 4 از 7 — گاڑی",
+    "stepLabel_customer": "مرحلہ 5 از 7 — کسٹمر",
+    "stepLabel_billing": "مرحلہ 6 از 7 — بلنگ",
+    "stepLabel_completion": "مرحلہ 7 از 7 — مکمل",
     "streetAddress": "گلی کا پتہ",
-    "zip": "زپ / پوسٹل کوڈ"
+    "zip": "زپ / پوسٹل کوڈ",
+    "ein": "EIN (ایمپلائر شناختی نمبر)",
+    "defaultNetTerms": "ڈیفالٹ ادائیگی کی شرائط",
+    "netTermsOption": "نیٹ {days} دن",
+    "stepLogoTitle": "اپنی کمپنی کا لوگو شامل کریں",
+    "stepLogoSubtitle": "انوائسز، عوامی ٹریکنگ صفحہ اور آپ کی کسٹمر ڈائریکٹری میں دکھایا جاتا ہے۔",
+    "uploadLogo": "لوگو اپ لوڈ کریں",
+    "replaceLogo": "لوگو تبدیل کریں",
+    "logoUploadFailed": "آپ کا لوگو اپ لوڈ نہیں ہو سکا۔ آپ بعد میں ترتیبات سے شامل کر سکتے ہیں۔",
+    "stepLabel_logo": "مرحلہ 3 از 7 — لوگو"
   },
   "dashboard": {
     "title": "فلیٹ کا جائزہ",
@@ -280,7 +292,12 @@
     "iftaSaveFailed": "وہ کراسنگ محفوظ نہیں ہو سکی۔ براہ کرم دوبارہ کوشش کریں۔",
     "iftaCancel": "منسوخ کریں",
     "iftaSave": "محفوظ کریں",
-    "iftaSaving": "محفوظ ہو رہا ہے…"
+    "iftaSaving": "محفوظ ہو رہا ہے…",
+    "shareCopyLink": "لنک کاپی کریں",
+    "shareViaSms": "ٹیکسٹ کے ذریعے شیئر کریں",
+    "shareViaEmail": "ای میل کے ذریعے شیئر کریں",
+    "shareMessage": "لوڈ {loadNumber} ٹریک کریں:",
+    "shareEmailSubject": "لوڈ {loadNumber} کے لیے ٹریکنگ لنک"
   },
   "drivers": {
     "title": "ڈرائیورز",
@@ -495,7 +512,12 @@
     "fuelSaveFailed": "وہ ایندھن سٹاپ محفوظ نہیں ہو سکا۔ براہ کرم دوبارہ کوشش کریں۔",
     "fuelCancel": "منسوخ کریں",
     "fuelSave": "محفوظ کریں",
-    "fuelSaving": "محفوظ ہو رہا ہے…"
+    "fuelSaving": "محفوظ ہو رہا ہے…",
+    "noDriverAssigned": "کوئی ڈرائیور تفویض نہیں",
+    "uploadPhoto": "تصویر اپ لوڈ کریں",
+    "replacePhoto": "تصویر تبدیل کریں",
+    "photoUploadFailed": "تصویر اپ لوڈ نہیں ہو سکی۔ دوبارہ کوشش کریں۔",
+    "dvirNotSigned": "دستخط نہیں"
   },
   "companyDocuments": {
     "title": "کمپنی کے دستاویزات",
@@ -590,7 +612,10 @@
     "createInvoicePrefill": "{customer} کو {amount}، اس لوڈ کے ریٹ کے مطابق۔",
     "createInvoiceNetTerms": "30 دن میں واجب الادا۔ بنانے کے بعد ادائیگی کا طریقہ بدل سکتے ہیں۔",
     "createInvoice": "انوائس بنائیں",
-    "creating": "بنایا جا رہا ہے…"
+    "creating": "بنایا جا رہا ہے…",
+    "opened": "کھولا گیا",
+    "openedAt": "کھولا گیا",
+    "notOpenedYet": "ابھی تک نہیں کھولا گیا"
   },
   "settlements": {
     "title": "سیٹلمنٹس",
@@ -644,7 +669,9 @@
     "upgradeRequired": "لائیو ڈسپیچ نقشے کے لیے Growth پلان یا اس سے اوپر درکار ہے۔",
     "noActiveLocations": "ابھی تک کسی فعال لوڈ نے مقام شیئر نہیں کیا۔",
     "queueTitle": "ڈسپیچ درکار ہے",
-    "noQueue": "ڈسپیچ ہونے کے انتظار میں کچھ نہیں۔"
+    "noQueue": "ڈسپیچ ہونے کے انتظار میں کچھ نہیں۔",
+    "dispatchAction": "ڈسپیچ →",
+    "dispatchModalTitle": "{loadNumber} ڈسپیچ کریں"
   },
   "settings": {
     "title": "پروفائل کی ترتیبات",
@@ -701,7 +728,14 @@
     "role_finance": "فنانس",
     "roleHelp_dispatcher": "لوڈ تفویض، ڈرائیور اور ڈسپیچ سنبھال سکتا ہے۔ ریٹ یا انوائس نہیں دیکھ سکتا۔",
     "roleHelp_finance": "انوائس، ریٹ اور مالیاتی رپورٹس دیکھ سکتا ہے۔ ڈسپیچ نہیں کر سکتا۔",
-    "roleHelp_owner": "مکمل رسائی، بشمول ٹیم مینجمنٹ اور بلنگ۔"
+    "roleHelp_owner": "مکمل رسائی، بشمول ٹیم مینجمنٹ اور بلنگ۔",
+    "permissionPreviewTitle": "یہ کردار یہ کر سکے گا:",
+    "permissionArea_loadsDispatch": "لوڈز بنائیں اور بھیجیں",
+    "permissionArea_ratesInvoices": "ریٹس، انوائسز اور مالی رپورٹس دیکھیں",
+    "permissionArea_customers": "کسٹمر ڈائریکٹری دیکھیں",
+    "permissionArea_teamBilling": "ٹیم ممبران اور بلنگ کا انتظام کریں",
+    "permissionArea_reports": "رپورٹس اور IFTA خلاصے دیکھیں",
+    "permissionArea_driverApp": "ڈرائیور موبائل ایپ استعمال کریں (لوڈز، DVIR، دستاویزات)"
   },
   "billing": {
     "title": "بلنگ",
@@ -816,7 +850,12 @@
     "contactsRevokeConfirm": "کیا اس رابطے کی پورٹل رسائی منسوخ کرنی ہے؟ انہیں سائن آؤٹ کر دیا جائے گا اور وہ ٹریکنگ، لوڈز یا انوائسز نہیں دیکھ سکیں گے۔",
     "contactsNoEmail": "اس رابطے کو دعوت دینے سے پہلے ایک ای میل ایڈریس شامل کریں",
     "contactsAddNew": "ایک رابطہ شامل کریں",
-    "contactsAdd": "رابطہ شامل کریں"
+    "contactsAdd": "رابطہ شامل کریں",
+    "revenue": "آمدنی",
+    "lastLoad": "آخری لوڈ",
+    "daysAgo": "{days, plural, =0 {آج} one {# دن پہلے} other {# دن پہلے}}",
+    "relationshipsGoingCold": "{count, plural, one {# تعلق ٹھنڈا ہو رہا ہے} other {# تعلقات ٹھنڈے ہو رہے ہیں}}",
+    "coldCustomerLine": "{name} — {days} دن"
   },
   "maintenance": {
     "title": "دیکھ بھال",
@@ -870,5 +909,70 @@
   },
   "language": {
     "appliesEverywhere": "آپ کی زبان کی ترجیح پوری ایپ پر لاگو ہوتی ہے۔"
+  },
+  "signup": {
+    "tagline": "اپنے فون سے اپنا ٹرکنگ کاروبار چلائیں۔ کوئی اسپریڈشیٹ نہیں۔",
+    "choosePlan": "اپنا پلان منتخب کریں",
+    "trialNotice": "90 دن تک آپ سے کوئی چارج نہیں لیا جائے گا۔ کسی بھی وقت منسوخ کریں۔",
+    "continueBtn": "جاری رکھیں",
+    "mostPopular": "سب سے مقبول",
+    "perMonth": "/ماہ",
+    "trucksIncluded": "{count, plural, one {# ٹرک شامل} other {# ٹرک شامل}} · +${additional}/اضافی",
+    "alreadyHaveAccount": "پہلے سے اکاؤنٹ ہے؟",
+    "signIn": "سائن ان",
+    "changePlan": "پلان تبدیل کریں",
+    "createAccount": "اپنا اکاؤنٹ بنائیں",
+    "yourName": "آپ کا نام",
+    "email": "ای میل",
+    "password": "پاسورڈ",
+    "passwordHint": "کم از کم 8 حروف",
+    "createAccountBtn": "اکاؤنٹ بنائیں",
+    "creatingAccount": "اکاؤنٹ بن رہا ہے…",
+    "missingFields": "براہ کرم تمام خانے پُر کریں۔",
+    "weakPassword": "پاسورڈ کم از کم 8 حروف کا ہونا چاہیے۔",
+    "emailExists": "اس ای میل کے ساتھ اکاؤنٹ پہلے سے موجود ہے۔",
+    "signupFailed": "اکاؤنٹ بنانے میں کچھ غلط ہو گیا۔ دوبارہ کوشش کریں۔"
+  },
+  "finance": {
+    "title": "فنانس حب",
+    "upgradeRequired": "فنانس اور IFTA حب کے لیے Pro میں اپ گریڈ کریں",
+    "upgradeRequiredDetail": "مکمل IFTA ٹیکس حساب، انوائس پائپ لائن، ڈرائیور تصفیے، ایندھن تجزیہ، اور روٹ آمدنی — سب ایک جگہ۔",
+    "kpiRevenue": "آمدنی (ادا شدہ)",
+    "kpiRevenueSub": "اس سہ ماہی",
+    "kpiOutstanding": "واجب الادا",
+    "kpiOverdueCount": "{count, plural, one {# انوائس واجب الادا} other {# انوائسز واجب الادا}}",
+    "kpiRevenuePerMile": "آمدنی / میل",
+    "kpiRevenuePerMileSub": "{miles} کل میل",
+    "kpiIftaTaxDue": "IFTA ٹیکس واجب الادا",
+    "kpiIftaTaxDueSub": "خالص، اس سہ ماہی",
+    "iftaBreakdownTitle": "IFTA — ریاستی تفصیل",
+    "iftaBreakdownSub": "{quarter}",
+    "iftaNoData": "اس سہ ماہی میں ابھی تک کوئی IFTA مائلیج درج نہیں ہوئی۔",
+    "colState": "ریاست",
+    "colMiles": "میل",
+    "colNetDue": "خالص واجب الادا",
+    "invoicePipelineTitle": "انوائس پائپ لائن",
+    "invoicePipelineSub": "{count, plural, one {# انوائس} other {# انوائسز}}",
+    "noInvoices": "ابھی تک کوئی انوائس نہیں۔",
+    "settlementsTitle": "ڈرائیور تصفیے",
+    "settlementsSub": "{quarter}",
+    "noSettlements": "اس سہ ماہی کوئی تصفیہ نہیں۔",
+    "fuelCostTitle": "فی میل ایندھن لاگت — بلحاظ ڈرائیور",
+    "fuelCostSub": "فلیٹ اوسط: {avg}/میل",
+    "noFuelData": "اس سہ ماہی کوئی ایندھن ڈیٹا درج نہیں ہوا۔",
+    "laneRevenueTitle": "فی میل آمدنی — سرفہرست روٹس",
+    "laneRevenueSub": "اس سہ ماہی",
+    "colLane": "روٹ",
+    "colLoads": "لوڈز",
+    "colRatePerMile": "$/میل",
+    "noLaneData": "اس سہ ماہی کوئی مکمل روٹ نہیں۔",
+    "kpiOverdueAmount": "واجب الادا رقم",
+    "kpiOverdueAmountSub": "{count} واجب الادا انوائس",
+    "kpiAvgDaysToPay": "اوسط ادائیگی دن",
+    "kpiAvgDaysToPayValue": "{days} دن",
+    "kpiAvgDaysToPaySub": "{count} ادا شدہ انوائسز میں سے",
+    "invoiceAgingTitle": "انوائس کی عمر",
+    "invoiceAgingSub": "واجب الادا انوائسز تاخیر کے دنوں کے مطابق",
+    "invoiceOpened": "کھولا گیا"
   }
 }

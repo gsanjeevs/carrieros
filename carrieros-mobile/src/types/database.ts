@@ -165,6 +165,7 @@ export type Database = {
           card_brand: string | null
           card_last4: string | null
           default_language: string
+          default_net_terms_days: number
           default_payment_method: string
           dot_number: string | null
           factoring_company: string | null
@@ -183,6 +184,7 @@ export type Database = {
           card_brand?: string | null
           card_last4?: string | null
           default_language?: string
+          default_net_terms_days?: number
           default_payment_method?: string
           dot_number?: string | null
           factoring_company?: string | null
@@ -201,6 +203,7 @@ export type Database = {
           card_brand?: string | null
           card_last4?: string | null
           default_language?: string
+          default_net_terms_days?: number
           default_payment_method?: string
           dot_number?: string | null
           factoring_company?: string | null
@@ -1124,6 +1127,7 @@ export type Database = {
           invoice_number: string
           load_id: number | null
           notes: string | null
+          opened_at: string | null
           paid_at: string | null
           payment_method: string
           sent_at: string | null
@@ -1142,6 +1146,7 @@ export type Database = {
           invoice_number: string
           load_id?: number | null
           notes?: string | null
+          opened_at?: string | null
           paid_at?: string | null
           payment_method?: string
           sent_at?: string | null
@@ -1160,6 +1165,7 @@ export type Database = {
           invoice_number?: string
           load_id?: number | null
           notes?: string | null
+          opened_at?: string | null
           paid_at?: string | null
           payment_method?: string
           sent_at?: string | null
@@ -1676,6 +1682,7 @@ export type Database = {
           country: string | null
           created_at: string | null
           currency: string | null
+          ein: string | null
           email: string | null
           id: number
           logo_path: string | null
@@ -1691,6 +1698,7 @@ export type Database = {
           country?: string | null
           created_at?: string | null
           currency?: string | null
+          ein?: string | null
           email?: string | null
           id?: number
           logo_path?: string | null
@@ -1706,6 +1714,7 @@ export type Database = {
           country?: string | null
           created_at?: string | null
           currency?: string | null
+          ein?: string | null
           email?: string | null
           id?: number
           logo_path?: string | null

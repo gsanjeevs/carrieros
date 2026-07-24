@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Button, Input, Modal } from '@/components/ui'
+import PermissionPreview from '@/components/PermissionPreview'
 
 type Vehicle = {
   id: number
@@ -150,6 +151,8 @@ export default function InviteDriverButton({ vehicles, variant }: { vehicles: Ve
               ))}
             </Input>
           </div>
+
+          <PermissionPreview role="driver" />
 
           {error && (
             <div className="rounded-lg bg-danger/10 border border-danger/20 px-4 py-3 text-danger text-sm">

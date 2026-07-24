@@ -55,6 +55,7 @@ const ERROR_SURFACES = [
   "app/(app)/dispatch/**/*.tsx",
   "app/(app)/exceptions/**/*.tsx",
   "app/(app)/settings/**/*.tsx",
+  "app/(app)/finance/**/*.tsx",
 ];
 const uiComponentPatternGuardError = {
   files: ERROR_SURFACES,

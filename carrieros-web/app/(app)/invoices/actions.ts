@@ -11,8 +11,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { generateInvoiceNumber } from '@/lib/generate-number'
-import { sendEmail } from '@/lib/send-email'
-import { formatMoney } from '@/lib/format-money'
+import { sendInvoiceAndMarkSent } from '@/lib/invoice-actions'
 import { revalidatePath } from 'next/cache'
 import { INVOICE_ROLES } from '@/lib/roles-policy'
 import { getProfileForUser } from '@/lib/queries/profiles'
@@ -153,68 +152,12 @@ export async function markInvoiceSent(invoiceId: number): Promise<ActionResult> 
   if ('error_code' in ctx) return { ok: false, error_code: ctx.error_code }
   const { supabase, orgId } = ctx
 
-  const { data: invoice, error: invoiceError } = await supabase
-    .from('invoices')
-    .select(`
-      invoice_number, amount, due_date, customer_org_id,
-      loads ( load_number, tracking_token ),
-      organizations!invoices_customer_org_id_fkey ( name, email )
-    `)
-    .eq('id', invoiceId)
-    .eq('carrier_org_id', orgId)
-    .maybeSingle()
-
-  if (invoiceError) return { ok: false, error_code: 'SERVER_ERROR' }
-  if (!invoice) return { ok: false, error_code: 'NOT_FOUND' }
-
-  const customerOrg = Array.isArray(invoice.organizations)
-    ? invoice.organizations[0]
-    : invoice.organizations
-  const load = Array.isArray(invoice.loads) ? invoice.loads[0] : invoice.loads
-  const recipient = customerOrg?.email ?? null
-
-  let warningCode: string | undefined
-  if (recipient) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    const trackingLink = load?.tracking_token ? `${appUrl}/track/${load.tracking_token}` : null
-
-    const html = `
-      <p>Hello${customerOrg?.name ? ` ${customerOrg.name}` : ''},</p>
-      <p>Invoice <strong>${invoice.invoice_number}</strong> for
-      <strong>${formatMoney(invoice.amount)}</strong> is now due${invoice.due_date ? ` by ${invoice.due_date}` : ''}.</p>
-      ${trackingLink ? `<p><a href="${trackingLink}">Track this shipment</a></p>` : ''}
-      <p>— CarrierOS</p>
-    `.trim()
-
-    const result = await sendEmail({
-      to: recipient,
-      subject: `Invoice ${invoice.invoice_number}`,
-      html,
-    })
-
-    if (!result.ok) return { ok: false, error_code: 'EMAIL_SEND_FAILED' }
-  } else {
-    // No customer contact email on file. Documented behavior (per the invoice
-    // action's contract): still mark the invoice sent — the carrier may be
-    // sending it by another means — but surface a warning rather than
-    // silently pretending an email went out.
-    warningCode = 'NO_RECIPIENT_EMAIL'
-  }
-
-  const { data, error } = await supabase
-    .from('invoices')
-    .update({ status: 'sent', sent_at: new Date().toISOString() })
-    .eq('id', invoiceId)
-    .eq('carrier_org_id', orgId)
-    .select('invoice_number')
-    .maybeSingle()
-
-  if (error) return { ok: false, error_code: 'SERVER_ERROR' }
-  if (!data) return { ok: false, error_code: 'NOT_FOUND' }
+  const result = await sendInvoiceAndMarkSent(supabase, orgId, invoiceId)
+  if (!result.ok) return result
 
   revalidatePath('/invoices')
-  revalidatePath(`/invoices/${data.invoice_number}`)
-  return { ok: true, invoice_number: data.invoice_number, warning_code: warningCode }
+  revalidatePath(`/invoices/${result.invoice_number}`)
+  return result
 }
 
 /** Marks an invoice paid. */
