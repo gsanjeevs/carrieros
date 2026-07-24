@@ -15,6 +15,8 @@ import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import { vehicleStatusVariant, type VehicleStatus } from '@/lib/domain/vehicle-status'
 import { Card, CardHeader, CardBody, KpiTile, StatusBadge, type StatusBadgeVariant, Table, TableHeaderCell, TableRow, TableCell, ProgressBar, EmptyState } from '@/components/ui'
 import { createStorageProvider } from '@/lib/storage'
+import { getProfileForUser } from '@/lib/queries/profiles'
+import { listLoadsForVehicle } from '@/lib/queries/loads'
 
 type MaintStatus = 'overdue' | 'dueSoon' | 'ok' | 'noDate'
 
@@ -95,11 +97,7 @@ export default async function VehicleDetailPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role, date_format, time_format')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) redirect('/onboarding')
 
@@ -165,11 +163,7 @@ export default async function VehicleDetailPage({
   )
 
   // ─── Load history ───
-  const { data: loadsData } = await supabase
-    .from('loads')
-    .select('id, load_number, status, pickup_city, pickup_state, delivery_city, delivery_state, delivery_date, total_miles, rate')
-    .eq('vehicle_id', vehicle.id)
-    .order('delivery_date', { ascending: false, nullsFirst: false })
+  const { data: loadsData } = await listLoadsForVehicle(supabase, vehicle.id)
 
   const loads = loadsData ?? []
   const totalLoads = loads.length

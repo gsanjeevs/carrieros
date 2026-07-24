@@ -16,6 +16,8 @@ import { settlementStatusVariant, type SettlementStatus } from '@/lib/domain/set
 import { Card, StatusBadge, Table, TableHeaderCell, TableRow, TableCell, EmptyState } from '@/components/ui'
 import RunSettlementButton from './RunSettlementButton'
 import SendAchButton from './SendAchButton'
+import { getProfileForUser } from '@/lib/queries/profiles'
+import { listActiveDriversForOrg } from '@/lib/queries/drivers'
 
 const STAFF_ROLES = ['owner', 'solo', 'finance']
 const VIEW_ROLES = ['owner', 'solo', 'finance', 'driver']
@@ -25,11 +27,7 @@ export default async function SettlementsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role, date_format, time_format')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) redirect('/onboarding')
   if (!VIEW_ROLES.includes(profile.role)) redirect('/dashboard')
@@ -63,12 +61,7 @@ export default async function SettlementsPage() {
 
   let driversForForm: { id: number; label: string; settlementType: string | null; settlementRate: number | null }[] = []
   if (isStaff) {
-    const { data: driverRows } = await supabase
-      .from('drivers')
-      .select('id, driver_number, settlement_type, settlement_rate, profiles(first_name, last_name)')
-      .eq('carrier_org_id', profile.org_id)
-      .eq('is_active', true)
-      .order('driver_number')
+    const { data: driverRows } = await listActiveDriversForOrg(supabase, profile.org_id)
 
     driversForForm = (driverRows ?? []).map((d) => ({
       id: d.id,

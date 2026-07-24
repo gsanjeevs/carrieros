@@ -2,6 +2,7 @@
 // the old filename silently does nothing, see decisions.md T1)
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 // Role → default landing route after login
 const ROLE_HOME: Record<string, string> = {
@@ -145,11 +146,7 @@ export async function proxy(request: NextRequest) {
 
   // ── Redirect logged-in users away from /login ───────────────
   if (user && pathname.startsWith('/login')) {
-    const profile = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
+    const profile = await getProfileForUser(supabase, user.id)
 
     const role = profile.data?.role ?? 'solo'
     const home = ROLE_HOME[role] ?? '/dashboard'
@@ -160,11 +157,7 @@ export async function proxy(request: NextRequest) {
   if (user && !isPublic) {
     const matched = ROLE_ROUTES.find((r) => pathname.startsWith(r.prefix))
     if (matched) {
-      const profile = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single()
+      const profile = await getProfileForUser(supabase, user.id)
 
       const role = profile.data?.role ?? 'solo'
       if (!matched.allowed.includes(role)) {

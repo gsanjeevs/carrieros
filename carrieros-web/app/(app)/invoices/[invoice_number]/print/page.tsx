@@ -13,6 +13,7 @@ import { formatDate } from '@/lib/format-datetime'
 import { formatMoney } from '@/lib/format-money'
 import { INVOICE_ROLES } from '@/lib/roles-policy'
 import PrintButton from './PrintButton'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 export default async function InvoicePrintPage({
   params,
@@ -25,11 +26,7 @@ export default async function InvoicePrintPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role, date_format, time_format')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) redirect('/onboarding')
   if (!INVOICE_ROLES.includes(profile.role)) redirect('/dashboard')

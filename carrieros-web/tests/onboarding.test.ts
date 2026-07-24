@@ -7,6 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { adminClient, apiFetch, cleanupTestOrg, cleanupTestUser } from './helpers'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 const admin = adminClient()
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -57,7 +58,7 @@ describe('POST /api/onboarding', () => {
     createdOrgId = body.org_id
     const orgId: number = createdOrgId!
 
-    const { data: profile } = await admin.from('profiles').select('org_id, role').eq('id', bareUserId).single()
+    const { data: profile } = await getProfileForUser(admin, bareUserId)
     expect(profile?.org_id).toBe(orgId)
     expect(profile?.role).toBe('owner')
 

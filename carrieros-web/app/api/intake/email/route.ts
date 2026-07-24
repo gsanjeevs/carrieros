@@ -26,6 +26,7 @@ import { createAdminClient } from '@/lib/api-auth'
 import { extractLoadFromText, ExtractionFailedError } from '@/lib/extract-load'
 import { orgIdFromIntakeEmail } from '@/lib/domain/intake-email'
 import { generateLoadNumber } from '@/lib/generate-number'
+import { createLoad } from '@/lib/queries/loads'
 
 interface InboundEmailPayload {
   to?: string
@@ -90,34 +91,30 @@ export async function POST(request: NextRequest) {
 
   const load_number = await generateLoadNumber(admin, orgId)
 
-  const { data: load, error } = await admin
-    .from('loads')
-    .insert({
-      carrier_org_id: orgId,
-      load_number,
-      status: 'draft',
-      intake_method: 'email',
-      raw_intake_text: bodyText,
-      customer_name_raw: typeof extracted.customer_name_raw === 'string' ? extracted.customer_name_raw : from,
-      pickup_address: typeof extracted.pickup_address === 'string' ? extracted.pickup_address : null,
-      pickup_city: typeof extracted.pickup_city === 'string' ? extracted.pickup_city : null,
-      pickup_state: typeof extracted.pickup_state === 'string' ? extracted.pickup_state : null,
-      pickup_zip: typeof extracted.pickup_zip === 'string' ? extracted.pickup_zip : null,
-      pickup_date: typeof extracted.pickup_date === 'string' ? extracted.pickup_date : null,
-      pickup_time: typeof extracted.pickup_time === 'string' ? extracted.pickup_time : null,
-      delivery_address: typeof extracted.delivery_address === 'string' ? extracted.delivery_address : null,
-      delivery_city: typeof extracted.delivery_city === 'string' ? extracted.delivery_city : null,
-      delivery_state: typeof extracted.delivery_state === 'string' ? extracted.delivery_state : null,
-      delivery_zip: typeof extracted.delivery_zip === 'string' ? extracted.delivery_zip : null,
-      delivery_date: typeof extracted.delivery_date === 'string' ? extracted.delivery_date : null,
-      delivery_time: typeof extracted.delivery_time === 'string' ? extracted.delivery_time : null,
-      commodity: typeof extracted.commodity === 'string' ? extracted.commodity : null,
-      weight_lbs: typeof extracted.weight_lbs === 'number' ? extracted.weight_lbs : null,
-      rate: typeof extracted.rate === 'number' ? extracted.rate : null,
-      total_miles: typeof extracted.total_miles === 'number' ? extracted.total_miles : null,
-    })
-    .select('id, load_number')
-    .single()
+  const { data: load, error } = await createLoad(admin, {
+    carrier_org_id: orgId,
+    load_number,
+    status: 'draft',
+    intake_method: 'email',
+    raw_intake_text: bodyText,
+    customer_name_raw: typeof extracted.customer_name_raw === 'string' ? extracted.customer_name_raw : from,
+    pickup_address: typeof extracted.pickup_address === 'string' ? extracted.pickup_address : null,
+    pickup_city: typeof extracted.pickup_city === 'string' ? extracted.pickup_city : null,
+    pickup_state: typeof extracted.pickup_state === 'string' ? extracted.pickup_state : null,
+    pickup_zip: typeof extracted.pickup_zip === 'string' ? extracted.pickup_zip : null,
+    pickup_date: typeof extracted.pickup_date === 'string' ? extracted.pickup_date : null,
+    pickup_time: typeof extracted.pickup_time === 'string' ? extracted.pickup_time : null,
+    delivery_address: typeof extracted.delivery_address === 'string' ? extracted.delivery_address : null,
+    delivery_city: typeof extracted.delivery_city === 'string' ? extracted.delivery_city : null,
+    delivery_state: typeof extracted.delivery_state === 'string' ? extracted.delivery_state : null,
+    delivery_zip: typeof extracted.delivery_zip === 'string' ? extracted.delivery_zip : null,
+    delivery_date: typeof extracted.delivery_date === 'string' ? extracted.delivery_date : null,
+    delivery_time: typeof extracted.delivery_time === 'string' ? extracted.delivery_time : null,
+    commodity: typeof extracted.commodity === 'string' ? extracted.commodity : null,
+    weight_lbs: typeof extracted.weight_lbs === 'number' ? extracted.weight_lbs : null,
+    rate: typeof extracted.rate === 'number' ? extracted.rate : null,
+    total_miles: typeof extracted.total_miles === 'number' ? extracted.total_miles : null,
+  })
 
   if (error) {
     return NextResponse.json({ error_code: 'SERVER_ERROR', error: error.message }, { status: 500 })

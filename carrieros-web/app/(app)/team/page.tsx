@@ -16,6 +16,7 @@ import { formatDate } from '@/lib/format-datetime'
 import InviteMemberButton from './InviteMemberButton'
 import MemberActions from './MemberActions'
 import { Card, StatusBadge, type StatusBadgeVariant, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
+import { getProfileForUser, listProfilesForOrg } from '@/lib/queries/profiles'
 
 const ROLE_VARIANT: Record<string, StatusBadgeVariant> = {
   owner:      'brand',
@@ -30,22 +31,14 @@ export default async function TeamPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role, date_format, time_format')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) redirect('/onboarding')
   if (!['owner', 'solo'].includes(profile.role)) redirect('/dashboard')
 
   const t = await getTranslations('team')
 
-  const { data: members } = await supabase
-    .from('profiles')
-    .select('id, role, first_name, last_name, phone, created_at')
-    .eq('org_id', profile.org_id)
-    .order('created_at')
+  const { data: members } = await listProfilesForOrg(supabase, profile.org_id)
 
   // auth.users lookup: email + whether the magic link has ever been used.
   // Micro-carrier orgs are 1–10 people (decision P1), so one page is ample.

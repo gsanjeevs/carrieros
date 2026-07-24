@@ -87,23 +87,29 @@ checkPattern({
   message: 'Use lib/auth-admin/AuthAdminProvider instead of calling supabase.auth.admin.* directly. See architecture-principles.md Rule G.',
 })
 
-// Rule B — hot-table query encapsulation. `lib/queries/profiles.ts` is the
-// only module that exists so far; `loads`/`drivers` still have dozens of ad
-// hoc `.from()` call sites (86 combined, found while scoping this check) —
-// too large to gate as zero-violation today, so this is `warn`-only:
-// visible, trackable in the design-system changelog over time, but doesn't
-// block a commit. Once a table gets its own lib/queries/<table>.ts and call
-// sites migrate, tighten this to `error` for that table the same way
-// ERROR_SURFACES tightens the UI lint guard.
-for (const table of ['profiles', 'loads', 'drivers']) {
+// Rule B — hot-table query encapsulation. Per-table severity: a table
+// tightens from `warn` to `error` once its lib/queries/<table>.ts module
+// exists and its call sites have actually migrated (same ratchet posture as
+// ERROR_SURFACES for the UI lint guard — ratchet per-surface, not all-or-
+// nothing). `profiles` migrated fully on 2026-07-24 (0 remaining call sites)
+// and is now gated as `error`. `loads`/`drivers` still have a handful of
+// deliberately-left one-off shapes (see each lib/queries/<table>.ts header
+// comment for why forcing those into the shared module would be over-
+// abstraction) — still `warn` until/unless those are revisited.
+const QUERY_ENCAPSULATION_SEVERITY = {
+  profiles: 'error',
+  loads: 'warn',
+  drivers: 'warn',
+}
+for (const [table, severity] of Object.entries(QUERY_ENCAPSULATION_SEVERITY)) {
   checkPattern({
     label: `query-encapsulation-${table}`,
     dirs: ['app', 'lib'],
     exts: ['ts', 'tsx'],
     exclude: ['lib/queries'],
     forbiddenPattern: new RegExp(`\\.from\\(['"]${table}['"]\\)`),
-    message: `Prefer a shared lib/queries/${table}.ts function over an ad hoc .from('${table}') call site. See architecture-principles.md Rule B. (warn-only — not yet a hard gate, see script comment.)`,
-    severity: 'warn',
+    message: `Prefer a shared lib/queries/${table}.ts function over an ad hoc .from('${table}') call site. See architecture-principles.md Rule B.${severity === 'warn' ? ' (warn-only — not yet a hard gate, see script comment.)' : ''}`,
+    severity,
   })
 }
 

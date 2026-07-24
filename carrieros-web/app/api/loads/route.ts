@@ -3,6 +3,7 @@ import { generateLoadNumber } from '@/lib/generate-number'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { createLoad } from '@/lib/queries/loads'
 
 // The request body is untrusted JSON, so every field is narrowed to the
 // column's actual type before it reaches the insert. Absent/empty means null;
@@ -82,16 +83,12 @@ export async function POST(request: NextRequest) {
   // on every call, so a rejected request must not consume a load number.
   const load_number = await generateLoadNumber(supabase, profile.org_id)
 
-  const { data: load, error } = await supabase
-    .from('loads')
-    .insert({
-      carrier_org_id: profile.org_id,
-      load_number,
-      status: 'draft',
-      ...values,
-    })
-    .select('load_number')
-    .single()
+  const { data: load, error } = await createLoad(supabase, {
+    carrier_org_id: profile.org_id,
+    load_number,
+    status: 'draft',
+    ...values,
+  })
 
   if (error) {
     console.error('[api/loads POST]', error)

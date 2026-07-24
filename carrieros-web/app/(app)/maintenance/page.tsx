@@ -21,6 +21,7 @@ import { formatDate, toDate } from '@/lib/format-datetime'
 import LogServiceButton from './LogServiceButton'
 import { getMaintenanceIcon } from '@/components/icons/maintenance'
 import { Card, CardHeader, StatusBadge, type StatusBadgeVariant, Table, TableHeaderCell, TableRow, TableCell, ProgressBar, EmptyState } from '@/components/ui'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 const VIEW_ROLES   = ['owner', 'solo', 'dispatcher']
 const MANAGE_ROLES = ['owner', 'solo']
@@ -135,11 +136,7 @@ export default async function MaintenancePage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role, date_format')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) redirect('/onboarding')
   if (!VIEW_ROLES.includes(profile.role)) redirect('/dashboard')

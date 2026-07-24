@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { isErrorResponse, apiError } from '@/lib/api-auth'
 import { requireAdminRole } from '@/lib/admin-auth'
 import { createAuthAdminProvider } from '@/lib/auth-admin'
+import { getOrgOwnerOrSolo } from '@/lib/queries/profiles'
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ org_id: string }> }) {
   const ctx = await requireAdminRole(request, ['sx_owner', 'sx_support'])
@@ -16,13 +17,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const orgId = Number((await params).org_id)
   if (!Number.isInteger(orgId)) return apiError('VALIDATION_ERROR', 'org_id must be an integer', 400)
 
-  const { data: owner, error: ownerErr } = await admin
-    .from('profiles')
-    .select('id')
-    .eq('org_id', orgId)
-    .in('role', ['owner', 'solo'])
-    .limit(1)
-    .maybeSingle()
+  const { data: owner, error: ownerErr } = await getOrgOwnerOrSolo(admin, orgId)
 
   if (ownerErr) {
     console.error('[admin/orgs/:id/impersonate] owner lookup:', ownerErr)

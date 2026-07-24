@@ -7,7 +7,7 @@
 import { NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'
 import { createAuthAdminProvider } from '@/lib/auth-admin'
-import { getProfileForUser } from '@/lib/queries/profiles'
+import { getProfileForUser, listProfilesForOrg } from '@/lib/queries/profiles'
 import type { NextRequest } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -22,11 +22,7 @@ export async function GET(request: NextRequest) {
   if (!['owner', 'solo'].includes(profile.role))
     return apiError('FORBIDDEN', 'Only owner/solo can view the team roster', 403)
 
-  const { data: members } = await supabase
-    .from('profiles')
-    .select('id, role, first_name, last_name, phone, created_at')
-    .eq('org_id', profile.org_id)
-    .order('created_at')
+  const { data: members } = await listProfilesForOrg(supabase, profile.org_id)
 
   const admin = createAdminClient()
   const { data: authList } = await createAuthAdminProvider(admin).listUsers({ page: 1, perPage: 1000 })

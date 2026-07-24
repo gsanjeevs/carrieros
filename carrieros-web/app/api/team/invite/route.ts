@@ -14,7 +14,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'
 import { hasFeature } from '@/lib/entitlements'
 import { logError } from '@/lib/observability'
-import { getProfileForUser } from '@/lib/queries/profiles'
+import { getProfileForUser, insertProfile } from '@/lib/queries/profiles'
 import { createAuthAdminProvider } from '@/lib/auth-admin'
 
 // Deliberately excludes 'driver' (has its own flow on /drivers, which also
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
   // the invitee has no session yet to satisfy own_profile_insert).
   //    NOTE: no `drivers` row, and no driver_number allocation. These roles
   //    never drive; giving them one would put them in dispatch pickers.
-  const { error: profileErr } = await admin.from('profiles').insert({
+  const { error: profileErr } = await insertProfile(admin, {
     id:         newUserId,
     org_id:     profile.org_id,
     role,

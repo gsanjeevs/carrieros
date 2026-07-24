@@ -22,6 +22,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/send-email'
 import { createAuthAdminProvider } from '@/lib/auth-admin'
+import { getOrgOwnersAndSolos } from '@/lib/queries/profiles'
 
 function isAuthorized(request: NextRequest): boolean {
   const secret = process.env.CRON_SECRET
@@ -94,11 +95,7 @@ export async function POST(request: NextRequest) {
   for (const orgId of orgIds) {
     const orgEvents = events.filter((e) => e.carrier_org_id === orgId)
 
-    const { data: recipients, error: profilesError } = await admin
-      .from('profiles')
-      .select('id')
-      .eq('org_id', orgId)
-      .in('role', ['owner', 'solo'])
+    const { data: recipients, error: profilesError } = await getOrgOwnersAndSolos(admin, orgId)
 
     if (profilesError || !recipients?.length) {
       emailsFailed += 1

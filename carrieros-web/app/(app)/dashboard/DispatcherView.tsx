@@ -11,6 +11,7 @@ import StatusBadge from '@/components/ui/StatusBadge'
 import ExceptionsBanner from './ExceptionsBanner'
 import { Card, CardHeader, KpiTile } from '@/components/ui'
 import { SLATE, SUCCESS, TEAL, WARNING } from '@/lib/design-tokens'
+import { listLoadIdsAndStatusForOrg, listRecentLoadsForOrg } from '@/lib/queries/loads'
 
 export default async function DispatcherView({ orgId }: { orgId: number | undefined }) {
   const supabase = await createClient()
@@ -20,15 +21,10 @@ export default async function DispatcherView({ orgId }: { orgId: number | undefi
 
   const [loadsRes, recentLoadsRes, fleetStatusRes] = await Promise.all([
     orgId
-      ? supabase.from('loads').select('id, status', { count: 'exact' }).eq('carrier_org_id', orgId)
+      ? listLoadIdsAndStatusForOrg(supabase, orgId)
       : Promise.resolve({ count: 0, data: [] }),
     orgId
-      ? supabase
-          .from('loads')
-          .select('id, load_number, status, pickup_city, pickup_state, delivery_city, delivery_state, customer_name_raw')
-          .eq('carrier_org_id', orgId)
-          .order('created_at', { ascending: false })
-          .limit(8)
+      ? listRecentLoadsForOrg(supabase, orgId, 8)
       : Promise.resolve({ data: [] }),
     orgId
       ? supabase.from('vehicles').select('status').eq('carrier_org_id', orgId).eq('is_active', true)

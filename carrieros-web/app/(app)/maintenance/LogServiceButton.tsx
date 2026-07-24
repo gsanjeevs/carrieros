@@ -13,6 +13,7 @@ import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { toDate } from '@/lib/format-datetime'
 import { Button, Input, Modal } from '@/components/ui'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 type Vehicle = {
   id: number
@@ -104,11 +105,7 @@ export default function LogServiceButton({ vehicles, reminders }: { vehicles: Ve
 
       const { data: { user } } = await supabase.auth.getUser()
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('org_id')
-        .eq('id', user?.id ?? '')
-        .single()
+      const { data: profile } = await getProfileForUser(supabase, user?.id ?? '')
 
       if (!profile?.org_id) throw new Error(tCommon('somethingWentWrong'))
 

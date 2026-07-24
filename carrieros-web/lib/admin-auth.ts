@@ -17,6 +17,7 @@
 // RLS on the cross-tenant reads these routes need to do.
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 export const SX_ROLES = ['sx_owner', 'sx_finance', 'sx_support'] as const
 export type SxRole = (typeof SX_ROLES)[number]
@@ -38,7 +39,7 @@ export async function requireAdminRole(
   if (isErrorResponse(ctx)) return ctx
   const { supabase, user } = ctx
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   const role = profile?.role as SxRole | undefined
   if (!role || !SX_ROLES.includes(role))

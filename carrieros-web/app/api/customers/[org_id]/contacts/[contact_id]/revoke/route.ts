@@ -9,7 +9,7 @@
 // route in this codebase.
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'
-import { getProfileForUser } from '@/lib/queries/profiles'
+import { getProfileForUser, setProfileActive } from '@/lib/queries/profiles'
 
 export async function POST(
   request: NextRequest,
@@ -39,10 +39,7 @@ export async function POST(
 
   const admin = createAdminClient()
 
-  const { error: deactivateErr } = await admin
-    .from('profiles')
-    .update({ is_active: false })
-    .eq('id', contact.portal_profile_id)
+  const { error: deactivateErr } = await setProfileActive(admin, contact.portal_profile_id, false)
 
   if (deactivateErr) {
     console.error('[customers/contacts/revoke] deactivate:', deactivateErr)

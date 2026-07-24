@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { Button, Input } from '@/components/ui'
+import { updateProfilePreferences } from '@/lib/queries/profiles'
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -55,15 +56,12 @@ export default function ProfileSettingsForm({
     setSaved(false)
 
     const supabase = createClient()
-    const { error: err } = await supabase
-      .from('profiles')
-      .update({
-        preferred_language: form.preferred_language,
-        uom_system: form.uom_system,
-        date_format: form.date_format,
-        time_format: form.time_format,
-      })
-      .eq('id', userId)
+    const { error: err } = await updateProfilePreferences(supabase, userId, {
+      preferred_language: form.preferred_language,
+      uom_system: form.uom_system ?? undefined,
+      date_format: form.date_format,
+      time_format: form.time_format,
+    })
 
     setSaving(false)
     if (err) {

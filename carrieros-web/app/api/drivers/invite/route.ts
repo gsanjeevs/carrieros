@@ -14,7 +14,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'
 import { generateDriverNumber } from '@/lib/generate-number'
-import { getProfileForUser } from '@/lib/queries/profiles'
+import { getProfileForUser, insertProfile } from '@/lib/queries/profiles'
+import { createDriver } from '@/lib/queries/drivers'
 import { createAuthAdminProvider } from '@/lib/auth-admin'
 
 export async function POST(request: NextRequest) {
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
 
   // 2. Create the profile row immediately (bypasses RLS via admin client —
   // the invitee has no session yet to satisfy own_profile_insert).
-  const { error: profileErr } = await admin.from('profiles').insert({
+  const { error: profileErr } = await insertProfile(admin, {
     id:         newUserId,
     org_id:     profile.org_id,
     role:       'driver',
@@ -71,17 +72,13 @@ export async function POST(request: NextRequest) {
   const driver_number = await generateDriverNumber(admin, profile.org_id)
 
   // 4. Create the drivers row.
-  const { data: driver, error: driverErr } = await admin
-    .from('drivers')
-    .insert({
-      carrier_org_id:    profile.org_id,
-      profile_id:        newUserId,
-      driver_number,
-      default_vehicle_id:  default_vehicle_id ?? null,
-      invite_status:     'pending',
-    })
-    .select('driver_number, invite_status')
-    .single()
+  const { data: driver, error: driverErr } = await createDriver(admin, {
+    carrier_org_id:    profile.org_id,
+    profile_id:        newUserId,
+    driver_number,
+    default_vehicle_id:  default_vehicle_id ?? null,
+    invite_status:     'pending',
+  })
 
   if (driverErr) {
     console.error('[drivers/invite] drivers row:', driverErr)

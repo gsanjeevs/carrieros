@@ -6,6 +6,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { isErrorResponse, apiError } from '@/lib/api-auth'
 import { requireAdminRole } from '@/lib/admin-auth'
 import { createAuthAdminProvider } from '@/lib/auth-admin'
+import { listProfilesForOrg } from '@/lib/queries/profiles'
+import { listRecentLoadsForOrg } from '@/lib/queries/loads'
+import { listDriverIdsForOrgs } from '@/lib/queries/drivers'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ org_id: string }> }) {
   const ctx = await requireAdminRole(request)
@@ -30,15 +33,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   const [{ data: profiles }, { data: loads }, { data: invoices }, { data: drivers }, { data: vehicles }, { data: notes }] =
     await Promise.all([
-      admin.from('profiles').select('id, first_name, last_name, role').eq('org_id', orgId),
-      admin
-        .from('loads')
-        .select('id, status, rate, created_at')
-        .eq('carrier_org_id', orgId)
-        .order('created_at', { ascending: false })
-        .limit(50),
+      listProfilesForOrg(admin, orgId),
+      listRecentLoadsForOrg(admin, orgId, 50),
       admin.from('invoices').select('id, status, load_id').eq('carrier_org_id', orgId),
-      admin.from('drivers').select('id').eq('carrier_org_id', orgId),
+      listDriverIdsForOrgs(admin, [orgId]),
       admin.from('vehicles').select('id').eq('carrier_org_id', orgId),
       admin
         .from('admin_notes')

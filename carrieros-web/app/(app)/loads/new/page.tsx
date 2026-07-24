@@ -5,17 +5,14 @@ import { createClient } from '@/lib/supabase/server'
 import { intakeEmailForOrg } from '@/lib/domain/intake-email'
 import CopyIntakeEmailButton from './CopyIntakeEmailButton'
 import { Card } from '@/components/ui'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 export default async function NewLoadPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   let intakeEmail: string | null = null
   if (profile?.org_id) {

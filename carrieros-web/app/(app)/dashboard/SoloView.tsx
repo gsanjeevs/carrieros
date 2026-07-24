@@ -8,8 +8,8 @@ import { createClient } from '@/lib/supabase/server'
 import { getTranslations } from 'next-intl/server'
 import MyLoadCard, { type MyLoad } from './MyLoadCard'
 import OwnerView from './OwnerView'
-
-const ACTIVE_STATUSES = ['dispatched', 'picked_up', 'in_transit']
+import { getDriverIdForProfile } from '@/lib/queries/drivers'
+import { getActiveLoadForDriver } from '@/lib/queries/loads'
 
 export default async function SoloView({ userId, orgId }: { userId: string; orgId: number | undefined }) {
   const supabase = await createClient()
@@ -18,21 +18,11 @@ export default async function SoloView({ userId, orgId }: { userId: string; orgI
 
   // Same driver-scoping pattern as app/(app)/loads/page.tsx and DriverView:
   // resolve this profile's own drivers row, then look for an active load.
-  const { data: driver } = await supabase
-    .from('drivers')
-    .select('id')
-    .eq('profile_id', userId)
-    .single()
+  const { data: driver } = await getDriverIdForProfile(supabase, userId)
 
   let activeLoad: MyLoad | null = null
   if (driver) {
-    const { data: loadRows } = await supabase
-      .from('loads')
-      .select('load_number, status, pickup_city, pickup_state, delivery_city, delivery_state, customer_name_raw')
-      .eq('driver_id', driver.id)
-      .in('status', ACTIVE_STATUSES)
-      .order('created_at', { ascending: false })
-      .limit(1)
+    const { data: loadRows } = await getActiveLoadForDriver(supabase, driver.id)
     activeLoad = (loadRows && loadRows[0]) ?? null
   }
 

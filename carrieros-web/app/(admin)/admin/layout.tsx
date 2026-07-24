@@ -10,6 +10,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import AdminSidebar from '@/components/AdminSidebar'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 const SX_ROLES = ['sx_owner', 'sx_finance', 'sx_support']
 
@@ -22,11 +23,7 @@ export default async function AdminLayout({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role, first_name, last_name')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile || !SX_ROLES.includes(profile.role)) redirect('/dashboard')
 

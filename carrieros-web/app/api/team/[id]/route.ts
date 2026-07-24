@@ -17,7 +17,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'
 import { hasFeature } from '@/lib/entitlements'
 import { logError } from '@/lib/observability'
-import { getProfileForUser } from '@/lib/queries/profiles'
+import { getProfileForUser, getProfileById, countOrgAdmins, updateProfileRole } from '@/lib/queries/profiles'
 import { createAuthAdminProvider } from '@/lib/auth-admin'
 
 const ASSIGNABLE_ROLES = ['dispatcher', 'finance', 'owner'] as const
@@ -41,11 +41,7 @@ async function resolve(request: NextRequest, targetId: string) {
 
   const admin = createAdminClient()
 
-  const { data: target } = await admin
-    .from('profiles')
-    .select('id, org_id, role')
-    .eq('id', targetId)
-    .maybeSingle()
+  const { data: target } = await getProfileById(admin, targetId)
 
   // Scoped to the caller's org, so a bad id and another tenant's id are
   // indistinguishable from the outside — no cross-tenant existence probe.
@@ -60,11 +56,7 @@ async function adminCount(
   admin: ReturnType<typeof createAdminClient>,
   orgId: number
 ): Promise<number> {
-  const { count } = await admin
-    .from('profiles')
-    .select('id', { count: 'exact', head: true })
-    .eq('org_id', orgId)
-    .in('role', ADMIN_ROLES)
+  const { count } = await countOrgAdmins(admin, orgId)
   return count ?? 0
 }
 
@@ -119,7 +111,7 @@ export async function PATCH(request: NextRequest, { params }: Ctx) {
   if (target.id === callerId)
     return apiError('SELF_ROLE_CHANGE', 'You cannot change your own role', 403)
 
-  const { error } = await admin.from('profiles').update({ role }).eq('id', target.id)
+  const { error } = await updateProfileRole(admin, target.id, role)
   if (error) {
     logError({ route: 'api/team/:id', userId: callerId, orgId }, error, { action: 'role_update', targetId: target.id })
     return apiError('SERVER_ERROR', error.message, 500)

@@ -10,6 +10,7 @@ import { inviteStatusVariant, type InviteStatus } from '@/lib/domain/invite-stat
 import { cdlGlowStatus } from '@/lib/domain/driver-compliance'
 import { Card, EmptyState, StatusBadge, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { listActiveDriversForOrg } from '@/lib/queries/drivers'
 
 type Driver = {
   id: number
@@ -56,12 +57,7 @@ export default async function DriversPage({
 
   if (profile?.org_id) {
     const [{ data }, exceptionItems] = await Promise.all([
-      supabase
-        .from('drivers')
-        .select('id, driver_number, invite_status, default_vehicle_id, cdl_number, cdl_class, cdl_state, cdl_expiry, med_cert_expiry, endorsements, is_active, profiles(first_name, last_name, phone)')
-        .eq('carrier_org_id', profile.org_id)
-        .eq('is_active', true)
-        .order('driver_number'),
+      listActiveDriversForOrg(supabase, profile.org_id),
       getExceptions(supabase, profile.org_id),
     ])
     drivers = (data ?? []) as unknown as Driver[]

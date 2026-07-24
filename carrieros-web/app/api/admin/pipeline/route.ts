@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isErrorResponse, apiError } from '@/lib/api-auth'
 import { requireAdminRole } from '@/lib/admin-auth'
+import { countActiveDriversForOrg } from '@/lib/queries/drivers'
 
 const UPGRADE_LOAD_THRESHOLD = 8
 
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
     (starterOrgs ?? []).map(async (o) => {
       const [{ count: loadsLast30d }, { count: driverCount }] = await Promise.all([
         admin.from('loads').select('id', { count: 'exact', head: true }).eq('carrier_org_id', o.org_id).gte('created_at', thirtyDaysAgo),
-        admin.from('drivers').select('id', { count: 'exact', head: true }).eq('carrier_org_id', o.org_id).eq('is_active', true),
+        countActiveDriversForOrg(admin, o.org_id),
       ])
       return {
         org_id: o.org_id,

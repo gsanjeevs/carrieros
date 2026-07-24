@@ -10,6 +10,7 @@ import { formatMoney } from '@/lib/format-money'
 import { INVOICE_ROLES } from '@/lib/roles-policy'
 import { invoiceStatusVariant, type InvoiceStatus } from '@/lib/domain/invoice-status'
 import { Card, EmptyState, StatusBadge, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 const STATUSES = ['draft', 'sent', 'paid', 'overdue'] as const
 
@@ -22,11 +23,7 @@ export default async function InvoicesPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role, date_format, time_format')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) redirect('/onboarding')
   if (!INVOICE_ROLES.includes(profile.role)) redirect('/dashboard')

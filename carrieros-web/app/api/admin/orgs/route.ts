@@ -15,6 +15,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { isErrorResponse, apiError } from '@/lib/api-auth'
 import { requireAdminRole } from '@/lib/admin-auth'
 import { createAuthAdminProvider } from '@/lib/auth-admin'
+import { listProfilesForOrgs } from '@/lib/queries/profiles'
+import { listDriverIdsForOrgs } from '@/lib/queries/drivers'
 
 function loginRecencyScore(lastSignInAt: string | null | undefined): number {
   if (!lastSignInAt) return 0
@@ -61,9 +63,9 @@ export async function GET(request: NextRequest) {
 
   const [{ data: profiles }, { data: recentLoads }, { data: drivers }, { data: invoices }, { data: vehicles }] =
     await Promise.all([
-      admin.from('profiles').select('id, org_id').in('org_id', orgIds),
+      listProfilesForOrgs(admin, orgIds),
       admin.from('loads').select('id, carrier_org_id').in('carrier_org_id', orgIds).gte('created_at', thirtyDaysAgo),
-      admin.from('drivers').select('id, carrier_org_id').in('carrier_org_id', orgIds),
+      listDriverIdsForOrgs(admin, orgIds),
       admin.from('invoices').select('id, carrier_org_id').in('carrier_org_id', orgIds),
       admin.from('vehicles').select('id, carrier_org_id').in('carrier_org_id', orgIds),
     ])

@@ -7,6 +7,7 @@ import { getTranslations, getLocale } from 'next-intl/server'
 import { formatMoney } from '@/lib/format-money'
 import { Card, CardHeader, KpiTile, EmptyState } from '@/components/ui'
 import { BRAND_ORANGE, DANGER, SUCCESS, WARNING } from '@/lib/design-tokens'
+import { getLoadsRateForOrg } from '@/lib/queries/loads'
 
 export default async function FinanceView({ orgId }: { orgId: number | undefined }) {
   const supabase = await createClient()
@@ -37,12 +38,7 @@ export default async function FinanceView({ orgId }: { orgId: number | undefined
     // Avg rate/load: exclude cancelled/declined loads — neither one's rate
     // was ever actually earned.
     orgId
-      ? supabase
-          .from('loads')
-          .select('rate')
-          .eq('carrier_org_id', orgId)
-          .not('status', 'in', '(cancelled,declined)')
-          .not('rate', 'is', null)
+      ? getLoadsRateForOrg(supabase, orgId)
       : Promise.resolve({ data: [] }),
   ])
 

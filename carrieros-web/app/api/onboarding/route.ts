@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { logError, logEvent } from '@/lib/observability'
+import { getProfileForUser, upsertProfile } from '@/lib/queries/profiles'
 
 // Derive timezone from country + state
 function deriveTimezone(country: string, state: string): string {
@@ -49,11 +50,7 @@ export async function POST(request: NextRequest) {
   const { supabase, user } = ctx
 
   // Prevent double-onboarding
-  const { data: existing } = await supabase
-    .from('profiles')
-    .select('org_id')
-    .eq('id', user.id)
-    .maybeSingle()
+  const { data: existing } = await getProfileForUser(supabase, user.id)
 
   if (existing?.org_id)
     return apiError('ALREADY_ONBOARDED', 'Already onboarded', 409)
@@ -124,15 +121,13 @@ export async function POST(request: NextRequest) {
   logEvent({ route: 'api/onboarding', userId: user.id, orgId }, { step: 2, event: 'carrier_details_created' })
 
   // 3. Upsert profile
-  const { error: profileErr } = await admin
-    .from('profiles')
-    .upsert({
-      id:         user.id,
-      org_id:     orgId,
-      role:       role ?? 'owner',
-      first_name: first_name.trim(),
-      last_name:  last_name.trim(),
-    }, { onConflict: 'id' })
+  const { error: profileErr } = await upsertProfile(admin, {
+    id:         user.id,
+    org_id:     orgId,
+    role:       role ?? 'owner',
+    first_name: first_name.trim(),
+    last_name:  last_name.trim(),
+  })
 
   if (profileErr) {
     logError({ route: 'api/onboarding', userId: user.id, orgId }, profileErr, { step: 3 })

@@ -11,6 +11,7 @@ import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import StatusBadge from '@/components/ui/StatusBadge'
 import { Card, CardHeader, CardBody, KpiTile } from '@/components/ui'
 import { BRAND_BLUE, BRAND_ORANGE, DANGER, SLATE, SUCCESS, TEAL, WARNING } from '@/lib/design-tokens'
+import { listLoadIdsAndStatusForOrg, listRecentLoadsForOrg, getLoadsRateForOrg } from '@/lib/queries/loads'
 
 interface KpiCard {
   label: string
@@ -68,15 +69,10 @@ export default async function OwnerView({ orgId, embedded = false }: { orgId: nu
     complianceRes,
   ] = await Promise.all([
     orgId
-      ? supabase.from('loads').select('id, status', { count: 'exact' }).eq('carrier_org_id', orgId)
+      ? listLoadIdsAndStatusForOrg(supabase, orgId)
       : Promise.resolve({ count: 0, data: [] }),
     orgId
-      ? supabase
-          .from('loads')
-          .select('id, load_number, status, pickup_city, pickup_state, delivery_city, delivery_state, customer_name_raw')
-          .eq('carrier_org_id', orgId)
-          .order('created_at', { ascending: false })
-          .limit(5)
+      ? listRecentLoadsForOrg(supabase, orgId, 5)
       : Promise.resolve({ data: [] }),
     // Revenue MTD: invoices paid within the current calendar month.
     orgId
@@ -100,12 +96,7 @@ export default async function OwnerView({ orgId, embedded = false }: { orgId: nu
     // was ever actually earned, so including either would understate the
     // average.
     orgId
-      ? supabase
-          .from('loads')
-          .select('rate')
-          .eq('carrier_org_id', orgId)
-          .not('status', 'in', '(cancelled,declined)')
-          .not('rate', 'is', null)
+      ? getLoadsRateForOrg(supabase, orgId)
       : Promise.resolve({ data: [] }),
     orgId
       ? supabase.from('vehicles').select('status').eq('carrier_org_id', orgId).eq('is_active', true)

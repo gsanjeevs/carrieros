@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { hasFeature } from '@/lib/entitlements'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { getLoadById } from '@/lib/queries/loads'
 import { sendPushNotification } from '@/lib/send-push'
 
 const VALID_STATUSES = ['draft','scheduled','dispatched','picked_up','in_transit','delivered','invoiced','paid','cancelled','declined']
@@ -61,11 +62,7 @@ export async function PATCH(
   // token must never fail the dispatch action itself, same principle as
   // markInvoiceSent()'s NO_RECIPIENT_EMAIL warning-not-error handling.
   if (update.status === 'dispatched') {
-    const { data: loadRow } = await supabase
-      .from('loads')
-      .select('load_number, driver_id')
-      .eq('id', Number(id))
-      .maybeSingle()
+    const { data: loadRow } = await getLoadById(supabase, Number(id))
 
     if (loadRow?.driver_id) {
       const { data: driver } = await supabase

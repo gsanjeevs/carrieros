@@ -8,6 +8,7 @@ import { toDate } from '@/lib/format-datetime'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import { Card, EmptyState, Input, StatusBadge } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { getDriverIdForProfile } from '@/lib/queries/drivers'
 import { INVOICE_ROLES } from '@/lib/roles-policy'
 
 type LoadGroupKey = 'needs_dispatch' | 'in_progress' | 'completed' | 'cancelled' | 'declined'
@@ -51,11 +52,7 @@ export default async function LoadsPage({
   }
 
   if (profile?.role === 'driver') {
-    const { data: driver } = await supabase
-      .from('drivers')
-      .select('id')
-      .eq('profile_id', user.id)
-      .single()
+    const { data: driver } = await getDriverIdForProfile(supabase, user.id)
     if (driver) query = query.eq('driver_id', driver.id)
   }
 

@@ -20,6 +20,7 @@ import { hasFeature } from '@/lib/entitlements'
 import { invoiceStatusVariant, type InvoiceStatus } from '@/lib/domain/invoice-status'
 import { Card, CardHeader, CardBody, KpiTile, StatusBadge, Table, TableHeaderCell, TableRow, TableCell, EmptyState, ProgressBar } from '@/components/ui'
 import { BRAND_ORANGE, DANGER, SUCCESS, WARNING } from '@/lib/design-tokens'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 const STAFF_ROLES = ['owner', 'solo', 'finance']
 
@@ -45,11 +46,7 @@ export default async function FinancePage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) redirect('/onboarding')
   if (!STAFF_ROLES.includes(profile.role)) redirect('/dashboard')

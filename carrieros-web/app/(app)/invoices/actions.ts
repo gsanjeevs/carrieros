@@ -15,6 +15,7 @@ import { sendInvoiceAndMarkSent } from '@/lib/invoice-actions'
 import { revalidatePath } from 'next/cache'
 import { INVOICE_ROLES } from '@/lib/roles-policy'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { getLoadForOrg, updateLoadStatus } from '@/lib/queries/loads'
 
 export type ActionResult =
   | { ok: true; invoice_number?: string; warning_code?: string }
@@ -54,12 +55,7 @@ export async function createInvoiceForLoad(loadId: number): Promise<ActionResult
   if ('error_code' in ctx) return { ok: false, error_code: ctx.error_code }
   const { supabase, orgId } = ctx
 
-  const { data: load, error: loadError } = await supabase
-    .from('loads')
-    .select('id, load_number, status, rate, customer_org_id, carrier_org_id')
-    .eq('id', loadId)
-    .eq('carrier_org_id', orgId)
-    .maybeSingle()
+  const { data: load, error: loadError } = await getLoadForOrg(supabase, loadId, orgId)
 
   if (loadError) return { ok: false, error_code: 'SERVER_ERROR' }
   if (!load) return { ok: false, error_code: 'NOT_FOUND' }
@@ -129,7 +125,7 @@ export async function createInvoiceForLoad(loadId: number): Promise<ActionResult
 
   // Advance the load's own status so the two views agree.
   if (load.status === 'delivered') {
-    await supabase.from('loads').update({ status: 'invoiced' }).eq('id', load.id)
+    await updateLoadStatus(supabase, load.id, 'invoiced')
   }
 
   revalidatePath('/invoices')
@@ -178,7 +174,7 @@ export async function markInvoicePaid(invoiceId: number): Promise<ActionResult> 
   if (!data) return { ok: false, error_code: 'NOT_FOUND' }
 
   if (data.load_id) {
-    await supabase.from('loads').update({ status: 'paid' }).eq('id', data.load_id)
+    await updateLoadStatus(supabase, data.load_id, 'paid')
   }
 
   revalidatePath('/invoices')

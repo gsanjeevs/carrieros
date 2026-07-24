@@ -10,6 +10,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { hasFeature } from '@/lib/entitlements'
+import { getProfileForUser } from '@/lib/queries/profiles'
+import { getLoadById } from '@/lib/queries/loads'
+import { getDriverIdForProfile } from '@/lib/queries/drivers'
 
 const DISPATCH_ROLES = ['owner', 'solo', 'dispatcher']
 
@@ -34,11 +37,7 @@ export async function POST(request: NextRequest) {
   if (isErrorResponse(ctx)) return ctx
   const { supabase, user } = ctx
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role, preferred_language')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) {
     return apiError('NOT_ONBOARDED', 'No organization found for this user', 400)
@@ -74,11 +73,7 @@ export async function POST(request: NextRequest) {
     return apiError('VALIDATION_ERROR', 'body is required', 400)
   }
 
-  const { data: load } = await supabase
-    .from('loads')
-    .select('id, carrier_org_id, driver_id')
-    .eq('id', loadId)
-    .maybeSingle()
+  const { data: load } = await getLoadById(supabase, loadId)
 
   if (!load) {
     return apiError('NOT_FOUND', 'No such load', 404)
@@ -92,11 +87,7 @@ export async function POST(request: NextRequest) {
   let allowed = load.carrier_org_id === profile.org_id && DISPATCH_ROLES.includes(profile.role)
 
   if (!allowed) {
-    const { data: driverRow } = await supabase
-      .from('drivers')
-      .select('id')
-      .eq('profile_id', user.id)
-      .maybeSingle()
+    const { data: driverRow } = await getDriverIdForProfile(supabase, user.id)
     allowed = !!driverRow && driverRow.id === load.driver_id
   }
 

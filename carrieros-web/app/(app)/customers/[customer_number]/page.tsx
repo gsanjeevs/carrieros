@@ -23,6 +23,8 @@ import { Card, CardHeader, CardBody, KpiTile, StatusBadge, Table, TableHeaderCel
 
 import { INVOICE_ROLES } from '@/lib/roles-policy'
 import { SCORE_CRITICAL, SCORE_WARNING, SUCCESS } from '@/lib/design-tokens'
+import { getProfileForUser } from '@/lib/queries/profiles'
+import { listLoadsForCustomer } from '@/lib/queries/loads'
 
 const VIEW_ROLES = ['owner', 'solo', 'dispatcher', 'finance']
 
@@ -95,11 +97,7 @@ export default async function CustomerDetailPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role, date_format, time_format')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) redirect('/onboarding')
   if (!VIEW_ROLES.includes(profile.role)) redirect('/dashboard')
@@ -130,12 +128,7 @@ export default async function CustomerDetailPage({
   const canBill = INVOICE_ROLES.includes(profile.role)
 
   // Loads for this customer.
-  const { data: loadsData } = await supabase
-    .from('loads')
-    .select('id, load_number, status, pickup_city, pickup_state, delivery_city, delivery_state, pickup_date, rate, vehicle_id, driver_id')
-    .eq('customer_org_id', org?.id ?? -1)
-    .eq('carrier_org_id', profile.org_id)
-    .order('created_at', { ascending: false })
+  const { data: loadsData } = await listLoadsForCustomer(supabase, org?.id ?? -1, profile.org_id)
 
   const loads = loadsData ?? []
   const totalRevenue = loads.reduce((sum, l) => sum + Number(l.rate ?? 0), 0)

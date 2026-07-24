@@ -12,6 +12,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { getLoadForOrg } from '@/lib/queries/loads'
 import { createStorageProvider } from '@/lib/storage'
 import { sendEmail, type SendEmailAttachment } from '@/lib/send-email'
 
@@ -41,12 +42,7 @@ export async function POST(
   if (documentIds.length === 0 || documentIds.length > MAX_DOCS || documentIds.some((n: number) => !Number.isInteger(n)))
     return apiError('VALIDATION_ERROR', `Select 1-${MAX_DOCS} documents`, 400)
 
-  const { data: load, error: loadError } = await supabase
-    .from('loads')
-    .select('id, load_number, customer_org_id, customer_name_raw')
-    .eq('id', loadId)
-    .eq('carrier_org_id', profile.org_id)
-    .maybeSingle()
+  const { data: load, error: loadError } = await getLoadForOrg(supabase, loadId, profile.org_id)
 
   if (loadError) return apiError('SERVER_ERROR', loadError.message, 500)
   if (!load) return apiError('NOT_FOUND', 'Load not found', 404)

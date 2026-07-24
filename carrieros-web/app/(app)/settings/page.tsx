@@ -8,17 +8,14 @@ import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import ProfileSettingsForm from './ProfileSettingsForm'
 import { Card, CardBody } from '@/components/ui'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 export default async function SettingsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, preferred_language, uom_system, date_format, time_format, timezone')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   let orgDefaultUom: 'imperial' | 'metric' = 'imperial'
   if (profile?.org_id) {

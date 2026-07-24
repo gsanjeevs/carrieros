@@ -15,6 +15,7 @@ import { formatMoney } from '@/lib/format-money'
 import CreateInvoiceButton from './CreateInvoiceButton'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import { Card, CardHeader, CardBody, StatusBadge } from '@/components/ui'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 const STATUS_FLOW_KEYS = [
   { key: 'draft',      icon: 'draft' },
@@ -52,11 +53,7 @@ export default async function LoadDetailPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role, date_format, time_format')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) redirect('/onboarding')
 

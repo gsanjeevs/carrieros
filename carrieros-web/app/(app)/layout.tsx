@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Sidebar from '@/components/Sidebar'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 export default async function AppLayout({
   children,
@@ -14,11 +15,7 @@ export default async function AppLayout({
 
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role, first_name, last_name, preferred_language')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   const role = profile?.role ?? 'solo'
   const name = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || user.email || 'User'

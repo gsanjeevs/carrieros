@@ -7,17 +7,14 @@ import SoloView from './SoloView'
 import DriverView from './DriverView'
 import DispatcherView from './DispatcherView'
 import FinanceView from './FinanceView'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role, first_name, last_name, org_id')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   const role  = profile?.role ?? 'solo'
   const orgId = profile?.org_id

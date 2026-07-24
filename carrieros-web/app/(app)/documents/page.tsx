@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { formatDateTime } from '@/lib/format-datetime'
 import CompanyDocuments, { type CompanyDocType, type CompanyDocument } from '@/components/CompanyDocuments'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 // RLS (owner_solo_org_docs_all / finance_org_docs_select): owner/solo have
 // full read-write, finance is read-only, dispatchers and drivers have no
@@ -16,11 +17,7 @@ export default async function DocumentsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role, date_format, time_format')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
   if (!profile?.org_id) redirect('/onboarding')
 
   const t = await getTranslations('companyDocuments')

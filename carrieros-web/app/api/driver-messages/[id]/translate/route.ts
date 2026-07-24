@@ -9,6 +9,8 @@ import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { hasFeature } from '@/lib/entitlements'
 import { SUPPORTED_LOCALES } from '@/i18n/request'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { getLoadById } from '@/lib/queries/loads'
+import { getDriverIdForProfile } from '@/lib/queries/drivers'
 
 const DISPATCH_ROLES = ['owner', 'solo', 'dispatcher']
 
@@ -93,17 +95,9 @@ export async function POST(request: NextRequest, { params }: Ctx) {
     message.carrier_org_id === profile.org_id && DISPATCH_ROLES.includes(profile.role)
 
   if (!allowed) {
-    const { data: driverRow } = await supabase
-      .from('drivers')
-      .select('id')
-      .eq('profile_id', user.id)
-      .maybeSingle()
+    const { data: driverRow } = await getDriverIdForProfile(supabase, user.id)
     if (driverRow) {
-      const { data: load } = await supabase
-        .from('loads')
-        .select('driver_id')
-        .eq('id', message.load_id)
-        .maybeSingle()
+      const { data: load } = await getLoadById(supabase, message.load_id)
       allowed = !!load && load.driver_id === driverRow.id
     }
   }

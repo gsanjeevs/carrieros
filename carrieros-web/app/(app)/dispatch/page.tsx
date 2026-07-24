@@ -13,6 +13,7 @@ import DispatchQueueRow from './DispatchQueueRow'
 import { hasFeature } from '@/lib/entitlements'
 import { Card, CardHeader, EmptyState } from '@/components/ui'
 import type { DispatchMapLoad } from '@/components/DispatchMap'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 const VIEW_ROLES = ['owner', 'solo', 'dispatcher']
 
@@ -21,11 +22,7 @@ export default async function DispatchPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id, role')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) redirect('/onboarding')
   if (!VIEW_ROLES.includes(profile.role)) redirect('/dashboard')

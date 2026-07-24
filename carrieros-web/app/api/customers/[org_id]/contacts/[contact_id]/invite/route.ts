@@ -11,7 +11,7 @@
 // to anything, per Phase 3H's whole reason for existing).
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'
-import { getProfileForUser } from '@/lib/queries/profiles'
+import { getProfileForUser, insertProfile } from '@/lib/queries/profiles'
 import { createAuthAdminProvider } from '@/lib/auth-admin'
 
 const INVITABLE_PORTAL_ROLES = ['customer_admin', 'customer_viewer'] as const
@@ -77,7 +77,7 @@ export async function POST(
 
   // 2. Create the profile row immediately, same reasoning as team/invite —
   //    the invitee has no session yet to satisfy own_profile_insert.
-  const { error: profileErr } = await admin.from('profiles').insert({
+  const { error: profileErr } = await insertProfile(admin, {
     id:         newUserId,
     org_id:     contact.org_id,
     role,

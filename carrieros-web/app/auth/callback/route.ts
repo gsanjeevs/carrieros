@@ -5,6 +5,7 @@ import { cookies } from 'next/headers'
 import { NextResponse, type NextRequest } from 'next/server'
 import type { EmailOtpType } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase'
+import { getProfileForUser } from '@/lib/queries/profiles'
 
 const ROLE_HOME: Record<string, string> = {
   owner:      '/dashboard',
@@ -64,11 +65,7 @@ export async function GET(request: NextRequest) {
   // Get role and redirect to role home
   const { data: { user } } = await supabase.auth.getUser()
   if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
+    const { data: profile } = await getProfileForUser(supabase, user.id)
 
     const role = profile?.role ?? 'solo'
     const home = ROLE_HOME[role] ?? '/dashboard'

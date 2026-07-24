@@ -5,6 +5,7 @@
 // tier/icon/color/CTA mapping lives in exactly one place.
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase'
+import { getLoadsByIds } from '@/lib/queries/loads'
 
 export type ExceptionTier = 'today' | 'this_week' | 'upcoming'
 
@@ -103,7 +104,7 @@ export async function getExceptions(
       ? supabase.from('invoices').select('id, invoice_number').in('id', invoiceIds)
       : Promise.resolve({ data: [] as { id: number; invoice_number: string }[] }),
     loadIds.length
-      ? supabase.from('loads').select('id, load_number').in('id', loadIds)
+      ? getLoadsByIds(supabase, loadIds)
       : Promise.resolve({ data: [] as { id: number; load_number: string }[] }),
   ])
 
