@@ -31,7 +31,7 @@ export default function CompletionStep({
   return (
     <div className="space-y-5">
       <div className="text-center">
-        <span className="material-symbols-outlined text-[#16a34a] text-4xl">check_circle</span>
+        <span className="material-symbols-outlined text-success text-4xl">check_circle</span>
         <h2 className="text-white font-semibold text-lg mt-2">{t('allSet')}</h2>
         <p className="text-slate-400 text-sm mt-1">{t('allSetSubtitle')}</p>
       </div>
@@ -39,7 +39,7 @@ export default function CompletionStep({
       <div className="space-y-2">
         {items.map(item => (
           <div key={item.label} className="flex items-center gap-2.5 rounded-lg bg-white/5 border border-white/10 px-4 py-2.5">
-            <span className={`material-symbols-outlined text-[18px] ${item.done ? 'text-[#16a34a]' : 'text-slate-600'}`}>
+            <span className={`material-symbols-outlined text-[18px] ${item.done ? 'text-success' : 'text-slate-600'}`}>
               {item.done ? 'check_circle' : 'radio_button_unchecked'}
             </span>
             <span className={`text-sm ${item.done ? 'text-white' : 'text-slate-500'}`}>{item.label}</span>
@@ -63,7 +63,7 @@ export default function CompletionStep({
         </button>
         <button
           onClick={() => router.push('/loads/new')}
-          className="flex-2 flex-grow py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+          className="flex-2 flex-grow py-2.5 bg-brand-orange hover:bg-brand-orange-hover text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
         >
           {t('addFirstLoad')}
         </button>

@@ -41,7 +41,7 @@ function Field({
         value={value}
         onChange={(e) => onChange(name, e.target.value)}
         placeholder={placeholder ?? label}
-        className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-[#f97316] focus:border-transparent transition"
+        className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition"
       />
     </div>
   )
@@ -141,7 +141,7 @@ export default function ManualLoadForm() {
 
         <div className="bg-white/5 border border-white/8 rounded-xl p-5">
           <h2 className="text-white text-sm font-medium mb-4 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#f97316]"></span>
+            <span className="w-2 h-2 rounded-full bg-brand-orange"></span>
             Pickup
           </h2>
           <div className="grid grid-cols-1 gap-4">
@@ -162,7 +162,7 @@ export default function ManualLoadForm() {
 
         <div className="bg-white/5 border border-white/8 rounded-xl p-5">
           <h2 className="text-white text-sm font-medium mb-4 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#16a34a]"></span>
+            <span className="w-2 h-2 rounded-full bg-success"></span>
             Delivery
           </h2>
           <div className="grid grid-cols-1 gap-4">
@@ -197,7 +197,7 @@ export default function ManualLoadForm() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-6 py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+          className="flex items-center gap-2 px-6 py-2.5 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
         >
           {saving ? (
             <>

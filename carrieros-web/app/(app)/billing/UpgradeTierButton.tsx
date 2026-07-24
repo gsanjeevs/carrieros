@@ -67,7 +67,7 @@ export default function UpgradeTierButton({
       <button
         onClick={changeTier}
         disabled={loading}
-        className="w-full px-3 py-2 bg-brand-orange hover:bg-[#ea6c0a] disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+        className="w-full px-3 py-2 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
       >
         {loading ? t('changingPlan') : isDowngrade ? t('downgrade') : t('upgrade')}
       </button>

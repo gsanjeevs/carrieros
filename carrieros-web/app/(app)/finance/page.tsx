@@ -19,6 +19,7 @@ import { formatMoney } from '@/lib/format-money'
 import { hasFeature } from '@/lib/entitlements'
 import { invoiceStatusVariant, type InvoiceStatus } from '@/lib/domain/invoice-status'
 import { Card, CardHeader, CardBody, KpiTile, StatusBadge, Table, TableHeaderCell, TableRow, TableCell, EmptyState, ProgressBar } from '@/components/ui'
+import { BRAND_ORANGE, DANGER, SUCCESS, WARNING } from '@/lib/design-tokens'
 
 const STAFF_ROLES = ['owner', 'solo', 'finance']
 
@@ -161,10 +162,10 @@ export default async function FinancePage() {
   }
   const tDashboard = await getTranslations('dashboard')
   const agingRows = [
-    { label: tDashboard('agingCurrent'), amount: agingBuckets.current, count: agingCounts.current, color: '#16a34a' },
-    { label: tDashboard('aging30'), amount: agingBuckets.days30, count: agingCounts.days30, color: '#d97706' },
-    { label: tDashboard('aging60'), amount: agingBuckets.days60, count: agingCounts.days60, color: '#f97316' },
-    { label: tDashboard('aging90'), amount: agingBuckets.days90, count: agingCounts.days90, color: '#dc2626' },
+    { label: tDashboard('agingCurrent'), amount: agingBuckets.current, count: agingCounts.current, color: SUCCESS },
+    { label: tDashboard('aging30'), amount: agingBuckets.days30, count: agingCounts.days30, color: WARNING },
+    { label: tDashboard('aging60'), amount: agingBuckets.days60, count: agingCounts.days60, color: BRAND_ORANGE },
+    { label: tDashboard('aging90'), amount: agingBuckets.days90, count: agingCounts.days90, color: DANGER },
   ]
 
   // Fuel cost/mile by driver — miles come from that driver's loads in the

@@ -89,9 +89,9 @@ export default async function InvoicesPage({
       </div>
 
       {params.created && (
-        <div className="mb-6 flex items-center gap-3 rounded-lg bg-[#16a34a]/10 border border-[#16a34a]/20 px-4 py-3">
-          <span className="material-symbols-outlined text-[#16a34a] text-[18px]">check_circle</span>
-          <p className="text-[#16a34a] text-sm">{t('createdSuccess', { invoiceNumber: params.created })}</p>
+        <div className="mb-6 flex items-center gap-3 rounded-lg bg-success/10 border border-success/20 px-4 py-3">
+          <span className="material-symbols-outlined text-success text-[18px]">check_circle</span>
+          <p className="text-success text-sm">{t('createdSuccess', { invoiceNumber: params.created })}</p>
         </div>
       )}
 
@@ -118,7 +118,7 @@ export default async function InvoicesPage({
           <div className="flex justify-center pb-8 -mt-2">
             <Link
               href="/loads"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-brand-orange hover:bg-brand-orange-hover text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
             >
               <span className="material-symbols-outlined text-[16px]">local_shipping</span>
               {t('goToLoads')}
@@ -194,7 +194,7 @@ function FilterChip({ href, label, active }: { href: string; label: string; acti
       href={href}
       className={`px-3 py-1.5 rounded-lg text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
         active
-          ? 'bg-[#f97316]/15 text-[#f97316] border border-[#f97316]/30'
+          ? 'bg-brand-orange/15 text-brand-orange border border-brand-orange/30'
           : 'bg-surface-card text-text-sec border border-border-ui hover:text-text-pri hover:bg-surface-subtle'
       }`}
     >

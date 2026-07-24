@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { VEHICLE_TYPE_ICONS } from '@/components/icons/vehicle-types'
 import { Button, Input, Modal } from '@/components/ui'
+import { BRAND_BLUE, BRAND_ORANGE, DANGER, SLATE_LIGHT } from '@/lib/design-tokens'
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
@@ -23,10 +24,10 @@ const US_STATES = [
 const FLEET_COLORS: { name: string; hex: string }[] = [
   { name: 'White', hex: '#f8fafc' },
   { name: 'Black', hex: '#0f172a' },
-  { name: 'Silver', hex: '#94a3b8' },
-  { name: 'Red', hex: '#dc2626' },
-  { name: 'Blue', hex: '#2563eb' },
-  { name: 'Orange', hex: '#f97316' },
+  { name: 'Silver', hex: SLATE_LIGHT },
+  { name: 'Red', hex: DANGER },
+  { name: 'Blue', hex: BRAND_BLUE },
+  { name: 'Orange', hex: BRAND_ORANGE },
 ]
 
 const CAB_TYPES = ['sleeper', 'day_cab', 'other'] as const
@@ -190,13 +191,13 @@ export default function AddVehicleButton({ variant }: { variant?: 'empty' }) {
                       }}
                       className={`flex flex-col items-center justify-center gap-1.5 rounded-lg border px-2 py-3 text-center transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
                         selected
-                          ? 'border-[#f97316] bg-[#f97316]/10 ring-2 ring-[#f97316]/40'
+                          ? 'border-brand-orange bg-brand-orange/10 ring-2 ring-brand-orange/40'
                           : 'border-border-ui bg-surface-subtle hover:bg-surface-subtle/70'
                       }`}
                     >
                       {Icon && (
                         <Icon
-                          className={`w-7 h-7 ${selected ? 'text-[#f97316]' : 'text-text-sec'}`}
+                          className={`w-7 h-7 ${selected ? 'text-brand-orange' : 'text-text-sec'}`}
                         />
                       )}
                       <span className={`text-[11px] leading-tight ${selected ? 'text-text-pri font-medium' : 'text-text-sec'}`}>
@@ -275,7 +276,7 @@ export default function AddVehicleButton({ variant }: { variant?: 'empty' }) {
                     onClick={() => set('cab_type', ct)}
                     className={`py-2 rounded-lg border text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
                       selected
-                        ? 'border-[#f97316] bg-[#f97316]/10 text-text-pri'
+                        ? 'border-brand-orange bg-brand-orange/10 text-text-pri'
                         : 'border-border-ui bg-surface-subtle text-text-sec hover:bg-surface-subtle/70'
                     }`}
                   >
@@ -304,7 +305,7 @@ export default function AddVehicleButton({ variant }: { variant?: 'empty' }) {
                     title={c.name}
                     onClick={() => set('color', selected ? '' : c.name)}
                     className={`w-8 h-8 rounded-full border-2 transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
-                      selected ? 'border-[#f97316] scale-110' : 'border-white/20'
+                      selected ? 'border-brand-orange scale-110' : 'border-white/20'
                     }`}
                     style={{ backgroundColor: c.hex }}
                   />

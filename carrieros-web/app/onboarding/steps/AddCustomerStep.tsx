@@ -14,7 +14,7 @@ const US_STATES = [
   'VA','WA','WV','WI','WY',
 ]
 
-const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-brand-orange/40 transition'
+const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/40 transition'
 const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
 
 export default function AddCustomerStep({ onNext }: { onNext: (added: boolean) => void }) {
@@ -140,7 +140,7 @@ export default function AddCustomerStep({ onNext }: { onNext: (added: boolean) =
         <button
           onClick={submit}
           disabled={loading || !form.name.trim()}
-          className="flex-2 flex-grow py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+          className="flex-2 flex-grow py-2.5 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
         >
           {loading ? tCommon('loading') : t('continue')}
         </button>

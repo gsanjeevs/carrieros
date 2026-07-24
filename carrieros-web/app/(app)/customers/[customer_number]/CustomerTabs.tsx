@@ -30,7 +30,7 @@ export default function CustomerTabs({
             onClick={() => setActive(tab.key)}
             className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 rounded-t ${
               active === tab.key
-                ? 'border-[#f97316] text-white'
+                ? 'border-brand-orange text-white'
                 : 'border-transparent text-slate-500 hover:text-slate-300'
             }`}
           >

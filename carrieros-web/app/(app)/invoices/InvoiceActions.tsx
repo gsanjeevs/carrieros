@@ -205,8 +205,8 @@ export default function InvoiceActions({
           </CardHeader>
           <CardBody>
             {factoredAtLabel && (
-              <div className="mb-4 rounded-lg bg-[#1abc9c]/10 border border-[#1abc9c]/20 px-3 py-2.5">
-                <p className="text-[#1abc9c] text-xs">
+              <div className="mb-4 rounded-lg bg-teal/10 border border-teal/20 px-3 py-2.5">
+                <p className="text-teal text-xs">
                   {t('factoredOn', { date: factoredAtLabel, company: factoringCompany ?? '—' })}
                 </p>
               </div>
@@ -236,7 +236,7 @@ export default function InvoiceActions({
               <button
                 onClick={sendToFactoring}
                 disabled={busy || !company.trim()}
-                className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#1abc9c] hover:bg-[#16a085] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-teal hover:bg-teal-hover disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
               >
                 <span className="material-symbols-outlined text-[18px]">account_balance</span>
                 {factorLoading ? t('sendingToFactoring') : t('sendToFactoring')}

@@ -13,7 +13,7 @@ import { INVOICE_ROLES } from '@/lib/roles-policy'
 type LoadGroupKey = 'needs_dispatch' | 'in_progress' | 'completed' | 'cancelled' | 'declined'
 
 const GROUPS: { key: LoadGroupKey; statuses: string[]; labelKey: string; accent: string }[] = [
-  { key: 'needs_dispatch', statuses: ['draft', 'scheduled'], labelKey: 'groupNeedsDispatch', accent: 'border-l-[3px] border-l-[#f97316]' },
+  { key: 'needs_dispatch', statuses: ['draft', 'scheduled'], labelKey: 'groupNeedsDispatch', accent: 'border-l-[3px] border-l-brand-orange' },
   { key: 'in_progress', statuses: ['dispatched', 'picked_up', 'in_transit'], labelKey: 'groupInProgress', accent: 'border-l-[3px] border-l-blue-500/60' },
   { key: 'completed', statuses: ['delivered', 'invoiced', 'paid'], labelKey: 'groupCompleted', accent: 'border-l-[3px] border-l-border-ui' },
   { key: 'cancelled', statuses: ['cancelled'], labelKey: 'groupCancelled', accent: 'border-l-[3px] border-l-rose-500/40' },
@@ -91,7 +91,7 @@ export default async function LoadsPage({
           )}
           <Link
             href="/loads/new"
-            className="flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+            className="flex items-center gap-2 px-4 py-2 bg-brand-orange hover:bg-brand-orange-hover text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
             {t('addLoad')}
@@ -100,9 +100,9 @@ export default async function LoadsPage({
       </div>
 
       {justCreated && (
-        <div className="mb-6 flex items-center gap-3 rounded-lg bg-[#16a34a]/10 border border-[#16a34a]/20 px-4 py-3">
-          <span className="material-symbols-outlined text-[#16a34a] text-[18px]">check_circle</span>
-          <p className="text-[#16a34a] text-sm">{t('createdSuccess', { loadNumber: justCreated })}</p>
+        <div className="mb-6 flex items-center gap-3 rounded-lg bg-success/10 border border-success/20 px-4 py-3">
+          <span className="material-symbols-outlined text-success text-[18px]">check_circle</span>
+          <p className="text-success text-sm">{t('createdSuccess', { loadNumber: justCreated })}</p>
         </div>
       )}
 
@@ -112,7 +112,7 @@ export default async function LoadsPage({
             <EmptyState icon="local_shipping" title={t('noLoadsYet')} />
             <Link
               href="/loads/new"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-brand-orange hover:bg-brand-orange-hover text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
             >
               <span className="material-symbols-outlined text-[16px]">add</span>
               {t('createFirstLoad')}
@@ -126,7 +126,7 @@ export default async function LoadsPage({
               href="/loads"
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
                 !activeGroup
-                  ? 'bg-[#f97316] text-white'
+                  ? 'bg-brand-orange text-white'
                   : 'bg-surface-subtle text-text-sec hover:bg-surface-subtle/70 hover:text-text-pri'
               }`}
             >
@@ -138,7 +138,7 @@ export default async function LoadsPage({
                 href={`/loads?status=${group.key}`}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
                   activeGroup?.key === group.key
-                    ? 'bg-[#f97316] text-white'
+                    ? 'bg-brand-orange text-white'
                     : 'bg-surface-subtle text-text-sec hover:bg-surface-subtle/70 hover:text-text-pri'
                 }`}
               >
@@ -199,7 +199,7 @@ export default async function LoadsPage({
                                 </span>
                               )}
                               {group.key === 'needs_dispatch' && (
-                                <span className="flex items-center gap-1 px-3 py-1.5 bg-[#f97316]/10 text-[#f97316] text-xs font-semibold rounded-lg">
+                                <span className="flex items-center gap-1 px-3 py-1.5 bg-brand-orange/10 text-brand-orange text-xs font-semibold rounded-lg">
                                   {t('dispatchAction')}
                                 </span>
                               )}

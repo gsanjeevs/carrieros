@@ -226,7 +226,7 @@ export default function BulkImportCustomers({ existingCustomers }: { existingCus
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
-          <div className="w-full max-w-2xl bg-[#0f1923] border border-white/10 rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-2xl bg-navy border border-white/10 rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-white font-semibold text-lg">{t('bulkImport')}</h2>
               <button onClick={close} className="text-slate-500 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 rounded">
@@ -236,12 +236,12 @@ export default function BulkImportCustomers({ existingCustomers }: { existingCus
 
             {results ? (
               <div className="space-y-4">
-                <div className="rounded-lg bg-[#16a34a]/10 border border-[#16a34a]/20 px-4 py-3 text-[#16a34a] text-sm">
+                <div className="rounded-lg bg-success/10 border border-success/20 px-4 py-3 text-success text-sm">
                   {t('importSummary', { created: createdCount, updated: updatedCount, skipped: skippedCount })}
                 </div>
                 <button
                   onClick={close}
-                  className="w-full py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+                  className="w-full py-2.5 bg-brand-orange hover:bg-brand-orange-hover text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
                 >
                   {tCommon('done')}
                 </button>
@@ -251,7 +251,7 @@ export default function BulkImportCustomers({ existingCustomers }: { existingCus
                 <p className="text-slate-400 text-sm">{t('importInstructions', { max: MAX_ROWS })}</p>
                 <button
                   onClick={downloadTemplate}
-                  className="flex items-center gap-1.5 text-[#f97316] hover:text-[#fb923c] text-sm font-medium transition"
+                  className="flex items-center gap-1.5 text-brand-orange hover:text-[#fb923c] text-sm font-medium transition"
                 >
                   <span className="material-symbols-outlined text-[16px]">download</span>
                   {t('downloadTemplate')}
@@ -268,7 +268,7 @@ export default function BulkImportCustomers({ existingCustomers }: { existingCus
                 />
                 <button
                   onClick={() => fileRef.current?.click()}
-                  className="w-full py-8 border-2 border-dashed border-white/15 hover:border-[#f97316]/50 rounded-xl text-slate-400 hover:text-white text-sm transition flex flex-col items-center gap-2"
+                  className="w-full py-8 border-2 border-dashed border-white/15 hover:border-brand-orange/50 rounded-xl text-slate-400 hover:text-white text-sm transition flex flex-col items-center gap-2"
                 >
                   <span className="material-symbols-outlined text-[28px]">upload_file</span>
                   {t('chooseCsvFile')}
@@ -332,7 +332,7 @@ export default function BulkImportCustomers({ existingCustomers }: { existingCus
                   <button
                     onClick={confirmImport}
                     disabled={importing}
-                    className="flex-2 flex-grow py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+                    className="flex-2 flex-grow py-2.5 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
                   >
                     {importing ? t('importing') : t('importConfirm', { count: rows.length })}
                   </button>

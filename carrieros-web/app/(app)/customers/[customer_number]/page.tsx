@@ -22,6 +22,7 @@ import { invoiceStatusVariant, type InvoiceStatus } from '@/lib/domain/invoice-s
 import { Card, CardHeader, CardBody, KpiTile, StatusBadge, Table, TableHeaderCell, TableRow, TableCell, EmptyState } from '@/components/ui'
 
 import { INVOICE_ROLES } from '@/lib/roles-policy'
+import { SCORE_CRITICAL, SCORE_WARNING, SUCCESS } from '@/lib/design-tokens'
 
 const VIEW_ROLES = ['owner', 'solo', 'dispatcher', 'finance']
 
@@ -32,9 +33,9 @@ const SEVERITY_COLOR: Record<string, string> = {
 }
 
 function scoreColor(score: number): { stroke: string; text: string } {
-  if (score >= 80) return { stroke: '#16a34a', text: 'text-[#16a34a]' }
-  if (score >= 50) return { stroke: '#f59e0b', text: 'text-amber-500' }
-  return { stroke: '#f43f5e', text: 'text-rose-500' }
+  if (score >= 80) return { stroke: SUCCESS, text: 'text-success' }
+  if (score >= 50) return { stroke: SCORE_WARNING, text: 'text-amber-500' }
+  return { stroke: SCORE_CRITICAL, text: 'text-rose-500' }
 }
 
 function HealthScoreRing({ score }: { score: number }) {
@@ -209,7 +210,7 @@ export default async function CustomerDetailPage({
             <CardBody>
               <div className="flex flex-wrap gap-1.5">
                 {customer.tags.map((tag) => (
-                  <span key={tag} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#f97316]/15 text-[#f97316]">
+                  <span key={tag} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-brand-orange/15 text-brand-orange">
                     {tag}
                   </span>
                 ))}

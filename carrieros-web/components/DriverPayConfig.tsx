@@ -65,7 +65,7 @@ export default function DriverPayConfig({
     router.refresh()
   }
 
-  const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 transition'
+  const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/40 transition'
 
   if (!editing) {
     return (
@@ -74,7 +74,7 @@ export default function DriverPayConfig({
           <h2 className="text-white font-medium text-sm">{t('payConfig')}</h2>
           <button
             onClick={() => setEditing(true)}
-            className="text-[#f97316] hover:text-[#fb923c] text-xs font-medium transition"
+            className="text-brand-orange hover:text-[#fb923c] text-xs font-medium transition"
           >
             {settlementType ? t('editPayConfig') : t('setPayConfig')}
           </button>
@@ -125,7 +125,7 @@ export default function DriverPayConfig({
         <button
           onClick={save}
           disabled={saving}
-          className="flex-1 py-2 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition"
+          className="flex-1 py-2 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition"
         >
           {saving ? t('payConfigSaving') : t('payConfigSave')}
         </button>

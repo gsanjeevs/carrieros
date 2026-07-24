@@ -30,6 +30,10 @@
   --color-navy-light: #1e3a5f;
   --color-navy-muted: #4b5a6e;
   --color-brand-orange: #f97316;
+  /* Hover state for brand-orange/teal — previously hardcoded as
+     hover:bg-[#ea6c0a]/hover:bg-[#16a085] next to bg-brand-orange/bg-teal
+     in ~26 files (raw-hex audit, 2026-07-24). */
+  --color-brand-orange-hover: #ea6c0a;
 
   --color-success: #16a34a;
   --color-success-light: #e8f9f1;
@@ -46,12 +50,37 @@
   --color-danger-dark: #c0392b;
 
   --color-teal: #1abc9c;
+  --color-teal-hover: #16a085;
 
   --color-info: #1a5eb8;
   --color-info-light: #e8f0fe;
 
   --color-purple: #6c3abf;
   --color-purple-light: #f3eeff;
+
+  /* Distinct, brighter blue used for dashboard KPI icons and the vehicle
+     fleet-card "active" banner gradient — visually different from `info`
+     (a darker, more desaturated blue used for status badges/pills), not a
+     substitute for it (raw-hex audit, 2026-07-24). */
+  --color-brand-blue: #2563eb;
+  --color-brand-blue-dark: #1a3a8a;
+
+  /* Neutral slate scale used for dashboard icon colors and the vehicle
+     "idle" banner gradient — distinct from navy-muted (which has a blue
+     cast; these are true neutrals) (raw-hex audit, 2026-07-24). */
+  --color-slate: #64748b;
+  --color-slate-light: #94a3b8;
+  --color-slate-dark: #374151;
+
+  /* Customer health-score gauge's 3-tier palette (success/score-warning/
+     score-critical) — deliberately its own scale, distinct from the
+     warning/danger status tokens above (raw-hex audit, 2026-07-24). */
+  --color-score-warning: #f59e0b;
+  --color-score-critical: #f43f5e;
+
+  /* Vehicle fleet-card status banner gradient endpoints (mockup-22) — the
+     "in shop" gradient reuses --color-danger as its light end. */
+  --color-vehicle-inshop-dark: #8a1a1a;
 
   /* Sidebar/team avatar initials — bg is navy-light, text is this specific
      light blue (design-gap-analysis.md 1.4), not reused elsewhere. */

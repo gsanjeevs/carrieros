@@ -85,7 +85,7 @@ export default function IftaCrossingsSection({
     router.refresh()
   }
 
-  const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 transition'
+  const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/40 transition'
 
   return (
     <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
@@ -94,7 +94,7 @@ export default function IftaCrossingsSection({
         {canManage && !adding && (
           <button
             onClick={() => setAdding(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-xs font-semibold rounded-lg transition"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-orange hover:bg-brand-orange-hover text-white text-xs font-semibold rounded-lg transition"
           >
             <span className="material-symbols-outlined text-[16px]">add</span>
             {t('iftaLogCrossing')}
@@ -137,7 +137,7 @@ export default function IftaCrossingsSection({
             <button onClick={() => { setAdding(false); setError('') }} disabled={saving} className="flex-1 py-2 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white text-sm font-medium rounded-lg transition">
               {t('iftaCancel')}
             </button>
-            <button onClick={submit} disabled={saving} className="flex-1 py-2 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition">
+            <button onClick={submit} disabled={saving} className="flex-1 py-2 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition">
               {saving ? t('iftaSaving') : t('iftaSave')}
             </button>
           </div>

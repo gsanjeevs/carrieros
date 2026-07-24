@@ -116,8 +116,8 @@ export default function DispatchPanel({
     }
   }
 
-  const cardBaseCls = 'flex-shrink-0 flex items-center gap-2 px-2.5 py-2 rounded-lg border text-left transition focus:outline-none focus:ring-2 focus:ring-[#f97316]/50'
-  const cardSelectedCls = 'border-[#f97316] bg-[#f97316]/10'
+  const cardBaseCls = 'flex-shrink-0 flex items-center gap-2 px-2.5 py-2 rounded-lg border text-left transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50'
+  const cardSelectedCls = 'border-brand-orange bg-brand-orange/10'
   const cardUnselectedCls = 'border-white/10 bg-white/5 hover:bg-white/10'
   const nextStatus = NEXT_STATUS[currentStatus]
   const actionKey = STATUS_ACTION_KEY[currentStatus]
@@ -228,7 +228,7 @@ export default function DispatchPanel({
           <button
             onClick={() => save(nextStatus)}
             disabled={saving}
-            className="flex-1 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+            className="flex-1 py-2 bg-brand-orange hover:bg-brand-orange-hover text-white text-sm font-semibold rounded-lg transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
           >
             {saving ? '…' : t(actionKey as never)}
           </button>

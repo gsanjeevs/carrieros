@@ -210,7 +210,7 @@ export default async function LoadDetailPage({
         {/* Route strip */}
         <div className="flex items-center gap-3 ml-9">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="w-2 h-2 rounded-full bg-[#f97316] shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-brand-orange shrink-0" />
             <span className="text-text-pri text-sm font-medium truncate">
               {[load.pickup_city, load.pickup_state].filter(Boolean).join(', ') || '—'}
             </span>
@@ -219,7 +219,7 @@ export default async function LoadDetailPage({
           <span className="material-symbols-outlined text-text-mut text-[16px] -mx-1 shrink-0">arrow_forward</span>
           <div className="flex-1 h-px bg-white/10 min-w-[24px] max-w-[80px]" />
           <div className="flex items-center gap-2 min-w-0">
-            <span className="w-2 h-2 rounded-full bg-[#1abc9c] shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-teal shrink-0" />
             <span className="text-text-pri text-sm font-medium truncate">
               {[load.delivery_city, load.delivery_state].filter(Boolean).join(', ') || '—'}
             </span>
@@ -255,19 +255,19 @@ export default async function LoadDetailPage({
               <div key={s.key} className="flex items-center flex-1 min-w-0">
                 <div className="flex flex-col items-center gap-1 shrink-0">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center transition ${
-                    current ? 'bg-[#f97316] ring-2 ring-[#f97316]/30' :
-                    done    ? 'bg-[#f97316]/20' : 'bg-surface-subtle'
+                    current ? 'bg-brand-orange ring-2 ring-brand-orange/30' :
+                    done    ? 'bg-brand-orange/20' : 'bg-surface-subtle'
                   }`}>
                     <span className={`material-symbols-outlined text-[16px] ${
-                      current ? 'text-white' : done ? 'text-[#f97316]' : 'text-text-mut'
+                      current ? 'text-white' : done ? 'text-brand-orange' : 'text-text-mut'
                     }`}>{s.icon}</span>
                   </div>
                   <span className={`text-[10px] font-medium whitespace-nowrap ${
-                    current ? 'text-[#f97316]' : done ? 'text-text-sec' : 'text-text-mut'
+                    current ? 'text-brand-orange' : done ? 'text-text-sec' : 'text-text-mut'
                   }`}>{s.label}</span>
                 </div>
                 {i < STATUS_FLOW.length - 1 && (
-                  <div className={`flex-1 h-px mx-1 ${done ? 'bg-[#f97316]/40' : 'bg-white/8'}`} />
+                  <div className={`flex-1 h-px mx-1 ${done ? 'bg-brand-orange/40' : 'bg-white/8'}`} />
                 )}
               </div>
             )
@@ -303,13 +303,13 @@ export default async function LoadDetailPage({
             <CardBody>
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-[#f97316] font-semibold mb-2">{t('pickup')}</p>
+                <p className="text-[10px] uppercase tracking-wider text-brand-orange font-semibold mb-2">{t('pickup')}</p>
                 <p className="text-text-pri text-sm font-medium">{load.pickup_address ?? '—'}</p>
                 <p className="text-text-sec text-sm">{[load.pickup_city, load.pickup_state, load.pickup_zip].filter(Boolean).join(', ')}</p>
                 <p className="text-text-mut text-xs mt-2">{fmt(load.pickup_date, locale)}{load.pickup_time ? ` · ${load.pickup_time}` : ''}</p>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-[#1abc9c] font-semibold mb-2">{t('delivery')}</p>
+                <p className="text-[10px] uppercase tracking-wider text-teal font-semibold mb-2">{t('delivery')}</p>
                 <p className="text-text-pri text-sm font-medium">{load.delivery_address ?? '—'}</p>
                 <p className="text-text-sec text-sm">{[load.delivery_city, load.delivery_state, load.delivery_zip].filter(Boolean).join(', ')}</p>
                 <p className="text-text-mut text-xs mt-2">{fmt(load.delivery_date, locale)}{load.delivery_time ? ` · ${load.delivery_time}` : ''}</p>
@@ -381,7 +381,7 @@ export default async function LoadDetailPage({
                     : 'System'
                   return (
                     <div key={e.id} className="flex gap-3">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#f97316] mt-2 shrink-0" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-brand-orange mt-2 shrink-0" />
                       <div>
                         <p className="text-text-pri text-sm">{e.event_type.replace(/_/g, ' ')}</p>
                         {e.note && <p className="text-text-sec text-xs mt-0.5">{e.note}</p>}

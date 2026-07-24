@@ -21,12 +21,12 @@ import { toDate } from '@/lib/format-datetime'
 const STATUS_COLOR: Record<string, string> = {
   draft:       'bg-slate-500/20 text-slate-400',
   scheduled:   'bg-blue-500/20 text-blue-400',
-  dispatched:  'bg-[#f97316]/20 text-[#f97316]',
+  dispatched:  'bg-brand-orange/20 text-brand-orange',
   picked_up:   'bg-amber-500/20 text-amber-400',
-  in_transit:  'bg-[#1abc9c]/20 text-[#1abc9c]',
-  delivered:   'bg-[#16a34a]/20 text-[#16a34a]',
+  in_transit:  'bg-teal/20 text-teal',
+  delivered:   'bg-success/20 text-success',
   invoiced:    'bg-purple-500/20 text-purple-400',
-  paid:        'bg-[#16a34a]/20 text-[#16a34a]',
+  paid:        'bg-success/20 text-success',
   cancelled:   'bg-rose-500/10 text-rose-400',
 }
 
@@ -77,7 +77,7 @@ function timeAgo(value: string, t: TimeAgoT): string {
 function Logo() {
   return (
     <div className="inline-flex items-center gap-2">
-      <div className="w-8 h-8 rounded-lg bg-[#f97316] flex items-center justify-center">
+      <div className="w-8 h-8 rounded-lg bg-brand-orange flex items-center justify-center">
         <span className="text-white font-bold text-sm">C</span>
       </div>
       <span className="text-white font-semibold text-xl tracking-tight">CarrierOS</span>
@@ -103,7 +103,7 @@ export default async function TrackingPage({
 
   if (!load) {
     return (
-      <div className="min-h-screen bg-[#0f1923] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-navy flex items-center justify-center px-4">
         <div className="w-full max-w-sm text-center">
           <div className="mb-8 flex justify-center">
             <Logo />
@@ -130,7 +130,7 @@ export default async function TrackingPage({
   const timeline = events ?? []
 
   return (
-    <div className="min-h-screen bg-[#0f1923] px-4 py-10 sm:py-16">
+    <div className="min-h-screen bg-navy px-4 py-10 sm:py-16">
       <div className="w-full max-w-md mx-auto">
 
         <div className="mb-8 flex justify-center">
@@ -163,9 +163,9 @@ export default async function TrackingPage({
             <p className="text-slate-500 text-xs uppercase tracking-wide mb-3">{tLoads('route')}</p>
             <div className="flex items-start gap-3">
               <div className="flex flex-col items-center pt-1">
-                <div className="w-2 h-2 rounded-full bg-[#f97316]" />
+                <div className="w-2 h-2 rounded-full bg-brand-orange" />
                 <div className="w-px h-8 bg-white/10" />
-                <div className="w-2 h-2 rounded-full bg-[#1abc9c]" />
+                <div className="w-2 h-2 rounded-full bg-teal" />
               </div>
               <div className="flex-1 space-y-6">
                 <div>
@@ -194,7 +194,7 @@ export default async function TrackingPage({
                 {timeline.map((event, i) => (
                   <div key={`${event.event_type}-${event.created_at}`} className="flex items-start gap-3">
                     <div className="flex flex-col items-center pt-1">
-                      <div className={`w-2 h-2 rounded-full ${i === timeline.length - 1 ? 'bg-[#1abc9c]' : 'bg-white/20'}`} />
+                      <div className={`w-2 h-2 rounded-full ${i === timeline.length - 1 ? 'bg-teal' : 'bg-white/20'}`} />
                       {i < timeline.length - 1 && <div className="w-px h-6 bg-white/10 mt-1" />}
                     </div>
                     <div className="flex-1 pb-0.5">
@@ -217,7 +217,7 @@ export default async function TrackingPage({
                 {load.carrier_phone && (
                   <a
                     href={`tel:${load.carrier_phone}`}
-                    className="flex items-center gap-2 text-slate-300 text-sm hover:text-[#f97316] transition-colors"
+                    className="flex items-center gap-2 text-slate-300 text-sm hover:text-brand-orange transition-colors"
                   >
                     <span className="material-symbols-outlined text-[16px]">call</span>
                     {load.carrier_phone}
@@ -226,7 +226,7 @@ export default async function TrackingPage({
                 {load.carrier_email && (
                   <a
                     href={`mailto:${load.carrier_email}`}
-                    className="flex items-center gap-2 text-slate-300 text-sm hover:text-[#f97316] transition-colors"
+                    className="flex items-center gap-2 text-slate-300 text-sm hover:text-brand-orange transition-colors"
                   >
                     <span className="material-symbols-outlined text-[16px]">mail</span>
                     {load.carrier_email}

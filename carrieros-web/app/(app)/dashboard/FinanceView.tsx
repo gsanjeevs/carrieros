@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { formatMoney } from '@/lib/format-money'
 import { Card, CardHeader, KpiTile, EmptyState } from '@/components/ui'
+import { BRAND_ORANGE, DANGER, SUCCESS, WARNING } from '@/lib/design-tokens'
 
 export default async function FinanceView({ orgId }: { orgId: number | undefined }) {
   const supabase = await createClient()
@@ -78,10 +79,10 @@ export default async function FinanceView({ orgId }: { orgId: number | undefined
   }
 
   const agingRows: { label: string; amount: number; count: number; color: string }[] = [
-    { label: t('agingCurrent'), amount: buckets.current, count: bucketCounts.current, color: '#16a34a' },
-    { label: t('aging30'), amount: buckets.days30, count: bucketCounts.days30, color: '#d97706' },
-    { label: t('aging60'), amount: buckets.days60, count: bucketCounts.days60, color: '#f97316' },
-    { label: t('aging90'), amount: buckets.days90, count: bucketCounts.days90, color: '#dc2626' },
+    { label: t('agingCurrent'), amount: buckets.current, count: bucketCounts.current, color: SUCCESS },
+    { label: t('aging30'), amount: buckets.days30, count: bucketCounts.days30, color: WARNING },
+    { label: t('aging60'), amount: buckets.days60, count: bucketCounts.days60, color: BRAND_ORANGE },
+    { label: t('aging90'), amount: buckets.days90, count: bucketCounts.days90, color: DANGER },
   ]
 
   return (

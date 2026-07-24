@@ -48,9 +48,9 @@ type ActiveAssignment = {
 }
 
 const BANNER_GRADIENTS: Record<string, string> = {
-  active: 'from-[#1a3a8a] to-[#2563eb]',
-  idle: 'from-[#374151] to-[#64748b]',
-  in_shop: 'from-[#8a1a1a] to-[#dc2626]',
+  active: 'from-brand-blue-dark to-brand-blue',
+  idle: 'from-slate-dark to-slate',
+  in_shop: 'from-vehicle-inshop-dark to-danger',
 }
 
 export default async function VehiclesPage({

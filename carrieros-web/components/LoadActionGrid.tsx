@@ -73,14 +73,14 @@ export default function LoadActionGrid({
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 relative">
       <div className="relative">
         <button type="button" onClick={shareTracking} disabled={!trackingToken} className={`${btnCls} w-full`}>
-          <span className={`material-symbols-outlined text-[20px] ${copied ? 'text-[#1abc9c]' : 'text-slate-300'}`}>
+          <span className={`material-symbols-outlined text-[20px] ${copied ? 'text-teal' : 'text-slate-300'}`}>
             {copied ? 'check' : 'ios_share'}
           </span>
           <span className={labelCls}>{copied ? t('actionCopied') : t('actionShareTracking')}</span>
         </button>
 
         {menuOpen && trackingToken && (
-          <div className="absolute z-10 top-full mt-1 left-0 right-0 bg-[#1a2530] border border-white/10 rounded-xl overflow-hidden shadow-lg">
+          <div className="absolute z-10 top-full mt-1 left-0 right-0 bg-navy border border-white/10 rounded-xl overflow-hidden shadow-lg">
             <button type="button" onClick={copyLink} className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-white hover:bg-white/10 transition">
               <span className="material-symbols-outlined text-[16px] text-slate-300">content_copy</span>
               {t('shareCopyLink')}

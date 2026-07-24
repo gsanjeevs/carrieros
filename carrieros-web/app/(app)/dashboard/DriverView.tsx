@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getTranslations } from 'next-intl/server'
 import MyLoadCard, { type MyLoad } from './MyLoadCard'
 import { Card } from '@/components/ui'
+import { BRAND_BLUE, DANGER, SUCCESS, WARNING } from '@/lib/design-tokens'
 
 const COMPLIANCE_DUE_SOON_DAYS = 30
 const ACTIVE_STATUSES = ['dispatched', 'picked_up', 'in_transit']
@@ -39,16 +40,16 @@ export default async function DriverView({ userId }: { userId: string }) {
   const dueSoonCutoff = new Date(now.getTime() + COMPLIANCE_DUE_SOON_DAYS * 24 * 60 * 60 * 1000)
 
   let complianceLabel = t('complianceIncomplete')
-  let complianceColor = '#dc2626'
+  let complianceColor = DANGER
   if (driver?.cdl_expiry && driver?.med_cert_expiry) {
     const cdl = new Date(driver.cdl_expiry)
     const med = new Date(driver.med_cert_expiry)
     if (cdl <= dueSoonCutoff || med <= dueSoonCutoff) {
       complianceLabel = t('complianceDueSoon')
-      complianceColor = '#d97706'
+      complianceColor = WARNING
     } else {
       complianceLabel = t('complianceClear')
-      complianceColor = '#16a34a'
+      complianceColor = SUCCESS
     }
   }
 
@@ -64,8 +65,8 @@ export default async function DriverView({ userId }: { userId: string }) {
       <Card className="p-5">
         <div className="flex items-start justify-between mb-3">
           <span className="text-text-sec text-sm font-medium">{t('driverCompliance')}</span>
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#3b82f620' }}>
-            <span className="material-symbols-outlined text-[18px]" style={{ color: '#3b82f6' }}>person</span>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${BRAND_BLUE}20` }}>
+            <span className="material-symbols-outlined text-[18px]" style={{ color: BRAND_BLUE }}>person</span>
           </div>
         </div>
         <div className="flex items-center gap-1.5">

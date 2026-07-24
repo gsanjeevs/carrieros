@@ -10,6 +10,7 @@ import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import StatusBadge from '@/components/ui/StatusBadge'
 import ExceptionsBanner from './ExceptionsBanner'
 import { Card, CardHeader, KpiTile } from '@/components/ui'
+import { SLATE, SUCCESS, TEAL, WARNING } from '@/lib/design-tokens'
 
 export default async function DispatcherView({ orgId }: { orgId: number | undefined }) {
   const supabase = await createClient()
@@ -59,8 +60,8 @@ export default async function DispatcherView({ orgId }: { orgId: number | undefi
         <Card className="p-5">
           <div className="flex items-start justify-between mb-3">
             <span className="text-text-sec text-sm font-medium">{t('fleetStatus')}</span>
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#1abc9c20' }}>
-              <span className="material-symbols-outlined text-[18px]" style={{ color: '#1abc9c' }}>fire_truck</span>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${TEAL}20` }}>
+              <span className="material-symbols-outlined text-[18px]" style={{ color: TEAL }}>fire_truck</span>
             </div>
           </div>
           <div className="flex items-baseline gap-2 mb-3">
@@ -69,15 +70,15 @@ export default async function DispatcherView({ orgId }: { orgId: number | undefi
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#16a34a' }} />
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: SUCCESS }} />
               <span className="text-text-sec text-xs">{fleetActive} {t('fleetActive')}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#64748b' }} />
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: SLATE }} />
               <span className="text-text-sec text-xs">{fleetIdle} {t('fleetIdle')}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#d97706' }} />
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: WARNING }} />
               <span className="text-text-sec text-xs">{fleetInShop} {t('fleetInShop')}</span>
             </div>
           </div>

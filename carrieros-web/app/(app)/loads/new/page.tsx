@@ -43,9 +43,9 @@ export default async function NewLoadPage() {
 
         {/* Paste rate con */}
         <Link href="/loads/new/paste" className="block">
-          <Card variant="interactive" className="group flex items-start gap-4 p-5 hover:border-[#f97316]/40 hover:bg-[#f97316]/5">
-            <div className="w-10 h-10 rounded-lg bg-[#f97316]/15 flex items-center justify-center flex-shrink-0 group-hover:bg-[#f97316]/25 transition-colors">
-              <span className="material-symbols-outlined text-[#f97316] text-[20px]">content_paste</span>
+          <Card variant="interactive" className="group flex items-start gap-4 p-5 hover:border-brand-orange/40 hover:bg-brand-orange/5">
+            <div className="w-10 h-10 rounded-lg bg-brand-orange/15 flex items-center justify-center flex-shrink-0 group-hover:bg-brand-orange/25 transition-colors">
+              <span className="material-symbols-outlined text-brand-orange text-[20px]">content_paste</span>
             </div>
             <div className="flex-1">
               <p className="text-text-pri font-medium text-sm">Paste rate confirmation</p>
@@ -60,8 +60,8 @@ export default async function NewLoadPage() {
             Disabled and labeled honestly instead of silently building a PDF
             extraction feature that hasn't been scoped. */}
         <Card aria-disabled="true" className="flex items-start gap-4 p-5 opacity-50 cursor-not-allowed">
-          <div className="w-10 h-10 rounded-lg bg-[#1abc9c]/15 flex items-center justify-center flex-shrink-0">
-            <span className="material-symbols-outlined text-[#1abc9c] text-[20px]">upload_file</span>
+          <div className="w-10 h-10 rounded-lg bg-teal/15 flex items-center justify-center flex-shrink-0">
+            <span className="material-symbols-outlined text-teal text-[20px]">upload_file</span>
           </div>
           <div className="flex-1">
             <p className="text-text-pri font-medium text-sm">Upload PDF</p>
@@ -72,7 +72,7 @@ export default async function NewLoadPage() {
 
         {/* Manual entry */}
         <Link href="/loads/new/manual" className="block">
-          <Card variant="interactive" className="group flex items-start gap-4 p-5 hover:border-[#f97316]/40 hover:bg-[#f97316]/5">
+          <Card variant="interactive" className="group flex items-start gap-4 p-5 hover:border-brand-orange/40 hover:bg-brand-orange/5">
             <div className="w-10 h-10 rounded-lg bg-surface-subtle flex items-center justify-center flex-shrink-0 group-hover:bg-white/15 transition-colors">
               <span className="material-symbols-outlined text-text-sec text-[20px]">edit</span>
             </div>

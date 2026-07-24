@@ -23,7 +23,7 @@ export default async function LoginPage({ searchParams }: Props) {
   const locale = await getLocale()
 
   return (
-    <div className="min-h-screen bg-[#0f1923] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-navy flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
 
         <div className="flex justify-end mb-4">
@@ -33,7 +33,7 @@ export default async function LoginPage({ searchParams }: Props) {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-[#f97316] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-brand-orange flex items-center justify-center">
               <span className="text-white font-bold text-sm">C</span>
             </div>
             <span className="text-white font-semibold text-xl tracking-tight">CarrierOS</span>
@@ -61,7 +61,7 @@ export default async function LoginPage({ searchParams }: Props) {
               autoComplete="email"
               required
               placeholder="you@example.com"
-              className="w-full rounded-lg bg-white/5 border border-white/10 px-3.5 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#f97316] focus:border-transparent transition"
+              className="w-full rounded-lg bg-white/5 border border-white/10 px-3.5 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition"
             />
           </div>
 
@@ -71,7 +71,7 @@ export default async function LoginPage({ searchParams }: Props) {
                 {t('password')}
               </label>
               {/* Forgot password — hook up later */}
-              <span className="text-xs text-[#f97316] cursor-pointer hover:underline">
+              <span className="text-xs text-brand-orange cursor-pointer hover:underline">
                 {t('forgotPassword')}
               </span>
             </div>
@@ -82,23 +82,23 @@ export default async function LoginPage({ searchParams }: Props) {
               autoComplete="current-password"
               required
               placeholder="••••••••"
-              className="w-full rounded-lg bg-white/5 border border-white/10 px-3.5 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#f97316] focus:border-transparent transition"
+              className="w-full rounded-lg bg-white/5 border border-white/10 px-3.5 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-[#f97316] hover:bg-[#ea6c0a] text-white font-semibold py-2.5 text-sm transition focus:outline-none focus:ring-2 focus:ring-[#f97316] focus:ring-offset-2 focus:ring-offset-[#0f1923]"
+            className="w-full rounded-lg bg-brand-orange hover:bg-brand-orange-hover text-white font-semibold py-2.5 text-sm transition focus:outline-none focus:ring-2 focus:ring-brand-orange focus:ring-offset-2 focus:ring-offset-navy"
           >
             {t('signIn')}
           </button>
         </form>
 
         <p className="mt-6 text-center text-xs text-slate-500">
-          {t('noAccount')} <a href="/signup" className="text-[#f97316] hover:underline">{t('signUpFree')}</a>
+          {t('noAccount')} <a href="/signup" className="text-brand-orange hover:underline">{t('signUpFree')}</a>
         </p>
         <p className="mt-2 text-center text-xs text-slate-500">
-          <a href="mailto:info@shipmentx.com" className="text-[#f97316] hover:underline">
+          <a href="mailto:info@shipmentx.com" className="text-brand-orange hover:underline">
             {t('needAccess')}
           </a>
         </p>

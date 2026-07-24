@@ -9,7 +9,7 @@ export default function PrintButton({ label }: { label: string }) {
     <button
       type="button"
       onClick={() => window.print()}
-      className="flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-sm font-semibold rounded-lg transition"
+      className="flex items-center gap-2 px-4 py-2 bg-brand-orange hover:bg-brand-orange-hover text-white text-sm font-semibold rounded-lg transition"
     >
       <span className="material-symbols-outlined text-[18px]">print</span>
       {label}

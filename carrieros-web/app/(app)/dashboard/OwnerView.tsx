@@ -10,6 +10,7 @@ import ExceptionsBanner from './ExceptionsBanner'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import StatusBadge from '@/components/ui/StatusBadge'
 import { Card, CardHeader, CardBody, KpiTile } from '@/components/ui'
+import { BRAND_BLUE, BRAND_ORANGE, DANGER, SLATE, SUCCESS, TEAL, WARNING } from '@/lib/design-tokens'
 
 interface KpiCard {
   label: string
@@ -158,33 +159,33 @@ export default async function OwnerView({ orgId, embedded = false }: { orgId: nu
   }
 
   const kpis: KpiCard[] = [
-    { label: t('activeLoads'),        value: activeLoads,                          sub: t('totalLoads', { count: loadsRes.count ?? 0 }),        icon: 'local_shipping', color: '#f97316' },
-    { label: t('revenueThisMonth'),   value: formatMoney(revenueMtd, 'USD', locale), sub: t('revenueThisMonthSub'),                               icon: 'payments',       color: '#16a34a' },
-    { label: t('outstandingInvoices'), value: formatMoney(outstandingAmount, 'USD', locale), sub: t('outstandingInvoicesSub', { count: outstandingCount }), icon: 'receipt_long', color: '#d97706' },
-    { label: t('avgRatePerLoad'),     value: formatMoney(avgRate, 'USD', locale),   sub: t('avgRatePerLoadSub', { count: rateRows.length }),     icon: 'trending_up',   color: '#3b82f6' },
+    { label: t('activeLoads'),        value: activeLoads,                          sub: t('totalLoads', { count: loadsRes.count ?? 0 }),        icon: 'local_shipping', color: BRAND_ORANGE },
+    { label: t('revenueThisMonth'),   value: formatMoney(revenueMtd, 'USD', locale), sub: t('revenueThisMonthSub'),                               icon: 'payments',       color: SUCCESS },
+    { label: t('outstandingInvoices'), value: formatMoney(outstandingAmount, 'USD', locale), sub: t('outstandingInvoicesSub', { count: outstandingCount }), icon: 'receipt_long', color: WARNING },
+    { label: t('avgRatePerLoad'),     value: formatMoney(avgRate, 'USD', locale),   sub: t('avgRatePerLoadSub', { count: rateRows.length }),     icon: 'trending_up',   color: BRAND_BLUE },
   ]
 
   const breakdowns: BreakdownCard[] = [
     {
       label: t('fleetStatus'),
       icon: 'fire_truck',
-      color: '#1abc9c',
+      color: TEAL,
       primary: { label: t('fleetActive'), value: fleetActive },
       stats: [
-        { label: t('fleetActive'), value: fleetActive, color: '#16a34a' },
-        { label: t('fleetIdle'), value: fleetIdle, color: '#64748b' },
-        { label: t('fleetInShop'), value: fleetInShop, color: '#d97706' },
+        { label: t('fleetActive'), value: fleetActive, color: SUCCESS },
+        { label: t('fleetIdle'), value: fleetIdle, color: SLATE },
+        { label: t('fleetInShop'), value: fleetInShop, color: WARNING },
       ],
     },
     {
       label: t('driverCompliance'),
       icon: 'person',
-      color: '#3b82f6',
+      color: BRAND_BLUE,
       primary: { label: t('complianceClear'), value: complianceClear },
       stats: [
-        { label: t('complianceClear'), value: complianceClear, color: '#16a34a' },
-        { label: t('complianceDueSoon'), value: complianceDueSoon, color: '#d97706' },
-        { label: t('complianceIncomplete'), value: complianceIncomplete, color: '#dc2626' },
+        { label: t('complianceClear'), value: complianceClear, color: SUCCESS },
+        { label: t('complianceDueSoon'), value: complianceDueSoon, color: WARNING },
+        { label: t('complianceIncomplete'), value: complianceIncomplete, color: DANGER },
       ],
     },
   ]

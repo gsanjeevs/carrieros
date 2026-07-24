@@ -35,7 +35,7 @@ export default async function AppLayout({
     .single()
 
   return (
-    <div className="flex h-screen bg-[#0f1923] overflow-hidden">
+    <div className="flex h-screen bg-navy overflow-hidden">
       <Sidebar
         role={role}
         userName={name}

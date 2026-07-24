@@ -21,7 +21,7 @@ type Contact = {
   portal_profile_id: string | null
 }
 
-const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-[#f97316] transition'
+const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-brand-orange transition'
 const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
 
 export default function CustomerContacts({
@@ -144,7 +144,7 @@ export default function CustomerContacts({
                   <td className="px-5 py-3.5 text-white font-medium">
                     {c.name}
                     {c.is_primary && (
-                      <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase bg-[#f97316]/15 text-[#f97316]">
+                      <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase bg-brand-orange/15 text-brand-orange">
                         {t('contactsPrimary')}
                       </span>
                     )}
@@ -153,7 +153,7 @@ export default function CustomerContacts({
                   <td className="px-4 py-3.5 text-slate-400">{[c.email, c.phone].filter(Boolean).join(' · ') || '—'}</td>
                   <td className="px-4 py-3.5">
                     {c.portal_profile_id ? (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#16a34a]/20 text-[#16a34a]">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-success/20 text-success">
                         {t('contactsLinked')}
                       </span>
                     ) : (
@@ -177,7 +177,7 @@ export default function CustomerContacts({
                           onClick={() => invite(c.id)}
                           disabled={busyId === c.id || !c.email}
                           title={!c.email ? t('contactsNoEmail') : undefined}
-                          className="text-xs font-medium text-[#f97316] hover:text-[#ea6c0a] disabled:opacity-40 transition"
+                          className="text-xs font-medium text-brand-orange hover:text-brand-orange-hover disabled:opacity-40 transition"
                         >
                           {busyId === c.id ? '…' : t('contactsInvite')}
                         </button>
@@ -216,7 +216,7 @@ export default function CustomerContacts({
           <button
             onClick={addContact}
             disabled={adding || !form.name.trim()}
-            className="px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition"
+            className="px-4 py-2 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition"
           >
             {adding ? '…' : t('contactsAdd')}
           </button>

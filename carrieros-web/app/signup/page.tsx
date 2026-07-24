@@ -64,12 +64,12 @@ function SignupForm() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-[#0f1923] flex items-center justify-center px-4 py-10">
+    <div className="min-h-screen bg-navy flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md">
 
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-[#f97316] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-brand-orange flex items-center justify-center">
               <span className="text-white font-bold text-sm">C</span>
             </div>
             <span className="text-white font-semibold text-xl tracking-tight">CarrierOS</span>
@@ -87,18 +87,18 @@ function SignupForm() {
                 key={tier.code}
                 onClick={() => setSelectedTier(tier.code)}
                 className={`w-full text-left rounded-xl border-2 p-4 transition ${
-                  selectedTier === tier.code ? 'border-[#f97316] bg-[#f97316]/5' : 'border-white/10 bg-white/5 hover:border-white/20'
+                  selectedTier === tier.code ? 'border-brand-orange bg-brand-orange/5' : 'border-white/10 bg-white/5 hover:border-white/20'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="text-white font-bold">{tier.label}</span>
                   {tier.code === 'growth' && (
-                    <span className="text-[10px] font-bold tracking-wide uppercase bg-[#f97316] text-white rounded-full px-2 py-0.5">
+                    <span className="text-[10px] font-bold tracking-wide uppercase bg-brand-orange text-white rounded-full px-2 py-0.5">
                       {t('mostPopular')}
                     </span>
                   )}
                 </div>
-                <div className="text-2xl font-extrabold text-[#f97316] mt-1">
+                <div className="text-2xl font-extrabold text-brand-orange mt-1">
                   ${tier.monthly_price}<span className="text-sm font-medium text-slate-400">{t('perMonth')}</span>
                 </div>
                 <div className="text-xs text-slate-400 mt-1">
@@ -110,13 +110,13 @@ function SignupForm() {
             <button
               onClick={() => setStep('account')}
               disabled={!selectedTier}
-              className="w-full mt-2 py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 text-white font-semibold rounded-lg transition text-sm"
+              className="w-full mt-2 py-2.5 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white font-semibold rounded-lg transition text-sm"
             >
               {t('continueBtn')}
             </button>
 
             <p className="mt-4 text-center text-xs text-slate-500">
-              {t('alreadyHaveAccount')} <a href="/login" className="text-[#f97316] hover:underline">{t('signIn')}</a>
+              {t('alreadyHaveAccount')} <a href="/login" className="text-brand-orange hover:underline">{t('signIn')}</a>
             </p>
           </div>
         )}
@@ -143,21 +143,21 @@ function SignupForm() {
                 <label className="block text-xs font-medium text-slate-400 mb-1.5">{t('yourName')}</label>
                 <input
                   name="name" type="text" required autoComplete="name" placeholder="Sam Johnson"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3.5 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#f97316] focus:border-transparent transition"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3.5 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition"
                 />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-1.5">{t('email')}</label>
                 <input
                   name="email" type="email" required autoComplete="email" placeholder="you@yourcompany.com"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3.5 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#f97316] focus:border-transparent transition"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3.5 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition"
                 />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-1.5">{t('password')}</label>
                 <input
                   name="password" type="password" required autoComplete="new-password" minLength={8} placeholder="••••••••"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3.5 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#f97316] focus:border-transparent transition"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3.5 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition"
                 />
                 <p className="text-[11px] text-slate-500 mt-1">{t('passwordHint')}</p>
               </div>
@@ -165,14 +165,14 @@ function SignupForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 text-white font-semibold rounded-lg transition text-sm"
+                className="w-full py-2.5 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white font-semibold rounded-lg transition text-sm"
               >
                 {loading ? t('creatingAccount') : t('createAccountBtn')}
               </button>
             </form>
 
             <p className="mt-6 text-center text-xs text-slate-500">
-              {t('alreadyHaveAccount')} <a href="/login" className="text-[#f97316] hover:underline">{t('signIn')}</a>
+              {t('alreadyHaveAccount')} <a href="/login" className="text-brand-orange hover:underline">{t('signIn')}</a>
             </p>
           </div>
         )}

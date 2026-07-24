@@ -244,7 +244,7 @@ export default async function CustomersPage({
                       {c.tags && c.tags.length > 0 ? (
                         <div className="flex flex-wrap gap-1.5">
                           {c.tags.map((tag) => (
-                            <span key={tag} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#f97316]/15 text-[#f97316]">
+                            <span key={tag} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-brand-orange/15 text-brand-orange">
                               {tag}
                             </span>
                           ))}

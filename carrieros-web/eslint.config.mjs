@@ -24,17 +24,55 @@ const CARD_PATTERN_SELECTOR_TEMPLATE =
 const CARD_PATTERN_MESSAGE =
   "Use components/ui/* (Card/KpiTile/StatusBadge/Table/Button) instead of hand-rolled card/badge Tailwind classes — see docs/design/carrieros-design-system.md §5.";
 
+// Raw-hex-color guard (added 2026-07-24, raw-hex audit) — the card-pattern
+// guard above only ever matched specific literal Tailwind fragments
+// (bg-white/5 etc.), so a raw hex color like bg-[#f97316] or a style prop's
+// color: '#f97316' was a silent blind spot even on surfaces the card-pattern
+// rule already gates at error. Catches: (a) Tailwind arbitrary-value hex in
+// a className (bg-[#hex], hover:text-[#hex], border-l-[#hex], etc.), (b) a
+// hex string literal assigned to a color-ish object property (color,
+// backgroundColor, borderColor) for the handful of call sites that need a
+// literal hex at runtime (see lib/design-tokens.ts) rather than a Tailwind
+// class. Deliberately does NOT match arbitrary object-literal properties
+// named anything else (e.g. AddVehicleButton.tsx's `hex: '#f8fafc'` paint-
+// color picker data is real domain data, not UI styling, and must keep its
+// own literal values) — the property-name allowlist below is intentionally
+// narrow.
+const HEX_PATTERN_SELECTOR_CLASSNAME =
+  "JSXAttribute[name.name='className'] Literal[value=/#[0-9a-fA-F]{6}/]";
+const HEX_PATTERN_SELECTOR_CLASSNAME_TEMPLATE =
+  "JSXAttribute[name.name='className'] TemplateElement[value.raw=/#[0-9a-fA-F]{6}/]";
+const HEX_PATTERN_SELECTOR_STYLE_PROP =
+  "Property[key.name=/^(color|backgroundColor|borderColor)$/] > Literal[value=/#[0-9a-fA-F]{6}/]";
+const HEX_PATTERN_MESSAGE =
+  "Use a design-system token (bg-brand-orange, text-teal, etc. — see app/globals.css's @theme block) or lib/design-tokens.ts instead of a raw hex color — see docs/design/carrieros-design-system.md §1.2.";
+
+function hexPatternRule(severity) {
+  return [
+    "no-restricted-syntax",
+    severity,
+    { selector: HEX_PATTERN_SELECTOR_CLASSNAME, message: HEX_PATTERN_MESSAGE },
+    { selector: HEX_PATTERN_SELECTOR_CLASSNAME_TEMPLATE, message: HEX_PATTERN_MESSAGE },
+    { selector: HEX_PATTERN_SELECTOR_STYLE_PROP, message: HEX_PATTERN_MESSAGE },
+  ];
+}
+
 function cardPatternRule(severity) {
   return [
     "no-restricted-syntax",
     severity,
     { selector: CARD_PATTERN_SELECTOR_LITERAL, message: CARD_PATTERN_MESSAGE },
     { selector: CARD_PATTERN_SELECTOR_TEMPLATE, message: CARD_PATTERN_MESSAGE },
+    ...hexPatternRule(severity).slice(2),
   ];
 }
 
+// Component files were previously entirely unguarded by this rule (glob was
+// app/**/*.tsx only) — a real gap the raw-hex audit found, since several
+// components/*.tsx files hand-roll the exact patterns this guard exists to
+// catch. Both globs share the same "warn repo-wide" ratchet posture as app/.
 const uiComponentPatternGuardWarn = {
-  files: ["app/**/*.tsx"],
+  files: ["app/**/*.tsx", "components/**/*.tsx"],
   rules: { "no-restricted-syntax": cardPatternRule("warn").slice(1) },
 };
 

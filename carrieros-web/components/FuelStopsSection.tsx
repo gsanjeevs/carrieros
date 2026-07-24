@@ -117,7 +117,7 @@ export default function FuelStopsSection({
     router.refresh()
   }
 
-  const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 transition'
+  const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/40 transition'
   const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
 
   return (
@@ -127,7 +127,7 @@ export default function FuelStopsSection({
         {canLog && (
           <button
             onClick={() => setOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f97316] hover:bg-[#ea6c0a] text-white text-xs font-semibold rounded-lg transition"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-orange hover:bg-brand-orange-hover text-white text-xs font-semibold rounded-lg transition"
           >
             <span className="material-symbols-outlined text-[16px]">add</span>
             {t('logFuelStop')}
@@ -166,7 +166,7 @@ export default function FuelStopsSection({
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
-          <div className="w-full max-w-md bg-[#0f1923] border border-white/10 rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-md bg-navy border border-white/10 rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-white font-semibold text-lg">{t('logFuelStop')}</h2>
               <button onClick={close} className="text-slate-500 hover:text-white transition rounded">
@@ -220,7 +220,7 @@ export default function FuelStopsSection({
                 <button onClick={close} disabled={saving} className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm">
                   {t('fuelCancel')}
                 </button>
-                <button onClick={submit} disabled={saving} className="flex-2 flex-grow py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 text-white font-semibold rounded-lg transition text-sm">
+                <button onClick={submit} disabled={saving} className="flex-2 flex-grow py-2.5 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white font-semibold rounded-lg transition text-sm">
                   {saving ? t('fuelSaving') : t('fuelSave')}
                 </button>
               </div>

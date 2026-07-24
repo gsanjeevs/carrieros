@@ -34,9 +34,9 @@ interface ExtractedLoad {
 }
 
 const CONFIDENCE_COLOR = {
-  high:   'text-[#16a34a]',
-  medium: 'text-[#d97706]',
-  low:    'text-[#dc2626]',
+  high:   'text-success',
+  medium: 'text-warning',
+  low:    'text-danger',
 }
 
 function Field({
@@ -71,48 +71,64 @@ function Field({
         value={value}
         onChange={(e) => onChange(name, e.target.value)}
         placeholder={placeholder ?? label}
-        className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-[#f97316] focus:border-transparent transition"
+        className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition"
       />
     </div>
   )
 }
 
+// Reads sessionStorage's one-time hand-off from the paste-extract page.
+// Pulled out of the component so both lazy useState initializers below can
+// call it without re-deriving the parsing logic — previously this ran the
+// parse once in an effect and called setData/setFields directly in the
+// effect body, which is exactly the "calling setState() directly within an
+// effect" pattern react-hooks/set-state-in-effect flags (Modal.tsx and
+// LanguageSwitcher.tsx have the same pre-existing, unfixed pattern
+// elsewhere — this one's fixed here because raw-hex-audit work touched the
+// file anyway). A lazy initializer runs once, synchronously, during the
+// component's own render — not "setState in an effect" at all.
+function readExtractedLoad(): ExtractedLoad | null {
+  const raw = sessionStorage.getItem('extracted_load')
+  return raw ? (JSON.parse(raw) as ExtractedLoad) : null
+}
+
+function fieldsFromExtractedLoad(parsed: ExtractedLoad | null): Record<string, string> {
+  if (!parsed) return {}
+  return {
+    customer_name_raw:  parsed.customer_name_raw  ?? '',
+    load_number_raw:    parsed.load_number_raw    ?? '',
+    pickup_address:     parsed.pickup_address     ?? '',
+    pickup_city:        parsed.pickup_city        ?? '',
+    pickup_state:       parsed.pickup_state       ?? '',
+    pickup_zip:         parsed.pickup_zip         ?? '',
+    pickup_date:        parsed.pickup_date        ?? '',
+    pickup_time:        parsed.pickup_time        ?? '',
+    delivery_address:   parsed.delivery_address   ?? '',
+    delivery_city:      parsed.delivery_city      ?? '',
+    delivery_state:     parsed.delivery_state     ?? '',
+    delivery_zip:       parsed.delivery_zip       ?? '',
+    delivery_date:      parsed.delivery_date      ?? '',
+    delivery_time:      parsed.delivery_time      ?? '',
+    commodity:          parsed.commodity          ?? '',
+    weight_lbs:         parsed.weight_lbs != null ? String(parsed.weight_lbs) : '',
+    rate:               parsed.rate       != null ? String(parsed.rate)       : '',
+    total_miles:        parsed.total_miles!= null ? String(parsed.total_miles): '',
+  }
+}
+
 export default function ExtractionReview() {
   const router = useRouter()
-  const [data, setData] = useState<ExtractedLoad | null>(null)
-  const [fields, setFields] = useState<Record<string, string>>({})
+  const [data] = useState<ExtractedLoad | null>(() => readExtractedLoad())
+  const [fields, setFields] = useState<Record<string, string>>(() => fieldsFromExtractedLoad(readExtractedLoad()))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
+  // Redirecting away is a legitimate effect (a real side effect reacting to
+  // "there was nothing to review"), unlike the setData/setFields calls this
+  // replaced above.
   useEffect(() => {
-    const raw = sessionStorage.getItem('extracted_load')
-    if (!raw) {
-      router.push('/loads/new')
-      return
-    }
-    const parsed: ExtractedLoad = JSON.parse(raw)
-    setData(parsed)
-    setFields({
-      customer_name_raw:  parsed.customer_name_raw  ?? '',
-      load_number_raw:    parsed.load_number_raw    ?? '',
-      pickup_address:     parsed.pickup_address     ?? '',
-      pickup_city:        parsed.pickup_city        ?? '',
-      pickup_state:       parsed.pickup_state       ?? '',
-      pickup_zip:         parsed.pickup_zip         ?? '',
-      pickup_date:        parsed.pickup_date        ?? '',
-      pickup_time:        parsed.pickup_time        ?? '',
-      delivery_address:   parsed.delivery_address   ?? '',
-      delivery_city:      parsed.delivery_city      ?? '',
-      delivery_state:     parsed.delivery_state     ?? '',
-      delivery_zip:       parsed.delivery_zip       ?? '',
-      delivery_date:      parsed.delivery_date      ?? '',
-      delivery_time:      parsed.delivery_time      ?? '',
-      commodity:          parsed.commodity          ?? '',
-      weight_lbs:         parsed.weight_lbs != null ? String(parsed.weight_lbs) : '',
-      rate:               parsed.rate       != null ? String(parsed.rate)       : '',
-      total_miles:        parsed.total_miles!= null ? String(parsed.total_miles): '',
-    })
-  }, [router])
+    if (!data) router.push('/loads/new')
+  }, [data, router])
 
   function update(name: string, val: string) {
     setFields((prev) => ({ ...prev, [name]: val }))
@@ -167,7 +183,7 @@ export default function ExtractionReview() {
             <p className="text-slate-400 text-sm mt-1">Check the details below — edit anything that looks off.</p>
           </div>
           <div className="flex items-center gap-2 text-xs text-slate-400 bg-white/5 border border-white/8 rounded-lg px-3 py-1.5">
-            <span className="material-symbols-outlined text-[14px] text-[#f97316]">auto_awesome</span>
+            <span className="material-symbols-outlined text-[14px] text-brand-orange">auto_awesome</span>
             AI extracted
           </div>
         </div>
@@ -193,7 +209,7 @@ export default function ExtractionReview() {
         {/* Pickup */}
         <div className="bg-white/5 border border-white/8 rounded-xl p-5">
           <h2 className="text-white text-sm font-medium mb-4 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#f97316]"></span>
+            <span className="w-2 h-2 rounded-full bg-brand-orange"></span>
             Pickup
           </h2>
           <div className="grid grid-cols-1 gap-4">
@@ -215,7 +231,7 @@ export default function ExtractionReview() {
         {/* Delivery */}
         <div className="bg-white/5 border border-white/8 rounded-xl p-5">
           <h2 className="text-white text-sm font-medium mb-4 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#16a34a]"></span>
+            <span className="w-2 h-2 rounded-full bg-success"></span>
             Delivery
           </h2>
           <div className="grid grid-cols-1 gap-4">
@@ -258,7 +274,7 @@ export default function ExtractionReview() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-6 py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition"
+          className="flex items-center gap-2 px-6 py-2.5 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition"
         >
           {saving ? (
             <>

@@ -157,7 +157,7 @@ export default function CompanyDocuments({
   }
 
   const selectCls =
-    'bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#f97316] focus:ring-2 focus:ring-[#f97316]/40 transition'
+    'bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/40 transition'
 
   return (
     <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
@@ -201,7 +201,7 @@ export default function CompanyDocuments({
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={busy}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
             >
               <span className="material-symbols-outlined text-[18px]">upload</span>
               {busy ? t('docUploading') : t('docUpload')}

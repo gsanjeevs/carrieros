@@ -188,7 +188,7 @@ export default function DriverMessageThread({
             const showTranslate = m.original_language && m.original_language !== locale
             return (
               <div key={m.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[75%] rounded-xl px-3 py-2 ${isMine ? 'bg-[#f97316] text-white' : 'bg-white/10 text-slate-100'}`}>
+                <div className={`max-w-[75%] rounded-xl px-3 py-2 ${isMine ? 'bg-brand-orange text-white' : 'bg-white/10 text-slate-100'}`}>
                   {!isMine && <p className="text-[10px] opacity-70 mb-0.5">{senderName}</p>}
                   <p className="text-sm">{translated[m.id] ?? m.body}</p>
                   <div className="flex items-center gap-2 mt-1">
@@ -215,7 +215,7 @@ export default function DriverMessageThread({
 
       <div className="flex gap-2">
         <input
-          className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#f97316] transition"
+          className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-orange transition"
           placeholder={t('chatPlaceholder')}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
@@ -230,7 +230,7 @@ export default function DriverMessageThread({
         <button
           onClick={send}
           disabled={sending || !draft.trim()}
-          className="px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition"
+          className="px-4 py-2 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition"
         >
           {t('chatSend')}
         </button>

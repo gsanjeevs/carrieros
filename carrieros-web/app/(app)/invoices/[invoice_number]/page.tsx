@@ -133,7 +133,7 @@ export default async function InvoiceDetailPage({
                 label={t('load')}
                 value={
                   invoice.loads?.load_number ? (
-                    <Link href={`/loads/${invoice.loads.load_number}`} className="text-[#f97316] hover:underline rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
+                    <Link href={`/loads/${invoice.loads.load_number}`} className="text-brand-orange hover:underline rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
                       {invoice.loads.load_number}
                     </Link>
                   ) : '—'

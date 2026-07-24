@@ -452,7 +452,7 @@ export default async function VehicleDetailPage({
                   <TableCell numeric className="font-medium text-text-pri">{log.cost != null ? formatMoney(log.cost, carrierOrg?.currency ?? 'USD', locale) : '—'}</TableCell>
                   <TableCell numeric>
                     {log.receiptUrl ? (
-                      <a href={log.receiptUrl} target="_blank" rel="noreferrer" className="text-[#f97316] hover:underline text-xs font-medium">
+                      <a href={log.receiptUrl} target="_blank" rel="noreferrer" className="text-brand-orange hover:underline text-xs font-medium">
                         {t('viewReceipt')}
                       </a>
                     ) : '—'}

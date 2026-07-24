@@ -32,7 +32,7 @@ export default function SendAchButton({ settlementId, entitled }: { settlementId
     <button
       onClick={send}
       disabled={loading}
-      className="px-3 py-1.5 bg-[#f97316]/10 hover:bg-[#f97316]/20 disabled:opacity-40 text-[#f97316] text-xs font-semibold rounded-lg transition"
+      className="px-3 py-1.5 bg-brand-orange/10 hover:bg-brand-orange/20 disabled:opacity-40 text-brand-orange text-xs font-semibold rounded-lg transition"
     >
       {loading ? t('sending') : t('sendAch')}
     </button>

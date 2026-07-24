@@ -142,7 +142,7 @@ export default async function DriverDetailPage({
 
   const glow = cdlGlowStatus(driver.cdl_expiry)
   const glowDotClass =
-    glow === 'success' ? 'bg-[#16a34a] shadow-glow-success' :
+    glow === 'success' ? 'bg-success shadow-glow-success' :
     glow === 'warning' ? 'bg-amber-500 shadow-glow-warning' :
     'bg-rose-500 shadow-glow-danger'
   const inviteStatus = (driver.invite_status ?? 'pending') as InviteStatus

@@ -100,7 +100,7 @@ export default function SendDocumentsButton({
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
-          <div className="w-full max-w-md bg-[#0f1923] border border-white/10 rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-md bg-navy border border-white/10 rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-white font-semibold text-lg">{t('sendToCustomer')}</h2>
               <button onClick={close} className="text-slate-500 hover:text-white transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
@@ -110,12 +110,12 @@ export default function SendDocumentsButton({
 
             {success ? (
               <div className="space-y-4">
-                <div className="rounded-lg bg-[#16a34a]/10 border border-[#16a34a]/20 px-4 py-3 text-[#16a34a] text-sm">
+                <div className="rounded-lg bg-success/10 border border-success/20 px-4 py-3 text-success text-sm">
                   {success}
                 </div>
                 <button
                   onClick={close}
-                  className="w-full py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] text-white font-semibold rounded-lg transition text-sm"
+                  className="w-full py-2.5 bg-brand-orange hover:bg-brand-orange-hover text-white font-semibold rounded-lg transition text-sm"
                 >
                   {tCommon('done')}
                 </button>
@@ -125,7 +125,7 @@ export default function SendDocumentsButton({
                 <div>
                   <label className="block text-xs font-medium text-slate-400 mb-1.5">{t('recipientEmail')}</label>
                   <input
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#f97316] transition"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-brand-orange transition"
                     type="email"
                     placeholder="dispatch@customer.example"
                     value={email}
@@ -142,7 +142,7 @@ export default function SendDocumentsButton({
                           type="checkbox"
                           checked={selected.has(doc.id)}
                           onChange={() => toggle(doc.id)}
-                          className="accent-[#f97316]"
+                          className="accent-brand-orange"
                         />
                         <span className="text-white text-sm truncate">{doc.fileName}</span>
                       </label>
@@ -167,7 +167,7 @@ export default function SendDocumentsButton({
                   <button
                     onClick={submit}
                     disabled={sending || selected.size === 0 || !email.trim()}
-                    className="flex-2 flex-grow py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm"
+                    className="flex-2 flex-grow py-2.5 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm"
                   >
                     {sending ? t('sendingDocuments') : t('sendDocuments')}
                   </button>

@@ -78,7 +78,7 @@ export default function AddLogoStep({ orgId, onNext }: { orgId: number; onNext: 
           type="button"
           onClick={() => fileRef.current?.click()}
           disabled={busy}
-          className="text-sm font-semibold text-[#f97316] hover:underline disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-brand-orange/50 rounded"
+          className="text-sm font-semibold text-brand-orange hover:underline disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-brand-orange/50 rounded"
         >
           {busy ? tVehicles('docUploading') : logoUrl ? t('replaceLogo') : t('uploadLogo')}
         </button>
@@ -113,7 +113,7 @@ export default function AddLogoStep({ orgId, onNext }: { orgId: number; onNext: 
         )}
         <button
           onClick={onNext}
-          className={`py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${logoUrl ? 'w-full' : 'flex-2 flex-grow'}`}
+          className={`py-2.5 bg-brand-orange hover:bg-brand-orange-hover text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${logoUrl ? 'w-full' : 'flex-2 flex-grow'}`}
         >
           {t('continue')}
         </button>

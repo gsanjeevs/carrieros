@@ -60,12 +60,12 @@ export default function BillingStep({ onNext }: { onNext: (added: boolean) => vo
           <button
             onClick={addPaymentMethod}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+            className="flex items-center gap-2 px-4 py-2 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
           >
             {loading ? tBilling('addingPaymentMethod') : tBilling('addPaymentMethod')}
           </button>
         )}
-        {card && <span className="material-symbols-outlined text-[#16a34a]">check_circle</span>}
+        {card && <span className="material-symbols-outlined text-success">check_circle</span>}
       </div>
 
       {error && (
@@ -86,7 +86,7 @@ export default function BillingStep({ onNext }: { onNext: (added: boolean) => vo
         )}
         <button
           onClick={() => onNext(!!card)}
-          className={`py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${card ? 'w-full' : 'flex-2 flex-grow'}`}
+          className={`py-2.5 bg-brand-orange hover:bg-brand-orange-hover text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${card ? 'w-full' : 'flex-2 flex-grow'}`}
         >
           {t('continue')}
         </button>

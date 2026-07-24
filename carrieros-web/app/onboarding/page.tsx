@@ -97,19 +97,19 @@ function OnboardingFlow() {
     }
   }
 
-  const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-[#f97316] transition'
+  const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-brand-orange transition'
   const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
 
   const stepIndex = STEPS.indexOf(step)
 
   return (
-    <div className="min-h-screen bg-[#0f1923] flex items-center justify-center p-6">
+    <div className="min-h-screen bg-navy flex items-center justify-center p-6">
       <div className="w-full max-w-lg">
 
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-2">
-            <span className="text-[#f97316] text-2xl font-bold tracking-tight">Carrier</span>
+            <span className="text-brand-orange text-2xl font-bold tracking-tight">Carrier</span>
             <span className="text-white text-2xl font-bold tracking-tight">OS</span>
           </div>
           <p className="text-slate-400 text-sm">{t('heading')}</p>
@@ -123,10 +123,10 @@ function OnboardingFlow() {
           {STEPS.map((s, i) => (
             <div key={s} className="flex items-center flex-1 last:flex-none">
               <div className={`w-2.5 h-2.5 rounded-full shrink-0 transition ${
-                i < stepIndex ? 'bg-[#f97316]' : i === stepIndex ? 'bg-[#f97316] ring-4 ring-[#f97316]/20' : 'bg-white/10'
+                i < stepIndex ? 'bg-brand-orange' : i === stepIndex ? 'bg-brand-orange ring-4 ring-brand-orange/20' : 'bg-white/10'
               }`} />
               {i < STEPS.length - 1 && (
-                <div className={`flex-1 h-px mx-1.5 transition ${i < stepIndex ? 'bg-[#f97316]/40' : 'bg-white/10'}`} />
+                <div className={`flex-1 h-px mx-1.5 transition ${i < stepIndex ? 'bg-brand-orange/40' : 'bg-white/10'}`} />
               )}
             </div>
           ))}
@@ -213,7 +213,7 @@ function OnboardingFlow() {
               <button
                 onClick={() => { if (form.company_name && form.state) setStep('profile') }}
                 disabled={!form.company_name || !form.state}
-                className="w-full mt-2 py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm"
+                className="w-full mt-2 py-2.5 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm"
               >
                 {t('continue')}
               </button>
@@ -262,7 +262,7 @@ function OnboardingFlow() {
                 <button
                   onClick={submitOrg}
                   disabled={loading || !form.first_name || !form.last_name}
-                  className="flex-2 flex-grow py-2.5 bg-[#f97316] hover:bg-[#ea6c0a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm"
+                  className="flex-2 flex-grow py-2.5 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm"
                 >
                   {loading ? t('settingUp') : t('continue')}
                 </button>
