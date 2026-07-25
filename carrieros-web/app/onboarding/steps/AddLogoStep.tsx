@@ -14,6 +14,7 @@ import { useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { createStorageProvider } from '@/lib/storage'
+import { Button, Callout, Card } from '@/components/ui'
 
 const ACCEPT = 'image/jpeg,image/png,image/webp'
 const MAX_BYTES = 5 * 1024 * 1024
@@ -67,7 +68,7 @@ export default function AddLogoStep({ orgId, onNext }: { orgId: number; onNext: 
       <h2 className="text-white font-semibold text-lg mb-1">{t('stepLogoTitle')}</h2>
       <p className="text-slate-400 text-sm mb-4">{t('stepLogoSubtitle')}</p>
 
-      <div className="rounded-lg bg-white/5 border border-white/10 px-4 py-4 flex items-center gap-4">
+      <Card className="px-4 py-4 flex items-center gap-4">
         {logoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- signed URL, not a static asset
           <img src={logoUrl} alt="" className="w-14 h-14 rounded-lg object-cover shrink-0" />
@@ -93,30 +94,19 @@ export default function AddLogoStep({ orgId, onNext }: { orgId: number; onNext: 
             e.target.value = ''
           }}
         />
-      </div>
+      </Card>
 
-      {error && (
-        <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-red-400 text-sm">
-          {error}
-        </div>
-      )}
+      {error && <Callout tone="danger">{error}</Callout>}
 
       <div className="flex gap-3 mt-2">
         {!logoUrl && (
-          <button
-            onClick={onNext}
-            disabled={busy}
-            className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-          >
+          <Button variant="secondary" onClick={onNext} disabled={busy} className="flex-1 py-2.5 text-sm">
             {t('skipForNow')}
-          </button>
+          </Button>
         )}
-        <button
-          onClick={onNext}
-          className={`py-2.5 bg-brand-orange hover:bg-brand-orange-hover text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${logoUrl ? 'w-full' : 'flex-2 flex-grow'}`}
-        >
+        <Button variant="primary" onClick={onNext} className={`py-2.5 text-sm ${logoUrl ? 'w-full' : 'flex-2 flex-grow'}`}>
           {t('continue')}
-        </button>
+        </Button>
       </div>
     </div>
   )

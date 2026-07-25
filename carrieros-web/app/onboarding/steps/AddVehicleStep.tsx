@@ -6,9 +6,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-
-const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/40 transition'
-const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
+import { Button, Callout, Field, Input } from '@/components/ui'
 
 export default function AddVehicleStep({ onNext }: { onNext: (added: boolean) => void }) {
   const t = useTranslations('onboarding')
@@ -58,51 +56,41 @@ export default function AddVehicleStep({ onNext }: { onNext: (added: boolean) =>
       <h2 className="text-white font-semibold text-lg mb-1">{t('stepVehicleTitle')}</h2>
       <p className="text-slate-400 text-sm mb-4">{t('stepVehicleSubtitle')}</p>
 
-      <div>
-        <label className={labelCls}>{tVehicles('nickname')}</label>
-        <input className={inputCls} placeholder="Big Red"
+      <Field label={tVehicles('nickname')}>
+        <Input size="lg" placeholder="Big Red"
           value={form.nickname} onChange={e => set('nickname', e.target.value)} />
-      </div>
+      </Field>
 
       <div className="grid grid-cols-3 gap-3">
-        <div>
-          <label className={labelCls}>{tVehicles('year')}</label>
-          <input className={inputCls} placeholder="2022" inputMode="numeric"
+        <Field label={tVehicles('year')}>
+          <Input size="lg" placeholder="2022" inputMode="numeric"
             value={form.year} onChange={e => set('year', e.target.value)} />
-        </div>
-        <div>
-          <label className={labelCls}>{tVehicles('make')}</label>
-          <input className={inputCls} placeholder="Freightliner"
+        </Field>
+        <Field label={tVehicles('make')}>
+          <Input size="lg" placeholder="Freightliner"
             value={form.make} onChange={e => set('make', e.target.value)} />
-        </div>
-        <div>
-          <label className={labelCls}>{tVehicles('model')}</label>
-          <input className={inputCls} placeholder="Cascadia"
+        </Field>
+        <Field label={tVehicles('model')}>
+          <Input size="lg" placeholder="Cascadia"
             value={form.model} onChange={e => set('model', e.target.value)} />
-        </div>
+        </Field>
       </div>
 
-      {error && (
-        <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-red-400 text-sm">
-          {error}
-        </div>
-      )}
+      {error && <Callout tone="danger">{error}</Callout>}
 
       <div className="flex gap-3 mt-2">
-        <button
-          onClick={() => onNext(false)}
-          disabled={loading}
-          className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-        >
+        <Button variant="secondary" onClick={() => onNext(false)} disabled={loading} className="flex-1 py-2.5 text-sm">
           {t('skipForNow')}
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="primary"
           onClick={submit}
           disabled={loading || !form.nickname.trim()}
-          className="flex-2 flex-grow py-2.5 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+          loading={loading}
+          className="flex-2 flex-grow py-2.5 text-sm"
         >
           {loading ? tCommon('loading') : t('continue')}
-        </button>
+        </Button>
       </div>
     </div>
   )

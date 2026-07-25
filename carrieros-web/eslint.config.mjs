@@ -120,6 +120,10 @@ const ERROR_SURFACES = [
   "app/(app)/exceptions/**/*.tsx",
   "app/(app)/settings/**/*.tsx",
   "app/(app)/finance/**/*.tsx",
+  // Migrated onto components/ui/* (Field/Input/Button/Card/StepProgress/
+  // ChecklistItem/Callout) 2026-07-25, Phase 5b of the mockup-06 re-skin —
+  // this is the flow those primitives were built for.
+  "app/onboarding/**/*.tsx",
 ];
 // components/** migrated onto components/ui/* clean 2026-07-25 (Phase 5 of
 // the mockup-06 re-skin, 18 files) — promoted from the warn block above.

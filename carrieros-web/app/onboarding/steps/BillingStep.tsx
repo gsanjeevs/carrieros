@@ -8,6 +8,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { Button, Callout, Card } from '@/components/ui'
 
 export default function BillingStep({ onNext }: { onNext: (added: boolean) => void }) {
   const t = useTranslations('onboarding')
@@ -46,7 +47,7 @@ export default function BillingStep({ onNext }: { onNext: (added: boolean) => vo
       <h2 className="text-white font-semibold text-lg mb-1">{t('stepBillingTitle')}</h2>
       <p className="text-slate-400 text-sm mb-4">{t('stepBillingSubtitle')}</p>
 
-      <div className="rounded-lg bg-white/5 border border-white/10 px-4 py-4 flex items-center justify-between">
+      <Card className="px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="material-symbols-outlined text-slate-400">credit_card</span>
           <div>
@@ -57,39 +58,24 @@ export default function BillingStep({ onNext }: { onNext: (added: boolean) => vo
           </div>
         </div>
         {!card && (
-          <button
-            onClick={addPaymentMethod}
-            disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-          >
+          <Button variant="primary" onClick={addPaymentMethod} disabled={loading} className="whitespace-nowrap text-sm">
             {loading ? tBilling('addingPaymentMethod') : tBilling('addPaymentMethod')}
-          </button>
+          </Button>
         )}
         {card && <span className="material-symbols-outlined text-success">check_circle</span>}
-      </div>
+      </Card>
 
-      {error && (
-        <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-red-400 text-sm">
-          {error}
-        </div>
-      )}
+      {error && <Callout tone="danger">{error}</Callout>}
 
       <div className="flex gap-3 mt-2">
         {!card && (
-          <button
-            onClick={() => onNext(false)}
-            disabled={loading}
-            className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-          >
+          <Button variant="secondary" onClick={() => onNext(false)} disabled={loading} className="flex-1 py-2.5 text-sm">
             {t('skipForNow')}
-          </button>
+          </Button>
         )}
-        <button
-          onClick={() => onNext(!!card)}
-          className={`py-2.5 bg-brand-orange hover:bg-brand-orange-hover text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${card ? 'w-full' : 'flex-2 flex-grow'}`}
-        >
+        <Button variant="primary" onClick={() => onNext(!!card)} className={`py-2.5 text-sm ${card ? 'w-full' : 'flex-2 flex-grow'}`}>
           {t('continue')}
-        </button>
+        </Button>
       </div>
     </div>
   )

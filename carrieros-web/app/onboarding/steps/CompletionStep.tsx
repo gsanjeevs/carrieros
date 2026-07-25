@@ -8,6 +8,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { Button, Card, ChecklistItem } from '@/components/ui'
 
 export default function CompletionStep({
   addedVehicle,
@@ -38,35 +39,24 @@ export default function CompletionStep({
 
       <div className="space-y-2">
         {items.map(item => (
-          <div key={item.label} className="flex items-center gap-2.5 rounded-lg bg-white/5 border border-white/10 px-4 py-2.5">
-            <span className={`material-symbols-outlined text-[18px] ${item.done ? 'text-success' : 'text-slate-600'}`}>
-              {item.done ? 'check_circle' : 'radio_button_unchecked'}
-            </span>
-            <span className={`text-sm ${item.done ? 'text-white' : 'text-slate-500'}`}>{item.label}</span>
-          </div>
+          <ChecklistItem key={item.label} state={item.done ? 'done' : 'pending'} title={item.label} />
         ))}
       </div>
 
-      <div className="rounded-lg bg-white/5 border border-white/10 px-4 py-3">
+      <Card className="px-4 py-3">
         <p className="text-slate-400 text-xs">
           <span className="material-symbols-outlined text-[14px] align-middle mr-1">mail</span>
           {t('emailIntakeComingSoon')}
         </p>
-      </div>
+      </Card>
 
       <div className="flex gap-3 mt-2">
-        <button
-          onClick={() => router.push('/dashboard')}
-          className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 text-white font-medium rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-        >
+        <Button variant="secondary" onClick={() => router.push('/dashboard')} className="flex-1 py-2.5 text-sm">
           {t('goToDashboard')}
-        </button>
-        <button
-          onClick={() => router.push('/loads/new')}
-          className="flex-2 flex-grow py-2.5 bg-brand-orange hover:bg-brand-orange-hover text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-        >
+        </Button>
+        <Button variant="primary" onClick={() => router.push('/loads/new')} className="flex-2 flex-grow py-2.5 text-sm">
           {t('addFirstLoad')}
-        </button>
+        </Button>
       </div>
     </div>
   )

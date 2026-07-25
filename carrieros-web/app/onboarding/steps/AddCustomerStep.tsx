@@ -6,6 +6,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { Button, Callout, Field, Input } from '@/components/ui'
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
@@ -13,9 +14,6 @@ const US_STATES = [
   'NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT',
   'VA','WA','WV','WI','WY',
 ]
-
-const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/40 transition'
-const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
 
 export default function AddCustomerStep({ onNext }: { onNext: (added: boolean) => void }) {
   const t = useTranslations('onboarding')
@@ -72,78 +70,64 @@ export default function AddCustomerStep({ onNext }: { onNext: (added: boolean) =
       <h2 className="text-white font-semibold text-lg mb-1">{t('stepCustomerTitle')}</h2>
       <p className="text-slate-400 text-sm mb-4">{t('stepCustomerSubtitle')}</p>
 
-      <div>
-        <label className={labelCls}>{t('customerName')}</label>
-        <input className={inputCls} placeholder="Pacific Produce Distributors"
+      <Field label={t('customerName')}>
+        <Input size="lg" placeholder="Pacific Produce Distributors"
           value={form.name} onChange={e => set('name', e.target.value)} />
-      </div>
+      </Field>
 
-      <div>
-        <label className={labelCls}>{t('customerContactName')}</label>
-        <input className={inputCls} placeholder="Jane Doe"
+      <Field label={t('customerContactName')}>
+        <Input size="lg" placeholder="Jane Doe"
           value={form.contact_name} onChange={e => set('contact_name', e.target.value)} />
-      </div>
+      </Field>
 
       <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className={labelCls}>{t('customerPhone')}</label>
-          <input className={inputCls} placeholder="(555) 123-4567"
+        <Field label={t('customerPhone')}>
+          <Input size="lg" placeholder="(555) 123-4567"
             value={form.phone} onChange={e => set('phone', e.target.value)} />
-        </div>
-        <div>
-          <label className={labelCls}>{t('customerEmail')}</label>
-          <input className={inputCls} placeholder="dispatch@example.com" type="email"
+        </Field>
+        <Field label={t('customerEmail')}>
+          <Input size="lg" placeholder="dispatch@example.com" type="email"
             value={form.email} onChange={e => set('email', e.target.value)} />
-        </div>
+        </Field>
       </div>
 
-      <div>
-        <label className={labelCls}>{tCustomers('address')}</label>
-        <input className={inputCls} placeholder="800 Market St"
+      <Field label={tCustomers('address')}>
+        <Input size="lg" placeholder="800 Market St"
           value={form.address} onChange={e => set('address', e.target.value)} />
-      </div>
+      </Field>
 
       <div className="grid grid-cols-3 gap-3">
-        <div>
-          <label className={labelCls}>{tCustomers('city')}</label>
-          <input className={inputCls} placeholder="Fresno"
+        <Field label={tCustomers('city')}>
+          <Input size="lg" placeholder="Fresno"
             value={form.city} onChange={e => set('city', e.target.value)} />
-        </div>
-        <div>
-          <label className={labelCls}>{tCustomers('state')}</label>
-          <select className={inputCls} value={form.state} onChange={e => set('state', e.target.value)}>
+        </Field>
+        <Field label={tCustomers('state')}>
+          <Input as="select" size="lg" value={form.state} onChange={e => set('state', e.target.value)}>
             <option value="">{tCommon('selectPlaceholder')}</option>
             {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className={labelCls}>{tCustomers('zip')}</label>
-          <input className={inputCls} placeholder="93706"
+          </Input>
+        </Field>
+        <Field label={tCustomers('zip')}>
+          <Input size="lg" placeholder="93706"
             value={form.zip} onChange={e => set('zip', e.target.value)} />
-        </div>
+        </Field>
       </div>
 
-      {error && (
-        <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-red-400 text-sm">
-          {error}
-        </div>
-      )}
+      {error && <Callout tone="danger">{error}</Callout>}
 
       <div className="flex gap-3 mt-2">
-        <button
-          onClick={() => onNext(false)}
-          disabled={loading}
-          className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-        >
+        <Button variant="secondary" onClick={() => onNext(false)} disabled={loading} className="flex-1 py-2.5 text-sm">
           {t('skipForNow')}
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="primary"
           onClick={submit}
           disabled={loading || !form.name.trim()}
-          className="flex-2 flex-grow py-2.5 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+          loading={loading}
+          className="flex-2 flex-grow py-2.5 text-sm"
         >
           {loading ? tCommon('loading') : t('continue')}
-        </button>
+        </Button>
       </div>
     </div>
   )
