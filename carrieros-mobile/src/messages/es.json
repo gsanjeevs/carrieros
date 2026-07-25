@@ -2,7 +2,8 @@
   "common": {
     "back": "← Atrás",
     "unknownCustomer": "Cliente desconocido",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "loadErrorRetry": "Algo salió mal al cargar esto. Desliza hacia abajo para volver a intentarlo."
   },
   "login": {
     "subtitle": "Inicia sesión en tu cuenta",

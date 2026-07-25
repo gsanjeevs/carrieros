@@ -53,9 +53,11 @@ export default function MyLoadsScreen() {
   const [loads, setLoads] = useState<LoadRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState('');
 
   const load = useCallback(async () => {
     if (!session?.user.id) return;
+    setError('');
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -67,13 +69,14 @@ export default function MyLoadsScreen() {
     setRole(currentRole);
 
     const cols = 'id, load_number, status, customer_name_raw, pickup_city, pickup_state, delivery_city, delivery_state';
-    const { data } =
+    const { data, error: loadsErr } =
       currentRole === 'driver'
         ? await supabase.from('loads_driver_view').select(cols).order('created_at', { ascending: false })
         : await supabase.from('loads').select(cols).order('created_at', { ascending: false });
 
+    if (loadsErr) setError(t('common.loadErrorRetry'));
     setLoads((data as LoadRow[]) ?? []);
-  }, [session?.user.id]);
+  }, [session?.user.id, t]);
 
   useEffect(() => {
     load().finally(() => setLoading(false));
@@ -123,8 +126,12 @@ export default function MyLoadsScreen() {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
-            <ThemedText type="small" themeColor="textSecondary" style={styles.empty}>
-              {t('loads.empty')}
+            <ThemedText
+              type="small"
+              themeColor={error ? undefined : 'textSecondary'}
+              style={[styles.empty, error ? styles.error : undefined]}
+            >
+              {error || t('loads.empty')}
             </ThemedText>
           }
           renderItem={({ item }) => {
@@ -185,6 +192,8 @@ const styles = StyleSheet.create({
   newLoadButton: { backgroundColor: '#f97316', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 8 },
   listContent: { gap: Spacing.two, paddingBottom: Spacing.four },
   empty: { textAlign: 'center', marginTop: Spacing.five },
+  // Matches load/[id].tsx's error text color.
+  error: { color: StatusColors.danger },
   signOut: { alignItems: 'center', paddingVertical: Spacing.four, marginTop: Spacing.three },
   // design-tokens.md "Cards (Mobile)": bg-white rounded-3xl p-4 mb-3 shadow-card
   card: { borderRadius: 16, padding: Spacing.three, gap: 4 },

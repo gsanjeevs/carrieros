@@ -52,9 +52,11 @@ export default function DvirHistoryScreen() {
   const [signatureUrls, setSignatureUrls] = useState<Map<number, string>>(new Map());
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState('');
 
   const load = useCallback(async () => {
     if (!session?.user.id) return;
+    setError('');
     const submitter = await resolveSubmitter(session.user.id);
     if (!submitter) return;
 
@@ -71,8 +73,11 @@ export default function DvirHistoryScreen() {
       query = query.eq('driver_id', submitter.driverId);
     }
 
-    const { data, error } = await query;
-    if (error) console.error('[dvir-history] list query failed:', error.message);
+    const { data, error: queryErr } = await query;
+    if (queryErr) {
+      console.error('[dvir-history] list query failed:', queryErr.message);
+      setError(t('common.loadErrorRetry'));
+    }
     const inspections = (data as unknown as InspectionRow[] | null) ?? [];
     setRows(inspections);
 
@@ -88,7 +93,7 @@ export default function DvirHistoryScreen() {
     } else {
       setSignatureUrls(new Map());
     }
-  }, [session?.user.id]);
+  }, [session?.user.id, t]);
 
   useEffect(() => {
     load().finally(() => setLoading(false));
@@ -121,8 +126,12 @@ export default function DvirHistoryScreen() {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
-            <ThemedText type="small" themeColor="textSecondary" style={styles.empty}>
-              {t('dvirHistory.empty')}
+            <ThemedText
+              type="small"
+              themeColor={error ? undefined : 'textSecondary'}
+              style={[styles.empty, error ? styles.error : undefined]}
+            >
+              {error || t('dvirHistory.empty')}
             </ThemedText>
           }
           renderItem={({ item }) => {
@@ -195,6 +204,7 @@ const styles = StyleSheet.create({
   heading: { fontSize: 24, marginBottom: Spacing.three },
   listContent: { gap: Spacing.two, paddingBottom: Spacing.four },
   empty: { textAlign: 'center', marginTop: Spacing.five },
+  error: { color: StatusColors.danger },
   card: { borderRadius: 16, padding: Spacing.three, gap: 6 },
   cardShadow: {
     shadowColor: '#000000',

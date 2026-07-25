@@ -2,7 +2,8 @@
   "common": {
     "back": "← Back",
     "unknownCustomer": "Unknown customer",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "loadErrorRetry": "Something went wrong loading this. Pull down to try again."
   },
   "login": {
     "subtitle": "Sign in to your account",

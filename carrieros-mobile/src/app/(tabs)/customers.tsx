@@ -34,9 +34,11 @@ export default function CustomersScreen() {
   const [exceptions, setExceptions] = useState<ExceptionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState('');
 
   const load = useCallback(async () => {
-    const [{ data, error }, exceptionRows] = await Promise.all([
+    setError('');
+    const [{ data, error: queryErr }, exceptionRows] = await Promise.all([
       supabase
         .from('customer_details')
         // See src/app/customers/index.tsx's comment — customer_details has
@@ -47,10 +49,13 @@ export default function CustomersScreen() {
         .order('org_id', { ascending: true }),
       fetchExceptions(),
     ]);
-    if (error) console.error('[customers tab] list query failed:', error.message);
+    if (queryErr) {
+      console.error('[customers tab] list query failed:', queryErr.message);
+      setError(t('common.loadErrorRetry'));
+    }
     setCustomers((data as unknown as CustomerRow[] | null) ?? []);
     setExceptions(exceptionRows);
-  }, []);
+  }, [t]);
 
   const topExceptionByCustomer = topExceptionByEntity(exceptions, 'customer');
 
@@ -82,8 +87,12 @@ export default function CustomersScreen() {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
-            <ThemedText type="small" themeColor="textSecondary" style={styles.empty}>
-              {t('customers.empty')}
+            <ThemedText
+              type="small"
+              themeColor={error ? undefined : 'textSecondary'}
+              style={[styles.empty, error ? styles.error : undefined]}
+            >
+              {error || t('customers.empty')}
             </ThemedText>
           }
           renderItem={({ item }) => {
@@ -115,6 +124,7 @@ const styles = StyleSheet.create({
   heading: { fontSize: 24, marginBottom: Spacing.three },
   listContent: { gap: Spacing.two, paddingBottom: Spacing.four },
   empty: { textAlign: 'center', marginTop: Spacing.five },
+  error: { color: StatusColors.danger },
   card: { borderRadius: 16, padding: Spacing.three, gap: 4 },
   cardShadow: {
     shadowColor: '#000000',

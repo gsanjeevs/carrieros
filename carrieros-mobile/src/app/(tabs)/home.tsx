@@ -117,6 +117,7 @@ export default function HomeScreen() {
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState('');
 
   // Owner/Solo
   const [activeLoadsCount, setActiveLoadsCount] = useState(0);
@@ -140,7 +141,11 @@ export default function HomeScreen() {
   const [recentPayments, setRecentPayments] = useState<InvoiceRow[]>([]);
 
   const loadOwnerSoloContent = useCallback(async () => {
-    const [{ count: activeCount }, { data: vehicles }, { data: recent }] = await Promise.all([
+    const [
+      { count: activeCount, error: activeErr },
+      { data: vehicles, error: vehiclesErr },
+      { data: recent, error: recentErr },
+    ] = await Promise.all([
       supabase.from('loads').select('id', { count: 'exact', head: true }).in('status', ACTIVE_LOAD_STATUSES),
       supabase.from('vehicles').select('status').eq('is_active', true),
       supabase
@@ -149,6 +154,7 @@ export default function HomeScreen() {
         .order('created_at', { ascending: false })
         .limit(5),
     ]);
+    if (activeErr || vehiclesErr || recentErr) setError(t('common.loadErrorRetry'));
 
     setActiveLoadsCount(activeCount ?? 0);
 
@@ -160,30 +166,36 @@ export default function HomeScreen() {
     }
     setFleetCounts(counts);
     setRecentLoads((recent as LoadRow[]) ?? []);
-  }, []);
+  }, [t]);
 
   const loadSoloDriverCard = useCallback(async () => {
     if (!session?.user.id) return;
-    const { data: driver } = await supabase
+    const { data: driver, error: driverErr } = await supabase
       .from('drivers')
       .select('id')
       .eq('profile_id', session.user.id)
       .single();
+    if (driverErr) setError(t('common.loadErrorRetry'));
     if (!driver) return;
 
-    const { data: activeLoad } = await supabase
+    const { data: activeLoad, error: activeLoadErr } = await supabase
       .from('loads_driver_view')
       .select('id, load_number, status, customer_name_raw, pickup_city, pickup_state, delivery_city, delivery_state')
       .eq('driver_id', driver.id)
       .in('status', ACTIVE_LOAD_STATUSES)
       .order('created_at', { ascending: false })
       .maybeSingle();
+    if (activeLoadErr) setError(t('common.loadErrorRetry'));
 
     setSoloActiveLoad((activeLoad as LoadRow | null) ?? null);
-  }, [session?.user.id]);
+  }, [session?.user.id, t]);
 
   const loadDispatcherContent = useCallback(async () => {
-    const [{ data: active }, { data: drivers }, { data: vehicles }] = await Promise.all([
+    const [
+      { data: active, error: activeErr },
+      { data: drivers, error: driversErr },
+      { data: vehicles, error: vehiclesErr },
+    ] = await Promise.all([
       supabase
         .from('loads')
         .select('id, load_number, status, customer_name_raw, pickup_city, pickup_state, delivery_city, delivery_state, driver_id, vehicle_id, updated_at')
@@ -192,6 +204,7 @@ export default function HomeScreen() {
       supabase.from('drivers').select('id').eq('is_active', true),
       supabase.from('vehicles').select('id, status').eq('is_active', true),
     ]);
+    if (activeErr || driversErr || vehiclesErr) setError(t('common.loadErrorRetry'));
 
     const activeLoads = (active as OpsLoadRow[] | null) ?? [];
     setOpsLoads(activeLoads);
@@ -206,10 +219,14 @@ export default function HomeScreen() {
     setAvailableVehicles(
       allVehicles.filter((v) => v.status === 'active' && !assignedVehicleIds.has(v.id)).length
     );
-  }, []);
+  }, [t]);
 
   const loadFinanceContent = useCallback(async () => {
-    const [{ data: outstanding }, { data: overdue }, { data: payments }] = await Promise.all([
+    const [
+      { data: outstanding, error: outstandingErr },
+      { data: overdue, error: overdueErr },
+      { data: payments, error: paymentsErr },
+    ] = await Promise.all([
       supabase.from('invoices').select('amount').in('status', ['sent', 'overdue']),
       supabase
         .from('invoices')
@@ -224,16 +241,18 @@ export default function HomeScreen() {
         .order('paid_at', { ascending: false })
         .limit(5),
     ]);
+    if (outstandingErr || overdueErr || paymentsErr) setError(t('common.loadErrorRetry'));
 
     const outstandingRows = (outstanding as { amount: number }[] | null) ?? [];
     setOutstandingCount(outstandingRows.length);
     setOutstandingTotal(outstandingRows.reduce((sum, r) => sum + Number(r.amount ?? 0), 0));
     setMostOverdue((overdue as InvoiceRow[] | null) ?? []);
     setRecentPayments((payments as InvoiceRow[] | null) ?? []);
-  }, []);
+  }, [t]);
 
   const load = useCallback(async () => {
     if (!role) return;
+    setError('');
     if (role === 'owner') {
       await loadOwnerSoloContent();
     } else if (role === 'solo') {
@@ -275,6 +294,10 @@ export default function HomeScreen() {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
           <ThemedText type="title" style={styles.heading}>{heading}</ThemedText>
+
+          {error ? (
+            <ThemedText type="small" style={styles.error}>{error}</ThemedText>
+          ) : null}
 
           {role === 'solo' && soloActiveLoad ? (
             <>
@@ -396,6 +419,7 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, paddingHorizontal: Spacing.three },
   scrollContent: { paddingBottom: Spacing.six, gap: Spacing.two },
   heading: { fontSize: 24, marginBottom: Spacing.two },
+  error: { color: StatusColors.danger, marginBottom: Spacing.two },
   sectionHeading: { fontSize: 18, marginTop: Spacing.three, marginBottom: Spacing.one },
   empty: { paddingVertical: Spacing.two },
   statRow: { flexDirection: 'row', gap: Spacing.two },
