@@ -20,11 +20,10 @@ import { Platform } from 'react-native';
 // Colors.dark (OS dark-mode) is a branded-navy variant of the light-mobile
 // card idea, not a port of web's dark theme.
 //
-// WARNING: as of 2026-07-25 `BrandColors` has ZERO importers — ~16 screens
-// each declare their own `const ORANGE = '#f97316'` instead, so editing the
-// values here currently changes NOTHING on screen. The sweep that makes this
-// file load-bearing is tracked separately; until it lands, mobile renders the
-// old palette regardless of what this says.
+// The 16-file `const ORANGE = '#f97316'` cluster (and a handful of inline
+// hex sites) that shadowed this export instead of importing it was swept
+// 2026-07-25 — every screen now does `const ORANGE = BrandColors.orange`,
+// so this file is finally load-bearing rather than descriptive-only.
 export const BrandColors = {
   navy: '#0f1e35',
   navyMid: '#182c46',

@@ -14,11 +14,11 @@ import * as Location from 'expo-location';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { BrandColors, Spacing } from '@/constants/theme';
 import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
 
-const ORANGE = '#f97316';
+const ORANGE = BrandColors.orange;
 // Balanced accuracy + a distance filter (not a time interval) — a parked/
 // idling driver shouldn't generate a write every few seconds for no
 // positional change.

@@ -12,14 +12,14 @@ import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { BrandColors, BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale, type DateFormat, type TimeFormat, type Uom } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
 import { SUPPORTED_LOCALES, type Locale } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
 
-const ORANGE = '#f97316';
+const ORANGE = BrandColors.orange;
 
 const LANGUAGE_LABEL_KEY: Record<Locale, string> = {
   en: 'settings.english',

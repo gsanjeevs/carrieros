@@ -23,14 +23,14 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { INVOICE_STATUS_PILL, Spacing, StatusColors } from '@/constants/theme';
+import { BrandColors, INVOICE_STATUS_PILL, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
 import { supabase } from '@/lib/supabase';
 import { apiFetch } from '@/lib/api';
 
-const ORANGE = '#f97316';
+const ORANGE = BrandColors.orange;
 const PAGE_BACKGROUND = StatusColors.grayLight;
 const WRITE_ROLES = ['owner', 'solo', 'finance'];
 

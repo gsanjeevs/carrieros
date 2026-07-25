@@ -31,7 +31,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { SignaturePad, type SignaturePadHandle } from '@/components/signature-pad';
-import { Spacing } from '@/constants/theme';
+import { BrandColors, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
@@ -39,7 +39,7 @@ import { base64ToArrayBuffer } from '@/lib/base64';
 import { supabase } from '@/lib/supabase';
 import { resolveSubmitter } from '@/lib/submitter';
 
-const ORANGE = '#f97316';
+const ORANGE = BrandColors.orange;
 const RED = '#dc2626';
 const GREEN = '#16a34a';
 const BUCKET = 'documents';

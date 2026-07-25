@@ -11,13 +11,13 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput } from 
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { BrandColors, Spacing } from '@/constants/theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useSession } from '@/hooks/use-session';
 import { supabase } from '@/lib/supabase';
 import { apiFetch } from '@/lib/api';
 
-const ORANGE = '#f97316';
+const ORANGE = BrandColors.orange;
 
 type MessageRow = {
   id: number;

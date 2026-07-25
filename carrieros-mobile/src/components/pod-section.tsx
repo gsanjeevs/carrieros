@@ -19,13 +19,13 @@ import * as ImagePicker from 'expo-image-picker';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { BrandColors, Spacing } from '@/constants/theme';
 import { useLocale } from '@/hooks/use-locale';
 import { base64ToArrayBuffer } from '@/lib/base64';
 import { supabase } from '@/lib/supabase';
 import { resolveSubmitter } from '@/lib/submitter';
 
-const ORANGE = '#f97316';
+const ORANGE = BrandColors.orange;
 const BUCKET = 'documents';
 const SIGNED_URL_TTL_SECONDS = 60 * 60; // 1h — plenty for a screen session
 

@@ -23,14 +23,14 @@ import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing, StatusColors } from '@/constants/theme';
+import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
 
 const PAGE_BACKGROUND = StatusColors.grayLight;
-const ORANGE = '#f97316';
+const ORANGE = BrandColors.orange;
 const CDL_CLASSES = ['A', 'B', 'C'] as const;
 const ENDORSEMENT_CODES = ['hazmat', 'tanker', 'doubles', 'airbrakes', 'passenger'] as const;
 

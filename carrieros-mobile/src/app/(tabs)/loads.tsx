@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { LOAD_STATUS_PILL, Spacing, StatusColors } from '@/constants/theme';
+import { BrandColors, LOAD_STATUS_PILL, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
@@ -188,8 +188,8 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.three },
   heading: { fontSize: 24 },
   newLoadButtonGroup: { flexDirection: 'row', gap: Spacing.two },
-  scanButton: { borderWidth: 1, borderColor: '#f97316', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 8 },
-  newLoadButton: { backgroundColor: '#f97316', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 8 },
+  scanButton: { borderWidth: 1, borderColor: BrandColors.orange, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 8 },
+  newLoadButton: { backgroundColor: BrandColors.orange, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 8 },
   listContent: { gap: Spacing.two, paddingBottom: Spacing.four },
   empty: { textAlign: 'center', marginTop: Spacing.five },
   // Matches load/[id].tsx's error text color.

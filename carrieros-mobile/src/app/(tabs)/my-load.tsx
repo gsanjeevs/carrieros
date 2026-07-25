@@ -10,7 +10,7 @@ import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { LOAD_STATUS_PILL, Spacing, StatusColors } from '@/constants/theme';
+import { BrandColors, LOAD_STATUS_PILL, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
@@ -276,13 +276,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#f9731622',
+    backgroundColor: `${BrandColors.orange}22`,
     borderWidth: 1,
-    borderColor: '#f97316',
+    borderColor: BrandColors.orange,
     borderRadius: 10,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,
     marginTop: Spacing.two,
   },
-  dvirNudgeText: { color: '#f97316' },
+  dvirNudgeText: { color: BrandColors.orange },
 });

@@ -13,7 +13,7 @@ import { ActivityIndicator, Pressable, StyleSheet, TextInput } from 'react-nativ
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { BrandColors, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useSession } from '@/hooks/use-session';
@@ -23,7 +23,7 @@ import { supabase } from '@/lib/supabase';
 
 const AMBER = '#d97706';
 const GREEN = '#16a34a';
-const ORANGE = '#f97316';
+const ORANGE = BrandColors.orange;
 
 type Crossing = { id: number; state: string; odometer_est: number | null; source: string };
 

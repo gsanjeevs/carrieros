@@ -12,14 +12,14 @@ import { ActivityIndicator, Pressable, StyleSheet, TextInput } from 'react-nativ
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { BrandColors, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useSession } from '@/hooks/use-session';
 import { formatMoney } from '@/lib/format-money';
 import { supabase } from '@/lib/supabase';
 
-const ORANGE = '#f97316';
+const ORANGE = BrandColors.orange;
 
 type FuelStop = {
   id: number;

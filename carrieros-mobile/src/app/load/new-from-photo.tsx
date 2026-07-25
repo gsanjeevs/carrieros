@@ -21,12 +21,12 @@ import * as ImagePicker from 'expo-image-picker';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { BrandColors, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { apiFetch } from '@/lib/api';
 
-const ORANGE = '#f97316';
+const ORANGE = BrandColors.orange;
 
 type FormState = {
   customer_name_raw: string;

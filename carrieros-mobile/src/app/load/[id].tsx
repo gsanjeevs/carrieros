@@ -15,7 +15,7 @@ import { ShareLocationSection } from '@/components/share-location-section';
 import { DriverChatSection } from '@/components/driver-chat-section';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { BrandColors, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
@@ -24,7 +24,7 @@ import { enqueueUpdate } from '@/lib/offline-queue';
 import { supabase } from '@/lib/supabase';
 import { apiFetch } from '@/lib/api';
 
-const ORANGE = '#f97316';
+const ORANGE = BrandColors.orange;
 
 type Role = 'owner' | 'solo' | 'driver' | 'dispatcher' | 'finance';
 

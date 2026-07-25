@@ -12,7 +12,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing, StatusColors } from '@/constants/theme';
+import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { hasFeature } from '@/lib/entitlements';
@@ -141,7 +141,7 @@ export default function CustomerDetailScreen() {
             <ThemedView style={styles.tagRow}>
               {customer.tags.map((tag) => (
                 <ThemedView key={tag} style={styles.tag}>
-                  <ThemedText type="small" style={{ color: '#f97316' }}>{tag}</ThemedText>
+                  <ThemedText type="small" style={{ color: BrandColors.orange }}>{tag}</ThemedText>
                 </ThemedView>
               ))}
             </ThemedView>

@@ -10,7 +10,7 @@ import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { ExceptionChip } from '@/components/exception-chip';
-import { Spacing, StatusColors, VEHICLE_STATUS_PILL } from '@/constants/theme';
+import { BrandColors, Spacing, StatusColors, VEHICLE_STATUS_PILL } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
@@ -92,7 +92,7 @@ export default function FleetScreen() {
         <ThemedView style={styles.headerRow} type="background">
           <ThemedText type="title" style={styles.heading}>{t('fleet.title')}</ThemedText>
           <Pressable onPress={() => router.push('/maintenance')} style={styles.maintenanceLink}>
-            <ThemedText type="smallBold" style={{ color: '#f97316' }}>{t('fleet.maintenanceLink')}</ThemedText>
+            <ThemedText type="smallBold" style={{ color: BrandColors.orange }}>{t('fleet.maintenanceLink')}</ThemedText>
           </Pressable>
         </ThemedView>
         <FlatList

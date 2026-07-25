@@ -14,9 +14,9 @@ import Svg, { Path } from 'react-native-svg';
 import { captureRef } from 'react-native-view-shot';
 
 import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
+import { BrandColors, Spacing } from '@/constants/theme';
 
-const ORANGE = '#f97316';
+const ORANGE = BrandColors.orange;
 
 export type SignaturePadHandle = {
   capture: () => Promise<string | null>;
