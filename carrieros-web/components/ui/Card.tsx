@@ -38,7 +38,9 @@ export default function Card({
   return (
     <div
       className={cn(
-        'bg-surface-card border rounded-xl transition-colors',
+        // rounded-card = --radius-card (14px), the mockups' single card
+        // radius step. Was rounded-xl (12px) until the 2026-07-25 re-skin.
+        'bg-surface-card border rounded-card transition-colors',
         variant === 'standard' && 'border-border-ui overflow-hidden',
         variant === 'interactive' &&
           cn(

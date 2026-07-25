@@ -61,7 +61,10 @@ export default function Button({
       disabled={isDisabled}
       aria-busy={loading || undefined}
       className={cn(
-        'inline-flex items-center justify-center gap-1.5 rounded-md font-semibold transition-colors',
+        // rounded-lg (8px) matches the mockups' --radius-sm exactly — no new
+        // token needed, Tailwind's stock 8px step already lines up. Was
+        // rounded-md (6px) until the 2026-07-25 re-skin.
+        'inline-flex items-center justify-center gap-1.5 rounded-lg font-semibold transition-colors',
         'focus:outline-none focus:ring-2 focus:ring-brand-orange/50',
         'disabled:opacity-50 disabled:cursor-not-allowed',
         VARIANT_CLASSES[variant],
