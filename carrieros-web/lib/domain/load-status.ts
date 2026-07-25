@@ -5,7 +5,7 @@
 // TypeScript compile error, not a silently blank/wrong render.
 //
 // Consolidates a real drift found 2026-07-22: the loads list page used
-// `bg-[#16a34a]/20 text-[#16a34a]` for delivered/paid while the load detail
+// `bg-success/20 text-success` for delivered/paid while the load detail
 // page used `bg-green-500/20 text-green-400` — visually similar, not the
 // same token. This module picks the hex-based value (matches the design
 // token already used in 3 of 4 consuming files), consolidating a decision
@@ -51,17 +51,17 @@ export function loadStatusColor(status: LoadStatus): string {
     case 'scheduled':
       return 'bg-blue-500/20 text-blue-400'
     case 'dispatched':
-      return 'bg-[#f97316]/20 text-[#f97316]'
+      return 'bg-brand-orange/20 text-brand-orange'
     case 'picked_up':
       return 'bg-amber-500/20 text-amber-400'
     case 'in_transit':
-      return 'bg-[#1abc9c]/20 text-[#1abc9c]'
+      return 'bg-teal/20 text-teal'
     case 'delivered':
-      return 'bg-[#16a34a]/20 text-[#16a34a]'
+      return 'bg-success/20 text-success'
     case 'invoiced':
       return 'bg-purple-500/20 text-purple-400'
     case 'paid':
-      return 'bg-[#16a34a]/20 text-[#16a34a]'
+      return 'bg-success/20 text-success'
     case 'cancelled':
       return 'bg-rose-500/10 text-rose-400'
     case 'declined':

@@ -9,7 +9,6 @@ import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { VEHICLE_TYPE_ICONS } from '@/components/icons/vehicle-types'
 import { Button, Input, Modal } from '@/components/ui'
-import { BRAND_BLUE, BRAND_ORANGE, DANGER, SLATE_LIGHT } from '@/lib/design-tokens'
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
@@ -21,13 +20,20 @@ const US_STATES = [
 // Curated set of common fleet paint colors. Stored as the human-readable
 // name in `vehicles.color` (plain TEXT column) — keep the swatch hex in
 // sync with the label so the UI stays simple (no free-form color picker).
+//
+// These are DOMAIN DATA (what color a truck is painted), not UI theming, so
+// every swatch is a literal hex rather than a brand token. Four of them used
+// to import SLATE_LIGHT/DANGER/BRAND_BLUE/BRAND_ORANGE from lib/design-tokens
+// — which meant a brand-palette change would silently repaint every user's
+// trucks. Decoupled during the 2026-07-25 re-skin prep for exactly that
+// reason; do not re-point these at tokens.
 const FLEET_COLORS: { name: string; hex: string }[] = [
   { name: 'White', hex: '#f8fafc' },
   { name: 'Black', hex: '#0f172a' },
-  { name: 'Silver', hex: SLATE_LIGHT },
-  { name: 'Red', hex: DANGER },
-  { name: 'Blue', hex: BRAND_BLUE },
-  { name: 'Orange', hex: BRAND_ORANGE },
+  { name: 'Silver', hex: '#94a3b8' },
+  { name: 'Red', hex: '#dc2626' },
+  { name: 'Blue', hex: '#2563eb' },
+  { name: 'Orange', hex: '#f97316' },
 ]
 
 const CAB_TYPES = ['sleeper', 'day_cab', 'other'] as const

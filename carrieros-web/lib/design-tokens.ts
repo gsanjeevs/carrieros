@@ -5,16 +5,18 @@
 // which can't be expressed as a Tailwind utility class or a `var(--color-*)`
 // reference (you can't append a hex-alpha suffix to a CSS custom property).
 //
-// MUST be kept in sync with app/globals.css's `@theme` block by hand — this
-// is a deliberate, narrow exception to "always use the Tailwind token
-// class," not a second source of truth to grow. Prefer the real Tailwind
-// class (`bg-brand-orange`, `text-teal`, etc.) everywhere a literal hex
-// string isn't structurally required. Added 2026-07-24 (raw-hex audit) to
-// stop these values being hand-copied per file.
-export const NAVY = '#0f1923'
-export const BRAND_ORANGE = '#f97316'
-export const BRAND_ORANGE_HOVER = '#ea6c0a'
-export const SUCCESS = '#16a34a'
+// MUST be kept in sync with app/globals.css's `@theme` block — that block is
+// the source of truth and `scripts/check-tokens.mjs` fails the build if these
+// drift from it. This file is a deliberate, narrow exception to "always use
+// the Tailwind token class," not a second source of truth to grow. Prefer the
+// real Tailwind class (`bg-brand-orange`, `text-teal`, etc.) everywhere a
+// literal hex string isn't structurally required. Added 2026-07-24 (raw-hex
+// audit) to stop these values being hand-copied per file.
+export const NAVY = '#0f1e35'
+export const BRAND_ORANGE = '#f47920'
+export const BRAND_ORANGE_HOVER = '#e06f1d'
+export const BRAND_ORANGE_LIGHT = '#f9a55a'
+export const SUCCESS = '#2ecc71'
 export const WARNING = '#d97706'
 export const DANGER = '#dc2626'
 export const TEAL = '#1abc9c'

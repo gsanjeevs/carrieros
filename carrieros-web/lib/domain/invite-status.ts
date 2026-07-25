@@ -16,7 +16,7 @@ export function inviteStatusColor(status: InviteStatus): string {
     case 'pending':
       return 'bg-amber-500/20 text-amber-400'
     case 'accepted':
-      return 'bg-[#16a34a]/20 text-[#16a34a]'
+      return 'bg-success/20 text-success'
     case 'revoked':
       return 'bg-slate-500/20 text-slate-400'
     default: {

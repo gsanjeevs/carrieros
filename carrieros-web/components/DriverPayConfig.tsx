@@ -74,7 +74,7 @@ export default function DriverPayConfig({
           <h2 className="text-white font-medium text-sm">{t('payConfig')}</h2>
           <button
             onClick={() => setEditing(true)}
-            className="text-brand-orange hover:text-[#fb923c] text-xs font-medium transition"
+            className="text-brand-orange hover:text-brand-orange-light text-xs font-medium transition"
           >
             {settlementType ? t('editPayConfig') : t('setPayConfig')}
           </button>

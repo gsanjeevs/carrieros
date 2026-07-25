@@ -251,7 +251,7 @@ export default function BulkImportCustomers({ existingCustomers }: { existingCus
                 <p className="text-slate-400 text-sm">{t('importInstructions', { max: MAX_ROWS })}</p>
                 <button
                   onClick={downloadTemplate}
-                  className="flex items-center gap-1.5 text-brand-orange hover:text-[#fb923c] text-sm font-medium transition"
+                  className="flex items-center gap-1.5 text-brand-orange hover:text-brand-orange-light text-sm font-medium transition"
                 >
                   <span className="material-symbols-outlined text-[16px]">download</span>
                   {t('downloadTemplate')}

@@ -8,7 +8,7 @@ export const VEHICLE_STATUSES: readonly VehicleStatus[] = ['active', 'idle', 'in
 export function vehicleStatusColor(status: VehicleStatus): string {
   switch (status) {
     case 'active':
-      return 'bg-[#16a34a]/20 text-[#16a34a]'
+      return 'bg-success/20 text-success'
     case 'idle':
       return 'bg-slate-500/20 text-slate-400'
     case 'in_shop':

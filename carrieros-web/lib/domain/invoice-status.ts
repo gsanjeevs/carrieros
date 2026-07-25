@@ -12,7 +12,7 @@ export function invoiceStatusColor(status: InvoiceStatus): string {
     case 'sent':
       return 'bg-blue-500/20 text-blue-400'
     case 'paid':
-      return 'bg-[#16a34a]/20 text-[#16a34a]'
+      return 'bg-success/20 text-success'
     case 'overdue':
       return 'bg-red-500/20 text-red-400'
     default: {

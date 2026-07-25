@@ -7,34 +7,59 @@ import '@/global.css';
 
 import { Platform } from 'react-native';
 
-// Brand palette — see docs/design/design-tokens.md ("Color Palette" section).
-// This is the canonical source; keep these in sync with
-// carrieros-web/tailwind.config.ts if either changes.
+// Brand palette — MIRROR of carrieros-web/app/globals.css's `@theme` block,
+// which is the source of truth. `carrieros-web/scripts/check-tokens.mjs`
+// fails the build if these drift from it. (This comment used to name
+// `docs/design/design-tokens.md` as canonical and point at a
+// `carrieros-web/tailwind.config.ts` — neither file exists; web is on
+// Tailwind v4 CSS-first config.)
 //
-// NOTE: design-tokens.md's "Dark Theme (Shipped)" section (added 2026-07-20)
-// applies ONLY to carrieros-web — it documents web's decision to keep a
-// dark navy page/card treatment instead of the lighter surface.* tokens.
-// Mobile screens (load detail, DVIR) already use light/white cards per the
-// doc's original surface.* spec, so Colors.light below stays on that
-// direction. Colors.dark (OS dark-mode) is a branded-navy variant of the
-// same light-mobile-card idea, not a port of web's dark theme.
+// Values updated 2026-07-25 to the mockup set's bespoke palette. Web's dark
+// page/card treatment still applies ONLY to carrieros-web — mobile screens
+// use light/white cards, so Colors.light below stays on that direction, and
+// Colors.dark (OS dark-mode) is a branded-navy variant of the light-mobile
+// card idea, not a port of web's dark theme.
+//
+// WARNING: as of 2026-07-25 `BrandColors` has ZERO importers — ~16 screens
+// each declare their own `const ORANGE = '#f97316'` instead, so editing the
+// values here currently changes NOTHING on screen. The sweep that makes this
+// file load-bearing is tracked separately; until it lands, mobile renders the
+// old palette regardless of what this says.
 export const BrandColors = {
-  navy: '#0f1923',
-  navyLight: '#1e3a5f',
+  navy: '#0f1e35',
+  navyMid: '#182c46',
+  navyLight: '#1f3a58',
+  navyCard: '#162033',
   navyMuted: '#4b5a6e',
-  orange: '#f97316',
+  orange: '#f47920',
+  orangeHover: '#e06f1d',
+  // Mockup `--orange-lt`. NOTE: distinct from StatusColors.orangeLight
+  // below, which is a pale pastel *badge background* (#fff0e6), not a
+  // lighter brand orange. They are not interchangeable.
+  orangeLight: '#f9a55a',
+  grayLight: '#d6e0ea',
+} as const;
+
+// Mockup radius scale (`--radius` / `--radius-sm`) — RN needs numbers, not
+// CSS lengths. Mirrors web's --radius-card (14px) and rounded-lg (8px).
+export const Radius = {
+  card: 14,
+  sm: 8,
 } as const;
 
 // Semantic + status colors, mirroring carrieros-web's STATUS_COLOR mapping
 // (app/(app)/loads/page.tsx) and design-tokens.md's "Badges / Status Chips"
 // pastel-bg/dark-text pairs. Used for load status pills across the app.
 export const StatusColors = {
-  success: '#16a34a',
+  success: '#2ecc71',
   successLight: '#e8f9f1',
   successDark: '#1a9e5c',
   warning: '#d97706',
-  warningLight: '#fff7e0',
-  warningDark: '#b37d00',
+  // warningLight/warningDark were #fff7e0/#b37d00 here vs #fff7ed/#9a3412 on
+  // web — a pre-existing drift from before either file was checked against
+  // the other. Resolved toward web (the source of truth), 2026-07-25.
+  warningLight: '#fff7ed',
+  warningDark: '#9a3412',
   danger: '#dc2626',
   dangerLight: '#fdecea',
   dangerDark: '#c0392b',
@@ -43,7 +68,7 @@ export const StatusColors = {
   tealDark: '#128f76',
   info: '#1a5eb8',
   infoLight: '#e8f0fe',
-  orange: '#f97316',
+  orange: '#f47920',
   orangeLight: '#fff0e6',
   orangeDark: '#c05a00',
   purple: '#6c3abf',
@@ -163,7 +188,8 @@ export const EXCEPTION_TIER_PILL: Record<string, { bg: string; text: string }> =
 
 export const Colors = {
   light: {
-    text: '#0f1923',
+    // Navy-as-body-text on light mobile cards — tracks BrandColors.navy.
+    text: BrandColors.navy,
     background: '#ffffff',
     // Nearly identical lightness to the old stock values (F0F0F3 / E0E1E6)
     // — swapped for the closest named design-tokens.md surface tokens
