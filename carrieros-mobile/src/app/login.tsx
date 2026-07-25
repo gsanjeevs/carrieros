@@ -6,6 +6,7 @@ import {
   TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -18,6 +19,7 @@ const ORANGE = BrandColors.orange;
 
 export default function LoginScreen() {
   const theme = useTheme();
+  const router = useRouter();
   const { t } = useLocale();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -98,6 +100,12 @@ export default function LoginScreen() {
               </ThemedText>
             )}
           </Pressable>
+
+          <Pressable onPress={() => router.push('/signup')} style={styles.signUpLink}>
+            <ThemedText type="small" themeColor="textSecondary">
+              {t('login.noAccount')} <ThemedText type="small" style={{ color: ORANGE }}>{t('login.signUp')}</ThemedText>
+            </ThemedText>
+          </Pressable>
         </ThemedView>
       </SafeAreaView>
     </ThemedView>
@@ -147,5 +155,9 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     opacity: 0.5,
+  },
+  signUpLink: {
+    alignItems: 'center',
+    marginTop: Spacing.three,
   },
 });
