@@ -28,4 +28,15 @@ if [ -n "$MOBILE_FILES" ]; then
   (cd carrieros-mobile && npx tsc --noEmit)
 fi
 
+# Token sync check (scripts/check-tokens.mjs) — fires when EITHER app's
+# palette-source file is staged, not just when *.ts/*.tsx under
+# carrieros-web/ changes: app/globals.css is .css (missed by WEB_FILES
+# above), and a mobile-only edit to constants/theme.ts must also be checked
+# against web's @theme block, the source of truth.
+TOKEN_FILES=$(echo "$STAGED" | grep -E '^(carrieros-web/app/globals\.css|carrieros-web/lib/design-tokens\.ts|carrieros-mobile/src/constants/theme\.ts)$' || true)
+if [ -n "$TOKEN_FILES" ]; then
+  echo "→ token sync check (globals.css ↔ design-tokens.ts ↔ mobile theme.ts)"
+  (cd carrieros-web && node scripts/check-tokens.mjs)
+fi
+
 echo "✓ pre-commit checks passed"
