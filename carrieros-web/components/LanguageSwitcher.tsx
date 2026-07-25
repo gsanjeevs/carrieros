@@ -57,6 +57,14 @@ export default function LanguageSwitcher({
     if (code === current || saving) return
     setSaving(true)
 
+    // False positive: this assignment only ever runs inside selectLanguage,
+    // itself only ever invoked from an onClick handler (see the two call
+    // sites below), never during render. The React Compiler's static
+    // analysis can't see that and flags any property assignment on
+    // `document` as if it mutated a render-scope variable, which
+    // document.cookie's setter semantics never do. Unrelated to (and
+    // predates) the 2026-07-25 re-skin.
+    // eslint-disable-next-line react-hooks/immutability
     document.cookie = `locale=${code};path=/;max-age=${60 * 60 * 24 * 365}`
 
     if (userId) {
@@ -88,7 +96,7 @@ export default function LanguageSwitcher({
               className={`relative w-8 h-8 rounded-lg flex items-center justify-center text-base transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
                 selected
                   ? 'bg-brand-orange/10 border-2 border-brand-orange'
-                  : 'border border-white/10 bg-white/5 hover:bg-white/10'
+                  : 'border border-border-ui bg-surface-subtle hover:bg-white/10'
               }`}
             >
               <span aria-hidden>{l.flag_emoji}</span>
@@ -119,7 +127,7 @@ export default function LanguageSwitcher({
               className={`relative flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
                 selected
                   ? 'border-2 border-brand-orange bg-brand-orange/10'
-                  : 'border border-white/10 bg-white/5 hover:bg-white/10'
+                  : 'border border-border-ui bg-surface-subtle hover:bg-white/10'
               }`}
             >
               <span className="text-lg leading-none" aria-hidden>{l.flag_emoji}</span>

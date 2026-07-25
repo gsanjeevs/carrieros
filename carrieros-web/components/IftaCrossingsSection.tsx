@@ -13,6 +13,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
+import { Card, Button, Input } from '@/components/ui'
 
 export interface IftaCrossingRow {
   id: number
@@ -85,20 +86,15 @@ export default function IftaCrossingsSection({
     router.refresh()
   }
 
-  const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/40 transition'
-
   return (
-    <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
+    <Card className="p-5">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-white font-medium text-sm">{t('iftaTitle')}</h2>
+        <h2 className="text-text-pri font-medium text-sm">{t('iftaTitle')}</h2>
         {canManage && !adding && (
-          <button
-            onClick={() => setAdding(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-orange hover:bg-brand-orange-hover text-white text-xs font-semibold rounded-lg transition"
-          >
+          <Button variant="primary" size="md" onClick={() => setAdding(true)}>
             <span className="material-symbols-outlined text-[16px]">add</span>
             {t('iftaLogCrossing')}
-          </button>
+          </Button>
         )}
       </div>
 
@@ -107,7 +103,7 @@ export default function IftaCrossingsSection({
       ) : (
         <div className="space-y-1.5">
           {crossings.map((c) => (
-            <div key={c.id} className="flex items-center justify-between px-3 py-2 bg-white/5 rounded-lg">
+            <div key={c.id} className="flex items-center justify-between px-3 py-2 bg-surface-subtle rounded-lg">
               <span className="text-white text-sm font-medium">{c.state}</span>
               <span className="text-slate-400 text-xs">{new Date(c.crossedAt).toLocaleString(locale)}</span>
               <span className="text-slate-400 text-xs">{c.odometerEst != null ? `${c.odometerEst.toLocaleString()} mi` : '—'}</span>
@@ -117,24 +113,32 @@ export default function IftaCrossingsSection({
       )}
 
       {adding && (
-        <div className="mt-4 space-y-3 border-t border-white/10 pt-4">
+        <div className="mt-4 space-y-3 border-t border-divider-ui pt-4">
           <div className="grid grid-cols-2 gap-3">
-            <select className={inputCls} value={form.state} onChange={(e) => set('state', e.target.value)}>
+            {/* Input's "select" mode can't take size="lg" here — SelectHTMLAttributes' own
+                numeric `size` (visible rows) collides with InputSize in the union type
+                (pre-existing components/ui/Input.tsx typing gap), so this uses a plain
+                <select> styled to match Input's lg variant instead. */}
+            <select
+              className="w-full bg-surface-input border border-border-ui rounded-lg px-3 py-2.5 text-[13px] text-text-pri cursor-pointer outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/20 transition-colors"
+              value={form.state}
+              onChange={(e) => set('state', e.target.value)}
+            >
               <option value="">{t('iftaState')}</option>
               {US_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
-            <input type="datetime-local" className={inputCls} value={form.crossed_at} onChange={(e) => set('crossed_at', e.target.value)} />
+            <Input type="datetime-local" size="lg" value={form.crossed_at} onChange={(e) => set('crossed_at', e.target.value)} />
           </div>
-          <input
+          <Input
             type="number"
-            className={inputCls}
+            size="lg"
             placeholder={t('iftaOdometer')}
             value={form.odometer_est}
             onChange={(e) => set('odometer_est', e.target.value)}
           />
           {error && <p className="text-red-400 text-xs">{error}</p>}
           <div className="flex gap-2">
-            <button onClick={() => { setAdding(false); setError('') }} disabled={saving} className="flex-1 py-2 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white text-sm font-medium rounded-lg transition">
+            <button onClick={() => { setAdding(false); setError('') }} disabled={saving} className="flex-1 py-2 bg-surface-subtle hover:bg-white/10 disabled:opacity-40 text-white text-sm font-medium rounded-lg transition">
               {t('iftaCancel')}
             </button>
             <button onClick={submit} disabled={saving} className="flex-1 py-2 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition">
@@ -143,6 +147,6 @@ export default function IftaCrossingsSection({
           </div>
         </div>
       )}
-    </div>
+    </Card>
   )
 }

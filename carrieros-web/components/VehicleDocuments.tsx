@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { createStorageProvider } from '@/lib/storage'
+import { Card, CardHeader, CardBody } from '@/components/ui'
 
 export type VehicleDocType = 'registration' | 'insurance_cert' | 'dot_authority' | 'annual_inspection' | 'other'
 
@@ -143,12 +144,12 @@ export default function VehicleDocuments({
   }
 
   const selectCls =
-    'bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/40 transition'
+    'bg-surface-input border border-border-ui rounded-lg px-3 py-2 text-text-pri text-sm focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/40 transition'
 
   return (
-    <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-        <h2 className="text-white font-medium text-sm">{t('vehicleDocuments')}</h2>
+    <Card>
+      <CardHeader className="flex-wrap gap-3">
+        <h2 className="text-text-pri font-medium text-sm">{t('vehicleDocuments')}</h2>
         {canUpload && (
           <div className="flex items-center gap-2 flex-wrap">
             <select
@@ -191,7 +192,9 @@ export default function VehicleDocuments({
             </button>
           </div>
         )}
-      </div>
+      </CardHeader>
+
+      <CardBody>
 
       {error && <p className="text-red-400 text-xs mb-3">{error}</p>}
 
@@ -204,7 +207,7 @@ export default function VehicleDocuments({
             return (
               <div
                 key={doc.id}
-                className="group relative bg-white/5 border border-white/8 rounded-lg overflow-hidden shadow-card-dark hover:bg-white/[0.07] hover:border-white/15 hover:shadow-hover-dark transition-all duration-150"
+                className="group relative bg-surface-card border border-border-ui rounded-lg overflow-hidden shadow-card hover:bg-surface-subtle hover:border-brand-orange/30 hover:shadow-hover transition-all duration-150"
               >
                 <a
                   href={doc.signedUrl ?? '#'}
@@ -269,6 +272,7 @@ export default function VehicleDocuments({
           })}
         </div>
       )}
-    </div>
+      </CardBody>
+    </Card>
   )
 }

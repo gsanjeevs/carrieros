@@ -17,10 +17,21 @@ import nextTs from "eslint-config-next/typescript";
 // without breaking the build; "error" for surfaces already fully migrated.
 // As a surface gets migrated, add its glob to ERROR_SURFACES below to lock
 // the regression out permanently instead of leaving it at warn forever.
+// Widened 2026-07-25 (Phase 5 of the mockup-06 re-skin): the original
+// bg-white\/(5|7) / border-white\/(5|8|10) alternation missed the bracketed
+// arbitrary-value form (bg-white/[0.05]) — semantically the same debt,
+// spelled differently. Did NOT add /10, /12, /16 to the bg- side or /12,
+// /16 to the border- side, despite the re-skin plan suggesting it: bg-white
+// /10 in particular is a widely-used, legitimate hover/progress-track
+// convention throughout already-migrated ERROR_SURFACES code (onboarding's
+// step dots, LoadActionGrid's row hovers, etc.), completely distinct from
+// the 5/7% "someone hand-rolled a whole card" pattern this guard targets.
+// Verified by trying the wider set first — it broke the build on 21
+// pre-existing, legitimate uses across files nowhere near this migration.
 const CARD_PATTERN_SELECTOR_LITERAL =
-  "JSXAttribute[name.name='className'] Literal[value=/shadow-card-dark|bg-white\\/(5|7)|border-white\\/(5|8|10)/]";
+  "JSXAttribute[name.name='className'] Literal[value=/shadow-card-dark|bg-white\\/(\\[[^\\]]+\\]|5|7)|border-white\\/(\\[[^\\]]+\\]|5|8|10)/]";
 const CARD_PATTERN_SELECTOR_TEMPLATE =
-  "JSXAttribute[name.name='className'] TemplateElement[value.raw=/shadow-card-dark|bg-white\\/(5|7)|border-white\\/(5|8|10)/]";
+  "JSXAttribute[name.name='className'] TemplateElement[value.raw=/shadow-card-dark|bg-white\\/(\\[[^\\]]+\\]|5|7)|border-white\\/(\\[[^\\]]+\\]|5|8|10)/]";
 const CARD_PATTERN_MESSAGE =
   "Use components/ui/* (Card/KpiTile/StatusBadge/Table/Button) instead of hand-rolled card/badge Tailwind classes — see docs/design/carrieros-design-system.md §5.";
 
@@ -46,6 +57,21 @@ const HEX_PATTERN_SELECTOR_STYLE_PROP =
   "Property[key.name=/^(color|backgroundColor|borderColor)$/] > Literal[value=/#[0-9a-fA-F]{6}/]";
 const HEX_PATTERN_MESSAGE =
   "Use a design-system token (bg-brand-orange, text-teal, etc. — see app/globals.css's @theme block) or lib/design-tokens.ts instead of a raw hex color — see docs/design/carrieros-design-system.md §1.2.";
+
+// lib/domain/*.ts's status-pill helpers used to return plain strings like
+// `'bg-[#f97316]/20 text-[#f97316]'` (converted to token classes in the
+// 2026-07-25 re-skin, see docs/decisions.md V6). The HEX_PATTERN_SELECTOR_*
+// rules above couldn't have caught these even with a wider `files` glob —
+// they require a `JSXAttribute[name.name='className']` ancestor, and a
+// domain function's return value has no such wrapper. This is a second,
+// narrower selector for exactly that shape: a bare string literal containing
+// a Tailwind arbitrary-hex utility, regardless of JSX context. Scoped to
+// lib/**/*.ts only (not app/lib.ts generally) to avoid false-positiving on
+// unrelated string literals elsewhere in business logic.
+const LIB_HEX_PATTERN_SELECTOR =
+  "Literal[value=/(?:bg|text|border)-\\[#[0-9a-fA-F]{6}\\]/]";
+const LIB_HEX_PATTERN_MESSAGE =
+  "Return a semantic token class (bg-brand-orange/20 text-brand-orange, etc.) instead of a raw hex Tailwind class — see docs/design/carrieros-design-system.md §1.2.";
 
 function hexPatternRule(severity) {
   return [
@@ -95,9 +121,30 @@ const ERROR_SURFACES = [
   "app/(app)/settings/**/*.tsx",
   "app/(app)/finance/**/*.tsx",
 ];
+// components/** migrated onto components/ui/* clean 2026-07-25 (Phase 5 of
+// the mockup-06 re-skin, 18 files) — promoted from the warn block above.
+// EXCLUDES components/ui/** itself: Button.tsx's `ghost` variant and
+// Table.tsx intentionally use bg-white/7 as the canonical implementation
+// this whole guard exists to point everyone else at — it stays on the warn
+// tier (via uiComponentPatternGuardWarn above), same as before.
 const uiComponentPatternGuardError = {
-  files: ERROR_SURFACES,
+  files: [...ERROR_SURFACES, "components/**/*.tsx"],
+  ignores: ["components/ui/**"],
   rules: { "no-restricted-syntax": cardPatternRule("error").slice(1) },
+};
+
+// lib/domain/*.ts's hex-return sites (see LIB_HEX_PATTERN_SELECTOR above)
+// were fixed to zero violations in the same pass — start this at `error`,
+// not `warn`, per the same "clean when written" posture check-architecture.mjs
+// documents for its own checks.
+const libHexPatternGuard = {
+  files: ["lib/**/*.ts"],
+  rules: {
+    "no-restricted-syntax": [
+      "error",
+      { selector: LIB_HEX_PATTERN_SELECTOR, message: LIB_HEX_PATTERN_MESSAGE },
+    ],
+  },
 };
 
 const eslintConfig = defineConfig([
@@ -105,6 +152,7 @@ const eslintConfig = defineConfig([
   ...nextTs,
   uiComponentPatternGuardWarn,
   uiComponentPatternGuardError,
+  libHexPatternGuard,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

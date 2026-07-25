@@ -16,6 +16,7 @@
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { Button, Input, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
 
 const MAX_ROWS = 50
 
@@ -216,17 +217,14 @@ export default function BulkImportCustomers({ existingCustomers }: { existingCus
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/8 text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-      >
+      <Button variant="secondary" onClick={() => setOpen(true)}>
         <span className="material-symbols-outlined text-[18px]">upload_file</span>
         {t('bulkImport')}
-      </button>
+      </Button>
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
-          <div className="w-full max-w-2xl bg-navy border border-white/10 rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-2xl bg-navy border border-border-ui rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-white font-semibold text-lg">{t('bulkImport')}</h2>
               <button onClick={close} className="text-slate-500 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 rounded">
@@ -239,12 +237,9 @@ export default function BulkImportCustomers({ existingCustomers }: { existingCus
                 <div className="rounded-lg bg-success/10 border border-success/20 px-4 py-3 text-success text-sm">
                   {t('importSummary', { created: createdCount, updated: updatedCount, skipped: skippedCount })}
                 </div>
-                <button
-                  onClick={close}
-                  className="w-full py-2.5 bg-brand-orange hover:bg-brand-orange-hover text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-                >
+                <Button variant="primary" onClick={close} className="w-full">
                   {tCommon('done')}
-                </button>
+                </Button>
               </div>
             ) : rows.length === 0 ? (
               <div className="space-y-4">
@@ -283,59 +278,51 @@ export default function BulkImportCustomers({ existingCustomers }: { existingCus
                   {truncatedCount > 0 && <p className="text-amber-400">{t('importTruncatedCount', { count: truncatedCount, max: MAX_ROWS })}</p>}
                 </div>
 
-                <div className="border border-white/10 rounded-lg overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead className="bg-white/5 text-slate-400 text-xs uppercase">
+                <div className="border border-border-ui rounded-lg overflow-hidden">
+                  <Table>
+                    <thead>
                       <tr>
-                        <th className="text-left px-3 py-2">{t('companyName')}</th>
-                        <th className="text-left px-3 py-2">{t('contactName')}</th>
-                        <th className="text-left px-3 py-2">{t('email')}</th>
-                        <th className="text-left px-3 py-2">{t('importStatus')}</th>
+                        <TableHeaderCell>{t('companyName')}</TableHeaderCell>
+                        <TableHeaderCell>{t('contactName')}</TableHeaderCell>
+                        <TableHeaderCell>{t('email')}</TableHeaderCell>
+                        <TableHeaderCell>{t('importStatus')}</TableHeaderCell>
                       </tr>
                     </thead>
                     <tbody>
                       {rows.map((r, i) => (
-                        <tr key={i} className="border-t border-white/5">
-                          <td className="px-3 py-2 text-white">{r.name}</td>
-                          <td className="px-3 py-2 text-slate-300">{r.contact_name || '—'}</td>
-                          <td className="px-3 py-2 text-slate-300">{r.email || '—'}</td>
-                          <td className="px-3 py-2">
+                        <TableRow key={i}>
+                          <TableCell>{r.name}</TableCell>
+                          <TableCell>{r.contact_name || '—'}</TableCell>
+                          <TableCell>{r.email || '—'}</TableCell>
+                          <TableCell>
                             {r.status === 'duplicate' ? (
-                              <select
-                                className="bg-white/5 border border-white/10 rounded px-2 py-1 text-xs text-white"
+                              <Input
+                                as="select"
                                 value={r.action}
                                 onChange={(e) => setRowAction(i, e.target.value as PreviewRow['action'])}
                               >
                                 <option value="skip">{t('importSkip')}</option>
                                 <option value="overwrite">{t('importOverwrite')}</option>
-                              </select>
+                              </Input>
                             ) : (
                               <span className="text-emerald-400 text-xs">{t('importNew')}</span>
                             )}
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       ))}
                     </tbody>
-                  </table>
+                  </Table>
                 </div>
 
                 {parseError && <p className="text-red-400 text-xs">{parseError}</p>}
 
                 <div className="flex gap-3">
-                  <button
-                    onClick={reset}
-                    disabled={importing}
-                    className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-                  >
+                  <Button variant="secondary" onClick={reset} disabled={importing} className="flex-1">
                     {tCommon('cancel')}
-                  </button>
-                  <button
-                    onClick={confirmImport}
-                    disabled={importing}
-                    className="flex-2 flex-grow py-2.5 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white font-semibold rounded-lg transition text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-                  >
+                  </Button>
+                  <Button variant="primary" onClick={confirmImport} disabled={importing} className="flex-grow">
                     {importing ? t('importing') : t('importConfirm', { count: rows.length })}
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}

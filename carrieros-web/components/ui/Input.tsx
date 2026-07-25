@@ -32,7 +32,14 @@ interface CommonProps {
 export type InputProps =
   | (CommonProps & { as?: 'input' } & Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>)
   | (CommonProps & { as: 'textarea' } & TextareaHTMLAttributes<HTMLTextAreaElement>)
-  | (CommonProps & { as: 'select'; children?: ReactNode } & SelectHTMLAttributes<HTMLSelectElement>)
+  // 'size' omitted here too — <select>'s native `size` attribute (a number
+  // of visible options) collides with CommonProps.size (InputSize, a
+  // string) exactly like <input>'s does above. Found during the Phase 5
+  // components/ migration (2026-07-25): every file needing a select fell
+  // back to a plain <select> to dodge this, rather than using this
+  // component at all. Fixed at the source instead of leaving that as the
+  // permanent workaround.
+  | (CommonProps & { as: 'select'; children?: ReactNode } & Omit<SelectHTMLAttributes<HTMLSelectElement>, 'size'>)
 
 const SIZE_CLASSES: Record<InputSize, string> = {
   lg: 'px-3 py-2.5 text-[13px]', // mockup-06 .field-input

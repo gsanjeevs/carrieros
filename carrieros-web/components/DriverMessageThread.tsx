@@ -18,6 +18,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
+import { Card, CardBody, Input, Button } from '@/components/ui'
 
 interface MessageRow {
   id: number
@@ -162,8 +163,9 @@ export default function DriverMessageThread({
   }
 
   return (
-    <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-      <h2 className="text-white font-medium text-sm mb-3">{t('chatTitle')}</h2>
+    <Card>
+      <CardBody>
+      <h2 className="text-text-pri font-medium text-sm mb-3">{t('chatTitle')}</h2>
 
       <div className="max-h-80 overflow-y-auto space-y-2 mb-3 pr-1">
         {messages.length === 0 ? (
@@ -214,8 +216,9 @@ export default function DriverMessageThread({
       {error && <p className="text-red-400 text-xs mb-2">{error}</p>}
 
       <div className="flex gap-2">
-        <input
-          className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-orange transition"
+        <Input
+          size="lg"
+          className="flex-1"
           placeholder={t('chatPlaceholder')}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
@@ -227,14 +230,14 @@ export default function DriverMessageThread({
           }}
           disabled={sending}
         />
-        <button
+        <Button
           onClick={send}
           disabled={sending || !draft.trim()}
-          className="px-4 py-2 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition"
         >
           {t('chatSend')}
-        </button>
+        </Button>
       </div>
-    </div>
+      </CardBody>
+    </Card>
   )
 }

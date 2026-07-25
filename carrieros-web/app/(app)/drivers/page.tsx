@@ -151,7 +151,7 @@ export default async function DriversPage({
                     </TableCell>
                     <TableCell>{driver.profiles?.phone ?? '—'}</TableCell>
                     <TableCell>
-                      <div className="inline-flex flex-col gap-1.5 rounded-lg border border-border-ui bg-white/[0.03] px-3 py-2 min-w-[148px]">
+                      <div className="inline-flex flex-col gap-1.5 rounded-lg border border-border-ui bg-surface-subtle px-3 py-2 min-w-[148px]">
                         <div className="flex items-center justify-between gap-2">
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-400 text-2xs font-semibold tracking-wide">
                             {driver.cdl_class ? t('cdlClass', { class: driver.cdl_class }) : t('cdlClassUnknown')}

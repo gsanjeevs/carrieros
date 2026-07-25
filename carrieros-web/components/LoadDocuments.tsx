@@ -123,17 +123,18 @@ export default function LoadDocuments({
     router.refresh()
   }
 
-  const selectCls =
-    'bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/40 transition'
-
   return (
     <Card>
       <CardHeader>
         <h2 className="text-text-pri font-medium text-sm">{t('documents')}</h2>
         {canUpload && (
           <div className="flex items-center gap-2">
+            {/* Input's "select" mode can't take a size prop here — SelectHTMLAttributes'
+                own numeric `size` (visible rows) collides with InputSize in the union type
+                (pre-existing components/ui/Input.tsx typing gap), so this uses a plain
+                <select> styled to match the original local selectCls instead. */}
             <select
-              className={selectCls}
+              className="bg-surface-input border border-border-ui rounded-lg px-3 py-2 text-text-pri text-sm cursor-pointer outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/40 transition"
               value={docType}
               onChange={(e) => setDocType(e.target.value as DocType)}
               disabled={busy}
@@ -175,7 +176,7 @@ export default function LoadDocuments({
           {documents.map((doc) => (
             <div
               key={doc.id}
-              className="group relative bg-white/5 border border-white/8 rounded-lg overflow-hidden shadow-card-dark hover:bg-white/[0.07] hover:border-white/15 hover:shadow-hover-dark transition-all duration-150"
+              className="group relative bg-surface-card border border-border-ui rounded-lg overflow-hidden hover:bg-surface-subtle hover:border-brand-orange/30 hover:shadow-hover-dark transition-all duration-150"
             >
               <a
                 href={doc.signedUrl ?? '#'}

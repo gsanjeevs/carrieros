@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { createStorageProvider } from '@/lib/storage'
+import { Card, CardBody, Input } from '@/components/ui'
 
 export type DriverDocType = 'cdl_scan' | 'medical_cert' | 'other'
 
@@ -145,17 +146,15 @@ export default function DriverDocuments({
     router.refresh()
   }
 
-  const selectCls =
-    'bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/40 transition'
-
   return (
-    <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
+    <Card>
+      <CardBody>
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-        <h2 className="text-white font-medium text-sm">{t('driverDocuments')}</h2>
+        <h2 className="text-text-pri font-medium text-sm">{t('driverDocuments')}</h2>
         {canUpload && (
           <div className="flex items-center gap-2 flex-wrap">
             <select
-              className={selectCls}
+              className="w-auto bg-surface-input border border-border-ui rounded-lg px-3 py-2.5 text-[13px] text-text-pri cursor-pointer focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               value={docType}
               onChange={(e) => setDocType(e.target.value as DriverDocType)}
               disabled={busy}
@@ -165,13 +164,14 @@ export default function DriverDocuments({
                 <option key={ty} value={ty}>{t(`ddocType_${ty}`)}</option>
               ))}
             </select>
-            <input
+            <Input
               type="date"
-              className={selectCls}
+              size="lg"
               value={expiryDate}
               onChange={(e) => setExpiryDate(e.target.value)}
               disabled={busy}
               aria-label={t('docExpiryDate')}
+              className="w-auto"
             />
             <input
               ref={fileRef}
@@ -202,14 +202,14 @@ export default function DriverDocuments({
         <p className="text-slate-500 text-sm">{t('noDocumentsYet')}</p>
       ) : (
         <div className="relative pl-6">
-          <div className="absolute left-[9px] top-1.5 bottom-1.5 w-px bg-white/10" />
+          <div className="absolute left-[9px] top-1.5 bottom-1.5 w-px bg-border-ui" />
           <div className="space-y-4">
             {documents.map((doc) => {
               const status = expiryStatus(doc.expiryDate)
               return (
                 <div key={doc.id} className="relative">
                   <span className="absolute -left-6 top-1.5 w-[9px] h-[9px] rounded-full bg-brand-orange ring-4 ring-navy" />
-                  <div className="group relative flex items-start gap-3 bg-white/5 border border-white/8 rounded-lg p-3 shadow-card-dark hover:bg-white/[0.07] hover:border-white/15 hover:shadow-hover-dark transition-all duration-150">
+                  <div className="group relative flex items-start gap-3 bg-surface-card border border-border-ui rounded-lg p-3 shadow-card hover:bg-surface-subtle hover:border-brand-orange/30 hover:shadow-hover transition-all duration-150">
                     <a
                       href={doc.signedUrl ?? '#'}
                       target="_blank"
@@ -232,7 +232,7 @@ export default function DriverDocuments({
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-white text-xs font-medium">{t(`ddocType_${doc.type}`)}</p>
+                        <p className="text-text-pri text-xs font-medium">{t(`ddocType_${doc.type}`)}</p>
                         {status && (
                           <span
                             className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${
@@ -271,6 +271,7 @@ export default function DriverDocuments({
           </div>
         </div>
       )}
-    </div>
+      </CardBody>
+    </Card>
   )
 }

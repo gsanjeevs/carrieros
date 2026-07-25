@@ -10,6 +10,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { Card, CardBody, Field, Input, Button, EmptyState, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
 
 type Contact = {
   id: number
@@ -20,9 +21,6 @@ type Contact = {
   is_primary: boolean
   portal_profile_id: string | null
 }
-
-const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-brand-orange transition'
-const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
 
 export default function CustomerContacts({
   orgId,
@@ -122,36 +120,35 @@ export default function CustomerContacts({
   return (
     <div className="space-y-6">
       {contacts.length === 0 ? (
-        <div className="bg-white/5 border border-white/8 rounded-xl px-5 py-16 text-center shadow-card-dark">
-          <span className="material-symbols-outlined text-slate-600 text-4xl">contacts</span>
-          <p className="text-slate-500 text-sm mt-3">{t('contactsEmpty')}</p>
-        </div>
+        <Card>
+          <EmptyState icon="contacts" title={t('contactsEmpty')} />
+        </Card>
       ) : (
-        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
-          <table className="w-full text-sm">
+        <Card>
+          <Table>
             <thead>
-              <tr className="border-b border-white/5">
-                <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('contactsName')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('contactsTitle')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('contactsEmailPhone')}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('contactsPortal')}</th>
-                {canManage && <th className="px-5 py-3" />}
+              <tr>
+                <TableHeaderCell>{t('contactsName')}</TableHeaderCell>
+                <TableHeaderCell>{t('contactsTitle')}</TableHeaderCell>
+                <TableHeaderCell>{t('contactsEmailPhone')}</TableHeaderCell>
+                <TableHeaderCell>{t('contactsPortal')}</TableHeaderCell>
+                {canManage && <TableHeaderCell />}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody>
               {contacts.map((c) => (
-                <tr key={c.id} className="hover:bg-white/[0.07] transition-colors duration-150">
-                  <td className="px-5 py-3.5 text-white font-medium">
+                <TableRow key={c.id}>
+                  <TableCell className="font-medium">
                     {c.name}
                     {c.is_primary && (
                       <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase bg-brand-orange/15 text-brand-orange">
                         {t('contactsPrimary')}
                       </span>
                     )}
-                  </td>
-                  <td className="px-4 py-3.5 text-slate-400">{c.title ?? '—'}</td>
-                  <td className="px-4 py-3.5 text-slate-400">{[c.email, c.phone].filter(Boolean).join(' · ') || '—'}</td>
-                  <td className="px-4 py-3.5">
+                  </TableCell>
+                  <TableCell className="text-text-sec">{c.title ?? '—'}</TableCell>
+                  <TableCell className="text-text-sec">{[c.email, c.phone].filter(Boolean).join(' · ') || '—'}</TableCell>
+                  <TableCell>
                     {c.portal_profile_id ? (
                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-success/20 text-success">
                         {t('contactsLinked')}
@@ -161,9 +158,9 @@ export default function CustomerContacts({
                         {t('contactsNotLinked')}
                       </span>
                     )}
-                  </td>
+                  </TableCell>
                   {canManage && (
-                    <td className="px-5 py-3.5 text-right">
+                    <TableCell className="text-right">
                       {c.portal_profile_id ? (
                         <button
                           onClick={() => revoke(c.id)}
@@ -182,45 +179,39 @@ export default function CustomerContacts({
                           {busyId === c.id ? '…' : t('contactsInvite')}
                         </button>
                       )}
-                    </td>
+                    </TableCell>
                   )}
-                </tr>
+                </TableRow>
               ))}
             </tbody>
-          </table>
-        </div>
+          </Table>
+        </Card>
       )}
 
       {canManage && (
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
+        <Card>
+          <CardBody>
           <h2 className="text-white font-medium text-sm mb-3">{t('contactsAddNew')}</h2>
           <div className="grid grid-cols-2 gap-3 mb-3">
-            <div>
-              <label className={labelCls}>{t('contactsName')} *</label>
-              <input className={inputCls} value={form.name} onChange={e => set('name', e.target.value)} />
-            </div>
-            <div>
-              <label className={labelCls}>{t('contactsTitle')}</label>
-              <input className={inputCls} placeholder="AP, Dispatch…" value={form.title} onChange={e => set('title', e.target.value)} />
-            </div>
-            <div>
-              <label className={labelCls}>{t('contactsEmail')}</label>
-              <input className={inputCls} type="email" value={form.email} onChange={e => set('email', e.target.value)} />
-            </div>
-            <div>
-              <label className={labelCls}>{t('contactsPhone')}</label>
-              <input className={inputCls} value={form.phone} onChange={e => set('phone', e.target.value)} />
-            </div>
+            <Field label={t('contactsName')} required>
+              <Input size="lg" value={form.name} onChange={e => set('name', e.target.value)} />
+            </Field>
+            <Field label={t('contactsTitle')}>
+              <Input size="lg" placeholder="AP, Dispatch…" value={form.title} onChange={e => set('title', e.target.value)} />
+            </Field>
+            <Field label={t('contactsEmail')}>
+              <Input size="lg" type="email" value={form.email} onChange={e => set('email', e.target.value)} />
+            </Field>
+            <Field label={t('contactsPhone')}>
+              <Input size="lg" value={form.phone} onChange={e => set('phone', e.target.value)} />
+            </Field>
           </div>
           {error && <p className="text-red-400 text-xs mb-3">{error}</p>}
-          <button
-            onClick={addContact}
-            disabled={adding || !form.name.trim()}
-            className="px-4 py-2 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition"
-          >
+          <Button variant="primary" onClick={addContact} disabled={adding || !form.name.trim()}>
             {adding ? '…' : t('contactsAdd')}
-          </button>
-        </div>
+          </Button>
+          </CardBody>
+        </Card>
       )}
     </div>
   )

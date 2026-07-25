@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { createStorageProvider } from '@/lib/storage'
+import { Card, CardHeader, CardBody, Input } from '@/components/ui'
 
 export type CompanyDocType =
   | 'coi'
@@ -156,20 +157,17 @@ export default function CompanyDocuments({
     router.refresh()
   }
 
-  const selectCls =
-    'bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/40 transition'
-
   return (
-    <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
-      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+    <Card className="shadow-[var(--shadow-card)]">
+      <CardHeader className="flex-wrap gap-3">
         <div>
           <h2 className="text-white font-medium text-sm">{t('title')}</h2>
           <p className="text-slate-500 text-xs mt-0.5">{t('description')}</p>
         </div>
         {canUpload && (
           <div className="flex items-center gap-2 flex-wrap">
-            <select
-              className={selectCls}
+            <Input
+              as="select"
               value={docType}
               onChange={(e) => setDocType(e.target.value as CompanyDocType)}
               disabled={busy}
@@ -178,10 +176,10 @@ export default function CompanyDocuments({
               {DOC_TYPES.map((ty) => (
                 <option key={ty} value={ty}>{t(`cdocType_${ty}`)}</option>
               ))}
-            </select>
-            <input
+            </Input>
+            <Input
               type="date"
-              className={selectCls}
+              size="md"
               value={expiryDate}
               onChange={(e) => setExpiryDate(e.target.value)}
               disabled={busy}
@@ -208,8 +206,9 @@ export default function CompanyDocuments({
             </button>
           </div>
         )}
-      </div>
+      </CardHeader>
 
+      <CardBody>
       {error && <p className="text-red-400 text-xs mb-3">{error}</p>}
 
       {documents.length === 0 ? (
@@ -221,7 +220,7 @@ export default function CompanyDocuments({
             return (
               <div
                 key={doc.id}
-                className="group relative bg-white/5 border border-white/8 rounded-lg overflow-hidden shadow-card-dark hover:bg-white/[0.07] hover:border-white/15 hover:shadow-hover-dark transition-all duration-150"
+                className="group relative bg-surface-card border border-border-ui rounded-lg overflow-hidden shadow-[var(--shadow-card)] hover:bg-surface-subtle hover:border-brand-orange/20 hover:shadow-[var(--shadow-hover)] transition-all duration-150"
               >
                 <a
                   href={doc.signedUrl ?? '#'}
@@ -286,6 +285,7 @@ export default function CompanyDocuments({
           })}
         </div>
       )}
-    </div>
+      </CardBody>
+    </Card>
   )
 }

@@ -11,6 +11,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
+import { Card, CardBody, Field, Input, Button } from '@/components/ui'
 
 type SettlementType = 'percent_of_rate' | 'per_mile' | 'flat_per_load'
 
@@ -65,13 +66,12 @@ export default function DriverPayConfig({
     router.refresh()
   }
 
-  const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/40 transition'
-
   if (!editing) {
     return (
-      <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark">
+      <Card>
+        <CardBody>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-white font-medium text-sm">{t('payConfig')}</h2>
+          <h2 className="text-text-pri font-medium text-sm">{t('payConfig')}</h2>
           <button
             onClick={() => setEditing(true)}
             className="text-brand-orange hover:text-brand-orange-light text-xs font-medium transition"
@@ -86,25 +86,30 @@ export default function DriverPayConfig({
         ) : (
           <p className="text-slate-500 text-sm">{t('noPayConfig')}</p>
         )}
-      </div>
+        </CardBody>
+      </Card>
     )
   }
 
   return (
-    <div className="bg-white/5 border border-white/8 rounded-xl p-5 shadow-card-dark space-y-3">
-      <h2 className="text-white font-medium text-sm">{t('payConfig')}</h2>
-      <div>
-        <label className="block text-xs font-medium text-slate-400 mb-1.5">{t('settlementType')}</label>
-        <select className={inputCls} value={type} onChange={(e) => setType(e.target.value as SettlementType)} disabled={saving}>
+    <Card>
+      <CardBody className="space-y-3">
+      <h2 className="text-text-pri font-medium text-sm">{t('payConfig')}</h2>
+      <Field label={t('settlementType')}>
+        <select
+          className="w-full bg-surface-input border border-border-ui rounded-lg px-3 py-2.5 text-[13px] text-text-pri cursor-pointer focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          value={type}
+          onChange={(e) => setType(e.target.value as SettlementType)}
+          disabled={saving}
+        >
           <option value="percent_of_rate">{t('settlementType_percent_of_rate')}</option>
           <option value="per_mile">{t('settlementType_per_mile')}</option>
           <option value="flat_per_load">{t('settlementType_flat_per_load')}</option>
         </select>
-      </div>
-      <div>
-        <label className="block text-xs font-medium text-slate-400 mb-1.5">{t(RATE_INPUT_LABEL_KEY[type] as never)}</label>
-        <input
-          className={inputCls}
+      </Field>
+      <Field label={t(RATE_INPUT_LABEL_KEY[type] as never)}>
+        <Input
+          size="lg"
           type="number"
           step="0.01"
           min="0"
@@ -112,24 +117,27 @@ export default function DriverPayConfig({
           onChange={(e) => setRate(e.target.value)}
           disabled={saving}
         />
-      </div>
+      </Field>
       {error && <p className="text-red-400 text-xs">{error}</p>}
       <div className="flex gap-2">
-        <button
+        <Button
+          variant="secondary"
           onClick={() => { setEditing(false); setError('') }}
           disabled={saving}
-          className="flex-1 py-2 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white text-sm font-medium rounded-lg transition"
+          className="flex-1"
         >
           {t('payConfigCancel')}
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={save}
           disabled={saving}
-          className="flex-1 py-2 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition"
+          loading={saving}
+          className="flex-1"
         >
           {saving ? t('payConfigSaving') : t('payConfigSave')}
-        </button>
+        </Button>
       </div>
-    </div>
+      </CardBody>
+    </Card>
   )
 }

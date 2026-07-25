@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { formatMoney } from '@/lib/format-money'
+import { Card, CardHeader, Field, Input, Button } from '@/components/ui'
 
 export interface FuelStopRow {
   id: number
@@ -117,30 +118,25 @@ export default function FuelStopsSection({
     router.refresh()
   }
 
-  const inputCls = 'w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/40 transition'
-  const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
-
   return (
-    <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
-      <div className="px-5 py-3.5 border-b border-white/5 flex items-center justify-between">
-        <h2 className="text-white font-medium text-sm">{t('fuelHistory')}</h2>
+    <>
+    <Card>
+      <CardHeader>
+        <h2 className="text-text-pri font-medium text-sm">{t('fuelHistory')}</h2>
         {canLog && (
-          <button
-            onClick={() => setOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-orange hover:bg-brand-orange-hover text-white text-xs font-semibold rounded-lg transition"
-          >
+          <Button variant="primary" size="md" onClick={() => setOpen(true)}>
             <span className="material-symbols-outlined text-[16px]">add</span>
             {t('logFuelStop')}
-          </button>
+          </Button>
         )}
-      </div>
+      </CardHeader>
 
       {fuelStops.length === 0 ? (
-        <div className="px-5 py-4 text-slate-500 text-sm">{t('noFuelStopsYet')}</div>
+        <div className="px-5 py-4 text-text-mut text-sm">{t('noFuelStopsYet')}</div>
       ) : (
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-divider-ui">
               <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('date')}</th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('fuelState')}</th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('fuelStation')}</th>
@@ -149,9 +145,9 @@ export default function FuelStopsSection({
               <th className="text-right px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('fuelCost')}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5">
+          <tbody className="divide-y divide-divider-ui">
             {fuelStops.map((f) => (
-              <tr key={f.id} className="hover:bg-white/[0.07] transition-colors duration-150">
+              <tr key={f.id} className="hover:bg-surface-subtle transition-colors duration-150">
                 <td className="px-5 py-3 text-slate-300">{new Date(f.stopDate).toLocaleDateString(locale)}</td>
                 <td className="px-4 py-3 text-white font-medium">{f.state}</td>
                 <td className="px-4 py-3 text-slate-400">{f.station ?? '—'}</td>
@@ -163,10 +159,11 @@ export default function FuelStopsSection({
           </tbody>
         </table>
       )}
+    </Card>
 
-      {open && (
+    {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
-          <div className="w-full max-w-md bg-navy border border-white/10 rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-md bg-navy border border-border-ui rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-white font-semibold text-lg">{t('logFuelStop')}</h2>
               <button onClick={close} className="text-slate-500 hover:text-white transition rounded">
@@ -176,39 +173,41 @@ export default function FuelStopsSection({
 
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={labelCls}>{t('fuelState')} *</label>
-                  <select className={inputCls} value={form.state} onChange={(e) => set('state', e.target.value)}>
+                <Field label={`${t('fuelState')} *`}>
+                  {/* Input's "select" mode can't take size="lg" here — SelectHTMLAttributes'
+                      own numeric `size` (visible rows) collides with InputSize in the union
+                      type (pre-existing components/ui/Input.tsx typing gap), so this uses a
+                      plain <select> styled to match Input's lg variant instead. */}
+                  <select
+                    className="w-full bg-surface-input border border-border-ui rounded-lg px-3 py-2.5 text-[13px] text-text-pri cursor-pointer outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/20 transition-colors"
+                    value={form.state}
+                    onChange={(e) => set('state', e.target.value)}
+                  >
                     <option value="">—</option>
                     {US_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>
-                </div>
-                <div>
-                  <label className={labelCls}>{t('date')} *</label>
-                  <input type="date" className={inputCls} value={form.stop_date} onChange={(e) => set('stop_date', e.target.value)} />
-                </div>
+                </Field>
+                <Field label={`${t('date')} *`}>
+                  <Input type="date" size="lg" value={form.stop_date} onChange={(e) => set('stop_date', e.target.value)} />
+                </Field>
               </div>
 
-              <div>
-                <label className={labelCls}>{t('fuelStation')}</label>
-                <input className={inputCls} placeholder="Pilot #4213" value={form.station} onChange={(e) => set('station', e.target.value)} />
-              </div>
+              <Field label={t('fuelStation')}>
+                <Input size="lg" placeholder="Pilot #4213" value={form.station} onChange={(e) => set('station', e.target.value)} />
+              </Field>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={labelCls}>{t('fuelGallons')} *</label>
-                  <input type="number" step="0.001" min="0" className={inputCls} value={form.gallons} onChange={(e) => set('gallons', e.target.value)} />
-                </div>
-                <div>
-                  <label className={labelCls}>{t('fuelPricePerGallon')}</label>
-                  <input type="number" step="0.001" min="0" className={inputCls} value={form.price_per_gallon} onChange={(e) => set('price_per_gallon', e.target.value)} />
-                </div>
+                <Field label={`${t('fuelGallons')} *`}>
+                  <Input type="number" step="0.001" min="0" size="lg" value={form.gallons} onChange={(e) => set('gallons', e.target.value)} />
+                </Field>
+                <Field label={t('fuelPricePerGallon')}>
+                  <Input type="number" step="0.001" min="0" size="lg" value={form.price_per_gallon} onChange={(e) => set('price_per_gallon', e.target.value)} />
+                </Field>
               </div>
 
-              <div>
-                <label className={labelCls}>{t('fuelOdometer')}</label>
-                <input type="number" min="0" className={inputCls} value={form.odometer} onChange={(e) => set('odometer', e.target.value)} />
-              </div>
+              <Field label={t('fuelOdometer')}>
+                <Input type="number" min="0" size="lg" value={form.odometer} onChange={(e) => set('odometer', e.target.value)} />
+              </Field>
 
               {computedTotal != null && (
                 <p className="text-slate-400 text-xs">{t('fuelComputedTotal', { amount: formatMoney(computedTotal, currency, locale) })}</p>
@@ -217,7 +216,7 @@ export default function FuelStopsSection({
               {error && <p className="text-red-400 text-xs">{error}</p>}
 
               <div className="flex gap-3 mt-2">
-                <button onClick={close} disabled={saving} className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm">
+                <button onClick={close} disabled={saving} className="flex-1 py-2.5 bg-surface-subtle hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm">
                   {t('fuelCancel')}
                 </button>
                 <button onClick={submit} disabled={saving} className="flex-2 flex-grow py-2.5 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white font-semibold rounded-lg transition text-sm">
@@ -228,6 +227,6 @@ export default function FuelStopsSection({
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }

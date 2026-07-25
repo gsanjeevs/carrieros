@@ -17,8 +17,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Card, CardBody, Field, Input } from '@/components/ui'
 
-function Field({
+function FormField({
   label,
   name,
   value,
@@ -34,16 +35,16 @@ function Field({
   placeholder?: string
 }) {
   return (
-    <div>
-      <label className="block text-xs font-medium text-slate-400 uppercase tracking-wide mb-1.5">{label}</label>
-      <input
+    <Field label={label} htmlFor={name}>
+      <Input
+        id={name}
+        size="lg"
         type={type}
         value={value}
         onChange={(e) => onChange(name, e.target.value)}
         placeholder={placeholder ?? label}
-        className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition"
       />
-    </div>
+    </Field>
   )
 }
 
@@ -131,65 +132,73 @@ export default function ManualLoadForm() {
 
       <div className="space-y-6">
 
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5">
+        <Card>
+          <CardBody>
           <h2 className="text-white text-sm font-medium mb-4">Customer & Reference</h2>
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Customer / Broker" name="customer_name_raw" value={fields.customer_name_raw} onChange={update} placeholder="Company name" />
-            <Field label="Load / Reference #" name="load_number_raw" value={fields.load_number_raw} onChange={update} placeholder="RC-12345" />
+            <FormField label="Customer / Broker" name="customer_name_raw" value={fields.customer_name_raw} onChange={update} placeholder="Company name" />
+            <FormField label="Load / Reference #" name="load_number_raw" value={fields.load_number_raw} onChange={update} placeholder="RC-12345" />
           </div>
-        </div>
+          </CardBody>
+        </Card>
 
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5">
+        <Card>
+          <CardBody>
           <h2 className="text-white text-sm font-medium mb-4 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-brand-orange"></span>
             Pickup
           </h2>
           <div className="grid grid-cols-1 gap-4">
-            <Field label="Address" name="pickup_address" value={fields.pickup_address} onChange={update} />
+            <FormField label="Address" name="pickup_address" value={fields.pickup_address} onChange={update} />
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-1">
-                <Field label="City" name="pickup_city" value={fields.pickup_city} onChange={update} />
+                <FormField label="City" name="pickup_city" value={fields.pickup_city} onChange={update} />
               </div>
-              <Field label="State" name="pickup_state" value={fields.pickup_state} onChange={update} placeholder="IL" />
-              <Field label="ZIP" name="pickup_zip" value={fields.pickup_zip} onChange={update} placeholder="60601" />
+              <FormField label="State" name="pickup_state" value={fields.pickup_state} onChange={update} placeholder="IL" />
+              <FormField label="ZIP" name="pickup_zip" value={fields.pickup_zip} onChange={update} placeholder="60601" />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Date" name="pickup_date" value={fields.pickup_date} onChange={update} type="date" />
-              <Field label="Time" name="pickup_time" value={fields.pickup_time} onChange={update} type="time" />
+              <FormField label="Date" name="pickup_date" value={fields.pickup_date} onChange={update} type="date" />
+              <FormField label="Time" name="pickup_time" value={fields.pickup_time} onChange={update} type="time" />
             </div>
           </div>
-        </div>
+          </CardBody>
+        </Card>
 
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5">
+        <Card>
+          <CardBody>
           <h2 className="text-white text-sm font-medium mb-4 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-success"></span>
             Delivery
           </h2>
           <div className="grid grid-cols-1 gap-4">
-            <Field label="Address" name="delivery_address" value={fields.delivery_address} onChange={update} />
+            <FormField label="Address" name="delivery_address" value={fields.delivery_address} onChange={update} />
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-1">
-                <Field label="City" name="delivery_city" value={fields.delivery_city} onChange={update} />
+                <FormField label="City" name="delivery_city" value={fields.delivery_city} onChange={update} />
               </div>
-              <Field label="State" name="delivery_state" value={fields.delivery_state} onChange={update} placeholder="TN" />
-              <Field label="ZIP" name="delivery_zip" value={fields.delivery_zip} onChange={update} placeholder="38101" />
+              <FormField label="State" name="delivery_state" value={fields.delivery_state} onChange={update} placeholder="TN" />
+              <FormField label="ZIP" name="delivery_zip" value={fields.delivery_zip} onChange={update} placeholder="38101" />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Date" name="delivery_date" value={fields.delivery_date} onChange={update} type="date" />
-              <Field label="Time" name="delivery_time" value={fields.delivery_time} onChange={update} type="time" />
+              <FormField label="Date" name="delivery_date" value={fields.delivery_date} onChange={update} type="date" />
+              <FormField label="Time" name="delivery_time" value={fields.delivery_time} onChange={update} type="time" />
             </div>
           </div>
-        </div>
+          </CardBody>
+        </Card>
 
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5">
+        <Card>
+          <CardBody>
           <h2 className="text-white text-sm font-medium mb-4">Load Details</h2>
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Commodity" name="commodity" value={fields.commodity} onChange={update} placeholder="General freight" />
-            <Field label="Weight (lbs)" name="weight_lbs" value={fields.weight_lbs} onChange={update} type="number" placeholder="42000" />
-            <Field label="Rate ($)" name="rate" value={fields.rate} onChange={update} type="number" placeholder="2850" />
-            <Field label="Miles" name="total_miles" value={fields.total_miles} onChange={update} type="number" placeholder="530" />
+            <FormField label="Commodity" name="commodity" value={fields.commodity} onChange={update} placeholder="General freight" />
+            <FormField label="Weight (lbs)" name="weight_lbs" value={fields.weight_lbs} onChange={update} type="number" placeholder="42000" />
+            <FormField label="Rate ($)" name="rate" value={fields.rate} onChange={update} type="number" placeholder="2850" />
+            <FormField label="Miles" name="total_miles" value={fields.total_miles} onChange={update} type="number" placeholder="530" />
           </div>
-        </div>
+          </CardBody>
+        </Card>
 
       </div>
 

@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Card, CardBody, Input, Button } from '@/components/ui'
 
 interface ExtractedLoad {
   customer_name_raw: string | null
@@ -66,12 +67,12 @@ function Field({
           </span>
         )}
       </div>
-      <input
+      <Input
+        size="lg"
         type={type}
         value={value}
         onChange={(e) => onChange(name, e.target.value)}
         placeholder={placeholder ?? label}
-        className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition"
       />
     </div>
   )
@@ -179,10 +180,10 @@ export default function ExtractionReview() {
         </Link>
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-white">Review Extracted Load</h1>
+            <h1 className="text-2xl font-semibold text-text-pri">Review Extracted Load</h1>
             <p className="text-slate-400 text-sm mt-1">Check the details below — edit anything that looks off.</p>
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-400 bg-white/5 border border-white/8 rounded-lg px-3 py-1.5">
+          <div className="flex items-center gap-2 text-xs text-slate-400 bg-surface-card border border-border-ui rounded-lg px-3 py-1.5">
             <span className="material-symbols-outlined text-[14px] text-brand-orange">auto_awesome</span>
             AI extracted
           </div>
@@ -198,17 +199,20 @@ export default function ExtractionReview() {
       <div className="space-y-6">
 
         {/* Customer + reference */}
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5">
-          <h2 className="text-white text-sm font-medium mb-4">Customer & Reference</h2>
+        <Card>
+          <CardBody>
+          <h2 className="text-text-pri text-sm font-medium mb-4">Customer & Reference</h2>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Customer / Broker" name="customer_name_raw" value={fields.customer_name_raw ?? ''} onChange={update} placeholder="Company name" />
             <Field label="Load / Reference #" name="load_number_raw" value={fields.load_number_raw ?? ''} onChange={update} placeholder="RC-12345" />
           </div>
-        </div>
+          </CardBody>
+        </Card>
 
         {/* Pickup */}
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5">
-          <h2 className="text-white text-sm font-medium mb-4 flex items-center gap-2">
+        <Card>
+          <CardBody>
+          <h2 className="text-text-pri text-sm font-medium mb-4 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-brand-orange"></span>
             Pickup
           </h2>
@@ -226,11 +230,13 @@ export default function ExtractionReview() {
               <Field label="Time" name="pickup_time" value={fields.pickup_time ?? ''} onChange={update} type="time" />
             </div>
           </div>
-        </div>
+          </CardBody>
+        </Card>
 
         {/* Delivery */}
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5">
-          <h2 className="text-white text-sm font-medium mb-4 flex items-center gap-2">
+        <Card>
+          <CardBody>
+          <h2 className="text-text-pri text-sm font-medium mb-4 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-success"></span>
             Delivery
           </h2>
@@ -248,18 +254,21 @@ export default function ExtractionReview() {
               <Field label="Time" name="delivery_time" value={fields.delivery_time ?? ''} onChange={update} type="time" />
             </div>
           </div>
-        </div>
+          </CardBody>
+        </Card>
 
         {/* Load details */}
-        <div className="bg-white/5 border border-white/8 rounded-xl p-5">
-          <h2 className="text-white text-sm font-medium mb-4">Load Details</h2>
+        <Card>
+          <CardBody>
+          <h2 className="text-text-pri text-sm font-medium mb-4">Load Details</h2>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Commodity" name="commodity" value={fields.commodity ?? ''} onChange={update} placeholder="General freight" />
             <Field label="Weight (lbs)" name="weight_lbs" value={fields.weight_lbs ?? ''} onChange={update} type="number" placeholder="42000" />
             <Field label="Rate ($)" name="rate" value={fields.rate ?? ''} onChange={update} type="number" confidence={c.rate} placeholder="2850" />
             <Field label="Miles" name="total_miles" value={fields.total_miles ?? ''} onChange={update} type="number" placeholder="530" />
           </div>
-        </div>
+          </CardBody>
+        </Card>
 
       </div>
 
@@ -271,23 +280,20 @@ export default function ExtractionReview() {
         >
           Re-extract
         </Link>
-        <button
+        <Button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-6 py-2.5 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition"
+          loading={saving}
         >
           {saving ? (
-            <>
-              <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
-              Saving...
-            </>
+            <>Saving...</>
           ) : (
             <>
               <span className="material-symbols-outlined text-[16px]">check</span>
               Confirm & Create Load
             </>
           )}
-        </button>
+        </Button>
       </div>
 
     </div>

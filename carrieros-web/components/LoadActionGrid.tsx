@@ -65,7 +65,7 @@ export default function LoadActionGrid({
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  const btnCls = 'flex flex-col items-center justify-center gap-1.5 py-3.5 bg-white/5 hover:bg-white/10 border border-white/8 rounded-xl transition text-center focus:outline-none focus:ring-2 focus:ring-brand-orange/50 disabled:opacity-40 disabled:hover:bg-white/5 disabled:cursor-not-allowed'
+  const btnCls = 'flex flex-col items-center justify-center gap-1.5 py-3.5 bg-surface-subtle hover:bg-white/10 border border-border-ui rounded-xl transition text-center focus:outline-none focus:ring-2 focus:ring-brand-orange/50 disabled:opacity-40 disabled:hover:bg-surface-subtle disabled:cursor-not-allowed'
   const iconCls = 'material-symbols-outlined text-[20px] text-slate-300'
   const labelCls = 'text-white text-xs font-medium'
 
@@ -80,7 +80,7 @@ export default function LoadActionGrid({
         </button>
 
         {menuOpen && trackingToken && (
-          <div className="absolute z-10 top-full mt-1 left-0 right-0 bg-navy border border-white/10 rounded-xl overflow-hidden shadow-lg">
+          <div className="absolute z-10 top-full mt-1 left-0 right-0 bg-navy border border-border-ui rounded-xl overflow-hidden shadow-lg">
             <button type="button" onClick={copyLink} className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-white hover:bg-white/10 transition">
               <span className="material-symbols-outlined text-[16px] text-slate-300">content_copy</span>
               {t('shareCopyLink')}

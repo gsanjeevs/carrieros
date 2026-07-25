@@ -8,6 +8,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { Button, Callout, Field, Input, Modal } from '@/components/ui'
 
 interface DocOption {
   id: number
@@ -90,93 +91,72 @@ export default function SendDocumentsButton({
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/8 text-white text-xs font-medium rounded-lg transition"
-      >
+      <Button variant="ghost" size="md" onClick={() => setOpen(true)}>
         <span className="material-symbols-outlined text-[16px]">forward_to_inbox</span>
         {t('sendToCustomer')}
-      </button>
+      </Button>
 
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
-          <div className="w-full max-w-md bg-navy border border-white/10 rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-white font-semibold text-lg">{t('sendToCustomer')}</h2>
-              <button onClick={close} className="text-slate-500 hover:text-white transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
-                <span className="material-symbols-outlined text-[20px]">close</span>
-              </button>
-            </div>
+      <Modal
+        open={open}
+        onClose={close}
+        size="md"
+        title={t('sendToCustomer')}
+        className="max-h-[90vh] overflow-y-auto"
+        footer={
+          success ? (
+            <Button onClick={close}>{tCommon('done')}</Button>
+          ) : (
+            <>
+              <Button variant="secondary" size="sm" onClick={close} disabled={sending}>
+                {tCommon('cancel')}
+              </Button>
+              <Button
+                size="sm"
+                onClick={submit}
+                disabled={sending || selected.size === 0 || !email.trim()}
+                loading={sending}
+              >
+                {sending ? t('sendingDocuments') : t('sendDocuments')}
+              </Button>
+            </>
+          )
+        }
+      >
+        {success ? (
+          <Callout tone="success">{success}</Callout>
+        ) : (
+          <div className="space-y-4">
+            <Field label={t('recipientEmail')} htmlFor="send-documents-email">
+              <Input
+                id="send-documents-email"
+                size="lg"
+                type="email"
+                placeholder="dispatch@customer.example"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </Field>
 
-            {success ? (
-              <div className="space-y-4">
-                <div className="rounded-lg bg-success/10 border border-success/20 px-4 py-3 text-success text-sm">
-                  {success}
-                </div>
-                <button
-                  onClick={close}
-                  className="w-full py-2.5 bg-brand-orange hover:bg-brand-orange-hover text-white font-semibold rounded-lg transition text-sm"
-                >
-                  {tCommon('done')}
-                </button>
+            <Field label={t('selectDocuments')}>
+              <div className="space-y-1.5">
+                {documents.map((doc) => (
+                  <label key={doc.id} className="flex items-center gap-2.5 px-3 py-2 bg-surface-subtle border border-border-ui rounded-lg cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selected.has(doc.id)}
+                      onChange={() => toggle(doc.id)}
+                      className="accent-brand-orange"
+                    />
+                    <span className="text-text-pri text-sm truncate">{doc.fileName}</span>
+                  </label>
+                ))}
               </div>
-            ) : (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">{t('recipientEmail')}</label>
-                  <input
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-brand-orange transition"
-                    type="email"
-                    placeholder="dispatch@customer.example"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
+            </Field>
 
-                <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">{t('selectDocuments')}</label>
-                  <div className="space-y-1.5">
-                    {documents.map((doc) => (
-                      <label key={doc.id} className="flex items-center gap-2.5 px-3 py-2 bg-white/5 border border-white/8 rounded-lg cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selected.has(doc.id)}
-                          onChange={() => toggle(doc.id)}
-                          className="accent-brand-orange"
-                        />
-                        <span className="text-white text-sm truncate">{doc.fileName}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {error && (
-                  <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-red-400 text-sm">
-                    {error}
-                  </div>
-                )}
-
-                <div className="flex gap-3 mt-2">
-                  <button
-                    onClick={close}
-                    disabled={sending}
-                    className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm"
-                  >
-                    {tCommon('cancel')}
-                  </button>
-                  <button
-                    onClick={submit}
-                    disabled={sending || selected.size === 0 || !email.trim()}
-                    className="flex-2 flex-grow py-2.5 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition text-sm"
-                  >
-                    {sending ? t('sendingDocuments') : t('sendDocuments')}
-                  </button>
-                </div>
-              </div>
-            )}
+            {error && <Callout tone="danger">{error}</Callout>}
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
     </>
   )
 }
