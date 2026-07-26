@@ -1,4 +1,4 @@
-import { DarkTheme, DefaultTheme, Redirect, Slot, ThemeProvider, usePathname } from 'expo-router';
+import { DarkTheme, DefaultTheme, Slot, ThemeProvider, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
@@ -9,22 +9,40 @@ import { useRegisterPushToken } from '@/hooks/use-register-push-token';
 import { OnboardingStatusProvider, useOnboardingStatus } from '@/hooks/use-onboarding-status';
 import { LocaleProvider } from '@/hooks/use-locale';
 import { OfflineBanner } from '@/components/offline-banner';
+import WelcomeScreen from './welcome';
+import OnboardingScreen from './onboarding';
 
 SplashScreen.preventAutoHideAsync();
 
 // Unauthenticated routes: /welcome (mockup-06 Screen 1 — the actual entry
 // point now, replacing the old hardcoded "/login only" rule), /login, and
-// /signup. Anything else while signed out redirects to /welcome.
+// /signup.
 const PUBLIC_ROUTES = ['/welcome', '/login', '/signup'];
 
 // Auth guard — three states, not two, since src/app/onboarding/index.tsx and
 // src/hooks/use-onboarding-status.ts were added: unauthenticated users can
 // only reach PUBLIC_ROUTES; authenticated users with no org_id yet (a
 // profiles row is only created once /onboarding's company step succeeds)
-// are held on /onboarding and bounced there from anywhere else; fully
-// onboarded users are bounced away from all of the above into the (tabs)
-// app shell, which owns its own tab bar — this layout only decides which
-// of the three stacks is on screen.
+// see the onboarding wizard; fully onboarded users see the (tabs) app shell.
+//
+// Deliberately does NOT navigate (no router.replace/<Redirect> anywhere in
+// this file) — it substitutes which COMPONENT renders, directly, without
+// touching the router. Reproduced live on an iOS Simulator (2026-07-25):
+// both the declarative <Redirect> and an effect-based router.replace()
+// caused a genuine infinite loop — router.replace('/onboarding') was, for
+// reasons not fully isolated, triggering a full remount of everything
+// mounted below RootLayout (OnboardingStatusProvider's own state reset to
+// its initial "no session yet" values each cycle, confirmed via added
+// console.log instrumentation, with zero corresponding Metro/"iOS Bundled"
+// events — a pure React-level remount storm, not a JS reload), which
+// re-ran the auth-status check, which flipped needsOnboarding back on,
+// which called replace('/onboarding') again, forever. Rendering the
+// target screen's component directly sidesteps React Navigation's
+// route-change machinery for this decision entirely; the router is still
+// used everywhere a user explicitly taps something (Welcome's "Get
+// Started", Signup's post-signup handoff, the onboarding completion
+// step's "Go to dashboard"/"Add first load") — those are normal,
+// one-directional pushes/replaces that were never the problem.
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { session, loading } = useSession();
   const { needsOnboarding, loading: onboardingLoading } = useOnboardingStatus();
@@ -43,22 +61,39 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   }, [stillResolving]);
 
   if (stillResolving) return null;
-  if (!session && !isPublicRoute) return <Redirect href="/welcome" />;
-  if (session && needsOnboarding && !isOnboardingRoute) return <Redirect href="/onboarding" />;
-  // Deliberately does NOT include isOnboardingRoute here: the company step
-  // calls refresh() (see src/app/onboarding/index.tsx) the instant org_id
-  // exists, while the user still has vehicle/customer/billing/completion
-  // left to go through on the SAME /onboarding screen. If this redirected
-  // away from /onboarding as soon as needsOnboarding flips false, the user
-  // would get bounced out of their own wizard mid-flow, right after
-  // finishing just the first step. Leaving /onboarding is that screen's own
-  // job (its completion step calls router.replace('/') /
-  // router.replace('/load/new') once the user is actually done).
-  if (session && !needsOnboarding && isPublicRoute) return <Redirect href="/" />;
+
+  if (!session) {
+    // Trust file-based routing for the public routes themselves (so
+    // Welcome's "Get Started" -> /signup and Signup's "Back" -> /welcome
+    // still work as real navigations); only substitute Welcome directly
+    // when the current route isn't one of those (e.g. a stale/persisted
+    // nav state pointing somewhere protected while signed out).
+    return isPublicRoute ? <>{children}</> : <WelcomeScreen />;
+  }
+
+  if (needsOnboarding) {
+    // Same idea: if the matched route already IS /onboarding, let it
+    // render normally through Slot; otherwise render it directly rather
+    // than navigating there.
+    return isOnboardingRoute ? <>{children}</> : <OnboardingScreen />;
+  }
+
+  // Fully onboarded. If the current route is one of the public/onboarding
+  // screens (e.g. returning to an app that still has that nav state
+  // persisted from before this session finished setup), fall through to
+  // the real (tabs) shell instead of re-rendering Welcome/Onboarding.
+  if (isPublicRoute || isOnboardingRoute) {
+    return (
+      <>
+        <OfflineBanner />
+        <Slot />
+      </>
+    );
+  }
 
   return (
     <>
-      {session && !needsOnboarding && <OfflineBanner />}
+      <OfflineBanner />
       {children}
     </>
   );

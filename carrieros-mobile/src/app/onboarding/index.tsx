@@ -123,94 +123,121 @@ export default function OnboardingScreen() {
     companyForm.first_name.trim().length > 0 &&
     companyForm.last_name.trim().length > 0;
 
+  // Every submit function below is wrapped in try/catch/finally rather than
+  // a bare await — reproduced live on an iOS Simulator (2026-07-25): a
+  // network failure (fetch() rejecting rather than resolving with a non-ok
+  // response) skipped straight past `setLoading(false)`, leaving the button
+  // stuck showing its spinner forever with no way to retry. finally()
+  // guarantees loading always resolves regardless of which way the request
+  // failed.
   async function submitCompany() {
     if (!canSubmitCompany) return;
     setLoading(true);
     setError('');
-    const res = await apiFetch('/api/onboarding', {
-      method: 'POST',
-      body: JSON.stringify({
-        company_name: companyForm.company_name.trim(),
-        dot_number: companyForm.dot_number.trim() || undefined,
-        ein: companyForm.ein.trim() || undefined,
-        country: companyForm.country,
-        state: companyForm.state.trim().toUpperCase(),
-        city: companyForm.city.trim() || undefined,
-        zip: companyForm.zip.trim() || undefined,
-        first_name: companyForm.first_name.trim(),
-        last_name: companyForm.last_name.trim(),
-        role: companyForm.role,
-      }),
-    });
-    const json = await res.json();
-    setLoading(false);
-    if (!res.ok) {
-      setError(json.error_code === 'ALREADY_ONBOARDED' ? t('onboarding.alreadyOnboarded') : t('onboarding.setupFailed'));
-      return;
+    try {
+      const res = await apiFetch('/api/onboarding', {
+        method: 'POST',
+        body: JSON.stringify({
+          company_name: companyForm.company_name.trim(),
+          dot_number: companyForm.dot_number.trim() || undefined,
+          ein: companyForm.ein.trim() || undefined,
+          country: companyForm.country,
+          state: companyForm.state.trim().toUpperCase(),
+          city: companyForm.city.trim() || undefined,
+          zip: companyForm.zip.trim() || undefined,
+          first_name: companyForm.first_name.trim(),
+          last_name: companyForm.last_name.trim(),
+          role: companyForm.role,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setError(json.error_code === 'ALREADY_ONBOARDED' ? t('onboarding.alreadyOnboarded') : t('onboarding.setupFailed'));
+        return;
+      }
+      // The org now exists — refresh the SHARED onboarding-status the
+      // moment it's true, not later at the completion screen. AuthGate
+      // reads this same context; if it were still stale by the time "Go to
+      // dashboard" / "Add first load" navigates away, AuthGate would still
+      // think onboarding is needed.
+      await refreshOnboardingStatus();
+      setStep('vehicle');
+    } catch {
+      setError(t('common.loadErrorRetry'));
+    } finally {
+      setLoading(false);
     }
-    // The org now exists — refresh the SHARED onboarding-status the moment
-    // it's true, not later at the completion screen. AuthGate reads this
-    // same context; if it were still stale by the time "Go to dashboard" /
-    // "Add first load" calls router.replace('/'), AuthGate would see
-    // needsOnboarding still true and bounce straight back to /onboarding.
-    await refreshOnboardingStatus();
-    setStep('vehicle');
   }
 
   async function submitVehicle() {
     setLoading(true);
     setError('');
-    const res = await apiFetch('/api/vehicles', {
-      method: 'POST',
-      body: JSON.stringify({
-        nickname: vehicleForm.nickname.trim(),
-        year: vehicleForm.year ? Number(vehicleForm.year) : undefined,
-        make: vehicleForm.make.trim() || undefined,
-        model: vehicleForm.model.trim() || undefined,
-      }),
-    });
-    setLoading(false);
-    if (!res.ok) {
-      setError(t('onboarding.setupFailed'));
-      return;
+    try {
+      const res = await apiFetch('/api/vehicles', {
+        method: 'POST',
+        body: JSON.stringify({
+          nickname: vehicleForm.nickname.trim(),
+          year: vehicleForm.year ? Number(vehicleForm.year) : undefined,
+          make: vehicleForm.make.trim() || undefined,
+          model: vehicleForm.model.trim() || undefined,
+        }),
+      });
+      if (!res.ok) {
+        setError(t('onboarding.setupFailed'));
+        return;
+      }
+      setAddedVehicle(true);
+      setStep('customer');
+    } catch {
+      setError(t('common.loadErrorRetry'));
+    } finally {
+      setLoading(false);
     }
-    setAddedVehicle(true);
-    setStep('customer');
   }
 
   async function submitCustomer() {
     setLoading(true);
     setError('');
-    const res = await apiFetch('/api/customers', {
-      method: 'POST',
-      body: JSON.stringify({
-        name: customerForm.name.trim(),
-        contact_name: customerForm.contact_name.trim() || undefined,
-        phone: customerForm.phone.trim() || undefined,
-        email: customerForm.email.trim() || undefined,
-      }),
-    });
-    setLoading(false);
-    if (!res.ok) {
-      setError(t('onboarding.setupFailed'));
-      return;
+    try {
+      const res = await apiFetch('/api/customers', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: customerForm.name.trim(),
+          contact_name: customerForm.contact_name.trim() || undefined,
+          phone: customerForm.phone.trim() || undefined,
+          email: customerForm.email.trim() || undefined,
+        }),
+      });
+      if (!res.ok) {
+        setError(t('onboarding.setupFailed'));
+        return;
+      }
+      setAddedCustomer(true);
+      setStep('billing');
+    } catch {
+      setError(t('common.loadErrorRetry'));
+    } finally {
+      setLoading(false);
     }
-    setAddedCustomer(true);
-    setStep('billing');
   }
 
   async function addPaymentMethod() {
     setLoading(true);
     setError('');
-    const res = await apiFetch('/api/billing/add-payment-method', { method: 'POST' });
-    const json = await res.json();
-    setLoading(false);
-    if (!res.ok) {
-      setError(t('onboarding.setupFailed'));
-      return;
+    try {
+      const res = await apiFetch('/api/billing/add-payment-method', { method: 'POST' });
+      const json = await res.json();
+      if (!res.ok) {
+        setError(t('onboarding.setupFailed'));
+        return;
+      }
+      setCard({ brand: json.card_brand, last4: json.card_last4 });
+      setAddedPaymentMethod(true);
+    } catch {
+      setError(t('common.loadErrorRetry'));
+    } finally {
+      setLoading(false);
     }
-    setCard({ brand: json.card_brand, last4: json.card_last4 });
-    setAddedPaymentMethod(true);
   }
 
   return (
