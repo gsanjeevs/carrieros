@@ -18,8 +18,6 @@ import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
 import { fetchExceptions, topExceptionByEntity, type ExceptionRow } from '@/lib/exceptions';
 
-const PAGE_BACKGROUND = StatusColors.grayLight;
-
 type CustomerRow = {
   org_id: number;
   contact_name: string | null;
@@ -78,7 +76,7 @@ export default function CustomersScreen() {
   }
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
+    <ThemedView style={[styles.container, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title" style={styles.heading}>{t('customers.title')}</ThemedText>
         <FlatList
@@ -100,7 +98,7 @@ export default function CustomersScreen() {
             const topException = topExceptionByCustomer.get(item.org_id);
             return (
               <Pressable
-                style={[styles.card, { backgroundColor: theme.background }, styles.cardShadow]}
+                style={[styles.card, { backgroundColor: theme.card }, styles.cardShadow]}
                 onPress={() => router.push({ pathname: '/customers/[id]', params: { id: String(item.org_id) } })}
               >
                 <ThemedText type="smallBold">{item.organizations?.name ?? t('common.unknownCustomer')}</ThemedText>

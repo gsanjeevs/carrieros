@@ -1761,6 +1761,7 @@ export type Database = {
           preferred_language: string | null
           push_token: string | null
           role: string
+          theme_preference: string
           time_format: string | null
           timezone: string | null
           uom_system: string | null
@@ -1778,6 +1779,7 @@ export type Database = {
           preferred_language?: string | null
           push_token?: string | null
           role: string
+          theme_preference?: string
           time_format?: string | null
           timezone?: string | null
           uom_system?: string | null
@@ -1795,6 +1797,7 @@ export type Database = {
           preferred_language?: string | null
           push_token?: string | null
           role?: string
+          theme_preference?: string
           time_format?: string | null
           timezone?: string | null
           uom_system?: string | null

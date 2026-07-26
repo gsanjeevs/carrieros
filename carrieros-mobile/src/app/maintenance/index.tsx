@@ -20,8 +20,6 @@ import { useLocale } from '@/hooks/use-locale';
 
 import { supabase } from '@/lib/supabase';
 
-const PAGE_BACKGROUND = StatusColors.grayLight;
-
 type ReminderRow = {
   id: number;
   vehicle_id: number;
@@ -98,7 +96,7 @@ export default function MaintenanceOverviewScreen() {
   }
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
+    <ThemedView style={[styles.container, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safeArea}>
         <Pressable onPress={() => router.back()} style={styles.backLink}>
           <ThemedText type="link" themeColor="textSecondary">{t('common.back')}</ThemedText>
@@ -124,10 +122,10 @@ export default function MaintenanceOverviewScreen() {
             ].filter(Boolean).join(' · ') || t('maintenanceOverview.noDueDate');
             return (
               <Pressable
-                style={[styles.card, { backgroundColor: theme.background }, styles.cardShadow]}
+                style={[styles.card, { backgroundColor: theme.card }, styles.cardShadow]}
                 onPress={() => router.push({ pathname: '/vehicle/[id]', params: { id: String(item.vehicle_id) } })}
               >
-                <ThemedView style={styles.cardHeader} type="background">
+                <ThemedView style={styles.cardHeader} type="transparent">
                   <ThemedText type="smallBold">{item.reminder_type}</ThemedText>
                   <ThemedView style={[styles.statusPill, { backgroundColor: pill.bg }]}>
                     <ThemedText type="small" style={[styles.statusPillText, { color: pill.text }]}>

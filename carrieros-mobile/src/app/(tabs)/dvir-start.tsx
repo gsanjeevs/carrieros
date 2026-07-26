@@ -11,12 +11,10 @@ import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
+import { BrandColors, Spacing } from '@/constants/theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
-
-const PAGE_BACKGROUND = StatusColors.grayLight;
 const ORANGE = BrandColors.orange;
 const ACTIVE_LOAD_STATUSES = ['dispatched', 'picked_up', 'in_transit'];
 
@@ -60,12 +58,12 @@ export default function DvirStartScreen() {
   }
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
+    <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title" style={styles.heading}>{t('dvirTab.heading')}</ThemedText>
 
         {activeLoadId ? (
-          <ThemedView style={styles.buttonGroup}>
+          <ThemedView type="transparent" style={styles.buttonGroup}>
             <Pressable
               style={styles.actionButton}
               onPress={() => router.push({ pathname: '/dvir/[loadId]', params: { loadId: String(activeLoadId), type: 'pre_trip' } })}
@@ -80,7 +78,7 @@ export default function DvirStartScreen() {
             </Pressable>
           </ThemedView>
         ) : (
-          <ThemedView style={styles.empty}>
+          <ThemedView type="transparent" style={styles.empty}>
             <ThemedText type="default" style={styles.emptyTitle}>{t('dvirTab.noActiveLoad')}</ThemedText>
             <ThemedText type="small" themeColor="textSecondary" style={styles.emptyDetail}>
               {t('dvirTab.noActiveLoadDetail')}

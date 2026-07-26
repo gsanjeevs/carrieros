@@ -117,7 +117,7 @@ export default function BillingScreen() {
             <ThemedText type="small" themeColor="textSecondary" style={styles.sectionLabel}>
               {t('billing.currentPlan').toUpperCase()}
             </ThemedText>
-            <ThemedView style={styles.rowBetween}>
+            <ThemedView type="transparent" style={styles.rowBetween}>
               <ThemedText type="default" style={{ textTransform: 'capitalize' }}>{t(`billing.tier_${tier}`)}</ThemedText>
               <ThemedText type="small" themeColor="textSecondary">{TIER_PRICE[tier] ?? ''}</ThemedText>
             </ThemedView>

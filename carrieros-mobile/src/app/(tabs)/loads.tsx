@@ -27,10 +27,6 @@ type LoadRow = {
   delivery_state: string | null;
 };
 
-// design-tokens.md "Surface / Neutral": surface.page — app background behind
-// white cards. Local to this screen only, see note at the ThemedView below.
-const PAGE_BACKGROUND = StatusColors.grayLight;
-
 // Status keys map 1:1 to src/messages/*.json loads.status.* — see t() calls
 // below rather than a hardcoded label map.
 const STATUS_KEYS = [
@@ -97,19 +93,18 @@ export default function MyLoadsScreen() {
   }
 
   return (
-    // Page tint (surface.page, #f4f6f9) is applied here only, not through
-    // theme.ts's shared `background` token — load-detail/DVIR rely on that
-    // token staying white, so we don't want a global change bleeding into
-    // them. See design-tokens.md "Cards (Mobile)": white cards need a
-    // slightly-off-white page behind them for the shadow to read.
-    <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
+    // Page surface comes from the theme (`background`), with cards on
+    // `card` above it. This used to be a screen-local `#f4f6f9` literal
+    // back when mobile was light-only; that hardcoded tint stayed grey in
+    // dark mode, so it now goes through the token like every other screen.
+    <ThemedView style={[styles.container, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.headerRow} type="background">
+        <ThemedView style={styles.headerRow} type="transparent">
           <ThemedText type="title" style={styles.heading}>
             {role === 'driver' ? t('loads.titleDriver') : t('loads.titleOffice')}
           </ThemedText>
           {(role === 'owner' || role === 'solo' || role === 'dispatcher') && (
-            <ThemedView style={styles.newLoadButtonGroup} type="background">
+            <ThemedView style={styles.newLoadButtonGroup} type="transparent">
               <Pressable onPress={() => router.push('/load/new-from-photo')} style={styles.scanButton}>
                 <ThemedText type="smallBold" themeColor="text">{t('loadNew.scanAction')}</ThemedText>
               </Pressable>
@@ -142,10 +137,10 @@ export default function MyLoadsScreen() {
 
             return (
               <Pressable
-                style={[styles.card, { backgroundColor: theme.background }, styles.cardShadow]}
+                style={[styles.card, { backgroundColor: theme.card }, styles.cardShadow]}
                 onPress={() => router.push({ pathname: '/load/[id]', params: { id: String(item.id) } })}
               >
-                <ThemedView style={styles.cardHeader} type="background">
+                <ThemedView style={styles.cardHeader} type="transparent">
                   <ThemedText type="smallBold">{item.load_number}</ThemedText>
                   <ThemedView style={[styles.statusPill, { backgroundColor: pill.bg }]}>
                     <ThemedText type="small" style={[styles.statusPillText, { color: pill.text }]}>
@@ -156,7 +151,7 @@ export default function MyLoadsScreen() {
                 <ThemedText type="small" themeColor="textSecondary">
                   {item.customer_name_raw ?? t('common.unknownCustomer')}
                 </ThemedText>
-                <ThemedView style={styles.routeRow} type="background">
+                <ThemedView style={styles.routeRow} type="transparent">
                   <ThemedText type="default" style={styles.routeText}>
                     {item.pickup_city ?? '—'}{item.pickup_state ? `, ${item.pickup_state}` : ''}
                   </ThemedText>

@@ -14,17 +14,15 @@ import { useRouter } from 'expo-router';
 import { IftaSummary } from '@/components/ifta-summary';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing, StatusColors } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 import { useLocale } from '@/hooks/use-locale';
-
-const PAGE_BACKGROUND = StatusColors.grayLight;
 
 export default function IftaReportScreen() {
   const router = useRouter();
   const { t } = useLocale();
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
+    <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <Pressable onPress={() => router.back()} style={styles.backLink}>
           <ThemedText type="link" themeColor="textSecondary">{t('common.back')}</ThemedText>

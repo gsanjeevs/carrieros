@@ -12,13 +12,13 @@ import { ActivityIndicator, Pressable, StyleSheet, TextInput } from 'react-nativ
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useSession } from '@/hooks/use-session';
 import { supabase } from '@/lib/supabase';
 
-const RED = '#dc2626';
+const RED = StatusColors.danger;
 
 // Reason codes are stable identifiers, never translated text, stored in
 // exception_events.title as `reason:<code>` — the exceptions inbox (a
@@ -88,14 +88,14 @@ export function ReportProblemSection({ loadId, carrierOrgId }: { loadId: number;
     <ThemedView type="backgroundElement" style={styles.section}>
       <ThemedText type="smallBold">{t('loadDetail.reportProblemTitle')}</ThemedText>
 
-      <ThemedView style={styles.reasonGrid}>
+      <ThemedView type="transparent" style={styles.reasonGrid}>
         {REASON_CODES.map((code) => (
           <Pressable
             key={code}
             onPress={() => setReason(code)}
             style={[
               styles.reasonChip,
-              { borderColor: reason === code ? RED : theme.backgroundSelected },
+              { borderColor: reason === code ? RED : theme.border },
             ]}
           >
             <ThemedText type="small">{t(`loadDetail.problemReason.${code}`)}</ThemedText>
@@ -109,12 +109,12 @@ export function ReportProblemSection({ loadId, carrierOrgId }: { loadId: number;
         placeholder={t('loadDetail.reportProblemNotePlaceholder')}
         placeholderTextColor={theme.textSecondary}
         multiline
-        style={[styles.noteInput, { color: theme.text, borderColor: theme.backgroundSelected }]}
+        style={[styles.noteInput, { color: theme.text, borderColor: theme.border }]}
       />
 
       {error ? <ThemedText type="small" style={styles.error}>{error}</ThemedText> : null}
 
-      <ThemedView style={styles.buttonRow}>
+      <ThemedView type="transparent" style={styles.buttonRow}>
         <Pressable onPress={() => setOpen(false)} style={styles.cancelButton}>
           <ThemedText type="small" themeColor="textSecondary">{t('common.cancel')}</ThemedText>
         </Pressable>

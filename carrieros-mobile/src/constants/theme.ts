@@ -14,11 +14,19 @@ import { Platform } from 'react-native';
 // `carrieros-web/tailwind.config.ts` — neither file exists; web is on
 // Tailwind v4 CSS-first config.)
 //
-// Values updated 2026-07-25 to the mockup set's bespoke palette. Web's dark
-// page/card treatment still applies ONLY to carrieros-web — mobile screens
-// use light/white cards, so Colors.light below stays on that direction, and
-// Colors.dark (OS dark-mode) is a branded-navy variant of the light-mobile
-// card idea, not a port of web's dark theme.
+// Values updated 2026-07-25 to the mockup set's bespoke palette.
+//
+// WITHDRAWN 2026-07-26, at the user's direction: this comment used to say
+// that web's dark page/card treatment "applies ONLY to carrieros-web —
+// mobile screens use light/white cards." That rule is gone. Mobile now ships
+// both themes as equals, user-selectable in Settings → Appearance
+// (profiles.theme_preference), and the dark one is a real port of the
+// mockups' navy phone-frame treatment rather than a tinted afterthought.
+//
+// It's recorded rather than deleted because the rule caused a specific,
+// repeated failure: every mockup is navy, mobile rendered white, and no
+// amount of feature work made the app resemble the design. Anyone tempted to
+// reintroduce a light-only rule should know it was tried and reversed.
 //
 // The 16-file `const ORANGE = '#f97316'` cluster (and a handful of inline
 // hex sites) that shadowed this export instead of importing it was swept
@@ -36,6 +44,8 @@ export const BrandColors = {
   // below, which is a pale pastel *badge background* (#fff0e6), not a
   // lighter brand orange. They are not interchangeable.
   orangeLight: '#f9a55a',
+  // Mockup `--gray` — secondary copy on navy. Mirrors web's --color-gray.
+  gray: '#8fa3b8',
   grayLight: '#d6e0ea',
 } as const;
 
@@ -185,25 +195,64 @@ export const EXCEPTION_TIER_PILL: Record<string, { bg: string; text: string }> =
   upcoming: { bg: StatusColors.infoLight, text: StatusColors.info },
 };
 
+// Both themes are first-class and user-selectable (Settings → Appearance,
+// persisted to profiles.theme_preference; see src/hooks/use-theme.tsx).
+//
+// `dark` is a direct port of the mockup set's phone-frame palette — navy page
+// (`--navy`), navyCard surfaces (`--navy-card`), hairline white borders — so
+// a dark-theme screen should read as the mockup does. `light` is the inverse
+// of the same system, not a separate design.
+//
+// This REPLACES the previous "mobile screens use light/white cards, so
+// Colors.light stays on that direction" note that used to sit on BrandColors.
+// That decision is withdrawn (2026-07-26, at the user's direction): it was
+// why the app never looked like the mockups no matter how many features
+// landed — the mockups are navy, and the app rendered white. Do not
+// reintroduce a light-only rule here.
+//
+// Keys beyond the original five (border, card, divider, textMuted) were added
+// so the mockup's visual language is expressible at all: it leans on card
+// surfaces distinct from the page, and hairline borders distinct from fills.
+// Previously every border in the app borrowed `backgroundSelected`, which is
+// why outlines read as heavy grey slabs instead of hairlines.
 export const Colors = {
   light: {
-    // Navy-as-body-text on light mobile cards — tracks BrandColors.navy.
+    // Navy-as-body-text on light cards — tracks BrandColors.navy.
     text: BrandColors.navy,
-    background: '#ffffff',
+    textSecondary: '#8898aa',
+    textMuted: '#a7b4c4',
+    // Page is TINTED and card is white, mirroring dark's navy-page /
+    // navyCard-surface split. Both were '#ffffff' until 2026-07-26, which
+    // was survivable only because nothing distinguished page from card back
+    // then: screens each hardcoded their own '#f4f6f9' page fill. Once those
+    // were routed through the token (dark-theme sweep, same day), leaving
+    // background white would have flattened every screen to white-on-white
+    // with only a shadow to separate a card from the page.
+    background: '#f4f6f9',
     // Nearly identical lightness to the old stock values (F0F0F3 / E0E1E6)
     // — swapped for the closest named design-tokens.md surface tokens
     // (surface.divider / surface.border) so load-detail and DVIR screens,
     // which rely on these for card/pill fills, don't visibly shift.
     backgroundElement: '#f1f3f8',
     backgroundSelected: '#e5e8ef',
-    textSecondary: '#8898aa',
+    card: '#ffffff',
+    border: '#dfe4ec',
+    divider: '#eef1f6',
   },
   dark: {
     text: '#ffffff',
+    // Mockup `--gray` / a dimmer step below it for de-emphasised captions.
+    textSecondary: BrandColors.gray,
+    textMuted: 'rgba(143,163,184,.6)',
+    // Mockup `--navy` page behind `--navy-card` phone-frame surfaces.
     background: BrandColors.navy,
-    backgroundElement: BrandColors.navyLight,
-    backgroundSelected: '#28496e',
-    textSecondary: '#9fb3c8',
+    backgroundElement: BrandColors.navyMid,
+    backgroundSelected: BrandColors.navyLight,
+    card: BrandColors.navyCard,
+    // Mockup borders are white at low alpha over navy, NOT a solid grey —
+    // that's what makes them read as hairlines rather than boxes.
+    border: 'rgba(255,255,255,.1)',
+    divider: 'rgba(255,255,255,.06)',
   },
 } as const;
 

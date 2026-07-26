@@ -31,7 +31,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { SignaturePad, type SignaturePadHandle } from '@/components/signature-pad';
-import { BrandColors, Spacing } from '@/constants/theme';
+import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
@@ -40,7 +40,7 @@ import { supabase } from '@/lib/supabase';
 import { resolveSubmitter } from '@/lib/submitter';
 
 const ORANGE = BrandColors.orange;
-const RED = '#dc2626';
+const RED = StatusColors.danger;
 const GREEN = '#16a34a';
 const BUCKET = 'documents';
 
@@ -365,9 +365,9 @@ export default function DVIRScreen() {
                 </Pressable>
 
                 {state.defect && (
-                  <ThemedView style={styles.defectDetails}>
+                  <ThemedView type="transparent" style={styles.defectDetails}>
                     <TextInput
-                      style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+                      style={[styles.input, { color: theme.text, borderColor: theme.border }]}
                       placeholder={t('dvir.describeDefect')}
                       placeholderTextColor={theme.textSecondary}
                       value={state.description}
@@ -383,7 +383,7 @@ export default function DVIRScreen() {
 
                     {state.photo ? (
                       <View style={styles.photoRow}>
-                        <Image source={{ uri: state.photo.uri }} style={styles.photoThumb} resizeMode="cover" />
+                        <Image source={{ uri: state.photo.uri }} style={[styles.photoThumb, { backgroundColor: theme.backgroundElement }]} resizeMode="cover" />
                         <View style={styles.photoMeta}>
                           <ThemedText type="small" themeColor="textSecondary">
                             {t('dvir.photoAttached')}
@@ -416,7 +416,7 @@ export default function DVIRScreen() {
               {t('dvir.odometer')}
             </ThemedText>
             <TextInput
-              style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+              style={[styles.input, { color: theme.text, borderColor: theme.border }]}
               placeholder={t('dvir.odometerPlaceholder')}
               placeholderTextColor={theme.textSecondary}
               value={odometer}
@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   photoRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
-  photoThumb: { width: 64, height: 64, borderRadius: 8, backgroundColor: '#00000022' },
+  photoThumb: { width: 64, height: 64, borderRadius: 8 },
   photoMeta: { gap: 4 },
   areaCard: { borderRadius: 12, padding: Spacing.three, gap: Spacing.two },
   areaHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
   severityRow: { flexDirection: 'row', gap: 6, alignItems: 'center' },
   section: { borderRadius: 12, padding: Spacing.three },
   input: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14 },
-  error: { color: '#dc2626', marginBottom: Spacing.two },
+  error: { color: StatusColors.danger, marginBottom: Spacing.two },
   submitButton: { backgroundColor: ORANGE, borderRadius: 8, paddingVertical: 14, alignItems: 'center' },
   submitButtonDisabled: { opacity: 0.5 },
   doneButton: { marginTop: Spacing.three, backgroundColor: ORANGE, borderRadius: 8, paddingHorizontal: 24, paddingVertical: 12 },

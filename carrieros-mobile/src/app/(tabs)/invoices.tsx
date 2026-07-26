@@ -9,12 +9,10 @@ import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { INVOICE_STATUS_PILL, Spacing, StatusColors } from '@/constants/theme';
+import { INVOICE_STATUS_PILL, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
-
-const PAGE_BACKGROUND = StatusColors.grayLight;
 
 type InvoiceRow = {
   id: number;
@@ -60,7 +58,7 @@ export default function InvoicesScreen() {
   }
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
+    <ThemedView style={[styles.container, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title" style={styles.heading}>{t('invoices.title')}</ThemedText>
         <FlatList
@@ -77,10 +75,10 @@ export default function InvoicesScreen() {
             const pill = INVOICE_STATUS_PILL[item.status] ?? INVOICE_STATUS_PILL.draft;
             return (
               <Pressable
-                style={[styles.card, { backgroundColor: theme.background }, styles.cardShadow]}
+                style={[styles.card, { backgroundColor: theme.card }, styles.cardShadow]}
                 onPress={() => router.push({ pathname: '/invoice/[id]', params: { id: String(item.id) } })}
               >
-                <ThemedView style={styles.cardHeader} type="background">
+                <ThemedView style={styles.cardHeader} type="transparent">
                   <ThemedText type="smallBold">{item.invoice_number}</ThemedText>
                   <ThemedView style={[styles.statusPill, { backgroundColor: pill.bg }]}>
                     <ThemedText type="small" style={[styles.statusPillText, { color: pill.text }]}>

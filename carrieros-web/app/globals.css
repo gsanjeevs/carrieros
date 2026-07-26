@@ -57,6 +57,15 @@
      text-secondary and pure white. No prior token. */
   --color-gray-light: #d6e0ea;
 
+  /* Mockup `--gray` — the companion to --gray-light above, and the mockups'
+     workhorse for secondary copy on navy. It reaches `.dark`'s
+     --color-text-secondary below, but that name is declared twice (light
+     :root and .dark) with different values, so it can't serve as a stable
+     mirror target for the other apps. Declared here as a palette token in
+     its own right so carrieros-mobile's BrandColors.gray has something
+     single-valued to mirror (check-tokens.mjs enforces the pair). */
+  --color-gray: #8fa3b8;
+
   --color-success: #2ecc71;
   --color-success-light: #e8f9f1;
   --color-success-dark: #1a9e5c;

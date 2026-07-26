@@ -15,8 +15,6 @@ import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
-
-const PAGE_BACKGROUND = StatusColors.grayLight;
 const ACTIVE_LOAD_STATUSES = ['dispatched', 'picked_up', 'in_transit'];
 // Compliance chip thresholds — 30 days mirrors get_exceptions()'s own CDL
 // "expiring soon" horizon (see supabase/schema/schema.sql), reused here for
@@ -154,7 +152,7 @@ export default function MyLoadScreen() {
   }
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
+    <ThemedView style={[styles.container, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
@@ -164,10 +162,10 @@ export default function MyLoadScreen() {
 
           {activeLoad ? (
             <Pressable
-              style={[styles.heroCard, { backgroundColor: theme.background }, styles.cardShadow]}
+              style={[styles.heroCard, { backgroundColor: theme.card }, styles.cardShadow]}
               onPress={() => router.push({ pathname: '/load/[id]', params: { id: String(activeLoad.id) } })}
             >
-              <ThemedView style={styles.cardHeader} type="background">
+              <ThemedView style={styles.cardHeader} type="transparent">
                 <ThemedText type="subtitle">{activeLoad.load_number}</ThemedText>
                 <ThemedView
                   style={[styles.statusPill, { backgroundColor: (LOAD_STATUS_PILL[activeLoad.status] ?? LOAD_STATUS_PILL.draft).bg }]}
@@ -183,7 +181,7 @@ export default function MyLoadScreen() {
               <ThemedText type="small" themeColor="textSecondary">
                 {activeLoad.customer_name_raw ?? t('common.unknownCustomer')}
               </ThemedText>
-              <ThemedView style={styles.routeRow} type="background">
+              <ThemedView style={styles.routeRow} type="transparent">
                 <ThemedText type="default" style={styles.routeText}>
                   {activeLoad.pickup_city ?? '—'}{activeLoad.pickup_state ? `, ${activeLoad.pickup_state}` : ''}
                 </ThemedText>
@@ -194,7 +192,7 @@ export default function MyLoadScreen() {
               </ThemedView>
             </Pressable>
           ) : (
-            <ThemedView style={[styles.heroCard, { backgroundColor: theme.background }, styles.cardShadow]}>
+            <ThemedView style={[styles.heroCard, { backgroundColor: theme.card }, styles.cardShadow]}>
               <ThemedText type="default" style={styles.emptyTitle}>{t('myLoadTab.noActiveLoad')}</ThemedText>
               <ThemedText type="small" themeColor="textSecondary">{t('myLoadTab.noActiveLoadDetail')}</ThemedText>
             </ThemedView>
@@ -213,7 +211,7 @@ export default function MyLoadScreen() {
           <ThemedText type="subtitle" style={styles.sectionHeading}>{t('myLoadTab.nextLoad')}</ThemedText>
           {nextLoad ? (
             <Pressable
-              style={[styles.card, { backgroundColor: theme.background }, styles.cardShadow]}
+              style={[styles.card, { backgroundColor: theme.card }, styles.cardShadow]}
               onPress={() => router.push({ pathname: '/load/[id]', params: { id: String(nextLoad.id) } })}
             >
               <ThemedText type="smallBold">{nextLoad.load_number}</ThemedText>
@@ -229,7 +227,7 @@ export default function MyLoadScreen() {
           )}
 
           <ThemedText type="subtitle" style={styles.sectionHeading}>{t('myLoadTab.compliance')}</ThemedText>
-          <ThemedView style={styles.chipRow} type="background">
+          <ThemedView style={styles.chipRow} type="transparent">
             <ComplianceChip label={t('myLoadTab.cdl')} status={complianceStatus(cdlExpiry)} t={t} />
             <ComplianceChip label={t('myLoadTab.medCert')} status={complianceStatus(medCertExpiry)} t={t} />
           </ThemedView>

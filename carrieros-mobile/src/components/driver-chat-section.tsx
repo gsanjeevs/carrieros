@@ -11,7 +11,8 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput } from 
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BrandColors, Spacing } from '@/constants/theme';
+import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useSession } from '@/hooks/use-session';
 import { supabase } from '@/lib/supabase';
@@ -30,6 +31,7 @@ type MessageRow = {
 
 export function DriverChatSection({ loadId }: { loadId: number }) {
   const { t, locale } = useLocale();
+  const theme = useTheme();
   const { session } = useSession();
   const [messages, setMessages] = useState<MessageRow[]>([]);
   const [draft, setDraft] = useState('');
@@ -130,7 +132,7 @@ export function DriverChatSection({ loadId }: { loadId: number }) {
             // comment) — centered/muted, not a chat bubble from either side.
             if (m.sender_id === null) {
               return (
-                <ThemedView key={m.id} type="background" style={styles.systemMessageRow}>
+                <ThemedView key={m.id} type="transparent" style={styles.systemMessageRow}>
                   <ThemedText type="small" themeColor="textSecondary" style={styles.systemMessageText}>{m.body}</ThemedText>
                 </ThemedView>
               );
@@ -140,16 +142,19 @@ export function DriverChatSection({ loadId }: { loadId: number }) {
             return (
               <ThemedView
                 key={m.id}
-                type="background"
+                type="transparent"
                 style={[styles.bubbleRow, { justifyContent: isMine ? 'flex-end' : 'flex-start' }]}
               >
-                <ThemedView style={[styles.bubble, { backgroundColor: isMine ? ORANGE : '#e5e7eb' }]}>
-                  <ThemedText type="small" style={{ color: isMine ? '#ffffff' : '#111827' }}>
+                {/* Own bubbles are brand orange in both themes, so their text
+                    stays literal white. The counterpart's bubble is a plain
+                    surface and must follow the theme. */}
+                <ThemedView style={[styles.bubble, { backgroundColor: isMine ? ORANGE : theme.backgroundElement }]}>
+                  <ThemedText type="small" style={{ color: isMine ? '#ffffff' : theme.text }}>
                     {translated[m.id] ?? m.body}
                   </ThemedText>
                   {showTranslate && !translated[m.id] && (
                     <Pressable onPress={() => translate(m.id)}>
-                      <ThemedText type="small" style={{ color: isMine ? '#ffffff' : '#111827', textDecorationLine: 'underline', marginTop: 2 }}>
+                      <ThemedText type="small" style={{ color: isMine ? '#ffffff' : theme.text, textDecorationLine: 'underline', marginTop: 2 }}>
                         {t('chat.translate')}
                       </ThemedText>
                     </Pressable>
@@ -163,10 +168,11 @@ export function DriverChatSection({ loadId }: { loadId: number }) {
 
       {error ? <ThemedText type="small" style={styles.error}>{error}</ThemedText> : null}
 
-      <ThemedView style={styles.inputRow} type="background">
+      <ThemedView style={styles.inputRow} type="transparent">
         <TextInput
-          style={styles.input}
+          style={[styles.input, { color: theme.text, borderColor: theme.border }]}
           placeholder={t('chat.placeholder')}
+          placeholderTextColor={theme.textMuted}
           value={draft}
           onChangeText={setDraft}
           editable={!sending}
@@ -191,12 +197,11 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#d1d5db',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
   sendButton: { backgroundColor: ORANGE, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10 },
   sendButtonDisabled: { opacity: 0.5 },
-  error: { color: '#dc2626' },
+  error: { color: StatusColors.danger },
 });

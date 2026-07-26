@@ -23,8 +23,6 @@ import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
 import { resolveSubmitter } from '@/lib/submitter';
-
-const PAGE_BACKGROUND = StatusColors.grayLight;
 const GREEN = '#16a34a';
 const AMBER = '#d97706';
 const BUCKET = 'documents';
@@ -114,7 +112,7 @@ export default function DvirHistoryScreen() {
   }
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
+    <ThemedView style={[styles.container, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safeArea}>
         <Pressable onPress={() => router.back()} style={styles.backLink}>
           <ThemedText type="link" themeColor="textSecondary">{t('common.back')}</ThemedText>
@@ -142,10 +140,10 @@ export default function DvirHistoryScreen() {
             const vehicleLabel = item.vehicles?.nickname ?? item.vehicles?.vehicle_number ?? null;
             const signatureUrl = signatureUrls.get(item.id);
             return (
-              <ThemedView style={[styles.card, { backgroundColor: theme.background }, styles.cardShadow]}>
-                <ThemedView style={styles.cardHeader} type="background">
-                  <ThemedView style={styles.badgeRow} type="background">
-                    <ThemedView style={styles.typeBadge}>
+              <ThemedView style={[styles.card, { backgroundColor: theme.card }, styles.cardShadow]}>
+                <ThemedView style={styles.cardHeader} type="transparent">
+                  <ThemedView style={styles.badgeRow} type="transparent">
+                    <ThemedView style={[styles.typeBadge, { backgroundColor: theme.backgroundElement }]}>
                       <ThemedText type="small" style={{ color: theme.text }}>
                         {t(item.type === 'pre_trip' ? 'dvirHistory.preTrip' : 'dvirHistory.postTrip')}
                       </ThemedText>
@@ -168,7 +166,7 @@ export default function DvirHistoryScreen() {
                 </ThemedText>
 
                 {hasDefects && item.dvir_defects.length > 0 && (
-                  <ThemedView style={styles.defectList} type="background">
+                  <ThemedView style={styles.defectList} type="transparent">
                     {item.dvir_defects.map((d) => (
                       <ThemedText key={d.id} type="small" themeColor="textSecondary">
                         {`• ${t(`dvir.areas.${d.area}` as never)}${d.description ? ` — ${d.description}` : ''}`}
@@ -177,7 +175,7 @@ export default function DvirHistoryScreen() {
                   </ThemedView>
                 )}
 
-                <ThemedView style={styles.signatureRow} type="background">
+                <ThemedView style={styles.signatureRow} type="transparent">
                   {signatureUrl ? (
                     <>
                       <Image source={{ uri: signatureUrl }} style={styles.signatureThumb} resizeMode="contain" />
@@ -215,9 +213,12 @@ const styles = StyleSheet.create({
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   badgeRow: { flexDirection: 'row', gap: 6 },
-  typeBadge: { backgroundColor: '#00000011', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
+  typeBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
   statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
   defectList: { gap: 2, marginTop: 2 },
   signatureRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, marginTop: 4 },
+  // Fixed white, not themed: the stored signature PNG is dark ink on a
+  // transparent background (see components/signature-pad.tsx), so its
+  // thumbnail needs a light plate under it in BOTH themes to stay visible.
   signatureThumb: { width: 80, height: 32, backgroundColor: '#ffffff', borderRadius: 4 },
 });

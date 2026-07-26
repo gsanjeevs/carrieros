@@ -9,12 +9,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing, StatusColors } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
-
-const PAGE_BACKGROUND = StatusColors.grayLight;
 
 type ExceptionRow = {
   entity_type: string;
@@ -66,7 +64,7 @@ export default function AlertsScreen() {
   }
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
+    <ThemedView style={[styles.container, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
@@ -80,12 +78,12 @@ export default function AlertsScreen() {
             </ThemedText>
           ) : (
             grouped.map((group) => (
-              <ThemedView key={group.tier} type="background">
+              <ThemedView key={group.tier} type="transparent">
                 <ThemedText type="subtitle" style={styles.sectionHeading}>{tierLabel(group.tier)}</ThemedText>
                 {group.items.map((item, idx) => (
                   <ThemedView
                     key={`${item.entity_type}-${item.entity_id}-${item.exception_type}-${idx}`}
-                    style={[styles.card, { backgroundColor: theme.background }, styles.cardShadow]}
+                    style={[styles.card, { backgroundColor: theme.card }, styles.cardShadow]}
                   >
                     <ThemedText type="smallBold">{item.title}</ThemedText>
                     <ThemedText type="small" themeColor="textSecondary">{item.detail}</ThemedText>

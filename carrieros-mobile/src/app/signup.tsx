@@ -83,10 +83,10 @@ export default function SignupScreen() {
             {t('signup.subtitle')}
           </ThemedText>
 
-          <ThemedView style={styles.form} type="background">
+          <ThemedView style={styles.form} type="transparent">
             <ThemedText type="small" themeColor="textSecondary">{t('signup.name')}</ThemedText>
             <TextInput
-              style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+              style={[styles.input, { color: theme.text, borderColor: theme.border }]}
               value={name}
               onChangeText={setName}
               autoCapitalize="words"
@@ -99,7 +99,7 @@ export default function SignupScreen() {
               {t('signup.email')}
             </ThemedText>
             <TextInput
-              style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+              style={[styles.input, { color: theme.text, borderColor: theme.border }]}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
@@ -113,7 +113,7 @@ export default function SignupScreen() {
               {t('signup.password')}
             </ThemedText>
             <TextInput
-              style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+              style={[styles.input, { color: theme.text, borderColor: theme.border }]}
               value={password}
               onChangeText={setPassword}
               secureTextEntry

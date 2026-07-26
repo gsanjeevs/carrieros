@@ -14,14 +14,12 @@ import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing, StatusColors } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
 import { supabase } from '@/lib/supabase';
 import { hasFeature } from '@/lib/entitlements';
-
-const PAGE_BACKGROUND = StatusColors.grayLight;
 const STAFF_ROLES = ['owner', 'solo', 'finance'];
 
 type SettlementRow = {
@@ -81,7 +79,7 @@ export default function SettlementsScreen() {
   }
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
+    <ThemedView style={[styles.container, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safeArea}>
         <Pressable onPress={() => router.back()} style={styles.backLink}>
           <ThemedText type="link" themeColor="textSecondary">{t('common.back')}</ThemedText>
@@ -108,8 +106,8 @@ export default function SettlementsScreen() {
                 ? [item.drivers.profiles.first_name, item.drivers.profiles.last_name].filter(Boolean).join(' ')
                 : item.drivers?.driver_number;
               return (
-                <ThemedView style={[styles.card, { backgroundColor: theme.background }, styles.cardShadow]}>
-                  <ThemedView style={styles.rowBetween}>
+                <ThemedView style={[styles.card, { backgroundColor: theme.card }, styles.cardShadow]}>
+                  <ThemedView type="transparent" style={styles.rowBetween}>
                     <ThemedText type="smallBold">{driverName || '—'}</ThemedText>
                     <ThemedText type="small" themeColor="textSecondary">{t(`settlements.status_${item.payment_status}`)}</ThemedText>
                   </ThemedView>

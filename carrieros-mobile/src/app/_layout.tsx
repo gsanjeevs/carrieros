@@ -1,9 +1,9 @@
 import { DarkTheme, DefaultTheme, Slot, ThemeProvider, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
-import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
+import { AppThemeProvider, useThemePreference } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useRegisterPushToken } from '@/hooks/use-register-push-token';
 import { OnboardingStatusProvider, useOnboardingStatus } from '@/hooks/use-onboarding-status';
@@ -160,21 +160,36 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   );
 }
 
+// React Navigation's own chrome (stack backgrounds, card transitions) is
+// themed separately from our palette, so it needs the SAME resolved value —
+// otherwise a navy screen animates in over a white navigation background.
+// Split into its own component because it has to consume AppThemeProvider's
+// context, which means it must render underneath it.
+function NavigationThemeBridge({ children }: { children: React.ReactNode }) {
+  const { resolved } = useThemePreference();
+  return <ThemeProvider value={resolved === 'dark' ? DarkTheme : DefaultTheme}>{children}</ThemeProvider>;
+}
+
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      {/* LocaleProvider sits alongside AuthGate (not instead of it): it reads
-          its own useSession() so locale resolution and auth redirects are
-          independent concerns, same as the rest of this file. */}
-      <LocaleProvider>
-        <OnboardingStatusProvider>
-          <AuthGate>
-            <Slot />
-          </AuthGate>
-        </OnboardingStatusProvider>
-      </LocaleProvider>
-    </ThemeProvider>
+    // AppThemeProvider is outermost: everything below it, including the splash
+    // overlay and the auth gate's own screens, should already be themed. It
+    // reads its own useSession() rather than taking one as a prop, same
+    // independent-concerns pattern as LocaleProvider below.
+    <AppThemeProvider>
+      <NavigationThemeBridge>
+        <AnimatedSplashOverlay />
+        {/* LocaleProvider sits alongside AuthGate (not instead of it): it reads
+            its own useSession() so locale resolution and auth redirects are
+            independent concerns, same as the rest of this file. */}
+        <LocaleProvider>
+          <OnboardingStatusProvider>
+            <AuthGate>
+              <Slot />
+            </AuthGate>
+          </OnboardingStatusProvider>
+        </LocaleProvider>
+      </NavigationThemeBridge>
+    </AppThemeProvider>
   );
 }

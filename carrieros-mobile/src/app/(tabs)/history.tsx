@@ -10,13 +10,11 @@ import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { LOAD_STATUS_PILL, Spacing, StatusColors } from '@/constants/theme';
+import { LOAD_STATUS_PILL, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
-
-const PAGE_BACKGROUND = StatusColors.grayLight;
 const HISTORY_STATUSES = ['delivered', 'invoiced', 'paid', 'cancelled'];
 
 type LoadRow = {
@@ -77,7 +75,7 @@ export default function HistoryScreen() {
   }
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
+    <ThemedView style={[styles.container, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title" style={styles.heading}>{t('history.title')}</ThemedText>
         <FlatList
@@ -94,10 +92,10 @@ export default function HistoryScreen() {
             const pill = LOAD_STATUS_PILL[item.status] ?? LOAD_STATUS_PILL.draft;
             return (
               <Pressable
-                style={[styles.card, { backgroundColor: theme.background }, styles.cardShadow]}
+                style={[styles.card, { backgroundColor: theme.card }, styles.cardShadow]}
                 onPress={() => router.push({ pathname: '/load/[id]', params: { id: String(item.id) } })}
               >
-                <ThemedView style={styles.cardHeader} type="background">
+                <ThemedView style={styles.cardHeader} type="transparent">
                   <ThemedText type="smallBold">{item.load_number}</ThemedText>
                   <ThemedView style={[styles.statusPill, { backgroundColor: pill.bg }]}>
                     <ThemedText type="small" style={[styles.statusPillText, { color: pill.text }]}>
@@ -108,7 +106,7 @@ export default function HistoryScreen() {
                 <ThemedText type="small" themeColor="textSecondary">
                   {item.customer_name_raw ?? t('common.unknownCustomer')}
                 </ThemedText>
-                <ThemedView style={styles.routeRow} type="background">
+                <ThemedView style={styles.routeRow} type="transparent">
                   <ThemedText type="default" style={styles.routeText}>
                     {item.pickup_city ?? '—'}{item.pickup_state ? `, ${item.pickup_state}` : ''}
                   </ThemedText>

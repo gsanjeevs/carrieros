@@ -12,13 +12,11 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
+import { BrandColors, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { hasFeature } from '@/lib/entitlements';
 import { supabase } from '@/lib/supabase';
-
-const PAGE_BACKGROUND = StatusColors.grayLight;
 
 type CustomerDetail = {
   org_id: number;
@@ -109,14 +107,14 @@ export default function CustomerDetailScreen() {
   const totalRevenue = loads.reduce((sum, l) => sum + Number(l.rate ?? 0), 0);
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
+    <ThemedView style={[styles.container, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <Pressable onPress={() => router.back()} style={styles.backLink}>
             <ThemedText type="link" themeColor="textSecondary">{t('common.back')}</ThemedText>
           </Pressable>
 
-          <ThemedView style={styles.headerRow}>
+          <ThemedView type="transparent" style={styles.headerRow}>
             <ThemedView style={{ flex: 1, backgroundColor: 'transparent' }}>
               <ThemedText type="title">{org?.name ?? '—'}</ThemedText>
               {customer.contact_name && (
@@ -124,7 +122,7 @@ export default function CustomerDetailScreen() {
               )}
             </ThemedView>
             {healthScore != null && (
-              <ThemedView style={[styles.healthBadge, { borderColor: healthColor(healthScore) }]}>
+              <ThemedView type="transparent" style={[styles.healthBadge, { borderColor: healthColor(healthScore) }]}>
                 <ThemedText type="smallBold" style={{ color: healthColor(healthScore) }}>{healthScore}</ThemedText>
               </ThemedView>
             )}
@@ -138,16 +136,16 @@ export default function CustomerDetailScreen() {
           ) : null}
 
           {customer.tags && customer.tags.length > 0 && (
-            <ThemedView style={styles.tagRow}>
+            <ThemedView type="transparent" style={styles.tagRow}>
               {customer.tags.map((tag) => (
-                <ThemedView key={tag} style={styles.tag}>
+                <ThemedView type="transparent" key={tag} style={styles.tag}>
                   <ThemedText type="small" style={{ color: BrandColors.orange }}>{tag}</ThemedText>
                 </ThemedView>
               ))}
             </ThemedView>
           )}
 
-          <ThemedView style={styles.statsRow}>
+          <ThemedView type="transparent" style={styles.statsRow}>
             <StatBox label={t('customers.loads')} value={String(loads.length)} />
             <StatBox label={t('customers.revenue')} value={`$${totalRevenue.toLocaleString()}`} />
           </ThemedView>

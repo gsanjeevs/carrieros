@@ -19,7 +19,8 @@ import * as ImagePicker from 'expo-image-picker';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BrandColors, Spacing } from '@/constants/theme';
+import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { base64ToArrayBuffer } from '@/lib/base64';
 import { supabase } from '@/lib/supabase';
@@ -38,6 +39,7 @@ type PodDoc = {
 
 export function PodSection({ loadId }: { loadId: number }) {
   const { t } = useLocale();
+  const theme = useTheme();
 
   const [docs, setDocs] = useState<PodDoc[]>([]);
   const [loading, setLoading] = useState(true);
@@ -213,7 +215,7 @@ export function PodSection({ loadId }: { loadId: number }) {
               {d.signedUrl ? (
                 <Image source={{ uri: d.signedUrl }} style={styles.thumb} resizeMode="cover" />
               ) : (
-                <View style={[styles.thumb, styles.thumbMissing]} />
+                <View style={[styles.thumb, { backgroundColor: theme.backgroundElement }, styles.thumbMissing]} />
               )}
               <ThemedText type="small" themeColor="textSecondary" style={styles.thumbCaption}>
                 {d.created_at ? new Date(d.created_at).toLocaleDateString() : ''}
@@ -240,10 +242,10 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: { opacity: 0.5 },
   uploadingRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
-  error: { color: '#dc2626' },
+  error: { color: StatusColors.danger },
   thumbRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   thumbWrap: { width: 88 },
-  thumb: { width: 88, height: 88, borderRadius: 8, backgroundColor: '#00000022' },
+  thumb: { width: 88, height: 88, borderRadius: 8 },
   thumbMissing: { opacity: 0.4 },
   thumbCaption: { marginTop: 2 },
 });

@@ -15,7 +15,7 @@ import { ShareLocationSection } from '@/components/share-location-section';
 import { DriverChatSection } from '@/components/driver-chat-section';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BrandColors, Spacing } from '@/constants/theme';
+import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
@@ -279,7 +279,7 @@ export default function LoadDetailScreen() {
             <ThemedText type="link" themeColor="textSecondary">{t('common.back')}</ThemedText>
           </Pressable>
 
-          <ThemedView style={styles.headerRow}>
+          <ThemedView type="transparent" style={styles.headerRow}>
             <ThemedText type="title" style={styles.loadNumber}>{load.load_number}</ThemedText>
             <ThemedView style={[styles.statusPill, { backgroundColor: theme.backgroundSelected }]}>
               <ThemedText type="smallBold">{statusLabel(load.status)}</ThemedText>
@@ -345,12 +345,12 @@ export default function LoadDetailScreen() {
               <ThemedText type="small" themeColor="textSecondary" style={{ marginBottom: 4 }}>
                 {t('loadDetail.assignDriver')}
               </ThemedText>
-              <ThemedView style={styles.assignRow}>
+              <ThemedView type="transparent" style={styles.assignRow}>
                 <Pressable
                   onPress={() => setAssignDriverId(null)}
                   style={[
                     styles.assignChip,
-                    { borderColor: assignDriverId === null ? ORANGE : theme.backgroundSelected },
+                    { borderColor: assignDriverId === null ? ORANGE : theme.border },
                   ]}
                 >
                   <ThemedText type="small">{t('loadDetail.unassigned')}</ThemedText>
@@ -365,7 +365,7 @@ export default function LoadDetailScreen() {
                       onPress={() => setAssignDriverId(d.id)}
                       style={[
                         styles.assignChip,
-                        { borderColor: assignDriverId === d.id ? ORANGE : theme.backgroundSelected },
+                        { borderColor: assignDriverId === d.id ? ORANGE : theme.border },
                       ]}
                     >
                       <ThemedText type="small">{name}</ThemedText>
@@ -377,12 +377,12 @@ export default function LoadDetailScreen() {
               <ThemedText type="small" themeColor="textSecondary" style={{ marginTop: Spacing.two, marginBottom: 4 }}>
                 {t('loadDetail.assignVehicle')}
               </ThemedText>
-              <ThemedView style={styles.assignRow}>
+              <ThemedView type="transparent" style={styles.assignRow}>
                 <Pressable
                   onPress={() => setAssignVehicleId(null)}
                   style={[
                     styles.assignChip,
-                    { borderColor: assignVehicleId === null ? ORANGE : theme.backgroundSelected },
+                    { borderColor: assignVehicleId === null ? ORANGE : theme.border },
                   ]}
                 >
                   <ThemedText type="small">{t('loadDetail.unassigned')}</ThemedText>
@@ -393,7 +393,7 @@ export default function LoadDetailScreen() {
                     onPress={() => setAssignVehicleId(v.id)}
                     style={[
                       styles.assignChip,
-                      { borderColor: assignVehicleId === v.id ? ORANGE : theme.backgroundSelected },
+                      { borderColor: assignVehicleId === v.id ? ORANGE : theme.border },
                     ]}
                   >
                     <ThemedText type="small">{v.nickname || v.vehicle_number}</ThemedText>
@@ -424,7 +424,7 @@ export default function LoadDetailScreen() {
           {(role === 'driver' || role === 'solo') && (
             <ThemedView type="backgroundElement" style={styles.section}>
               <SectionLabel text={t('loadDetail.sectionCompliance')} />
-              <ThemedView style={styles.dvirRow}>
+              <ThemedView type="transparent" style={styles.dvirRow}>
                 <Pressable
                   style={styles.dvirButton}
                   onPress={() => router.push({ pathname: '/dvir/[loadId]', params: { loadId: String(load.id), type: 'pre_trip' } })}
@@ -473,7 +473,7 @@ export default function LoadDetailScreen() {
             <ThemedView type="backgroundElement" style={styles.section}>
               <SectionLabel text={t('loadDetail.sectionTimeline')} />
               {events.map((e) => (
-                <ThemedView key={e.id} style={styles.eventRow}>
+                <ThemedView type="transparent" key={e.id} style={styles.eventRow}>
                   <ThemedText type="small">{statusLabel(e.event_type.replace('status_', ''))}</ThemedText>
                   <ThemedText type="small" themeColor="textSecondary">
                     {e.created_at ? new Date(e.created_at).toLocaleString() : ''}
@@ -518,7 +518,7 @@ function SectionLabel({ text }: { text: string }) {
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <ThemedView style={styles.detailRow}>
+    <ThemedView type="transparent" style={styles.detailRow}>
       <ThemedText type="small" themeColor="textSecondary">{label}</ThemedText>
       <ThemedText type="small">{value}</ThemedText>
     </ThemedView>
@@ -557,7 +557,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     alignItems: 'center',
   },
-  error: { color: '#dc2626', marginBottom: Spacing.two },
+  error: { color: StatusColors.danger, marginBottom: Spacing.two },
   actionButton: {
     marginTop: Spacing.two,
     backgroundColor: ORANGE,

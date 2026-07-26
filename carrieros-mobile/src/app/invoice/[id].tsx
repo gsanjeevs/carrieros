@@ -30,9 +30,7 @@ import { useProfileRole } from '@/hooks/use-profile-role';
 import { supabase } from '@/lib/supabase';
 import { apiFetch } from '@/lib/api';
 
-const ORANGE = BrandColors.orange;
-const PAGE_BACKGROUND = StatusColors.grayLight;
-const WRITE_ROLES = ['owner', 'solo', 'finance'];
+const ORANGE = BrandColors.orange;const WRITE_ROLES = ['owner', 'solo', 'finance'];
 
 type InvoiceDetail = {
   id: number;
@@ -169,14 +167,14 @@ export default function InvoiceDetailScreen() {
   const pill = INVOICE_STATUS_PILL[invoice.status] ?? INVOICE_STATUS_PILL.draft;
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
+    <ThemedView style={[styles.container, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <Pressable onPress={() => router.back()} style={styles.backLink}>
             <ThemedText type="link" themeColor="textSecondary">{t('common.back')}</ThemedText>
           </Pressable>
 
-          <ThemedView style={styles.headerRow} type="background">
+          <ThemedView style={styles.headerRow} type="transparent">
             <ThemedText type="title">{invoice.invoice_number}</ThemedText>
             <ThemedView style={[styles.statusPill, { backgroundColor: pill.bg }]}>
               <ThemedText type="small" style={[styles.statusPillText, { color: pill.text }]}>
@@ -198,14 +196,14 @@ export default function InvoiceDetailScreen() {
               <ThemedText type="smallBold" style={styles.sectionLabel}>{t('invoices.editDraft').toUpperCase()}</ThemedText>
               <ThemedText type="small" themeColor="textSecondary" style={styles.fieldLabel}>{t('invoices.amount')}</ThemedText>
               <TextInput
-                style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+                style={[styles.input, { color: theme.text, borderColor: theme.border }]}
                 value={amount}
                 onChangeText={setAmount}
                 keyboardType="numeric"
               />
               <ThemedText type="small" themeColor="textSecondary" style={styles.fieldLabel}>{t('invoices.due')}</ThemedText>
               <TextInput
-                style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+                style={[styles.input, { color: theme.text, borderColor: theme.border }]}
                 value={dueDate}
                 onChangeText={setDueDate}
                 placeholder="YYYY-MM-DD"
@@ -213,7 +211,7 @@ export default function InvoiceDetailScreen() {
               />
               <ThemedText type="small" themeColor="textSecondary" style={styles.fieldLabel}>{t('invoices.notes')}</ThemedText>
               <TextInput
-                style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+                style={[styles.input, { color: theme.text, borderColor: theme.border }]}
                 value={notes}
                 onChangeText={setNotes}
                 multiline
@@ -250,7 +248,7 @@ export default function InvoiceDetailScreen() {
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <ThemedView style={styles.infoRow} type="background">
+    <ThemedView style={styles.infoRow} type="transparent">
       <ThemedText type="small" themeColor="textSecondary">{label}</ThemedText>
       <ThemedText type="small">{value}</ThemedText>
     </ThemedView>
@@ -271,7 +269,7 @@ const styles = StyleSheet.create({
   fieldLabel: { marginTop: Spacing.one },
   input: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14 },
   infoRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  error: { color: '#dc2626' },
+  error: { color: StatusColors.danger },
   saved: { color: '#16a34a' },
   primaryButton: { backgroundColor: ORANGE, borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginTop: Spacing.two },
   secondaryButton: { borderWidth: 1, borderColor: ORANGE, borderRadius: 8, paddingVertical: 12, alignItems: 'center', marginTop: Spacing.one },

@@ -10,13 +10,11 @@ import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { ExceptionChip } from '@/components/exception-chip';
-import { BrandColors, Spacing, StatusColors, VEHICLE_STATUS_PILL } from '@/constants/theme';
+import { BrandColors, Spacing, VEHICLE_STATUS_PILL } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
 import { fetchExceptions, topExceptionByEntity, type ExceptionRow } from '@/lib/exceptions';
-
-const PAGE_BACKGROUND = StatusColors.grayLight;
 
 type VehicleRow = {
   id: number;
@@ -87,9 +85,9 @@ export default function FleetScreen() {
   }
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
+    <ThemedView style={[styles.container, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.headerRow} type="background">
+        <ThemedView style={styles.headerRow} type="transparent">
           <ThemedText type="title" style={styles.heading}>{t('fleet.title')}</ThemedText>
           <Pressable onPress={() => router.push('/maintenance')} style={styles.maintenanceLink}>
             <ThemedText type="smallBold" style={{ color: BrandColors.orange }}>{t('fleet.maintenanceLink')}</ThemedText>
@@ -116,11 +114,11 @@ export default function FleetScreen() {
             const photoUrl = photoUrls.get(item.id);
             return (
               <Pressable
-                style={[styles.card, { backgroundColor: theme.background }, styles.cardShadow]}
+                style={[styles.card, { backgroundColor: theme.card }, styles.cardShadow]}
                 onPress={() => router.push({ pathname: '/vehicle/[id]', params: { id: String(item.id) } })}
               >
                 {photoUrl && <Image source={{ uri: photoUrl }} style={styles.cardPhoto} resizeMode="cover" />}
-                <ThemedView style={styles.cardHeader} type="background">
+                <ThemedView style={styles.cardHeader} type="transparent">
                   <ThemedText type="smallBold">{item.nickname}</ThemedText>
                   <ThemedView style={[styles.statusPill, { backgroundColor: pill.bg }]}>
                     <ThemedText type="small" style={[styles.statusPillText, { color: pill.text }]}>

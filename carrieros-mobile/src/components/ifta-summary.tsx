@@ -111,7 +111,7 @@ export function IftaSummary() {
       ) : (
         <ThemedView type="backgroundElement" style={styles.table}>
           {rows.map((r) => (
-            <ThemedView key={r.state} style={styles.stateRow}>
+            <ThemedView type="transparent" key={r.state} style={styles.stateRow}>
               <ThemedText type="smallBold">{r.state}</ThemedText>
               <ThemedText type="small">
                 {Number(r.total_miles).toLocaleString()} {t('loadDetail.unitMi')}

@@ -7,13 +7,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { IftaSummary } from '@/components/ifta-summary';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing, StatusColors } from '@/constants/theme';
-
-const PAGE_BACKGROUND = StatusColors.grayLight;
+import { Spacing } from '@/constants/theme';
 
 export default function ReportsScreen() {
   return (
-    <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
+    <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <IftaSummary />
       </SafeAreaView>

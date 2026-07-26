@@ -130,6 +130,7 @@ const MOBILE_MAP = [
   ['color-brand-orange', brandColors, 'orange'],
   ['color-brand-orange-hover', brandColors, 'orangeHover'],
   ['color-brand-orange-light', brandColors, 'orangeLight'],
+  ['color-gray', brandColors, 'gray'],
   ['color-gray-light', brandColors, 'grayLight'],
 
   ['color-success', statusColors, 'success'],

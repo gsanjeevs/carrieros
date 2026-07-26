@@ -14,7 +14,7 @@ import Svg, { Path } from 'react-native-svg';
 import { captureRef } from 'react-native-view-shot';
 
 import { ThemedText } from '@/components/themed-text';
-import { BrandColors, Spacing } from '@/constants/theme';
+import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 
 const ORANGE = BrandColors.orange;
 
@@ -98,16 +98,16 @@ export const SignaturePad = forwardRef<SignaturePadHandle, Props>(function Signa
         {...panResponder.panHandlers}
       >
         {paths.length === 0 && !currentPath.current ? (
-          <ThemedText type="small" themeColor="textSecondary" style={styles.emptyText}>
+          <ThemedText type="small" style={styles.emptyText}>
             {emptyLabel}
           </ThemedText>
         ) : null}
         <Svg style={StyleSheet.absoluteFill}>
           {paths.map((d, i) => (
-            <Path key={i} d={d} stroke="#111827" strokeWidth={2.5} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            <Path key={i} d={d} stroke={INK} strokeWidth={2.5} fill="none" strokeLinecap="round" strokeLinejoin="round" />
           ))}
           {currentPath.current ? (
-            <Path d={currentPath.current} stroke="#111827" strokeWidth={2.5} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d={currentPath.current} stroke={INK} strokeWidth={2.5} fill="none" strokeLinecap="round" strokeLinejoin="round" />
           ) : null}
         </Svg>
       </View>
@@ -120,16 +120,27 @@ export const SignaturePad = forwardRef<SignaturePadHandle, Props>(function Signa
   );
 });
 
+// DELIBERATELY NOT THEME-AWARE. The pad is a paper surface: what's drawn
+// here is captured to an image and stored as the POD/DVIR signature, then
+// re-displayed on light thumbnails and on carrieros-web. Inking it with
+// theme.text would produce a white-on-navy signature in dark mode that is
+// invisible everywhere it's later shown. White paper + dark ink + a fixed
+// hairline is the correct fixed pairing, the same way StatusColors badge
+// pairs are fixed.
+const PAPER = '#ffffff';
+const INK = '#111827';
+
 const styles = StyleSheet.create({
   pad: {
     height: 160,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#d1d5db',
-    backgroundColor: '#ffffff',
+    backgroundColor: PAPER,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emptyText: { position: 'absolute' },
+  // Fixed, not a theme token — the placeholder sits on the fixed white pad.
+  emptyText: { position: 'absolute', color: StatusColors.gray },
   clearButton: { alignSelf: 'flex-end', paddingVertical: Spacing.two },
 });

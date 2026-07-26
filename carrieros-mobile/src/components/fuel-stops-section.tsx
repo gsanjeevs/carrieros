@@ -12,7 +12,7 @@ import { ActivityIndicator, Pressable, StyleSheet, TextInput } from 'react-nativ
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BrandColors, Spacing } from '@/constants/theme';
+import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useSession } from '@/hooks/use-session';
@@ -131,7 +131,7 @@ export function FuelStopsSection({
 
   return (
     <ThemedView type="backgroundElement" style={styles.section}>
-      <ThemedView style={styles.headerRow}>
+      <ThemedView type="transparent" style={styles.headerRow}>
         <ThemedText type="smallBold" style={styles.sectionLabel}>{t('loadDetail.sectionFuel').toUpperCase()}</ThemedText>
         {!open && (
           <Pressable onPress={() => setOpen(true)}>
@@ -141,7 +141,7 @@ export function FuelStopsSection({
       </ThemedView>
 
       {stops.length > 0 && (
-        <ThemedView style={styles.summaryRow}>
+        <ThemedView type="transparent" style={styles.summaryRow}>
           <SummaryCell label={t('loadDetail.fuelTotalCost')} value={formatMoney(totalCost)} />
           <SummaryCell label={t('loadDetail.fuelGallons')} value={totalGallons.toLocaleString()} />
           <SummaryCell label={t('loadDetail.fuelStops')} value={String(stops.length)} />
@@ -153,15 +153,15 @@ export function FuelStopsSection({
       )}
 
       {stops.map((s) => (
-        <ThemedView key={s.id} style={styles.stopRow}>
+        <ThemedView type="transparent" key={s.id} style={styles.stopRow}>
           <ThemedText type="small">{s.state} — {s.station || '—'}</ThemedText>
           <ThemedText type="small">{formatMoney(Number(s.total_cost))} · {Number(s.gallons)} gal</ThemedText>
         </ThemedView>
       ))}
 
       {open && (
-        <ThemedView style={styles.form}>
-          <ThemedView style={styles.formRow}>
+        <ThemedView type="transparent" style={styles.form}>
+          <ThemedView type="transparent" style={styles.formRow}>
             <TextInput
               value={state}
               onChangeText={setState}
@@ -169,24 +169,24 @@ export function FuelStopsSection({
               placeholderTextColor={theme.textSecondary}
               autoCapitalize="characters"
               maxLength={2}
-              style={[styles.input, styles.inputSmall, { color: theme.text, borderColor: theme.backgroundSelected }]}
+              style={[styles.input, styles.inputSmall, { color: theme.text, borderColor: theme.border }]}
             />
             <TextInput
               value={station}
               onChangeText={setStation}
               placeholder={t('loadDetail.fuelStation')}
               placeholderTextColor={theme.textSecondary}
-              style={[styles.input, styles.inputFlex, { color: theme.text, borderColor: theme.backgroundSelected }]}
+              style={[styles.input, styles.inputFlex, { color: theme.text, borderColor: theme.border }]}
             />
           </ThemedView>
-          <ThemedView style={styles.formRow}>
+          <ThemedView type="transparent" style={styles.formRow}>
             <TextInput
               value={gallons}
               onChangeText={setGallons}
               placeholder={t('loadDetail.fuelGallons')}
               placeholderTextColor={theme.textSecondary}
               keyboardType="decimal-pad"
-              style={[styles.input, styles.inputFlex, { color: theme.text, borderColor: theme.backgroundSelected }]}
+              style={[styles.input, styles.inputFlex, { color: theme.text, borderColor: theme.border }]}
             />
             <TextInput
               value={pricePerGallon}
@@ -194,7 +194,7 @@ export function FuelStopsSection({
               placeholder={t('loadDetail.fuelPricePerGallon')}
               placeholderTextColor={theme.textSecondary}
               keyboardType="decimal-pad"
-              style={[styles.input, styles.inputFlex, { color: theme.text, borderColor: theme.backgroundSelected }]}
+              style={[styles.input, styles.inputFlex, { color: theme.text, borderColor: theme.border }]}
             />
           </ThemedView>
 
@@ -206,7 +206,7 @@ export function FuelStopsSection({
 
           {error ? <ThemedText type="small" style={styles.error}>{error}</ThemedText> : null}
 
-          <ThemedView style={styles.buttonRow}>
+          <ThemedView type="transparent" style={styles.buttonRow}>
             <Pressable onPress={() => { setOpen(false); resetForm(); }} style={styles.cancelButton}>
               <ThemedText type="small" themeColor="textSecondary">{t('common.cancel')}</ThemedText>
             </Pressable>
@@ -226,7 +226,7 @@ export function FuelStopsSection({
 
 function SummaryCell({ label, value }: { label: string; value: string }) {
   return (
-    <ThemedView style={styles.summaryCell}>
+    <ThemedView type="transparent" style={styles.summaryCell}>
       <ThemedText type="smallBold">{value}</ThemedText>
       <ThemedText type="small" themeColor="textSecondary">{label}</ThemedText>
     </ThemedView>
@@ -249,5 +249,5 @@ const styles = StyleSheet.create({
   cancelButton: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 12 },
   submitButton: { flex: 2, backgroundColor: ORANGE, borderRadius: 8, paddingVertical: 12, alignItems: 'center' },
   disabled: { opacity: 0.5 },
-  error: { color: '#dc2626' },
+  error: { color: StatusColors.danger },
 });

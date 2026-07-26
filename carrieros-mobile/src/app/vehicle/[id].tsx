@@ -18,7 +18,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BrandColors, Spacing } from '@/constants/theme';
+import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
@@ -222,10 +222,10 @@ export default function VehicleDetailScreen() {
               <ThemedText type="small" themeColor="textSecondary" style={styles.fieldLabel}>
                 {t('vehicleDetail.whichReminder')}
               </ThemedText>
-              <ThemedView style={styles.assignRow}>
+              <ThemedView type="transparent" style={styles.assignRow}>
                 <Pressable
                   onPress={() => setReminderId(NO_REMINDER)}
-                  style={[styles.assignChip, { borderColor: reminderId === NO_REMINDER ? ORANGE : theme.backgroundSelected }]}
+                  style={[styles.assignChip, { borderColor: reminderId === NO_REMINDER ? ORANGE : theme.border }]}
                 >
                   <ThemedText type="small">{t('vehicleDetail.generalServiceNoReminder')}</ThemedText>
                 </Pressable>
@@ -233,7 +233,7 @@ export default function VehicleDetailScreen() {
                   <Pressable
                     key={r.id}
                     onPress={() => setReminderId(String(r.id))}
-                    style={[styles.assignChip, { borderColor: reminderId === String(r.id) ? ORANGE : theme.backgroundSelected }]}
+                    style={[styles.assignChip, { borderColor: reminderId === String(r.id) ? ORANGE : theme.border }]}
                   >
                     <ThemedText type="small">{r.reminder_type}</ThemedText>
                   </Pressable>
@@ -241,12 +241,12 @@ export default function VehicleDetailScreen() {
               </ThemedView>
 
               {reminderId === NO_REMINDER && (
-                <ThemedView style={styles.field}>
+                <ThemedView type="transparent" style={styles.field}>
                   <ThemedText type="small" themeColor="textSecondary" style={styles.fieldLabel}>
                     {t('vehicleDetail.serviceType')}
                   </ThemedText>
                   <TextInput
-                    style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+                    style={[styles.input, { color: theme.text, borderColor: theme.border }]}
                     value={serviceType}
                     onChangeText={setServiceType}
                     placeholder={t('vehicleDetail.serviceTypePlaceholder')}
@@ -255,12 +255,12 @@ export default function VehicleDetailScreen() {
                 </ThemedView>
               )}
 
-              <ThemedView style={styles.field}>
+              <ThemedView type="transparent" style={styles.field}>
                 <ThemedText type="small" themeColor="textSecondary" style={styles.fieldLabel}>
                   {t('vehicleDetail.serviceDate')}
                 </ThemedText>
                 <TextInput
-                  style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+                  style={[styles.input, { color: theme.text, borderColor: theme.border }]}
                   value={serviceDate}
                   onChangeText={setServiceDate}
                   placeholder="YYYY-MM-DD"
@@ -268,12 +268,12 @@ export default function VehicleDetailScreen() {
                 />
               </ThemedView>
 
-              <ThemedView style={styles.field}>
+              <ThemedView type="transparent" style={styles.field}>
                 <ThemedText type="small" themeColor="textSecondary" style={styles.fieldLabel}>
                   {t('vehicleDetail.odometer')}
                 </ThemedText>
                 <TextInput
-                  style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+                  style={[styles.input, { color: theme.text, borderColor: theme.border }]}
                   value={odometer}
                   onChangeText={setOdometer}
                   keyboardType="numeric"
@@ -281,12 +281,12 @@ export default function VehicleDetailScreen() {
                 />
               </ThemedView>
 
-              <ThemedView style={styles.field}>
+              <ThemedView type="transparent" style={styles.field}>
                 <ThemedText type="small" themeColor="textSecondary" style={styles.fieldLabel}>
                   {t('vehicleDetail.cost')}
                 </ThemedText>
                 <TextInput
-                  style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+                  style={[styles.input, { color: theme.text, borderColor: theme.border }]}
                   value={cost}
                   onChangeText={setCost}
                   keyboardType="numeric"
@@ -294,24 +294,24 @@ export default function VehicleDetailScreen() {
                 />
               </ThemedView>
 
-              <ThemedView style={styles.field}>
+              <ThemedView type="transparent" style={styles.field}>
                 <ThemedText type="small" themeColor="textSecondary" style={styles.fieldLabel}>
                   {t('vehicleDetail.shop')}
                 </ThemedText>
                 <TextInput
-                  style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+                  style={[styles.input, { color: theme.text, borderColor: theme.border }]}
                   value={shopName}
                   onChangeText={setShopName}
                   placeholderTextColor={theme.textSecondary}
                 />
               </ThemedView>
 
-              <ThemedView style={styles.field}>
+              <ThemedView type="transparent" style={styles.field}>
                 <ThemedText type="small" themeColor="textSecondary" style={styles.fieldLabel}>
                   {t('vehicleDetail.notes')}
                 </ThemedText>
                 <TextInput
-                  style={[styles.input, styles.notesInput, { color: theme.text, borderColor: theme.backgroundSelected }]}
+                  style={[styles.input, styles.notesInput, { color: theme.text, borderColor: theme.border }]}
                   value={notes}
                   onChangeText={setNotes}
                   multiline
@@ -321,8 +321,8 @@ export default function VehicleDetailScreen() {
 
               {error ? <ThemedText type="small" style={styles.error}>{error}</ThemedText> : null}
 
-              <ThemedView style={styles.formButtonRow}>
-                <Pressable onPress={() => setFormOpen(false)} disabled={submitting} style={styles.cancelButton}>
+              <ThemedView type="transparent" style={styles.formButtonRow}>
+                <Pressable onPress={() => setFormOpen(false)} disabled={submitting} style={[styles.cancelButton, { borderColor: theme.border }]}>
                   <ThemedText type="smallBold">{t('vehicleDetail.cancel')}</ThemedText>
                 </Pressable>
                 <Pressable
@@ -348,7 +348,7 @@ export default function VehicleDetailScreen() {
               <ThemedText type="small" themeColor="textSecondary">{t('vehicleDetail.noServiceHistory')}</ThemedText>
             ) : (
               logs.map((l) => (
-                <ThemedView key={l.id} style={styles.logRow}>
+                <ThemedView type="transparent" key={l.id} style={[styles.logRow, { borderTopColor: theme.divider }]}>
                   <ThemedView style={{ backgroundColor: 'transparent' }}>
                     <ThemedText type="small">{l.service_type}</ThemedText>
                     <ThemedText type="small" themeColor="textSecondary">{l.service_date}</ThemedText>
@@ -387,16 +387,15 @@ const styles = StyleSheet.create({
   assignRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, backgroundColor: 'transparent' },
   assignChip: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
   formButtonRow: { flexDirection: 'row', gap: Spacing.two, marginTop: Spacing.two, backgroundColor: 'transparent' },
-  cancelButton: { flex: 1, borderRadius: 8, paddingVertical: 12, alignItems: 'center', borderWidth: 1, borderColor: '#00000022' },
+  cancelButton: { flex: 1, borderRadius: 8, paddingVertical: 12, alignItems: 'center', borderWidth: 1 },
   submitButton: { flex: 1, backgroundColor: ORANGE, borderRadius: 8, paddingVertical: 12, alignItems: 'center' },
   submitButtonDisabled: { opacity: 0.5 },
-  error: { color: '#dc2626' },
+  error: { color: StatusColors.danger },
   logRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: Spacing.two,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#00000022',
   },
 });

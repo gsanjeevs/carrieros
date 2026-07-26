@@ -10,7 +10,7 @@ import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BrandColors, Spacing } from '@/constants/theme';
+import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
@@ -40,7 +40,7 @@ export default function LoginScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.logoRow}>
+        <ThemedView type="transparent" style={styles.logoRow}>
           <ThemedText type="title" style={{ color: ORANGE, fontSize: 32 }}>
             Carrier
           </ThemedText>
@@ -53,12 +53,12 @@ export default function LoginScreen() {
           {t('login.subtitle')}
         </ThemedText>
 
-        <ThemedView style={styles.form}>
+        <ThemedView type="transparent" style={styles.form}>
           <ThemedText type="small" themeColor="textSecondary">
             {t('login.email')}
           </ThemedText>
           <TextInput
-            style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+            style={[styles.input, { color: theme.text, borderColor: theme.border }]}
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -72,7 +72,7 @@ export default function LoginScreen() {
             {t('login.password')}
           </ThemedText>
           <TextInput
-            style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+            style={[styles.input, { color: theme.text, borderColor: theme.border }]}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   error: {
-    color: '#dc2626',
+    color: StatusColors.danger,
     marginTop: 4,
   },
   button: {

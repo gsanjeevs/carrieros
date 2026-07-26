@@ -14,7 +14,7 @@ import * as Location from 'expo-location';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BrandColors, Spacing } from '@/constants/theme';
+import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
 
@@ -73,8 +73,8 @@ export function ShareLocationSection({ loadId }: { loadId: number }) {
 
   return (
     <ThemedView type="backgroundElement" style={styles.section}>
-      <ThemedView style={styles.row}>
-        <ThemedView style={styles.textCol}>
+      <ThemedView type="transparent" style={styles.row}>
+        <ThemedView type="transparent" style={styles.textCol}>
           <ThemedText type="smallBold">{t('loadDetail.shareLocation')}</ThemedText>
           <ThemedText type="small" themeColor="textSecondary">
             {sharing ? t('loadDetail.shareLocationOn') : t('loadDetail.shareLocationOff')}
@@ -95,5 +95,5 @@ const styles = StyleSheet.create({
   section: { borderRadius: 12, padding: Spacing.three, gap: 4, marginBottom: Spacing.two },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   textCol: { flex: 1, gap: 2, backgroundColor: 'transparent' },
-  error: { color: '#dc2626', marginTop: 4 },
+  error: { color: StatusColors.danger, marginTop: 4 },
 });

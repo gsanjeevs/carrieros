@@ -17,8 +17,6 @@ import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { apiFetch } from '@/lib/api';
 
-const PAGE_BACKGROUND = StatusColors.grayLight;
-
 type Member = {
   id: string;
   role: string;
@@ -66,7 +64,7 @@ export default function TeamScreen() {
   }
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
+    <ThemedView style={[styles.container, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safeArea}>
         <Pressable onPress={() => router.back()} style={styles.backLink}>
           <ThemedText type="link" themeColor="textSecondary">{t('common.back')}</ThemedText>
@@ -88,10 +86,10 @@ export default function TeamScreen() {
           renderItem={({ item }) => {
             const name = [item.first_name, item.last_name].filter(Boolean).join(' ') || item.email || '—';
             return (
-              <ThemedView style={[styles.card, { backgroundColor: theme.background }, styles.cardShadow]}>
+              <ThemedView style={[styles.card, { backgroundColor: theme.card }, styles.cardShadow]}>
                 <ThemedText type="smallBold">{name}</ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">{item.email ?? '—'}</ThemedText>
-                <ThemedView style={styles.metaRow}>
+                <ThemedView type="transparent" style={styles.metaRow}>
                   <ThemedText type="small" themeColor="textSecondary">{t(`team.role_${item.role}`)}</ThemedText>
                   <ThemedText type="small" style={{ color: item.accepted ? '#16a34a' : '#d97706' }}>
                     {item.accepted ? t('team.statusActive') : t('team.statusPending')}
@@ -114,7 +112,7 @@ const styles = StyleSheet.create({
   heading: { fontSize: 24, marginBottom: Spacing.three },
   listContent: { gap: Spacing.two, paddingBottom: Spacing.four },
   empty: { textAlign: 'center', marginTop: Spacing.five },
-  error: { color: '#dc2626', marginBottom: Spacing.two },
+  error: { color: StatusColors.danger, marginBottom: Spacing.two },
   card: { borderRadius: 16, padding: Spacing.three, gap: 4 },
   cardShadow: {
     shadowColor: '#000000',

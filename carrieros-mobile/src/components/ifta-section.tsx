@@ -160,7 +160,7 @@ export function IftaSection({
       <ThemedText type="smallBold" style={styles.sectionLabel}>{t('loadDetail.sectionIfta').toUpperCase()}</ThemedText>
 
       {isActive && trackingResult && (
-        <ThemedView style={[styles.banner, { borderColor: trackingResult.started ? GREEN : AMBER }]}>
+        <ThemedView type="transparent" style={[styles.banner, { borderColor: trackingResult.started ? GREEN : AMBER }]}>
           <ThemedText type="small" style={{ color: trackingResult.started ? GREEN : AMBER }}>
             {trackingResult.started
               ? t('loadDetail.iftaTrackingActive')
@@ -174,7 +174,7 @@ export function IftaSection({
       )}
 
       {crossings.map((c) => (
-        <ThemedView key={c.id} style={styles.crossingRow}>
+        <ThemedView type="transparent" key={c.id} style={styles.crossingRow}>
           <ThemedText type="small">
             {c.state}{c.source === 'manual' ? ` (${t('loadDetail.iftaManualTag')})` : ''}
           </ThemedText>
@@ -183,13 +183,13 @@ export function IftaSection({
       ))}
 
       {fallbackNeeded && (
-        <ThemedView style={styles.fallback}>
+        <ThemedView type="transparent" style={styles.fallback}>
           <ThemedText type="small" style={{ color: AMBER }}>
             {t('loadDetail.iftaFallbackWarning')}
           </ThemedText>
 
           {fallbackRows.map((row, i) => (
-            <ThemedView key={i} style={styles.formRow}>
+            <ThemedView type="transparent" key={i} style={styles.formRow}>
               <TextInput
                 value={row.state}
                 onChangeText={(v) => updateFallbackRow(i, 'state', v)}
@@ -197,7 +197,7 @@ export function IftaSection({
                 placeholderTextColor={theme.textSecondary}
                 autoCapitalize="characters"
                 maxLength={2}
-                style={[styles.input, styles.inputSmall, { color: theme.text, borderColor: theme.backgroundSelected }]}
+                style={[styles.input, styles.inputSmall, { color: theme.text, borderColor: theme.border }]}
               />
               <TextInput
                 value={row.miles}
@@ -205,7 +205,7 @@ export function IftaSection({
                 placeholder={t('loadDetail.miles')}
                 placeholderTextColor={theme.textSecondary}
                 keyboardType="number-pad"
-                style={[styles.input, styles.inputFlex, { color: theme.text, borderColor: theme.backgroundSelected }]}
+                style={[styles.input, styles.inputFlex, { color: theme.text, borderColor: theme.border }]}
               />
             </ThemedView>
           ))}

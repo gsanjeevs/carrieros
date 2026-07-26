@@ -21,7 +21,7 @@ import * as ImagePicker from 'expo-image-picker';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BrandColors, Spacing } from '@/constants/theme';
+import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { apiFetch } from '@/lib/api';
@@ -203,12 +203,12 @@ export default function NewLoadFromPhotoScreen() {
     keyboardType?: 'default' | 'numeric';
   }) {
     return (
-      <ThemedView style={styles.field}>
+      <ThemedView type="transparent" style={styles.field}>
         <ThemedText type="small" themeColor="textSecondary" style={styles.fieldLabel}>
           {t(labelKey)}
         </ThemedText>
         <TextInput
-          style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+          style={[styles.input, { color: theme.text, borderColor: theme.border }]}
           placeholder={placeholder}
           placeholderTextColor={theme.textSecondary}
           value={form ? form[valueKey] : ''}
@@ -242,7 +242,7 @@ export default function NewLoadFromPhotoScreen() {
                 </ThemedText>
               </ThemedView>
             ) : (
-              <ThemedView style={styles.photoButtonRow}>
+              <ThemedView type="transparent" style={styles.photoButtonRow}>
                 <Pressable style={styles.photoButton} onPress={() => pickAndExtract('camera')}>
                   <ThemedText type="smallBold" themeColor="text">{t('loadNew.scanTakePhoto')}</ThemedText>
                 </Pressable>
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
   field: { gap: 4 },
   fieldLabel: {},
   input: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14 },
-  error: { color: '#dc2626', marginTop: Spacing.two },
+  error: { color: StatusColors.danger, marginTop: Spacing.two },
   submitButton: { backgroundColor: ORANGE, borderRadius: 8, paddingVertical: 14, alignItems: 'center' },
   submitButtonDisabled: { opacity: 0.5 },
 });

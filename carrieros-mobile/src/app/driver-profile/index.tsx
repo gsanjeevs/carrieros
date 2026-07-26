@@ -28,8 +28,6 @@ import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
-
-const PAGE_BACKGROUND = StatusColors.grayLight;
 const ORANGE = BrandColors.orange;
 const CDL_CLASSES = ['A', 'B', 'C'] as const;
 const ENDORSEMENT_CODES = ['hazmat', 'tanker', 'doubles', 'airbrakes', 'passenger'] as const;
@@ -154,7 +152,7 @@ export default function DriverProfileScreen() {
   }
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
+    <ThemedView style={[styles.container, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <Pressable onPress={() => router.back()} style={styles.backLink}>
@@ -170,7 +168,7 @@ export default function DriverProfileScreen() {
 
             <ThemedText type="small" themeColor="textSecondary" style={styles.fieldLabel}>{t('driverProfile.cdlNumber')}</ThemedText>
             <TextInput
-              style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+              style={[styles.input, { color: theme.text, borderColor: theme.border }]}
               value={cdlNumber}
               onChangeText={setCdlNumber}
               placeholder={t('driverProfile.cdlNumberPlaceholder')}
@@ -178,14 +176,14 @@ export default function DriverProfileScreen() {
             />
 
             <ThemedText type="small" themeColor="textSecondary" style={styles.fieldLabel}>{t('driverProfile.cdlClass')}</ThemedText>
-            <ThemedView style={styles.chipRow} type="background">
+            <ThemedView style={styles.chipRow} type="transparent">
               {CDL_CLASSES.map((c) => (
                 <Pressable
                   key={c}
                   onPress={() => setCdlClass(c)}
                   style={[
                     styles.chip,
-                    { borderColor: cdlClass === c ? ORANGE : theme.backgroundSelected, backgroundColor: cdlClass === c ? `${ORANGE}22` : 'transparent' },
+                    { borderColor: cdlClass === c ? ORANGE : theme.border, backgroundColor: cdlClass === c ? `${ORANGE}22` : 'transparent' },
                   ]}
                 >
                   <ThemedText type="small" style={cdlClass === c ? { color: ORANGE } : undefined}>{c}</ThemedText>
@@ -195,7 +193,7 @@ export default function DriverProfileScreen() {
 
             <ThemedText type="small" themeColor="textSecondary" style={styles.fieldLabel}>{t('driverProfile.cdlState')}</ThemedText>
             <TextInput
-              style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+              style={[styles.input, { color: theme.text, borderColor: theme.border }]}
               value={cdlState}
               onChangeText={(v) => setCdlState(v.toUpperCase().slice(0, 2))}
               placeholder="CA"
@@ -205,7 +203,7 @@ export default function DriverProfileScreen() {
             />
 
             <ThemedText type="small" themeColor="textSecondary" style={styles.fieldLabel}>{t('driverProfile.endorsements')}</ThemedText>
-            <ThemedView style={styles.chipRow} type="background">
+            <ThemedView style={styles.chipRow} type="transparent">
               {ENDORSEMENT_CODES.map((code) => {
                 const selected = endorsements.includes(code);
                 return (
@@ -214,7 +212,7 @@ export default function DriverProfileScreen() {
                     onPress={() => toggleEndorsement(code)}
                     style={[
                       styles.chip,
-                      { borderColor: selected ? ORANGE : theme.backgroundSelected, backgroundColor: selected ? `${ORANGE}22` : 'transparent' },
+                      { borderColor: selected ? ORANGE : theme.border, backgroundColor: selected ? `${ORANGE}22` : 'transparent' },
                     ]}
                   >
                     <ThemedText type="small" style={selected ? { color: ORANGE } : undefined}>
@@ -238,7 +236,7 @@ export default function DriverProfileScreen() {
 
             <ThemedText type="small" themeColor="textSecondary" style={styles.fieldLabel}>{t('driverProfile.emergencyName')}</ThemedText>
             <TextInput
-              style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+              style={[styles.input, { color: theme.text, borderColor: theme.border }]}
               value={emergencyName}
               onChangeText={setEmergencyName}
               placeholderTextColor={theme.textSecondary}
@@ -246,7 +244,7 @@ export default function DriverProfileScreen() {
 
             <ThemedText type="small" themeColor="textSecondary" style={styles.fieldLabel}>{t('driverProfile.emergencyPhone')}</ThemedText>
             <TextInput
-              style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+              style={[styles.input, { color: theme.text, borderColor: theme.border }]}
               value={emergencyPhone}
               onChangeText={setEmergencyPhone}
               keyboardType="phone-pad"
@@ -255,7 +253,7 @@ export default function DriverProfileScreen() {
 
             <ThemedText type="small" themeColor="textSecondary" style={styles.fieldLabel}>{t('driverProfile.emergencyRelation')}</ThemedText>
             <TextInput
-              style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+              style={[styles.input, { color: theme.text, borderColor: theme.border }]}
               value={emergencyRelation}
               onChangeText={setEmergencyRelation}
               placeholder={t('driverProfile.emergencyRelationPlaceholder')}
@@ -266,12 +264,12 @@ export default function DriverProfileScreen() {
           {vehicles.length > 0 && (
             <ThemedView type="backgroundElement" style={styles.section}>
               <ThemedText type="smallBold" style={styles.sectionLabel}>{t('driverProfile.defaultVehicle').toUpperCase()}</ThemedText>
-              <ThemedView style={styles.chipRow} type="background">
+              <ThemedView style={styles.chipRow} type="transparent">
                 <Pressable
                   onPress={() => setDefaultVehicleId(null)}
                   style={[
                     styles.chip,
-                    { borderColor: defaultVehicleId === null ? ORANGE : theme.backgroundSelected, backgroundColor: defaultVehicleId === null ? `${ORANGE}22` : 'transparent' },
+                    { borderColor: defaultVehicleId === null ? ORANGE : theme.border, backgroundColor: defaultVehicleId === null ? `${ORANGE}22` : 'transparent' },
                   ]}
                 >
                   <ThemedText type="small" style={defaultVehicleId === null ? { color: ORANGE } : undefined}>{t('driverProfile.noDefaultVehicle')}</ThemedText>
@@ -282,7 +280,7 @@ export default function DriverProfileScreen() {
                     onPress={() => setDefaultVehicleId(v.id)}
                     style={[
                       styles.chip,
-                      { borderColor: defaultVehicleId === v.id ? ORANGE : theme.backgroundSelected, backgroundColor: defaultVehicleId === v.id ? `${ORANGE}22` : 'transparent' },
+                      { borderColor: defaultVehicleId === v.id ? ORANGE : theme.border, backgroundColor: defaultVehicleId === v.id ? `${ORANGE}22` : 'transparent' },
                     ]}
                   >
                     <ThemedText type="small" style={defaultVehicleId === v.id ? { color: ORANGE } : undefined}>
@@ -323,7 +321,7 @@ const styles = StyleSheet.create({
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
   readOnlyNote: { marginTop: Spacing.two },
-  error: { color: '#dc2626' },
+  error: { color: StatusColors.danger },
   saved: { color: '#16a34a' },
   saveButton: { backgroundColor: ORANGE, borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginTop: Spacing.two },
   saveButtonDisabled: { opacity: 0.5 },

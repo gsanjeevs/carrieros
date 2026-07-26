@@ -13,7 +13,7 @@ import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BrandColors, Spacing } from '@/constants/theme';
+import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { apiFetch } from '@/lib/api';
@@ -104,12 +104,12 @@ export default function NewLoadScreen() {
     keyboardType?: 'default' | 'numeric';
   }) {
     return (
-      <ThemedView style={styles.field}>
+      <ThemedView type="transparent" style={styles.field}>
         <ThemedText type="small" themeColor="textSecondary" style={styles.fieldLabel}>
           {t(labelKey)}
         </ThemedText>
         <TextInput
-          style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+          style={[styles.input, { color: theme.text, borderColor: theme.border }]}
           placeholder={placeholder}
           placeholderTextColor={theme.textSecondary}
           value={form[valueKey]}
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   field: { gap: 4 },
   fieldLabel: {},
   input: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14 },
-  error: { color: '#dc2626', marginBottom: Spacing.two },
+  error: { color: StatusColors.danger, marginBottom: Spacing.two },
   submitButton: { backgroundColor: ORANGE, borderRadius: 8, paddingVertical: 14, alignItems: 'center' },
   submitButtonDisabled: { opacity: 0.5 },
 });

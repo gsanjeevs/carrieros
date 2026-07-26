@@ -18,8 +18,6 @@ import { useLocale } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
 import { supabase } from '@/lib/supabase';
 
-const PAGE_BACKGROUND = StatusColors.grayLight;
-
 // A load actively in progress — same set used for the Dispatcher ops board
 // and the Solo "My Load Today" hybrid check.
 const ACTIVE_LOAD_STATUSES = ['dispatched', 'picked_up', 'in_transit'];
@@ -58,10 +56,10 @@ function LoadCard({ load, onPress, staleLabel }: { load: LoadRow; onPress: () =>
   const { t } = useLocale();
   const pill = LOAD_STATUS_PILL[load.status] ?? LOAD_STATUS_PILL.draft;
   return (
-    <Pressable style={[styles.card, { backgroundColor: theme.background }, styles.cardShadow]} onPress={onPress}>
-      <ThemedView style={styles.cardHeader} type="background">
+    <Pressable style={[styles.card, { backgroundColor: theme.card }, styles.cardShadow]} onPress={onPress}>
+      <ThemedView style={styles.cardHeader} type="transparent">
         <ThemedText type="smallBold">{load.load_number}</ThemedText>
-        <ThemedView style={styles.cardHeaderRight} type="background">
+        <ThemedView style={styles.cardHeaderRight} type="transparent">
           {staleLabel ? (
             <ThemedView style={[styles.statusPill, { backgroundColor: StatusColors.dangerLight }]}>
               <ThemedText type="small" style={[styles.statusPillText, { color: StatusColors.dangerDark }]}>
@@ -79,7 +77,7 @@ function LoadCard({ load, onPress, staleLabel }: { load: LoadRow; onPress: () =>
       <ThemedText type="small" themeColor="textSecondary">
         {load.customer_name_raw ?? t('common.unknownCustomer')}
       </ThemedText>
-      <ThemedView style={styles.routeRow} type="background">
+      <ThemedView style={styles.routeRow} type="transparent">
         <ThemedText type="default" style={styles.routeText}>
           {load.pickup_city ?? '—'}{load.pickup_state ? `, ${load.pickup_state}` : ''}
         </ThemedText>
@@ -95,7 +93,7 @@ function LoadCard({ load, onPress, staleLabel }: { load: LoadRow; onPress: () =>
 function StatTile({ label, value }: { label: string; value: string | number }) {
   const theme = useTheme();
   return (
-    <ThemedView style={[styles.statTile, { backgroundColor: theme.background }, styles.cardShadow]}>
+    <ThemedView style={[styles.statTile, { backgroundColor: theme.card }, styles.cardShadow]}>
       <ThemedText type="title" style={styles.statValue}>{String(value)}</ThemedText>
       <ThemedText type="small" themeColor="textSecondary">{label}</ThemedText>
     </ThemedView>
@@ -287,7 +285,7 @@ export default function HomeScreen() {
     role === 'dispatcher' ? t('home.titleDispatcher') : role === 'finance' ? t('home.titleFinance') : t('home.titleOwner');
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor: PAGE_BACKGROUND }]}>
+    <ThemedView style={[styles.container, { backgroundColor: theme.background }]}>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
@@ -311,12 +309,12 @@ export default function HomeScreen() {
 
           {(role === 'owner' || role === 'solo') && (
             <>
-              <ThemedView style={styles.statRow} type="background">
+              <ThemedView style={styles.statRow} type="transparent">
                 <StatTile label={t('home.activeLoads')} value={activeLoadsCount} />
               </ThemedView>
 
               <SectionHeading text={t('home.fleetStatus')} />
-              <ThemedView style={styles.statRow} type="background">
+              <ThemedView style={styles.statRow} type="transparent">
                 <StatTile label={t('home.statusActive')} value={fleetCounts.active} />
                 <StatTile label={t('home.statusIdle')} value={fleetCounts.idle} />
                 <StatTile label={t('home.statusInShop')} value={fleetCounts.in_shop} />
@@ -341,7 +339,7 @@ export default function HomeScreen() {
 
           {role === 'dispatcher' && (
             <>
-              <ThemedView style={styles.statRow} type="background">
+              <ThemedView style={styles.statRow} type="transparent">
                 <StatTile label={t('home.availableDrivers')} value={availableDrivers} />
                 <StatTile label={t('home.availableVehicles')} value={availableVehicles} />
               </ThemedView>
@@ -370,7 +368,7 @@ export default function HomeScreen() {
 
           {role === 'finance' && (
             <>
-              <ThemedView style={styles.statRow} type="background">
+              <ThemedView style={styles.statRow} type="transparent">
                 <StatTile label={t('home.outstanding')} value={`$${outstandingTotal.toLocaleString()} (${outstandingCount})`} />
               </ThemedView>
 
@@ -381,7 +379,7 @@ export default function HomeScreen() {
                 </ThemedText>
               ) : (
                 mostOverdue.map((inv) => (
-                  <ThemedView key={inv.id} style={[styles.invoiceRow, { backgroundColor: theme.background }, styles.cardShadow]}>
+                  <ThemedView key={inv.id} style={[styles.invoiceRow, { backgroundColor: theme.card }, styles.cardShadow]}>
                     <ThemedText type="smallBold">{inv.invoice_number}</ThemedText>
                     <ThemedText type="small" themeColor="textSecondary">
                       ${Number(inv.amount).toLocaleString()} · {t('home.due')} {inv.due_date ?? '—'}
@@ -397,7 +395,7 @@ export default function HomeScreen() {
                 </ThemedText>
               ) : (
                 recentPayments.map((inv) => (
-                  <ThemedView key={inv.id} style={[styles.invoiceRow, { backgroundColor: theme.background }, styles.cardShadow]}>
+                  <ThemedView key={inv.id} style={[styles.invoiceRow, { backgroundColor: theme.card }, styles.cardShadow]}>
                     <ThemedText type="smallBold">{inv.invoice_number}</ThemedText>
                     <ThemedText type="small" themeColor="textSecondary">
                       ${Number(inv.amount).toLocaleString()} · {inv.paid_at ? inv.paid_at.slice(0, 10) : '—'}

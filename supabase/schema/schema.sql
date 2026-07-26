@@ -347,6 +347,13 @@ CREATE TABLE profiles (
   uom_system         TEXT CHECK (uom_system IN ('imperial','metric')),
   date_format        TEXT DEFAULT 'MM/DD/YYYY' CHECK (date_format IN ('MM/DD/YYYY','DD/MM/YYYY','YYYY-MM-DD')),
   time_format        TEXT DEFAULT '12h' CHECK (time_format IN ('12h','24h')),
+  -- Light/dark appearance (2026-07-26). NOT NULL with a 'system' default
+  -- rather than nullable-means-inherit like uom_system above: there is no
+  -- org-level theme to inherit from, and 'system' already expresses "follow
+  -- the device" explicitly. Mobile mirrors this into AsyncStorage so the
+  -- pre-login screens (welcome/login/signup) and cold start can theme
+  -- themselves before any profile row is readable.
+  theme_preference   TEXT NOT NULL DEFAULT 'system' CHECK (theme_preference IN ('light','dark','system')),
   -- Driver photo (2026-07-21, decisions.md S10) -- mobile-captured only, web
   -- is display-only (signed URL). Same `documents` bucket path convention.
   avatar_path        TEXT,

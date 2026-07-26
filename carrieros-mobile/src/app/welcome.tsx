@@ -30,7 +30,7 @@ export default function WelcomeScreen() {
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <ThemedView style={styles.hero} type="background">
+          <ThemedView style={styles.hero} type="transparent">
             <ThemedText style={styles.heroIcon}>🚛</ThemedText>
             <ThemedText type="title" style={styles.heroTitle}>{t('welcome.title')}</ThemedText>
             <ThemedText type="default" themeColor="textSecondary" style={styles.heroSub}>
@@ -38,7 +38,7 @@ export default function WelcomeScreen() {
             </ThemedText>
           </ThemedView>
 
-          <ThemedView style={styles.featureList} type="background">
+          <ThemedView style={styles.featureList} type="transparent">
             {FEATURES.map((f) => (
               <ThemedView key={f.titleKey} style={styles.featureRow} type="backgroundElement">
                 <ThemedText style={styles.featureIcon}>{f.icon}</ThemedText>
@@ -51,7 +51,7 @@ export default function WelcomeScreen() {
           </ThemedView>
         </ScrollView>
 
-        <ThemedView style={styles.footer} type="background">
+        <ThemedView style={styles.footer} type="transparent">
           <Pressable onPress={() => router.push('/signup')} style={styles.primaryButton}>
             <ThemedText type="smallBold" style={{ color: '#ffffff' }}>{t('welcome.getStarted')}</ThemedText>
           </Pressable>

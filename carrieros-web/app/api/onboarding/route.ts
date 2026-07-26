@@ -7,6 +7,49 @@ import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { logError, logEvent } from '@/lib/observability'
 import { getProfileForUser, upsertProfile } from '@/lib/queries/profiles'
 
+// Inbound load-email domain. Env-overridable so staging doesn't mint
+// addresses that collide with production's namespace.
+const LOAD_EMAIL_DOMAIN = process.env.LOAD_EMAIL_DOMAIN ?? 'carrierosapp.com'
+
+/**
+ * Mint the carrier's dedicated inbound load address (mockup-06 screen 6:
+ * "loads@acme.carrierosapp.com — forward broker emails here").
+ *
+ * Slug rules: lowercase, alphanumerics collapsed to single hyphens, trimmed.
+ * A company name that slugs to nothing (e.g. all punctuation, or a
+ * non-Latin script) falls back to `carrier`, which then collides its way to
+ * a numbered suffix below rather than producing `loads@.domain`.
+ */
+async function generateLoadEmail(
+  admin: ReturnType<typeof createAdminClient>,
+  companyName: string
+): Promise<string | null> {
+  const base =
+    companyName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 40) || 'carrier'
+
+  // Bounded retry, not an unbounded while(true): the column is UNIQUE, so a
+  // pathological run of collisions should degrade to "no address yet"
+  // rather than spin. Onboarding must not fail just because we couldn't pick
+  // a pretty name — load_email is nullable and can be assigned later.
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const candidate = `loads@${attempt === 0 ? base : `${base}-${attempt + 1}`}.${LOAD_EMAIL_DOMAIN}`
+    const { data, error } = await admin
+      .from('carrier_details')
+      .select('org_id')
+      .eq('load_email', candidate)
+      .maybeSingle()
+    // On a query error, stop guessing rather than risk inserting a duplicate
+    // into a UNIQUE column and failing the whole onboarding transaction.
+    if (error) return null
+    if (!data) return candidate
+  }
+  return null
+}
+
 // Derive timezone from country + state
 function deriveTimezone(country: string, state: string): string {
   if (country === 'CA') {
@@ -77,6 +120,16 @@ export async function POST(request: NextRequest) {
   // Use admin client for all DB writes — bypasses RLS during initial setup
   const admin = createAdminClient()
 
+  // carrier_details.load_email has existed (UNIQUE) since the original
+  // schema but was never populated by anything — a grep across both apps
+  // found zero writers and zero readers (2026-07-26). That left mockup-06's
+  // centrepiece, the "Your Load Email · forward broker emails here" panel on
+  // the setup-complete screen, with no value to show. Generated here rather
+  // than client-side because uniqueness is a server concern and the column
+  // is UNIQUE: a slug collision between two carriers with similar names must
+  // be resolved against the table, not guessed at in the app.
+  const loadEmail = await generateLoadEmail(admin, company_name)
+
   // 1. Create organization
   const { data: org, error: orgErr } = await admin
     .from('organizations')
@@ -112,6 +165,7 @@ export async function POST(request: NextRequest) {
       timezone,
       uom_system: uom,
       default_net_terms_days: resolvedNetTerms,
+      load_email: loadEmail,
     })
 
   if (detailErr) {
@@ -135,5 +189,8 @@ export async function POST(request: NextRequest) {
   }
   logEvent({ route: 'api/onboarding', userId: user.id, orgId }, { step: 3, event: 'profile_upserted' })
 
-  return NextResponse.json({ org_id: orgId }, { status: 201 })
+  // load_email is returned so the client's setup-complete screen can show it
+  // immediately without a second round-trip. Null when generation gave up
+  // (see generateLoadEmail) — callers must treat it as optional.
+  return NextResponse.json({ org_id: orgId, load_email: loadEmail }, { status: 201 })
 }

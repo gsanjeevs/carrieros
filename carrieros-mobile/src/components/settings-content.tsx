@@ -13,7 +13,7 @@ import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BrandColors, BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+import { useTheme, useThemePreference, type ThemePreference } from '@/hooks/use-theme';
 import { useLocale, type DateFormat, type TimeFormat, type Uom } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
 import { SUPPORTED_LOCALES, type Locale } from '@/lib/i18n';
@@ -27,6 +27,14 @@ const LANGUAGE_LABEL_KEY: Record<Locale, string> = {
   pa: 'settings.punjabi',
   ur: 'settings.urdu',
 };
+
+const THEME_LABEL_KEY: Record<ThemePreference, string> = {
+  light: 'settings.appearanceLight',
+  dark: 'settings.appearanceDark',
+  system: 'settings.appearanceSystem',
+};
+
+const THEME_PREFERENCES: ThemePreference[] = ['light', 'dark', 'system'];
 
 const DATE_FORMAT_EXAMPLES: Record<DateFormat, string> = {
   'MM/DD/YYYY': '07/20/2026',
@@ -42,6 +50,7 @@ export function SettingsContent() {
   const router = useRouter();
   const { locale, setLocale, t, prefs, setUomSystem, setDateFormat, setTimeFormat } = useLocale();
   const { role } = useProfileRole();
+  const { preference: themePreference, setPreference: setThemePreference } = useThemePreference();
   const [saving, setSaving] = useState<OptionKey | null>(null);
 
   const isOwnerSolo = role === 'owner' || role === 'solo';
@@ -138,6 +147,23 @@ export function SettingsContent() {
         <ThemedText type="small" themeColor="textSecondary" style={styles.notice}>
           {t('settings.restartNotice')}
         </ThemedText>
+
+        {/* Appearance */}
+        <ThemedText type="default" style={[styles.sectionHeading, styles.sectionHeadingText]}>{t('settings.appearanceSection')}</ThemedText>
+        <ThemedText type="small" themeColor="textSecondary" style={styles.sectionSubtitle}>
+          {t('settings.appearanceSubtitle')}
+        </ThemedText>
+        <ThemedView style={styles.options}>
+          {THEME_PREFERENCES.map((pref) => (
+            <OptionRow
+              key={pref}
+              optionKey={`theme-${pref}`}
+              label={t(THEME_LABEL_KEY[pref])}
+              selected={pref === themePreference}
+              onPress={() => withSaving(`theme-${pref}`, () => setThemePreference(pref))}
+            />
+          ))}
+        </ThemedView>
 
         {/* Units */}
         <ThemedText type="default" style={[styles.sectionHeading, styles.sectionHeadingText]}>{t('settings.unitsSection')}</ThemedText>
