@@ -29,6 +29,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useOnboardingStatus } from '@/hooks/use-onboarding-status';
 import { apiFetch } from '@/lib/api';
+import { supabase } from '@/lib/supabase';
 
 const ORANGE = BrandColors.orange;
 
@@ -244,9 +245,22 @@ export default function OnboardingScreen() {
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-          <ThemedView style={styles.logoRow} type="background">
-            <ThemedText type="title" style={{ color: ORANGE, fontSize: 22 }}>Carrier</ThemedText>
-            <ThemedText type="title" style={{ fontSize: 22 }}>OS</ThemedText>
+          <ThemedView style={styles.headerRow} type="background">
+            <ThemedView style={styles.headerSpacer} type="background" />
+            <ThemedView style={styles.logoRow} type="background">
+              <ThemedText type="title" style={{ color: ORANGE, fontSize: 22 }}>Carrier</ThemedText>
+              <ThemedText type="title" style={{ fontSize: 22 }}>OS</ThemedText>
+            </ThemedView>
+            {/* Onboarding previously had NO way to leave — a user stuck here
+                (wrong account, abandoned signup, wants to try a different
+                email) had no path back to Welcome/Login at all, since
+                AuthGate renders this screen directly rather than through the
+                (tabs) shell that owns the app's only other Sign out link. */}
+            <ThemedView style={styles.headerSignOut} type="background">
+              <Pressable onPress={() => supabase.auth.signOut()} hitSlop={12}>
+                <ThemedText type="small" themeColor="textSecondary">{t('onboarding.signOut')}</ThemedText>
+              </Pressable>
+            </ThemedView>
           </ThemedView>
 
           <ThemedView style={styles.progressTrack} type="backgroundElement">
@@ -560,7 +574,13 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   safeArea: { flex: 1, paddingHorizontal: Spacing.four },
   scrollContent: { paddingBottom: Spacing.six },
-  logoRow: { flexDirection: 'row', justifyContent: 'center', marginTop: Spacing.three, marginBottom: Spacing.three },
+  headerRow: {
+    flexDirection: 'row', alignItems: 'center',
+    marginTop: Spacing.three, marginBottom: Spacing.three,
+  },
+  headerSpacer: { flex: 1 },
+  logoRow: { flexDirection: 'row', flex: 2, justifyContent: 'center' },
+  headerSignOut: { flex: 1, alignItems: 'flex-end' },
   progressTrack: { height: 4, borderRadius: 2, overflow: 'hidden' },
   progressFill: { height: '100%', borderRadius: 2 },
   progressLabel: { textAlign: 'right', marginTop: 4, marginBottom: Spacing.four },

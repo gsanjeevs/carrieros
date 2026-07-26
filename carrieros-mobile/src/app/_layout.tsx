@@ -9,6 +9,7 @@ import { useRegisterPushToken } from '@/hooks/use-register-push-token';
 import { OnboardingStatusProvider, useOnboardingStatus } from '@/hooks/use-onboarding-status';
 import { LocaleProvider } from '@/hooks/use-locale';
 import { OfflineBanner } from '@/components/offline-banner';
+import { OnboardingStatusError } from '@/components/onboarding-status-error';
 import WelcomeScreen from './welcome';
 import OnboardingScreen from './onboarding';
 
@@ -45,7 +46,7 @@ const PUBLIC_ROUTES = ['/welcome', '/login', '/signup'];
 // one-directional pushes/replaces that were never the problem.
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { session, loading } = useSession();
-  const { needsOnboarding, loading: onboardingLoading } = useOnboardingStatus();
+  const { needsOnboarding, loading: onboardingLoading, error: onboardingCheckError, refresh: refreshOnboardingStatus } = useOnboardingStatus();
   const pathname = usePathname();
   useRegisterPushToken();
 
@@ -69,6 +70,17 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     // when the current route isn't one of those (e.g. a stale/persisted
     // nav state pointing somewhere protected while signed out).
     return isPublicRoute ? <>{children}</> : <WelcomeScreen />;
+  }
+
+  if (onboardingCheckError) {
+    // The "does this user have a company yet" check itself failed (network
+    // error, Supabase unreachable) — distinct from a successful check that
+    // confirmed no org exists. Rendering the onboarding wizard here would
+    // be actively misleading for an already-onboarded user hitting a
+    // transient failure, with no explanation and (before onboarding/
+    // index.tsx got its own sign-out link) no way out. Show what actually
+    // happened instead, with a retry and an escape hatch that always works.
+    return <OnboardingStatusError onRetry={refreshOnboardingStatus} />;
   }
 
   if (needsOnboarding) {

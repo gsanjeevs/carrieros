@@ -3,7 +3,9 @@
     "back": "← Atrás",
     "unknownCustomer": "Cliente desconocido",
     "cancel": "Cancelar",
-    "loadErrorRetry": "Algo salió mal al cargar esto. Desliza hacia abajo para volver a intentarlo."
+    "loadErrorRetry": "Algo salió mal al cargar esto. Desliza hacia abajo para volver a intentarlo.",
+    "somethingWentWrongTitle": "Algo salió mal",
+    "retry": "Intentar de nuevo"
   },
   "welcome": {
     "title": "Bienvenido a CarrierOS",
@@ -31,6 +33,7 @@
   },
   "onboarding": {
     "stepLabel": "Paso %{current} de %{total}",
+    "signOut": "Cerrar sesión",
     "companyDetails": "Datos de la empresa",
     "companyName": "Nombre de la empresa",
     "dotNumber": "Número DOT",

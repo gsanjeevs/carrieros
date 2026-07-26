@@ -3,7 +3,9 @@
     "back": "← Back",
     "unknownCustomer": "Unknown customer",
     "cancel": "Cancel",
-    "loadErrorRetry": "Something went wrong loading this. Pull down to try again."
+    "loadErrorRetry": "Something went wrong loading this. Pull down to try again.",
+    "somethingWentWrongTitle": "Something went wrong",
+    "retry": "Try again"
   },
   "welcome": {
     "title": "Welcome to CarrierOS",
@@ -31,6 +33,7 @@
   },
   "onboarding": {
     "stepLabel": "Step %{current} of %{total}",
+    "signOut": "Sign out",
     "companyDetails": "Company details",
     "companyName": "Company name",
     "dotNumber": "DOT Number",

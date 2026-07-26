@@ -25,6 +25,13 @@ import { supabase } from '@/lib/supabase';
 interface OnboardingStatus {
   needsOnboarding: boolean;
   loading: boolean;
+  // True when the "does this user have a company yet" check itself failed
+  // (network error, Supabase unreachable, etc) — distinct from
+  // needsOnboarding, which means the check SUCCEEDED and confirmed there's
+  // no org yet. Conflating the two used to mean any transient failure
+  // showed the onboarding wizard to an already-onboarded user, with no
+  // indication anything had gone wrong and no way to sign out.
+  error: boolean;
   refresh: () => Promise<void>;
 }
 
@@ -34,6 +41,7 @@ export function OnboardingStatusProvider({ children }: { children: ReactNode }) 
   const { session } = useSession();
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   // `check` takes the user id as a PARAMETER rather than closing over
   // `session`, so it has zero dependencies and a permanently stable
@@ -58,13 +66,27 @@ export function OnboardingStatusProvider({ children }: { children: ReactNode }) 
   // this codebase; satisfying the lint rule was the wrong call.
   const check = useCallback(async (userId: string) => {
     setLoading(true);
-    const { data } = await supabase
-      .from('profiles')
-      .select('org_id')
-      .eq('id', userId)
-      .maybeSingle();
-    setNeedsOnboarding(!data?.org_id);
-    setLoading(false);
+    setError(false);
+    try {
+      const { data, error: queryErr } = await supabase
+        .from('profiles')
+        .select('org_id')
+        .eq('id', userId)
+        .maybeSingle();
+      // A query error (e.g. Supabase unreachable) is NOT the same as a
+      // successful query that found no org_id — reproduced live on an iOS
+      // Simulator (2026-07-25): before this, both cases set
+      // needsOnboarding(true), so a network hiccup showed an already-
+      // onboarded user the onboarding wizard with no explanation and no
+      // way out (that screen previously had no sign-out link either — see
+      // src/app/onboarding/index.tsx).
+      if (queryErr) throw queryErr;
+      setNeedsOnboarding(!data?.org_id);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   // This effect's "no session" branch calls setState directly, the same
@@ -80,6 +102,7 @@ export function OnboardingStatusProvider({ children }: { children: ReactNode }) 
     if (!session?.user.id) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setNeedsOnboarding(false);
+      setError(false);
       setLoading(false);
       return;
     }
@@ -113,8 +136,8 @@ export function OnboardingStatusProvider({ children }: { children: ReactNode }) 
   // within a single commit. Confirmed by testing the real signup ->
   // onboarding handoff on an iOS Simulator, not caught by tsc/eslint/jest.
   const value = useMemo(
-    () => ({ needsOnboarding, loading, refresh }),
-    [needsOnboarding, loading, refresh]
+    () => ({ needsOnboarding, loading, error, refresh }),
+    [needsOnboarding, loading, error, refresh]
   );
 
   return (

@@ -3,7 +3,9 @@
     "back": "← پیچھے",
     "unknownCustomer": "نامعلوم گاہک",
     "cancel": "منسوخ کریں",
-    "loadErrorRetry": "اسے لوڈ کرنے میں کچھ غلط ہو گیا۔ دوبارہ کوشش کرنے کے لیے نیچے کھینچیں۔"
+    "loadErrorRetry": "اسے لوڈ کرنے میں کچھ غلط ہو گیا۔ دوبارہ کوشش کرنے کے لیے نیچے کھینچیں۔",
+    "somethingWentWrongTitle": "کچھ غلط ہو گیا",
+    "retry": "دوبارہ کوشش کریں"
   },
   "welcome": {
     "title": "CarrierOS میں خوش آمدید",
@@ -31,6 +33,7 @@
   },
   "onboarding": {
     "stepLabel": "مرحلہ %{current} از %{total}",
+    "signOut": "سائن آؤٹ کریں",
     "companyDetails": "کمپنی کی تفصیلات",
     "companyName": "کمپنی کا نام",
     "dotNumber": "DOT نمبر",
