@@ -1,6 +1,6 @@
 import { DarkTheme, DefaultTheme, Slot, ThemeProvider, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
@@ -52,10 +52,50 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 
   const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
   const isOnboardingRoute = pathname === '/onboarding';
+
+  // Latch: keep rendering the wizard once it has started, even after
+  // needsOnboarding flips false underneath it.
+  //
+  // The wizard has five steps but only step 1 (company details) creates the
+  // org. As soon as it succeeds, submitCompany() calls
+  // refreshOnboardingStatus() — deliberately, so the completion step's
+  // router.replace('/') isn't fighting a stale "still needs onboarding".
+  // But that flipped needsOnboarding false while the user was still on step
+  // 1, so this gate swapped the wizard out for the (tabs) shell mid-flight
+  // and steps 2-5 (vehicle, customer, billing, completion) never rendered at
+  // all. Reproduced live on an iOS Simulator (2026-07-26): filling in step 1
+  // and pressing Continue landed straight on the Dashboard, and the org row
+  // it created (organizations.id 971) confirmed the submit itself had
+  // worked — the wizard was being unmounted, not failing.
+  //
+  // Keyed by user id so signing out or switching accounts clears it for
+  // free; cleared explicitly by the completion step via onFinish.
+  const userId = session?.user.id;
+  const [wizardUser, setWizardUser] = useState<string | null>(null);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (needsOnboarding && userId) setWizardUser(userId);
+  }, [needsOnboarding, userId]);
+  const wizardActive = !!userId && wizardUser === userId;
   // Session loading always gates; onboarding-status loading only matters
   // once a session exists (the hook itself returns loading:false with no
   // session, so this can't deadlock a signed-out user on the splash screen).
-  const stillResolving = loading || (!!session && onboardingLoading);
+  //
+  // ...and it stops mattering entirely once the wizard is on screen. `check()`
+  // sets loading:true on every run, including the refresh() that submitCompany
+  // fires mid-wizard — which made this whole component `return null` for the
+  // duration of that request, UNMOUNTING the wizard and taking its useState
+  // with it. Reproduced live on an iOS Simulator (2026-07-26): with the latch
+  // below already in place, step 1 correctly stayed in the wizard instead of
+  // bailing to the Dashboard, but came back as a blank "Step 1 of 5" with
+  // every field cleared, because `step` had been reset to its 'company'
+  // initial value. The org row it created (organizations.id 972) proved the
+  // submit had succeeded — the state loss was purely this unmount.
+  //
+  // Excluding onboardingLoading while wizardActive is safe: wizardActive can
+  // only be true after a check has already completed and returned
+  // needsOnboarding, so this never skips the initial "which screen?" gate.
+  const stillResolving = loading || (!!session && onboardingLoading && !wizardActive);
 
   useEffect(() => {
     if (!stillResolving) SplashScreen.hideAsync();
@@ -72,7 +112,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     return isPublicRoute ? <>{children}</> : <WelcomeScreen />;
   }
 
-  if (onboardingCheckError) {
+  if (onboardingCheckError && !wizardActive) {
     // The "does this user have a company yet" check itself failed (network
     // error, Supabase unreachable) — distinct from a successful check that
     // confirmed no org exists. Rendering the onboarding wizard here would
@@ -80,14 +120,23 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     // transient failure, with no explanation and (before onboarding/
     // index.tsx got its own sign-out link) no way out. Show what actually
     // happened instead, with a retry and an escape hatch that always works.
+    //
+    // Skipped while the wizard is active, for the same reason the loading
+    // gate above is: swapping this in mid-wizard would unmount the wizard and
+    // discard everything the user had typed. A refresh() that fails during
+    // setup doesn't change what we should be showing — they still need to
+    // finish onboarding — and the wizard surfaces its own submit errors
+    // inline (see the catch blocks in onboarding/index.tsx).
     return <OnboardingStatusError onRetry={refreshOnboardingStatus} />;
   }
 
-  if (needsOnboarding) {
-    // Same idea: if the matched route already IS /onboarding, let it
-    // render normally through Slot; otherwise render it directly rather
-    // than navigating there.
-    return isOnboardingRoute ? <>{children}</> : <OnboardingScreen />;
+  if (needsOnboarding || wizardActive) {
+    // Rendered directly in both cases, rather than deferring to Slot when
+    // the matched route already IS /onboarding. It's the same component
+    // either way, and rendering it here is what lets onFinish be wired up —
+    // without that the latch above would never clear and the wizard could
+    // never hand off to the app.
+    return <OnboardingScreen onFinish={() => setWizardUser(null)} />;
   }
 
   // Fully onboarded. If the current route is one of the public/onboarding

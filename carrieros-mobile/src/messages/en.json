@@ -5,6 +5,7 @@
     "cancel": "Cancel",
     "loadErrorRetry": "Something went wrong loading this. Pull down to try again.",
     "somethingWentWrongTitle": "Something went wrong",
+    "connectionError": "Can't reach the CarrierOS server. Check your connection and try again.",
     "retry": "Try again"
   },
   "welcome": {

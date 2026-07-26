@@ -98,7 +98,12 @@ function OnboardingField({
   );
 }
 
-export default function OnboardingScreen() {
+// onFinish is supplied by _layout.tsx's AuthGate, which renders this screen
+// directly rather than as a route. Optional because this file is also a real
+// expo-router route (/onboarding), and route components are mounted with no
+// props — in that case the completion buttons just navigate, with no latch to
+// release.
+export default function OnboardingScreen({ onFinish }: { onFinish?: () => void }) {
   const theme = useTheme();
   const router = useRouter();
   const { t } = useLocale();
@@ -131,6 +136,23 @@ export default function OnboardingScreen() {
   // stuck showing its spinner forever with no way to retry. finally()
   // guarantees loading always resolves regardless of which way the request
   // failed.
+  //
+  // Each catch reports a CONNECTION problem specifically, not a generic
+  // "something went wrong." fetch() only rejects for transport-level
+  // failures — server unreachable, DNS, no network; an HTTP error status
+  // resolves normally and is handled by the `!res.ok` branch above. So
+  // reaching a catch here always means the request never got to the server,
+  // and saying that is strictly more actionable. These previously showed
+  // common.loadErrorRetry ("...Pull down to try again"), which was wrong
+  // twice over: it named the wrong operation (this is a submit, not a load)
+  // and told the user to pull-to-refresh on a screen that has no such
+  // gesture. Reproduced live on an iOS Simulator (2026-07-26): with
+  // carrieros-web not running, every Continue tap showed that message, which
+  // is why this read as "throwing an error without telling me why."
+  //
+  // The console.warn matters as much as the copy — a bare `catch {}` threw
+  // the only diagnostic detail away, so neither the user NOR the logs said
+  // what actually failed.
   async function submitCompany() {
     if (!canSubmitCompany) return;
     setLoading(true);
@@ -163,8 +185,9 @@ export default function OnboardingScreen() {
       // think onboarding is needed.
       await refreshOnboardingStatus();
       setStep('vehicle');
-    } catch {
-      setError(t('common.loadErrorRetry'));
+    } catch (err) {
+      console.warn('[onboarding] request failed:', err);
+      setError(t('common.connectionError'));
     } finally {
       setLoading(false);
     }
@@ -189,8 +212,9 @@ export default function OnboardingScreen() {
       }
       setAddedVehicle(true);
       setStep('customer');
-    } catch {
-      setError(t('common.loadErrorRetry'));
+    } catch (err) {
+      console.warn('[onboarding] request failed:', err);
+      setError(t('common.connectionError'));
     } finally {
       setLoading(false);
     }
@@ -215,8 +239,9 @@ export default function OnboardingScreen() {
       }
       setAddedCustomer(true);
       setStep('billing');
-    } catch {
-      setError(t('common.loadErrorRetry'));
+    } catch (err) {
+      console.warn('[onboarding] request failed:', err);
+      setError(t('common.connectionError'));
     } finally {
       setLoading(false);
     }
@@ -234,8 +259,9 @@ export default function OnboardingScreen() {
       }
       setCard({ brand: json.card_brand, last4: json.card_last4 });
       setAddedPaymentMethod(true);
-    } catch {
-      setError(t('common.loadErrorRetry'));
+    } catch (err) {
+      console.warn('[onboarding] request failed:', err);
+      setError(t('common.connectionError'));
     } finally {
       setLoading(false);
     }
@@ -555,10 +581,14 @@ export default function OnboardingScreen() {
               ))}
 
               <ThemedView style={styles.buttonRow} type="background">
-                <Pressable onPress={() => router.replace('/')} style={styles.secondaryButton}>
+                {/* onFinish() releases AuthGate's wizard latch before
+                    navigating — see the latch comment in _layout.tsx. It has
+                    to run first, or the gate would re-render this wizard
+                    straight back over the destination. */}
+                <Pressable onPress={() => { onFinish?.(); router.replace('/'); }} style={styles.secondaryButton}>
                   <ThemedText type="smallBold" themeColor="text">{t('onboarding.goToDashboard')}</ThemedText>
                 </Pressable>
-                <Pressable onPress={() => router.replace('/load/new')} style={[styles.button, styles.buttonFlex]}>
+                <Pressable onPress={() => { onFinish?.(); router.replace('/load/new'); }} style={[styles.button, styles.buttonFlex]}>
                   <ThemedText type="smallBold" style={{ color: '#ffffff' }}>{t('onboarding.addFirstLoad')}</ThemedText>
                 </Pressable>
               </ThemedView>

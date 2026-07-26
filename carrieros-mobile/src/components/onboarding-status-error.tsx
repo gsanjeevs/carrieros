@@ -25,7 +25,10 @@ export function OnboardingStatusError({ onRetry }: { onRetry: () => void }) {
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title" style={styles.title}>{t('common.somethingWentWrongTitle')}</ThemedText>
         <ThemedText type="default" themeColor="textSecondary" style={styles.subtitle}>
-          {t('common.loadErrorRetry')}
+          {/* Not common.loadErrorRetry — that string ends "Pull down to try
+              again," and this screen has a Retry button rather than a
+              pull-to-refresh gesture. */}
+          {t('common.connectionError')}
         </ThemedText>
 
         <Pressable onPress={onRetry} style={styles.button}>
