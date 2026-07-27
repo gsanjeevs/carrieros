@@ -1,0 +1,4727 @@
+{
+  "generatedFor": "carrieros-web",
+  "generatedAt": "2026-07-26",
+  "scannedRoots": [
+    "app",
+    "components",
+    "lib",
+    "tests"
+  ],
+  "totals": {
+    "total": 376,
+    "byKind": {
+      "auth": 48,
+      "table": 296,
+      "rpc": 18,
+      "storage": 10,
+      "realtime": 4
+    },
+    "byLayer": {
+      "server-component": 97,
+      "server-action": 11,
+      "client-component": 33,
+      "route-handler": 79,
+      "lib": 51,
+      "test": 105
+    },
+    "byOperation": {
+      "auth": 48,
+      "read": 165,
+      "rpc": 18,
+      "storage": 10,
+      "write": 131,
+      "realtime": 4
+    },
+    "byKindAndLayer": {
+      "auth:server-component": 24,
+      "table:server-component": 62,
+      "rpc:server-component": 5,
+      "storage:server-component": 6,
+      "auth:server-action": 4,
+      "table:server-action": 7,
+      "auth:client-component": 2,
+      "table:client-component": 27,
+      "table:route-handler": 72,
+      "rpc:route-handler": 4,
+      "auth:route-handler": 3,
+      "realtime:client-component": 4,
+      "auth:lib": 8,
+      "rpc:lib": 4,
+      "table:lib": 35,
+      "storage:lib": 4,
+      "table:test": 93,
+      "rpc:test": 5,
+      "auth:test": 7
+    },
+    "distinctTables": 33,
+    "distinctRpcs": 13,
+    "distinctBuckets": 3,
+    "serviceRoleCallSites": 20,
+    "serviceRoleReferences": 40,
+    "realtimeUsages": 4,
+    "entitlementCallers": 40
+  },
+  "tables": [
+    "<dynamic:table>",
+    "admin_events",
+    "admin_notes",
+    "billing_events",
+    "carrier_details",
+    "customer_contacts",
+    "customer_details",
+    "documents",
+    "driver_documents",
+    "driver_message_translations",
+    "driver_messages",
+    "driver_settlements",
+    "drivers",
+    "dvir_inspections",
+    "exception_events",
+    "fuel_stops",
+    "ifta_state_crossings",
+    "invoices",
+    "languages",
+    "load_events",
+    "loads",
+    "maintenance_reminders",
+    "org_documents",
+    "org_flag_overrides",
+    "organizations",
+    "platform_flags",
+    "profiles",
+    "roles",
+    "service_logs",
+    "tiers",
+    "vehicle_documents",
+    "vehicle_types",
+    "vehicles"
+  ],
+  "rpcs": [
+    "bulk_import_customers",
+    "check_ifta_completeness",
+    "create_customer_org",
+    "get_customer_health_score",
+    "get_exceptions",
+    "get_ifta_tax_summary",
+    "get_my_entitlements",
+    "get_public_tracking",
+    "get_public_tracking_events",
+    "has_feature",
+    "mark_overdue_invoices",
+    "next_entity_val",
+    "send_expiry_reminders"
+  ],
+  "buckets": [
+    "<dynamic:this.bucket>",
+    "avatars",
+    "documents"
+  ],
+  "tableStats": {
+    "carrier_details": {
+      "read": 15,
+      "write": 11,
+      "unknown": 0,
+      "byLayer": {
+        "server-component": 3,
+        "server-action": 1,
+        "route-handler": 14,
+        "test": 8
+      }
+    },
+    "vehicles": {
+      "read": 11,
+      "write": 3,
+      "unknown": 0,
+      "byLayer": {
+        "server-component": 7,
+        "client-component": 1,
+        "route-handler": 4,
+        "test": 2
+      }
+    },
+    "tiers": {
+      "read": 3,
+      "write": 0,
+      "unknown": 0,
+      "byLayer": {
+        "server-component": 1,
+        "route-handler": 1,
+        "client-component": 1
+      }
+    },
+    "customer_details": {
+      "read": 3,
+      "write": 8,
+      "unknown": 0,
+      "byLayer": {
+        "server-component": 2,
+        "route-handler": 1,
+        "test": 8
+      }
+    },
+    "organizations": {
+      "read": 17,
+      "write": 11,
+      "unknown": 0,
+      "byLayer": {
+        "server-component": 9,
+        "route-handler": 8,
+        "client-component": 1,
+        "test": 10
+      }
+    },
+    "exception_events": {
+      "read": 2,
+      "write": 1,
+      "unknown": 0,
+      "byLayer": {
+        "server-component": 1,
+        "route-handler": 1,
+        "test": 1
+      }
+    },
+    "invoices": {
+      "read": 19,
+      "write": 17,
+      "unknown": 0,
+      "byLayer": {
+        "server-component": 11,
+        "server-action": 6,
+        "route-handler": 5,
+        "lib": 3,
+        "test": 11
+      }
+    },
+    "customer_contacts": {
+      "read": 4,
+      "write": 7,
+      "unknown": 0,
+      "byLayer": {
+        "server-component": 1,
+        "route-handler": 6,
+        "test": 4
+      }
+    },
+    "loads": {
+      "read": 30,
+      "write": 14,
+      "unknown": 0,
+      "byLayer": {
+        "server-component": 8,
+        "route-handler": 5,
+        "lib": 15,
+        "test": 16
+      }
+    },
+    "drivers": {
+      "read": 11,
+      "write": 11,
+      "unknown": 0,
+      "byLayer": {
+        "server-component": 2,
+        "route-handler": 2,
+        "client-component": 3,
+        "lib": 5,
+        "test": 10
+      }
+    },
+    "org_documents": {
+      "read": 1,
+      "write": 2,
+      "unknown": 0,
+      "byLayer": {
+        "server-component": 1,
+        "client-component": 2
+      }
+    },
+    "driver_documents": {
+      "read": 1,
+      "write": 2,
+      "unknown": 0,
+      "byLayer": {
+        "server-component": 1,
+        "client-component": 2
+      }
+    },
+    "dvir_inspections": {
+      "read": 2,
+      "write": 0,
+      "unknown": 0,
+      "byLayer": {
+        "server-component": 2
+      }
+    },
+    "driver_settlements": {
+      "read": 5,
+      "write": 3,
+      "unknown": 0,
+      "byLayer": {
+        "server-component": 2,
+        "route-handler": 3,
+        "test": 3
+      }
+    },
+    "fuel_stops": {
+      "read": 2,
+      "write": 1,
+      "unknown": 0,
+      "byLayer": {
+        "server-component": 2,
+        "client-component": 1
+      }
+    },
+    "roles": {
+      "read": 1,
+      "write": 0,
+      "unknown": 0,
+      "byLayer": {
+        "server-component": 1
+      }
+    },
+    "load_events": {
+      "read": 2,
+      "write": 2,
+      "unknown": 0,
+      "byLayer": {
+        "server-component": 1,
+        "route-handler": 2,
+        "test": 1
+      }
+    },
+    "documents": {
+      "read": 2,
+      "write": 4,
+      "unknown": 0,
+      "byLayer": {
+        "server-component": 1,
+        "route-handler": 1,
+        "client-component": 2,
+        "test": 2
+      }
+    },
+    "ifta_state_crossings": {
+      "read": 1,
+      "write": 1,
+      "unknown": 0,
+      "byLayer": {
+        "server-component": 1,
+        "client-component": 1
+      }
+    },
+    "service_logs": {
+      "read": 2,
+      "write": 1,
+      "unknown": 0,
+      "byLayer": {
+        "client-component": 1,
+        "server-component": 2
+      }
+    },
+    "maintenance_reminders": {
+      "read": 2,
+      "write": 2,
+      "unknown": 0,
+      "byLayer": {
+        "client-component": 2,
+        "server-component": 2
+      }
+    },
+    "vehicle_types": {
+      "read": 2,
+      "write": 0,
+      "unknown": 0,
+      "byLayer": {
+        "client-component": 1,
+        "test": 1
+      }
+    },
+    "vehicle_documents": {
+      "read": 1,
+      "write": 2,
+      "unknown": 0,
+      "byLayer": {
+        "server-component": 1,
+        "client-component": 2
+      }
+    },
+    "admin_events": {
+      "read": 1,
+      "write": 6,
+      "unknown": 0,
+      "byLayer": {
+        "route-handler": 7
+      }
+    },
+    "billing_events": {
+      "read": 1,
+      "write": 0,
+      "unknown": 0,
+      "byLayer": {
+        "route-handler": 1
+      }
+    },
+    "platform_flags": {
+      "read": 2,
+      "write": 1,
+      "unknown": 0,
+      "byLayer": {
+        "route-handler": 3
+      }
+    },
+    "org_flag_overrides": {
+      "read": 1,
+      "write": 1,
+      "unknown": 0,
+      "byLayer": {
+        "route-handler": 2
+      }
+    },
+    "admin_notes": {
+      "read": 1,
+      "write": 1,
+      "unknown": 0,
+      "byLayer": {
+        "route-handler": 2
+      }
+    },
+    "driver_messages": {
+      "read": 6,
+      "write": 4,
+      "unknown": 0,
+      "byLayer": {
+        "route-handler": 2,
+        "client-component": 5,
+        "test": 3
+      }
+    },
+    "driver_message_translations": {
+      "read": 2,
+      "write": 1,
+      "unknown": 0,
+      "byLayer": {
+        "route-handler": 2,
+        "test": 1
+      }
+    },
+    "languages": {
+      "read": 1,
+      "write": 0,
+      "unknown": 0,
+      "byLayer": {
+        "client-component": 1
+      }
+    },
+    "profiles": {
+      "read": 10,
+      "write": 10,
+      "unknown": 0,
+      "byLayer": {
+        "client-component": 1,
+        "lib": 12,
+        "test": 7
+      }
+    },
+    "<dynamic:table>": {
+      "read": 1,
+      "write": 4,
+      "unknown": 0,
+      "byLayer": {
+        "test": 5
+      }
+    }
+  },
+  "occurrences": [
+    {
+      "file": "app/(admin)/admin/layout.tsx",
+      "line": 23,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/billing/page.tsx",
+      "line": 30,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/billing/page.tsx",
+      "line": 39,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('carrier_details')"
+    },
+    {
+      "file": "app/(app)/billing/page.tsx",
+      "line": 54,
+      "kind": "table",
+      "target": "vehicles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('vehicles')"
+    },
+    {
+      "file": "app/(app)/billing/page.tsx",
+      "line": 60,
+      "kind": "table",
+      "target": "tiers",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('tiers')"
+    },
+    {
+      "file": "app/(app)/customers/[customer_number]/page.tsx",
+      "line": 97,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/customers/[customer_number]/page.tsx",
+      "line": 111,
+      "kind": "table",
+      "target": "customer_details",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('customer_details')"
+    },
+    {
+      "file": "app/(app)/customers/[customer_number]/page.tsx",
+      "line": 121,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('organizations')"
+    },
+    {
+      "file": "app/(app)/customers/[customer_number]/page.tsx",
+      "line": 144,
+      "kind": "rpc",
+      "target": "get_customer_health_score",
+      "operation": "rpc",
+      "layer": "server-component",
+      "snippet": "const { data: scoreData, error: scoreError } = await supabase.rpc('get_customer_health_score', {"
+    },
+    {
+      "file": "app/(app)/customers/[customer_number]/page.tsx",
+      "line": 154,
+      "kind": "table",
+      "target": "exception_events",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('exception_events')"
+    },
+    {
+      "file": "app/(app)/customers/[customer_number]/page.tsx",
+      "line": 166,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "app/(app)/customers/[customer_number]/page.tsx",
+      "line": 177,
+      "kind": "table",
+      "target": "customer_contacts",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('customer_contacts')"
+    },
+    {
+      "file": "app/(app)/customers/page.tsx",
+      "line": 58,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/customers/page.tsx",
+      "line": 73,
+      "kind": "table",
+      "target": "customer_details",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('customer_details')"
+    },
+    {
+      "file": "app/(app)/customers/page.tsx",
+      "line": 81,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "app/(app)/dashboard/DispatcherView.tsx",
+      "line": 30,
+      "kind": "table",
+      "target": "vehicles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": "? supabase.from('vehicles').select('status').eq('carrier_org_id', orgId).eq('is_active', true)"
+    },
+    {
+      "file": "app/(app)/dashboard/FinanceView.tsx",
+      "line": 24,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "app/(app)/dashboard/FinanceView.tsx",
+      "line": 33,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "app/(app)/dashboard/OwnerView.tsx",
+      "line": 80,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "app/(app)/dashboard/OwnerView.tsx",
+      "line": 90,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "app/(app)/dashboard/OwnerView.tsx",
+      "line": 102,
+      "kind": "table",
+      "target": "vehicles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": "? supabase.from('vehicles').select('status').eq('carrier_org_id', orgId).eq('is_active', true)"
+    },
+    {
+      "file": "app/(app)/dashboard/OwnerView.tsx",
+      "line": 105,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": "? supabase.from('drivers').select('cdl_expiry, med_cert_expiry').eq('carrier_org_id', orgId).eq('is_active', true)"
+    },
+    {
+      "file": "app/(app)/dashboard/page.tsx",
+      "line": 14,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/dispatch/page.tsx",
+      "line": 22,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/dispatch/page.tsx",
+      "line": 47,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "app/(app)/dispatch/page.tsx",
+      "line": 67,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "app/(app)/documents/page.tsx",
+      "line": 17,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/documents/page.tsx",
+      "line": 37,
+      "kind": "table",
+      "target": "org_documents",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('org_documents')"
+    },
+    {
+      "file": "app/(app)/documents/page.tsx",
+      "line": 47,
+      "kind": "storage",
+      "target": "documents",
+      "operation": "storage",
+      "subOperation": "createSignedUrl",
+      "layer": "server-component",
+      "snippet": "const { data: signed } = await supabase.storage"
+    },
+    {
+      "file": "app/(app)/drivers/[driver_number]/page.tsx",
+      "line": 35,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/drivers/[driver_number]/page.tsx",
+      "line": 47,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "app/(app)/drivers/[driver_number]/page.tsx",
+      "line": 76,
+      "kind": "storage",
+      "target": "avatars",
+      "operation": "storage",
+      "subOperation": "createSignedUrl",
+      "layer": "server-component",
+      "snippet": "const { data: signedAvatar } = await supabase.storage"
+    },
+    {
+      "file": "app/(app)/drivers/[driver_number]/page.tsx",
+      "line": 84,
+      "kind": "table",
+      "target": "driver_documents",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('driver_documents')"
+    },
+    {
+      "file": "app/(app)/drivers/[driver_number]/page.tsx",
+      "line": 94,
+      "kind": "storage",
+      "target": "documents",
+      "operation": "storage",
+      "subOperation": "createSignedUrl",
+      "layer": "server-component",
+      "snippet": "const { data: signed } = await supabase.storage"
+    },
+    {
+      "file": "app/(app)/drivers/[driver_number]/page.tsx",
+      "line": 123,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('organizations')"
+    },
+    {
+      "file": "app/(app)/drivers/[driver_number]/page.tsx",
+      "line": 130,
+      "kind": "table",
+      "target": "dvir_inspections",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('dvir_inspections')"
+    },
+    {
+      "file": "app/(app)/drivers/page.tsx",
+      "line": 42,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/drivers/page.tsx",
+      "line": 68,
+      "kind": "table",
+      "target": "vehicles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('vehicles')"
+    },
+    {
+      "file": "app/(app)/exceptions/page.tsx",
+      "line": 19,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/finance/page.tsx",
+      "line": 46,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/finance/page.tsx",
+      "line": 87,
+      "kind": "rpc",
+      "target": "get_ifta_tax_summary",
+      "operation": "rpc",
+      "layer": "server-component",
+      "snippet": "supabase.rpc('get_ifta_tax_summary', { p_carrier_org_id: orgId, p_quarter: quarterKey }),"
+    },
+    {
+      "file": "app/(app)/finance/page.tsx",
+      "line": 90,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "app/(app)/finance/page.tsx",
+      "line": 98,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "app/(app)/finance/page.tsx",
+      "line": 101,
+      "kind": "table",
+      "target": "driver_settlements",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('driver_settlements')"
+    },
+    {
+      "file": "app/(app)/finance/page.tsx",
+      "line": 107,
+      "kind": "table",
+      "target": "fuel_stops",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('fuel_stops')"
+    },
+    {
+      "file": "app/(app)/finance/page.tsx",
+      "line": 111,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "app/(app)/finance/page.tsx",
+      "line": 176,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "app/(app)/invoices/[invoice_number]/page.tsx",
+      "line": 33,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/invoices/[invoice_number]/page.tsx",
+      "line": 45,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "app/(app)/invoices/[invoice_number]/page.tsx",
+      "line": 63,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('organizations')"
+    },
+    {
+      "file": "app/(app)/invoices/[invoice_number]/page.tsx",
+      "line": 70,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('carrier_details')"
+    },
+    {
+      "file": "app/(app)/invoices/[invoice_number]/print/page.tsx",
+      "line": 26,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/invoices/[invoice_number]/print/page.tsx",
+      "line": 38,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "app/(app)/invoices/[invoice_number]/print/page.tsx",
+      "line": 51,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('organizations')"
+    },
+    {
+      "file": "app/(app)/invoices/actions.ts",
+      "line": 34,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-action",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/invoices/actions.ts",
+      "line": 74,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-action",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "app/(app)/invoices/actions.ts",
+      "line": 84,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-action",
+      "snippet": ".from('carrier_details')"
+    },
+    {
+      "file": "app/(app)/invoices/actions.ts",
+      "line": 103,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "server-action",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "app/(app)/invoices/actions.ts",
+      "line": 166,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "server-action",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "app/(app)/invoices/actions.ts",
+      "line": 208,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-action",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "app/(app)/invoices/actions.ts",
+      "line": 219,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "server-action",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "app/(app)/invoices/actions.ts",
+      "line": 253,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "server-action",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "app/(app)/invoices/page.tsx",
+      "line": 23,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/invoices/page.tsx",
+      "line": 40,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('organizations')"
+    },
+    {
+      "file": "app/(app)/invoices/page.tsx",
+      "line": 53,
+      "kind": "rpc",
+      "target": "mark_overdue_invoices",
+      "operation": "rpc",
+      "layer": "server-component",
+      "snippet": "const { error: overdueError } = await supabase.rpc('mark_overdue_invoices')"
+    },
+    {
+      "file": "app/(app)/invoices/page.tsx",
+      "line": 57,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "app/(app)/layout.tsx",
+      "line": 14,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/layout.tsx",
+      "line": 29,
+      "kind": "table",
+      "target": "roles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('roles')"
+    },
+    {
+      "file": "app/(app)/loads/[load_number]/page.tsx",
+      "line": 53,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/loads/[load_number]/page.tsx",
+      "line": 68,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "app/(app)/loads/[load_number]/page.tsx",
+      "line": 85,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('organizations')"
+    },
+    {
+      "file": "app/(app)/loads/[load_number]/page.tsx",
+      "line": 95,
+      "kind": "table",
+      "target": "load_events",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('load_events')"
+    },
+    {
+      "file": "app/(app)/loads/[load_number]/page.tsx",
+      "line": 102,
+      "kind": "table",
+      "target": "documents",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('documents')"
+    },
+    {
+      "file": "app/(app)/loads/[load_number]/page.tsx",
+      "line": 113,
+      "kind": "storage",
+      "target": "documents",
+      "operation": "storage",
+      "subOperation": "createSignedUrl",
+      "layer": "server-component",
+      "snippet": "const { data: signed } = await supabase.storage"
+    },
+    {
+      "file": "app/(app)/loads/[load_number]/page.tsx",
+      "line": 137,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "app/(app)/loads/[load_number]/page.tsx",
+      "line": 146,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('organizations')"
+    },
+    {
+      "file": "app/(app)/loads/[load_number]/page.tsx",
+      "line": 168,
+      "kind": "table",
+      "target": "ifta_state_crossings",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('ifta_state_crossings')"
+    },
+    {
+      "file": "app/(app)/loads/new/page.tsx",
+      "line": 12,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/loads/new/page.tsx",
+      "line": 20,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('organizations')"
+    },
+    {
+      "file": "app/(app)/loads/page.tsx",
+      "line": 30,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/loads/page.tsx",
+      "line": 45,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "app/(app)/maintenance/LogServiceButton.tsx",
+      "line": 106,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "client-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/maintenance/LogServiceButton.tsx",
+      "line": 113,
+      "kind": "table",
+      "target": "service_logs",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "client-component",
+      "snippet": ".from('service_logs')"
+    },
+    {
+      "file": "app/(app)/maintenance/LogServiceButton.tsx",
+      "line": 134,
+      "kind": "table",
+      "target": "maintenance_reminders",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "client-component",
+      "snippet": ".from('maintenance_reminders')"
+    },
+    {
+      "file": "app/(app)/maintenance/LogServiceButton.tsx",
+      "line": 155,
+      "kind": "table",
+      "target": "maintenance_reminders",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "client-component",
+      "snippet": ".from('maintenance_reminders')"
+    },
+    {
+      "file": "app/(app)/maintenance/page.tsx",
+      "line": 136,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/maintenance/page.tsx",
+      "line": 150,
+      "kind": "table",
+      "target": "vehicles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('vehicles')"
+    },
+    {
+      "file": "app/(app)/maintenance/page.tsx",
+      "line": 156,
+      "kind": "table",
+      "target": "maintenance_reminders",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('maintenance_reminders')"
+    },
+    {
+      "file": "app/(app)/maintenance/page.tsx",
+      "line": 162,
+      "kind": "table",
+      "target": "service_logs",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('service_logs')"
+    },
+    {
+      "file": "app/(app)/settings/page.tsx",
+      "line": 15,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/settings/page.tsx",
+      "line": 23,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('carrier_details')"
+    },
+    {
+      "file": "app/(app)/settlements/page.tsx",
+      "line": 27,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/settlements/page.tsx",
+      "line": 56,
+      "kind": "table",
+      "target": "driver_settlements",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('driver_settlements')"
+    },
+    {
+      "file": "app/(app)/team/page.tsx",
+      "line": 31,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/vehicles/[vehicle_number]/page.tsx",
+      "line": 97,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/vehicles/[vehicle_number]/page.tsx",
+      "line": 110,
+      "kind": "table",
+      "target": "vehicles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('vehicles')"
+    },
+    {
+      "file": "app/(app)/vehicles/[vehicle_number]/page.tsx",
+      "line": 136,
+      "kind": "table",
+      "target": "vehicle_documents",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('vehicle_documents')"
+    },
+    {
+      "file": "app/(app)/vehicles/[vehicle_number]/page.tsx",
+      "line": 146,
+      "kind": "storage",
+      "target": "documents",
+      "operation": "storage",
+      "subOperation": "createSignedUrl",
+      "layer": "server-component",
+      "snippet": "const { data: signed } = await supabase.storage"
+    },
+    {
+      "file": "app/(app)/vehicles/[vehicle_number]/page.tsx",
+      "line": 175,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('organizations')"
+    },
+    {
+      "file": "app/(app)/vehicles/[vehicle_number]/page.tsx",
+      "line": 183,
+      "kind": "table",
+      "target": "maintenance_reminders",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('maintenance_reminders')"
+    },
+    {
+      "file": "app/(app)/vehicles/[vehicle_number]/page.tsx",
+      "line": 189,
+      "kind": "table",
+      "target": "service_logs",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('service_logs')"
+    },
+    {
+      "file": "app/(app)/vehicles/[vehicle_number]/page.tsx",
+      "line": 201,
+      "kind": "storage",
+      "target": "documents",
+      "operation": "storage",
+      "subOperation": "createSignedUrl",
+      "layer": "server-component",
+      "snippet": "const { data: signed } = await supabase.storage"
+    },
+    {
+      "file": "app/(app)/vehicles/[vehicle_number]/page.tsx",
+      "line": 212,
+      "kind": "table",
+      "target": "fuel_stops",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('fuel_stops')"
+    },
+    {
+      "file": "app/(app)/vehicles/[vehicle_number]/page.tsx",
+      "line": 235,
+      "kind": "table",
+      "target": "dvir_inspections",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('dvir_inspections')"
+    },
+    {
+      "file": "app/(app)/vehicles/[vehicle_number]/VehiclePhotoUpload.tsx",
+      "line": 59,
+      "kind": "table",
+      "target": "vehicles",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "client-component",
+      "snippet": "const { error: updateErr } = await supabase.from('vehicles').update({ photo_path: path }).eq('id', vehicleId)"
+    },
+    {
+      "file": "app/(app)/vehicles/AddVehicleButton.tsx",
+      "line": 91,
+      "kind": "table",
+      "target": "vehicle_types",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "client-component",
+      "snippet": ".from('vehicle_types')"
+    },
+    {
+      "file": "app/(app)/vehicles/page.tsx",
+      "line": 62,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "server-component",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/(app)/vehicles/page.tsx",
+      "line": 80,
+      "kind": "table",
+      "target": "vehicles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('vehicles')"
+    },
+    {
+      "file": "app/(app)/vehicles/page.tsx",
+      "line": 87,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "server-component",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "app/api/admin/audit/route.ts",
+      "line": 21,
+      "kind": "table",
+      "target": "admin_events",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('admin_events')"
+    },
+    {
+      "file": "app/api/admin/billing/route.ts",
+      "line": 20,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('carrier_details')"
+    },
+    {
+      "file": "app/api/admin/billing/route.ts",
+      "line": 24,
+      "kind": "table",
+      "target": "billing_events",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('billing_events')"
+    },
+    {
+      "file": "app/api/admin/flags/override/route.ts",
+      "line": 23,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": "const { data: org } = await admin.from('organizations').select('id').eq('id', orgId).eq('type', 'carrier').maybeSingle()"
+    },
+    {
+      "file": "app/api/admin/flags/override/route.ts",
+      "line": 26,
+      "kind": "table",
+      "target": "platform_flags",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": "const { data: flag } = await admin.from('platform_flags').select('flag_key').eq('flag_key', flagKey).maybeSingle()"
+    },
+    {
+      "file": "app/api/admin/flags/override/route.ts",
+      "line": 30,
+      "kind": "table",
+      "target": "org_flag_overrides",
+      "operation": "write",
+      "subOperation": "upsert",
+      "layer": "route-handler",
+      "snippet": ".from('org_flag_overrides')"
+    },
+    {
+      "file": "app/api/admin/flags/override/route.ts",
+      "line": 38,
+      "kind": "table",
+      "target": "admin_events",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "route-handler",
+      "snippet": "await admin.from('admin_events').insert({"
+    },
+    {
+      "file": "app/api/admin/flags/route.ts",
+      "line": 15,
+      "kind": "table",
+      "target": "platform_flags",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": "admin.from('platform_flags').select('flag_key, description, default_enabled, created_at').order('flag_key'),"
+    },
+    {
+      "file": "app/api/admin/flags/route.ts",
+      "line": 17,
+      "kind": "table",
+      "target": "org_flag_overrides",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('org_flag_overrides')"
+    },
+    {
+      "file": "app/api/admin/flags/route.ts",
+      "line": 52,
+      "kind": "table",
+      "target": "platform_flags",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "route-handler",
+      "snippet": "const { error } = await admin.from('platform_flags').update({ default_enabled: defaultEnabled }).eq('flag_key', flagKey)"
+    },
+    {
+      "file": "app/api/admin/orgs/[org_id]/grace-period/route.ts",
+      "line": 27,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": "const { data: before } = await admin.from('carrier_details').select('grace_period_until').eq('org_id', orgId).maybeSingle()"
+    },
+    {
+      "file": "app/api/admin/orgs/[org_id]/grace-period/route.ts",
+      "line": 32,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "route-handler",
+      "snippet": "const { error } = await admin.from('carrier_details').update({ grace_period_until: graceUntil }).eq('org_id', orgId)"
+    },
+    {
+      "file": "app/api/admin/orgs/[org_id]/grace-period/route.ts",
+      "line": 38,
+      "kind": "table",
+      "target": "admin_events",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "route-handler",
+      "snippet": "await admin.from('admin_events').insert({"
+    },
+    {
+      "file": "app/api/admin/orgs/[org_id]/impersonate/route.ts",
+      "line": 40,
+      "kind": "table",
+      "target": "admin_events",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "route-handler",
+      "snippet": "await admin.from('admin_events').insert({"
+    },
+    {
+      "file": "app/api/admin/orgs/[org_id]/notes/route.ts",
+      "line": 21,
+      "kind": "table",
+      "target": "admin_notes",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "route-handler",
+      "snippet": ".from('admin_notes')"
+    },
+    {
+      "file": "app/api/admin/orgs/[org_id]/notes/route.ts",
+      "line": 31,
+      "kind": "table",
+      "target": "admin_events",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "route-handler",
+      "snippet": "await admin.from('admin_events').insert({"
+    },
+    {
+      "file": "app/api/admin/orgs/[org_id]/route.ts",
+      "line": 22,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('organizations')"
+    },
+    {
+      "file": "app/api/admin/orgs/[org_id]/route.ts",
+      "line": 38,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": "admin.from('invoices').select('id, status, load_id').eq('carrier_org_id', orgId),"
+    },
+    {
+      "file": "app/api/admin/orgs/[org_id]/route.ts",
+      "line": 40,
+      "kind": "table",
+      "target": "vehicles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": "admin.from('vehicles').select('id').eq('carrier_org_id', orgId),"
+    },
+    {
+      "file": "app/api/admin/orgs/[org_id]/route.ts",
+      "line": 42,
+      "kind": "table",
+      "target": "admin_notes",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('admin_notes')"
+    },
+    {
+      "file": "app/api/admin/orgs/[org_id]/tier/route.ts",
+      "line": 23,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": "const { data: before } = await admin.from('carrier_details').select('tier').eq('org_id', orgId).maybeSingle()"
+    },
+    {
+      "file": "app/api/admin/orgs/[org_id]/tier/route.ts",
+      "line": 26,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "route-handler",
+      "snippet": "const { error } = await admin.from('carrier_details').update({ tier }).eq('org_id', orgId)"
+    },
+    {
+      "file": "app/api/admin/orgs/[org_id]/tier/route.ts",
+      "line": 32,
+      "kind": "table",
+      "target": "admin_events",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "route-handler",
+      "snippet": "await admin.from('admin_events').insert({"
+    },
+    {
+      "file": "app/api/admin/orgs/[org_id]/trial/route.ts",
+      "line": 25,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": "const { data: before } = await admin.from('carrier_details').select('trial_ends_at').eq('org_id', orgId).maybeSingle()"
+    },
+    {
+      "file": "app/api/admin/orgs/[org_id]/trial/route.ts",
+      "line": 36,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "route-handler",
+      "snippet": "const { error } = await admin.from('carrier_details').update({ trial_ends_at: newTrialEndsAt }).eq('org_id', orgId)"
+    },
+    {
+      "file": "app/api/admin/orgs/[org_id]/trial/route.ts",
+      "line": 42,
+      "kind": "table",
+      "target": "admin_events",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "route-handler",
+      "snippet": "await admin.from('admin_events').insert({"
+    },
+    {
+      "file": "app/api/admin/orgs/route.ts",
+      "line": 50,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('organizations')"
+    },
+    {
+      "file": "app/api/admin/orgs/route.ts",
+      "line": 67,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": "admin.from('loads').select('id, carrier_org_id').in('carrier_org_id', orgIds).gte('created_at', thirtyDaysAgo),"
+    },
+    {
+      "file": "app/api/admin/orgs/route.ts",
+      "line": 69,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": "admin.from('invoices').select('id, carrier_org_id').in('carrier_org_id', orgIds),"
+    },
+    {
+      "file": "app/api/admin/orgs/route.ts",
+      "line": 70,
+      "kind": "table",
+      "target": "vehicles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": "admin.from('vehicles').select('id, carrier_org_id').in('carrier_org_id', orgIds),"
+    },
+    {
+      "file": "app/api/admin/pipeline/route.ts",
+      "line": 21,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('carrier_details')"
+    },
+    {
+      "file": "app/api/admin/pipeline/route.ts",
+      "line": 27,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('carrier_details')"
+    },
+    {
+      "file": "app/api/admin/pipeline/route.ts",
+      "line": 41,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": "admin.from('loads').select('id', { count: 'exact', head: true }).eq('carrier_org_id', o.org_id).gte('created_at', thirtyDaysAgo),"
+    },
+    {
+      "file": "app/api/billing/add-payment-method/route.ts",
+      "line": 39,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('organizations')"
+    },
+    {
+      "file": "app/api/billing/add-payment-method/route.ts",
+      "line": 47,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "route-handler",
+      "snippet": ".from('carrier_details')"
+    },
+    {
+      "file": "app/api/billing/change-tier/route.ts",
+      "line": 43,
+      "kind": "table",
+      "target": "tiers",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('tiers')"
+    },
+    {
+      "file": "app/api/billing/change-tier/route.ts",
+      "line": 51,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "route-handler",
+      "snippet": ".from('carrier_details')"
+    },
+    {
+      "file": "app/api/cron/send-reminders/route.ts",
+      "line": 51,
+      "kind": "rpc",
+      "target": "send_expiry_reminders",
+      "operation": "rpc",
+      "layer": "route-handler",
+      "snippet": "const { data: newCount, error: rpcError } = await admin.rpc('send_expiry_reminders')"
+    },
+    {
+      "file": "app/api/cron/send-reminders/route.ts",
+      "line": 71,
+      "kind": "table",
+      "target": "exception_events",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('exception_events')"
+    },
+    {
+      "file": "app/api/customers/[org_id]/contacts/[contact_id]/invite/route.ts",
+      "line": 35,
+      "kind": "table",
+      "target": "customer_contacts",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('customer_contacts')"
+    },
+    {
+      "file": "app/api/customers/[org_id]/contacts/[contact_id]/invite/route.ts",
+      "line": 96,
+      "kind": "table",
+      "target": "customer_contacts",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "route-handler",
+      "snippet": ".from('customer_contacts')"
+    },
+    {
+      "file": "app/api/customers/[org_id]/contacts/[contact_id]/revoke/route.ts",
+      "line": 30,
+      "kind": "table",
+      "target": "customer_contacts",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('customer_contacts')"
+    },
+    {
+      "file": "app/api/customers/[org_id]/contacts/[contact_id]/revoke/route.ts",
+      "line": 50,
+      "kind": "table",
+      "target": "customer_contacts",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "route-handler",
+      "snippet": ".from('customer_contacts')"
+    },
+    {
+      "file": "app/api/customers/[org_id]/contacts/route.ts",
+      "line": 22,
+      "kind": "table",
+      "target": "customer_contacts",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('customer_contacts')"
+    },
+    {
+      "file": "app/api/customers/[org_id]/contacts/route.ts",
+      "line": 66,
+      "kind": "table",
+      "target": "customer_contacts",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "route-handler",
+      "snippet": ".from('customer_contacts')"
+    },
+    {
+      "file": "app/api/customers/bulk-import/route.ts",
+      "line": 31,
+      "kind": "rpc",
+      "target": "bulk_import_customers",
+      "operation": "rpc",
+      "layer": "route-handler",
+      "snippet": "const { data, error } = await supabase.rpc('bulk_import_customers', { p_rows: rows as unknown as Json })"
+    },
+    {
+      "file": "app/api/customers/route.ts",
+      "line": 24,
+      "kind": "table",
+      "target": "customer_details",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('customer_details')"
+    },
+    {
+      "file": "app/api/customers/route.ts",
+      "line": 63,
+      "kind": "rpc",
+      "target": "create_customer_org",
+      "operation": "rpc",
+      "layer": "route-handler",
+      "snippet": "const { data, error } = await supabase.rpc('create_customer_org', {"
+    },
+    {
+      "file": "app/api/driver-messages/[id]/translate/route.ts",
+      "line": 81,
+      "kind": "table",
+      "target": "driver_messages",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('driver_messages')"
+    },
+    {
+      "file": "app/api/driver-messages/[id]/translate/route.ts",
+      "line": 113,
+      "kind": "table",
+      "target": "driver_message_translations",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('driver_message_translations')"
+    },
+    {
+      "file": "app/api/driver-messages/[id]/translate/route.ts",
+      "line": 126,
+      "kind": "table",
+      "target": "driver_message_translations",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "route-handler",
+      "snippet": ".from('driver_message_translations')"
+    },
+    {
+      "file": "app/api/driver-messages/route.ts",
+      "line": 107,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('carrier_details')"
+    },
+    {
+      "file": "app/api/driver-messages/route.ts",
+      "line": 115,
+      "kind": "table",
+      "target": "driver_messages",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "route-handler",
+      "snippet": ".from('driver_messages')"
+    },
+    {
+      "file": "app/api/intake/email/route.ts",
+      "line": 72,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('organizations')"
+    },
+    {
+      "file": "app/api/invoices/[id]/factor/route.ts",
+      "line": 92,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "app/api/invoices/[id]/factor/route.ts",
+      "line": 112,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('organizations')"
+    },
+    {
+      "file": "app/api/invoices/[id]/factor/route.ts",
+      "line": 120,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "route-handler",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "app/api/invoices/[id]/track/route.ts",
+      "line": 38,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "route-handler",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "app/api/loads/[id]/route.ts",
+      "line": 53,
+      "kind": "table",
+      "target": "loads",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "route-handler",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "app/api/loads/[id]/route.ts",
+      "line": 69,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "app/api/loads/[id]/route.ts",
+      "line": 87,
+      "kind": "table",
+      "target": "load_events",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "route-handler",
+      "snippet": "await supabase.from('load_events').insert({"
+    },
+    {
+      "file": "app/api/loads/[id]/route.ts",
+      "line": 109,
+      "kind": "rpc",
+      "target": "check_ifta_completeness",
+      "operation": "rpc",
+      "layer": "route-handler",
+      "snippet": "const { data: completeness, error: iftaError } = await supabase.rpc("
+    },
+    {
+      "file": "app/api/loads/[id]/send-documents/route.ts",
+      "line": 54,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('organizations')"
+    },
+    {
+      "file": "app/api/loads/[id]/send-documents/route.ts",
+      "line": 66,
+      "kind": "table",
+      "target": "documents",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('documents')"
+    },
+    {
+      "file": "app/api/loads/[id]/send-documents/route.ts",
+      "line": 104,
+      "kind": "table",
+      "target": "load_events",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "route-handler",
+      "snippet": "await supabase.from('load_events').insert({"
+    },
+    {
+      "file": "app/api/loads/export/route.ts",
+      "line": 44,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "app/api/onboarding/route.ts",
+      "line": 41,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('carrier_details')"
+    },
+    {
+      "file": "app/api/onboarding/route.ts",
+      "line": 135,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "route-handler",
+      "snippet": ".from('organizations')"
+    },
+    {
+      "file": "app/api/onboarding/route.ts",
+      "line": 159,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "route-handler",
+      "snippet": ".from('carrier_details')"
+    },
+    {
+      "file": "app/api/settlements/[id]/send-ach/route.ts",
+      "line": 71,
+      "kind": "table",
+      "target": "driver_settlements",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('driver_settlements')"
+    },
+    {
+      "file": "app/api/settlements/[id]/send-ach/route.ts",
+      "line": 81,
+      "kind": "table",
+      "target": "driver_settlements",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "route-handler",
+      "snippet": ".from('driver_settlements')"
+    },
+    {
+      "file": "app/api/settlements/run/route.ts",
+      "line": 78,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "app/api/settlements/run/route.ts",
+      "line": 103,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "app/api/settlements/run/route.ts",
+      "line": 128,
+      "kind": "table",
+      "target": "driver_settlements",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "route-handler",
+      "snippet": ".from('driver_settlements')"
+    },
+    {
+      "file": "app/api/vehicles/route.ts",
+      "line": 17,
+      "kind": "table",
+      "target": "vehicles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "route-handler",
+      "snippet": ".from('vehicles')"
+    },
+    {
+      "file": "app/api/vehicles/route.ts",
+      "line": 64,
+      "kind": "table",
+      "target": "vehicles",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "route-handler",
+      "snippet": ".from('vehicles')"
+    },
+    {
+      "file": "app/auth/callback/route.ts",
+      "line": 57,
+      "kind": "auth",
+      "target": "auth.exchangeCodeForSession",
+      "operation": "auth",
+      "layer": "route-handler",
+      "snippet": "? await supabase.auth.exchangeCodeForSession(code)"
+    },
+    {
+      "file": "app/auth/callback/route.ts",
+      "line": 58,
+      "kind": "auth",
+      "target": "auth.verifyOtp",
+      "operation": "auth",
+      "layer": "route-handler",
+      "snippet": ": await supabase.auth.verifyOtp({ type: type ?? 'invite', token_hash: token_hash! })"
+    },
+    {
+      "file": "app/auth/callback/route.ts",
+      "line": 66,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "route-handler",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "app/login/actions.ts",
+      "line": 17,
+      "kind": "auth",
+      "target": "auth.signInWithPassword",
+      "operation": "auth",
+      "layer": "server-action",
+      "snippet": "const { error } = await supabase.auth.signInWithPassword({ email, password })"
+    },
+    {
+      "file": "app/login/actions.ts",
+      "line": 30,
+      "kind": "auth",
+      "target": "auth.signOut",
+      "operation": "auth",
+      "layer": "server-action",
+      "snippet": "await supabase.auth.signOut()"
+    },
+    {
+      "file": "app/onboarding/steps/AddLogoStep.tsx",
+      "line": 53,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "client-component",
+      "snippet": "const { error: updateErr } = await supabase.from('organizations').update({ logo_path: path }).eq('id', orgId)"
+    },
+    {
+      "file": "app/signup/actions.ts",
+      "line": 35,
+      "kind": "auth",
+      "target": "auth.signUp",
+      "operation": "auth",
+      "layer": "server-action",
+      "snippet": "const { error } = await supabase.auth.signUp({"
+    },
+    {
+      "file": "app/signup/page.tsx",
+      "line": 59,
+      "kind": "table",
+      "target": "tiers",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "client-component",
+      "snippet": ".from('tiers')"
+    },
+    {
+      "file": "app/track/[token]/page.tsx",
+      "line": 96,
+      "kind": "rpc",
+      "target": "get_public_tracking",
+      "operation": "rpc",
+      "layer": "server-component",
+      "snippet": "const { data, error } = await supabase.rpc('get_public_tracking', { p_token: token })"
+    },
+    {
+      "file": "app/track/[token]/page.tsx",
+      "line": 129,
+      "kind": "rpc",
+      "target": "get_public_tracking_events",
+      "operation": "rpc",
+      "layer": "server-component",
+      "snippet": "const { data: events } = await supabase.rpc('get_public_tracking_events', { p_token: token })"
+    },
+    {
+      "file": "components/CompanyDocuments.tsx",
+      "line": 114,
+      "kind": "table",
+      "target": "org_documents",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "client-component",
+      "snippet": "const { error: insErr } = await supabase.from('org_documents').insert({"
+    },
+    {
+      "file": "components/CompanyDocuments.tsx",
+      "line": 151,
+      "kind": "table",
+      "target": "org_documents",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "client-component",
+      "snippet": "const { error: delErr } = await supabase.from('org_documents').delete().eq('id', doc.id)"
+    },
+    {
+      "file": "components/DriverDocuments.tsx",
+      "line": 102,
+      "kind": "table",
+      "target": "driver_documents",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "client-component",
+      "snippet": "const { error: insErr } = await supabase.from('driver_documents').insert({"
+    },
+    {
+      "file": "components/DriverDocuments.tsx",
+      "line": 140,
+      "kind": "table",
+      "target": "driver_documents",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "client-component",
+      "snippet": "const { error: delErr } = await supabase.from('driver_documents').delete().eq('id', doc.id)"
+    },
+    {
+      "file": "components/DriverMessageThread.tsx",
+      "line": 54,
+      "kind": "table",
+      "target": "driver_messages",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "client-component",
+      "snippet": ".from('driver_messages')"
+    },
+    {
+      "file": "components/DriverMessageThread.tsx",
+      "line": 67,
+      "kind": "table",
+      "target": "driver_messages",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "client-component",
+      "snippet": "await supabase.from('driver_messages').update({ read_at: new Date().toISOString() }).in('id', unreadIds)"
+    },
+    {
+      "file": "components/DriverMessageThread.tsx",
+      "line": 83,
+      "kind": "table",
+      "target": "driver_messages",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "client-component",
+      "snippet": ".from('driver_messages')"
+    },
+    {
+      "file": "components/DriverMessageThread.tsx",
+      "line": 92,
+      "kind": "table",
+      "target": "driver_messages",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "client-component",
+      "snippet": "supabase.from('driver_messages').update({ read_at: new Date().toISOString() }).in('id', unreadIds)"
+    },
+    {
+      "file": "components/DriverMessageThread.tsx",
+      "line": 100,
+      "kind": "realtime",
+      "target": "driver-messages-load-${loadId}",
+      "operation": "realtime",
+      "layer": "client-component",
+      "snippet": ".channel(`driver-messages-load-${loadId}`)"
+    },
+    {
+      "file": "components/DriverMessageThread.tsx",
+      "line": 102,
+      "kind": "realtime",
+      "target": "postgres_changes",
+      "operation": "realtime",
+      "layer": "client-component",
+      "snippet": "'postgres_changes',"
+    },
+    {
+      "file": "components/DriverMessageThread.tsx",
+      "line": 106,
+      "kind": "table",
+      "target": "driver_messages",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "client-component",
+      "snippet": ".from('driver_messages')"
+    },
+    {
+      "file": "components/DriverMessageThread.tsx",
+      "line": 114,
+      "kind": "realtime",
+      "target": "channel",
+      "operation": "realtime",
+      "layer": "client-component",
+      "snippet": ".subscribe()"
+    },
+    {
+      "file": "components/DriverMessageThread.tsx",
+      "line": 117,
+      "kind": "realtime",
+      "target": "channel",
+      "operation": "realtime",
+      "layer": "client-component",
+      "snippet": "supabase.removeChannel(channel)"
+    },
+    {
+      "file": "components/DriverPayConfig.tsx",
+      "line": 57,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "client-component",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "components/FuelStopsSection.tsx",
+      "line": 90,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "client-component",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "components/FuelStopsSection.tsx",
+      "line": 98,
+      "kind": "table",
+      "target": "fuel_stops",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "client-component",
+      "snippet": "const { error: insErr } = await supabase.from('fuel_stops').insert({"
+    },
+    {
+      "file": "components/IftaCrossingsSection.tsx",
+      "line": 65,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "client-component",
+      "snippet": "const { data: driver } = await supabase.auth.getUser().then(({ data }) =>"
+    },
+    {
+      "file": "components/IftaCrossingsSection.tsx",
+      "line": 66,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "client-component",
+      "snippet": "supabase.from('drivers').select('id').eq('carrier_org_id', orgId).eq('profile_id', data.user?.id ?? '').maybeSingle()"
+    },
+    {
+      "file": "components/IftaCrossingsSection.tsx",
+      "line": 69,
+      "kind": "table",
+      "target": "ifta_state_crossings",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "client-component",
+      "snippet": "const { error: insErr } = await supabase.from('ifta_state_crossings').insert({"
+    },
+    {
+      "file": "components/LanguageSwitcher.tsx",
+      "line": 45,
+      "kind": "table",
+      "target": "languages",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "client-component",
+      "snippet": ".from('languages')"
+    },
+    {
+      "file": "components/LanguageSwitcher.tsx",
+      "line": 72,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "client-component",
+      "snippet": "await supabase.from('profiles').update({ preferred_language: code }).eq('id', userId)"
+    },
+    {
+      "file": "components/LoadDocuments.tsx",
+      "line": 81,
+      "kind": "table",
+      "target": "documents",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "client-component",
+      "snippet": "const { error: insErr } = await supabase.from('documents').insert({"
+    },
+    {
+      "file": "components/LoadDocuments.tsx",
+      "line": 117,
+      "kind": "table",
+      "target": "documents",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "client-component",
+      "snippet": "const { error: delErr } = await supabase.from('documents').delete().eq('id', doc.id)"
+    },
+    {
+      "file": "components/VehicleDocuments.tsx",
+      "line": 99,
+      "kind": "table",
+      "target": "vehicle_documents",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "client-component",
+      "snippet": "const { error: insErr } = await supabase.from('vehicle_documents').insert({"
+    },
+    {
+      "file": "components/VehicleDocuments.tsx",
+      "line": 137,
+      "kind": "table",
+      "target": "vehicle_documents",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "client-component",
+      "snippet": "const { error: delErr } = await supabase.from('vehicle_documents').delete().eq('id', doc.id)"
+    },
+    {
+      "file": "lib/api-auth.ts",
+      "line": 79,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "lib",
+      "snippet": "const { data: { user }, error } = await supabase.auth.getUser(bearerToken)"
+    },
+    {
+      "file": "lib/api-auth.ts",
+      "line": 86,
+      "kind": "auth",
+      "target": "auth.getUser",
+      "operation": "auth",
+      "layer": "lib",
+      "snippet": "const { data: { user } } = await supabase.auth.getUser()"
+    },
+    {
+      "file": "lib/auth-admin/supabase-auth-admin-provider.ts",
+      "line": 17,
+      "kind": "auth",
+      "target": "auth.admin.listUsers",
+      "operation": "auth",
+      "layer": "lib",
+      "snippet": "const { data, error } = await this.admin.auth.admin.listUsers(opts)"
+    },
+    {
+      "file": "lib/auth-admin/supabase-auth-admin-provider.ts",
+      "line": 28,
+      "kind": "auth",
+      "target": "auth.admin.getUserById",
+      "operation": "auth",
+      "layer": "lib",
+      "snippet": "const { data, error } = await this.admin.auth.admin.getUserById(userId)"
+    },
+    {
+      "file": "lib/auth-admin/supabase-auth-admin-provider.ts",
+      "line": 37,
+      "kind": "auth",
+      "target": "auth.admin.inviteUserByEmail",
+      "operation": "auth",
+      "layer": "lib",
+      "snippet": "const { data, error } = await this.admin.auth.admin.inviteUserByEmail(email, {"
+    },
+    {
+      "file": "lib/auth-admin/supabase-auth-admin-provider.ts",
+      "line": 47,
+      "kind": "auth",
+      "target": "auth.admin.deleteUser",
+      "operation": "auth",
+      "layer": "lib",
+      "snippet": "const { error } = await this.admin.auth.admin.deleteUser(userId)"
+    },
+    {
+      "file": "lib/auth-admin/supabase-auth-admin-provider.ts",
+      "line": 52,
+      "kind": "auth",
+      "target": "auth.admin.createUser",
+      "operation": "auth",
+      "layer": "lib",
+      "snippet": "const { data, error } = await this.admin.auth.admin.createUser({"
+    },
+    {
+      "file": "lib/auth-admin/supabase-auth-admin-provider.ts",
+      "line": 63,
+      "kind": "auth",
+      "target": "auth.admin.generateLink",
+      "operation": "auth",
+      "layer": "lib",
+      "snippet": "const { data, error } = await this.admin.auth.admin.generateLink({"
+    },
+    {
+      "file": "lib/entitlements.ts",
+      "line": 18,
+      "kind": "rpc",
+      "target": "has_feature",
+      "operation": "rpc",
+      "layer": "lib",
+      "snippet": "const { data } = await supabase.rpc('has_feature', { feature_key: featureKey })"
+    },
+    {
+      "file": "lib/entitlements.ts",
+      "line": 30,
+      "kind": "rpc",
+      "target": "get_my_entitlements",
+      "operation": "rpc",
+      "layer": "lib",
+      "snippet": "const { data } = await supabase.rpc('get_my_entitlements')"
+    },
+    {
+      "file": "lib/exceptions.ts",
+      "line": 91,
+      "kind": "rpc",
+      "target": "get_exceptions",
+      "operation": "rpc",
+      "layer": "lib",
+      "snippet": "const { data, error } = await supabase.rpc('get_exceptions')"
+    },
+    {
+      "file": "lib/exceptions.ts",
+      "line": 104,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": "? supabase.from('invoices').select('id, invoice_number').in('id', invoiceIds)"
+    },
+    {
+      "file": "lib/generate-number.ts",
+      "line": 23,
+      "kind": "rpc",
+      "target": "next_entity_val",
+      "operation": "rpc",
+      "layer": "lib",
+      "snippet": "const { data, error } = await client.rpc('next_entity_val', {"
+    },
+    {
+      "file": "lib/invoice-actions.ts",
+      "line": 31,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "lib/invoice-actions.ts",
+      "line": 84,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "lib",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "lib/queries/drivers.ts",
+      "line": 18,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "lib/queries/drivers.ts",
+      "line": 31,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "lib/queries/drivers.ts",
+      "line": 40,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "lib/queries/drivers.ts",
+      "line": 54,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "lib/queries/drivers.ts",
+      "line": 60,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "lib",
+      "snippet": "return supabase.from('drivers').insert(values as never).select('id, driver_number, invite_status').single()"
+    },
+    {
+      "file": "lib/queries/loads.ts",
+      "line": 18,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "lib/queries/loads.ts",
+      "line": 31,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "lib/queries/loads.ts",
+      "line": 39,
+      "kind": "table",
+      "target": "loads",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "lib",
+      "snippet": "return supabase.from('loads').update(values as never).eq('id', loadId)"
+    },
+    {
+      "file": "lib/queries/loads.ts",
+      "line": 43,
+      "kind": "table",
+      "target": "loads",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "lib",
+      "snippet": "return supabase.from('loads').update({ status }).eq('id', loadId)"
+    },
+    {
+      "file": "lib/queries/loads.ts",
+      "line": 51,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "lib/queries/loads.ts",
+      "line": 60,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "lib/queries/loads.ts",
+      "line": 70,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "lib/queries/loads.ts",
+      "line": 78,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "lib/queries/loads.ts",
+      "line": 85,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "lib/queries/loads.ts",
+      "line": 98,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "lib/queries/loads.ts",
+      "line": 106,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "lib/queries/loads.ts",
+      "line": 118,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "lib/queries/loads.ts",
+      "line": 131,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "lib/queries/loads.ts",
+      "line": 141,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "lib/queries/loads.ts",
+      "line": 147,
+      "kind": "table",
+      "target": "loads",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "lib",
+      "snippet": "return supabase.from('loads').insert(values as never).select('id, load_number').single()"
+    },
+    {
+      "file": "lib/queries/profiles.ts",
+      "line": 36,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('profiles')"
+    },
+    {
+      "file": "lib/queries/profiles.ts",
+      "line": 47,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('profiles')"
+    },
+    {
+      "file": "lib/queries/profiles.ts",
+      "line": 56,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('profiles')"
+    },
+    {
+      "file": "lib/queries/profiles.ts",
+      "line": 67,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "lib",
+      "snippet": "return supabase.from('profiles').update(prefs).eq('id', userId)"
+    },
+    {
+      "file": "lib/queries/profiles.ts",
+      "line": 74,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('profiles')"
+    },
+    {
+      "file": "lib/queries/profiles.ts",
+      "line": 87,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('profiles')"
+    },
+    {
+      "file": "lib/queries/profiles.ts",
+      "line": 97,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('profiles')"
+    },
+    {
+      "file": "lib/queries/profiles.ts",
+      "line": 105,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "lib",
+      "snippet": ".from('profiles')"
+    },
+    {
+      "file": "lib/queries/profiles.ts",
+      "line": 112,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "lib",
+      "snippet": "return supabase.from('profiles').update({ role }).eq('id', profileId)"
+    },
+    {
+      "file": "lib/queries/profiles.ts",
+      "line": 116,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "lib",
+      "snippet": "return supabase.from('profiles').update({ is_active: isActive }).eq('id', profileId)"
+    },
+    {
+      "file": "lib/queries/profiles.ts",
+      "line": 130,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "lib",
+      "snippet": "return supabase.from('profiles').insert(profile)"
+    },
+    {
+      "file": "lib/queries/profiles.ts",
+      "line": 143,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "subOperation": "upsert",
+      "layer": "lib",
+      "snippet": "return supabase.from('profiles').upsert(profile, { onConflict: 'id' })"
+    },
+    {
+      "file": "lib/storage/supabase-storage-provider.ts",
+      "line": 20,
+      "kind": "storage",
+      "target": "<dynamic:this.bucket>",
+      "operation": "storage",
+      "subOperation": "upload",
+      "layer": "lib",
+      "snippet": "const { error } = await this.supabase.storage"
+    },
+    {
+      "file": "lib/storage/supabase-storage-provider.ts",
+      "line": 27,
+      "kind": "storage",
+      "target": "<dynamic:this.bucket>",
+      "operation": "storage",
+      "subOperation": "createSignedUrl",
+      "layer": "lib",
+      "snippet": "const { data, error } = await this.supabase.storage"
+    },
+    {
+      "file": "lib/storage/supabase-storage-provider.ts",
+      "line": 35,
+      "kind": "storage",
+      "target": "<dynamic:this.bucket>",
+      "operation": "storage",
+      "subOperation": "remove",
+      "layer": "lib",
+      "snippet": "const { error } = await this.supabase.storage.from(this.bucket).remove(paths)"
+    },
+    {
+      "file": "lib/storage/supabase-storage-provider.ts",
+      "line": 40,
+      "kind": "storage",
+      "target": "<dynamic:this.bucket>",
+      "operation": "storage",
+      "subOperation": "download",
+      "layer": "lib",
+      "snippet": "const { data, error } = await this.supabase.storage.from(this.bucket).download(path)"
+    },
+    {
+      "file": "tests/billing.test.ts",
+      "line": 53,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": "const { data } = await admin.from('carrier_details').select('tier').eq('org_id', org.orgId).single()"
+    },
+    {
+      "file": "tests/billing.test.ts",
+      "line": 73,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": "const { data } = await admin.from('carrier_details').select('stripe_customer_id, card_brand').eq('org_id', org.orgId).single()"
+    },
+    {
+      "file": "tests/driver-messages.test.ts",
+      "line": 18,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "tests/driver-messages.test.ts",
+      "line": 53,
+      "kind": "table",
+      "target": "loads",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "tests/driver-messages.test.ts",
+      "line": 82,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "test",
+      "snippet": "await admin.from('carrier_details').update({ default_language: 'es' }).eq('org_id', org.orgId)"
+    },
+    {
+      "file": "tests/driver-messages.test.ts",
+      "line": 92,
+      "kind": "table",
+      "target": "driver_messages",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": ".from('driver_messages')"
+    },
+    {
+      "file": "tests/driver-messages.test.ts",
+      "line": 100,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "test",
+      "snippet": "await admin.from('profiles').update({ preferred_language: 'en' }).eq('id', dispatcher.userId)"
+    },
+    {
+      "file": "tests/driver-messages.test.ts",
+      "line": 110,
+      "kind": "table",
+      "target": "driver_messages",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": ".from('driver_messages')"
+    },
+    {
+      "file": "tests/driver-messages.test.ts",
+      "line": 118,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "test",
+      "snippet": "await admin.from('carrier_details').update({ tier: 'starter' }).eq('org_id', org.orgId)"
+    },
+    {
+      "file": "tests/driver-messages.test.ts",
+      "line": 129,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "test",
+      "snippet": "await admin.from('carrier_details').update({ tier: 'growth' }).eq('org_id', org.orgId)"
+    },
+    {
+      "file": "tests/driver-messages.test.ts",
+      "line": 147,
+      "kind": "table",
+      "target": "loads",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "tests/driver-messages.test.ts",
+      "line": 153,
+      "kind": "table",
+      "target": "driver_messages",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": ".from('driver_messages')"
+    },
+    {
+      "file": "tests/driver-messages.test.ts",
+      "line": 190,
+      "kind": "table",
+      "target": "driver_message_translations",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": ".from('driver_message_translations')"
+    },
+    {
+      "file": "tests/exceptions.test.ts",
+      "line": 40,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": "await admin.from('invoices').insert(["
+    },
+    {
+      "file": "tests/exceptions.test.ts",
+      "line": 45,
+      "kind": "rpc",
+      "target": "get_exceptions",
+      "operation": "rpc",
+      "layer": "test",
+      "snippet": "const { data, error } = await ownerSession.client.rpc('get_exceptions')"
+    },
+    {
+      "file": "tests/exceptions.test.ts",
+      "line": 55,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": "await admin.from('invoices').insert({"
+    },
+    {
+      "file": "tests/exceptions.test.ts",
+      "line": 59,
+      "kind": "rpc",
+      "target": "get_exceptions",
+      "operation": "rpc",
+      "layer": "test",
+      "snippet": "const { data } = await ownerSession.client.rpc('get_exceptions')"
+    },
+    {
+      "file": "tests/exceptions.test.ts",
+      "line": 79,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": ".from('organizations')"
+    },
+    {
+      "file": "tests/exceptions.test.ts",
+      "line": 84,
+      "kind": "table",
+      "target": "customer_details",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": "await admin.from('customer_details').insert({ org_id: customerOrgId, carrier_org_id: org.orgId })"
+    },
+    {
+      "file": "tests/exceptions.test.ts",
+      "line": 92,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('organizations').delete().eq('id', customerOrgId)"
+    },
+    {
+      "file": "tests/exceptions.test.ts",
+      "line": 97,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": "await admin.from('invoices').insert(["
+    },
+    {
+      "file": "tests/exceptions.test.ts",
+      "line": 102,
+      "kind": "rpc",
+      "target": "get_customer_health_score",
+      "operation": "rpc",
+      "layer": "test",
+      "snippet": "const { data, error } = await ownerSession.client.rpc('get_customer_health_score', { customer_org_id: customerOrgId })"
+    },
+    {
+      "file": "tests/exceptions.test.ts",
+      "line": 110,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": ".from('organizations')"
+    },
+    {
+      "file": "tests/exceptions.test.ts",
+      "line": 115,
+      "kind": "table",
+      "target": "customer_details",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": "await admin.from('customer_details').insert({ org_id: freshCustomerOrgId, carrier_org_id: org.orgId })"
+    },
+    {
+      "file": "tests/exceptions.test.ts",
+      "line": 117,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": "await admin.from('invoices').insert(["
+    },
+    {
+      "file": "tests/exceptions.test.ts",
+      "line": 123,
+      "kind": "table",
+      "target": "exception_events",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": "await admin.from('exception_events').insert(["
+    },
+    {
+      "file": "tests/exceptions.test.ts",
+      "line": 129,
+      "kind": "rpc",
+      "target": "get_customer_health_score",
+      "operation": "rpc",
+      "layer": "test",
+      "snippet": "const { data, error } = await ownerSession.client.rpc('get_customer_health_score', { customer_org_id: freshCustomerOrgId })"
+    },
+    {
+      "file": "tests/exceptions.test.ts",
+      "line": 133,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('organizations').delete().eq('id', freshCustomerOrgId)"
+    },
+    {
+      "file": "tests/exceptions.test.ts",
+      "line": 139,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": ".from('organizations')"
+    },
+    {
+      "file": "tests/exceptions.test.ts",
+      "line": 144,
+      "kind": "table",
+      "target": "customer_details",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": "await admin.from('customer_details').insert({ org_id: otherCustomerOrgId, carrier_org_id: otherOrg.orgId })"
+    },
+    {
+      "file": "tests/exceptions.test.ts",
+      "line": 148,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": "await admin.from('invoices').insert({"
+    },
+    {
+      "file": "tests/exceptions.test.ts",
+      "line": 153,
+      "kind": "rpc",
+      "target": "get_customer_health_score",
+      "operation": "rpc",
+      "layer": "test",
+      "snippet": "const { data, error } = await ownerSession.client.rpc('get_customer_health_score', { customer_org_id: otherCustomerOrgId })"
+    },
+    {
+      "file": "tests/exceptions.test.ts",
+      "line": 157,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('organizations').delete().eq('id', otherCustomerOrgId)"
+    },
+    {
+      "file": "tests/global-teardown.ts",
+      "line": 29,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": ".from('organizations')"
+    },
+    {
+      "file": "tests/global-teardown.ts",
+      "line": 45,
+      "kind": "table",
+      "target": "<dynamic:table>",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await (admin.from(table as any).delete().in('carrier_org_id', ids) as any)"
+    },
+    {
+      "file": "tests/global-teardown.ts",
+      "line": 47,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('invoices').delete().in('carrier_org_id', ids)"
+    },
+    {
+      "file": "tests/global-teardown.ts",
+      "line": 48,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('invoices').delete().in('customer_org_id', ids)"
+    },
+    {
+      "file": "tests/global-teardown.ts",
+      "line": 49,
+      "kind": "table",
+      "target": "documents",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('documents').delete().in('carrier_org_id', ids)"
+    },
+    {
+      "file": "tests/global-teardown.ts",
+      "line": 50,
+      "kind": "table",
+      "target": "customer_contacts",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('customer_contacts').delete().in('carrier_org_id', ids)"
+    },
+    {
+      "file": "tests/global-teardown.ts",
+      "line": 51,
+      "kind": "table",
+      "target": "customer_contacts",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('customer_contacts').delete().in('org_id', ids)"
+    },
+    {
+      "file": "tests/global-teardown.ts",
+      "line": 56,
+      "kind": "table",
+      "target": "customer_details",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('customer_details').delete().in('org_id', ids)"
+    },
+    {
+      "file": "tests/global-teardown.ts",
+      "line": 57,
+      "kind": "table",
+      "target": "customer_details",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('customer_details').delete().in('carrier_org_id', ids)"
+    },
+    {
+      "file": "tests/global-teardown.ts",
+      "line": 58,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('drivers').delete().in('carrier_org_id', ids)"
+    },
+    {
+      "file": "tests/global-teardown.ts",
+      "line": 59,
+      "kind": "table",
+      "target": "loads",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('loads').delete().in('carrier_org_id', ids)"
+    },
+    {
+      "file": "tests/global-teardown.ts",
+      "line": 60,
+      "kind": "table",
+      "target": "loads",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('loads').delete().in('customer_org_id', ids)"
+    },
+    {
+      "file": "tests/global-teardown.ts",
+      "line": 62,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": "const { data: profileRows } = await admin.from('profiles').select('id').in('org_id', ids)"
+    },
+    {
+      "file": "tests/global-teardown.ts",
+      "line": 91,
+      "kind": "table",
+      "target": "<dynamic:table>",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await (admin.from(table as any).delete().in(col, profileIds) as any)"
+    },
+    {
+      "file": "tests/global-teardown.ts",
+      "line": 96,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": "const { data: profiles } = await admin.from('profiles').select('id').eq('org_id', id)"
+    },
+    {
+      "file": "tests/global-teardown.ts",
+      "line": 98,
+      "kind": "auth",
+      "target": "auth.admin.deleteUser",
+      "operation": "auth",
+      "layer": "test",
+      "snippet": "await admin.auth.admin.deleteUser(p.id).catch(() => {})"
+    },
+    {
+      "file": "tests/global-teardown.ts",
+      "line": 104,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('profiles').delete().eq('org_id', id)"
+    },
+    {
+      "file": "tests/global-teardown.ts",
+      "line": 106,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "const { error } = await admin.from('organizations').delete().eq('id', id)"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 49,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": ".from('organizations')"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 56,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": "const { error } = await admin.from('carrier_details').insert({"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 62,
+      "kind": "table",
+      "target": "customer_details",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": "const { error } = await admin.from('customer_details').insert({"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 91,
+      "kind": "auth",
+      "target": "auth.admin.createUser",
+      "operation": "auth",
+      "layer": "test",
+      "snippet": "const { data: created, error: createErr } = await admin.auth.admin.createUser({"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 98,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": "const { error: profileErr } = await admin.from('profiles').insert({"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 114,
+      "kind": "auth",
+      "target": "auth.signInWithPassword",
+      "operation": "auth",
+      "layer": "test",
+      "snippet": "const { data, error } = await anon.auth.signInWithPassword({ email: user.email, password: user.password })"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 124,
+      "kind": "auth",
+      "target": "auth.admin.deleteUser",
+      "operation": "auth",
+      "layer": "test",
+      "snippet": "await admin.auth.admin.deleteUser(userId).catch(() => {})"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 163,
+      "kind": "table",
+      "target": "<dynamic:table>",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await (admin.from(table as any).delete().eq('carrier_org_id', orgId) as any)"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 168,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('invoices').delete().eq('carrier_org_id', orgId)"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 169,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('invoices').delete().eq('customer_org_id', orgId)"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 172,
+      "kind": "table",
+      "target": "documents",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('documents').delete().eq('carrier_org_id', orgId)"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 173,
+      "kind": "table",
+      "target": "customer_contacts",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('customer_contacts').delete().eq('carrier_org_id', orgId)"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 174,
+      "kind": "table",
+      "target": "customer_contacts",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('customer_contacts').delete().eq('org_id', orgId)"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 178,
+      "kind": "table",
+      "target": "customer_details",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('customer_details').delete().eq('org_id', orgId)"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 179,
+      "kind": "table",
+      "target": "customer_details",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('customer_details').delete().eq('carrier_org_id', orgId)"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 181,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('drivers').delete().eq('carrier_org_id', orgId)"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 184,
+      "kind": "table",
+      "target": "loads",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('loads').delete().eq('carrier_org_id', orgId)"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 185,
+      "kind": "table",
+      "target": "loads",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('loads').delete().eq('customer_org_id', orgId)"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 187,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": "const { data: remainingProfiles } = await admin.from('profiles').select('id').eq('org_id', orgId)"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 192,
+      "kind": "table",
+      "target": "<dynamic:table>",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await (admin.from(table as any).delete().in(col, profileIds) as any)"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 196,
+      "kind": "auth",
+      "target": "auth.admin.deleteUser",
+      "operation": "auth",
+      "layer": "test",
+      "snippet": "await admin.auth.admin.deleteUser(p.id).catch(() => {})"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 201,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "await admin.from('profiles').delete().eq('org_id', orgId)"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 202,
+      "kind": "table",
+      "target": "organizations",
+      "operation": "write",
+      "subOperation": "delete",
+      "layer": "test",
+      "snippet": "const { error: orgDeleteErr } = await admin.from('organizations').delete().eq('id', orgId)"
+    },
+    {
+      "file": "tests/loads.test.ts",
+      "line": 44,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "tests/loads.test.ts",
+      "line": 71,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": "const { data: row } = await admin.from('loads').select('status').eq('id', loadId).single()"
+    },
+    {
+      "file": "tests/loads.test.ts",
+      "line": 74,
+      "kind": "table",
+      "target": "load_events",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": "const { data: events } = await admin.from('load_events').select('event_type').eq('load_id', loadId)"
+    },
+    {
+      "file": "tests/loads.test.ts",
+      "line": 92,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": "const { data: row } = await admin.from('loads').select('status').eq('id', loadId).single()"
+    },
+    {
+      "file": "tests/onboarding.test.ts",
+      "line": 26,
+      "kind": "auth",
+      "target": "auth.admin.createUser",
+      "operation": "auth",
+      "layer": "test",
+      "snippet": "const { data: created, error } = await admin.auth.admin.createUser({"
+    },
+    {
+      "file": "tests/onboarding.test.ts",
+      "line": 33,
+      "kind": "auth",
+      "target": "auth.signInWithPassword",
+      "operation": "auth",
+      "layer": "test",
+      "snippet": "const { data: signIn, error: signInErr } = await anon.auth.signInWithPassword({ email, password })"
+    },
+    {
+      "file": "tests/onboarding.test.ts",
+      "line": 65,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": "const { data: details } = await admin.from('carrier_details').select('tier').eq('org_id', orgId).single()"
+    },
+    {
+      "file": "tests/rls-isolation.test.ts",
+      "line": 37,
+      "kind": "table",
+      "target": "loads",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "tests/rls-isolation.test.ts",
+      "line": 44,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "tests/rls-isolation.test.ts",
+      "line": 50,
+      "kind": "table",
+      "target": "vehicle_types",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": "const { data: vehicleType } = await admin.from('vehicle_types').select('id').eq('code', 'semi').single()"
+    },
+    {
+      "file": "tests/rls-isolation.test.ts",
+      "line": 52,
+      "kind": "table",
+      "target": "vehicles",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": ".from('vehicles')"
+    },
+    {
+      "file": "tests/rls-isolation.test.ts",
+      "line": 59,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "tests/rls-isolation.test.ts",
+      "line": 73,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": "const { data, error } = await sessionB.client.from('loads').select('id').eq('id', loadAId)"
+    },
+    {
+      "file": "tests/rls-isolation.test.ts",
+      "line": 80,
+      "kind": "table",
+      "target": "loads",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "test",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "tests/rls-isolation.test.ts",
+      "line": 86,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": "const { data: stillIntact } = await admin.from('loads').select('commodity').eq('id', loadAId).single()"
+    },
+    {
+      "file": "tests/rls-isolation.test.ts",
+      "line": 91,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": "const { data, error } = await sessionB.client.from('invoices').select('id').eq('id', invoiceAId)"
+    },
+    {
+      "file": "tests/rls-isolation.test.ts",
+      "line": 97,
+      "kind": "table",
+      "target": "vehicles",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": "const { data, error } = await sessionB.client.from('vehicles').select('id').eq('id', vehicleAId)"
+    },
+    {
+      "file": "tests/rls-isolation.test.ts",
+      "line": 103,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": "const { data, error } = await sessionB.client.from('drivers').select('id').eq('id', driverAId)"
+    },
+    {
+      "file": "tests/rls-isolation.test.ts",
+      "line": 109,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": "const { data } = await sessionB.client.from('loads').select('id')"
+    },
+    {
+      "file": "tests/rls-isolation.test.ts",
+      "line": 119,
+      "kind": "table",
+      "target": "<dynamic:table>",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": "const { data, error } = await sessionB.client.from(table).select('*')"
+    },
+    {
+      "file": "tests/settlements.test.ts",
+      "line": 40,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "tests/settlements.test.ts",
+      "line": 70,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "tests/settlements.test.ts",
+      "line": 87,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "tests/settlements.test.ts",
+      "line": 104,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "tests/settlements.test.ts",
+      "line": 109,
+      "kind": "table",
+      "target": "loads",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": "await admin.from('loads').insert({"
+    },
+    {
+      "file": "tests/settlements.test.ts",
+      "line": 127,
+      "kind": "table",
+      "target": "driver_settlements",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": ".from('driver_settlements')"
+    },
+    {
+      "file": "tests/settlements.test.ts",
+      "line": 146,
+      "kind": "table",
+      "target": "loads",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": "const { error } = await admin.from('loads').insert({"
+    },
+    {
+      "file": "tests/settlements.test.ts",
+      "line": 165,
+      "kind": "table",
+      "target": "driver_settlements",
+      "operation": "read",
+      "subOperation": "select",
+      "layer": "test",
+      "snippet": ".from('driver_settlements')"
+    },
+    {
+      "file": "tests/settlements.test.ts",
+      "line": 193,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "tests/settlements.test.ts",
+      "line": 199,
+      "kind": "table",
+      "target": "driver_settlements",
+      "operation": "write",
+      "subOperation": "insert",
+      "layer": "test",
+      "snippet": ".from('driver_settlements')"
+    },
+    {
+      "file": "tests/settlements.test.ts",
+      "line": 227,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "write",
+      "subOperation": "update",
+      "layer": "test",
+      "snippet": "await admin.from('carrier_details').update({ tier: 'pro' }).eq('org_id', org.orgId)"
+    }
+  ],
+  "serviceRoleCallSites": [
+    {
+      "file": "app/(app)/team/page.tsx",
+      "line": 13,
+      "layer": "server-component",
+      "snippet": "import { createClient, createAdminClient } from '@/lib/supabase/server'",
+      "role": "import"
+    },
+    {
+      "file": "app/(app)/team/page.tsx",
+      "line": 45,
+      "layer": "server-component",
+      "snippet": "const admin = createAdminClient()",
+      "role": "call-site"
+    },
+    {
+      "file": "app/api/cron/send-reminders/route.ts",
+      "line": 19,
+      "layer": "route-handler",
+      "snippet": "// send_expiry_reminders() itself is service_role-only (EXECUTE revoked from",
+      "role": "comment"
+    },
+    {
+      "file": "app/api/cron/send-reminders/route.ts",
+      "line": 22,
+      "layer": "route-handler",
+      "snippet": "import { createAdminClient } from '@/lib/supabase/server'",
+      "role": "import"
+    },
+    {
+      "file": "app/api/cron/send-reminders/route.ts",
+      "line": 45,
+      "layer": "route-handler",
+      "snippet": "const admin = createAdminClient()",
+      "role": "call-site"
+    },
+    {
+      "file": "app/api/customers/[org_id]/contacts/[contact_id]/invite/route.ts",
+      "line": 13,
+      "layer": "route-handler",
+      "snippet": "import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'",
+      "role": "import"
+    },
+    {
+      "file": "app/api/customers/[org_id]/contacts/[contact_id]/invite/route.ts",
+      "line": 51,
+      "layer": "route-handler",
+      "snippet": "const admin = createAdminClient()",
+      "role": "call-site"
+    },
+    {
+      "file": "app/api/customers/[org_id]/contacts/[contact_id]/revoke/route.ts",
+      "line": 11,
+      "layer": "route-handler",
+      "snippet": "import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'",
+      "role": "import"
+    },
+    {
+      "file": "app/api/customers/[org_id]/contacts/[contact_id]/revoke/route.ts",
+      "line": 40,
+      "layer": "route-handler",
+      "snippet": "const admin = createAdminClient()",
+      "role": "call-site"
+    },
+    {
+      "file": "app/api/drivers/invite/route.ts",
+      "line": 3,
+      "layer": "route-handler",
+      "snippet": "// Server-only: uses createAdminClient() (service role) to call the Supabase",
+      "role": "comment"
+    },
+    {
+      "file": "app/api/drivers/invite/route.ts",
+      "line": 15,
+      "layer": "route-handler",
+      "snippet": "import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'",
+      "role": "import"
+    },
+    {
+      "file": "app/api/drivers/invite/route.ts",
+      "line": 38,
+      "layer": "route-handler",
+      "snippet": "const admin = createAdminClient()",
+      "role": "call-site"
+    },
+    {
+      "file": "app/api/intake/email/route.ts",
+      "line": 25,
+      "layer": "route-handler",
+      "snippet": "import { createAdminClient } from '@/lib/api-auth'",
+      "role": "import"
+    },
+    {
+      "file": "app/api/intake/email/route.ts",
+      "line": 69,
+      "layer": "route-handler",
+      "snippet": "const admin = createAdminClient()",
+      "role": "call-site"
+    },
+    {
+      "file": "app/api/invoices/[id]/track/route.ts",
+      "line": 10,
+      "layer": "route-handler",
+      "snippet": "import { createAdminClient } from '@/lib/supabase/server'",
+      "role": "import"
+    },
+    {
+      "file": "app/api/invoices/[id]/track/route.ts",
+      "line": 33,
+      "layer": "route-handler",
+      "snippet": "const admin = createAdminClient()",
+      "role": "call-site"
+    },
+    {
+      "file": "app/api/onboarding/route.ts",
+      "line": 4,
+      "layer": "route-handler",
+      "snippet": "import { createAdminClient } from '@/lib/supabase/server'",
+      "role": "import"
+    },
+    {
+      "file": "app/api/onboarding/route.ts",
+      "line": 24,
+      "layer": "route-handler",
+      "snippet": "admin: ReturnType<typeof createAdminClient>,",
+      "role": "call-site"
+    },
+    {
+      "file": "app/api/onboarding/route.ts",
+      "line": 121,
+      "layer": "route-handler",
+      "snippet": "const admin = createAdminClient()",
+      "role": "call-site"
+    },
+    {
+      "file": "app/api/team/[id]/route.ts",
+      "line": 17,
+      "layer": "route-handler",
+      "snippet": "import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'",
+      "role": "import"
+    },
+    {
+      "file": "app/api/team/[id]/route.ts",
+      "line": 42,
+      "layer": "route-handler",
+      "snippet": "const admin = createAdminClient()",
+      "role": "call-site"
+    },
+    {
+      "file": "app/api/team/[id]/route.ts",
+      "line": 56,
+      "layer": "route-handler",
+      "snippet": "admin: ReturnType<typeof createAdminClient>,",
+      "role": "call-site"
+    },
+    {
+      "file": "app/api/team/invite/route.ts",
+      "line": 14,
+      "layer": "route-handler",
+      "snippet": "import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'",
+      "role": "import"
+    },
+    {
+      "file": "app/api/team/invite/route.ts",
+      "line": 77,
+      "layer": "route-handler",
+      "snippet": "const admin = createAdminClient()",
+      "role": "call-site"
+    },
+    {
+      "file": "app/api/team/route.ts",
+      "line": 8,
+      "layer": "route-handler",
+      "snippet": "import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'",
+      "role": "import"
+    },
+    {
+      "file": "app/api/team/route.ts",
+      "line": 27,
+      "layer": "route-handler",
+      "snippet": "const admin = createAdminClient()",
+      "role": "call-site"
+    },
+    {
+      "file": "lib/admin-auth.ts",
+      "line": 19,
+      "layer": "lib",
+      "snippet": "import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'",
+      "role": "import"
+    },
+    {
+      "file": "lib/admin-auth.ts",
+      "line": 26,
+      "layer": "lib",
+      "snippet": "admin: ReturnType<typeof createAdminClient>",
+      "role": "call-site"
+    },
+    {
+      "file": "lib/admin-auth.ts",
+      "line": 51,
+      "layer": "lib",
+      "snippet": "return { admin: createAdminClient(), userId: user.id, role }",
+      "role": "call-site"
+    },
+    {
+      "file": "lib/api-auth.ts",
+      "line": 22,
+      "layer": "lib",
+      "snippet": "import { createClient as createServerClient, createAdminClient } from '@/lib/supabase/server'",
+      "role": "import"
+    },
+    {
+      "file": "lib/api-auth.ts",
+      "line": 95,
+      "layer": "lib",
+      "snippet": "export { createAdminClient }",
+      "role": "call-site"
+    },
+    {
+      "file": "lib/auth-admin/supabase-auth-admin-provider.ts",
+      "line": 3,
+      "layer": "lib",
+      "snippet": "// SupabaseClient (from createAdminClient()) — same privilege level as the",
+      "role": "comment"
+    },
+    {
+      "file": "lib/auth-admin/types.ts",
+      "line": 7,
+      "layer": "lib",
+      "snippet": "// surface (createAdminClient()'s service-role operations), which is where",
+      "role": "comment"
+    },
+    {
+      "file": "lib/supabase/server.ts",
+      "line": 9,
+      "layer": "lib",
+      "snippet": "export function createAdminClient() {",
+      "role": "definition"
+    },
+    {
+      "file": "lib/supabase/server.ts",
+      "line": 12,
+      "layer": "lib",
+      "snippet": "process.env.SUPABASE_SERVICE_ROLE_KEY!,",
+      "role": "definition"
+    },
+    {
+      "file": "tests/global-teardown.ts",
+      "line": 22,
+      "layer": "test",
+      "snippet": "const key = process.env.SUPABASE_SERVICE_ROLE_KEY",
+      "role": "call-site"
+    },
+    {
+      "file": "tests/helpers.ts",
+      "line": 19,
+      "layer": "test",
+      "snippet": "const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!",
+      "role": "call-site"
+    },
+    {
+      "file": "tests/setup.ts",
+      "line": 2,
+      "layer": "test",
+      "snippet": "// NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY the app itself uses.",
+      "role": "comment"
+    },
+    {
+      "file": "tests/setup.ts",
+      "line": 10,
+      "layer": "test",
+      "snippet": "if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {",
+      "role": "call-site"
+    },
+    {
+      "file": "tests/setup.ts",
+      "line": 12,
+      "layer": "test",
+      "snippet": "'Tests require NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in carrieros-web/.env.local ' +",
+      "role": "call-site"
+    }
+  ],
+  "realtimeUsage": [
+    {
+      "file": "components/DriverMessageThread.tsx",
+      "line": 100,
+      "kind": "realtime",
+      "target": "driver-messages-load-${loadId}",
+      "operation": "realtime",
+      "layer": "client-component",
+      "snippet": ".channel(`driver-messages-load-${loadId}`)"
+    },
+    {
+      "file": "components/DriverMessageThread.tsx",
+      "line": 102,
+      "kind": "realtime",
+      "target": "postgres_changes",
+      "operation": "realtime",
+      "layer": "client-component",
+      "snippet": "'postgres_changes',"
+    },
+    {
+      "file": "components/DriverMessageThread.tsx",
+      "line": 114,
+      "kind": "realtime",
+      "target": "channel",
+      "operation": "realtime",
+      "layer": "client-component",
+      "snippet": ".subscribe()"
+    },
+    {
+      "file": "components/DriverMessageThread.tsx",
+      "line": 117,
+      "kind": "realtime",
+      "target": "channel",
+      "operation": "realtime",
+      "layer": "client-component",
+      "snippet": "supabase.removeChannel(channel)"
+    }
+  ],
+  "hasFeatureCallers": [
+    {
+      "file": "app/(app)/customers/[customer_number]/page.tsx",
+      "line": 17,
+      "via": "import",
+      "layer": "server-component",
+      "snippet": "import { hasFeature } from '@/lib/entitlements'"
+    },
+    {
+      "file": "app/(app)/customers/[customer_number]/page.tsx",
+      "line": 139,
+      "via": "call",
+      "layer": "server-component",
+      "snippet": "const canSeeHealthScore = await hasFeature(supabase, 'customer_health_score')"
+    },
+    {
+      "file": "app/(app)/customers/[customer_number]/page.tsx",
+      "line": 140,
+      "via": "call",
+      "layer": "server-component",
+      "snippet": "const canSeeExceptions = await hasFeature(supabase, 'exception_history')"
+    },
+    {
+      "file": "app/(app)/dispatch/page.tsx",
+      "line": 13,
+      "via": "import",
+      "layer": "server-component",
+      "snippet": "import { hasFeature } from '@/lib/entitlements'"
+    },
+    {
+      "file": "app/(app)/dispatch/page.tsx",
+      "line": 33,
+      "via": "call",
+      "layer": "server-component",
+      "snippet": "const entitled = await hasFeature(supabase, 'desktop_command_center')"
+    },
+    {
+      "file": "app/(app)/exceptions/page.tsx",
+      "line": 10,
+      "via": "import",
+      "layer": "server-component",
+      "snippet": "import { hasFeature } from '@/lib/entitlements'"
+    },
+    {
+      "file": "app/(app)/exceptions/page.tsx",
+      "line": 30,
+      "via": "call",
+      "layer": "server-component",
+      "snippet": "hasFeature(supabase, 'full_exceptions_inbox'),"
+    },
+    {
+      "file": "app/(app)/finance/page.tsx",
+      "line": 3,
+      "via": "comment",
+      "layer": "server-component",
+      "snippet": "// \"Coming soon\" stub. Pro-tier only (hasFeature('ifta_tax_hub')); Growth"
+    },
+    {
+      "file": "app/(app)/finance/page.tsx",
+      "line": 19,
+      "via": "import",
+      "layer": "server-component",
+      "snippet": "import { hasFeature } from '@/lib/entitlements'"
+    },
+    {
+      "file": "app/(app)/finance/page.tsx",
+      "line": 57,
+      "via": "call",
+      "layer": "server-component",
+      "snippet": "const entitled = await hasFeature(supabase, 'ifta_tax_hub')"
+    },
+    {
+      "file": "app/(app)/loads/[load_number]/page.tsx",
+      "line": 12,
+      "via": "import",
+      "layer": "server-component",
+      "snippet": "import { hasFeature } from '@/lib/entitlements'"
+    },
+    {
+      "file": "app/(app)/loads/[load_number]/page.tsx",
+      "line": 159,
+      "via": "call",
+      "layer": "server-component",
+      "snippet": "const chatEntitled = canChat && (await hasFeature(supabase, 'driver_chat'))"
+    },
+    {
+      "file": "app/(app)/loads/[load_number]/page.tsx",
+      "line": 164,
+      "via": "call",
+      "layer": "server-component",
+      "snippet": "const iftaEntitled = canIfta && (await hasFeature(supabase, 'ifta_mileage_log'))"
+    },
+    {
+      "file": "app/(app)/settlements/SendAchButton.tsx",
+      "line": 4,
+      "via": "comment",
+      "layer": "client-component",
+      "snippet": "// `entitled` is passed in from the server component's own hasFeature() call"
+    },
+    {
+      "file": "app/(app)/settlements/page.tsx",
+      "line": 14,
+      "via": "import",
+      "layer": "server-component",
+      "snippet": "import { hasFeature } from '@/lib/entitlements'"
+    },
+    {
+      "file": "app/(app)/settlements/page.tsx",
+      "line": 40,
+      "via": "call",
+      "layer": "server-component",
+      "snippet": "hasFeature(supabase, 'driver_settlements'),"
+    },
+    {
+      "file": "app/(app)/settlements/page.tsx",
+      "line": 41,
+      "via": "call",
+      "layer": "server-component",
+      "snippet": "hasFeature(supabase, 'settlement_ach'),"
+    },
+    {
+      "file": "app/api/driver-messages/[id]/translate/route.ts",
+      "line": 9,
+      "via": "import",
+      "layer": "route-handler",
+      "snippet": "import { hasFeature } from '@/lib/entitlements'"
+    },
+    {
+      "file": "app/api/driver-messages/[id]/translate/route.ts",
+      "line": 52,
+      "via": "call",
+      "layer": "route-handler",
+      "snippet": "const entitled = await hasFeature(supabase, 'driver_chat')"
+    },
+    {
+      "file": "app/api/driver-messages/route.ts",
+      "line": 12,
+      "via": "import",
+      "layer": "route-handler",
+      "snippet": "import { hasFeature } from '@/lib/entitlements'"
+    },
+    {
+      "file": "app/api/driver-messages/route.ts",
+      "line": 46,
+      "via": "call",
+      "layer": "route-handler",
+      "snippet": "const entitled = await hasFeature(supabase, 'driver_chat')"
+    },
+    {
+      "file": "app/api/loads/[id]/route.ts",
+      "line": 5,
+      "via": "import",
+      "layer": "route-handler",
+      "snippet": "import { hasFeature } from '@/lib/entitlements'"
+    },
+    {
+      "file": "app/api/loads/[id]/route.ts",
+      "line": 107,
+      "via": "call",
+      "layer": "route-handler",
+      "snippet": "const iftaEntitled = await hasFeature(supabase, 'ifta_mileage_log')"
+    },
+    {
+      "file": "app/api/settlements/[id]/send-ach/route.ts",
+      "line": 7,
+      "via": "comment",
+      "layer": "route-handler",
+      "snippet": "// Gated Pro+ via the `settlement_ach` feature (has_feature RPC) — a"
+    },
+    {
+      "file": "app/api/settlements/[id]/send-ach/route.ts",
+      "line": 21,
+      "via": "import",
+      "layer": "route-handler",
+      "snippet": "import { hasFeature } from '@/lib/entitlements'"
+    },
+    {
+      "file": "app/api/settlements/[id]/send-ach/route.ts",
+      "line": 61,
+      "via": "call",
+      "layer": "route-handler",
+      "snippet": "const entitled = await hasFeature(supabase, 'settlement_ach')"
+    },
+    {
+      "file": "app/api/settlements/run/route.ts",
+      "line": 9,
+      "via": "comment",
+      "layer": "route-handler",
+      "snippet": "// Gated Growth+ via the `driver_settlements` feature (has_feature RPC)."
+    },
+    {
+      "file": "app/api/settlements/run/route.ts",
+      "line": 27,
+      "via": "import",
+      "layer": "route-handler",
+      "snippet": "import { hasFeature } from '@/lib/entitlements'"
+    },
+    {
+      "file": "app/api/settlements/run/route.ts",
+      "line": 43,
+      "via": "call",
+      "layer": "route-handler",
+      "snippet": "const entitled = await hasFeature(supabase, 'driver_settlements')"
+    },
+    {
+      "file": "app/api/team/[id]/route.ts",
+      "line": 18,
+      "via": "import",
+      "layer": "route-handler",
+      "snippet": "import { hasFeature } from '@/lib/entitlements'"
+    },
+    {
+      "file": "app/api/team/[id]/route.ts",
+      "line": 82,
+      "via": "call",
+      "layer": "route-handler",
+      "snippet": "const entitled = await hasFeature(supabase, 'dispatcher_finance_roles')"
+    },
+    {
+      "file": "app/api/team/invite/route.ts",
+      "line": 15,
+      "via": "import",
+      "layer": "route-handler",
+      "snippet": "import { hasFeature } from '@/lib/entitlements'"
+    },
+    {
+      "file": "app/api/team/invite/route.ts",
+      "line": 64,
+      "via": "comment",
+      "layer": "route-handler",
+      "snippet": "// reading this file directly. has_feature() is the same RLS-usable gate"
+    },
+    {
+      "file": "app/api/team/invite/route.ts",
+      "line": 67,
+      "via": "call",
+      "layer": "route-handler",
+      "snippet": "const entitled = await hasFeature(supabase, 'dispatcher_finance_roles')"
+    },
+    {
+      "file": "lib/entitlements.ts",
+      "line": 2,
+      "via": "comment",
+      "layer": "lib",
+      "snippet": "// Thin wrapper around the has_feature() RLS-usable RPC (decisions.md S11 /"
+    },
+    {
+      "file": "lib/entitlements.ts",
+      "line": 5,
+      "via": "comment",
+      "layer": "lib",
+      "snippet": "// JWT/auth.uid() context, so my_org_id() (which has_feature() depends on)"
+    },
+    {
+      "file": "lib/entitlements.ts",
+      "line": 14,
+      "via": "call",
+      "layer": "lib",
+      "snippet": "export async function hasFeature("
+    },
+    {
+      "file": "lib/entitlements.ts",
+      "line": 18,
+      "via": "rpc:has_feature",
+      "layer": "lib",
+      "snippet": "const { data } = await supabase.rpc('has_feature', { feature_key: featureKey })"
+    },
+    {
+      "file": "lib/entitlements.ts",
+      "line": 27,
+      "via": "comment",
+      "layer": "lib",
+      "snippet": "// `tiers` tables — this is just a batched read of the same has_feature()"
+    },
+    {
+      "file": "lib/entitlements.ts",
+      "line": 30,
+      "via": "rpc:get_my_entitlements",
+      "layer": "lib",
+      "snippet": "const { data } = await supabase.rpc('get_my_entitlements')"
+    }
+  ]
+}

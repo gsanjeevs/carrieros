@@ -1,0 +1,4333 @@
+{
+  "generatedAt": "2026-07-26",
+  "database": "local supabase_db_carrieros / postgres, schema=public (+ storage policies)",
+  "summary": {
+    "tableCount": 40,
+    "viewCount": 1,
+    "tablesWithRlsEnabled": 40,
+    "tablesWithRlsDisabled": [
+      "loads_driver_view"
+    ],
+    "tablesWithRlsButNoPolicies": [],
+    "tablesWithForceRls": [],
+    "tablesWithoutDirectTenantColumn": [
+      "driver_message_translations",
+      "dvir_defects",
+      "features",
+      "ifta_tax_rates",
+      "languages",
+      "load_events",
+      "organizations",
+      "platform_flags",
+      "roles",
+      "settlement_deductions",
+      "tiers",
+      "vehicle_classifications",
+      "vehicle_type_classifications",
+      "vehicle_types"
+    ],
+    "publicPolicyCount": 95,
+    "storagePolicyCount": 5,
+    "functionCount": 18,
+    "securityDefinerCount": 16,
+    "securityDefinerFunctions": [
+      "bulk_import_customers",
+      "check_ifta_completeness",
+      "create_customer_org",
+      "driver_self_update_allowed",
+      "get_customer_health_score",
+      "get_exceptions",
+      "get_ifta_quarterly_summary",
+      "get_ifta_tax_summary",
+      "get_my_entitlements",
+      "get_public_tracking",
+      "get_public_tracking_events",
+      "has_feature",
+      "mark_overdue_invoices",
+      "my_org_id",
+      "my_role",
+      "send_expiry_reminders"
+    ],
+    "triggerCount": 2,
+    "businessLogicTriggerCount": 0
+  },
+  "tables": [
+    {
+      "name": "admin_events",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 1,
+      "tenantColumn": "org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "org_id",
+        "admin_id",
+        "event_type",
+        "metadata",
+        "created_at"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "admin_notes",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 1,
+      "tenantColumn": "org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "org_id",
+        "body",
+        "admin_id",
+        "created_at"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "billing_events",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 1,
+      "tenantColumn": "org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "org_id",
+        "stripe_event_id",
+        "event_type",
+        "amount",
+        "status",
+        "card_last4",
+        "resolved_at",
+        "created_at"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "carrier_details",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 3,
+      "tenantColumn": "org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "org_id",
+        "mc_number",
+        "dot_number",
+        "load_email",
+        "tier",
+        "timezone",
+        "uom_system",
+        "default_payment_method",
+        "factoring_company",
+        "billing_status",
+        "trial_ends_at",
+        "stripe_customer_id",
+        "card_brand",
+        "card_last4",
+        "default_language",
+        "grace_period_until",
+        "default_net_terms_days"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "customer_contacts",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 3,
+      "tenantColumn": "carrier_org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "org_id",
+        "carrier_org_id",
+        "name",
+        "email",
+        "phone",
+        "title",
+        "is_primary",
+        "portal_profile_id",
+        "created_at"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "customer_details",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 2,
+      "tenantColumn": "carrier_org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "org_id",
+        "carrier_org_id",
+        "customer_number",
+        "contact_name",
+        "tags",
+        "notes"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "documents",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 4,
+      "tenantColumn": "carrier_org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "load_id",
+        "carrier_org_id",
+        "type",
+        "storage_path",
+        "uploaded_by",
+        "created_at"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "driver_documents",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 2,
+      "tenantColumn": "carrier_org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "driver_id",
+        "carrier_org_id",
+        "doc_type",
+        "label",
+        "storage_path",
+        "expiry_date",
+        "uploaded_by",
+        "created_at"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "driver_message_translations",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 2,
+      "tenantColumn": null,
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "message_id",
+        "target_language",
+        "translated_body",
+        "translated_at"
+      ],
+      "ownership": "indirect",
+      "ownershipNote": "via message_id -> driver_messages.carrier_org_id"
+    },
+    {
+      "name": "driver_messages",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 2,
+      "tenantColumn": "carrier_org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "carrier_org_id",
+        "load_id",
+        "sender_id",
+        "body",
+        "original_language",
+        "sent_at",
+        "read_at"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "driver_settlements",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 2,
+      "tenantColumn": "carrier_org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "carrier_org_id",
+        "driver_id",
+        "load_id",
+        "pay_method",
+        "gross_revenue",
+        "net_pay",
+        "loads_count",
+        "rate_value",
+        "advance_amount",
+        "payment_status",
+        "period_start",
+        "period_end",
+        "pdf_statement_path",
+        "created_by",
+        "created_at"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "drivers",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 5,
+      "tenantColumn": "carrier_org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "carrier_org_id",
+        "profile_id",
+        "driver_number",
+        "default_vehicle_id",
+        "is_active",
+        "cdl_number",
+        "cdl_class",
+        "cdl_state",
+        "cdl_expiry",
+        "med_cert_expiry",
+        "endorsements",
+        "emergency_contact_name",
+        "emergency_contact_phone",
+        "emergency_contact_relation",
+        "created_at",
+        "invite_status",
+        "settlement_type",
+        "settlement_rate"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "dvir_defects",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 4,
+      "tenantColumn": null,
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "inspection_id",
+        "area",
+        "description",
+        "photo_path",
+        "severity",
+        "created_at"
+      ],
+      "ownership": "indirect",
+      "ownershipNote": "via inspection_id -> dvir_inspections.carrier_org_id"
+    },
+    {
+      "name": "dvir_inspections",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 4,
+      "tenantColumn": "carrier_org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "carrier_org_id",
+        "vehicle_id",
+        "load_id",
+        "driver_id",
+        "type",
+        "condition",
+        "odometer",
+        "signature_url",
+        "submitted_at",
+        "created_at"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "exception_events",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 3,
+      "tenantColumn": "carrier_org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "carrier_org_id",
+        "entity_type",
+        "entity_id",
+        "event_type",
+        "severity",
+        "title",
+        "detail",
+        "occurred_at",
+        "created_at"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "features",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 1,
+      "tenantColumn": null,
+      "secondaryTenantColumn": null,
+      "columns": [
+        "key",
+        "label",
+        "min_tier",
+        "display_order"
+      ],
+      "ownership": "global-reference",
+      "ownershipNote": "platform-wide reference/config data, not tenant-scoped by design"
+    },
+    {
+      "name": "fuel_stops",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 3,
+      "tenantColumn": "carrier_org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "carrier_org_id",
+        "vehicle_id",
+        "driver_id",
+        "load_id",
+        "state",
+        "station",
+        "stop_date",
+        "gallons",
+        "price_per_gallon",
+        "total_cost",
+        "odometer",
+        "receipt_path",
+        "logged_by",
+        "created_at"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "ifta_state_crossings",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 3,
+      "tenantColumn": "carrier_org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "carrier_org_id",
+        "vehicle_id",
+        "driver_id",
+        "load_id",
+        "state",
+        "crossed_at",
+        "lat",
+        "lng",
+        "odometer_est",
+        "source",
+        "created_at"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "ifta_tax_rates",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 1,
+      "tenantColumn": null,
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "state",
+        "quarter",
+        "rate_per_gallon"
+      ],
+      "ownership": "global-reference",
+      "ownershipNote": "platform-wide reference/config data, not tenant-scoped by design"
+    },
+    {
+      "name": "invoices",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 2,
+      "tenantColumn": "carrier_org_id",
+      "secondaryTenantColumn": [
+        "customer_org_id"
+      ],
+      "columns": [
+        "id",
+        "carrier_org_id",
+        "customer_org_id",
+        "load_id",
+        "invoice_number",
+        "amount",
+        "status",
+        "sent_at",
+        "due_date",
+        "paid_at",
+        "notes",
+        "created_at",
+        "payment_method",
+        "factoring_company",
+        "factoring_reference",
+        "factored_at",
+        "opened_at"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "languages",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 2,
+      "tenantColumn": null,
+      "secondaryTenantColumn": null,
+      "columns": [
+        "code",
+        "label",
+        "native_name",
+        "flag_emoji",
+        "display_order"
+      ],
+      "ownership": "global-reference",
+      "ownershipNote": "platform-wide reference/config data, not tenant-scoped by design"
+    },
+    {
+      "name": "load_events",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 2,
+      "tenantColumn": null,
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "load_id",
+        "event_type",
+        "note",
+        "location_lat",
+        "location_lng",
+        "created_by",
+        "created_at"
+      ],
+      "ownership": "indirect",
+      "ownershipNote": "via load_id -> loads.carrier_org_id"
+    },
+    {
+      "name": "load_expenses",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 2,
+      "tenantColumn": "carrier_org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "carrier_org_id",
+        "load_id",
+        "expense_type",
+        "amount",
+        "note",
+        "logged_by",
+        "created_at"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "loads",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 9,
+      "tenantColumn": "carrier_org_id",
+      "secondaryTenantColumn": [
+        "customer_org_id"
+      ],
+      "columns": [
+        "id",
+        "carrier_org_id",
+        "customer_org_id",
+        "customer_name_raw",
+        "load_number",
+        "driver_id",
+        "vehicle_id",
+        "pickup_address",
+        "pickup_city",
+        "pickup_state",
+        "pickup_zip",
+        "pickup_lat",
+        "pickup_lng",
+        "delivery_address",
+        "delivery_city",
+        "delivery_state",
+        "delivery_zip",
+        "delivery_lat",
+        "delivery_lng",
+        "total_miles",
+        "pickup_date",
+        "pickup_time",
+        "delivery_date",
+        "delivery_time",
+        "commodity",
+        "weight_lbs",
+        "rate",
+        "status",
+        "intake_method",
+        "raw_intake_text",
+        "extraction_data",
+        "tracking_token",
+        "last_location_lat",
+        "last_location_lng",
+        "last_location_at",
+        "created_at",
+        "updated_at"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "loads_driver_view",
+      "kind": "view",
+      "rlsEnabled": false,
+      "policyCount": 0,
+      "tenantColumn": "carrier_org_id",
+      "secondaryTenantColumn": [
+        "customer_org_id"
+      ],
+      "columns": [
+        "id",
+        "load_number",
+        "carrier_org_id",
+        "customer_org_id",
+        "customer_name_raw",
+        "driver_id",
+        "vehicle_id",
+        "pickup_address",
+        "pickup_city",
+        "pickup_state",
+        "pickup_zip",
+        "pickup_lat",
+        "pickup_lng",
+        "delivery_address",
+        "delivery_city",
+        "delivery_state",
+        "delivery_zip",
+        "delivery_lat",
+        "delivery_lng",
+        "total_miles",
+        "pickup_date",
+        "pickup_time",
+        "delivery_date",
+        "delivery_time",
+        "commodity",
+        "weight_lbs",
+        "status",
+        "intake_method",
+        "tracking_token",
+        "last_location_lat",
+        "last_location_lng",
+        "last_location_at",
+        "created_at",
+        "updated_at"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "maintenance_reminders",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 2,
+      "tenantColumn": "carrier_org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "vehicle_id",
+        "carrier_org_id",
+        "reminder_type",
+        "trigger_miles",
+        "trigger_months",
+        "last_service_date",
+        "last_odometer",
+        "next_due_date",
+        "next_due_miles",
+        "is_active",
+        "created_at"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "org_documents",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 2,
+      "tenantColumn": "org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "org_id",
+        "doc_type",
+        "label",
+        "storage_path",
+        "expiry_date",
+        "uploaded_by",
+        "created_at",
+        "updated_at"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "org_flag_overrides",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 2,
+      "tenantColumn": "org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "org_id",
+        "flag_key",
+        "enabled",
+        "set_by",
+        "set_at"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "org_sequences",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 1,
+      "tenantColumn": "org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "org_id",
+        "entity",
+        "last_val"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "organizations",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 4,
+      "tenantColumn": null,
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "type",
+        "name",
+        "phone",
+        "email",
+        "address",
+        "city",
+        "state",
+        "zip",
+        "country",
+        "currency",
+        "created_at",
+        "logo_path",
+        "ein"
+      ],
+      "ownership": "self",
+      "ownershipNote": "id is itself the tenant key (organizations IS the tenant table)"
+    },
+    {
+      "name": "platform_flags",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 2,
+      "tenantColumn": null,
+      "secondaryTenantColumn": null,
+      "columns": [
+        "flag_key",
+        "description",
+        "default_enabled",
+        "created_at"
+      ],
+      "ownership": "global-reference",
+      "ownershipNote": "platform-wide reference/config data, not tenant-scoped by design"
+    },
+    {
+      "name": "profiles",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 4,
+      "tenantColumn": "org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "org_id",
+        "role",
+        "first_name",
+        "last_name",
+        "phone",
+        "preferred_language",
+        "timezone",
+        "created_at",
+        "uom_system",
+        "date_format",
+        "time_format",
+        "avatar_path",
+        "is_active",
+        "push_token",
+        "theme_preference"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "roles",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 1,
+      "tenantColumn": null,
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "code",
+        "label",
+        "abbreviation",
+        "color_token",
+        "display_order",
+        "scope"
+      ],
+      "ownership": "global-reference",
+      "ownershipNote": "platform-wide reference/config data, not tenant-scoped by design"
+    },
+    {
+      "name": "service_logs",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 2,
+      "tenantColumn": "carrier_org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "vehicle_id",
+        "carrier_org_id",
+        "service_type",
+        "service_date",
+        "odometer",
+        "cost",
+        "shop_name",
+        "notes",
+        "logged_by",
+        "created_at",
+        "receipt_path"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "settlement_deductions",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 2,
+      "tenantColumn": null,
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "settlement_id",
+        "deduction_type",
+        "amount",
+        "note"
+      ],
+      "ownership": "indirect",
+      "ownershipNote": "via settlement_id -> driver_settlements.carrier_org_id"
+    },
+    {
+      "name": "tiers",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 2,
+      "tenantColumn": null,
+      "secondaryTenantColumn": null,
+      "columns": [
+        "code",
+        "label",
+        "rank",
+        "monthly_price",
+        "included_trucks",
+        "price_per_additional_truck"
+      ],
+      "ownership": "global-reference",
+      "ownershipNote": "platform-wide reference/config data, not tenant-scoped by design"
+    },
+    {
+      "name": "vehicle_classifications",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 1,
+      "tenantColumn": null,
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "region",
+        "scheme_name",
+        "code",
+        "label",
+        "min_weight_kg",
+        "max_weight_kg",
+        "requires_special_license",
+        "license_category_note",
+        "display_order"
+      ],
+      "ownership": "global-reference",
+      "ownershipNote": "platform-wide reference/config data, not tenant-scoped by design"
+    },
+    {
+      "name": "vehicle_documents",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 2,
+      "tenantColumn": "carrier_org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "vehicle_id",
+        "carrier_org_id",
+        "doc_type",
+        "label",
+        "storage_path",
+        "expiry_date",
+        "uploaded_by",
+        "created_at"
+      ],
+      "ownership": "direct"
+    },
+    {
+      "name": "vehicle_type_classifications",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 1,
+      "tenantColumn": null,
+      "secondaryTenantColumn": null,
+      "columns": [
+        "vehicle_type_id",
+        "classification_id"
+      ],
+      "ownership": "indirect",
+      "ownershipNote": "via vehicle_type_id -> vehicle_types (global reference)"
+    },
+    {
+      "name": "vehicle_types",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 1,
+      "tenantColumn": null,
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "code",
+        "label",
+        "icon",
+        "generic_photo_path",
+        "typical_length_ft",
+        "typical_payload_capacity_lbs",
+        "typical_cargo_volume_cuft",
+        "specialized_capacity_note",
+        "display_order"
+      ],
+      "ownership": "global-reference",
+      "ownershipNote": "platform-wide reference/config data, not tenant-scoped by design"
+    },
+    {
+      "name": "vehicles",
+      "kind": "table",
+      "rlsEnabled": true,
+      "policyCount": 2,
+      "tenantColumn": "carrier_org_id",
+      "secondaryTenantColumn": null,
+      "columns": [
+        "id",
+        "carrier_org_id",
+        "vehicle_number",
+        "nickname",
+        "year",
+        "make",
+        "model",
+        "vin",
+        "license_plate",
+        "license_state",
+        "is_active",
+        "created_at",
+        "vehicle_type_id",
+        "cab_type",
+        "color",
+        "dimensions",
+        "photo_path",
+        "status"
+      ],
+      "ownership": "direct"
+    }
+  ],
+  "rlsPolicies": [
+    {
+      "schema": "public",
+      "table": "admin_events",
+      "name": "sx_admin_events_select",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(my_role() = ANY (ARRAY['sx_owner'::text, 'sx_finance'::text, 'sx_support'::text]))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "admin_notes",
+      "name": "sx_admin_notes_all",
+      "command": "ALL",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(my_role() = ANY (ARRAY['sx_owner'::text, 'sx_finance'::text, 'sx_support'::text]))",
+      "with_check_expr": "(my_role() = ANY (ARRAY['sx_owner'::text, 'sx_finance'::text, 'sx_support'::text]))"
+    },
+    {
+      "schema": "public",
+      "table": "billing_events",
+      "name": "sx_billing_events_select",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(my_role() = ANY (ARRAY['sx_owner'::text, 'sx_finance'::text]))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "carrier_details",
+      "name": "auth_user_create_carrier_details",
+      "command": "INSERT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "",
+      "with_check_expr": "(auth.uid() IS NOT NULL)"
+    },
+    {
+      "schema": "public",
+      "table": "carrier_details",
+      "name": "carrier_details_select",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid())))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "carrier_details",
+      "name": "owner_solo_carrier_update",
+      "command": "UPDATE",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid()))) AND (( SELECT profiles.role FROM profiles WHERE (profiles.id = auth.uid())) = ANY (ARRAY['owner'::text, 'solo'::text])))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "customer_contacts",
+      "name": "carrier_customer_contacts_select",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(carrier_org_id = my_org_id())",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "customer_contacts",
+      "name": "carrier_customer_contacts_write",
+      "command": "ALL",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = my_org_id()) AND (my_role() = ANY (ARRAY['owner'::text, 'solo'::text, 'dispatcher'::text])))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "customer_contacts",
+      "name": "portal_contact_own_row_select",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(portal_profile_id = auth.uid())",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "customer_details",
+      "name": "carrier_customer_select",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = my_org_id()) OR (org_id = my_org_id()))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "customer_details",
+      "name": "carrier_customer_write",
+      "command": "ALL",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = my_org_id()) AND (my_role() = ANY (ARRAY['owner'::text, 'solo'::text, 'dispatcher'::text])))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "documents",
+      "name": "carrier_docs_select",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(carrier_org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid())))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "documents",
+      "name": "driver_pod_insert",
+      "command": "INSERT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "",
+      "with_check_expr": "((uploaded_by = auth.uid()) AND (carrier_org_id = my_org_id()))"
+    },
+    {
+      "schema": "public",
+      "table": "documents",
+      "name": "owner_solo_docs_all",
+      "command": "ALL",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid()))) AND (( SELECT profiles.role FROM profiles WHERE (profiles.id = auth.uid())) = ANY (ARRAY['owner'::text, 'solo'::text])))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "documents",
+      "name": "uploader_deletes_own_doc",
+      "command": "DELETE",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((uploaded_by = auth.uid()) AND (carrier_org_id = my_org_id()))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "driver_documents",
+      "name": "carrier_driver_docs_select",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(carrier_org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid())))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "driver_documents",
+      "name": "owner_solo_driver_docs_all",
+      "command": "ALL",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid()))) AND (( SELECT profiles.role FROM profiles WHERE (profiles.id = auth.uid())) = ANY (ARRAY['owner'::text, 'solo'::text])))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "driver_message_translations",
+      "name": "same_org_message_translations_insert",
+      "command": "INSERT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "",
+      "with_check_expr": "(message_id IN ( SELECT driver_messages.id FROM driver_messages WHERE (driver_messages.carrier_org_id = my_org_id())))"
+    },
+    {
+      "schema": "public",
+      "table": "driver_message_translations",
+      "name": "same_org_message_translations_select",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(message_id IN ( SELECT driver_messages.id FROM driver_messages WHERE (driver_messages.carrier_org_id = my_org_id())))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "driver_messages",
+      "name": "driver_own_thread_messages",
+      "command": "ALL",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(load_id IN ( SELECT loads.id FROM loads WHERE (loads.driver_id = ( SELECT drivers.id FROM drivers WHERE (drivers.profile_id = auth.uid())))))",
+      "with_check_expr": "(load_id IN ( SELECT loads.id FROM loads WHERE (loads.driver_id = ( SELECT drivers.id FROM drivers WHERE (drivers.profile_id = auth.uid())))))"
+    },
+    {
+      "schema": "public",
+      "table": "driver_messages",
+      "name": "owner_solo_dispatcher_messages_all",
+      "command": "ALL",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = my_org_id()) AND (my_role() = ANY (ARRAY['owner'::text, 'solo'::text, 'dispatcher'::text])))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "driver_settlements",
+      "name": "driver_own_settlements_select",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(driver_id = ( SELECT drivers.id FROM drivers WHERE (drivers.profile_id = auth.uid())))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "driver_settlements",
+      "name": "owner_solo_finance_settlements_all",
+      "command": "ALL",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = my_org_id()) AND (my_role() = ANY (ARRAY['owner'::text, 'solo'::text, 'finance'::text])))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "drivers",
+      "name": "dispatcher_drivers_select",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid()))) AND (( SELECT profiles.role FROM profiles WHERE (profiles.id = auth.uid())) = 'dispatcher'::text))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "drivers",
+      "name": "driver_own_record",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(profile_id = auth.uid())",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "drivers",
+      "name": "driver_own_record_update",
+      "command": "UPDATE",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(profile_id = auth.uid())",
+      "with_check_expr": "((profile_id = auth.uid()) AND driver_self_update_allowed(carrier_org_id, cdl_expiry, med_cert_expiry, is_active, driver_number))"
+    },
+    {
+      "schema": "public",
+      "table": "drivers",
+      "name": "finance_drivers_select",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = my_org_id()) AND (my_role() = 'finance'::text))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "drivers",
+      "name": "owner_solo_drivers_all",
+      "command": "ALL",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid()))) AND (( SELECT profiles.role FROM profiles WHERE (profiles.id = auth.uid())) = ANY (ARRAY['owner'::text, 'solo'::text])))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "dvir_defects",
+      "name": "driver_dvir_defects_insert",
+      "command": "INSERT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "",
+      "with_check_expr": "(inspection_id IN ( SELECT dvir_inspections.id FROM dvir_inspections WHERE (dvir_inspections.driver_id = ( SELECT drivers.id FROM drivers WHERE (drivers.profile_id = auth.uid())))))"
+    },
+    {
+      "schema": "public",
+      "table": "dvir_defects",
+      "name": "driver_dvir_defects_modify",
+      "command": "ALL",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(inspection_id IN ( SELECT i.id FROM dvir_inspections i WHERE (i.driver_id = ( SELECT d.id FROM drivers d WHERE (d.profile_id = auth.uid())))))",
+      "with_check_expr": "(inspection_id IN ( SELECT i.id FROM dvir_inspections i WHERE (i.driver_id = ( SELECT d.id FROM drivers d WHERE (d.profile_id = auth.uid())))))"
+    },
+    {
+      "schema": "public",
+      "table": "dvir_defects",
+      "name": "dvir_defects_select",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(inspection_id IN ( SELECT dvir_inspections.id FROM dvir_inspections WHERE (dvir_inspections.carrier_org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid())))))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "dvir_defects",
+      "name": "owner_solo_dvir_defects_all",
+      "command": "ALL",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((my_role() = ANY (ARRAY['owner'::text, 'solo'::text])) AND (inspection_id IN ( SELECT dvir_inspections.id FROM dvir_inspections WHERE (dvir_inspections.carrier_org_id = my_org_id()))))",
+      "with_check_expr": "((my_role() = ANY (ARRAY['owner'::text, 'solo'::text])) AND (inspection_id IN ( SELECT dvir_inspections.id FROM dvir_inspections WHERE (dvir_inspections.carrier_org_id = my_org_id()))))"
+    },
+    {
+      "schema": "public",
+      "table": "dvir_inspections",
+      "name": "carrier_dvir_select",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(carrier_org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid())))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "dvir_inspections",
+      "name": "driver_dvir_insert",
+      "command": "INSERT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "",
+      "with_check_expr": "(driver_id = ( SELECT drivers.id FROM drivers WHERE (drivers.profile_id = auth.uid())))"
+    },
+    {
+      "schema": "public",
+      "table": "dvir_inspections",
+      "name": "driver_dvir_modify",
+      "command": "UPDATE",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(driver_id = ( SELECT d.id FROM drivers d WHERE (d.profile_id = auth.uid())))",
+      "with_check_expr": "(driver_id = ( SELECT d.id FROM drivers d WHERE (d.profile_id = auth.uid())))"
+    },
+    {
+      "schema": "public",
+      "table": "dvir_inspections",
+      "name": "owner_solo_dvir_all",
+      "command": "ALL",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid()))) AND (( SELECT profiles.role FROM profiles WHERE (profiles.id = auth.uid())) = ANY (ARRAY['owner'::text, 'solo'::text])))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "exception_events",
+      "name": "carrier_exception_events_select",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(carrier_org_id = my_org_id())",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "exception_events",
+      "name": "driver_exception_events_insert",
+      "command": "INSERT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "",
+      "with_check_expr": "((carrier_org_id = my_org_id()) AND (my_role() = 'driver'::text) AND (entity_type = 'load'::text) AND (event_type = 'driver_reported_problem'::text) AND (entity_id IN ( SELECT loads.id FROM loads WHERE (loads.driver_id = ( SELECT drivers.id FROM drivers WHERE (drivers.profile_id = auth.uid()))))))"
+    },
+    {
+      "schema": "public",
+      "table": "exception_events",
+      "name": "owner_solo_exception_events_all",
+      "command": "ALL",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = my_org_id()) AND (my_role() = ANY (ARRAY['owner'::text, 'solo'::text])))",
+      "with_check_expr": "((carrier_org_id = my_org_id()) AND (my_role() = ANY (ARRAY['owner'::text, 'solo'::text])))"
+    },
+    {
+      "schema": "public",
+      "table": "features",
+      "name": "features_select",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "true",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "fuel_stops",
+      "name": "carrier_fuel_stops_select",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(carrier_org_id = my_org_id())",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "fuel_stops",
+      "name": "driver_fuel_stops_insert",
+      "command": "INSERT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "",
+      "with_check_expr": "((carrier_org_id = my_org_id()) AND (driver_id = ( SELECT drivers.id FROM drivers WHERE (drivers.profile_id = auth.uid()))))"
+    },
+    {
+      "schema": "public",
+      "table": "fuel_stops",
+      "name": "owner_solo_dispatcher_fuel_stops_all",
+      "command": "ALL",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = my_org_id()) AND (my_role() = ANY (ARRAY['owner'::text, 'solo'::text, 'dispatcher'::text])))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "ifta_state_crossings",
+      "name": "carrier_ifta_crossings_select",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(carrier_org_id = my_org_id())",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "ifta_state_crossings",
+      "name": "driver_ifta_crossings_insert",
+      "command": "INSERT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "",
+      "with_check_expr": "((carrier_org_id = my_org_id()) AND (driver_id = ( SELECT drivers.id FROM drivers WHERE (drivers.profile_id = auth.uid()))))"
+    },
+    {
+      "schema": "public",
+      "table": "ifta_state_crossings",
+      "name": "owner_solo_dispatcher_ifta_crossings_all",
+      "command": "ALL",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = my_org_id()) AND (my_role() = ANY (ARRAY['owner'::text, 'solo'::text, 'dispatcher'::text])))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "ifta_tax_rates",
+      "name": "ifta_tax_rates_select",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "true",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "invoices",
+      "name": "billing_invoices_all",
+      "command": "ALL",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid()))) AND (( SELECT profiles.role FROM profiles WHERE (profiles.id = auth.uid())) = ANY (ARRAY['owner'::text, 'solo'::text, 'finance'::text])))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "invoices",
+      "name": "customer_invoices_select",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((customer_org_id = ( SELECT profiles.org_id FROM profiles WHERE ((profiles.id = auth.uid()) AND (profiles.is_active = true)))) AND (( SELECT profiles.role FROM profiles WHERE ((profiles.id = auth.uid()) AND (profiles.is_active = true))) = ANY (ARRAY['customer_admin'::text, 'customer_viewer'::text])",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "languages",
+      "name": "languages_select",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "true",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "languages",
+      "name": "languages_select_anon",
+      "command": "SELECT",
+      "roles": [
+        "anon"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "true",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "load_events",
+      "name": "authenticated_load_events_insert",
+      "command": "INSERT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "",
+      "with_check_expr": "((created_by = auth.uid()) AND (load_id IN ( SELECT loads.id FROM loads WHERE (loads.carrier_org_id = my_org_id()))))"
+    },
+    {
+      "schema": "public",
+      "table": "load_events",
+      "name": "carrier_load_events_select",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(load_id IN ( SELECT loads.id FROM loads WHERE (loads.carrier_org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid())))))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "load_expenses",
+      "name": "carrier_load_expenses_select",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(carrier_org_id = my_org_id())",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "load_expenses",
+      "name": "owner_solo_dispatcher_load_expenses_all",
+      "command": "ALL",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = my_org_id()) AND (my_role() = ANY (ARRAY['owner'::text, 'solo'::text, 'dispatcher'::text])))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "loads",
+      "name": "customer_loads_select",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((customer_org_id = ( SELECT profiles.org_id FROM profiles WHERE ((profiles.id = auth.uid()) AND (profiles.is_active = true)))) AND (( SELECT profiles.role FROM profiles WHERE ((profiles.id = auth.uid()) AND (profiles.is_active = true))) = ANY (ARRAY['customer_admin'::text, 'customer_viewer'::text])",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "loads",
+      "name": "dispatcher_loads_insert",
+      "command": "INSERT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "",
+      "with_check_expr": "((carrier_org_id = my_org_id()) AND (my_role() = 'dispatcher'::text))"
+    },
+    {
+      "schema": "public",
+      "table": "loads",
+      "name": "dispatcher_loads_select",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid()))) AND (( SELECT profiles.role FROM profiles WHERE (profiles.id = auth.uid())) = 'dispatcher'::text))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "loads",
+      "name": "dispatcher_loads_update",
+      "command": "UPDATE",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = my_org_id()) AND (my_role() = 'dispatcher'::text))",
+      "with_check_expr": "((carrier_org_id = my_org_id()) AND (my_role() = 'dispatcher'::text))"
+    },
+    {
+      "schema": "public",
+      "table": "loads",
+      "name": "driver_loads_update_status",
+      "command": "UPDATE",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(driver_id = ( SELECT drivers.id FROM drivers WHERE (drivers.profile_id = auth.uid())))",
+      "with_check_expr": "true"
+    },
+    {
+      "schema": "public",
+      "table": "loads",
+      "name": "driver_own_loads_select",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(driver_id = ( SELECT drivers.id FROM drivers WHERE (drivers.profile_id = auth.uid())))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "loads",
+      "name": "finance_loads_select",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = my_org_id()) AND (my_role() = 'finance'::text))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "loads",
+      "name": "finance_loads_update",
+      "command": "UPDATE",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = my_org_id()) AND (my_role() = 'finance'::text))",
+      "with_check_expr": "((carrier_org_id = my_org_id()) AND (my_role() = 'finance'::text))"
+    },
+    {
+      "schema": "public",
+      "table": "loads",
+      "name": "owner_solo_loads_all",
+      "command": "ALL",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid()))) AND (( SELECT profiles.role FROM profiles WHERE (profiles.id = auth.uid())) = ANY (ARRAY['owner'::text, 'solo'::text])))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "maintenance_reminders",
+      "name": "carrier_reminders_select",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(carrier_org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid())))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "maintenance_reminders",
+      "name": "owner_solo_reminders_all",
+      "command": "ALL",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid()))) AND (( SELECT profiles.role FROM profiles WHERE (profiles.id = auth.uid())) = ANY (ARRAY['owner'::text, 'solo'::text])))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "org_documents",
+      "name": "finance_org_docs_select",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid()))) AND (( SELECT profiles.role FROM profiles WHERE (profiles.id = auth.uid())) = 'finance'::text))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "org_documents",
+      "name": "owner_solo_org_docs_all",
+      "command": "ALL",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid()))) AND (( SELECT profiles.role FROM profiles WHERE (profiles.id = auth.uid())) = ANY (ARRAY['owner'::text, 'solo'::text])))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "org_flag_overrides",
+      "name": "sx_org_flag_overrides_select",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(my_role() = ANY (ARRAY['sx_owner'::text, 'sx_finance'::text, 'sx_support'::text]))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "org_flag_overrides",
+      "name": "sx_owner_org_flag_overrides_write",
+      "command": "ALL",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(my_role() = 'sx_owner'::text)",
+      "with_check_expr": "(my_role() = 'sx_owner'::text)"
+    },
+    {
+      "schema": "public",
+      "table": "org_sequences",
+      "name": "org_sequences_own_org",
+      "command": "ALL",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(org_id = my_org_id())",
+      "with_check_expr": "(org_id = my_org_id())"
+    },
+    {
+      "schema": "public",
+      "table": "organizations",
+      "name": "auth_user_create_carrier_org",
+      "command": "INSERT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "",
+      "with_check_expr": "((type = 'carrier'::text) AND (auth.uid() IS NOT NULL))"
+    },
+    {
+      "schema": "public",
+      "table": "organizations",
+      "name": "carrier_reads_own_customer_orgs",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((type = 'customer'::text) AND (id IN ( SELECT customer_details.org_id FROM customer_details WHERE (customer_details.carrier_org_id = my_org_id()))))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "organizations",
+      "name": "org_member_select",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid()))) OR (id IN ( SELECT customer_details.carrier_org_id FROM customer_details WHERE (customer_details.org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid()))))))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "organizations",
+      "name": "owner_solo_org_update",
+      "command": "UPDATE",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid()))) AND (( SELECT profiles.role FROM profiles WHERE (profiles.id = auth.uid())) = ANY (ARRAY['owner'::text, 'solo'::text])))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "platform_flags",
+      "name": "sx_owner_platform_flags_write",
+      "command": "ALL",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(my_role() = 'sx_owner'::text)",
+      "with_check_expr": "(my_role() = 'sx_owner'::text)"
+    },
+    {
+      "schema": "public",
+      "table": "platform_flags",
+      "name": "sx_platform_flags_select",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(my_role() = ANY (ARRAY['sx_owner'::text, 'sx_finance'::text, 'sx_support'::text]))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "profiles",
+      "name": "own_profile_insert",
+      "command": "INSERT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "",
+      "with_check_expr": "(id = auth.uid())"
+    },
+    {
+      "schema": "public",
+      "table": "profiles",
+      "name": "own_profile_update",
+      "command": "UPDATE",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(id = auth.uid())",
+      "with_check_expr": "((id = auth.uid()) AND (role = my_role()) AND (org_id = my_org_id()))"
+    },
+    {
+      "schema": "public",
+      "table": "profiles",
+      "name": "same_org_profiles_select",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((org_id = my_org_id()) OR (org_id IN ( SELECT customer_details.org_id FROM customer_details WHERE (customer_details.carrier_org_id = my_org_id()))))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "profiles",
+      "name": "users_read_own_profile",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(auth.uid() = id)",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "roles",
+      "name": "roles_select",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "true",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "service_logs",
+      "name": "carrier_service_logs_select",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(carrier_org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid())))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "service_logs",
+      "name": "owner_solo_service_logs_all",
+      "command": "ALL",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid()))) AND (( SELECT profiles.role FROM profiles WHERE (profiles.id = auth.uid())) = ANY (ARRAY['owner'::text, 'solo'::text])))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "settlement_deductions",
+      "name": "owner_solo_finance_settlement_deductions_all",
+      "command": "ALL",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(settlement_id IN ( SELECT driver_settlements.id FROM driver_settlements WHERE ((driver_settlements.carrier_org_id = my_org_id()) AND (my_role() = ANY (ARRAY['owner'::text, 'solo'::text, 'finance'::text])))))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "settlement_deductions",
+      "name": "same_org_settlement_deductions_select",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(settlement_id IN ( SELECT ds.id FROM driver_settlements ds WHERE ((ds.carrier_org_id = my_org_id()) OR (ds.driver_id = ( SELECT drivers.id FROM drivers WHERE (drivers.profile_id = auth.uid()))))))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "tiers",
+      "name": "tiers_select",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "true",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "tiers",
+      "name": "tiers_select_anon",
+      "command": "SELECT",
+      "roles": [
+        "anon"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "true",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "vehicle_classifications",
+      "name": "vehicle_classifications_select",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "true",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "vehicle_documents",
+      "name": "carrier_vehicle_docs_select",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(carrier_org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid())))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "vehicle_documents",
+      "name": "owner_solo_vehicle_docs_all",
+      "command": "ALL",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid()))) AND (( SELECT profiles.role FROM profiles WHERE (profiles.id = auth.uid())) = ANY (ARRAY['owner'::text, 'solo'::text])))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "vehicle_type_classifications",
+      "name": "vehicle_type_classifications_select",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "true",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "vehicle_types",
+      "name": "vehicle_types_select",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "true",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "vehicles",
+      "name": "carrier_vehicles_select",
+      "command": "SELECT",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "(carrier_org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid())))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "public",
+      "table": "vehicles",
+      "name": "owner_solo_vehicles_all",
+      "command": "ALL",
+      "roles": [
+        "public"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((carrier_org_id = ( SELECT profiles.org_id FROM profiles WHERE (profiles.id = auth.uid()))) AND (( SELECT profiles.role FROM profiles WHERE (profiles.id = auth.uid())) = ANY (ARRAY['owner'::text, 'solo'::text])))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "storage",
+      "table": "objects",
+      "name": "member_deletes_orphan_docs",
+      "command": "DELETE",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((bucket_id = 'documents'::text) AND ((storage.foldername(name))[1] = (my_org_id())::text) AND (NOT (EXISTS ( SELECT 1 FROM documents d WHERE (d.storage_path = objects.name)))))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "storage",
+      "table": "objects",
+      "name": "org_docs_insert",
+      "command": "INSERT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "",
+      "with_check_expr": "((bucket_id = 'documents'::text) AND ((storage.foldername(name))[1] = (my_org_id())::text))"
+    },
+    {
+      "schema": "storage",
+      "table": "objects",
+      "name": "org_docs_read",
+      "command": "SELECT",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((bucket_id = 'documents'::text) AND ((storage.foldername(name))[1] = (my_org_id())::text))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "storage",
+      "table": "objects",
+      "name": "owner_solo_docs_delete",
+      "command": "DELETE",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((bucket_id = 'documents'::text) AND ((storage.foldername(name))[1] = (my_org_id())::text) AND (my_role() = ANY (ARRAY['owner'::text, 'solo'::text])))",
+      "with_check_expr": ""
+    },
+    {
+      "schema": "storage",
+      "table": "objects",
+      "name": "owner_solo_docs_update",
+      "command": "UPDATE",
+      "roles": [
+        "authenticated"
+      ],
+      "permissive": "PERMISSIVE",
+      "using_expr": "((bucket_id = 'documents'::text) AND ((storage.foldername(name))[1] = (my_org_id())::text) AND (my_role() = ANY (ARRAY['owner'::text, 'solo'::text])))",
+      "with_check_expr": ""
+    }
+  ],
+  "functions": [
+    {
+      "name": "bulk_import_customers",
+      "arguments": "p_rows jsonb",
+      "returns": "TABLE(row_name text, row_action text, customer_number text, org_id bigint)",
+      "security": "DEFINER",
+      "volatility": "VOLATILE",
+      "language": "13619",
+      "executeAcl": "(null acl - PUBLIC EXECUTE)",
+      "description": "Bulk-creates/updates up to 50 customer orgs from a JSONB array; enforces caller org + owner/solo/dispatcher role internally."
+    },
+    {
+      "name": "check_ifta_completeness",
+      "arguments": "p_load_id bigint",
+      "returns": "boolean",
+      "security": "DEFINER",
+      "volatility": "VOLATILE",
+      "language": "14",
+      "executeAcl": "=X/postgres ; postgres=X/postgres ; authenticated=X/postgres",
+      "description": "Returns true if a load's recorded IFTA state-crossing mileage covers >=60% of loads.total_miles."
+    },
+    {
+      "name": "create_customer_org",
+      "arguments": "p_name text, p_phone text DEFAULT NULL::text, p_email text DEFAULT NULL::text, p_address text DEFAULT NULL::text, p_city text DEFAULT NULL::text, p_state text DEFAULT NULL::text, p_zip text DEFAULT NULL::text, p_country text DEFAULT 'US'::text, p_contact_name text DEFAULT NULL::text, p_notes text DEFAULT NULL::text",
+      "returns": "TABLE(org_id bigint, name text, customer_number text)",
+      "security": "DEFINER",
+      "volatility": "VOLATILE",
+      "language": "13619",
+      "executeAcl": "(null acl - PUBLIC EXECUTE)",
+      "description": "Creates a type='customer' organization + customer_details row for the caller's carrier; enforces owner/solo/dispatcher."
+    },
+    {
+      "name": "driver_self_update_allowed",
+      "arguments": "p_org bigint, p_cdl_expiry date, p_med_expiry date, p_active boolean, p_number text",
+      "returns": "boolean",
+      "security": "DEFINER",
+      "volatility": "STABLE",
+      "language": "14",
+      "executeAcl": "postgres=X/postgres ; authenticated=X/postgres",
+      "description": "RLS helper: true only if a driver's self-UPDATE leaves org, CDL expiry, med expiry, is_active and driver_number unchanged."
+    },
+    {
+      "name": "get_customer_health_score",
+      "arguments": "customer_org_id bigint",
+      "returns": "numeric",
+      "security": "DEFINER",
+      "volatility": "STABLE",
+      "language": "13619",
+      "executeAcl": "=X/postgres ; postgres=X/postgres ; authenticated=X/postgres",
+      "description": "Computes a 0-100 customer health score from on-time paid invoices and exception counts, scoped to my_org_id()."
+    },
+    {
+      "name": "get_exceptions",
+      "arguments": "",
+      "returns": "TABLE(entity_type text, entity_id bigint, exception_type text, tier text, title text, detail text, due_at timestamp with time zone)",
+      "security": "DEFINER",
+      "volatility": "STABLE",
+      "language": "14",
+      "executeAcl": "=X/postgres ; postgres=X/postgres ; authenticated=X/postgres",
+      "description": "Returns the live exceptions inbox (overdue invoices, expiring org/driver/vehicle docs, stale loads) for my_org_id()."
+    },
+    {
+      "name": "get_ifta_quarterly_summary",
+      "arguments": "p_carrier_org_id bigint, p_quarter text",
+      "returns": "TABLE(state text, total_miles numeric)",
+      "security": "DEFINER",
+      "volatility": "VOLATILE",
+      "language": "14",
+      "executeAcl": "=X/postgres ; postgres=X/postgres ; authenticated=X/postgres",
+      "description": "Per-state mileage totals for a carrier/quarter; self-checks p_carrier_org_id = my_org_id()."
+    },
+    {
+      "name": "get_ifta_tax_summary",
+      "arguments": "p_carrier_org_id bigint, p_quarter text",
+      "returns": "TABLE(state text, miles_in_state numeric, net_tax_due numeric)",
+      "security": "DEFINER",
+      "volatility": "VOLATILE",
+      "language": "13619",
+      "executeAcl": "=X/postgres ; postgres=X/postgres ; authenticated=X/postgres",
+      "description": "Per-state IFTA miles and net tax due for a carrier/quarter; returns nothing if p_carrier_org_id != my_org_id()."
+    },
+    {
+      "name": "get_my_entitlements",
+      "arguments": "",
+      "returns": "TABLE(key text)",
+      "security": "DEFINER",
+      "volatility": "STABLE",
+      "language": "14",
+      "executeAcl": "=X/postgres ; postgres=X/postgres ; authenticated=X/postgres",
+      "description": "Returns every features.key whose min_tier rank <= the caller org's carrier_details.tier rank. Batched has_feature()."
+    },
+    {
+      "name": "get_public_tracking",
+      "arguments": "p_token text",
+      "returns": "TABLE(load_number text, status text, pickup_city text, pickup_state text, delivery_city text, delivery_state text, pickup_date date, delivery_date date, last_location_lat numeric, last_location_lng numeric, last_location_at timestamp with time zone, carrier_name text, carrier_phone text, carrier_email text)",
+      "security": "DEFINER",
+      "volatility": "STABLE",
+      "language": "14",
+      "executeAcl": "=X/postgres ; postgres=X/postgres ; anon=X/postgres",
+      "description": "Public (anon-executable) load tracking lookup by tracking_token; returns load status/locations + carrier contact."
+    },
+    {
+      "name": "get_public_tracking_events",
+      "arguments": "p_token text",
+      "returns": "TABLE(event_type text, created_at timestamp with time zone)",
+      "security": "DEFINER",
+      "volatility": "STABLE",
+      "language": "14",
+      "executeAcl": "=X/postgres ; postgres=X/postgres ; anon=X/postgres",
+      "description": "Public (anon-executable) load_events timeline lookup by tracking_token."
+    },
+    {
+      "name": "has_feature",
+      "arguments": "feature_key text",
+      "returns": "boolean",
+      "security": "DEFINER",
+      "volatility": "VOLATILE",
+      "language": "14",
+      "executeAcl": "=X/postgres ; postgres=X/postgres ; authenticated=X/postgres",
+      "description": "Tier gate: true if the caller org's tier rank >= the feature's min_tier rank. See hasFeature section."
+    },
+    {
+      "name": "mark_overdue_invoices",
+      "arguments": "",
+      "returns": "integer",
+      "security": "DEFINER",
+      "volatility": "VOLATILE",
+      "language": "13619",
+      "executeAcl": "=X/postgres ; postgres=X/postgres ; authenticated=X/postgres",
+      "description": "Flips status 'sent'->'overdue' for past-due invoices in my_org_id(); returns row count."
+    },
+    {
+      "name": "my_org_id",
+      "arguments": "",
+      "returns": "bigint",
+      "security": "DEFINER",
+      "volatility": "STABLE",
+      "language": "14",
+      "executeAcl": "(null acl - PUBLIC EXECUTE)",
+      "description": "RLS helper: the active caller's profiles.org_id (NULL if no active profile)."
+    },
+    {
+      "name": "my_role",
+      "arguments": "",
+      "returns": "text",
+      "security": "DEFINER",
+      "volatility": "STABLE",
+      "language": "14",
+      "executeAcl": "(null acl - PUBLIC EXECUTE)",
+      "description": "RLS helper: the active caller's profiles.role (NULL if no active profile)."
+    },
+    {
+      "name": "next_entity_val",
+      "arguments": "carrier_org_bigint bigint, entity_name text",
+      "returns": "bigint",
+      "security": "INVOKER",
+      "volatility": "VOLATILE",
+      "language": "13619",
+      "executeAcl": "(null acl - PUBLIC EXECUTE)",
+      "description": "Per-org monotonic counter (upsert into org_sequences) used to mint load/invoice/customer numbers. SECURITY INVOKER."
+    },
+    {
+      "name": "send_expiry_reminders",
+      "arguments": "",
+      "returns": "integer",
+      "security": "DEFINER",
+      "volatility": "VOLATILE",
+      "language": "13619",
+      "executeAcl": "postgres=X/postgres ; service_role=X/postgres",
+      "description": "Batch job: inserts exception_events 'reminder_sent' rows for expiring CDLs/med certs/vehicle+org docs. service_role only."
+    },
+    {
+      "name": "update_updated_at",
+      "arguments": "",
+      "returns": "trigger",
+      "security": "INVOKER",
+      "volatility": "VOLATILE",
+      "language": "13619",
+      "executeAcl": "(null acl - PUBLIC EXECUTE)",
+      "description": "Trigger fn: sets NEW.updated_at = now()."
+    }
+  ],
+  "triggers": [
+    {
+      "table": "loads",
+      "name": "loads_updated_at",
+      "timing": "BEFORE",
+      "events": [
+        "UPDATE"
+      ],
+      "function": "update_updated_at",
+      "businessLogic": false,
+      "note": "bookkeeping only - stamps updated_at"
+    },
+    {
+      "table": "org_documents",
+      "name": "org_docs_updated_at",
+      "timing": "BEFORE",
+      "events": [
+        "UPDATE"
+      ],
+      "function": "update_updated_at",
+      "businessLogic": false,
+      "note": "bookkeeping only - stamps updated_at"
+    }
+  ],
+  "hasFeature": {
+    "signature": "public.has_feature(feature_key text) RETURNS boolean",
+    "security": "SECURITY DEFINER",
+    "volatility": "VOLATILE (not marked STABLE, unlike get_my_entitlements which is STABLE)",
+    "language": "sql",
+    "searchPath": "SET search_path TO 'public'",
+    "executeGrant": "authenticated only",
+    "definition": "SELECT (SELECT rank FROM tiers WHERE code = (SELECT tier FROM carrier_details WHERE org_id = my_org_id())) >= (SELECT rank FROM tiers WHERE code = (SELECT min_tier FROM features WHERE key = feature_key));",
+    "consults": [
+      "profiles (via my_org_id())",
+      "carrier_details.tier",
+      "tiers.rank",
+      "features.min_tier"
+    ],
+    "doesNotConsult": [
+      "carrier_details.billing_status",
+      "carrier_details.trial_ends_at",
+      "carrier_details.grace_period_until",
+      "platform_flags",
+      "org_flag_overrides",
+      "organizations.type"
+    ],
+    "semantics": "Pure tier-rank comparison. True iff rank(caller org's carrier_details.tier) >= rank(features.min_tier for feature_key). Nothing else is considered.",
+    "tierRanks": {
+      "starter": 1,
+      "growth": 2,
+      "pro": 3,
+      "enterprise": 4
+    },
+    "trialHandling": "NOT handled. billing_status='trialing' and trial_ends_at are ignored. A trialing org on tier='pro' keeps every Pro feature after trial_ends_at passes, until something else changes carrier_details.tier.",
+    "graceHandling": "NOT handled. grace_period_until exists on carrier_details and is written by the /admin SuperAdmin UI (admin_events 'admin.grace_period') but has_feature() never reads it.",
+    "suspensionHandling": "NOT handled. billing_status='past_due' or 'canceled' has zero effect on entitlements. Entitlement revocation on non-payment must be done by mutating carrier_details.tier - there is no independent kill switch.",
+    "flagOverrideHandling": "NOT handled. org_flag_overrides / platform_flags are a SEPARATE, currently-unused system (both tables are empty) and are not consulted.",
+    "edgeCases": [
+      {
+        "case": "caller has no active profile row (my_org_id() IS NULL)",
+        "returns": "NULL",
+        "note": "NULL, not false. In an RLS USING clause NULL denies. In TypeScript hasFeature() the wrapper coerces with `data === true`, so NULL -> false (fails closed). A raw .rpc() caller that does `if (data)` also fails closed since NULL is falsy."
+      },
+      {
+        "case": "caller's org has no carrier_details row (e.g. a customer-type or platform-type org, incl. the sx_* SuperAdmin org)",
+        "returns": "NULL",
+        "note": "ShipmentX staff on the platform org are entitled to NOTHING by has_feature(); /admin must not gate on it."
+      },
+      {
+        "case": "feature_key does not exist in features",
+        "returns": "NULL",
+        "note": "Typo in a feature key silently fails closed rather than erroring - no referential check on the argument."
+      },
+      {
+        "case": "carrier_details.tier is NULL",
+        "returns": "NULL",
+        "note": "Column is nullable with DEFAULT 'starter', so only reachable by explicit NULL write."
+      },
+      {
+        "case": "feature exists and ranks compare",
+        "returns": "true/false"
+      }
+    ],
+    "calledFromSQL": {
+      "policies": [],
+      "functions": [],
+      "note": "ZERO SQL callers. No RLS policy and no other DB function calls has_feature(). Despite the 'RLS-usable' framing in schema.sql comments and lib/entitlements.ts, every gate is enforced in application code only."
+    },
+    "calledFromTypeScript": {
+      "wrapper": "carrieros-web/lib/entitlements.ts::hasFeature (and mirror carrieros-mobile/src/lib/entitlements.ts::hasFeature)",
+      "webCallSites": [
+        "carrieros-web/app/(app)/customers/[customer_number]/page.tsx:139 customer_health_score",
+        "carrieros-web/app/(app)/customers/[customer_number]/page.tsx:140 exception_history",
+        "carrieros-web/app/(app)/loads/[load_number]/page.tsx:159 driver_chat",
+        "carrieros-web/app/(app)/loads/[load_number]/page.tsx:164 ifta_mileage_log",
+        "carrieros-web/app/(app)/settlements/page.tsx:40 driver_settlements",
+        "carrieros-web/app/(app)/settlements/page.tsx:41 settlement_ach",
+        "carrieros-web/app/(app)/dispatch/page.tsx:33 desktop_command_center",
+        "carrieros-web/app/(app)/exceptions/page.tsx:30 full_exceptions_inbox",
+        "carrieros-web/app/(app)/finance/page.tsx:57 ifta_tax_hub",
+        "carrieros-web/app/api/loads/[id]/route.ts:107 ifta_mileage_log",
+        "carrieros-web/app/api/settlements/run/route.ts:43 driver_settlements",
+        "carrieros-web/app/api/settlements/[id]/send-ach/route.ts:61 settlement_ach",
+        "carrieros-web/app/api/driver-messages/route.ts:46 driver_chat",
+        "carrieros-web/app/api/driver-messages/[id]/translate/route.ts:52 driver_chat",
+        "carrieros-web/app/api/team/invite/route.ts:67 dispatcher_finance_roles",
+        "carrieros-web/app/api/team/[id]/route.ts:82 dispatcher_finance_roles"
+      ],
+      "mobileCallSites": [
+        "carrieros-mobile/src/app/load/[id].tsx:137 raw .rpc('has_feature') driver_chat",
+        "carrieros-mobile/src/app/customers/[id].tsx:74 customer_health_score",
+        "carrieros-mobile/src/app/settlements/index.tsx:51 driver_settlements",
+        "carrieros-mobile/src/components/ifta-section.tsx:70 ifta_mileage_log",
+        "carrieros-mobile/src/components/ifta-summary.tsx:45 ifta_mileage_log"
+      ],
+      "ungatedFeatureKeys": [
+        "driver_performance_analytics",
+        "fuel_analytics",
+        "load_expenses",
+        "quickbooks_export"
+      ],
+      "ungatedNote": "4 of the 14 rows in `features` have no has_feature() call site anywhere in either app - they are advertised in tier marketing/entitlement lists but not enforced."
+    }
+  },
+  "entitlementModel": {
+    "model": "Two independent systems. (1) tiers/features/carrier_details.tier -> has_feature()/get_my_entitlements(): live and enforced in app code. (2) platform_flags/org_flag_overrides: schema exists, both tables EMPTY, no reader anywhere in SQL or TypeScript - dead/\u672awired.",
+    "tiers": {
+      "table": "tiers",
+      "columns": [
+        "code",
+        "label",
+        "rank",
+        "monthly_price",
+        "included_trucks",
+        "price_per_additional_truck"
+      ],
+      "check": "code IN (starter, growth, pro, enterprise)",
+      "rows": [
+        {
+          "code": "starter",
+          "label": "Starter",
+          "rank": 1,
+          "monthly_price": "49.00",
+          "included_trucks": 1,
+          "price_per_additional_truck": "15.00"
+        },
+        {
+          "code": "growth",
+          "label": "Growth",
+          "rank": 2,
+          "monthly_price": "99.00",
+          "included_trucks": 3,
+          "price_per_additional_truck": "20.00"
+        },
+        {
+          "code": "pro",
+          "label": "Pro",
+          "rank": 3,
+          "monthly_price": "199.00",
+          "included_trucks": 6,
+          "price_per_additional_truck": "25.00"
+        },
+        {
+          "code": "enterprise",
+          "label": "Enterprise",
+          "rank": 4,
+          "monthly_price": "349.00",
+          "included_trucks": 12,
+          "price_per_additional_truck": "30.00"
+        }
+      ],
+      "rls": "RLS on; 2 policies; anon has SELECT (marketing/pricing page)"
+    },
+    "features": {
+      "table": "features",
+      "columns": [
+        "key",
+        "label",
+        "min_tier (FK -> tiers.code)",
+        "display_order"
+      ],
+      "rls": "RLS on; single policy features_select FOR SELECT TO authenticated USING (true) - readable by every authenticated user of every tenant, by design",
+      "rows": [
+        {
+          "key": "full_exceptions_inbox",
+          "label": "Full Exceptions Inbox",
+          "min_tier": "growth",
+          "display_order": 1
+        },
+        {
+          "key": "exception_history",
+          "label": "Exception History Timelines",
+          "min_tier": "growth",
+          "display_order": 2
+        },
+        {
+          "key": "customer_health_score",
+          "label": "Customer Health Score",
+          "min_tier": "growth",
+          "display_order": 3
+        },
+        {
+          "key": "dispatcher_finance_roles",
+          "label": "Dispatcher & Finance Roles",
+          "min_tier": "growth",
+          "display_order": 4
+        },
+        {
+          "key": "driver_chat",
+          "label": "Driver In-App Chat",
+          "min_tier": "growth",
+          "display_order": 5
+        },
+        {
+          "key": "ifta_mileage_log",
+          "label": "IFTA Mileage Log",
+          "min_tier": "growth",
+          "display_order": 6
+        },
+        {
+          "key": "driver_settlements",
+          "label": "Driver Settlements",
+          "min_tier": "growth",
+          "display_order": 7
+        },
+        {
+          "key": "desktop_command_center",
+          "label": "Desktop Command Center",
+          "min_tier": "growth",
+          "display_order": 8
+        },
+        {
+          "key": "load_expenses",
+          "label": "Load Expense Tracking",
+          "min_tier": "growth",
+          "display_order": 9
+        },
+        {
+          "key": "quickbooks_export",
+          "label": "QuickBooks Export",
+          "min_tier": "growth",
+          "display_order": 10
+        },
+        {
+          "key": "ifta_tax_hub",
+          "label": "Full IFTA Tax Reporting",
+          "min_tier": "pro",
+          "display_order": 11
+        },
+        {
+          "key": "fuel_analytics",
+          "label": "Fuel Card Integration & Analytics",
+          "min_tier": "pro",
+          "display_order": 12
+        },
+        {
+          "key": "settlement_ach",
+          "label": "ACH Settlement Payments",
+          "min_tier": "pro",
+          "display_order": 13
+        },
+        {
+          "key": "driver_performance_analytics",
+          "label": "Driver Performance & Lane Analytics",
+          "min_tier": "pro",
+          "display_order": 14
+        }
+      ],
+      "note": "No feature has min_tier='starter' or 'enterprise'. Enterprise currently unlocks nothing beyond Pro."
+    },
+    "carrierDetails": {
+      "table": "carrier_details",
+      "tenantKey": "org_id (PK, FK -> organizations)",
+      "entitlementColumns": [
+        "tier (default 'starter')",
+        "billing_status (default 'trialing'; trialing|active|past_due|canceled)",
+        "trial_ends_at (default now()+90 days)",
+        "grace_period_until (nullable)",
+        "stripe_customer_id",
+        "card_brand",
+        "card_last4"
+      ],
+      "note": "tier is the ONLY column has_feature() reads. billing_status / trial_ends_at / grace_period_until are recorded and shown in /admin but have no enforcement path."
+    },
+    "platformFlags": {
+      "table": "platform_flags",
+      "columns": [
+        "flag_key",
+        "description",
+        "default_enabled",
+        "created_at"
+      ],
+      "rowCount": 0,
+      "rls": "sx_platform_flags_select (SELECT to sx_owner/sx_finance/sx_support), sx_owner_platform_flags_write (ALL to sx_owner)",
+      "status": "DEAD - zero rows, zero readers in SQL or TypeScript"
+    },
+    "orgFlagOverrides": {
+      "table": "org_flag_overrides",
+      "columns": [
+        "org_id",
+        "flag_key",
+        "enabled",
+        "set_by",
+        "set_at"
+      ],
+      "rowCount": 0,
+      "rls": "sx_org_flag_overrides_select (SELECT to sx_*), sx_owner_org_flag_overrides_write (ALL to sx_owner)",
+      "status": "DEAD - zero rows, zero readers. Note the intended per-org override cannot currently affect any gate because has_feature() ignores it."
+    },
+    "getMyEntitlements": {
+      "signature": "public.get_my_entitlements() RETURNS TABLE(key text)",
+      "security": "SECURITY DEFINER",
+      "volatility": "STABLE",
+      "executeGrant": "authenticated",
+      "semantics": "Same tier-rank rule as has_feature(), applied to every features row. Returns an empty set (not an error) when my_org_id() is NULL or the org has no carrier_details row.",
+      "callers": [
+        "carrieros-web/lib/entitlements.ts::getEntitlements",
+        "carrieros-mobile/src/lib/entitlements.ts (getEntitlements)"
+      ],
+      "note": "getEntitlements() is exported in both apps but has ZERO call sites - the batched primitive the design doc recommends is unused; every surface does individual has_feature() round trips instead."
+    },
+    "billingEvents": {
+      "table": "billing_events",
+      "tenantColumn": "org_id",
+      "note": "event_type and status are free-text with no CHECK; table is empty"
+    }
+  },
+  "grants": {
+    "anon": {
+      "tablePrivileges": {
+        "admin_events": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "admin_notes": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "billing_events": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "carrier_details": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "customer_contacts": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "customer_details": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "documents": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "driver_documents": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "driver_message_translations": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "driver_messages": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "driver_settlements": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "drivers": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "dvir_defects": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "dvir_inspections": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "exception_events": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "features": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "fuel_stops": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "ifta_state_crossings": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "ifta_tax_rates": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "invoices": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "languages": [
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "load_events": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "load_expenses": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "loads": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "loads_driver_view": [
+          "REFERENCES",
+          "TRIGGER"
+        ],
+        "maintenance_reminders": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "org_documents": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "org_flag_overrides": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "org_sequences": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "organizations": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "platform_flags": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "profiles": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "roles": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "service_logs": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "settlement_deductions": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "tiers": [
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "vehicle_classifications": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "vehicle_documents": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "vehicle_type_classifications": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "vehicle_types": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ],
+        "vehicles": [
+          "REFERENCES",
+          "TRIGGER",
+          "TRUNCATE"
+        ]
+      }
+    },
+    "authenticated": {
+      "tablePrivileges": {
+        "admin_events": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "admin_notes": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "billing_events": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "carrier_details": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "customer_contacts": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "customer_details": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "documents": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "driver_documents": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "driver_message_translations": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "driver_messages": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "driver_settlements": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "drivers": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "dvir_defects": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "dvir_inspections": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "exception_events": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "features": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "fuel_stops": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "ifta_state_crossings": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "ifta_tax_rates": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "invoices": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "languages": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "load_events": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "load_expenses": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "loads": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "loads_driver_view": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "UPDATE"
+        ],
+        "maintenance_reminders": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "org_documents": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "org_flag_overrides": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "org_sequences": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "organizations": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "platform_flags": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "profiles": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "roles": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "service_logs": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "settlement_deductions": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "tiers": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "vehicle_classifications": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "vehicle_documents": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "vehicle_type_classifications": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "vehicle_types": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "vehicles": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ]
+      }
+    },
+    "service_role": {
+      "tablePrivileges": {
+        "admin_events": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "admin_notes": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "billing_events": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "carrier_details": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "customer_contacts": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "customer_details": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "documents": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "driver_documents": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "driver_message_translations": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "driver_messages": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "driver_settlements": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "drivers": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "dvir_defects": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "dvir_inspections": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "exception_events": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "features": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "fuel_stops": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "ifta_state_crossings": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "ifta_tax_rates": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "invoices": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "languages": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "load_events": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "load_expenses": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "loads": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "loads_driver_view": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "maintenance_reminders": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "org_documents": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "org_flag_overrides": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "org_sequences": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "organizations": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "platform_flags": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "profiles": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "roles": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "service_logs": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "settlement_deductions": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "tiers": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "vehicle_classifications": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "vehicle_documents": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "vehicle_type_classifications": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "vehicle_types": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ],
+        "vehicles": [
+          "DELETE",
+          "INSERT",
+          "REFERENCES",
+          "SELECT",
+          "TRIGGER",
+          "TRUNCATE",
+          "UPDATE"
+        ]
+      }
+    },
+    "schemaUsage": {
+      "public": [
+        "anon",
+        "authenticated",
+        "service_role",
+        "PUBLIC"
+      ],
+      "storage": [
+        "anon",
+        "authenticated",
+        "service_role"
+      ],
+      "auth": [
+        "anon",
+        "authenticated",
+        "service_role"
+      ]
+    },
+    "defaultPrivileges": {
+      "public.tables(owner=postgres)": "anon=Dxtm, authenticated=Dxtm, service_role=Dxtm (TRUNCATE, REFERENCES, TRIGGER, MAINTAIN) - NOT SELECT/INSERT/UPDATE/DELETE",
+      "public.tables(owner=supabase_admin)": "anon/authenticated/service_role = arwdDxtm (full)",
+      "public.sequences(owner=postgres)": "anon=w, authenticated=w, service_role=w",
+      "public.functions(owner=postgres)": "postgres=X only"
+    },
+    "autoExposure": {
+      "newTablesReadableByAuthenticated": false,
+      "explanation": "A newly created public table owned by postgres grants authenticated only Dxtm - no SELECT. It is NOT auto-exposed; schema.sql SECTION 8c's blanket GRANT ... ON ALL TABLES is what makes existing tables readable. A future new table added without re-running that GRANT returns zero rows silently (documented in supabase/schema/README.md).",
+      "anonReadable": [
+        "languages",
+        "tiers"
+      ],
+      "anonHasTruncateOnEveryPublicTable": true,
+      "anonTruncateNote": "anon holds TRUNCATE (+REFERENCES, TRIGGER) on all 39 public tables via Supabase default privileges. TRUNCATE bypasses RLS entirely. Not reachable through PostgREST (no TRUNCATE verb) but is a latent privilege that should be REVOKEd."
+    },
+    "functionExecute": {
+      "bulk_import_customers": "(null acl - PUBLIC EXECUTE)",
+      "check_ifta_completeness": "=X/postgres ; postgres=X/postgres ; authenticated=X/postgres",
+      "create_customer_org": "(null acl - PUBLIC EXECUTE)",
+      "driver_self_update_allowed": "postgres=X/postgres ; authenticated=X/postgres",
+      "get_customer_health_score": "=X/postgres ; postgres=X/postgres ; authenticated=X/postgres",
+      "get_exceptions": "=X/postgres ; postgres=X/postgres ; authenticated=X/postgres",
+      "get_ifta_quarterly_summary": "=X/postgres ; postgres=X/postgres ; authenticated=X/postgres",
+      "get_ifta_tax_summary": "=X/postgres ; postgres=X/postgres ; authenticated=X/postgres",
+      "get_my_entitlements": "=X/postgres ; postgres=X/postgres ; authenticated=X/postgres",
+      "get_public_tracking": "=X/postgres ; postgres=X/postgres ; anon=X/postgres",
+      "get_public_tracking_events": "=X/postgres ; postgres=X/postgres ; anon=X/postgres",
+      "has_feature": "=X/postgres ; postgres=X/postgres ; authenticated=X/postgres",
+      "mark_overdue_invoices": "=X/postgres ; postgres=X/postgres ; authenticated=X/postgres",
+      "my_org_id": "(null acl - PUBLIC EXECUTE)",
+      "my_role": "(null acl - PUBLIC EXECUTE)",
+      "next_entity_val": "(null acl - PUBLIC EXECUTE)",
+      "send_expiry_reminders": "postgres=X/postgres ; service_role=X/postgres",
+      "update_updated_at": "(null acl - PUBLIC EXECUTE)"
+    },
+    "publiclyExecutableFunctions": [
+      "bulk_import_customers",
+      "create_customer_org",
+      "my_org_id",
+      "my_role",
+      "next_entity_val",
+      "update_updated_at"
+    ],
+    "anonExecutableFunctions": [
+      "get_public_tracking",
+      "get_public_tracking_events"
+    ]
+  },
+  "statusColumns": {
+    "checkConstrained": [
+      {
+        "table": "carrier_details",
+        "column": "billing_status",
+        "constraint": "carrier_details_billing_status_check",
+        "allowedValues": [
+          "trialing",
+          "active",
+          "past_due",
+          "canceled"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((billing_status = ANY (ARRAY['trialing'::text, 'active'::text, 'past_due'::text, 'canceled'::text])))"
+      },
+      {
+        "table": "carrier_details",
+        "column": "default_language",
+        "constraint": "carrier_details_default_language_check",
+        "allowedValues": [
+          "en",
+          "es",
+          "pa",
+          "ur"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((default_language = ANY (ARRAY['en'::text, 'es'::text, 'pa'::text, 'ur'::text])))"
+      },
+      {
+        "table": "carrier_details",
+        "column": "default_net_terms_days",
+        "constraint": "carrier_details_default_net_terms_days_check",
+        "allowedValues": [
+          "7",
+          "15",
+          "30",
+          "45",
+          "60"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((default_net_terms_days = ANY (ARRAY[7, 15, 30, 45, 60])))"
+      },
+      {
+        "table": "carrier_details",
+        "column": "default_payment_method",
+        "constraint": "carrier_details_default_payment_method_check",
+        "allowedValues": [
+          "stripe",
+          "factoring",
+          "other"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((default_payment_method = ANY (ARRAY['stripe'::text, 'factoring'::text, 'other'::text])))"
+      },
+      {
+        "table": "carrier_details",
+        "column": "tier",
+        "constraint": "carrier_details_tier_check",
+        "allowedValues": [
+          "starter",
+          "growth",
+          "pro",
+          "enterprise"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((tier = ANY (ARRAY['starter'::text, 'growth'::text, 'pro'::text, 'enterprise'::text])))"
+      },
+      {
+        "table": "carrier_details",
+        "column": "uom_system",
+        "constraint": "carrier_details_uom_system_check",
+        "allowedValues": [
+          "imperial",
+          "metric"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((uom_system = ANY (ARRAY['imperial'::text, 'metric'::text])))"
+      },
+      {
+        "table": "documents",
+        "column": "type",
+        "constraint": "documents_type_check",
+        "allowedValues": [
+          "pod",
+          "rate_con",
+          "bol",
+          "other"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((type = ANY (ARRAY['pod'::text, 'rate_con'::text, 'bol'::text, 'other'::text])))"
+      },
+      {
+        "table": "driver_documents",
+        "column": "doc_type",
+        "constraint": "driver_documents_doc_type_check",
+        "allowedValues": [
+          "cdl_scan",
+          "medical_cert",
+          "other"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((doc_type = ANY (ARRAY['cdl_scan'::text, 'medical_cert'::text, 'other'::text])))"
+      },
+      {
+        "table": "driver_settlements",
+        "column": "pay_method",
+        "constraint": "driver_settlements_pay_method_check",
+        "allowedValues": [
+          "percent_of_rate",
+          "per_mile",
+          "flat_per_load"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((pay_method = ANY (ARRAY['percent_of_rate'::text, 'per_mile'::text, 'flat_per_load'::text])))"
+      },
+      {
+        "table": "driver_settlements",
+        "column": "payment_status",
+        "constraint": "driver_settlements_payment_status_check",
+        "allowedValues": [
+          "pending",
+          "sent",
+          "cleared"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((payment_status = ANY (ARRAY['pending'::text, 'sent'::text, 'cleared'::text])))"
+      },
+      {
+        "table": "drivers",
+        "column": "cdl_class",
+        "constraint": "drivers_cdl_class_check",
+        "allowedValues": [
+          "A",
+          "B",
+          "C"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((cdl_class = ANY (ARRAY['A'::text, 'B'::text, 'C'::text])))"
+      },
+      {
+        "table": "drivers",
+        "column": "invite_status",
+        "constraint": "drivers_invite_status_check",
+        "allowedValues": [
+          "pending",
+          "accepted",
+          "revoked"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((invite_status = ANY (ARRAY['pending'::text, 'accepted'::text, 'revoked'::text])))"
+      },
+      {
+        "table": "drivers",
+        "column": "settlement_type",
+        "constraint": "drivers_settlement_type_check",
+        "allowedValues": [
+          "percent_of_rate",
+          "per_mile",
+          "flat_per_load"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((settlement_type = ANY (ARRAY['percent_of_rate'::text, 'per_mile'::text, 'flat_per_load'::text])))"
+      },
+      {
+        "table": "dvir_defects",
+        "column": "severity",
+        "constraint": "dvir_defects_severity_check",
+        "allowedValues": [
+          "minor",
+          "major"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((severity = ANY (ARRAY['minor'::text, 'major'::text])))"
+      },
+      {
+        "table": "dvir_inspections",
+        "column": "condition",
+        "constraint": "dvir_inspections_condition_check",
+        "allowedValues": [
+          "satisfactory",
+          "defects_noted"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((condition = ANY (ARRAY['satisfactory'::text, 'defects_noted'::text])))"
+      },
+      {
+        "table": "dvir_inspections",
+        "column": "type",
+        "constraint": "dvir_inspections_type_check",
+        "allowedValues": [
+          "pre_trip",
+          "post_trip"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((type = ANY (ARRAY['pre_trip'::text, 'post_trip'::text])))"
+      },
+      {
+        "table": "exception_events",
+        "column": "entity_type",
+        "constraint": "exception_events_entity_type_check",
+        "allowedValues": [
+          "driver",
+          "vehicle",
+          "customer",
+          "invoice",
+          "load"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((entity_type = ANY (ARRAY['driver'::text, 'vehicle'::text, 'customer'::text, 'invoice'::text, 'load'::text])))"
+      },
+      {
+        "table": "exception_events",
+        "column": "severity",
+        "constraint": "exception_events_severity_check",
+        "allowedValues": [
+          "info",
+          "warning",
+          "urgent"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((severity = ANY (ARRAY['info'::text, 'warning'::text, 'urgent'::text])))"
+      },
+      {
+        "table": "ifta_state_crossings",
+        "column": "source",
+        "constraint": "ifta_state_crossings_source_check",
+        "allowedValues": [
+          "gps",
+          "manual"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((source = ANY (ARRAY['gps'::text, 'manual'::text])))"
+      },
+      {
+        "table": "invoices",
+        "column": "payment_method",
+        "constraint": "invoices_payment_method_check",
+        "allowedValues": [
+          "stripe",
+          "factoring",
+          "other"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((payment_method = ANY (ARRAY['stripe'::text, 'factoring'::text, 'other'::text])))"
+      },
+      {
+        "table": "invoices",
+        "column": "status",
+        "constraint": "invoices_status_check",
+        "allowedValues": [
+          "draft",
+          "sent",
+          "paid",
+          "overdue"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((status = ANY (ARRAY['draft'::text, 'sent'::text, 'paid'::text, 'overdue'::text])))"
+      },
+      {
+        "table": "loads",
+        "column": "intake_method",
+        "constraint": "loads_intake_method_check",
+        "allowedValues": [
+          "email",
+          "pdf",
+          "paste",
+          "manual"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((intake_method = ANY (ARRAY['email'::text, 'pdf'::text, 'paste'::text, 'manual'::text])))"
+      },
+      {
+        "table": "loads",
+        "column": "status",
+        "constraint": "loads_status_check",
+        "allowedValues": [
+          "draft",
+          "scheduled",
+          "dispatched",
+          "picked_up",
+          "in_transit",
+          "delivered",
+          "invoiced",
+          "paid",
+          "cancelled",
+          "declined"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((status = ANY (ARRAY['draft'::text, 'scheduled'::text, 'dispatched'::text, 'picked_up'::text, 'in_transit'::text, 'delivered'::text, 'invoiced'::text, 'paid'::text, 'cancelled'::text, 'declined'::text])))"
+      },
+      {
+        "table": "org_documents",
+        "column": "doc_type",
+        "constraint": "org_documents_doc_type_check",
+        "allowedValues": [
+          "coi",
+          "general_liability",
+          "workers_comp",
+          "mc_authority",
+          "dot_certificate",
+          "ucr",
+          "w9",
+          "business_license"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((doc_type = ANY (ARRAY['coi'::text, 'general_liability'::text, 'workers_comp'::text, 'mc_authority'::text, 'dot_certificate'::text, 'ucr'::text, 'w9'::text, 'business_license'::text])))"
+      },
+      {
+        "table": "organizations",
+        "column": "country",
+        "constraint": "organizations_country_check",
+        "allowedValues": [
+          "US",
+          "CA",
+          "MX"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((country = ANY (ARRAY['US'::text, 'CA'::text, 'MX'::text])))"
+      },
+      {
+        "table": "organizations",
+        "column": "currency",
+        "constraint": "organizations_currency_check",
+        "allowedValues": [
+          "USD",
+          "CAD",
+          "MXN"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((currency = ANY (ARRAY['USD'::text, 'CAD'::text, 'MXN'::text])))"
+      },
+      {
+        "table": "organizations",
+        "column": "type",
+        "constraint": "organizations_type_check",
+        "allowedValues": [
+          "carrier",
+          "customer",
+          "platform"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((type = ANY (ARRAY['carrier'::text, 'customer'::text, 'platform'::text])))"
+      },
+      {
+        "table": "profiles",
+        "column": "date_format",
+        "constraint": "profiles_date_format_check",
+        "allowedValues": [
+          "MM/DD/YYYY",
+          "DD/MM/YYYY",
+          "YYYY-MM-DD"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((date_format = ANY (ARRAY['MM/DD/YYYY'::text, 'DD/MM/YYYY'::text, 'YYYY-MM-DD'::text])))"
+      },
+      {
+        "table": "profiles",
+        "column": "preferred_language",
+        "constraint": "profiles_preferred_language_check",
+        "allowedValues": [
+          "en",
+          "es",
+          "pa",
+          "ur"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((preferred_language = ANY (ARRAY['en'::text, 'es'::text, 'pa'::text, 'ur'::text])))"
+      },
+      {
+        "table": "profiles",
+        "column": "role",
+        "constraint": "profiles_role_check",
+        "allowedValues": [
+          "owner",
+          "solo",
+          "driver",
+          "dispatcher",
+          "finance",
+          "customer_admin",
+          "customer_viewer",
+          "sx_owner",
+          "sx_finance",
+          "sx_support"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((role = ANY (ARRAY['owner'::text, 'solo'::text, 'driver'::text, 'dispatcher'::text, 'finance'::text, 'customer_admin'::text, 'customer_viewer'::text, 'sx_owner'::text, 'sx_finance'::text, 'sx_support'::text])))"
+      },
+      {
+        "table": "profiles",
+        "column": "theme_preference",
+        "constraint": "profiles_theme_preference_check",
+        "allowedValues": [
+          "light",
+          "dark",
+          "system"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((theme_preference = ANY (ARRAY['light'::text, 'dark'::text, 'system'::text])))"
+      },
+      {
+        "table": "profiles",
+        "column": "time_format",
+        "constraint": "profiles_time_format_check",
+        "allowedValues": [
+          "12h",
+          "24h"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((time_format = ANY (ARRAY['12h'::text, '24h'::text])))"
+      },
+      {
+        "table": "profiles",
+        "column": "uom_system",
+        "constraint": "profiles_uom_system_check",
+        "allowedValues": [
+          "imperial",
+          "metric"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((uom_system = ANY (ARRAY['imperial'::text, 'metric'::text])))"
+      },
+      {
+        "table": "roles",
+        "column": "scope",
+        "constraint": "roles_scope_check",
+        "allowedValues": [
+          "carrier",
+          "customer",
+          "platform"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((scope = ANY (ARRAY['carrier'::text, 'customer'::text, 'platform'::text])))"
+      },
+      {
+        "table": "tiers",
+        "column": "code",
+        "constraint": "tiers_code_check",
+        "allowedValues": [
+          "starter",
+          "growth",
+          "pro",
+          "enterprise"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((code = ANY (ARRAY['starter'::text, 'growth'::text, 'pro'::text, 'enterprise'::text])))"
+      },
+      {
+        "table": "vehicle_documents",
+        "column": "doc_type",
+        "constraint": "truck_documents_doc_type_check",
+        "allowedValues": [
+          "registration",
+          "insurance_cert",
+          "dot_authority",
+          "annual_inspection",
+          "other"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((doc_type = ANY (ARRAY['registration'::text, 'insurance_cert'::text, 'dot_authority'::text, 'annual_inspection'::text, 'other'::text])))"
+      },
+      {
+        "table": "vehicles",
+        "column": "cab_type",
+        "constraint": "vehicles_cab_type_check",
+        "allowedValues": [
+          "sleeper",
+          "day_cab",
+          "other"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((cab_type = ANY (ARRAY['sleeper'::text, 'day_cab'::text, 'other'::text])))"
+      },
+      {
+        "table": "vehicles",
+        "column": "status",
+        "constraint": "vehicles_status_check",
+        "allowedValues": [
+          "active",
+          "idle",
+          "in_shop"
+        ],
+        "source": "CHECK constraint",
+        "definition": "CHECK ((status = ANY (ARRAY['active'::text, 'idle'::text, 'in_shop'::text])))"
+      }
+    ],
+    "unconstrainedVocabularies": [
+      {
+        "table": "load_events",
+        "column": "event_type",
+        "source": "free text (NO CHECK)",
+        "observedValues": [
+          "status_scheduled",
+          "status_dispatched",
+          "status_in_transit",
+          "status_delivered",
+          "status_invoiced"
+        ]
+      },
+      {
+        "table": "exception_events",
+        "column": "event_type",
+        "source": "free text (NO CHECK)",
+        "observedValues": []
+      },
+      {
+        "table": "admin_events",
+        "column": "event_type",
+        "source": "free text (NO CHECK)",
+        "observedValues": [
+          "admin.change_tier",
+          "admin.grace_period",
+          "admin.impersonate",
+          "admin.note_add"
+        ]
+      },
+      {
+        "table": "billing_events",
+        "column": "event_type",
+        "source": "free text (NO CHECK)",
+        "observedValues": []
+      },
+      {
+        "table": "billing_events",
+        "column": "status",
+        "source": "free text (NO CHECK)",
+        "observedValues": []
+      },
+      {
+        "table": "load_expenses",
+        "column": "expense_type",
+        "source": "free text (NO CHECK)",
+        "observedValues": []
+      },
+      {
+        "table": "service_logs",
+        "column": "service_type",
+        "source": "free text (NO CHECK)",
+        "observedValues": [
+          "Oil Change"
+        ]
+      },
+      {
+        "table": "settlement_deductions",
+        "column": "deduction_type",
+        "source": "free text (NO CHECK)",
+        "observedValues": []
+      },
+      {
+        "table": "maintenance_reminders",
+        "column": "reminder_type",
+        "source": "free text (NO CHECK)",
+        "observedValues": [
+          "Oil Change"
+        ]
+      }
+    ],
+    "booleanLifecycleFlags": [
+      {
+        "table": "drivers",
+        "column": "is_active",
+        "source": "boolean",
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "note": "deactivate-not-delete flag"
+      },
+      {
+        "table": "vehicles",
+        "column": "is_active",
+        "source": "boolean",
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "note": "separate from vehicles.status"
+      },
+      {
+        "table": "profiles",
+        "column": "is_active",
+        "source": "boolean",
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "note": "my_org_id()/my_role() return NULL when false - deactivation kills all RLS access"
+      },
+      {
+        "table": "maintenance_reminders",
+        "column": "is_active",
+        "source": "boolean",
+        "allowedValues": [
+          "true",
+          "false"
+        ]
+      }
+    ],
+    "enumTypes": [],
+    "enumNote": "There are ZERO Postgres enum types in this database. Every vocabulary is TEXT + CHECK, so Supabase generated types are plain `string` with no compile-time exhaustiveness (see supabase/schema/README.md step 3)."
+  },
+  "schemaDrift": {
+    "method": "Object-name diff between supabase/schema/schema.sql (2492 lines) and live introspection of the running supabase_db_carrieros container. Full replay against a scratch DB was NOT performed (read-only audit).",
+    "tables": {
+      "fileOnly": [],
+      "liveOnly": [],
+      "verdict": "MATCH - 39 tables + 1 view in both"
+    },
+    "functions": {
+      "fileOnly": [],
+      "liveOnly": [],
+      "verdict": "MATCH - 18 functions in both"
+    },
+    "policies": {
+      "fileCount": 99,
+      "liveCount": 100,
+      "liveOnly": [
+        {
+          "schema": "public",
+          "table": "profiles",
+          "policy": "users_read_own_profile",
+          "command": "SELECT",
+          "roles": [
+            "authenticated"
+          ],
+          "using": "(auth.uid() = id)",
+          "impact": "DRIFT. Exists in the live DB but is absent from schema.sql. It is a strict subset of the existing same_org_profiles_select policy (which already covers the caller's own row via org_id = my_org_id()), so dropping it on a fresh replay would not change effective access - but it is an undocumented divergence and a `db reset` would silently remove it. Likely a leftover from an early bootstrap before my_org_id() existed."
+        }
+      ],
+      "fileOnly": [],
+      "verdict": "1 policy of drift (live has one extra). All 5 storage.objects policies and all 94 shared public policies match by name."
+    },
+    "triggers": {
+      "fileOnly": [],
+      "liveOnly": [],
+      "verdict": "MATCH - 2 triggers in both"
+    },
+    "otherNotes": [
+      "supabase/schema/README.md line 82 states 'a clean replay yields 0 errors, 35 tables, 80 policies' as of 2026-07-21. Live is now 39 tables / 100 public+storage policies. The README's counts are STALE and should be refreshed.",
+      "docs/carrieros-db/schema.sql (the Zoho copy) was not compared - docs/ is a gitignored symlink outside this audit's scope. supabase/schema/schema.sql is authoritative per its README."
+    ]
+  }
+}

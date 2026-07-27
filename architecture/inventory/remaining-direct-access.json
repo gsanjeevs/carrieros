@@ -1,0 +1,142 @@
+{
+  "$comment": "Machine-readable inventory of business data access that still bypasses /api/v1, per the brief's requirement to leave one when full conversion exceeds a single run. Counts are from architecture/inventory/{web,mobile}-supabase-usage.json, generated 2026-07-26. 'owner' is the module that will own the operation once migrated, matching the module boundaries in the brief.",
+  "generatedAt": "2026-07-26",
+  "totals": {
+    "web": { "occurrences": 376, "tableReads": 165, "tableWrites": 131, "rpc": 18, "storage": 10, "realtime": 4, "serviceRoleCallSites": 20 },
+    "mobile": { "occurrences": 131, "tableReads": 62, "tableWrites": 26, "rpc": 8, "storage": 7, "realtime": 4, "apiFetchCallSites": 14 },
+    "migratedToV1": 0,
+    "note": "No business write has been migrated yet. Phases 2, 3 and 6 delivered the foundation (migrations, layering+enforcement, entitlement engine); the vertical slices are next and are ordered below."
+  },
+  "priorities": [
+    {
+      "id": "P1-load-status-machine",
+      "priority": "critical",
+      "owner": "tracking-and-milestones",
+      "surface": "mobile",
+      "sites": [
+        { "file": "carrieros-mobile/src/app/load/[id].tsx", "line": 228, "table": "loads", "operation": "update" },
+        { "file": "carrieros-mobile/src/app/load/[id].tsx", "line": 238, "table": "load_events", "operation": "insert" }
+      ],
+      "why": "The load status state machine runs in a React component. The status update and its audit-event insert are two separate non-transactional writes, so a failure between them yields a status change with no audit record. The same file already calls PATCH /api/loads/:id at line 179, so two write paths for one aggregate coexist.",
+      "targetEndpoint": "POST /api/v1/shipments/{id}/milestones",
+      "requires": ["UnitOfWork adapter", "outbox MilestoneSubmitted", "Idempotency-Key"]
+    },
+    {
+      "id": "P2-offline-queue",
+      "priority": "critical",
+      "owner": "shipment-collaboration",
+      "surface": "mobile",
+      "sites": [{ "file": "carrieros-mobile/src/lib/offline-queue.ts", "line": 70, "table": "<dynamic>", "operation": "update" }],
+      "why": "Replays supabase.from(entry.table as any).update(patch) — arbitrary table/patch pairs persisted in AsyncStorage. This is a generic table-write primitive on the client and cannot be preserved under a REST API; it must be redesigned to queue API commands carrying an Idempotency-Key.",
+      "targetEndpoint": "n/a — client redesign; queue commands, not table patches",
+      "requires": ["P1", "Idempotency-Key middleware"]
+    },
+    {
+      "id": "P3-client-component-writes",
+      "priority": "high",
+      "owner": "documents-and-pod, carrier-profile-and-compliance",
+      "surface": "web",
+      "count": 19,
+      "tables": 13,
+      "exampleSites": [{ "file": "carrieros-web/components/DriverPayConfig.tsx", "line": 57, "table": "drivers", "operation": "update" }],
+      "why": "19 writes issued straight from client components across 13 tables (documents, maintenance logs, fuel stops, IFTA crossings, driver pay config). RLS is the only authorization control and there is no server-side validation in front of any of them.",
+      "targetEndpoint": "various /api/v1 resources",
+      "requires": ["policy service", "per-module application services"]
+    },
+    {
+      "id": "P4-document-storage-atomicity",
+      "priority": "high",
+      "owner": "documents-and-pod",
+      "surface": "web+mobile",
+      "sites": [
+        { "file": "carrieros-web/components/LoadDocuments.tsx", "operation": "storage+table" },
+        { "file": "carrieros-web/components/DriverDocuments.tsx", "operation": "storage+table" },
+        { "file": "carrieros-web/components/VehicleDocuments.tsx", "operation": "storage+table" },
+        { "file": "carrieros-web/components/CompanyDocuments.tsx", "operation": "storage+table" },
+        { "file": "carrieros-mobile/src/components/pod-section.tsx", "line": 149, "table": "documents", "operation": "insert" },
+        { "file": "carrieros-mobile/src/components/pod-section.tsx", "line": 163, "operation": "storage.remove (client-side blob delete)" }
+      ],
+      "why": "Upload-then-insert and delete-row-then-remove-blob, with inconsistent ordering between the four web components. Partial failure orphans either a row or a blob. Mobile deletes blobs directly from the client.",
+      "targetEndpoint": "POST /api/v1/documents/upload-sessions, PATCH /api/v1/documents/{id}",
+      "requires": ["storage adapter", "scan-state model", "outbox DocumentAccepted"]
+    },
+    {
+      "id": "P5-ifta-non-atomic-replace",
+      "priority": "high",
+      "owner": "tracking-and-milestones",
+      "surface": "mobile",
+      "sites": [
+        { "file": "carrieros-mobile/src/components/ifta-section.tsx", "line": 148, "table": "ifta_state_crossings", "operation": "delete" },
+        { "file": "carrieros-mobile/src/components/ifta-section.tsx", "line": 149, "table": "ifta_state_crossings", "operation": "insert" }
+      ],
+      "why": "Delete-then-insert replace on tax-filing data with no transaction. A failure between the two loses the quarter's crossings for that load.",
+      "targetEndpoint": "PUT /api/v1/shipments/{id}/ifta-crossings",
+      "requires": ["UnitOfWork adapter"]
+    },
+    {
+      "id": "P6-unauthenticated-service-role-intake",
+      "priority": "high",
+      "owner": "integrations",
+      "surface": "web",
+      "sites": [{ "file": "carrieros-web/app/api/intake/email/route.ts", "line": 69, "operation": "service-role write" }],
+      "why": "Resolves the target org from an inbound email 'to:' header — attacker-controlled — then writes a load with the service-role client. Widest blast radius of the unauthenticated entry points.",
+      "targetEndpoint": "POST /api/v1/integrations/email-intake",
+      "requires": ["signed webhook verification", "isolated privileged operation with audit"]
+    },
+    {
+      "id": "P7-cross-tenant-admin-listusers",
+      "priority": "medium",
+      "owner": "identity",
+      "surface": "web",
+      "sites": [
+        { "file": "carrieros-web/app/(app)/team/page.tsx", "line": 45, "operation": "auth.admin.listUsers" },
+        { "file": "carrieros-web/app/api/team/route.ts", "line": 27, "operation": "auth.admin.listUsers" }
+      ],
+      "why": "Pulls the entire auth user table (perPage 1000) on a per-tenant page and filters in memory. Role-gated, but the data crosses every tenant boundary before the filter runs.",
+      "targetEndpoint": "GET /api/v1/team/members",
+      "requires": ["org-scoped membership repository"]
+    },
+    {
+      "id": "P8-check-ifta-completeness-no-tenant-check",
+      "priority": "high",
+      "owner": "tracking-and-milestones",
+      "surface": "database",
+      "sites": [{ "object": "public.check_ifta_completeness(p_load_id bigint)", "operation": "SECURITY DEFINER, no tenant predicate" }],
+      "why": "Any authenticated user may pass an arbitrary load id and learn about another carrier's IFTA state. Not fixed in 0003 because adding a carrier_org_id predicate changes results for existing callers; the call sites must move behind a service first.",
+      "targetEndpoint": "n/a — fix in migration once callers are migrated",
+      "requires": ["P1", "P5"]
+    },
+    {
+      "id": "P9-has-feature-callers",
+      "priority": "medium",
+      "owner": "subscriptions-and-entitlements",
+      "surface": "web+mobile",
+      "count": 21,
+      "breakdown": { "web": 16, "mobile": 5 },
+      "why": "All 21 gates still call the legacy has_feature()/get_my_entitlements() RPCs, which ignore billing_status, trial_ends_at, grace_period_until, org_flag_overrides and platform_flags. EntitlementService.hasFeatureCompat() exists so these migrate one at a time. NOTE: migrating a call site may start denying access it previously allowed (expired trial / canceled org) — that is the defect being fixed and is why each move is reviewed individually.",
+      "targetEndpoint": "GET /api/v1/entitlements + server-side EntitlementService.require()",
+      "requires": ["SupabaseEntitlementRepository"]
+    },
+    {
+      "id": "P10-realtime-business-meaning",
+      "priority": "medium",
+      "owner": "notifications",
+      "surface": "web",
+      "sites": [{ "file": "carrieros-web/components/DriverMessageThread.tsx", "operation": "postgres_changes INSERT" }],
+      "why": "The only Realtime usage carrying business meaning: live driver-chat delivery. Updates and deletes never propagate, and the read-receipt update at line 92 is fired without await or error handling. Realtime must become a nonauthoritative 're-fetch' nudge. Mobile's equivalent subscription (driver-chat-section.tsx:67) is already pure UX refresh and needs no change.",
+      "targetEndpoint": "GET /api/v1/shipments/{id}/messages (authoritative re-fetch)",
+      "requires": ["messages read model"]
+    },
+    {
+      "id": "P11-service-role-surface",
+      "priority": "low",
+      "owner": "identity",
+      "surface": "web",
+      "count": 20,
+      "sites": [{ "file": "carrieros-web/lib/api-auth.ts", "line": 95, "operation": "re-export createAdminClient" }],
+      "why": "20 service-role call sites; lib/api-auth.ts re-exports createAdminClient, widening the privileged import surface beyond lib/supabase/server for no benefit. Each site needs review against 'isolate, minimize, audit'.",
+      "targetEndpoint": "n/a — narrow imports, add audit wrapper",
+      "requires": []
+    }
+  ]
+}

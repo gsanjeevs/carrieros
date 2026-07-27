@@ -1,0 +1,1785 @@
+{
+  "generatedFor": "carrieros-mobile",
+  "generatedAt": "2026-07-26",
+  "scope": "carrieros-mobile/src (node_modules excluded)",
+  "totals": {
+    "occurrences": 131,
+    "byKind": {
+      "rpc": 8,
+      "table": 88,
+      "storage": 7,
+      "auth": 10,
+      "api": 14,
+      "realtime": 4
+    },
+    "tableReads": 62,
+    "tableWrites": 26,
+    "distinctTables": 21,
+    "distinctRpcs": 6,
+    "apiFetchCallSites": 14,
+    "filesScanned": 76
+  },
+  "distinctTables": [
+    "(dynamic — runtime table name)",
+    "carrier_details",
+    "customer_details",
+    "documents",
+    "driver_messages",
+    "driver_settlements",
+    "drivers",
+    "dvir_defects",
+    "dvir_inspections",
+    "exception_events",
+    "fuel_stops",
+    "ifta_state_crossings",
+    "invoices",
+    "load_events",
+    "loads",
+    "loads_driver_view",
+    "maintenance_reminders",
+    "profiles",
+    "service_logs",
+    "tiers",
+    "vehicles"
+  ],
+  "distinctRpcs": [
+    "check_ifta_completeness",
+    "get_customer_health_score",
+    "get_exceptions",
+    "get_ifta_quarterly_summary",
+    "get_my_entitlements",
+    "has_feature"
+  ],
+  "occurrences": [
+    {
+      "file": "src/app/(tabs)/alerts.tsx",
+      "line": 37,
+      "kind": "rpc",
+      "target": "get_exceptions",
+      "operation": "rpc",
+      "verb": "rpc",
+      "screen": "screen /(tabs)/alerts",
+      "snippet": "const { data } = await supabase.rpc('get_exceptions');"
+    },
+    {
+      "file": "src/app/(tabs)/customers.tsx",
+      "line": 41,
+      "kind": "table",
+      "target": "customer_details",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/customers",
+      "snippet": ".from('customer_details')"
+    },
+    {
+      "file": "src/app/(tabs)/dvir-start.tsx",
+      "line": 31,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/dvir-start",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "src/app/(tabs)/dvir-start.tsx",
+      "line": 38,
+      "kind": "table",
+      "target": "loads_driver_view",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/dvir-start",
+      "snippet": ".from('loads_driver_view')"
+    },
+    {
+      "file": "src/app/(tabs)/fleet.tsx",
+      "line": 40,
+      "kind": "table",
+      "target": "vehicles",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/fleet",
+      "snippet": ".from('vehicles')"
+    },
+    {
+      "file": "src/app/(tabs)/fleet.tsx",
+      "line": 57,
+      "kind": "storage",
+      "target": "documents",
+      "operation": "storage",
+      "verb": "unknown",
+      "screen": "screen /(tabs)/fleet",
+      "snippet": "const { data: signed } = await supabase.storage.from('documents').createSignedUrl(v.photo_path!, 3600);"
+    },
+    {
+      "file": "src/app/(tabs)/history.tsx",
+      "line": 43,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/history",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "src/app/(tabs)/history.tsx",
+      "line": 50,
+      "kind": "table",
+      "target": "loads_driver_view",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/history",
+      "snippet": ".from('loads_driver_view')"
+    },
+    {
+      "file": "src/app/(tabs)/home.tsx",
+      "line": 147,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/home",
+      "snippet": "supabase.from('loads').select('id', { count: 'exact', head: true }).in('status', ACTIVE_LOAD_STATUSES),"
+    },
+    {
+      "file": "src/app/(tabs)/home.tsx",
+      "line": 148,
+      "kind": "table",
+      "target": "vehicles",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/home",
+      "snippet": "supabase.from('vehicles').select('status').eq('is_active', true),"
+    },
+    {
+      "file": "src/app/(tabs)/home.tsx",
+      "line": 150,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/home",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "src/app/(tabs)/home.tsx",
+      "line": 172,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/home",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "src/app/(tabs)/home.tsx",
+      "line": 180,
+      "kind": "table",
+      "target": "loads_driver_view",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/home",
+      "snippet": ".from('loads_driver_view')"
+    },
+    {
+      "file": "src/app/(tabs)/home.tsx",
+      "line": 198,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/home",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "src/app/(tabs)/home.tsx",
+      "line": 202,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/home",
+      "snippet": "supabase.from('drivers').select('id').eq('is_active', true),"
+    },
+    {
+      "file": "src/app/(tabs)/home.tsx",
+      "line": 203,
+      "kind": "table",
+      "target": "vehicles",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/home",
+      "snippet": "supabase.from('vehicles').select('id, status').eq('is_active', true),"
+    },
+    {
+      "file": "src/app/(tabs)/home.tsx",
+      "line": 228,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/home",
+      "snippet": "supabase.from('invoices').select('amount').in('status', ['sent', 'overdue']),"
+    },
+    {
+      "file": "src/app/(tabs)/home.tsx",
+      "line": 230,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/home",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "src/app/(tabs)/home.tsx",
+      "line": 236,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/home",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "src/app/(tabs)/invoices.tsx",
+      "line": 36,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/invoices",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "src/app/(tabs)/loads.tsx",
+      "line": 59,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/loads",
+      "snippet": ".from('profiles')"
+    },
+    {
+      "file": "src/app/(tabs)/loads.tsx",
+      "line": 70,
+      "kind": "table",
+      "target": "loads_driver_view",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/loads",
+      "snippet": "? await supabase.from('loads_driver_view').select(cols).order('created_at', { ascending: false })"
+    },
+    {
+      "file": "src/app/(tabs)/loads.tsx",
+      "line": 71,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/loads",
+      "snippet": ": await supabase.from('loads').select(cols).order('created_at', { ascending: false });"
+    },
+    {
+      "file": "src/app/(tabs)/loads.tsx",
+      "line": 169,
+      "kind": "auth",
+      "target": "auth.signOut",
+      "operation": "auth",
+      "verb": "signOut",
+      "screen": "screen /(tabs)/loads",
+      "snippet": "<Pressable onPress={() => supabase.auth.signOut()} style={styles.signOut}>"
+    },
+    {
+      "file": "src/app/(tabs)/my-load.tsx",
+      "line": 89,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/my-load",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "src/app/(tabs)/my-load.tsx",
+      "line": 102,
+      "kind": "table",
+      "target": "loads_driver_view",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/my-load",
+      "snippet": ".from('loads_driver_view')"
+    },
+    {
+      "file": "src/app/(tabs)/my-load.tsx",
+      "line": 109,
+      "kind": "table",
+      "target": "loads_driver_view",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/my-load",
+      "snippet": ".from('loads_driver_view')"
+    },
+    {
+      "file": "src/app/(tabs)/my-load.tsx",
+      "line": 125,
+      "kind": "table",
+      "target": "dvir_inspections",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /(tabs)/my-load",
+      "snippet": ".from('dvir_inspections')"
+    },
+    {
+      "file": "src/app/billing/index.tsx",
+      "line": 52,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /billing",
+      "snippet": ".from('profiles')"
+    },
+    {
+      "file": "src/app/billing/index.tsx",
+      "line": 61,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /billing",
+      "snippet": ".from('carrier_details')"
+    },
+    {
+      "file": "src/app/billing/index.tsx",
+      "line": 66,
+      "kind": "table",
+      "target": "vehicles",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /billing",
+      "snippet": ".from('vehicles')"
+    },
+    {
+      "file": "src/app/billing/index.tsx",
+      "line": 77,
+      "kind": "table",
+      "target": "tiers",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /billing",
+      "snippet": ".from('tiers')"
+    },
+    {
+      "file": "src/app/customers/[id].tsx",
+      "line": 61,
+      "kind": "table",
+      "target": "customer_details",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /customers/[id]",
+      "snippet": ".from('customer_details')"
+    },
+    {
+      "file": "src/app/customers/[id].tsx",
+      "line": 69,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /customers/[id]",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "src/app/customers/[id].tsx",
+      "line": 81,
+      "kind": "rpc",
+      "target": "get_customer_health_score",
+      "operation": "rpc",
+      "verb": "rpc",
+      "screen": "screen /customers/[id]",
+      "snippet": "const { data: scoreData } = await supabase.rpc('get_customer_health_score', { customer_org_id: orgId });"
+    },
+    {
+      "file": "src/app/customers/index.tsx",
+      "line": 43,
+      "kind": "table",
+      "target": "customer_details",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /customers",
+      "snippet": ".from('customer_details')"
+    },
+    {
+      "file": "src/app/driver-profile/index.tsx",
+      "line": 78,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /driver-profile",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "src/app/driver-profile/index.tsx",
+      "line": 99,
+      "kind": "table",
+      "target": "vehicles",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /driver-profile",
+      "snippet": ".from('vehicles')"
+    },
+    {
+      "file": "src/app/driver-profile/index.tsx",
+      "line": 124,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "write",
+      "verb": "update",
+      "screen": "screen /driver-profile",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "src/app/dvir-history/index.tsx",
+      "line": 62,
+      "kind": "table",
+      "target": "dvir_inspections",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /dvir-history",
+      "snippet": ".from('dvir_inspections')"
+    },
+    {
+      "file": "src/app/dvir-history/index.tsx",
+      "line": 86,
+      "kind": "storage",
+      "target": "documents",
+      "operation": "storage",
+      "verb": "createSignedUrl",
+      "screen": "screen /dvir-history",
+      "snippet": "const { data: signed } = await supabase.storage.from(BUCKET).createSignedUrl(i.signature_url!, 3600);"
+    },
+    {
+      "file": "src/app/dvir/[loadId].tsx",
+      "line": 107,
+      "kind": "table",
+      "target": "loads_driver_view",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /dvir/[loadId]",
+      "snippet": ".from('loads_driver_view')"
+    },
+    {
+      "file": "src/app/dvir/[loadId].tsx",
+      "line": 202,
+      "kind": "table",
+      "target": "loads_driver_view",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /dvir/[loadId]",
+      "snippet": ".from('loads_driver_view')"
+    },
+    {
+      "file": "src/app/dvir/[loadId].tsx",
+      "line": 211,
+      "kind": "table",
+      "target": "dvir_inspections",
+      "operation": "write",
+      "verb": "insert",
+      "screen": "screen /dvir/[loadId]",
+      "snippet": ".from('dvir_inspections')"
+    },
+    {
+      "file": "src/app/dvir/[loadId].tsx",
+      "line": 239,
+      "kind": "storage",
+      "target": "documents",
+      "operation": "storage",
+      "verb": "upload",
+      "screen": "screen /dvir/[loadId]",
+      "snippet": "const { error: sigUploadErr } = await supabase.storage"
+    },
+    {
+      "file": "src/app/dvir/[loadId].tsx",
+      "line": 246,
+      "kind": "table",
+      "target": "dvir_inspections",
+      "operation": "write",
+      "verb": "update",
+      "screen": "screen /dvir/[loadId]",
+      "snippet": ".from('dvir_inspections')"
+    },
+    {
+      "file": "src/app/dvir/[loadId].tsx",
+      "line": 270,
+      "kind": "storage",
+      "target": "documents",
+      "operation": "storage",
+      "verb": "upload",
+      "screen": "screen /dvir/[loadId]",
+      "snippet": "const { error: uploadErr } = await supabase.storage"
+    },
+    {
+      "file": "src/app/dvir/[loadId].tsx",
+      "line": 292,
+      "kind": "table",
+      "target": "dvir_defects",
+      "operation": "write",
+      "verb": "insert",
+      "screen": "screen /dvir/[loadId]",
+      "snippet": "const { error: defectsErr } = await supabase.from('dvir_defects').insert(rows);"
+    },
+    {
+      "file": "src/app/invoice/[id].tsx",
+      "line": 69,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /invoice/[id]",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "src/app/invoice/[id].tsx",
+      "line": 101,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "write",
+      "verb": "update",
+      "screen": "screen /invoice/[id]",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "src/app/invoice/[id].tsx",
+      "line": 120,
+      "kind": "api",
+      "target": "/api/invoices/${invoice.id}/send",
+      "operation": "api",
+      "verb": "POST",
+      "screen": "screen /invoice/[id]",
+      "snippet": "const res = await apiFetch(`/api/invoices/${invoice.id}/send`, { method: 'POST' });"
+    },
+    {
+      "file": "src/app/invoice/[id].tsx",
+      "line": 135,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "write",
+      "verb": "update",
+      "screen": "screen /invoice/[id]",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "src/app/invoice/[id].tsx",
+      "line": 140,
+      "kind": "table",
+      "target": "loads",
+      "operation": "write",
+      "verb": "update",
+      "screen": "screen /invoice/[id]",
+      "snippet": "await supabase.from('loads').update({ status: 'paid' }).eq('id', invoice.load_id);"
+    },
+    {
+      "file": "src/app/load/[id].tsx",
+      "line": 128,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /load/[id]",
+      "snippet": ".from('profiles')"
+    },
+    {
+      "file": "src/app/load/[id].tsx",
+      "line": 137,
+      "kind": "rpc",
+      "target": "has_feature",
+      "operation": "rpc",
+      "verb": "rpc",
+      "screen": "screen /load/[id]",
+      "snippet": "const { data: entitled } = await supabase.rpc('has_feature', { feature_key: 'driver_chat' });"
+    },
+    {
+      "file": "src/app/load/[id].tsx",
+      "line": 142,
+      "kind": "table",
+      "target": "loads_driver_view",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /load/[id]",
+      "snippet": "? await supabase.from('loads_driver_view').select(DETAIL_COLS).eq('id', Number(id)).single()"
+    },
+    {
+      "file": "src/app/load/[id].tsx",
+      "line": 143,
+      "kind": "table",
+      "target": "loads",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /load/[id]",
+      "snippet": ": await supabase.from('loads').select(DETAIL_COLS).eq('id', Number(id)).single();"
+    },
+    {
+      "file": "src/app/load/[id].tsx",
+      "line": 155,
+      "kind": "table",
+      "target": "load_events",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /load/[id]",
+      "snippet": ".from('load_events')"
+    },
+    {
+      "file": "src/app/load/[id].tsx",
+      "line": 166,
+      "kind": "api",
+      "target": "/api/drivers",
+      "operation": "api",
+      "verb": "GET",
+      "screen": "screen /load/[id]",
+      "snippet": "apiFetch('/api/drivers'),"
+    },
+    {
+      "file": "src/app/load/[id].tsx",
+      "line": 167,
+      "kind": "api",
+      "target": "/api/vehicles",
+      "operation": "api",
+      "verb": "GET",
+      "screen": "screen /load/[id]",
+      "snippet": "apiFetch('/api/vehicles'),"
+    },
+    {
+      "file": "src/app/load/[id].tsx",
+      "line": 179,
+      "kind": "api",
+      "target": "/api/loads/${load.id}",
+      "operation": "api",
+      "verb": "PATCH",
+      "screen": "screen /load/[id]",
+      "snippet": "const res = await apiFetch(`/api/loads/${load.id}`, {"
+    },
+    {
+      "file": "src/app/load/[id].tsx",
+      "line": 228,
+      "kind": "table",
+      "target": "loads",
+      "operation": "write",
+      "verb": "update",
+      "screen": "screen /load/[id]",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "src/app/load/[id].tsx",
+      "line": 238,
+      "kind": "table",
+      "target": "load_events",
+      "operation": "write",
+      "verb": "insert",
+      "screen": "screen /load/[id]",
+      "snippet": "await supabase.from('load_events').insert({"
+    },
+    {
+      "file": "src/app/load/new-from-photo.tsx",
+      "line": 134,
+      "kind": "api",
+      "target": "/api/extract-load-image",
+      "operation": "api",
+      "verb": "POST",
+      "screen": "screen /load/new-from-photo",
+      "snippet": "const res = await apiFetch('/api/extract-load-image', {"
+    },
+    {
+      "file": "src/app/load/new-from-photo.tsx",
+      "line": 159,
+      "kind": "api",
+      "target": "/api/loads",
+      "operation": "api",
+      "verb": "POST",
+      "screen": "screen /load/new-from-photo",
+      "snippet": "const res = await apiFetch('/api/loads', {"
+    },
+    {
+      "file": "src/app/load/new.tsx",
+      "line": 68,
+      "kind": "api",
+      "target": "/api/loads",
+      "operation": "api",
+      "verb": "POST",
+      "screen": "screen /load/new",
+      "snippet": "const res = await apiFetch('/api/loads', {"
+    },
+    {
+      "file": "src/app/login.tsx",
+      "line": 33,
+      "kind": "auth",
+      "target": "auth.signInWithPassword",
+      "operation": "auth",
+      "verb": "signInWithPassword",
+      "screen": "screen /login",
+      "snippet": "const { error } = await supabase.auth.signInWithPassword({ email, password });"
+    },
+    {
+      "file": "src/app/maintenance/index.tsx",
+      "line": 66,
+      "kind": "table",
+      "target": "maintenance_reminders",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /maintenance",
+      "snippet": ".from('maintenance_reminders')"
+    },
+    {
+      "file": "src/app/onboarding/index.tsx",
+      "line": 198,
+      "kind": "api",
+      "target": "/api/onboarding",
+      "operation": "api",
+      "verb": "POST",
+      "screen": "screen /onboarding",
+      "snippet": "const res = await apiFetch('/api/onboarding', {"
+    },
+    {
+      "file": "src/app/onboarding/index.tsx",
+      "line": 240,
+      "kind": "api",
+      "target": "/api/vehicles",
+      "operation": "api",
+      "verb": "POST",
+      "screen": "screen /onboarding",
+      "snippet": "const res = await apiFetch('/api/vehicles', {"
+    },
+    {
+      "file": "src/app/onboarding/index.tsx",
+      "line": 271,
+      "kind": "api",
+      "target": "/api/customers",
+      "operation": "api",
+      "verb": "POST",
+      "screen": "screen /onboarding",
+      "snippet": "const res = await apiFetch('/api/customers', {"
+    },
+    {
+      "file": "src/app/onboarding/index.tsx",
+      "line": 299,
+      "kind": "api",
+      "target": "/api/billing/add-payment-method",
+      "operation": "api",
+      "verb": "POST",
+      "screen": "screen /onboarding",
+      "snippet": "const res = await apiFetch('/api/billing/add-payment-method', { method: 'POST' });"
+    },
+    {
+      "file": "src/app/onboarding/index.tsx",
+      "line": 342,
+      "kind": "auth",
+      "target": "auth.signOut",
+      "operation": "auth",
+      "verb": "signOut",
+      "screen": "screen /onboarding",
+      "snippet": "<Pressable onPress={() => supabase.auth.signOut()} hitSlop={12} accessibilityRole=\"button\">"
+    },
+    {
+      "file": "src/app/settlements/index.tsx",
+      "line": 56,
+      "kind": "table",
+      "target": "driver_settlements",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /settlements",
+      "snippet": ".from('driver_settlements')"
+    },
+    {
+      "file": "src/app/signup.tsx",
+      "line": 48,
+      "kind": "auth",
+      "target": "auth.signUp",
+      "operation": "auth",
+      "verb": "signUp",
+      "screen": "screen /signup",
+      "snippet": "const { error: signUpErr } = await supabase.auth.signUp({"
+    },
+    {
+      "file": "src/app/team/index.tsx",
+      "line": 40,
+      "kind": "api",
+      "target": "/api/team",
+      "operation": "api",
+      "verb": "GET",
+      "screen": "screen /team",
+      "snippet": "const res = await apiFetch('/api/team');"
+    },
+    {
+      "file": "src/app/vehicle/[id].tsx",
+      "line": 81,
+      "kind": "table",
+      "target": "vehicles",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /vehicle/[id]",
+      "snippet": "supabase.from('vehicles').select('id, vehicle_number, nickname, status').eq('id', Number(id)).single(),"
+    },
+    {
+      "file": "src/app/vehicle/[id].tsx",
+      "line": 83,
+      "kind": "table",
+      "target": "service_logs",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /vehicle/[id]",
+      "snippet": ".from('service_logs')"
+    },
+    {
+      "file": "src/app/vehicle/[id].tsx",
+      "line": 88,
+      "kind": "table",
+      "target": "maintenance_reminders",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /vehicle/[id]",
+      "snippet": ".from('maintenance_reminders')"
+    },
+    {
+      "file": "src/app/vehicle/[id].tsx",
+      "line": 117,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "read",
+      "verb": "select",
+      "screen": "screen /vehicle/[id]",
+      "snippet": ".from('profiles')"
+    },
+    {
+      "file": "src/app/vehicle/[id].tsx",
+      "line": 131,
+      "kind": "table",
+      "target": "service_logs",
+      "operation": "write",
+      "verb": "insert",
+      "screen": "screen /vehicle/[id]",
+      "snippet": "const { error: insertErr } = await supabase.from('service_logs').insert({"
+    },
+    {
+      "file": "src/app/vehicle/[id].tsx",
+      "line": 156,
+      "kind": "table",
+      "target": "maintenance_reminders",
+      "operation": "write",
+      "verb": "update",
+      "screen": "screen /vehicle/[id]",
+      "snippet": ".from('maintenance_reminders')"
+    },
+    {
+      "file": "src/components/driver-chat-section.tsx",
+      "line": 45,
+      "kind": "table",
+      "target": "driver_messages",
+      "operation": "read",
+      "verb": "select",
+      "screen": "component driver-chat-section",
+      "snippet": ".from('driver_messages')"
+    },
+    {
+      "file": "src/components/driver-chat-section.tsx",
+      "line": 56,
+      "kind": "table",
+      "target": "driver_messages",
+      "operation": "write",
+      "verb": "update",
+      "screen": "component driver-chat-section",
+      "snippet": "await supabase.from('driver_messages').update({ read_at: new Date().toISOString() }).in('id', unreadIds);"
+    },
+    {
+      "file": "src/components/driver-chat-section.tsx",
+      "line": 67,
+      "kind": "realtime",
+      "target": "driver-messages-load-${loadId}",
+      "operation": "realtime",
+      "verb": "realtime",
+      "screen": "component driver-chat-section",
+      "snippet": ".channel(`driver-messages-load-${loadId}`)"
+    },
+    {
+      "file": "src/components/driver-chat-section.tsx",
+      "line": 69,
+      "kind": "realtime",
+      "target": "postgres_changes",
+      "operation": "realtime",
+      "verb": "realtime",
+      "screen": "component driver-chat-section",
+      "snippet": "'postgres_changes',"
+    },
+    {
+      "file": "src/components/driver-chat-section.tsx",
+      "line": 76,
+      "kind": "realtime",
+      "target": "subscribe",
+      "operation": "realtime",
+      "verb": "realtime",
+      "screen": "component driver-chat-section",
+      "snippet": ".subscribe();"
+    },
+    {
+      "file": "src/components/driver-chat-section.tsx",
+      "line": 79,
+      "kind": "realtime",
+      "target": "removeChannel",
+      "operation": "realtime",
+      "verb": "realtime",
+      "screen": "component driver-chat-section",
+      "snippet": "supabase.removeChannel(channel);"
+    },
+    {
+      "file": "src/components/driver-chat-section.tsx",
+      "line": 88,
+      "kind": "api",
+      "target": "/api/driver-messages",
+      "operation": "api",
+      "verb": "POST",
+      "screen": "component driver-chat-section",
+      "snippet": "const res = await apiFetch('/api/driver-messages', {"
+    },
+    {
+      "file": "src/components/driver-chat-section.tsx",
+      "line": 108,
+      "kind": "api",
+      "target": "/api/driver-messages/${messageId}/translate",
+      "operation": "api",
+      "verb": "POST",
+      "screen": "component driver-chat-section",
+      "snippet": "const res = await apiFetch(`/api/driver-messages/${messageId}/translate`, {"
+    },
+    {
+      "file": "src/components/fuel-stops-section.tsx",
+      "line": 58,
+      "kind": "table",
+      "target": "fuel_stops",
+      "operation": "read",
+      "verb": "select",
+      "screen": "component fuel-stops-section",
+      "snippet": ".from('fuel_stops')"
+    },
+    {
+      "file": "src/components/fuel-stops-section.tsx",
+      "line": 95,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "read",
+      "verb": "select",
+      "screen": "component fuel-stops-section",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "src/components/fuel-stops-section.tsx",
+      "line": 103,
+      "kind": "table",
+      "target": "fuel_stops",
+      "operation": "write",
+      "verb": "insert",
+      "screen": "component fuel-stops-section",
+      "snippet": "const { error: insertErr } = await supabase.from('fuel_stops').insert({"
+    },
+    {
+      "file": "src/components/ifta-section.tsx",
+      "line": 61,
+      "kind": "table",
+      "target": "ifta_state_crossings",
+      "operation": "read",
+      "verb": "select",
+      "screen": "component ifta-section",
+      "snippet": ".from('ifta_state_crossings')"
+    },
+    {
+      "file": "src/components/ifta-section.tsx",
+      "line": 85,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "read",
+      "verb": "select",
+      "screen": "component ifta-section",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "src/components/ifta-section.tsx",
+      "line": 107,
+      "kind": "rpc",
+      "target": "check_ifta_completeness",
+      "operation": "rpc",
+      "verb": "rpc",
+      "screen": "component ifta-section",
+      "snippet": "const { data: complete } = await supabase.rpc('check_ifta_completeness', { p_load_id: loadId });"
+    },
+    {
+      "file": "src/components/ifta-section.tsx",
+      "line": 148,
+      "kind": "table",
+      "target": "ifta_state_crossings",
+      "operation": "write",
+      "verb": "delete",
+      "screen": "component ifta-section",
+      "snippet": "await supabase.from('ifta_state_crossings').delete().eq('load_id', loadId).eq('source', 'gps');"
+    },
+    {
+      "file": "src/components/ifta-section.tsx",
+      "line": 149,
+      "kind": "table",
+      "target": "ifta_state_crossings",
+      "operation": "write",
+      "verb": "insert",
+      "screen": "component ifta-section",
+      "snippet": "await supabase.from('ifta_state_crossings').insert(rows);"
+    },
+    {
+      "file": "src/components/ifta-summary.tsx",
+      "line": 53,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "read",
+      "verb": "select",
+      "screen": "component ifta-summary",
+      "snippet": ".from('profiles')"
+    },
+    {
+      "file": "src/components/ifta-summary.tsx",
+      "line": 62,
+      "kind": "rpc",
+      "target": "get_ifta_quarterly_summary",
+      "operation": "rpc",
+      "verb": "rpc",
+      "screen": "component ifta-summary",
+      "snippet": "const { data } = await supabase.rpc('get_ifta_quarterly_summary', {"
+    },
+    {
+      "file": "src/components/onboarding-status-error.tsx",
+      "line": 37,
+      "kind": "auth",
+      "target": "auth.signOut",
+      "operation": "auth",
+      "verb": "signOut",
+      "screen": "component onboarding-status-error",
+      "snippet": "<Pressable onPress={() => supabase.auth.signOut()} style={styles.signOutLink}>"
+    },
+    {
+      "file": "src/components/pod-section.tsx",
+      "line": 51,
+      "kind": "table",
+      "target": "documents",
+      "operation": "read",
+      "verb": "select",
+      "screen": "component pod-section",
+      "snippet": ".from('documents')"
+    },
+    {
+      "file": "src/components/pod-section.tsx",
+      "line": 67,
+      "kind": "storage",
+      "target": "documents",
+      "operation": "storage",
+      "verb": "createSignedUrl",
+      "screen": "component pod-section",
+      "snippet": "const { data: signed } = await supabase.storage"
+    },
+    {
+      "file": "src/components/pod-section.tsx",
+      "line": 124,
+      "kind": "auth",
+      "target": "auth.getSession",
+      "operation": "auth",
+      "verb": "getSession",
+      "screen": "component pod-section",
+      "snippet": "const { data: sessionData } = await supabase.auth.getSession();"
+    },
+    {
+      "file": "src/components/pod-section.tsx",
+      "line": 140,
+      "kind": "storage",
+      "target": "documents",
+      "operation": "storage",
+      "verb": "upload",
+      "screen": "component pod-section",
+      "snippet": "const { error: uploadErr } = await supabase.storage"
+    },
+    {
+      "file": "src/components/pod-section.tsx",
+      "line": 149,
+      "kind": "table",
+      "target": "documents",
+      "operation": "write",
+      "verb": "insert",
+      "screen": "component pod-section",
+      "snippet": "const { error: insertErr } = await supabase.from('documents').insert({"
+    },
+    {
+      "file": "src/components/pod-section.tsx",
+      "line": 163,
+      "kind": "storage",
+      "target": "documents",
+      "operation": "storage",
+      "verb": "remove",
+      "screen": "component pod-section",
+      "snippet": "const { error: removeErr } = await supabase.storage.from(BUCKET).remove([storagePath]);"
+    },
+    {
+      "file": "src/components/report-problem-section.tsx",
+      "line": 47,
+      "kind": "table",
+      "target": "exception_events",
+      "operation": "write",
+      "verb": "insert",
+      "screen": "component report-problem-section",
+      "snippet": "const { error: insertErr } = await supabase.from('exception_events').insert({"
+    },
+    {
+      "file": "src/components/settings-content.tsx",
+      "line": 257,
+      "kind": "auth",
+      "target": "auth.signOut",
+      "operation": "auth",
+      "verb": "signOut",
+      "screen": "component settings-content",
+      "snippet": "<Pressable onPress={() => supabase.auth.signOut()} style={styles.signOut}>"
+    },
+    {
+      "file": "src/components/share-location-section.tsx",
+      "line": 51,
+      "kind": "table",
+      "target": "loads",
+      "operation": "write",
+      "verb": "update",
+      "screen": "component share-location-section",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "src/hooks/use-locale.tsx",
+      "line": 142,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "read",
+      "verb": "select",
+      "screen": "hook use-locale",
+      "snippet": ".from('profiles')"
+    },
+    {
+      "file": "src/hooks/use-locale.tsx",
+      "line": 152,
+      "kind": "table",
+      "target": "carrier_details",
+      "operation": "read",
+      "verb": "select",
+      "screen": "hook use-locale",
+      "snippet": ".from('carrier_details')"
+    },
+    {
+      "file": "src/hooks/use-locale.tsx",
+      "line": 177,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "verb": "update",
+      "screen": "hook use-locale",
+      "snippet": "await supabase.from('profiles').update({ preferred_language: next }).eq('id', session.user.id);"
+    },
+    {
+      "file": "src/hooks/use-locale.tsx",
+      "line": 187,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "verb": "update",
+      "screen": "hook use-locale",
+      "snippet": "await supabase.from('profiles').update({ uom_system: uom }).eq('id', session.user.id);"
+    },
+    {
+      "file": "src/hooks/use-locale.tsx",
+      "line": 197,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "verb": "update",
+      "screen": "hook use-locale",
+      "snippet": "await supabase.from('profiles').update({ date_format: format }).eq('id', session.user.id);"
+    },
+    {
+      "file": "src/hooks/use-locale.tsx",
+      "line": 207,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "verb": "update",
+      "screen": "hook use-locale",
+      "snippet": "await supabase.from('profiles').update({ time_format: format }).eq('id', session.user.id);"
+    },
+    {
+      "file": "src/hooks/use-onboarding-status.tsx",
+      "line": 72,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "read",
+      "verb": "select",
+      "screen": "hook use-onboarding-status",
+      "snippet": ".from('profiles')"
+    },
+    {
+      "file": "src/hooks/use-profile-role.ts",
+      "line": 29,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "read",
+      "verb": "select",
+      "screen": "hook use-profile-role",
+      "snippet": ".from('profiles')"
+    },
+    {
+      "file": "src/hooks/use-register-push-token.ts",
+      "line": 42,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "verb": "update",
+      "screen": "hook use-register-push-token",
+      "snippet": ".from('profiles')"
+    },
+    {
+      "file": "src/hooks/use-session.ts",
+      "line": 11,
+      "kind": "auth",
+      "target": "auth.getSession",
+      "operation": "auth",
+      "verb": "getSession",
+      "screen": "hook use-session",
+      "snippet": "supabase.auth.getSession().then(({ data: { session } }) => {"
+    },
+    {
+      "file": "src/hooks/use-session.ts",
+      "line": 16,
+      "kind": "auth",
+      "target": "auth.onAuthStateChange",
+      "operation": "auth",
+      "verb": "onAuthStateChange",
+      "screen": "hook use-session",
+      "snippet": "const { data: { subscription } } = supabase.auth.onAuthStateChange("
+    },
+    {
+      "file": "src/hooks/use-theme.tsx",
+      "line": 89,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "read",
+      "verb": "select",
+      "screen": "hook use-theme",
+      "snippet": ".from('profiles')"
+    },
+    {
+      "file": "src/hooks/use-theme.tsx",
+      "line": 114,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "verb": "update",
+      "screen": "hook use-theme",
+      "snippet": "await supabase.from('profiles').update({ theme_preference: next }).eq('id', userId);"
+    },
+    {
+      "file": "src/lib/api.ts",
+      "line": 13,
+      "kind": "auth",
+      "target": "auth.getSession",
+      "operation": "auth",
+      "verb": "getSession",
+      "screen": "lib api",
+      "snippet": "const { data: { session } } = await supabase.auth.getSession()"
+    },
+    {
+      "file": "src/lib/entitlements.ts",
+      "line": 14,
+      "kind": "rpc",
+      "target": "has_feature",
+      "operation": "rpc",
+      "verb": "rpc",
+      "screen": "lib entitlements",
+      "snippet": "const { data } = await supabase.rpc('has_feature', { feature_key: featureKey });"
+    },
+    {
+      "file": "src/lib/entitlements.ts",
+      "line": 19,
+      "kind": "rpc",
+      "target": "get_my_entitlements",
+      "operation": "rpc",
+      "verb": "rpc",
+      "screen": "lib entitlements",
+      "snippet": "const { data } = await supabase.rpc('get_my_entitlements');"
+    },
+    {
+      "file": "src/lib/exceptions.ts",
+      "line": 39,
+      "kind": "rpc",
+      "target": "get_exceptions",
+      "operation": "rpc",
+      "verb": "rpc",
+      "screen": "lib exceptions",
+      "snippet": "const { data } = await supabase.rpc('get_exceptions');"
+    },
+    {
+      "file": "src/lib/ifta-tracking.ts",
+      "line": 69,
+      "kind": "table",
+      "target": "ifta_state_crossings",
+      "operation": "write",
+      "verb": "insert",
+      "screen": "lib ifta-tracking",
+      "snippet": "const { error } = await supabase.from('ifta_state_crossings').insert({"
+    },
+    {
+      "file": "src/lib/offline-queue.ts",
+      "line": 70,
+      "kind": "table",
+      "target": "(dynamic — runtime table name)",
+      "operation": "write",
+      "verb": "update",
+      "screen": "lib offline-queue",
+      "snippet": "let query = (supabase.from(entry.table as any) as any).update(entry.patch)",
+      "note": "Generic offline-replay queue. Only enqueue call site today is src/app/load/[id].tsx:213 with table=\"loads\"."
+    },
+    {
+      "file": "src/lib/submitter.ts",
+      "line": 22,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "read",
+      "verb": "select",
+      "screen": "lib submitter",
+      "snippet": ".from('profiles')"
+    },
+    {
+      "file": "src/lib/submitter.ts",
+      "line": 29,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "read",
+      "verb": "select",
+      "screen": "lib submitter",
+      "snippet": ".from('drivers')"
+    }
+  ],
+  "apiFetchCallSites": [
+    {
+      "file": "src/app/invoice/[id].tsx",
+      "line": 120,
+      "path": "/api/invoices/${invoice.id}/send",
+      "method": "POST",
+      "screen": "screen /invoice/[id]",
+      "snippet": "const res = await apiFetch(`/api/invoices/${invoice.id}/send`, { method: 'POST' });"
+    },
+    {
+      "file": "src/app/load/[id].tsx",
+      "line": 166,
+      "path": "/api/drivers",
+      "method": "GET",
+      "screen": "screen /load/[id]",
+      "snippet": "apiFetch('/api/drivers'),"
+    },
+    {
+      "file": "src/app/load/[id].tsx",
+      "line": 167,
+      "path": "/api/vehicles",
+      "method": "GET",
+      "screen": "screen /load/[id]",
+      "snippet": "apiFetch('/api/vehicles'),"
+    },
+    {
+      "file": "src/app/load/[id].tsx",
+      "line": 179,
+      "path": "/api/loads/${load.id}",
+      "method": "PATCH",
+      "screen": "screen /load/[id]",
+      "snippet": "const res = await apiFetch(`/api/loads/${load.id}`, {"
+    },
+    {
+      "file": "src/app/load/new-from-photo.tsx",
+      "line": 134,
+      "path": "/api/extract-load-image",
+      "method": "POST",
+      "screen": "screen /load/new-from-photo",
+      "snippet": "const res = await apiFetch('/api/extract-load-image', {"
+    },
+    {
+      "file": "src/app/load/new-from-photo.tsx",
+      "line": 159,
+      "path": "/api/loads",
+      "method": "POST",
+      "screen": "screen /load/new-from-photo",
+      "snippet": "const res = await apiFetch('/api/loads', {"
+    },
+    {
+      "file": "src/app/load/new.tsx",
+      "line": 68,
+      "path": "/api/loads",
+      "method": "POST",
+      "screen": "screen /load/new",
+      "snippet": "const res = await apiFetch('/api/loads', {"
+    },
+    {
+      "file": "src/app/onboarding/index.tsx",
+      "line": 198,
+      "path": "/api/onboarding",
+      "method": "POST",
+      "screen": "screen /onboarding",
+      "snippet": "const res = await apiFetch('/api/onboarding', {"
+    },
+    {
+      "file": "src/app/onboarding/index.tsx",
+      "line": 240,
+      "path": "/api/vehicles",
+      "method": "POST",
+      "screen": "screen /onboarding",
+      "snippet": "const res = await apiFetch('/api/vehicles', {"
+    },
+    {
+      "file": "src/app/onboarding/index.tsx",
+      "line": 271,
+      "path": "/api/customers",
+      "method": "POST",
+      "screen": "screen /onboarding",
+      "snippet": "const res = await apiFetch('/api/customers', {"
+    },
+    {
+      "file": "src/app/onboarding/index.tsx",
+      "line": 299,
+      "path": "/api/billing/add-payment-method",
+      "method": "POST",
+      "screen": "screen /onboarding",
+      "snippet": "const res = await apiFetch('/api/billing/add-payment-method', { method: 'POST' });"
+    },
+    {
+      "file": "src/app/team/index.tsx",
+      "line": 40,
+      "path": "/api/team",
+      "method": "GET",
+      "screen": "screen /team",
+      "snippet": "const res = await apiFetch('/api/team');"
+    },
+    {
+      "file": "src/components/driver-chat-section.tsx",
+      "line": 88,
+      "path": "/api/driver-messages",
+      "method": "POST",
+      "screen": "component driver-chat-section",
+      "snippet": "const res = await apiFetch('/api/driver-messages', {"
+    },
+    {
+      "file": "src/components/driver-chat-section.tsx",
+      "line": 108,
+      "path": "/api/driver-messages/${messageId}/translate",
+      "method": "POST",
+      "screen": "component driver-chat-section",
+      "snippet": "const res = await apiFetch(`/api/driver-messages/${messageId}/translate`, {"
+    }
+  ],
+  "realtimeUsage": [
+    {
+      "file": "src/components/driver-chat-section.tsx",
+      "line": 67,
+      "kind": "realtime",
+      "target": "driver-messages-load-${loadId}",
+      "operation": "realtime",
+      "verb": "realtime",
+      "screen": "component driver-chat-section",
+      "snippet": ".channel(`driver-messages-load-${loadId}`)"
+    },
+    {
+      "file": "src/components/driver-chat-section.tsx",
+      "line": 69,
+      "kind": "realtime",
+      "target": "postgres_changes",
+      "operation": "realtime",
+      "verb": "realtime",
+      "screen": "component driver-chat-section",
+      "snippet": "'postgres_changes',"
+    },
+    {
+      "file": "src/components/driver-chat-section.tsx",
+      "line": 76,
+      "kind": "realtime",
+      "target": "subscribe",
+      "operation": "realtime",
+      "verb": "realtime",
+      "screen": "component driver-chat-section",
+      "snippet": ".subscribe();"
+    },
+    {
+      "file": "src/components/driver-chat-section.tsx",
+      "line": 79,
+      "kind": "realtime",
+      "target": "removeChannel",
+      "operation": "realtime",
+      "verb": "realtime",
+      "screen": "component driver-chat-section",
+      "snippet": "supabase.removeChannel(channel);"
+    }
+  ],
+  "writeOperations": [
+    {
+      "file": "src/app/driver-profile/index.tsx",
+      "line": 124,
+      "kind": "table",
+      "target": "drivers",
+      "operation": "write",
+      "verb": "update",
+      "screen": "screen /driver-profile",
+      "snippet": ".from('drivers')"
+    },
+    {
+      "file": "src/app/dvir/[loadId].tsx",
+      "line": 211,
+      "kind": "table",
+      "target": "dvir_inspections",
+      "operation": "write",
+      "verb": "insert",
+      "screen": "screen /dvir/[loadId]",
+      "snippet": ".from('dvir_inspections')"
+    },
+    {
+      "file": "src/app/dvir/[loadId].tsx",
+      "line": 246,
+      "kind": "table",
+      "target": "dvir_inspections",
+      "operation": "write",
+      "verb": "update",
+      "screen": "screen /dvir/[loadId]",
+      "snippet": ".from('dvir_inspections')"
+    },
+    {
+      "file": "src/app/dvir/[loadId].tsx",
+      "line": 292,
+      "kind": "table",
+      "target": "dvir_defects",
+      "operation": "write",
+      "verb": "insert",
+      "screen": "screen /dvir/[loadId]",
+      "snippet": "const { error: defectsErr } = await supabase.from('dvir_defects').insert(rows);"
+    },
+    {
+      "file": "src/app/invoice/[id].tsx",
+      "line": 101,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "write",
+      "verb": "update",
+      "screen": "screen /invoice/[id]",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "src/app/invoice/[id].tsx",
+      "line": 135,
+      "kind": "table",
+      "target": "invoices",
+      "operation": "write",
+      "verb": "update",
+      "screen": "screen /invoice/[id]",
+      "snippet": ".from('invoices')"
+    },
+    {
+      "file": "src/app/invoice/[id].tsx",
+      "line": 140,
+      "kind": "table",
+      "target": "loads",
+      "operation": "write",
+      "verb": "update",
+      "screen": "screen /invoice/[id]",
+      "snippet": "await supabase.from('loads').update({ status: 'paid' }).eq('id', invoice.load_id);"
+    },
+    {
+      "file": "src/app/load/[id].tsx",
+      "line": 228,
+      "kind": "table",
+      "target": "loads",
+      "operation": "write",
+      "verb": "update",
+      "screen": "screen /load/[id]",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "src/app/load/[id].tsx",
+      "line": 238,
+      "kind": "table",
+      "target": "load_events",
+      "operation": "write",
+      "verb": "insert",
+      "screen": "screen /load/[id]",
+      "snippet": "await supabase.from('load_events').insert({"
+    },
+    {
+      "file": "src/app/vehicle/[id].tsx",
+      "line": 131,
+      "kind": "table",
+      "target": "service_logs",
+      "operation": "write",
+      "verb": "insert",
+      "screen": "screen /vehicle/[id]",
+      "snippet": "const { error: insertErr } = await supabase.from('service_logs').insert({"
+    },
+    {
+      "file": "src/app/vehicle/[id].tsx",
+      "line": 156,
+      "kind": "table",
+      "target": "maintenance_reminders",
+      "operation": "write",
+      "verb": "update",
+      "screen": "screen /vehicle/[id]",
+      "snippet": ".from('maintenance_reminders')"
+    },
+    {
+      "file": "src/components/driver-chat-section.tsx",
+      "line": 56,
+      "kind": "table",
+      "target": "driver_messages",
+      "operation": "write",
+      "verb": "update",
+      "screen": "component driver-chat-section",
+      "snippet": "await supabase.from('driver_messages').update({ read_at: new Date().toISOString() }).in('id', unreadIds);"
+    },
+    {
+      "file": "src/components/fuel-stops-section.tsx",
+      "line": 103,
+      "kind": "table",
+      "target": "fuel_stops",
+      "operation": "write",
+      "verb": "insert",
+      "screen": "component fuel-stops-section",
+      "snippet": "const { error: insertErr } = await supabase.from('fuel_stops').insert({"
+    },
+    {
+      "file": "src/components/ifta-section.tsx",
+      "line": 148,
+      "kind": "table",
+      "target": "ifta_state_crossings",
+      "operation": "write",
+      "verb": "delete",
+      "screen": "component ifta-section",
+      "snippet": "await supabase.from('ifta_state_crossings').delete().eq('load_id', loadId).eq('source', 'gps');"
+    },
+    {
+      "file": "src/components/ifta-section.tsx",
+      "line": 149,
+      "kind": "table",
+      "target": "ifta_state_crossings",
+      "operation": "write",
+      "verb": "insert",
+      "screen": "component ifta-section",
+      "snippet": "await supabase.from('ifta_state_crossings').insert(rows);"
+    },
+    {
+      "file": "src/components/pod-section.tsx",
+      "line": 149,
+      "kind": "table",
+      "target": "documents",
+      "operation": "write",
+      "verb": "insert",
+      "screen": "component pod-section",
+      "snippet": "const { error: insertErr } = await supabase.from('documents').insert({"
+    },
+    {
+      "file": "src/components/report-problem-section.tsx",
+      "line": 47,
+      "kind": "table",
+      "target": "exception_events",
+      "operation": "write",
+      "verb": "insert",
+      "screen": "component report-problem-section",
+      "snippet": "const { error: insertErr } = await supabase.from('exception_events').insert({"
+    },
+    {
+      "file": "src/components/share-location-section.tsx",
+      "line": 51,
+      "kind": "table",
+      "target": "loads",
+      "operation": "write",
+      "verb": "update",
+      "screen": "component share-location-section",
+      "snippet": ".from('loads')"
+    },
+    {
+      "file": "src/hooks/use-locale.tsx",
+      "line": 177,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "verb": "update",
+      "screen": "hook use-locale",
+      "snippet": "await supabase.from('profiles').update({ preferred_language: next }).eq('id', session.user.id);"
+    },
+    {
+      "file": "src/hooks/use-locale.tsx",
+      "line": 187,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "verb": "update",
+      "screen": "hook use-locale",
+      "snippet": "await supabase.from('profiles').update({ uom_system: uom }).eq('id', session.user.id);"
+    },
+    {
+      "file": "src/hooks/use-locale.tsx",
+      "line": 197,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "verb": "update",
+      "screen": "hook use-locale",
+      "snippet": "await supabase.from('profiles').update({ date_format: format }).eq('id', session.user.id);"
+    },
+    {
+      "file": "src/hooks/use-locale.tsx",
+      "line": 207,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "verb": "update",
+      "screen": "hook use-locale",
+      "snippet": "await supabase.from('profiles').update({ time_format: format }).eq('id', session.user.id);"
+    },
+    {
+      "file": "src/hooks/use-register-push-token.ts",
+      "line": 42,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "verb": "update",
+      "screen": "hook use-register-push-token",
+      "snippet": ".from('profiles')"
+    },
+    {
+      "file": "src/hooks/use-theme.tsx",
+      "line": 114,
+      "kind": "table",
+      "target": "profiles",
+      "operation": "write",
+      "verb": "update",
+      "screen": "hook use-theme",
+      "snippet": "await supabase.from('profiles').update({ theme_preference: next }).eq('id', userId);"
+    },
+    {
+      "file": "src/lib/ifta-tracking.ts",
+      "line": 69,
+      "kind": "table",
+      "target": "ifta_state_crossings",
+      "operation": "write",
+      "verb": "insert",
+      "screen": "lib ifta-tracking",
+      "snippet": "const { error } = await supabase.from('ifta_state_crossings').insert({"
+    },
+    {
+      "file": "src/lib/offline-queue.ts",
+      "line": 70,
+      "kind": "table",
+      "target": "(dynamic — runtime table name)",
+      "operation": "write",
+      "verb": "update",
+      "screen": "lib offline-queue",
+      "snippet": "let query = (supabase.from(entry.table as any) as any).update(entry.patch)",
+      "note": "Generic offline-replay queue. Only enqueue call site today is src/app/load/[id].tsx:213 with table=\"loads\"."
+    }
+  ]
+}
