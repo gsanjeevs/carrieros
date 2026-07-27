@@ -8,13 +8,20 @@
 // grepping the real tree before adding it as a hard gate) — so any hit here
 // is a real new regression, not pre-existing debt to grandfather.
 
-import { readFileSync } from 'node:fs'
+import { readFileSync, existsSync } from 'node:fs'
 import path from 'node:path'
 import { execSync } from 'node:child_process'
 
 const ROOT = process.cwd()
 
 function filesMatching(dir, exts) {
+  // A rule may legitimately guard a directory that does not exist yet — the
+  // v1-route-delegation rule guards app/api/v1 before the first endpoint is
+  // written, so that the boundary is in place the moment someone creates it.
+  // Checked up front rather than relying on the catch below, because `find`
+  // writes "No such file or directory" to stderr and still exits non-zero,
+  // which produced a spurious error line on every run.
+  if (!existsSync(path.join(ROOT, dir))) return []
   try {
     return execSync(`find ${dir} -type f \\( ${exts.map((e) => `-name "*.${e}"`).join(' -o ')} \\)`, {
       cwd: ROOT,
@@ -54,6 +61,70 @@ checkPattern({
   exts: ['ts', 'tsx'],
   forbiddenPattern: /from\s+['"](react|next\/|@\/components)/,
   message: 'lib/domain and lib/queries are business/query logic — must not import React, Next.js, or components/*. See architecture-principles.md Rule B/D.',
+})
+
+// ── server/ layer boundaries (2026-07-26 modernization, Phase 3) ────────────
+//
+// server/ holds the layered API stack: domain -> application -> ports, with
+// infrastructure adapters implementing the ports and app/api/v1 route handlers
+// as transport. The whole directory is written so it can later be lifted into
+// a standalone Node service; these rules are what keep that true, because the
+// thing that makes such a move expensive is always a handful of stray imports
+// that nobody noticed accumulating.
+//
+// The rules are enforced as ERRORS from day one, not ratcheted like the older
+// UI/query debt. That is affordable precisely because server/ is new: there is
+// no pre-existing violation to grandfather, and the cheapest moment to enforce
+// a boundary is before anything has crossed it.
+
+// The domain layer is pure: no framework, no I/O, no SDK. This is what lets
+// the entitlement decision (and every state machine) be unit-tested with a
+// plain object and a fixed Date, with no database in scope.
+checkPattern({
+  label: 'server-domain-purity',
+  dirs: ['server/domain'],
+  exts: ['ts'],
+  forbiddenPattern:
+    /from\s+['"](react|react-dom|next(\/|['"])|@supabase\/|@\/components|@\/lib\/supabase|@\/app\/)/,
+  message:
+    'server/domain must be pure — no React, Next.js, Supabase, components, or app imports. It may import only other server/domain modules. See architecture/adr/0002-layered-server-architecture.md.',
+})
+
+// The application layer orchestrates domain + ports. It may not reach for a
+// concrete adapter: depending on the interface is what allows a repository to
+// be swapped for a fake in tests and for a different database later.
+checkPattern({
+  label: 'server-application-purity',
+  dirs: ['server/application'],
+  exts: ['ts'],
+  forbiddenPattern:
+    /from\s+['"](react|react-dom|next(\/|['"])|@supabase\/|@\/components|@\/lib\/supabase|@\/app\/|\.\.\/infrastructure|@\/server\/infrastructure)/,
+  message:
+    'server/application may import server/domain and server/ports only — never Next.js, React, Supabase, or a concrete infrastructure adapter. Inject dependencies through the service constructor instead.',
+})
+
+// Ports are interface declarations. A port that imports an adapter has
+// inverted the dependency it exists to create.
+checkPattern({
+  label: 'server-ports-purity',
+  dirs: ['server/ports'],
+  exts: ['ts'],
+  forbiddenPattern:
+    /from\s+['"](react|next(\/|['"])|@supabase\/|@\/components|@\/lib\/supabase|\.\.\/infrastructure|@\/server\/infrastructure)/,
+  message:
+    'server/ports declares interfaces only — it must not import Next.js, React, Supabase, or any infrastructure adapter.',
+})
+
+// Route handlers are transport: parse, authenticate, authorize, validate,
+// delegate, map the result. Reaching past the application layer straight into
+// the database is how business logic ends up back in the HTTP layer.
+checkPattern({
+  label: 'v1-route-delegation',
+  dirs: ['app/api/v1'],
+  exts: ['ts'],
+  forbiddenPattern: /\.from\(['"`]|\.rpc\(['"`]/,
+  message:
+    'app/api/v1 route handlers must delegate to an application service — no direct .from()/.rpc() table or RPC access. Persistence belongs behind a repository port.',
 })
 
 // UI layer must not talk to Supabase directly — routes/server components/
