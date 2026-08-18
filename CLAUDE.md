@@ -11,16 +11,24 @@ check it for anything not covered here.
 - `carrieros-mobile/` — Expo/React Native (SDK 57). Read
   `carrieros-mobile/AGENTS.md` first, same reason.
 - `supabase/` — local Supabase project (Postgres + Auth), shared by both
-  apps. No `supabase/migrations/` — schema changes are applied ad hoc via
-  `docker exec supabase_db_carrieros psql ...` and then written into
-  **`supabase/schema/schema.sql`**, which is the version-controlled source of
-  truth. Read `supabase/schema/README.md` before editing it: policies go
-  next to the table they guard (a duplicate `CREATE POLICY` name fails on a
-  fresh run), and anything calling `my_org_id()`/`my_role()` must appear
-  after those functions are defined — an ordering bug there already shipped
-  once. Verify by replaying the file against a scratch DB (recipe in the
-  README) before committing. `docs/carrieros-db/schema.sql` is a copy kept so
-  the product docs stay self-contained; if they disagree, the repo wins.
+  apps. Schema changes go through **`supabase/migrations/*.sql`**, the
+  authority for schema evolution since 2026-07-26 (read
+  `architecture/database-migrations.md` before touching schema — it replaced
+  the old ad hoc `docker exec psql` + hand-copy-into-schema.sql workflow,
+  which had real, already-occurred drift/upgrade-path failure modes).
+  `node scripts/db/migrate.mjs` applies pending migrations (`--status` /
+  `--dry-run` to inspect first); migrations are numbered, checksummed, and
+  immutable once applied — fix mistakes forward with a new migration, never
+  edit a merged one. `supabase/schema/schema.sql` is now a **reviewed
+  current-state snapshot**, verified against the migrations by
+  `node scripts/db/verify-migrations.mjs` (9 checks in throwaway DBs) — it is
+  no longer the thing you hand-edit to change the database, but it must still
+  be kept in sync by hand alongside any new migration (the verifier catches
+  drift, it doesn't generate the snapshot). Read `supabase/schema/README.md`
+  for schema.sql's own ordering rules (policies next to the table they guard,
+  anything calling `my_org_id()`/`my_role()` after those functions are
+  defined). `docs/carrieros-db/schema.sql` is a copy kept so the product docs
+  stay self-contained; if they disagree, the repo wins.
 - `.claude/launch.json` — dev server configs for the Browser-pane preview
   tool (`carrieros-web`, `carrieros-mobile (web preview)`, `supabase`).
 
@@ -38,12 +46,17 @@ After browser-testing changes their language/units/date/time prefs, run
 by hand.
 
 ## After any schema change
-Run `./scripts/regen-types.sh` to regenerate both apps' generated types, then
-`npx tsc --noEmit` in each app. Don't run `supabase gen types ... > file`
-directly — the CLI sometimes writes a log line to stdout before the real
-output, and `2>&1 | tail` redirects that into the file too, silently
-corrupting it (tsc then fails with a cryptic parse error on line 1). The
-script redirects stderr to `/dev/null` to avoid this.
+Write a new numbered file in `supabase/migrations/` (never edit a merged
+one — see `architecture/database-migrations.md`), apply it locally with
+`node scripts/db/migrate.mjs`, and hand-update `supabase/schema/schema.sql`
+to match — `node scripts/db/verify-migrations.mjs` checks the two agree but
+does not generate the snapshot for you. Then run `./scripts/regen-types.sh`
+to regenerate both apps' generated types, then `npx tsc --noEmit` in each
+app. Don't run `supabase gen types ... > file` directly — the CLI sometimes
+writes a log line to stdout before the real output, and `2>&1 | tail`
+redirects that into the file too, silently corrupting it (tsc then fails
+with a cryptic parse error on line 1). The script redirects stderr to
+`/dev/null` to avoid this.
 
 ## Browser-pane automation reliability
 The Browser pane's `computer` click tool is unreliable in this environment:
