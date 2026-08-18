@@ -25,7 +25,7 @@ const NAV_SECTIONS: NavSection[] = [
   {
     sectionKey: 'main',
     items: [
-      { labelKey: 'dashboard', href: '/dashboard', icon: 'dashboard',         roles: ['owner','solo','dispatcher','finance'] },
+      { labelKey: 'dashboard', href: '/dashboard', icon: 'dashboard',         roles: ['owner','solo','dispatcher','finance','driver'] },
       { labelKey: 'exceptions', href: '/exceptions', icon: 'warning',         roles: ['owner','solo','dispatcher'] },
       { labelKey: 'loads',     href: '/loads',      icon: 'local_shipping',    roles: ['owner','solo','dispatcher','finance'] },
       { labelKey: 'dispatch',  href: '/dispatch',   icon: 'swap_driving_apps',roles: ['owner','solo','dispatcher'] },
