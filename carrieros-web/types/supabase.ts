@@ -115,6 +115,62 @@ export type Database = {
           },
         ]
       }
+      audit_events: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          aggregate_id: string
+          aggregate_type: string
+          correlation_id: string
+          expected_version: number | null
+          id: number
+          metadata: Json | null
+          new_state: string | null
+          occurred_at: string
+          org_id: number
+          prior_state: string | null
+          reason: string | null
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          aggregate_id: string
+          aggregate_type: string
+          correlation_id: string
+          expected_version?: number | null
+          id?: number
+          metadata?: Json | null
+          new_state?: string | null
+          occurred_at?: string
+          org_id: number
+          prior_state?: string | null
+          reason?: string | null
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          aggregate_id?: string
+          aggregate_type?: string
+          correlation_id?: string
+          expected_version?: number | null
+          id?: number
+          metadata?: Json | null
+          new_state?: string | null
+          occurred_at?: string
+          org_id?: number
+          prior_state?: string | null
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_events_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_events: {
         Row: {
           amount: number | null
@@ -1011,6 +1067,56 @@ export type Database = {
           },
         ]
       }
+      idempotency_keys: {
+        Row: {
+          correlation_id: string
+          created_at: string
+          endpoint: string
+          expires_at: string
+          id: number
+          idempotency_key: string
+          org_id: number
+          request_hash: string
+          response_body: Json | null
+          status_code: number
+          user_id: string
+        }
+        Insert: {
+          correlation_id: string
+          created_at?: string
+          endpoint: string
+          expires_at?: string
+          id?: number
+          idempotency_key: string
+          org_id: number
+          request_hash: string
+          response_body?: Json | null
+          status_code: number
+          user_id: string
+        }
+        Update: {
+          correlation_id?: string
+          created_at?: string
+          endpoint?: string
+          expires_at?: string
+          id?: number
+          idempotency_key?: string
+          org_id?: number
+          request_hash?: string
+          response_body?: Json | null
+          status_code?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "idempotency_keys_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ifta_state_crossings: {
         Row: {
           carrier_org_id: number
@@ -1726,6 +1832,81 @@ export type Database = {
         }
         Relationships: []
       }
+      outbox_events: {
+        Row: {
+          aggregate_id: string
+          aggregate_type: string
+          attempts: number
+          correlation_id: string
+          event_type: string
+          id: number
+          idempotency_key: string
+          last_error: string | null
+          max_attempts: number
+          next_attempt_at: string
+          occurred_at: string
+          org_id: number
+          payload: Json
+          processed_at: string | null
+          replayed_by: string | null
+          replayed_from_id: number | null
+          status: string
+        }
+        Insert: {
+          aggregate_id: string
+          aggregate_type: string
+          attempts?: number
+          correlation_id: string
+          event_type: string
+          id?: number
+          idempotency_key: string
+          last_error?: string | null
+          max_attempts?: number
+          next_attempt_at?: string
+          occurred_at?: string
+          org_id: number
+          payload: Json
+          processed_at?: string | null
+          replayed_by?: string | null
+          replayed_from_id?: number | null
+          status?: string
+        }
+        Update: {
+          aggregate_id?: string
+          aggregate_type?: string
+          attempts?: number
+          correlation_id?: string
+          event_type?: string
+          id?: number
+          idempotency_key?: string
+          last_error?: string | null
+          max_attempts?: number
+          next_attempt_at?: string
+          occurred_at?: string
+          org_id?: number
+          payload?: Json
+          processed_at?: string | null
+          replayed_by?: string | null
+          replayed_from_id?: number | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outbox_events_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outbox_events_replayed_from_id_fkey"
+            columns: ["replayed_from_id"]
+            isOneToOne: false
+            referencedRelation: "outbox_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_flags: {
         Row: {
           created_at: string | null
@@ -1839,6 +2020,30 @@ export type Database = {
           id?: number
           label?: string
           scope?: string
+        }
+        Relationships: []
+      }
+      schema_migrations: {
+        Row: {
+          applied_at: string
+          checksum: string
+          duration_ms: number | null
+          name: string
+          version: string
+        }
+        Insert: {
+          applied_at?: string
+          checksum: string
+          duration_ms?: number | null
+          name: string
+          version: string
+        }
+        Update: {
+          applied_at?: string
+          checksum?: string
+          duration_ms?: number | null
+          name?: string
+          version?: string
         }
         Relationships: []
       }
@@ -2467,6 +2672,19 @@ export type Database = {
         Returns: number
       }
       send_expiry_reminders: { Args: never; Returns: number }
+      submit_shipment_milestone: {
+        Args: {
+          p_correlation_id: string
+          p_event_type: string
+          p_expected_status: string
+          p_idempotency_key: string
+          p_load_id: number
+          p_new_status: string
+          p_occurred_at: string
+          p_reason: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
