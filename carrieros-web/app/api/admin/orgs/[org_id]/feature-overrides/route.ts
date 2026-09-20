@@ -15,7 +15,7 @@ async function parseOrg(params: Ctx['params']) {
 }
 
 export async function PUT(request: NextRequest, { params }: Ctx) {
-  const ctx = await requireAdminRole(request, ['sx_owner', 'sx_finance'])
+  const ctx = await requireAdminRole(request, 'admin_billing')
   if (isErrorResponse(ctx)) return ctx
   const { admin, userId } = ctx
 
@@ -55,7 +55,7 @@ export async function PUT(request: NextRequest, { params }: Ctx) {
 }
 
 export async function DELETE(request: NextRequest, { params }: Ctx) {
-  const ctx = await requireAdminRole(request, ['sx_owner', 'sx_finance'])
+  const ctx = await requireAdminRole(request, 'admin_billing')
   if (isErrorResponse(ctx)) return ctx
   const { admin, userId } = ctx
 

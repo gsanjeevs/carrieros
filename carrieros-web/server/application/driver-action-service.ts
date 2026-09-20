@@ -9,10 +9,8 @@ import type { Clock, DriverActionRepository, IdempotencyRepository, ShipmentAcce
 import { withIdempotency } from './idempotency'
 import { authorizeLoadAction } from './load-access'
 
-// Mirrors today's RLS: fuel_stops -> driver(own load)/owner/solo/dispatcher;
-// exception_events driver reports -> driver(own load)/owner/solo.
-const MAY_LOG_FUEL = new Set(['owner', 'solo', 'dispatcher', 'driver'])
-const MAY_REPORT_PROBLEM = new Set(['owner', 'solo', 'driver'])
+// Roles come from role_capabilities ('fuel_log', 'problem_report'), mirroring today's RLS: fuel_stops ->
+// driver(own load)/owner/solo/dispatcher; exception_events driver reports -> driver(own load)/owner/solo.
 
 export class DriverActionService {
   constructor(
@@ -34,7 +32,7 @@ export class DriverActionService {
     if (!draft.ok) return draft
 
     return withIdempotency(this.deps.idempotency, actor, `POST /loads/${loadId}/fuel-stops`, idempotencyKey, input, async () => {
-      const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, MAY_LOG_FUEL, 'log fuel')
+      const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, 'fuel_log', 'log fuel')
       if (!access.ok) return access
       const { load, actorDriverId } = access.value
 
@@ -64,7 +62,7 @@ export class DriverActionService {
     if (!draft.ok) return draft
 
     return withIdempotency(this.deps.idempotency, actor, `POST /loads/${loadId}/problem-reports`, idempotencyKey, input, async () => {
-      const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, MAY_REPORT_PROBLEM, 'report a problem')
+      const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, 'problem_report', 'report a problem')
       if (!access.ok) return access
       return this.deps.actions.createProblemReport(actor, access.value.load, {
         eventType: 'driver_reported_problem',

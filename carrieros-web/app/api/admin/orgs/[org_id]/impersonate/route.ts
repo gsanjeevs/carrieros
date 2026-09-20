@@ -11,7 +11,7 @@ import { getOrgOwnerOrSolo } from '@/lib/queries/profiles'
 import { logError } from '@/lib/observability'
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ org_id: string }> }) {
-  const ctx = await requireAdminRole(request, ['sx_owner', 'sx_support'])
+  const ctx = await requireAdminRole(request, 'admin_impersonate')
   if (isErrorResponse(ctx)) return ctx
   const { admin, userId } = ctx
 

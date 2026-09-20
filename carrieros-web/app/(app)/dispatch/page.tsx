@@ -14,8 +14,7 @@ import { hasFeature } from '@/lib/entitlements'
 import { Card, CardHeader, EmptyState } from '@/components/ui'
 import type { DispatchMapLoad } from '@/components/DispatchMap'
 import { getProfileForUser } from '@/lib/queries/profiles'
-
-const VIEW_ROLES = ['owner', 'solo', 'dispatcher']
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 export default async function DispatchPage() {
   const supabase = await createClient()
@@ -25,7 +24,7 @@ export default async function DispatchPage() {
   const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) redirect('/onboarding')
-  if (!VIEW_ROLES.includes(profile.role)) redirect('/dashboard')
+  if (!roleHasCapability(profile.role, 'dispatch')) redirect('/dashboard')
 
   const t = await getTranslations('dispatch')
   const locale = await getLocale()

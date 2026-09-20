@@ -12,7 +12,7 @@ import { requireAdminRole } from '@/lib/admin-auth'
 import { logError } from '@/lib/observability'
 
 export async function GET(request: NextRequest) {
-  const ctx = await requireAdminRole(request, ['sx_owner', 'sx_finance'])
+  const ctx = await requireAdminRole(request, 'admin_billing')
   if (isErrorResponse(ctx)) return ctx
   const { admin } = ctx
 

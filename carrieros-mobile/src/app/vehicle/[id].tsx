@@ -25,6 +25,7 @@ import { useLocale } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
 import { supabase } from '@/lib/supabase'; // reads only; writes go through the API
 import { apiClient } from '@/lib/api-client';
+import { roleHasCapability } from '@/lib/generated/role-capabilities';
 import { keyForSubmission } from '@/lib/idempotency';
 
 const ORANGE = BrandColors.orange;
@@ -173,7 +174,10 @@ export default function VehicleDetailScreen() {
     );
   }
 
-  const canLogService = role === 'owner' || role === 'solo';
+  // Same capability the server checks in carrieros-web's
+  // server/application/field-actions-service.ts (`service_log`), read from the
+  // generated role_capabilities table — owner/solo today.
+  const canLogService = roleHasCapability(role, 'service_log');
 
   return (
     <ThemedView style={styles.container}>

@@ -18,9 +18,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { roleHasCapability, rolesWithCapability, type RoleCapability } from '@/lib/generated/role-capabilities'
 
-export const SX_ROLES = ['sx_owner', 'sx_finance', 'sx_support'] as const
-export type SxRole = (typeof SX_ROLES)[number]
+// The platform-staff roles are exactly those holding the 'admin' console capability, so this derives
+// from role_capabilities rather than restating the list (migrations 0009/0023).
+export const SX_ROLES = rolesWithCapability('admin') as readonly SxRole[]
+export type SxRole = 'sx_owner' | 'sx_finance' | 'sx_support'
 
 type AdminContext = {
   admin: ReturnType<typeof createAdminClient>
@@ -28,12 +31,14 @@ type AdminContext = {
   role: SxRole
 }
 
-// `allowedRoles` narrows which sx_* roles may proceed for routes that need
-// finer permissioning than "any ShipmentX staff" (e.g. tier changes are
-// sx_owner/sx_finance only; feature-flag edits are sx_owner only).
+// `capability` narrows which sx_* roles may proceed for routes needing finer permissioning than "any
+// ShipmentX staff": 'admin_billing' for the commercial actions (tier, trial, grace period, feature
+// overrides, pipeline), 'admin_flags' for kill switches, 'admin_impersonate' for impersonation. Which
+// roles hold each lives in role_capabilities (migration 0023), never in a list written at the call site.
+// Omitted means "any ShipmentX staff", i.e. the console-access capability itself.
 export async function requireAdminRole(
   request: NextRequest,
-  allowedRoles: readonly SxRole[] = SX_ROLES
+  capability: RoleCapability = 'admin'
 ): Promise<AdminContext | NextResponse> {
   const ctx = await getAuthedContext(request)
   if (isErrorResponse(ctx)) return ctx
@@ -45,7 +50,7 @@ export async function requireAdminRole(
   if (!role || !SX_ROLES.includes(role))
     return apiError('FORBIDDEN', 'ShipmentX admin access required', 403)
 
-  if (!allowedRoles.includes(role))
+  if (!roleHasCapability(role, capability))
     return apiError('FORBIDDEN', 'Your ShipmentX role cannot perform this action', 403)
 
   return { admin: createAdminClient(), userId: user.id, role }

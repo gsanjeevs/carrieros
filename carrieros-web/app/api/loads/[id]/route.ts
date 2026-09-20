@@ -7,6 +7,7 @@ import { getProfileForUser } from '@/lib/queries/profiles'
 import { getLoadById } from '@/lib/queries/loads'
 import { sendPushNotification } from '@/lib/send-push'
 import { logError } from '@/lib/observability'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 const VALID_STATUSES = ['draft','scheduled','dispatched','picked_up','in_transit','delivered','invoiced','paid','cancelled','declined']
 
@@ -24,7 +25,7 @@ export async function PATCH(
   if (!profile?.org_id)
     return apiError('NOT_ONBOARDED', 'No organization', 400)
 
-  if (!['owner', 'solo', 'dispatcher'].includes(profile.role))
+  if (!roleHasCapability(profile.role, 'loads_manage'))
     return apiError('FORBIDDEN', 'Insufficient permissions', 403)
 
   const body = await request.json()

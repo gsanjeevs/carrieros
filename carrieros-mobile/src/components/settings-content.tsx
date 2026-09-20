@@ -16,6 +16,7 @@ import { BrandColors, BottomTabInset, MaxContentWidth, Spacing } from '@/constan
 import { useTheme, useThemePreference, type ThemePreference } from '@/hooks/use-theme';
 import { useLocale, type DateFormat, type TimeFormat, type Uom } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
+import { roleHasCapability } from '@/lib/generated/role-capabilities';
 import { SUPPORTED_LOCALES, type Locale } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
 
@@ -53,6 +54,15 @@ export function SettingsContent() {
   const { preference: themePreference, setPreference: setThemePreference } = useThemePreference();
   const [saving, setSaving] = useState<OptionKey | null>(null);
 
+  // Capability-backed gates (generated from the role_capabilities table).
+  const canManageTeam = roleHasCapability(role, 'team_manage');
+  const canManageSubscription = roleHasCapability(role, 'subscription_management');
+  // Still hand-gated: the Customers / IFTA report / DVIR history links are
+  // owner-solo-only here, which is NARROWER than the matching capabilities
+  // (`customers_manage` and `ifta_record` are also held by dispatcher/driver),
+  // and `canSeeSettlements` is WIDER than `settlements_manage` (drivers keep
+  // the link to see their own settlement rows). Migrating those would change
+  // who sees what, so they stay role literals until that's a deliberate call.
   const isOwnerSolo = role === 'owner' || role === 'solo';
   const canSeeSettlements = role != null && role !== 'dispatcher';
 
@@ -224,17 +234,17 @@ export function SettingsContent() {
           </>
         )}
 
-        {(isOwnerSolo || canSeeSettlements) && (
+        {(isOwnerSolo || canManageTeam || canManageSubscription || canSeeSettlements) && (
           <>
             <ThemedText type="default" style={[styles.sectionHeading, styles.sectionHeadingText]}>{t('settings.businessSection')}</ThemedText>
             <ThemedView style={styles.options}>
               {isOwnerSolo && (
                 <LinkRow label={t('tabs.customers')} onPress={() => router.push('/customers')} />
               )}
-              {isOwnerSolo && (
+              {canManageTeam && (
                 <LinkRow label={t('team.title')} onPress={() => router.push('/team')} />
               )}
-              {isOwnerSolo && (
+              {canManageSubscription && (
                 <LinkRow label={t('billing.title')} onPress={() => router.push('/billing')} />
               )}
               {canSeeSettlements && (

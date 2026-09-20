@@ -12,6 +12,7 @@
 // column combination that theoretically exists.
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase'
+import { rolesWithCapability } from '@/lib/generated/role-capabilities'
 
 type AnySupabaseClient = SupabaseClient<Database> | ReturnType<typeof import('@supabase/supabase-js').createClient<Database>>
 
@@ -87,7 +88,7 @@ export async function getOrgOwnerOrSolo(supabase: AnySupabaseClient, orgId: numb
     .from('profiles')
     .select('id')
     .eq('org_id', orgId)
-    .in('role', ['owner', 'solo'])
+    .in('role', rolesWithCapability('team_manage'))
     .limit(1)
     .maybeSingle()
 }
@@ -97,7 +98,7 @@ export async function getOrgOwnersAndSolos(supabase: AnySupabaseClient, orgId: n
     .from('profiles')
     .select('id, first_name, last_name, role')
     .eq('org_id', orgId)
-    .in('role', ['owner', 'solo'])
+    .in('role', rolesWithCapability('team_manage'))
 }
 
 export async function countOrgAdmins(supabase: AnySupabaseClient, orgId: number) {
@@ -105,7 +106,7 @@ export async function countOrgAdmins(supabase: AnySupabaseClient, orgId: number)
     .from('profiles')
     .select('id', { count: 'exact', head: true })
     .eq('org_id', orgId)
-    .in('role', ['owner', 'solo'])
+    .in('role', rolesWithCapability('team_manage'))
 }
 
 export async function updateProfileRole(supabase: AnySupabaseClient, profileId: string, role: string) {

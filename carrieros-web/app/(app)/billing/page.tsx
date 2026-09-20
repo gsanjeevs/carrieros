@@ -17,6 +17,7 @@ import AddPaymentMethodButton from './AddPaymentMethodButton'
 import UpgradeTierButton from './UpgradeTierButton'
 import { Card, CardBody } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 const TIER_PRICE: Record<string, string> = {
   starter: '$49/mo',
@@ -33,7 +34,7 @@ export default async function BillingPage() {
   const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) redirect('/onboarding')
-  if (!['owner', 'solo'].includes(profile.role)) redirect('/dashboard')
+  if (!roleHasCapability(profile.role, 'subscription_management')) redirect('/dashboard')
 
   const { data: details } = await supabase
     .from('carrier_details')

@@ -65,14 +65,18 @@ function fetchCapabilityNames(byRole) {
 }
 
 const HEADER = `// GENERATED FILE — do not hand-edit.
-// Source: role_capabilities table (supabase/migrations/0009_role_capabilities.sql).
+// Source: role_capabilities table (migrations 0009_role_capabilities.sql, 0023_action_capabilities.sql).
 // Regenerate with: node scripts/gen-role-capabilities.mjs
 //
 // This is the single source of truth for "which role can do what" —
 // consumed identically by carrieros-web and carrieros-mobile so the two
 // apps cannot drift the way hand-written role arrays already did once
-// (BILLING_ROLES). This is UI/navigation gating only, NOT a security
-// boundary — RLS on the actual data tables is what enforces access.
+// (BILLING_ROLES).
+//
+// Since 0023 this gates ACTIONS (services and API routes), not just
+// navigation: a wrong entry here is a real access bug. RLS on the data
+// tables remains the enforcement backstop beneath it, and the black-box
+// probes in tests/security-*.test.ts are what keep the two agreeing.
 `
 
 function renderModule(byRole, capabilityNames) {
@@ -90,6 +94,17 @@ ${roleEntries}
 export function roleHasCapability(role: string | null | undefined, capability: RoleCapability): boolean {
   if (!role) return false
   return (ROLE_CAPABILITIES[role] ?? []).includes(capability)
+}
+
+/**
+ * Every role holding a capability, for the places that need the LIST rather than a yes/no:
+ * a database filter (\`.in('role', ...)\`), or a UI that renders the roles which can do something.
+ * Sorted so the output is stable to compare and diff.
+ */
+export function rolesWithCapability(capability: RoleCapability): string[] {
+  return Object.keys(ROLE_CAPABILITIES)
+    .filter((role) => ROLE_CAPABILITIES[role].includes(capability))
+    .sort()
 }
 `
 }

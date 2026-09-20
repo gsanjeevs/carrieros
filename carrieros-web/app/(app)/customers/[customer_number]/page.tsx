@@ -26,7 +26,10 @@ import { SCORE_CRITICAL, SCORE_WARNING, SUCCESS } from '@/lib/design-tokens'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { listLoadsForCustomer } from '@/lib/queries/loads'
 import { logError } from '@/lib/observability'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
+// Matches customers/page.tsx's list gate — wider than `customers_manage`
+// (finance reads the directory), so no capability's role set covers it.
 const VIEW_ROLES = ['owner', 'solo', 'dispatcher', 'finance']
 
 const SEVERITY_COLOR: Record<string, string> = {
@@ -173,7 +176,7 @@ export default async function CustomerDetailPage({
   }
 
   // Contacts (Phase 3H) — one org, many contacts, some with portal login.
-  const canManageContacts = ['owner', 'solo', 'dispatcher'].includes(profile.role)
+  const canManageContacts = roleHasCapability(profile.role, 'customers_manage')
   const { data: contactsData } = await supabase
     .from('customer_contacts')
     .select('id, name, email, phone, title, is_primary, portal_profile_id')

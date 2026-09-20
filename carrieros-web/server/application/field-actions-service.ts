@@ -10,11 +10,7 @@ import type { ActorContext } from '../domain/shared/identity'
 import type { Clock, DriverSelfRepository, FleetRepository, IdempotencyRepository, LoadLocationRepository, MessageRepository, ShipmentAccessRepository } from '../ports'
 import { withIdempotency } from './idempotency'
 import { authorizeLoadAction } from './load-access'
-
-const MAY_CHAT = new Set(['owner', 'solo', 'dispatcher', 'driver'])
-const MAY_SHARE_LOCATION = new Set(['owner', 'solo', 'driver'])
-const MAY_EDIT_OWN_DRIVER_RECORD = new Set(['driver', 'solo'])
-const MAY_LOG_SERVICE = new Set(['owner', 'solo']) // service_logs / maintenance_reminders RLS is owner+solo only
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 export class FieldActionsService {
   constructor(
@@ -30,7 +26,7 @@ export class FieldActionsService {
   ) {}
 
   async markMessagesRead(actor: ActorContext, loadId: number, messageIds: readonly number[]): Promise<Result<{ updated: number }>> {
-    const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, MAY_CHAT, 'read messages')
+    const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, 'chat_participate', 'read messages')
     if (!access.ok) return access
     const updated = await this.deps.messages.markRead(actor, loadId, messageIds, this.deps.clock.now())
     return updated.ok ? ok({ updated: updated.value }) : updated
@@ -39,7 +35,7 @@ export class FieldActionsService {
   async shareLocation(actor: ActorContext, loadId: number, sample: { latitude: number; longitude: number; recordedAt?: Date }): Promise<Result<void>> {
     const valid = validateLocation(sample.latitude, sample.longitude)
     if (!valid.ok) return valid
-    const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, MAY_SHARE_LOCATION, 'share location')
+    const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, 'location_share', 'share location')
     if (!access.ok) return access
     if (!(ACTIVE_LOAD_STATUSES as readonly string[]).includes(access.value.load.status)) {
       return err(validationFailed('Location is only shared while a load is active', { status: 'NOT_ACTIVE' }))
@@ -51,7 +47,7 @@ export class FieldActionsService {
   }
 
   async updateOwnDriverProfile(actor: ActorContext, input: DriverProfileInput): Promise<Result<void>> {
-    if (!MAY_EDIT_OWN_DRIVER_RECORD.has(actor.role)) return err(forbidden('Only drivers edit a driver profile here', { role: actor.role }))
+    if (!roleHasCapability(actor.role, 'driver_profile_edit_own')) return err(forbidden('Only drivers edit a driver profile here', { role: actor.role }))
     const patch = buildDriverProfilePatch(input)
     if (!patch.ok) return patch
     if (patch.value.default_vehicle_id !== null) {
@@ -70,7 +66,7 @@ export class FieldActionsService {
     input: ServiceLogInput & { reminderId?: number | null },
     idempotencyKey: string
   ): Promise<Result<{ id: number }>> {
-    if (!MAY_LOG_SERVICE.has(actor.role)) return err(forbidden('This role cannot log vehicle service', { role: actor.role }))
+    if (!roleHasCapability(actor.role, 'service_log')) return err(forbidden('This role cannot log vehicle service', { role: actor.role }))
     const draft = buildServiceLog(input)
     if (!draft.ok) return draft
 

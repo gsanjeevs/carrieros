@@ -16,6 +16,7 @@ import { hasFeature } from '@/lib/entitlements'
 import { logError } from '@/lib/observability'
 import { getProfileForUser, insertProfile } from '@/lib/queries/profiles'
 import { createAuthAdminProvider } from '@/lib/auth-admin'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 // Deliberately excludes 'driver' (has its own flow on /drivers, which also
 // creates the drivers row) and 'solo' (owner+driver combined — only ever set
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
   const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) return apiError('NOT_ONBOARDED', 'No organization found for this user', 400)
-  if (!['owner', 'solo'].includes(profile.role))
+  if (!roleHasCapability(profile.role, 'team_manage'))
     return apiError('FORBIDDEN', 'Only owner/solo can invite team members', 403)
 
   const body = await request.json()

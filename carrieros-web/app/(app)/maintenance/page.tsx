@@ -23,9 +23,11 @@ import { getMaintenanceIcon } from '@/components/icons/maintenance'
 import { Card, CardHeader, StatusBadge, type StatusBadgeVariant, Table, TableHeaderCell, TableRow, TableCell, ProgressBar, EmptyState } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { logError } from '@/lib/observability'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
+// Viewing the schedule is wider than logging service (`service_log`) and
+// matches no capability's role set, so it stays an explicit list.
 const VIEW_ROLES   = ['owner', 'solo', 'dispatcher']
-const MANAGE_ROLES = ['owner', 'solo']
 
 type Vehicle = {
   id: number
@@ -142,7 +144,7 @@ export default async function MaintenancePage({
   if (!profile?.org_id) redirect('/onboarding')
   if (!VIEW_ROLES.includes(profile.role)) redirect('/dashboard')
 
-  const canManage = MANAGE_ROLES.includes(profile.role)
+  const canManage = roleHasCapability(profile.role, 'service_log')
   const params = await searchParams
   const t = await getTranslations('maintenance')
 

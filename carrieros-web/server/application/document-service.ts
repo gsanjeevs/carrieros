@@ -15,8 +15,6 @@ import type { DocumentRecord, DocumentRepository, IdGenerator, IdempotencyReposi
 import { withIdempotency } from './idempotency'
 import { authorizeLoadAction } from './load-access'
 
-const MAY_UPLOAD = new Set(['owner', 'solo', 'dispatcher', 'driver'])
-const MAY_READ = new Set(['owner', 'solo', 'dispatcher', 'finance', 'driver'])
 const DOWNLOAD_TTL_SECONDS = 3600
 
 export interface UploadIntent {
@@ -41,7 +39,7 @@ export class DocumentService {
     loadId: number,
     input: { type: DocumentType; contentType: UploadContentType }
   ): Promise<Result<UploadIntent>> {
-    const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, MAY_UPLOAD, 'upload a document')
+    const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, 'documents_upload', 'upload a document')
     if (!access.ok) return access
 
     const storagePath = buildStoragePath(actor.orgId, loadId, input.type, this.deps.ids.uuid(), input.contentType)
@@ -57,7 +55,7 @@ export class DocumentService {
     idempotencyKey: string
   ): Promise<Result<DocumentRecord>> {
     return withIdempotency(this.deps.idempotency, actor, `POST /loads/${loadId}/documents`, idempotencyKey, input, async () => {
-      const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, MAY_UPLOAD, 'attach a document')
+      const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, 'documents_upload', 'attach a document')
       if (!access.ok) return access
 
       // A client may only claim a path this system issued for this org, load and type.
@@ -86,7 +84,7 @@ export class DocumentService {
 
   async list(actor: ActorContext, loadId: number, type: DocumentType): Promise<Result<readonly (DocumentRecord & { url: string | null })[]>> {
     if (!(DOCUMENT_TYPES as readonly string[]).includes(type)) return err(validationFailed('Unknown document type', { type: 'INVALID' }))
-    const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, MAY_READ, 'view documents')
+    const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, 'documents_read', 'view documents')
     if (!access.ok) return access
 
     const rows = await this.deps.documents.listForLoad(actor, loadId, type)

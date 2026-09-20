@@ -14,7 +14,7 @@ import { logError } from '@/lib/observability'
 const UPGRADE_LOAD_THRESHOLD = 8
 
 export async function GET(request: NextRequest) {
-  const ctx = await requireAdminRole(request, ['sx_owner', 'sx_finance'])
+  const ctx = await requireAdminRole(request, 'admin_billing')
   if (isErrorResponse(ctx)) return ctx
   const { admin } = ctx
 

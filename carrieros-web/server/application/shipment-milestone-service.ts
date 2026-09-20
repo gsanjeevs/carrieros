@@ -21,7 +21,6 @@ import { authorizeLoadAction } from './load-access'
 
 // Deliberately narrower than today's RLS, which also lets `finance` UPDATE loads:
 // advancing a shipment is a dispatch/driving action, not a billing one.
-const MAY_ADVANCE = new Set(['owner', 'solo', 'dispatcher', 'driver'])
 
 export interface SubmitMilestoneInput {
   readonly loadId: number
@@ -42,7 +41,7 @@ export class ShipmentMilestoneService {
       return err(validationFailed(`"${input.newStatus}" is not an execution status`, { new_status: 'NOT_EXECUTION_STATUS' }))
     }
 
-    const access = await authorizeLoadAction(this.deps.shipments, actor, input.loadId, MAY_ADVANCE, 'advance a shipment')
+    const access = await authorizeLoadAction(this.deps.shipments, actor, input.loadId, 'loads_advance_status', 'advance a shipment')
     if (!access.ok) return access
     const found = { value: access.value.load }
 

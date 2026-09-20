@@ -9,7 +9,7 @@ import { logError } from '@/lib/observability'
 const VALID_TIERS = ['starter', 'growth', 'pro', 'enterprise'] as const
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ org_id: string }> }) {
-  const ctx = await requireAdminRole(request, ['sx_owner', 'sx_finance'])
+  const ctx = await requireAdminRole(request, 'admin_billing')
   if (isErrorResponse(ctx)) return ctx
   const { admin, userId } = ctx
 

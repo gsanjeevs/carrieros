@@ -19,9 +19,9 @@ import { hasFeature } from '@/lib/entitlements'
 import { logError } from '@/lib/observability'
 import { getProfileForUser, getProfileById, countOrgAdmins, updateProfileRole } from '@/lib/queries/profiles'
 import { createAuthAdminProvider } from '@/lib/auth-admin'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 const ASSIGNABLE_ROLES = ['dispatcher', 'finance', 'owner'] as const
-const ADMIN_ROLES = ['owner', 'solo']
 
 type Ctx = { params: Promise<{ id: string }> }
 
@@ -36,7 +36,7 @@ async function resolve(request: NextRequest, targetId: string) {
 
   if (!profile?.org_id)
     return { error: apiError('NOT_ONBOARDED', 'No organization found for this user', 400) }
-  if (!ADMIN_ROLES.includes(profile.role))
+  if (!roleHasCapability(profile.role, 'team_manage'))
     return { error: apiError('FORBIDDEN', 'Only owner/solo can manage team members', 403) }
 
   const admin = createAdminClient()
@@ -102,7 +102,7 @@ export async function PATCH(request: NextRequest, { params }: Ctx) {
   // can never be 1. Ordering it second would make this branch unreachable —
   // dead code that reads like a control. Org integrity is also the more
   // fundamental invariant of the two, so it earns the earlier check.
-  if (ADMIN_ROLES.includes(target.role) && !ADMIN_ROLES.includes(role)) {
+  if (roleHasCapability(target.role, 'team_manage') && !roleHasCapability(role, 'team_manage')) {
     if ((await adminCount(admin, orgId)) <= 1)
       return apiError('LAST_OWNER', 'An organization must keep at least one owner', 409)
   }
@@ -131,7 +131,7 @@ export async function DELETE(request: NextRequest, { params }: Ctx) {
 
   // Same ordering rationale as PATCH — last-admin first, otherwise the
   // self-check masks it and this branch can never run.
-  if (ADMIN_ROLES.includes(target.role) && (await adminCount(admin, orgId)) <= 1)
+  if (roleHasCapability(target.role, 'team_manage') && (await adminCount(admin, orgId)) <= 1)
     return apiError('LAST_OWNER', 'An organization must keep at least one owner', 409)
 
   if (target.id === callerId)

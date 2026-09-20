@@ -17,6 +17,7 @@ import InviteMemberButton from './InviteMemberButton'
 import MemberActions from './MemberActions'
 import { Card, StatusBadge, type StatusBadgeVariant, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
 import { getProfileForUser, listProfilesForOrg } from '@/lib/queries/profiles'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 const ROLE_VARIANT: Record<string, StatusBadgeVariant> = {
   owner:      'brand',
@@ -34,7 +35,7 @@ export default async function TeamPage() {
   const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) redirect('/onboarding')
-  if (!['owner', 'solo'].includes(profile.role)) redirect('/dashboard')
+  if (!roleHasCapability(profile.role, 'team')) redirect('/dashboard')
 
   const t = await getTranslations('team')
 
@@ -58,6 +59,9 @@ export default async function TeamPage() {
     }
   })
 
+  // Not a capability check: "does this member have a driver record" (their
+  // account is managed on /drivers), which is a property of the role, not
+  // something role_capabilities expresses.
   const isDriverRole = (role: string) => ['driver', 'solo'].includes(role)
 
   return (

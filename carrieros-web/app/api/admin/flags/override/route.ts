@@ -8,7 +8,7 @@ import { requireAdminRole } from '@/lib/admin-auth'
 import { logError } from '@/lib/observability'
 
 export async function POST(request: NextRequest) {
-  const ctx = await requireAdminRole(request, ['sx_owner'])
+  const ctx = await requireAdminRole(request, 'admin_flags')
   if (isErrorResponse(ctx)) return ctx
   const { admin, userId } = ctx
 

@@ -9,8 +9,8 @@ import type { Clock, FeatureGate, IdempotencyRepository, IftaRepository, Shipmen
 import { withIdempotency } from './idempotency'
 import { authorizeLoadAction } from './load-access'
 
-// Mirrors RLS: owner/solo/dispatcher (ALL) and drivers (INSERT on their own driver id).
-const MAY_RECORD = new Set(['owner', 'solo', 'dispatcher', 'driver'])
+// Roles come from role_capabilities ('ifta_record'), mirroring RLS: owner/solo/dispatcher (ALL) and
+// drivers (INSERT on their own driver id).
 
 export class IftaService {
   constructor(
@@ -35,7 +35,7 @@ export class IftaService {
     if (!draft.ok) return draft
 
     return withIdempotency(this.deps.idempotency, actor, `POST /loads/${loadId}/ifta-crossings`, idempotencyKey, { ...input, crossedAt: input.crossedAt.toISOString() }, async () => {
-      const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, MAY_RECORD, 'record IFTA mileage')
+      const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, 'ifta_record', 'record IFTA mileage')
       if (!access.ok) return access
       const gate = await this.requireEntitlement(actor)
       if (!gate.ok) return gate
@@ -49,7 +49,7 @@ export class IftaService {
   async replaceWithManual(actor: ActorContext, loadId: number, rows: readonly { state: string; miles: number }[]): Promise<Result<{ written: number }>> {
     const valid = validateManualRows(rows)
     if (!valid.ok) return valid
-    const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, MAY_RECORD, 'record IFTA mileage')
+    const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, 'ifta_record', 'record IFTA mileage')
     if (!access.ok) return access
     const gate = await this.requireEntitlement(actor)
     if (!gate.ok) return gate

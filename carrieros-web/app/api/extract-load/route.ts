@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { extractLoadFromText, ExtractionFailedError } from '@/lib/extract-load'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 export async function POST(request: NextRequest) {
   // Extraction is a paid LLM call made on behalf of load intake, so only the roles that create loads may spend it
@@ -10,7 +11,7 @@ export async function POST(request: NextRequest) {
   const ctx = await getAuthedContext(request)
   if (isErrorResponse(ctx)) return ctx
   const { data: profile } = await getProfileForUser(ctx.supabase, ctx.user.id)
-  if (!profile?.org_id || !['owner', 'solo', 'dispatcher'].includes(profile.role))
+  if (!profile?.org_id || !roleHasCapability(profile.role, 'load_intake_extract'))
     return apiError('FORBIDDEN', 'Insufficient permissions', 403)
 
   let text: string

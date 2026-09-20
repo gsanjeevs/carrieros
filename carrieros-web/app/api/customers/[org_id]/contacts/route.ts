@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 export async function GET(
   request: NextRequest,
@@ -55,7 +56,7 @@ export async function POST(
   const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) return apiError('NOT_ONBOARDED', 'No company', 400)
-  if (!['owner', 'solo', 'dispatcher'].includes(profile.role))
+  if (!roleHasCapability(profile.role, 'customers_manage'))
     return apiError('FORBIDDEN', 'Insufficient permissions', 403)
 
   const body = await request.json()

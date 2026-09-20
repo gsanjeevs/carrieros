@@ -10,10 +10,10 @@ import type { ActorContext } from '../domain/shared/identity'
 import type { DvirRepository, IdGenerator, IdempotencyRepository, ObjectStorage, ShipmentAccessRepository } from '../ports'
 import { withIdempotency } from './idempotency'
 import { authorizeLoadAction } from './load-access'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
-// Mirrors RLS: drivers file their own; owner/solo have ALL. Dispatcher/finance do not file DVIRs.
-const MAY_FILE = new Set(['driver', 'solo', 'owner'])
-const MAY_ATTACH_ANY = new Set(['owner', 'solo'])
+// Roles come from role_capabilities ('dvir_file', 'dvir_attach_any'), mirroring RLS: drivers file their
+// own, owner/solo have ALL, dispatcher/finance do not file DVIRs.
 
 export class DvirService {
   constructor(
@@ -36,7 +36,7 @@ export class DvirService {
     if (!draft.ok) return draft
 
     return withIdempotency(this.deps.idempotency, actor, `POST /loads/${loadId}/dvir-inspections`, idempotencyKey, input, async () => {
-      const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, MAY_FILE, 'file an inspection')
+      const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, 'dvir_file', 'file an inspection')
       if (!access.ok) return access
       const { load, actorDriverId } = access.value
 
@@ -62,7 +62,7 @@ export class DvirService {
   }
 
   private async authorizeInspection(actor: ActorContext, inspectionId: number): Promise<Result<void>> {
-    if (!MAY_FILE.has(actor.role)) return err(forbidden('This role cannot attach to an inspection', { role: actor.role }))
+    if (!roleHasCapability(actor.role, 'dvir_file')) return err(forbidden('This role cannot attach to an inspection', { role: actor.role }))
     const found = await this.deps.dvir.findInspection(actor, inspectionId)
     if (!found.ok) return found
     if (!found.value) return err(notFound('Inspection'))
@@ -71,7 +71,7 @@ export class DvirService {
       const own = await this.deps.shipments.findDriverIdForActor(actor)
       if (!own.ok) return own
       if (own.value === null || found.value.driverId !== own.value) return err(notFound('Inspection'))
-    } else if (!MAY_ATTACH_ANY.has(actor.role)) {
+    } else if (!roleHasCapability(actor.role, 'dvir_attach_any')) {
       return err(notFound('Inspection'))
     }
     return ok(undefined)

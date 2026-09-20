@@ -4,7 +4,10 @@
 // carrieros-web/app/(app)/invoices/actions.ts's three mutations, gated to
 // the same roles as invoices' own RLS (`billing_invoices_all`:
 // owner/solo/finance — dispatcher has no invoice access at all, matching
-// web).
+// web). That gate is the generated `invoice_actions` capability
+// (src/lib/generated/role-capabilities.ts, from the role_capabilities
+// table) rather than a hand-written role array, so mobile, web and the API
+// cannot drift apart.
 //
 // markInvoicePaid/updateInvoiceDraft have no side effect beyond DB writes,
 // so this screen does them directly against Supabase (RLS-protected) —
@@ -30,10 +33,11 @@ import { useProfileRole } from '@/hooks/use-profile-role';
 import { supabase } from '@/lib/supabase';
 import { apiFetch } from '@/lib/api';
 import { apiClient } from '@/lib/api-client';
+import { roleHasCapability } from '@/lib/generated/role-capabilities';
 import { formatDateTime } from '@/lib/format-date';
 import { formatMoney } from '@/lib/format-money';
 
-const ORANGE = BrandColors.orange;const WRITE_ROLES = ['owner', 'solo', 'finance'];
+const ORANGE = BrandColors.orange;
 
 type InvoiceDetail = {
   id: number;
@@ -64,7 +68,7 @@ export default function InvoiceDetailScreen() {
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
 
-  const canWrite = role != null && WRITE_ROLES.includes(role);
+  const canWrite = roleHasCapability(role, 'invoice_actions');
 
   const load = useCallback(async () => {
     if (!id) return;

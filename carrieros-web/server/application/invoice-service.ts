@@ -6,14 +6,13 @@ import { buildDraftPatch, type DraftInput } from '../domain/invoice/draft'
 import { domainError, err, forbidden, ok, type Result } from '../domain/shared/result'
 import type { ActorContext } from '../domain/shared/identity'
 import type { Clock, InvoiceWriteRepository } from '../ports'
-
-const MAY_MANAGE_INVOICES = new Set(['owner', 'solo', 'finance'])
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 export class InvoiceService {
   constructor(private readonly deps: { readonly invoices: InvoiceWriteRepository; readonly clock: Clock }) {}
 
   async updateDraft(actor: ActorContext, invoiceId: number, input: DraftInput): Promise<Result<{ id: number }>> {
-    if (!MAY_MANAGE_INVOICES.has(actor.role)) return err(forbidden('This role cannot edit invoices', { role: actor.role }))
+    if (!roleHasCapability(actor.role, 'invoice_actions')) return err(forbidden('This role cannot edit invoices', { role: actor.role }))
     const patch = buildDraftPatch(input)
     if (!patch.ok) return patch
 
@@ -27,7 +26,7 @@ export class InvoiceService {
   }
 
   async markPaid(actor: ActorContext, invoiceId: number): Promise<Result<{ outcome: 'APPLIED' | 'ALREADY_PAID'; invoiceId: number }>> {
-    if (!MAY_MANAGE_INVOICES.has(actor.role)) return err(forbidden('This role cannot mark invoices paid', { role: actor.role }))
+    if (!roleHasCapability(actor.role, 'invoice_actions')) return err(forbidden('This role cannot mark invoices paid', { role: actor.role }))
     return this.deps.invoices.markPaid(actor, invoiceId, this.deps.clock.now())
   }
 }

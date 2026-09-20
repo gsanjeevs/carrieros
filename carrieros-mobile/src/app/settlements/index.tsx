@@ -5,8 +5,13 @@
 // web-only — it's a deliberate, infrequent, higher-stakes compute-then-write
 // action best done with full context, not from a phone. Staff additionally
 // need the driver_settlements Growth+ entitlement, same gate as web
-// (STAFF_ROLES && !entitled shows an upgrade prompt instead of the list) —
+// (staff && !entitled shows an upgrade prompt instead of the list) —
 // mirrored via src/lib/entitlements.ts's hasFeature().
+//
+// "Staff" is no longer a hand-written role array here: it comes from the
+// generated `settlements_manage` capability (src/lib/generated/role-capabilities.ts,
+// sourced from the role_capabilities table), whose holders are exactly
+// owner/solo/finance — the same set the old STAFF_ROLES literal listed.
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -21,7 +26,7 @@ import { useProfileRole } from '@/hooks/use-profile-role';
 import { supabase } from '@/lib/supabase';
 import { hasFeature } from '@/lib/entitlements';
 import { formatMoney } from '@/lib/format-money';
-const STAFF_ROLES = ['owner', 'solo', 'finance'];
+import { roleHasCapability } from '@/lib/generated/role-capabilities';
 
 type SettlementRow = {
   id: number;
@@ -45,7 +50,7 @@ export default function SettlementsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const isStaff = role ? STAFF_ROLES.includes(role) : false;
+  const isStaff = roleHasCapability(role, 'settlements_manage');
 
   const load = useCallback(async () => {
     if (isStaff) {

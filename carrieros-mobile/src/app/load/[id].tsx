@@ -23,6 +23,7 @@ import { useOfflineSync } from '@/hooks/use-offline-sync';
 import { enqueueMilestone } from '@/lib/offline-queue';
 import { newIdempotencyKey } from '@/lib/idempotency';
 import { apiClient } from '@/lib/api-client';
+import { roleHasCapability } from '@/lib/generated/role-capabilities';
 import { formatDateTime } from '@/lib/format-date';
 import { formatNumber } from '@/lib/format-number';
 import { supabase } from '@/lib/supabase';
@@ -164,8 +165,10 @@ export default function LoadDetailScreen() {
     setEvents(eventData ?? []);
 
     // Assignment pickers are office-side only — skip the extra fetches for
-    // drivers, who can never see this section.
-    if (['owner', 'solo', 'dispatcher'].includes(currentRole)) {
+    // anyone without `loads_manage` (owner/solo/dispatcher today, per the
+    // generated role_capabilities source of truth), who can never see the
+    // section below.
+    if (roleHasCapability(currentRole, 'loads_manage')) {
       const [driversRes, vehiclesRes] = await Promise.all([
         apiFetch('/api/drivers'),
         apiFetch('/api/vehicles'),
@@ -357,7 +360,7 @@ export default function LoadDetailScreen() {
             />
           </ThemedView>
 
-          {(role === 'owner' || role === 'solo' || role === 'dispatcher') && (
+          {roleHasCapability(role, 'loads_manage') && (
             <ThemedView type="backgroundElement" style={styles.section}>
               <SectionLabel text={t('loadDetail.sectionAssignment')} />
               <ThemedText type="small" themeColor="textSecondary" style={{ marginBottom: 4 }}>

@@ -6,16 +6,21 @@
 import { err, forbidden, notFound, ok, type Result } from '../domain/shared/result'
 import type { ActorContext } from '../domain/shared/identity'
 import type { ShipmentAccess, ShipmentAccessRepository } from '../ports'
+import { roleHasCapability, type RoleCapability } from '@/lib/generated/role-capabilities'
 
 export async function authorizeLoadAction(
   shipments: ShipmentAccessRepository,
   actor: ActorContext,
   loadId: number,
-  /** Roles allowed to perform this action at all. `driver` is further limited to their own load. */
-  allowedRoles: ReadonlySet<string>,
+  /**
+   * Capability required to perform this action at all, from the `role_capabilities` table
+   * (migration 0023) via the module generated into both apps — never a role list written here.
+   * `driver` is further limited to their own load below.
+   */
+  capability: RoleCapability,
   action: string
 ): Promise<Result<{ load: ShipmentAccess; actorDriverId: number | null }>> {
-  if (!allowedRoles.has(actor.role)) return err(forbidden(`This role cannot ${action}`, { role: actor.role }))
+  if (!roleHasCapability(actor.role, capability)) return err(forbidden(`This role cannot ${action}`, { role: actor.role }))
 
   const found = await shipments.findForActor(actor, loadId)
   if (!found.ok) return found

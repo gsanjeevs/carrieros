@@ -10,21 +10,25 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { signOut } from '@/app/login/actions'
+import { roleHasCapability, type RoleCapability } from '@/lib/generated/role-capabilities'
 
+// Visibility comes from the generated role_capabilities table (migrations
+// 0009 + 0023), the same source proxy.ts's `/admin` guard reads — not a
+// hand-written sx_* list that can drift from it.
 interface NavItem {
   labelKey: string
   href: string
   icon: string
-  roles: string[]
+  capability: RoleCapability
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { labelKey: 'triage',  href: '/admin',         icon: 'inbox',         roles: ['sx_owner', 'sx_finance', 'sx_support'] },
-  { labelKey: 'health',  href: '/admin/health',   icon: 'monitor_heart', roles: ['sx_owner', 'sx_finance', 'sx_support'] },
-  { labelKey: 'billing', href: '/admin/billing',  icon: 'payments',      roles: ['sx_owner', 'sx_finance'] },
-  { labelKey: 'pipeline', href: '/admin/pipeline', icon: 'trending_up',  roles: ['sx_owner', 'sx_finance'] },
-  { labelKey: 'audit',   href: '/admin/audit',    icon: 'history',       roles: ['sx_owner', 'sx_finance', 'sx_support'] },
-  { labelKey: 'flags',   href: '/admin/flags',    icon: 'flag',          roles: ['sx_owner'] },
+  { labelKey: 'triage',  href: '/admin',         icon: 'inbox',         capability: 'admin' },
+  { labelKey: 'health',  href: '/admin/health',   icon: 'monitor_heart', capability: 'admin' },
+  { labelKey: 'billing', href: '/admin/billing',  icon: 'payments',      capability: 'admin_billing' },
+  { labelKey: 'pipeline', href: '/admin/pipeline', icon: 'trending_up',  capability: 'admin_billing' },
+  { labelKey: 'audit',   href: '/admin/audit',    icon: 'history',       capability: 'admin' },
+  { labelKey: 'flags',   href: '/admin/flags',    icon: 'flag',          capability: 'admin_flags' },
 ]
 
 export default function AdminSidebar({ role, userName }: { role: string; userName: string }) {
@@ -32,7 +36,7 @@ export default function AdminSidebar({ role, userName }: { role: string; userNam
   const t = useTranslations('admin.nav')
   const tRole = useTranslations('admin.roleLabels')
   const tCommon = useTranslations('common')
-  const items = NAV_ITEMS.filter((item) => item.roles.includes(role))
+  const items = NAV_ITEMS.filter((item) => roleHasCapability(role, item.capability))
 
   const initials = userName
     .split(' ')

@@ -12,8 +12,7 @@ import { getProfileForUser } from '@/lib/queries/profiles'
 import { getLoadById } from '@/lib/queries/loads'
 import { getDriverIdForProfile } from '@/lib/queries/drivers'
 import { logError } from '@/lib/observability'
-
-const DISPATCH_ROLES = ['owner', 'solo', 'dispatcher']
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 type Ctx = { params: Promise<{ id: string }> }
 
@@ -92,8 +91,12 @@ export async function POST(request: NextRequest, { params }: Ctx) {
   // message's org, or the driver assigned to its load. Checked explicitly
   // here rather than relying solely on RLS, matching this codebase's
   // convention (app/api/team/[id]/route.ts).
+  // Office staff, i.e. may act on ANY load in the org — deliberately NOT 'chat_participate', which also
+  // covers the driver, whose access is the separate assigned-load check below.
   let allowed =
-    message.carrier_org_id === profile.org_id && DISPATCH_ROLES.includes(profile.role)
+    // Office staff, i.e. may act on ANY load in the org — deliberately NOT 'chat_participate', which also
+    // covers the driver, whose access is the separate assigned-load check below.
+    message.carrier_org_id === profile.org_id && roleHasCapability(profile.role, 'loads_manage')
 
   if (!allowed) {
     const { data: driverRow } = await getDriverIdForProfile(supabase, user.id)

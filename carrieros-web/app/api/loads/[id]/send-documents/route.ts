@@ -15,8 +15,8 @@ import { getProfileForUser } from '@/lib/queries/profiles'
 import { getLoadForOrg } from '@/lib/queries/loads'
 import { createStorageProvider } from '@/lib/storage'
 import { sendEmail, type SendEmailAttachment } from '@/lib/send-email'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
-const SEND_ROLES = ['owner', 'solo', 'dispatcher']
 const MAX_DOCS = 10
 
 export async function POST(
@@ -33,7 +33,7 @@ export async function POST(
 
   const { data: profile } = await getProfileForUser(supabase, user.id)
   if (!profile?.org_id) return apiError('NOT_ONBOARDED', 'No organization', 400)
-  if (!SEND_ROLES.includes(profile.role)) return apiError('FORBIDDEN', 'Insufficient permissions', 403)
+  if (!roleHasCapability(profile.role, 'documents_send')) return apiError('FORBIDDEN', 'Insufficient permissions', 403)
 
   const body = await request.json()
   const documentIds = Array.isArray(body.document_ids) ? body.document_ids.map(Number) : []

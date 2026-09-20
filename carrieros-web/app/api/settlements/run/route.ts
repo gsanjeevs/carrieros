@@ -26,8 +26,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { hasFeature } from '@/lib/entitlements'
 import { getProfileForUser } from '@/lib/queries/profiles'
-
-const SETTLEMENT_ROLES = ['owner', 'solo', 'finance']
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 export async function POST(request: NextRequest) {
   const ctx = await getAuthedContext(request)
@@ -37,7 +36,7 @@ export async function POST(request: NextRequest) {
   const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) return apiError('NOT_ONBOARDED', 'No organization', 400)
-  if (!SETTLEMENT_ROLES.includes(profile.role))
+  if (!roleHasCapability(profile.role, 'settlements_manage'))
     return apiError('FORBIDDEN', 'Insufficient permissions', 403)
 
   const entitled = await hasFeature(supabase, 'driver_settlements')
