@@ -44,7 +44,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Get the caller's own display preferences (language, units, date/time format, theme) */
+        get: operations["getMyPreferences"];
         put?: never;
         post?: never;
         delete?: never;
@@ -802,6 +803,76 @@ export interface operations {
             };
             /** @description Error */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getMyPreferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string|null} */
+                        preferred_language: "en" | "es" | "pa" | "ur" | null;
+                        /**
+                         * @description null = inherit org_default_uom_system.
+                         * @enum {string|null}
+                         */
+                        uom_system: "imperial" | "metric" | null;
+                        /** @enum {string|null} */
+                        date_format: "MM/DD/YYYY" | "DD/MM/YYYY" | "YYYY-MM-DD" | null;
+                        /** @enum {string|null} */
+                        time_format: "12h" | "24h" | null;
+                        /** @enum {string|null} */
+                        theme_preference: "light" | "dark" | "system" | null;
+                        /** @enum {string} */
+                        org_default_uom_system: "imperial" | "metric";
+                    };
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

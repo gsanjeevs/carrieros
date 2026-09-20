@@ -471,6 +471,184 @@
       }
     },
     "/api/v1/me/preferences": {
+      "get": {
+        "operationId": "getMyPreferences",
+        "summary": "Get the caller's own display preferences (language, units, date/time format, theme)",
+        "tags": [
+          "identity"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "preferred_language": {
+                      "nullable": true,
+                      "type": "string",
+                      "enum": [
+                        "en",
+                        "es",
+                        "pa",
+                        "ur"
+                      ]
+                    },
+                    "uom_system": {
+                      "nullable": true,
+                      "description": "null = inherit org_default_uom_system.",
+                      "type": "string",
+                      "enum": [
+                        "imperial",
+                        "metric"
+                      ]
+                    },
+                    "date_format": {
+                      "nullable": true,
+                      "type": "string",
+                      "enum": [
+                        "MM/DD/YYYY",
+                        "DD/MM/YYYY",
+                        "YYYY-MM-DD"
+                      ]
+                    },
+                    "time_format": {
+                      "nullable": true,
+                      "type": "string",
+                      "enum": [
+                        "12h",
+                        "24h"
+                      ]
+                    },
+                    "theme_preference": {
+                      "nullable": true,
+                      "type": "string",
+                      "enum": [
+                        "light",
+                        "dark",
+                        "system"
+                      ]
+                    },
+                    "org_default_uom_system": {
+                      "type": "string",
+                      "enum": [
+                        "imperial",
+                        "metric"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "preferred_language",
+                    "uom_system",
+                    "date_format",
+                    "time_format",
+                    "theme_preference",
+                    "org_default_uom_system"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
       "patch": {
         "operationId": "updateMyPreferences",
         "summary": "Update the caller's own display preferences (language, units, date/time format, theme)",

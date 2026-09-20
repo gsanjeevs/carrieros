@@ -234,6 +234,8 @@ const API_ONLY = new Set([
   '../carrieros-mobile/src/components/fuel-stops-section.tsx',
   '../carrieros-mobile/src/components/driver-chat-section.tsx',
   '../carrieros-mobile/src/app/(tabs)/home.tsx',
+  '../carrieros-mobile/src/hooks/use-theme.tsx',
+  '../carrieros-mobile/src/hooks/use-locale.tsx',
 ])
 const DIRECT_DB = /\.from\(\s*['"`][A-Za-z_]+['"`]\s*\)|\.rpc\(\s*['"`]|supabase\s*\.\s*storage\b/
 const debt = { web: { files: new Set(), sites: 0 }, mobile: { files: new Set(), sites: 0 } }

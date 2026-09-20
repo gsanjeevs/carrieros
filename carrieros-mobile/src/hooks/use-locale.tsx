@@ -29,7 +29,7 @@ import {
 
 import { useSession } from '@/hooks/use-session';
 import { i18n, isRTLLocale, isSupportedLocale, setI18nLocale, t as translate, type Locale } from '@/lib/i18n';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 import { savePreferences } from '@/lib/profile-api';
 
 type LocaleFontFamily = { regular: string; bold: string } | null;
@@ -139,30 +139,15 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     async function loadProfile() {
       if (!session?.user.id) return;
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('preferred_language, org_id, uom_system, date_format, time_format')
-        .eq('id', session.user.id)
-        .single();
+      const { data: profile } = await apiClient.http.GET('/api/v1/me/preferences');
       if (cancelled) return;
       applyLocale(isSupportedLocale(profile?.preferred_language) ? profile.preferred_language : 'en');
-
-      let orgDefaultUom: Uom = 'imperial';
-      if (profile?.org_id) {
-        const { data: details } = await supabase
-          .from('carrier_details')
-          .select('uom_system')
-          .eq('org_id', profile.org_id)
-          .maybeSingle();
-        if (details?.uom_system) orgDefaultUom = details.uom_system as Uom;
-      }
-      if (cancelled) return;
 
       setPrefs({
         uomSystem: (profile?.uom_system as Uom | null) ?? null,
         dateFormat: (profile?.date_format as DateFormat) ?? 'MM/DD/YYYY',
         timeFormat: (profile?.time_format as TimeFormat) ?? '12h',
-        orgDefaultUom,
+        orgDefaultUom: (profile?.org_default_uom_system as Uom | undefined) ?? 'imperial',
       });
     }
     loadProfile();

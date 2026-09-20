@@ -257,8 +257,19 @@ export interface ShipmentCommandRepository extends ShipmentAccessRepository {
 
 // ── Profile ─────────────────────────────────────────────────────────────────
 
+export interface ProfilePreferencesRecord {
+  readonly preferred_language: string | null
+  readonly uom_system: 'imperial' | 'metric' | null
+  readonly date_format: string | null
+  readonly time_format: string | null
+  readonly theme_preference: string | null
+  /** carrier_details.uom_system for the actor's org — the fallback when the profile's own uom_system is null. */
+  readonly org_default_uom_system: 'imperial' | 'metric'
+}
+
 /** Writes to the ACTOR'S OWN profile only: the row is chosen from actor.userId, never from a caller-supplied id. */
 export interface ProfileWriteRepository {
+  getPreferences(actor: ActorContext): Promise<Result<ProfilePreferencesRecord>>
   updatePreferences(actor: ActorContext, patch: PreferencesPatch): Promise<Result<void>>
   setPushToken(actor: ActorContext, token: string): Promise<Result<void>>
 }

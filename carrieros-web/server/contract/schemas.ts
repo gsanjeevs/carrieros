@@ -146,6 +146,15 @@ export const MilestoneResponseSchema = z.object({
   load_number: z.string().nullable(),
 })
 
+export const PreferencesResponseSchema = z.object({
+  preferred_language: z.enum(LANGUAGES).nullable(),
+  uom_system: z.enum(UOM_SYSTEMS).nullable().describe('null = inherit org_default_uom_system.'),
+  date_format: z.enum(DATE_FORMATS).nullable(),
+  time_format: z.enum(TIME_FORMATS).nullable(),
+  theme_preference: z.enum(THEMES).nullable(),
+  org_default_uom_system: z.enum(UOM_SYSTEMS),
+})
+
 export const UpdatePreferencesBodySchema = z
   .object({
     preferred_language: z.enum(LANGUAGES).optional(),

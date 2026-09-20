@@ -5,10 +5,14 @@
 import { ok, err, validationFailed, type Result } from '../domain/shared/result'
 import type { ActorContext } from '../domain/shared/identity'
 import type { PreferencesPatch } from '../domain/profile/preferences'
-import type { ProfileWriteRepository } from '../ports'
+import type { ProfilePreferencesRecord, ProfileWriteRepository } from '../ports'
 
 export class ProfilePreferencesService {
   constructor(private readonly deps: { readonly profiles: ProfileWriteRepository }) {}
+
+  async getPreferences(actor: ActorContext): Promise<Result<ProfilePreferencesRecord>> {
+    return this.deps.profiles.getPreferences(actor)
+  }
 
   async updatePreferences(actor: ActorContext, patch: PreferencesPatch): Promise<Result<void>> {
     if (Object.keys(patch).length === 0) return err(validationFailed('No preferences provided'))

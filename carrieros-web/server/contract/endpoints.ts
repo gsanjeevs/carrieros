@@ -38,6 +38,7 @@ import {
   ReportProblemBodySchema,
   ReportProblemResponseSchema,
   OkResponseSchema,
+  PreferencesResponseSchema,
   SetPushTokenBodySchema,
   UpdatePreferencesBodySchema,
   SubmitMilestoneBodySchema,
@@ -105,6 +106,15 @@ export const endpoints: readonly Endpoint[] = [
     query: ListLoadsQuerySchema,
     response: ListLoadsResponseSchema,
     errorStatuses: [400, 401, 403, 500],
+  },
+  {
+    operationId: 'getMyPreferences',
+    method: 'get',
+    path: '/api/v1/me/preferences',
+    summary: 'Get the caller\'s own display preferences (language, units, date/time format, theme)',
+    tag: 'identity',
+    response: PreferencesResponseSchema,
+    errorStatuses: [401, 403],
   },
   {
     operationId: 'updateMyPreferences',
