@@ -2740,6 +2740,10 @@ export type Database = {
         Args: { carrier_org_bigint: number; entity_name: string }
         Returns: number
       }
+      replace_ifta_crossings_with_manual: {
+        Args: { p_load_id: number; p_rows: Json }
+        Returns: number
+      }
       send_expiry_reminders: { Args: never; Returns: number }
       submit_shipment_milestone: {
         Args: {

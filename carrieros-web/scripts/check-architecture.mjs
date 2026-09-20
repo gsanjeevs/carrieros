@@ -204,6 +204,7 @@ const API_ONLY = new Set([
   '../carrieros-mobile/src/lib/profile-api.ts',
   '../carrieros-mobile/src/components/pod-section.tsx',
   '../carrieros-mobile/src/components/share-location-section.tsx',
+  '../carrieros-mobile/src/lib/ifta-tracking.ts',
 ])
 const DIRECT_DB = /\.from\(\s*['"`][A-Za-z_]+['"`]\s*\)|\.rpc\(\s*['"`]|supabase\s*\.\s*storage\b/
 const debt = { web: { files: new Set(), sites: 0 }, mobile: { files: new Set(), sites: 0 } }

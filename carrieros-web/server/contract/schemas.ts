@@ -205,5 +205,18 @@ export const LogServiceBodySchema = z.object({
 })
 export const LogServiceResponseSchema = z.object({ id: z.number().int() })
 
+export const RecordCrossingBodySchema = z.object({
+  state: z.string().length(2),
+  crossed_at: z.string().datetime(),
+  latitude: z.number().min(-90).max(90).nullable().optional(),
+  longitude: z.number().min(-180).max(180).nullable().optional(),
+})
+export const RecordCrossingResponseSchema = z.object({ id: z.number().int() })
+
+export const ManualCrossingsBodySchema = z.object({
+  rows: z.array(z.object({ state: z.string().length(2), miles: z.number().int().positive().max(5000) })).min(1).max(60),
+})
+export const ManualCrossingsResponseSchema = z.object({ written: z.number().int() })
+
 export type ListLoadsQuery = z.infer<typeof ListLoadsQuerySchema>
 export type ListLoadsResponse = z.infer<typeof ListLoadsResponseSchema>

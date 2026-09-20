@@ -364,3 +364,19 @@ export interface FleetRepository {
     }
   ): Promise<Result<{ id: number }>>
 }
+
+// ── IFTA ────────────────────────────────────────────────────────────────────
+
+export interface FeatureGate {
+  hasFeature(actor: ActorContext, featureKey: string): Promise<Result<boolean>>
+}
+
+export interface IftaRepository {
+  insertGpsCrossing(
+    actor: ActorContext,
+    load: ShipmentAccess,
+    record: { state: string; crossedAt: Date; latitude: number | null; longitude: number | null; driverId: number | null }
+  ): Promise<Result<{ id: number }>>
+  /** Atomic: delete the load's GPS crossings, insert the manual rows. Returns rows written. */
+  replaceWithManual(actor: ActorContext, loadId: number, rows: readonly { state: string; miles: number }[]): Promise<Result<number>>
+}

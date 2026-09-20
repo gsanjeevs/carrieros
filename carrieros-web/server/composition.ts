@@ -97,3 +97,16 @@ export function createFieldActionsService(supabase: SupabaseClient<Database>): F
     clock: { now: () => new Date() },
   })
 }
+
+import { IftaService } from './application/ifta-service'
+import { SupabaseFeatureGate, SupabaseIftaRepository } from './infrastructure/supabase/ifta-repository'
+
+export function createIftaService(supabase: SupabaseClient<Database>): IftaService {
+  return new IftaService({
+    shipments: new SupabaseShipmentCommandRepository(supabase),
+    ifta: new SupabaseIftaRepository(supabase),
+    features: new SupabaseFeatureGate(supabase),
+    idempotency: new SupabaseIdempotencyRepository(createAdminClient()),
+    clock: { now: () => new Date() },
+  })
+}
