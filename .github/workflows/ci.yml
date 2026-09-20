@@ -72,8 +72,15 @@ jobs:
       - name: Start local Supabase
         run: supabase start -x studio,imgproxy,vector,logflare,edge-runtime,realtime,mailpit
 
-      - name: Apply migrations through the tracked runner
-        run: node scripts/db/migrate.mjs
+      # `supabase start` itself applies supabase/migrations/ (the CLI reads that
+      # directory), so the database is already at head. Adopt it into our
+      # bookkeeping with the real checksums instead of re-running the files;
+      # verify-migrations below exercises the runner itself on throwaway
+      # databases (clean build + upgrade path), which is the actual test of it.
+      - name: Adopt the CLI-built database into migration bookkeeping
+        run: |
+          node scripts/db/migrate.mjs --baseline
+          node scripts/db/migrate.mjs --status
 
       - name: Verify migrations (clean build, upgrade path, snapshot parity, grants)
         run: node scripts/db/verify-migrations.mjs
