@@ -20,7 +20,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { useSession } from '@/hooks/use-session';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 
 interface OnboardingStatus {
   needsOnboarding: boolean;
@@ -64,24 +64,29 @@ export function OnboardingStatusProvider({ children }: { children: ReactNode }) 
   // crash. Depending on `session?.user.id` (a stable primitive string) is
   // what src/hooks/use-profile-role.ts already does safely elsewhere in
   // this codebase; satisfying the lint rule was the wrong call.
-  const check = useCallback(async (userId: string) => {
+  const check = useCallback(async (_userId: string) => {
     setLoading(true);
     setError(false);
     try {
-      const { data, error: queryErr } = await supabase
-        .from('profiles')
-        .select('org_id')
-        .eq('id', userId)
-        .maybeSingle();
-      // A query error (e.g. Supabase unreachable) is NOT the same as a
-      // successful query that found no org_id — reproduced live on an iOS
-      // Simulator (2026-07-25): before this, both cases set
-      // needsOnboarding(true), so a network hiccup showed an already-
-      // onboarded user the onboarding wizard with no explanation and no
-      // way out (that screen previously had no sign-out link either — see
+      // GET /api/v1/me answers FORBIDDEN ("no organization membership yet")
+      // for a signed-in user with no profiles.org_id — that is needsOnboarding,
+      // not a failure. A THROWN error (network unreachable, etc) is NOT the
+      // same as that successful-but-not-onboarded answer — reproduced live on
+      // an iOS Simulator (2026-07-25): before this distinction existed, both
+      // cases set needsOnboarding(true), so a network hiccup showed an
+      // already-onboarded user the onboarding wizard with no explanation and
+      // no way out (that screen previously had no sign-out link either — see
       // src/app/onboarding/index.tsx).
-      if (queryErr) throw queryErr;
-      setNeedsOnboarding(!data?.org_id);
+      const { data, error: apiErr } = await apiClient.http.GET('/api/v1/me');
+      if (apiErr) {
+        if (apiErr.error_code === 'FORBIDDEN') {
+          setNeedsOnboarding(true);
+        } else {
+          throw new Error(apiErr.error_code);
+        }
+      } else {
+        setNeedsOnboarding(!data?.org_id);
+      }
     } catch {
       setError(true);
     } finally {

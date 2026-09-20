@@ -26,7 +26,6 @@ import { apiClient } from '@/lib/api-client';
 import { roleHasCapability } from '@/lib/generated/role-capabilities';
 import { formatDateTime } from '@/lib/format-date';
 import { formatNumber } from '@/lib/format-number';
-import { supabase } from '@/lib/supabase';
 import { apiFetch } from '@/lib/api';
 
 const ORANGE = BrandColors.orange;
@@ -129,40 +128,29 @@ export default function LoadDetailScreen() {
   const fetchAll = useCallback(async () => {
     if (!session?.user.id || !id) return;
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role, org_id')
-      .eq('id', session.user.id)
-      .single();
-
-    const currentRole = (profile?.role ?? 'solo') as Role;
+    const { data: me } = await apiClient.http.GET('/api/v1/me');
+    const currentRole = (me?.role ?? 'solo') as Role;
     setRole(currentRole);
-    setOrgId(profile?.org_id ?? null);
+    setOrgId(me?.org_id ?? null);
 
-    const { data: entitled } = await supabase.rpc('has_feature', { feature_key: 'driver_chat' });
-    setChatEntitled(entitled === true);
+    const { data: entitlements } = await apiClient.http.GET('/api/v1/me/entitlements');
+    setChatEntitled((entitlements?.keys ?? []).includes('driver_chat'));
 
-    const { data: loadData, error: loadErr } =
-      currentRole === 'driver'
-        ? await supabase.from('loads_driver_view').select(DETAIL_COLS).eq('id', Number(id)).single()
-        : await supabase.from('loads').select(DETAIL_COLS).eq('id', Number(id)).single();
+    // The server picks loads vs. loads_driver_view (and derives rate visibility) by role; this
+    // screen no longer has to know which table/view backs a given actor.
+    const { data: loadData, error: loadErr } = await apiClient.http.GET('/api/v1/loads/{id}', {
+      params: { path: { id: Number(id) } },
+    });
 
     if (loadErr) {
       setError(t('loadDetail.loadAccessError'));
-    } else {
-      const detail = loadData as unknown as LoadDetail;
+    } else if (loadData) {
+      const detail = loadData.load as unknown as LoadDetail;
       setLoad(detail);
       setAssignDriverId(detail.driver_id);
       setAssignVehicleId(detail.vehicle_id);
+      setEvents(loadData.events);
     }
-
-    const { data: eventData } = await supabase
-      .from('load_events')
-      .select('id, event_type, created_at')
-      .eq('load_id', Number(id))
-      .order('created_at', { ascending: true });
-
-    setEvents(eventData ?? []);
 
     // Assignment pickers are office-side only — skip the extra fetches for
     // anyone without `loads_manage` (owner/solo/dispatcher today, per the

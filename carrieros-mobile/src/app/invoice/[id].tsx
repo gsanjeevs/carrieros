@@ -30,7 +30,6 @@ import { BrandColors, INVOICE_STATUS_PILL, Spacing, StatusColors } from '@/const
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
-import { supabase } from '@/lib/supabase';
 import { apiFetch } from '@/lib/api';
 import { apiClient } from '@/lib/api-client';
 import { roleHasCapability } from '@/lib/generated/role-capabilities';
@@ -72,13 +71,9 @@ export default function InvoiceDetailScreen() {
 
   const load = useCallback(async () => {
     if (!id) return;
-    const { data } = await supabase
-      .from('invoices')
-      .select('id, invoice_number, amount, status, due_date, notes, sent_at, paid_at, opened_at, load_id')
-      .eq('id', Number(id))
-      .maybeSingle();
+    const { data } = await apiClient.http.GET('/api/v1/invoices/{id}', { params: { path: { id: Number(id) } } });
 
-    const inv = data as InvoiceDetail | null;
+    const inv = (data as InvoiceDetail | undefined) ?? null;
     setInvoice(inv);
     if (inv) {
       setAmount(String(inv.amount));

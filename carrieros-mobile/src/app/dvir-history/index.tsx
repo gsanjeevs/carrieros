@@ -6,10 +6,11 @@
 //
 // Read-only. carrier_dvir_select (schema.sql) is org-wide with no role
 // restriction, so drivers could technically see the whole fleet's
-// inspections — this screen deliberately narrows to "my own" for drivers via
-// a client-side filter on driver_id, and shows the full org list for
-// owner/solo/dispatcher/finance, matching how settlements/index.tsx splits
-// "mine" vs. "everyone's" for the same roles.
+// inspections — GET /api/v1/dvir-inspections narrows to "my own" for a
+// driver actor server-side (the same narrowing this screen used to do
+// client-side) and returns the full org list for owner/solo/dispatcher/
+// finance, matching how settlements/index.tsx splits "mine" vs. "everyone's"
+// for the same roles.
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Pressable, RefreshControl, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,13 +24,11 @@ import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
 import { formatDate } from '@/lib/format-date';
 import { formatNumber } from '@/lib/format-number';
-import { supabase } from '@/lib/supabase';
-import { resolveSubmitter } from '@/lib/submitter';
+import { apiClient } from '@/lib/api-client';
 const GREEN = '#16a34a';
 const AMBER = '#d97706';
-const BUCKET = 'documents';
 
-type DefectRow = { id: number; area: string; description: string | null; severity: 'minor' | 'major' };
+type DefectRow = { id: number; area: string; description: string | null; severity: 'minor' | 'major' | null };
 type InspectionRow = {
   id: number;
   type: 'pre_trip' | 'post_trip';
@@ -37,9 +36,9 @@ type InspectionRow = {
   odometer: number | null;
   signature_url: string | null;
   submitted_at: string;
-  vehicles: { vehicle_number: string | null; nickname: string } | null;
-  drivers: { profiles: { first_name: string | null; last_name: string | null } | null } | null;
-  dvir_defects: DefectRow[];
+  vehicle: { vehicle_number: string | null; nickname: string } | null;
+  driver_name: string | null;
+  defects: DefectRow[];
 };
 
 export default function DvirHistoryScreen() {
@@ -49,7 +48,6 @@ export default function DvirHistoryScreen() {
   const { t, locale } = useLocale();
 
   const [rows, setRows] = useState<InspectionRow[]>([]);
-  const [signatureUrls, setSignatureUrls] = useState<Map<number, string>>(new Map());
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
@@ -57,42 +55,10 @@ export default function DvirHistoryScreen() {
   const load = useCallback(async () => {
     if (!session?.user.id) return;
     setError('');
-    const submitter = await resolveSubmitter(session.user.id);
-    if (!submitter) return;
-
-    let query = supabase
-      .from('dvir_inspections')
-      .select(
-        'id, type, condition, odometer, signature_url, submitted_at, vehicles(vehicle_number, nickname), drivers(profiles(first_name, last_name)), dvir_defects(id, area, description, severity)'
-      )
-      .eq('carrier_org_id', submitter.carrierOrgId)
-      .order('submitted_at', { ascending: false })
-      .limit(50);
-
-    if (submitter.role === 'driver' && submitter.driverId) {
-      query = query.eq('driver_id', submitter.driverId);
-    }
-
-    const { data, error: queryErr } = await query;
-    if (queryErr) {
-      console.error('[dvir-history] list query failed:', queryErr.message);
-      setError(t('common.loadErrorRetry'));
-    }
-    const inspections = (data as unknown as InspectionRow[] | null) ?? [];
-    setRows(inspections);
-
-    const withSignature = inspections.filter((i) => i.signature_url);
-    if (withSignature.length > 0) {
-      const entries = await Promise.all(
-        withSignature.map(async (i) => {
-          const { data: signed } = await supabase.storage.from(BUCKET).createSignedUrl(i.signature_url!, 3600);
-          return [i.id, signed?.signedUrl] as const;
-        })
-      );
-      setSignatureUrls(new Map(entries.filter((e): e is [number, string] => !!e[1])));
-    } else {
-      setSignatureUrls(new Map());
-    }
+    // The server already returns a signed signature URL per inspection.
+    const { data, error: apiErr } = await apiClient.http.GET('/api/v1/dvir-inspections');
+    if (apiErr) setError(t('common.loadErrorRetry'));
+    setRows((data?.inspections as InspectionRow[] | undefined) ?? []);
   }, [session?.user.id, t]);
 
   useEffect(() => {
@@ -135,12 +101,10 @@ export default function DvirHistoryScreen() {
             </ThemedText>
           }
           renderItem={({ item }) => {
-            const hasDefects = item.condition === 'defects_noted' || item.dvir_defects.length > 0;
-            const driverName = item.drivers?.profiles
-              ? [item.drivers.profiles.first_name, item.drivers.profiles.last_name].filter(Boolean).join(' ')
-              : null;
-            const vehicleLabel = item.vehicles?.nickname ?? item.vehicles?.vehicle_number ?? null;
-            const signatureUrl = signatureUrls.get(item.id);
+            const hasDefects = item.condition === 'defects_noted' || item.defects.length > 0;
+            const driverName = item.driver_name;
+            const vehicleLabel = item.vehicle?.nickname ?? item.vehicle?.vehicle_number ?? null;
+            const signatureUrl = item.signature_url;
             return (
               <ThemedView style={[styles.card, { backgroundColor: theme.card }, styles.cardShadow]}>
                 <ThemedView style={styles.cardHeader} type="transparent">
@@ -167,9 +131,9 @@ export default function DvirHistoryScreen() {
                     .join(' · ')}
                 </ThemedText>
 
-                {hasDefects && item.dvir_defects.length > 0 && (
+                {hasDefects && item.defects.length > 0 && (
                   <ThemedView style={styles.defectList} type="transparent">
-                    {item.dvir_defects.map((d) => (
+                    {item.defects.map((d) => (
                       <ThemedText key={d.id} type="small" themeColor="textSecondary">
                         {`• ${t(`dvir.areas.${d.area}` as never)}${d.description ? ` — ${d.description}` : ''}`}
                       </ThemedText>

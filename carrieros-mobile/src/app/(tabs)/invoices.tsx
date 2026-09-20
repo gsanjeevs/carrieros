@@ -13,7 +13,7 @@ import { INVOICE_STATUS_PILL, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { formatMoney } from '@/lib/format-money';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 
 type InvoiceRow = {
   id: number;
@@ -33,11 +33,8 @@ export default function InvoicesScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
-    const { data } = await supabase
-      .from('invoices')
-      .select('id, invoice_number, amount, status, due_date, opened_at')
-      .order('created_at', { ascending: false });
-    setInvoices((data as InvoiceRow[] | null) ?? []);
+    const { data } = await apiClient.http.GET('/api/v1/invoices');
+    setInvoices((data?.invoices as InvoiceRow[] | undefined) ?? []);
   }, []);
 
   useEffect(() => {

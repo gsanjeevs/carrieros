@@ -36,7 +36,6 @@ import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
 import { base64ToArrayBuffer } from '@/lib/base64';
-import { supabase } from '@/lib/supabase'; // reads only; the write path is the API
 import { apiClient } from '@/lib/api-client';
 import { keyForSubmission } from '@/lib/idempotency';
 import { uploadDvirAttachment } from '@/lib/dvir-attachments';
@@ -106,12 +105,8 @@ export default function DVIRScreen() {
     async function checkVehicle() {
       if (!session?.user.id) return;
       const submitter = await resolveSubmitter(session.user.id);
-      const { data: load } = await supabase
-        .from('loads_driver_view')
-        .select('vehicle_id')
-        .eq('id', Number(loadId))
-        .single();
-      if (!load?.vehicle_id && !submitter?.defaultVehicleId) setNoVehicleWarning(true);
+      const { data } = await apiClient.http.GET('/api/v1/loads/{id}', { params: { path: { id: Number(loadId) } } });
+      if (!data?.load.vehicle_id && !submitter?.defaultVehicleId) setNoVehicleWarning(true);
     }
     checkVehicle();
   }, [session?.user.id, loadId]);

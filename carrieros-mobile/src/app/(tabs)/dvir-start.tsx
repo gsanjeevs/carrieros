@@ -14,9 +14,8 @@ import { ThemedView } from '@/components/themed-view';
 import { BrandColors, Spacing } from '@/constants/theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 const ORANGE = BrandColors.orange;
-const ACTIVE_LOAD_STATUSES = ['dispatched', 'picked_up', 'in_transit'];
 
 export default function DvirStartScreen() {
   const router = useRouter();
@@ -27,22 +26,10 @@ export default function DvirStartScreen() {
 
   const load = useCallback(async () => {
     if (!session?.user.id) return;
-    const { data: driver } = await supabase
-      .from('drivers')
-      .select('id')
-      .eq('profile_id', session.user.id)
-      .single();
-    if (!driver) return;
-
-    const { data: activeLoad } = await supabase
-      .from('loads_driver_view')
-      .select('id')
-      .eq('driver_id', driver.id)
-      .in('status', ACTIVE_LOAD_STATUSES)
-      .order('created_at', { ascending: false })
-      .maybeSingle();
-
-    setActiveLoadId(activeLoad?.id ?? null);
+    // /api/v1/loads already restricts a driver to their own loads (loads_driver_view under the hood),
+    // so this screen no longer resolves its own drivers row first.
+    const { data } = await apiClient.http.GET('/api/v1/loads', { params: { query: { status_group: 'in_progress' } } });
+    setActiveLoadId(data?.loads[0]?.id ?? null);
   }, [session?.user.id]);
 
   useEffect(() => {

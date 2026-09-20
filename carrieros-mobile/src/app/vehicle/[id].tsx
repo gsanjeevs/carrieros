@@ -23,7 +23,6 @@ import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
-import { supabase } from '@/lib/supabase'; // reads only; writes go through the API
 import { apiClient } from '@/lib/api-client';
 import { roleHasCapability } from '@/lib/generated/role-capabilities';
 import { keyForSubmission } from '@/lib/idempotency';
@@ -75,22 +74,10 @@ export default function VehicleDetailScreen() {
 
   const fetchAll = useCallback(async () => {
     if (!id) return;
-    const [{ data: v }, { data: l }, { data: r }] = await Promise.all([
-      supabase.from('vehicles').select('id, vehicle_number, nickname, status').eq('id', Number(id)).single(),
-      supabase
-        .from('service_logs')
-        .select('id, service_type, service_date, odometer, cost, shop_name')
-        .eq('vehicle_id', Number(id))
-        .order('service_date', { ascending: false }),
-      supabase
-        .from('maintenance_reminders')
-        .select('id, reminder_type, trigger_miles, trigger_months')
-        .eq('vehicle_id', Number(id))
-        .eq('is_active', true),
-    ]);
-    setVehicle(v ?? null);
-    setLogs(l ?? []);
-    setReminders(r ?? []);
+    const { data } = await apiClient.http.GET('/api/v1/vehicles/{id}', { params: { path: { id: Number(id) } } });
+    setVehicle(data ? { id: data.id, vehicle_number: data.vehicle_number, nickname: data.nickname, status: data.status } : null);
+    setLogs(data?.service_logs ?? []);
+    setReminders(data?.maintenance_reminders ?? []);
   }, [id]);
 
   useEffect(() => {
