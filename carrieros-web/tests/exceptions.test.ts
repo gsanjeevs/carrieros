@@ -71,7 +71,7 @@ describe('get_customer_health_score()', () => {
   let customerOrgId: number
 
   beforeAll(async () => {
-    org = await createTestOrg(admin, 'carrier')
+    org = await createTestOrg(admin, 'carrier', { tier: 'growth' }) // gated: customer_health_score is Growth+ (migration 0021)
     owner = await createTestUser(admin, org.orgId, 'owner')
     ownerSession = await signInAs(owner)
 

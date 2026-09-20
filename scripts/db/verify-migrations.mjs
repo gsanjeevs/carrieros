@@ -345,6 +345,7 @@ try {
       'schema_migrations', // migration bookkeeping (0000/0002)
       'outbox_events', // relayed by the worker's own connection (0005)
       'change_events', // read only by the API's SSE stream via service_role (0012)
+      'org_feature_overrides', // per-org feature grants/denies, server-only (0021)
     ])
 
     const orphans = sh(
@@ -381,7 +382,7 @@ try {
         `select table_name||':'||grantee||':'||privilege_type
            from information_schema.role_table_grants
           where table_schema='public'
-            and table_name in ('schema_migrations','outbox_events','change_events')
+            and table_name in ('schema_migrations','outbox_events','change_events','org_feature_overrides')
             and grantee in ('anon','authenticated')
           order by 1`,
       ],

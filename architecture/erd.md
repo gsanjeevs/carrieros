@@ -3,7 +3,7 @@
 > **Generated** by `node scripts/db/gen-erd.mjs` from the live schema. Do not edit by hand:
 > change the database via a migration, then re-run the generator. CI runs it with `--check`.
 
-46 tables, 85 foreign keys, split into 6 domain diagrams (one diagram of every table is unreadable).
+47 tables, 88 foreign keys, split into 6 domain diagrams (one diagram of every table is unreadable).
 A box drawn without columns belongs to another domain; find it in its own section.
 `||` = the FK is required (NOT NULL); `|o` = the FK is optional (nullable). `PK`/`FK` mark keys.
 
@@ -15,7 +15,7 @@ row-level security; vocabularies are `TEXT` + `CHECK`, not Postgres enums (so ge
 
 Organizations (carrier / customer / platform), their users, roles and the tier/feature model that gates what each org may use.
 
-Tables: `organizations`, `carrier_details`, `customer_details`, `customer_contacts`, `profiles`, `roles`, `languages`, `role_capabilities`, `tiers`, `features`, `org_sequences`, `org_flag_overrides`, `platform_flags`
+Tables: `organizations`, `carrier_details`, `customer_details`, `customer_contacts`, `profiles`, `roles`, `languages`, `role_capabilities`, `tiers`, `features`, `org_sequences`, `org_flag_overrides`, `org_feature_overrides`, `platform_flags`
 
 ```mermaid
 erDiagram
@@ -125,6 +125,7 @@ erDiagram
     integer display_order
     text label
     text min_tier FK
+    boolean retained_when_delinquent
   }
   org_sequences {
     text entity PK
@@ -135,6 +136,15 @@ erDiagram
     text flag_key PK
     bigint org_id PK
     boolean enabled
+    timestamptz set_at
+    uuid set_by FK
+  }
+  org_feature_overrides {
+    text feature_key PK
+    bigint org_id PK
+    text effect
+    timestamptz expires_at
+    text reason
     timestamptz set_at
     uuid set_by FK
   }
@@ -151,6 +161,9 @@ erDiagram
   organizations ||--o{ customer_details : "carrier_org_id"
   organizations ||--o{ customer_details : "org_id"
   tiers ||--o{ features : "min_tier"
+  features ||--o{ org_feature_overrides : "feature_key"
+  organizations ||--o{ org_feature_overrides : "org_id"
+  profiles |o--o{ org_feature_overrides : "set_by"
   platform_flags ||--o{ org_flag_overrides : "flag_key"
   organizations ||--o{ org_flag_overrides : "org_id"
   profiles |o--o{ org_flag_overrides : "set_by"

@@ -974,18 +974,21 @@ export type Database = {
           key: string
           label: string
           min_tier: string
+          retained_when_delinquent: boolean
         }
         Insert: {
           display_order: number
           key: string
           label: string
           min_tier: string
+          retained_when_delinquent?: boolean
         }
         Update: {
           display_order?: number
           key?: string
           label?: string
           min_tier?: string
+          retained_when_delinquent?: boolean
         }
         Relationships: [
           {
@@ -1730,6 +1733,58 @@ export type Database = {
           {
             foreignKeyName: "org_documents_uploaded_by_fkey"
             columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_feature_overrides: {
+        Row: {
+          effect: string
+          expires_at: string | null
+          feature_key: string
+          org_id: number
+          reason: string
+          set_at: string
+          set_by: string | null
+        }
+        Insert: {
+          effect: string
+          expires_at?: string | null
+          feature_key: string
+          org_id: number
+          reason: string
+          set_at?: string
+          set_by?: string | null
+        }
+        Update: {
+          effect?: string
+          expires_at?: string | null
+          feature_key?: string
+          org_id?: number
+          reason?: string
+          set_at?: string
+          set_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_feature_overrides_feature_key_fkey"
+            columns: ["feature_key"]
+            isOneToOne: false
+            referencedRelation: "features"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "org_feature_overrides_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_feature_overrides_set_by_fkey"
+            columns: ["set_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -2651,6 +2706,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      entitlement_decision: {
+        Args: { p_key: string; p_org_id: number }
+        Returns: {
+          allowed: boolean
+          reason: string
+        }[]
+      }
       get_customer_health_score: {
         Args: { customer_org_id: number }
         Returns: number
@@ -2680,6 +2742,13 @@ export type Database = {
           miles_in_state: number
           net_tax_due: number
           state: string
+        }[]
+      }
+      get_my_entitlement: {
+        Args: { p_key: string }
+        Returns: {
+          allowed: boolean
+          reason: string
         }[]
       }
       get_my_entitlements: {

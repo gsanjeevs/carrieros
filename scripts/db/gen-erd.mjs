@@ -27,7 +27,7 @@ const DATABASE = process.env.PGDATABASE || 'postgres'
 
 const DOMAINS = [
   ['Tenancy, identity & entitlements', 'Organizations (carrier / customer / platform), their users, roles and the tier/feature model that gates what each org may use.',
-    ['organizations', 'carrier_details', 'customer_details', 'customer_contacts', 'profiles', 'roles', 'languages', 'role_capabilities', 'tiers', 'features', 'org_sequences', 'org_flag_overrides', 'platform_flags']],
+    ['organizations', 'carrier_details', 'customer_details', 'customer_contacts', 'profiles', 'roles', 'languages', 'role_capabilities', 'tiers', 'features', 'org_sequences', 'org_flag_overrides', 'org_feature_overrides', 'platform_flags']],
   ['Fleet', 'Vehicles, drivers, their documents, and maintenance.',
     ['vehicles', 'vehicle_types', 'vehicle_classifications', 'vehicle_type_classifications', 'vehicle_documents', 'drivers', 'driver_documents', 'org_documents', 'maintenance_reminders', 'service_logs']],
   ['Loads & dispatch', 'The core shipment record, its timeline, expenses, documents (POD etc.), exceptions and driver chat.',

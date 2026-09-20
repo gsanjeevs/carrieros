@@ -25,7 +25,7 @@ export default defineConfig({
     //
     // tests/audit/** are black-box probes from the 2026-09-20 roles/tiers/billing/localization audit. Many are
     // RED ON PURPOSE (each red test is an open finding), so they stay out of the default run and CI until the
-    // fix lands; when one is fixed, promote its assertion into a normal test. Run them: `npm run test:audit`.
+    // fix lands; when one is fixed, promote its assertion into a normal test. Run them: `npm run test:audit` (vitest.audit.config.ts).
     exclude: [...configDefaults.exclude, '**/*.golden.test.ts', 'tests/audit/**'],
   },
   resolve: {
