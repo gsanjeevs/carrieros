@@ -1,0 +1,46 @@
+import { test, expect } from '@playwright/test'
+import { login, OWNER } from './helpers'
+
+// Zero test coverage existed for this flow anywhere in the repo before this
+// spec. Demo customer C-1 (Sierra Steel Fabricators) starts with no
+// contacts, so this test adds one (with a unique name/email per run) and
+// then invites it to portal access, rather than depending on seeded contact
+// data. The magic-link email itself isn't asserted here (see
+// mailpit.spec.ts for that); this only asserts the API call succeeded and
+// the UI reflects it, per the task's scope.
+test('owner adds a customer contact and invites them to portal access', async ({ page }) => {
+  await login(page, OWNER.email, OWNER.password)
+
+  await page.goto('/customers/C-1')
+  await page.getByRole('tab', { name: 'Contacts' }).click()
+
+  const panel = page.getByRole('tabpanel')
+  const contactName = `E2E Contact ${Date.now()}`
+  const contactEmail = `e2e-contact-${Date.now()}@example.com`
+
+  await panel.locator('input').first().fill(contactName)
+  await panel.locator('input[type="email"]').fill(contactEmail)
+  await panel.getByRole('button', { name: 'Add Contact' }).click()
+
+  const row = page.getByRole('row', { name: new RegExp(contactName) })
+  await expect(row).toBeVisible()
+  await expect(row.getByText('Not linked')).toBeVisible()
+
+  await row.getByRole('button', { name: 'Invite to portal' }).click()
+
+  await expect(row.getByText('Linked', { exact: true })).toBeVisible()
+  await expect(row.getByRole('button', { name: 'Revoke access' })).toBeVisible()
+
+  // Bonus check: lib/send-email.ts falls back to the local Mailpit instance
+  // that `supabase start` runs (127.0.0.1:54324, see supabase/config.toml),
+  // and the invite route sends a real magic-link email via Supabase Auth's
+  // admin inviteUserByEmail. Confirm it actually landed there rather than
+  // just trusting the UI state — this repo's whole working pattern is to
+  // verify independently instead of taking a success state at face value.
+  const search = await page.request.get(
+    `http://127.0.0.1:54324/api/v1/search?query=${encodeURIComponent(`to:${contactEmail}`)}`
+  )
+  expect(search.ok()).toBeTruthy()
+  const { messages } = await search.json()
+  expect(messages.length).toBeGreaterThan(0)
+})

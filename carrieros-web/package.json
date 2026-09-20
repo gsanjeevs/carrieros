@@ -15,7 +15,8 @@
     "test:extraction": "vitest run --config vitest.extraction.config.ts",
     "gen:api": "tsx scripts/gen-api-client.ts",
     "check:api": "tsx scripts/gen-api-client.ts --check",
-    "test:audit": "vitest run -c vitest.audit.config.ts"
+    "test:audit": "vitest run -c vitest.audit.config.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.112.3",
@@ -34,6 +35,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/nodemailer": "^8.0.1",
