@@ -380,3 +380,31 @@ export interface IftaRepository {
   /** Atomic: delete the load's GPS crossings, insert the manual rows. Returns rows written. */
   replaceWithManual(actor: ActorContext, loadId: number, rows: readonly { state: string; miles: number }[]): Promise<Result<number>>
 }
+
+// ── DVIR ────────────────────────────────────────────────────────────────────
+
+export interface InspectionAccess {
+  readonly id: number
+  readonly driverId: number | null
+}
+
+export interface DvirRepository {
+  /** The actor's default vehicle (drivers.default_vehicle_id), when they are a driver. */
+  findDefaultVehicle(actor: ActorContext): Promise<Result<number | null>>
+  /** Inspection + its defects, atomically. Returns the new ids. */
+  submit(
+    actor: ActorContext,
+    input: {
+      loadId: number
+      vehicleId: number | null
+      driverId: number | null
+      type: string
+      condition: string
+      odometer: number | null
+      defects: readonly { area: string; description: string; severity: string }[]
+    }
+  ): Promise<Result<{ id: number; defects: readonly { id: number; area: string }[] }>>
+  findInspection(actor: ActorContext, inspectionId: number): Promise<Result<InspectionAccess | null>>
+  /** Point the inspection's signature, or one defect's photo, at an uploaded object. Ok(false) = nothing matched. */
+  attach(actor: ActorContext, inspectionId: number, target: { kind: 'signature' } | { kind: 'defect_photo'; area: string }, storagePath: string): Promise<Result<boolean>>
+}

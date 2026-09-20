@@ -110,3 +110,16 @@ export function createIftaService(supabase: SupabaseClient<Database>): IftaServi
     clock: { now: () => new Date() },
   })
 }
+
+import { DvirService } from './application/dvir-service'
+import { SupabaseDvirRepository } from './infrastructure/supabase/dvir-repository'
+
+export function createDvirService(supabase: SupabaseClient<Database>): DvirService {
+  return new DvirService({
+    shipments: new SupabaseShipmentCommandRepository(supabase),
+    dvir: new SupabaseDvirRepository(supabase),
+    storage: new SupabaseObjectStorage(createStorageProvider(supabase)),
+    ids: { uuid: () => crypto.randomUUID() },
+    idempotency: new SupabaseIdempotencyRepository(createAdminClient()),
+  })
+}

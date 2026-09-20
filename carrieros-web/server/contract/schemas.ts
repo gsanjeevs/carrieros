@@ -12,6 +12,7 @@ import { CHANGE_ENTITIES } from '../domain/events/entities'
 import { LOAD_STATUS_GROUP_KEYS } from '../domain/load/status-groups'
 import { DOCUMENT_TYPES, UPLOAD_CONTENT_TYPES, MAX_UPLOAD_BYTES } from '../domain/documents/upload'
 import { CDL_CLASSES, ENDORSEMENT_CODES } from '../domain/driver/self-profile'
+import { DEFECT_SEVERITIES, DVIR_AREAS, DVIR_TYPES } from '../domain/compliance/dvir'
 import { PROBLEM_REASONS } from '../domain/driver-actions/problem-report'
 import { DATE_FORMATS, LANGUAGES, THEMES, TIME_FORMATS, UOM_SYSTEMS } from '../domain/profile/preferences'
 
@@ -217,6 +218,29 @@ export const ManualCrossingsBodySchema = z.object({
   rows: z.array(z.object({ state: z.string().length(2), miles: z.number().int().positive().max(5000) })).min(1).max(60),
 })
 export const ManualCrossingsResponseSchema = z.object({ written: z.number().int() })
+
+export const SubmitDvirBodySchema = z.object({
+  type: z.enum(DVIR_TYPES),
+  odometer: z.number().int().min(0).nullable().optional(),
+  defects: z
+    .array(z.object({ area: z.enum(DVIR_AREAS), description: z.string().min(1).max(1000), severity: z.enum(DEFECT_SEVERITIES) }))
+    .max(DVIR_AREAS.length),
+})
+export const SubmitDvirResponseSchema = z.object({
+  id: z.number().int(),
+  defects: z.array(z.object({ id: z.number().int(), area: z.string() })),
+})
+
+export const RequestAttachmentBodySchema = z.object({
+  kind: z.enum(['signature', 'defect_photo']),
+  area: z.enum(DVIR_AREAS).nullable().optional().describe('Required for defect_photo.'),
+  content_type: z.enum(['image/png', 'image/jpeg']),
+})
+export const FinalizeAttachmentBodySchema = z.object({
+  kind: z.enum(['signature', 'defect_photo']),
+  area: z.enum(DVIR_AREAS).nullable().optional(),
+  storage_path: z.string().min(1).max(300),
+})
 
 export type ListLoadsQuery = z.infer<typeof ListLoadsQuerySchema>
 export type ListLoadsResponse = z.infer<typeof ListLoadsResponseSchema>

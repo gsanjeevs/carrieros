@@ -36,13 +36,15 @@ import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
 import { base64ToArrayBuffer } from '@/lib/base64';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase'; // reads only; the write path is the API
+import { apiClient } from '@/lib/api-client';
+import { keyForSubmission } from '@/lib/idempotency';
+import { uploadDvirAttachment } from '@/lib/dvir-attachments';
 import { resolveSubmitter } from '@/lib/submitter';
 
 const ORANGE = BrandColors.orange;
 const RED = StatusColors.danger;
 const GREEN = '#16a34a';
-const BUCKET = 'documents';
 
 // Keys map 1:1 to src/messages/*.json dvir.areas.* — labels are resolved via
 // t() at render time, not hardcoded here.
@@ -88,6 +90,7 @@ export default function DVIRScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
+  const submissionKey = useRef<{ key: string; body: string } | null>(null);
   // Non-fatal: photos that failed to upload after the inspection was already
   // saved. Shown on the confirmation screen, not treated as a submit failure.
   const [photoWarningCount, setPhotoWarningCount] = useState(0);
@@ -190,114 +193,51 @@ export default function DVIRScreen() {
     setSubmitting(true);
     setError('');
 
-    const submitter = await resolveSubmitter(session.user.id);
+    const submissionBody = {
+      type: type as 'pre_trip' | 'post_trip',
+      odometer: odometer ? Number(odometer) : null,
+      defects: defectAreas.map((a) => ({ area: a.key, description: areas[a.key].description.trim(), severity: areas[a.key].severity })),
+    };
 
-    if (!submitter) {
-      setError(t('dvir.errorResolveAccount'));
-      setSubmitting(false);
-      return;
+    // The inspection AND its defects are ONE atomic call. The server files it as the caller, picks the
+    // vehicle (the load's, else the driver's default), and DERIVES the condition from the defects, so an
+    // inspection can never claim 'satisfactory' while listing defects. (Previously: inspection insert,
+    // then a separate defects insert, so a failure between them left a 'defects_noted' report with no
+    // defects: a safety record that lies.)
+    let filed: { id: number; defects: { id: number; area: string }[] } | null = null;
+    try {
+      const { data } = await apiClient.http.POST('/api/v1/loads/{id}/dvir-inspections', {
+        params: { path: { id: Number(loadId) }, header: { 'Idempotency-Key': keyForSubmission(submissionKey, submissionBody) } },
+        body: submissionBody,
+      });
+      filed = data ?? null;
+    } catch {
+      filed = null;
     }
 
-    const { data: load } = await supabase
-      .from('loads_driver_view')
-      .select('vehicle_id')
-      .eq('id', Number(loadId))
-      .single();
-
-    const vehicleId = load?.vehicle_id ?? submitter.defaultVehicleId ?? null;
-    const condition = defectAreas.length > 0 ? 'defects_noted' : 'satisfactory';
-
-    const { data: inspection, error: inspectionErr } = await supabase
-      .from('dvir_inspections')
-      .insert({
-        carrier_org_id: submitter.carrierOrgId,
-        vehicle_id: vehicleId,
-        load_id: Number(loadId),
-        driver_id: submitter.driverId,
-        type,
-        condition,
-        odometer: odometer ? Number(odometer) : null,
-      })
-      .select('id')
-      .single();
-
-    if (inspectionErr || !inspection) {
+    if (!filed) {
       setError(t('dvir.errorSubmitFailed'));
       setSubmitting(false);
       return;
     }
+    submissionKey.current = null;
 
-    // Signature upload/attach mirrors the defect-photo pattern below: it can
-    // only happen now that we have an inspection id for the storage path,
-    // and a failure here is non-fatal — the inspection itself is already
-    // recorded, so a warning is shown instead of aborting the submit.
+    // Attachments are best-effort: the report is already saved, so a failed signature/photo is a
+    // warning on the confirmation screen, never a lost inspection.
     let signatureFailed = false;
     const signatureBase64 = await signaturePadRef.current?.capture();
     if (signatureBase64) {
-      const path = `${submitter.carrierOrgId}/dvir/${inspection.id}/signature-${Date.now()}.png`;
-      try {
-        const { error: sigUploadErr } = await supabase.storage
-          .from(BUCKET)
-          .upload(path, base64ToArrayBuffer(signatureBase64), { contentType: 'image/png', upsert: false });
-        if (sigUploadErr) {
-          signatureFailed = true;
-        } else {
-          const { error: sigAttachErr } = await supabase
-            .from('dvir_inspections')
-            .update({ signature_url: path })
-            .eq('id', inspection.id);
-          if (sigAttachErr) signatureFailed = true;
-        }
-      } catch {
-        signatureFailed = true;
-      }
+      signatureFailed = !(await uploadDvirAttachment(filed.id, { kind: 'signature' }, 'image/png', base64ToArrayBuffer(signatureBase64)));
     }
 
-    if (defectAreas.length > 0) {
-      // Photos can only be uploaded now that we have an inspection id for the
-      // path. A failure here is deliberately non-fatal: the defect row is
-      // still written, just with photo_path null.
-      let failedPhotos = 0;
-      const rows = [];
-
-      for (const a of defectAreas) {
-        const state = areas[a.key];
-        let photoPath: string | null = null;
-
-        if (state.photo) {
-          const path = `${submitter.carrierOrgId}/dvir/${inspection.id}/${a.key}-${Date.now()}.jpg`;
-          try {
-            const { error: uploadErr } = await supabase.storage
-              .from(BUCKET)
-              .upload(path, base64ToArrayBuffer(state.photo.base64), {
-                contentType: 'image/jpeg',
-                upsert: false,
-              });
-            if (uploadErr) failedPhotos += 1;
-            else photoPath = path;
-          } catch {
-            failedPhotos += 1;
-          }
-        }
-
-        rows.push({
-          inspection_id: inspection.id,
-          area: a.key,
-          description: state.description.trim(),
-          severity: state.severity,
-          photo_path: photoPath,
-        });
-      }
-
-      const { error: defectsErr } = await supabase.from('dvir_defects').insert(rows);
-      if (defectsErr) {
-        setError(t('dvir.errorDefectsSaveFailed'));
-        setSubmitting(false);
-        return;
-      }
-
-      setPhotoWarningCount(failedPhotos);
+    let failedPhotos = 0;
+    for (const a of defectAreas) {
+      const photo = areas[a.key].photo;
+      if (!photo) continue;
+      const ok = await uploadDvirAttachment(filed.id, { kind: 'defect_photo', area: a.key }, 'image/jpeg', base64ToArrayBuffer(photo.base64));
+      if (!ok) failedPhotos += 1;
     }
+    setPhotoWarningCount(failedPhotos);
 
     setSignatureWarning(signatureFailed);
     setSubmitting(false);

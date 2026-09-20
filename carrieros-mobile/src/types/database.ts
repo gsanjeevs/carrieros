@@ -2745,6 +2745,18 @@ export type Database = {
         Returns: number
       }
       send_expiry_reminders: { Args: never; Returns: number }
+      submit_dvir_inspection: {
+        Args: {
+          p_condition: string
+          p_defects: Json
+          p_driver_id: number
+          p_load_id: number
+          p_odometer: number
+          p_type: string
+          p_vehicle_id: number
+        }
+        Returns: Json
+      }
       submit_shipment_milestone: {
         Args: {
           p_correlation_id: string

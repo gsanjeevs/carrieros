@@ -70,6 +70,7 @@ makes it the *only* way UI code touches data, and adds live updates.
 | Endpoints | `GET /api/v1/{loads,me,events}` |
 | Migrated screens | web `app/(app)/loads/page.tsx`, mobile `(tabs)/loads.tsx` |
 | Writes migrated (batch 1) | `POST /api/v1/loads/{id}/milestones` (atomic status+timeline+audit+outbox, idempotent, CAS), `PATCH /api/v1/me/preferences`, `PUT /api/v1/me/push-token`; mobile offline queue is now a typed command queue over the same endpoint |
+| Writes migrated (batches 3-5: COMPLETE for mobile) | invoices edit + atomic mark-paid (0014), chat read receipts, live location (column-restricted), own driver profile, vehicle service log + reminder atomically (0015), IFTA GPS crossing + manual override that finally works for drivers (0016), DVIR inspection+defects atomically with signature/photo attachments via signed URLs (0017), proof-of-delivery upload via signed URLs |
 | Writes migrated (batch 2) | `POST /api/v1/loads/{id}/fuel-stops`, `POST /api/v1/loads/{id}/problem-reports`, on a shared reserve->complete/abandon idempotency lifecycle (`server/application/idempotency.ts`, migration 0013) |
 | Tests | `v1-loads`, `v1-events`, `api-client` (Vitest), CI drift check |
 
@@ -83,12 +84,13 @@ without the `invoice_actions` capability.
 Remaining debt is printed by `check-architecture.mjs` on every run and itemised
 in `architecture/inventory/*`. Suggested order (highest risk first):
 
-1. **Writes** — (batches 1-2 done: load status, preferences, push token, fuel stops, problem reports = 9 of 26 mobile writes) 26 mobile table writes, ~19 web client components that write
+1. **Writes** — DONE for mobile: zero direct `insert/update/delete/upsert` calls remain in `carrieros-mobile/src` (26 original sites). Still open on WEB: ~19 client components that write directly, plus the legacy `/api/*` routes and server actions, which predate the layered stack.
+   Was: 26 mobile table writes, ~19 web client components that write
    directly. Each becomes a command endpoint; multi-step ones (load status +
    timeline) route through `submit_shipment_milestone` (0006–0011), which is
    already built but not yet called.
 2. **Storage** — 7 mobile + web upload/download sites behind a signed-URL API.
-3. **RPCs** — 8 mobile (`get_exceptions`, entitlements, IFTA, health score...).
+3. **RPCs (reads)** — 8 mobile (`get_exceptions`, entitlements, IFTA, health score...).
 4. **Reads** — 62 mobile + ~100 web, by screen, starting with dashboards.
 5. Add each migrated file to `API_ONLY`; when the debt count is zero, tighten the
    check to fail on *any* direct call and reconsider the hard lockdown above.

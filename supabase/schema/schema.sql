@@ -3165,3 +3165,50 @@ END $$;
 
 REVOKE EXECUTE ON FUNCTION replace_ifta_crossings_with_manual(BIGINT, JSONB) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION replace_ifta_crossings_with_manual(BIGINT, JSONB) TO authenticated;
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 17: ATOMIC DVIR SUBMISSION (migration 0017)
+-- ────────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION submit_dvir_inspection(
+  p_load_id    BIGINT,
+  p_vehicle_id BIGINT,
+  p_driver_id  BIGINT,
+  p_type       TEXT,
+  p_condition  TEXT,
+  p_odometer   INTEGER,
+  p_defects    JSONB          -- [{ "area": "brakes", "description": "...", "severity": "major" }, ...] (may be empty)
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path = public
+AS $$
+DECLARE
+  v_org BIGINT := my_org_id();
+  v_id  BIGINT;
+  v_defects JSONB;
+BEGIN
+  IF v_org IS NULL THEN
+    RAISE EXCEPTION 'AUTH_REQUIRED' USING ERRCODE = '28000';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM loads WHERE id = p_load_id AND carrier_org_id = v_org) THEN
+    RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404';
+  END IF;
+
+  INSERT INTO dvir_inspections (carrier_org_id, vehicle_id, load_id, driver_id, type, condition, odometer)
+  VALUES (v_org, p_vehicle_id, p_load_id, p_driver_id, p_type, p_condition, p_odometer)
+  RETURNING id INTO v_id;
+
+  WITH ins AS (
+    INSERT INTO dvir_defects (inspection_id, area, description, severity)
+    SELECT v_id, d.area, d.description, d.severity
+      FROM jsonb_to_recordset(COALESCE(p_defects, '[]'::jsonb)) AS d(area TEXT, description TEXT, severity TEXT)
+    RETURNING id, area
+  )
+  SELECT COALESCE(jsonb_agg(jsonb_build_object('id', id, 'area', area)), '[]'::jsonb) INTO v_defects FROM ins;
+
+  RETURN jsonb_build_object('id', v_id, 'defects', v_defects);
+END $$;
+
+REVOKE EXECUTE ON FUNCTION submit_dvir_inspection(BIGINT, BIGINT, BIGINT, TEXT, TEXT, INTEGER, JSONB) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION submit_dvir_inspection(BIGINT, BIGINT, BIGINT, TEXT, TEXT, INTEGER, JSONB) TO authenticated;
