@@ -61,7 +61,7 @@ const PUBLIC_PREFIXES = ['/login', '/signup', '/auth', '/track', '/onboarding']
 // are untouched — same-origin requests ignore these headers entirely.
 const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'GET,POST,PATCH,PUT,DELETE,OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, Last-Event-ID, x-request-id',
   'Access-Control-Max-Age': '86400',
 }
 

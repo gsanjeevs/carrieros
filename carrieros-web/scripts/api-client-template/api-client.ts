@@ -1,0 +1,146 @@
+// Typed API client shared by carrieros-web and carrieros-mobile.
+// Platform-agnostic on purpose: it needs only `fetch`, and the two apps differ
+// solely in what they pass to createApiClient (base URL, how to get a token,
+// and which fetch can stream).
+import createClient from 'openapi-fetch'
+import type { paths } from './api-types'
+
+export type ChangeEntity = 'loads' | 'exceptions' | 'invoices' | 'messages' | 'documents'
+/** `resync` is synthetic: the stream (re)connected after a gap, so refetch everything. */
+export type ChangeSignal = ChangeEntity | 'resync'
+export type LiveStatus = 'connecting' | 'live' | 'reconnecting' | 'stopped'
+
+export interface ApiClientOptions {
+  /** '' for same-origin web; the web app's origin for mobile. */
+  baseUrl: string
+  /** Mobile sends a Bearer token; web relies on its session cookie and omits this. */
+  getAccessToken?: () => Promise<string | null | undefined>
+  /** A fetch that exposes response.body as a stream (mobile: `fetch` from 'expo/fetch'). Defaults to global fetch. */
+  streamFetch?: typeof fetch
+  /** Called when the server rejects the token; the stream stops until subscribe() is called again. */
+  onUnauthorized?: () => void
+}
+
+export interface SubscribeOptions {
+  onStatus?: (status: LiveStatus) => void
+}
+
+function parseSseBlock(block: string): { event: string; id?: string; data: string } {
+  let event = 'message'
+  let id: string | undefined
+  const data: string[] = []
+  for (const line of block.split('\n')) {
+    if (line.startsWith(':')) continue // comment / keepalive
+    const sep = line.indexOf(':')
+    const field = sep === -1 ? line : line.slice(0, sep)
+    const value = sep === -1 ? '' : line.slice(sep + 1).replace(/^ /, '')
+    if (field === 'event') event = value
+    else if (field === 'id') id = value
+    else if (field === 'data') data.push(value)
+  }
+  return { event, id, data: data.join('\n') }
+}
+
+export function createApiClient(options: ApiClientOptions) {
+  const http = createClient<paths>({ baseUrl: options.baseUrl })
+
+  // Middleware deliberately returns nothing. openapi-fetch requires a returned
+  // value to be `instanceof Request/Response`, and in React Native the global
+  // Response is a different class from the one fetch yields, so returning the
+  // object we were handed throws there (found on the iOS simulator). Mutating
+  // request.headers in place needs no return value.
+  http.use({
+    async onRequest({ request }) {
+      const token = await options.getAccessToken?.()
+      if (token) request.headers.set('Authorization', `Bearer ${token}`)
+    },
+    onResponse({ response }) {
+      if (response.status === 401) options.onUnauthorized?.()
+    },
+  })
+
+  /**
+   * Live change signals for the caller's organization. Signals carry no data;
+   * react by refetching through `http`. Reconnects with backoff and resumes from
+   * the last seen id, and emits `resync` after any gap. Returns an unsubscribe.
+   */
+  function subscribe(
+    entities: readonly ChangeEntity[],
+    onSignal: (signal: ChangeSignal) => void,
+    subscribeOptions: SubscribeOptions = {}
+  ): () => void {
+    const doFetch = options.streamFetch ?? fetch
+    const wanted = new Set<string>(entities)
+    const controller = new AbortController()
+    let stopped = false
+    let lastId: string | undefined
+    let everConnected = false
+    let attempt = 0
+
+    const status = (s: LiveStatus) => subscribeOptions.onStatus?.(s)
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+    async function run() {
+      while (!stopped) {
+        status(everConnected ? 'reconnecting' : 'connecting')
+        try {
+          const token = await options.getAccessToken?.()
+          const url = `${options.baseUrl}/api/v1/events?entities=${encodeURIComponent(entities.join(','))}`
+          const res = await doFetch(url, {
+            headers: {
+              Accept: 'text/event-stream',
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              ...(lastId ? { 'Last-Event-ID': lastId } : {}),
+            },
+            signal: controller.signal,
+          })
+          if (res.status === 401) {
+            options.onUnauthorized?.()
+            break
+          }
+          if (!res.ok || !res.body) throw new Error(`events stream failed: ${res.status}`)
+
+          attempt = 0
+          status('live')
+          if (everConnected) onSignal('resync')
+          everConnected = true
+
+          const reader = res.body.getReader()
+          const decoder = new TextDecoder()
+          let buffer = ''
+          for (;;) {
+            const { done, value } = await reader.read()
+            if (done) break
+            buffer += decoder.decode(value, { stream: true })
+            let cut: number
+            while ((cut = buffer.indexOf('\n\n')) !== -1) {
+              const block = parseSseBlock(buffer.slice(0, cut))
+              buffer = buffer.slice(cut + 2)
+              if (block.id) lastId = block.id
+              if (block.event === 'change' && block.data) {
+                const { entity } = JSON.parse(block.data) as { entity: string }
+                if (wanted.has(entity)) onSignal(entity as ChangeEntity)
+              }
+            }
+          }
+          // Server closed cleanly (it caps stream length): reconnect promptly.
+          if (!stopped) await sleep(250)
+        } catch {
+          if (stopped) break
+          await sleep(Math.min(30_000, 1000 * 2 ** attempt++))
+        }
+      }
+      status('stopped')
+    }
+
+    void run()
+    return () => {
+      stopped = true
+      controller.abort()
+    }
+  }
+
+  return { http, subscribe }
+}
+
+export type ApiClient = ReturnType<typeof createApiClient>

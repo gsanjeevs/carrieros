@@ -59,6 +59,19 @@ by hand.
 - Mobile sessions live in the keychain (`src/lib/secure-session-storage.ts`).
 - Env vars: see `carrieros-web/.env.example` / `carrieros-mobile/.env.example`.
 
+## API-only data access (ADR 0003, 2026-09-20)
+UI code (mobile screens, web client components, web Server Components) must not
+call `.from()` / `.rpc()` / `.storage` directly; data goes through application
+services, reached over `/api/v1` (mobile: `apiClient` from `src/lib/api-client.ts`)
+or in-process (web pages: `server/composition.ts`). Shapes live in
+`carrieros-web/server/contract/`; after changing them run `npm run gen:api` in
+`carrieros-web` (it writes the typed client into BOTH apps; CI runs
+`npm run check:api`). Live updates: `<LiveRefresh entities={[...]}/>` (web) /
+`useLiveRefresh` (mobile) over the `/api/v1/events` SSE stream (signal-only).
+When you migrate a screen, add it to `API_ONLY` in
+`carrieros-web/scripts/check-architecture.mjs`. Full rationale, costs and the
+remaining-work roadmap: `architecture/adr/0003-api-only-data-access.md`.
+
 ## After any schema change
 Write a new numbered file in `supabase/migrations/` (never edit a merged
 one — see `architecture/database-migrations.md`), apply it locally with

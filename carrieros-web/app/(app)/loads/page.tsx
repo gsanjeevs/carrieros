@@ -7,18 +7,19 @@ import { formatMoney } from '@/lib/format-money'
 import { toDate } from '@/lib/format-datetime'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import { Card, EmptyState, Input, StatusBadge } from '@/components/ui'
-import { getProfileForUser } from '@/lib/queries/profiles'
-import { getDriverIdForProfile } from '@/lib/queries/drivers'
-import { INVOICE_ROLES } from '@/lib/roles-policy'
+import LiveRefresh from '@/components/LiveRefresh'
+import { createLoadQueryService } from '@/server/composition'
+import { buildActorContext } from '@/server/infrastructure/supabase/actor-context'
+import { LOAD_STATUS_GROUPS } from '@/server/domain/load/status-groups'
 
 type LoadGroupKey = 'needs_dispatch' | 'in_progress' | 'completed' | 'cancelled' | 'declined'
 
 const GROUPS: { key: LoadGroupKey; statuses: string[]; labelKey: string; accent: string }[] = [
-  { key: 'needs_dispatch', statuses: ['draft', 'scheduled'], labelKey: 'groupNeedsDispatch', accent: 'border-l-[3px] border-l-brand-orange' },
-  { key: 'in_progress', statuses: ['dispatched', 'picked_up', 'in_transit'], labelKey: 'groupInProgress', accent: 'border-l-[3px] border-l-blue-500/60' },
-  { key: 'completed', statuses: ['delivered', 'invoiced', 'paid'], labelKey: 'groupCompleted', accent: 'border-l-[3px] border-l-border-ui' },
-  { key: 'cancelled', statuses: ['cancelled'], labelKey: 'groupCancelled', accent: 'border-l-[3px] border-l-rose-500/40' },
-  { key: 'declined', statuses: ['declined'], labelKey: 'groupDeclined', accent: 'border-l-[3px] border-l-rose-500/40' },
+  { key: 'needs_dispatch', statuses: [...LOAD_STATUS_GROUPS.needs_dispatch], labelKey: 'groupNeedsDispatch', accent: 'border-l-[3px] border-l-brand-orange' },
+  { key: 'in_progress', statuses: [...LOAD_STATUS_GROUPS.in_progress], labelKey: 'groupInProgress', accent: 'border-l-[3px] border-l-blue-500/60' },
+  { key: 'completed', statuses: [...LOAD_STATUS_GROUPS.completed], labelKey: 'groupCompleted', accent: 'border-l-[3px] border-l-border-ui' },
+  { key: 'cancelled', statuses: [...LOAD_STATUS_GROUPS.cancelled], labelKey: 'groupCancelled', accent: 'border-l-[3px] border-l-rose-500/40' },
+  { key: 'declined', statuses: [...LOAD_STATUS_GROUPS.declined], labelKey: 'groupDeclined', accent: 'border-l-[3px] border-l-rose-500/40' },
 ]
 
 export default async function LoadsPage({
@@ -30,7 +31,8 @@ export default async function LoadsPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await getProfileForUser(supabase, user.id)
+  const actor = await buildActorContext(supabase, user, crypto.randomUUID())
+  if (!actor.ok) redirect('/onboarding')
 
   const params = await searchParams
   const justCreated = params.created
@@ -41,30 +43,17 @@ export default async function LoadsPage({
 
   const statusLabel = (status: string) => t(`status_${status}` as never)
 
-  let query = supabase
-    .from('loads')
-    .select('id, load_number, status, pickup_city, pickup_state, delivery_city, delivery_state, pickup_date, delivery_date, commodity, rate, customer_name_raw, driver_id')
-    .order('created_at', { ascending: false })
-    .limit(50)
-
-  if (profile?.org_id) {
-    query = query.eq('carrier_org_id', profile.org_id)
-  }
-
-  if (profile?.role === 'driver') {
-    const { data: driver } = await getDriverIdForProfile(supabase, user.id)
-    if (driver) query = query.eq('driver_id', driver.id)
-  }
-
-  if (activeGroup) {
-    query = query.in('status', activeGroup.statuses)
-  }
-
-  const { data: loads } = await query
-  const showRate = INVOICE_ROLES.includes(profile?.role ?? '')
+  // Same service the /api/v1/loads endpoint uses (mobile, web client code):
+  // tenant scoping, driver restriction and rate visibility are decided there.
+  const result = await createLoadQueryService(supabase).list(actor.value, {
+    statusGroup: activeGroup?.key,
+  })
+  const loads = result.ok ? result.value.loads : []
+  const showRate = result.ok && result.value.canSeeRate
 
   return (
     <div className="p-8">
+      <LiveRefresh entities={['loads']} />
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-white">{t('title')}</h1>

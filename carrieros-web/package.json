@@ -9,10 +9,12 @@
     "lint": "eslint",
     "check:architecture": "node scripts/check-architecture.mjs",
     "check:tokens": "node scripts/check-tokens.mjs",
-    "verify:compliance": "eslint && tsc --noEmit && node scripts/check-architecture.mjs && node scripts/check-tokens.mjs",
+    "verify:compliance": "eslint && tsc --noEmit && node scripts/check-architecture.mjs && node scripts/check-tokens.mjs && npm run check:api",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:extraction": "vitest run --config vitest.extraction.config.ts"
+    "test:extraction": "vitest run --config vitest.extraction.config.ts",
+    "gen:api": "tsx scripts/gen-api-client.ts",
+    "check:api": "tsx scripts/gen-api-client.ts --check"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.112.3",
@@ -24,9 +26,11 @@
     "next": "16.2.10",
     "next-intl": "^4.13.2",
     "nodemailer": "^9.0.3",
+    "openapi-fetch": "^0.17.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "react-leaflet": "^5.0.0"
+    "react-leaflet": "^5.0.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -37,7 +41,9 @@
     "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "openapi-typescript": "^7.13.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.13",
     "typescript": "^5",
     "vitest": "^4.1.10"
   }

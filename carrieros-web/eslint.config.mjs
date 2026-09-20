@@ -237,6 +237,9 @@ const eslintConfig = defineConfig([
   textPatternGuardError,
   // Override default ignores of eslint-config-next.
   globalIgnores([
+    // Sources copied verbatim into both apps by scripts/gen-api-client.ts; they
+    // only resolve inside a generated/ directory.
+    "scripts/api-client-template/**",
     // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",

@@ -12,6 +12,8 @@
 import type { ActorContext, OrgId, UserId, CorrelationId } from '../domain/shared/identity'
 import type { EntitlementSnapshot } from '../domain/entitlement/model'
 import type { Result } from '../domain/shared/result'
+import type { LoadSummary } from '../domain/load/read-model'
+import type { ChangeEntity } from '../domain/events/entities'
 
 // ── Cross-cutting ───────────────────────────────────────────────────────────
 
@@ -165,4 +167,42 @@ export interface AuditEntry {
 
 export interface AuditRepository {
   append(entry: AuditEntry): Promise<Result<void>>
+}
+
+// ── Read models ─────────────────────────────────────────────────────────────
+
+export interface ListLoadsCriteria {
+  /** Empty/undefined = every status. */
+  readonly statuses?: readonly string[]
+  readonly limit: number
+  /** Policy decision made by the application layer; the adapter only obeys it. */
+  readonly includeRate: boolean
+}
+
+/**
+ * Read side for load lists. Scoping by `actor.orgId` (and, for drivers, to
+ * their own loads) is the adapter's job and never depends on a caller-supplied
+ * id. Adapters must never return `rate` when `includeRate` is false.
+ */
+export interface LoadReadRepository {
+  listForActor(actor: ActorContext, criteria: ListLoadsCriteria): Promise<Result<readonly LoadSummary[]>>
+}
+
+// ── Change feed ─────────────────────────────────────────────────────────────
+
+export interface ChangeSignal {
+  readonly id: number
+  readonly entity: ChangeEntity
+}
+
+/**
+ * Cursor-based read of the signal-only change feed. `orgId` always comes from
+ * an ActorContext; a signal carries no business data, only "entity X changed".
+ */
+export interface ChangeFeedRepository {
+  /** Highest signal id for the org, or 0 when there are none. */
+  latestId(orgId: number): Promise<Result<number>>
+  readAfter(orgId: number, afterId: number, limit: number): Promise<Result<readonly ChangeSignal[]>>
+  /** Housekeeping: the feed is short-lived by design. */
+  pruneOlderThan(cutoff: Date): Promise<Result<void>>
 }
