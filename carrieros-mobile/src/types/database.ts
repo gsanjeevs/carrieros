@@ -2729,6 +2729,18 @@ export type Database = {
           title: string
         }[]
       }
+      get_exceptions_unchecked: {
+        Args: never
+        Returns: {
+          detail: string
+          due_at: string
+          entity_id: number
+          entity_type: string
+          exception_type: string
+          tier: string
+          title: string
+        }[]
+      }
       get_ifta_quarterly_summary: {
         Args: { p_carrier_org_id: number; p_quarter: string }
         Returns: {
@@ -2804,6 +2816,7 @@ export type Database = {
         Returns: Json
       }
       mark_overdue_invoices: { Args: never; Returns: number }
+      my_driver_id: { Args: never; Returns: number }
       my_org_id: { Args: never; Returns: number }
       my_role: { Args: never; Returns: string }
       next_entity_val: {

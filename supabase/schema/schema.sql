@@ -1336,6 +1336,19 @@ AS $$
   SELECT role FROM profiles WHERE id = auth.uid() AND is_active = true
 $$;
 
+-- The caller's drivers.id, or NULL when they are not a driver or their profile is deactivated (migration 0022).
+-- Policies used to subquery drivers directly, which ignored profiles.is_active; this is the driver-side twin of
+-- my_org_id()/my_role().
+CREATE OR REPLACE FUNCTION my_driver_id()
+RETURNS BIGINT
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+SET search_path = public
+AS $$
+  SELECT d.id FROM drivers d JOIN profiles p ON p.id = d.profile_id WHERE p.id = auth.uid() AND p.is_active = true
+$$;
+
 -- Tier entitlements gate (2026-07-21, decisions.md S11) — real, RLS-usable
 -- function (same idiom as my_org_id()/my_role() above, not just an app-layer
 -- JS helper), so any future tier-gated table's RLS policy can reference
@@ -1492,8 +1505,8 @@ ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
 -- Covers: (a) reading your own org, (b) if you're a customer-portal user,
 -- reading your carrier's org.
 CREATE POLICY "org_member_select" ON organizations FOR SELECT USING (
-  id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  OR id IN (SELECT carrier_org_id FROM customer_details WHERE org_id = (SELECT org_id FROM profiles WHERE id = auth.uid()))
+  id = my_org_id()
+  OR id IN (SELECT carrier_org_id FROM customer_details WHERE org_id = my_org_id())
 );
 -- The reverse direction: a carrier reading the org rows of its OWN
 -- customers. Without this, any query embedding organizations(...) from
@@ -1504,15 +1517,15 @@ CREATE POLICY "carrier_reads_own_customer_orgs" ON organizations FOR SELECT USIN
   type = 'customer' AND id IN (SELECT org_id FROM customer_details WHERE carrier_org_id = my_org_id())
 );
 CREATE POLICY "owner_solo_org_update" ON organizations FOR UPDATE USING (
-  id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 
 -- CARRIER DETAILS
 ALTER TABLE carrier_details ENABLE ROW LEVEL SECURITY;
 -- Read-only to clients: tier/billing state is written only by the server (migration 0019, see SECTION 19).
 CREATE POLICY "carrier_details_select" ON carrier_details FOR SELECT USING (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  org_id = my_org_id()
 );
 
 -- CUSTOMER DETAILS
@@ -1521,7 +1534,7 @@ CREATE POLICY "carrier_details_select" ON carrier_details FOR SELECT USING (
 -- subquery cycle here would recurse into that policy and back again.
 ALTER TABLE customer_details ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_customer_select" ON customer_details FOR SELECT USING (
-  carrier_org_id = my_org_id() OR org_id = my_org_id()
+  carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher','finance')
 );
 CREATE POLICY "carrier_customer_write" ON customer_details FOR ALL USING (
   carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher')
@@ -1583,12 +1596,12 @@ CREATE POLICY "own_profile_update" ON profiles FOR UPDATE TO authenticated
 -- LOADS
 ALTER TABLE loads ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "owner_solo_loads_all" ON loads FOR ALL USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 CREATE POLICY "dispatcher_loads_select" ON loads FOR SELECT USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) = 'dispatcher'
+  carrier_org_id = my_org_id()
+  AND my_role() = 'dispatcher'
 );
 -- Tightened 2026-07-20: WITH CHECK (true) let the new row be anything,
 -- including a different carrier_org_id (move a load to another tenant).
@@ -1609,14 +1622,14 @@ CREATE POLICY "finance_loads_update" ON loads FOR UPDATE TO authenticated
   USING (carrier_org_id = my_org_id() AND my_role() = 'finance')
   WITH CHECK (carrier_org_id = my_org_id() AND my_role() = 'finance');
 CREATE POLICY "finance_loads_select" ON loads FOR SELECT USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) = 'finance'
+  carrier_org_id = my_org_id()
+  AND my_role() = 'finance'
 );
 CREATE POLICY "driver_own_loads_select" ON loads FOR SELECT USING (
-  driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid())
+  driver_id = my_driver_id()
 );
 CREATE POLICY "driver_loads_update_status" ON loads FOR UPDATE USING (
-  driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid())
+  driver_id = my_driver_id()
 ) WITH CHECK (true);
 -- Explicit is_active check (2026-07-21, Phase 3H) -- this policy predates
 -- my_org_id()/my_role() and subqueries profiles directly, so patching those
@@ -1639,8 +1652,8 @@ CREATE POLICY "customer_loads_select" ON loads FOR SELECT USING (
 -- INVOICES
 ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "billing_invoices_all" ON invoices FOR ALL USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo','finance')
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo','finance')
 );
 -- Explicit is_active check, same reasoning as customer_loads_select above.
 CREATE POLICY "customer_invoices_select" ON invoices FOR SELECT USING (
@@ -1655,7 +1668,7 @@ CREATE POLICY "carrier_fuel_stops_select" ON fuel_stops FOR SELECT TO authentica
   carrier_org_id = my_org_id()
 );
 CREATE POLICY "driver_fuel_stops_insert" ON fuel_stops FOR INSERT TO authenticated WITH CHECK (
-  carrier_org_id = my_org_id() AND driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid())
+  carrier_org_id = my_org_id() AND driver_id = my_driver_id()
 );
 CREATE POLICY "owner_solo_dispatcher_fuel_stops_all" ON fuel_stops FOR ALL TO authenticated USING (
   carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher')
@@ -1663,7 +1676,7 @@ CREATE POLICY "owner_solo_dispatcher_fuel_stops_all" ON fuel_stops FOR ALL TO au
 
 ALTER TABLE load_expenses ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_load_expenses_select" ON load_expenses FOR SELECT TO authenticated USING (
-  carrier_org_id = my_org_id()
+  carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher','finance')
 );
 CREATE POLICY "owner_solo_dispatcher_load_expenses_all" ON load_expenses FOR ALL TO authenticated USING (
   carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher')
@@ -1675,7 +1688,7 @@ CREATE POLICY "carrier_ifta_crossings_select" ON ifta_state_crossings FOR SELECT
   carrier_org_id = my_org_id()
 );
 CREATE POLICY "driver_ifta_crossings_insert" ON ifta_state_crossings FOR INSERT TO authenticated WITH CHECK (
-  carrier_org_id = my_org_id() AND driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid())
+  carrier_org_id = my_org_id() AND driver_id = my_driver_id()
 );
 CREATE POLICY "owner_solo_dispatcher_ifta_crossings_all" ON ifta_state_crossings FOR ALL TO authenticated USING (
   carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher')
@@ -1686,19 +1699,19 @@ CREATE POLICY "owner_solo_dispatcher_ifta_crossings_all" ON ifta_state_crossings
 ALTER TABLE driver_messages ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "driver_thread_messages_select" ON driver_messages FOR SELECT TO authenticated USING (
   carrier_org_id = my_org_id()
-  AND load_id IN (SELECT id FROM loads WHERE driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid()))
+  AND load_id IN (SELECT id FROM loads WHERE driver_id = my_driver_id())
 );
 CREATE POLICY "driver_thread_messages_insert" ON driver_messages FOR INSERT TO authenticated WITH CHECK (
   carrier_org_id = my_org_id()
   AND sender_id = auth.uid()
-  AND load_id IN (SELECT id FROM loads WHERE driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid()))
+  AND load_id IN (SELECT id FROM loads WHERE driver_id = my_driver_id())
 );
 CREATE POLICY "driver_thread_messages_update" ON driver_messages FOR UPDATE TO authenticated USING (
   carrier_org_id = my_org_id()
-  AND load_id IN (SELECT id FROM loads WHERE driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid()))
+  AND load_id IN (SELECT id FROM loads WHERE driver_id = my_driver_id())
 ) WITH CHECK (
   carrier_org_id = my_org_id()
-  AND load_id IN (SELECT id FROM loads WHERE driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid()))
+  AND load_id IN (SELECT id FROM loads WHERE driver_id = my_driver_id())
 );
 -- Drivers may only flip read_at on an update: trigger driver_messages_columns (SECTION 20, migration 0020).
 CREATE POLICY "owner_solo_dispatcher_messages_all" ON driver_messages FOR ALL TO authenticated USING (
@@ -1726,7 +1739,7 @@ CREATE POLICY "same_org_message_translations_insert" ON driver_message_translati
 -- role table).
 ALTER TABLE driver_settlements ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "driver_own_settlements_select" ON driver_settlements FOR SELECT TO authenticated USING (
-  driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid())
+  driver_id = my_driver_id()
 );
 CREATE POLICY "owner_solo_finance_settlements_all" ON driver_settlements FOR ALL TO authenticated USING (
   carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','finance')
@@ -1737,7 +1750,7 @@ CREATE POLICY "same_org_settlement_deductions_select" ON settlement_deductions F
   settlement_id IN (
     SELECT ds.id FROM driver_settlements ds
     WHERE ds.carrier_org_id = my_org_id()
-       OR ds.driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid())
+       OR ds.driver_id = my_driver_id()
   )
 );
 CREATE POLICY "owner_solo_finance_settlement_deductions_all" ON settlement_deductions FOR ALL TO authenticated USING (
@@ -2226,12 +2239,12 @@ GRANT EXECUTE ON FUNCTION get_customer_health_score(BIGINT) TO authenticated;
 -- DRIVERS
 ALTER TABLE drivers ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "owner_solo_drivers_all" ON drivers FOR ALL USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 CREATE POLICY "dispatcher_drivers_select" ON drivers FOR SELECT USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) = 'dispatcher'
+  carrier_org_id = my_org_id()
+  AND my_role() = 'dispatcher'
 );
 
 -- Added 2026-07-20 (audit finding 8): finance could not read drivers at all,
@@ -2273,17 +2286,18 @@ CREATE POLICY "driver_own_record_update" ON drivers FOR UPDATE TO authenticated
 -- VEHICLES (renamed from TRUCKS, 2026-07-21, decisions.md S8)
 ALTER TABLE vehicles ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_vehicles_select" ON vehicles FOR SELECT USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  carrier_org_id = my_org_id()
 );
 CREATE POLICY "owner_solo_vehicles_all" ON vehicles FOR ALL USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 
 -- DOCUMENTS
 ALTER TABLE documents ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_docs_select" ON documents FOR SELECT USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  carrier_org_id = my_org_id()
+  AND (my_role() <> 'driver' OR uploaded_by = auth.uid() OR load_id IN (SELECT id FROM loads WHERE driver_id = my_driver_id()))
 );
 -- CRITICAL (fixed 2026-07-20): checked only that the row claimed the caller's
 -- uid, never the org — any user could plant phantom document rows that render
@@ -2297,14 +2311,14 @@ CREATE POLICY "driver_pod_insert" ON documents FOR INSERT TO authenticated
 CREATE POLICY "uploader_deletes_own_doc" ON documents FOR DELETE TO authenticated
   USING (uploaded_by = auth.uid() AND carrier_org_id = my_org_id());
 CREATE POLICY "owner_solo_docs_all" ON documents FOR ALL USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 
 -- LOAD EVENTS
 ALTER TABLE load_events ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_load_events_select" ON load_events FOR SELECT USING (
-  load_id IN (SELECT id FROM loads WHERE carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid()))
+  load_id IN (SELECT id FROM loads WHERE carrier_org_id = my_org_id())
 );
 -- CRITICAL (fixed 2026-07-20): same shape as driver_pod_insert above — any
 -- authenticated user could inject fake status events into ANY carrier's load
@@ -2318,10 +2332,10 @@ CREATE POLICY "authenticated_load_events_insert" ON load_events FOR INSERT TO au
 -- DVIR INSPECTIONS
 ALTER TABLE dvir_inspections ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_dvir_select" ON dvir_inspections FOR SELECT USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  carrier_org_id = my_org_id()
 );
 CREATE POLICY "driver_dvir_insert" ON dvir_inspections FOR INSERT WITH CHECK (
-  driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid())
+  driver_id = my_driver_id()
 );
 
 -- Added 2026-07-20 (audit finding 6): driver had INSERT only, so a two-step
@@ -2331,17 +2345,17 @@ CREATE POLICY "driver_dvir_modify" ON dvir_inspections FOR UPDATE TO authenticat
   USING (driver_id = (SELECT d.id FROM drivers d WHERE d.profile_id = auth.uid()))
   WITH CHECK (driver_id = (SELECT d.id FROM drivers d WHERE d.profile_id = auth.uid()));
 CREATE POLICY "owner_solo_dvir_all" ON dvir_inspections FOR ALL USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 
 -- DVIR DEFECTS
 ALTER TABLE dvir_defects ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "dvir_defects_select" ON dvir_defects FOR SELECT USING (
-  inspection_id IN (SELECT id FROM dvir_inspections WHERE carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid()))
+  inspection_id IN (SELECT id FROM dvir_inspections WHERE carrier_org_id = my_org_id())
 );
 CREATE POLICY "driver_dvir_defects_insert" ON dvir_defects FOR INSERT WITH CHECK (
-  inspection_id IN (SELECT id FROM dvir_inspections WHERE driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid()))
+  inspection_id IN (SELECT id FROM dvir_inspections WHERE driver_id = my_driver_id())
 );
 -- owner/solo counterpart (added 2026-07-20). The policy above keys on driver_id
 -- matching a `drivers` row, but owner/solo accounts have NO drivers row — that
@@ -2373,53 +2387,54 @@ CREATE POLICY "owner_solo_dvir_defects_all" ON dvir_defects FOR ALL TO authentic
 -- SERVICE LOGS
 ALTER TABLE service_logs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_service_logs_select" ON service_logs FOR SELECT USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  carrier_org_id = my_org_id()
 );
 CREATE POLICY "owner_solo_service_logs_all" ON service_logs FOR ALL USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 
 -- MAINTENANCE REMINDERS
 ALTER TABLE maintenance_reminders ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_reminders_select" ON maintenance_reminders FOR SELECT USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  carrier_org_id = my_org_id()
 );
 CREATE POLICY "owner_solo_reminders_all" ON maintenance_reminders FOR ALL USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 
 -- VEHICLE DOCUMENTS (renamed from TRUCK DOCUMENTS, 2026-07-21, decisions.md S8)
 ALTER TABLE vehicle_documents ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_vehicle_docs_select" ON vehicle_documents FOR SELECT USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  carrier_org_id = my_org_id()
 );
 CREATE POLICY "owner_solo_vehicle_docs_all" ON vehicle_documents FOR ALL USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 
 -- ORG DOCUMENTS
 ALTER TABLE org_documents ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "owner_solo_org_docs_all" ON org_documents FOR ALL USING (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 CREATE POLICY "finance_org_docs_select" ON org_documents FOR SELECT USING (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) = 'finance'
+  org_id = my_org_id()
+  AND my_role() = 'finance'
 );
 
 -- DRIVER DOCUMENTS (new, 2026-07-21, decisions.md S10 — mirrors
 -- vehicle_documents' shape exactly, scoped via a direct profiles subquery)
 ALTER TABLE driver_documents ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_driver_docs_select" ON driver_documents FOR SELECT USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  carrier_org_id = my_org_id()
+  AND (my_role() IN ('owner','solo','dispatcher') OR driver_id = my_driver_id())
 );
 CREATE POLICY "owner_solo_driver_docs_all" ON driver_documents FOR ALL USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 
 -- EXCEPTION EVENTS (new, 2026-07-21, decisions.md P2 amendment) — scoped via
@@ -2443,7 +2458,7 @@ CREATE POLICY "driver_exception_events_insert" ON exception_events FOR INSERT TO
     AND my_role() = 'driver'
     AND entity_type = 'load'
     AND event_type = 'driver_reported_problem'
-    AND entity_id IN (SELECT id FROM loads WHERE driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid()))
+    AND entity_id IN (SELECT id FROM loads WHERE driver_id = my_driver_id())
   );
 
 -- PLATFORM ADMIN (SHIPMENTX) TABLES (new, 2026-07-22, Phase 8 foundation) --
@@ -3725,4 +3740,237 @@ BEGIN
 
   RETURN ROUND((v_payment_pct * 0.7) + (v_exception_pct * 0.3));
 END;
+$$;
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 22: ROLE-SCOPED READS (migration 0022)
+-- The policy rewrites (is_active-aware helpers, role-scoped reads) are edited IN PLACE next to their tables above;
+-- this section holds the trigger and function changes. get_exceptions() supersedes the earlier definition.
+-- ────────────────────────────────────────────────────────────
+-- 3. Finance: status to invoiced/paid only. Same technique as 0018 (RLS cannot say which columns).
+CREATE OR REPLACE FUNCTION enforce_finance_load_columns() RETURNS trigger
+LANGUAGE plpgsql SET search_path = public AS $$
+DECLARE
+  v_ignored TEXT[] := ARRAY['status', 'updated_at'];
+BEGIN
+  IF my_role() = 'finance' THEN
+    IF (to_jsonb(NEW) - v_ignored) IS DISTINCT FROM (to_jsonb(OLD) - v_ignored) THEN
+      RAISE EXCEPTION 'finance may only change a load''s billing status' USING ERRCODE = '42501';
+    END IF;
+    IF NEW.status IS DISTINCT FROM OLD.status AND NEW.status NOT IN ('invoiced', 'paid') THEN
+      RAISE EXCEPTION 'finance may only move a load to invoiced or paid' USING ERRCODE = '42501';
+    END IF;
+  END IF;
+  RETURN NEW;
+END $$;
+
+CREATE TRIGGER loads_finance_columns BEFORE UPDATE ON loads
+  FOR EACH ROW EXECUTE FUNCTION enforce_finance_load_columns();
+
+-- 4. Office roles only.
+CREATE OR REPLACE FUNCTION mark_overdue_invoices()
+RETURNS INTEGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_count INTEGER;
+BEGIN
+  IF my_role() IS NULL OR my_role() NOT IN ('owner', 'solo', 'dispatcher', 'finance') THEN
+    RETURN 0;
+  END IF;
+  UPDATE invoices SET status = 'overdue'
+  WHERE status = 'sent' AND due_date < CURRENT_DATE
+    AND carrier_org_id = my_org_id();
+  GET DIAGNOSTICS v_count = ROW_COUNT;
+  RETURN v_count;
+END;
+$$;
+
+-- get_exceptions(): the existing body moves to an internal function that no client role can call; the public name
+-- becomes a role-checked wrapper with the same signature.
+CREATE OR REPLACE FUNCTION public.get_exceptions_unchecked()
+ RETURNS TABLE(entity_type text, entity_id bigint, exception_type text, tier text, title text, detail text, due_at timestamp with time zone)
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+
+  -- 1) INVOICES: overdue, or about to become overdue. No "upcoming" tier --
+  -- an invoice not yet due within a week isn't an exception yet.
+  SELECT
+    'invoice'::TEXT,
+    i.id,
+    'invoice_overdue'::TEXT,
+    CASE WHEN i.due_date < CURRENT_DATE THEN 'today' ELSE 'this_week' END,
+    'Invoice overdue'::TEXT,
+    'Invoice ' || i.invoice_number || ' for $' || i.amount || ' due ' || to_char(i.due_date, 'Mon DD, YYYY'),
+    i.due_date::TIMESTAMPTZ
+  FROM invoices i
+  WHERE i.carrier_org_id = my_org_id()
+    AND i.status IN ('sent', 'overdue')
+    AND i.due_date IS NOT NULL
+    AND i.due_date <= CURRENT_DATE + INTERVAL '7 days'
+
+  UNION ALL
+
+  -- 2) ORG DOCUMENTS: carrier's own compliance docs (COI, MC authority, UCR,
+  -- etc.) -- these are typically annual filings, so the "upcoming" horizon
+  -- is the widest of the doc branches (180 days, per the UCR-style hint).
+  -- entity_type is 'organization', NOT 'customer' -- this branch is scoped
+  -- to `od.org_id = my_org_id()`, i.e. the CARRIER's own org, never an
+  -- actual customer org. Bug found 2026-07-21: it was originally mislabeled
+  -- 'customer', which meant these exceptions silently could never match any
+  -- customer-entity filter anywhere in the app (there's no page that lists
+  -- exceptions for the carrier's own org itself, only the aggregate inbox/
+  -- banner, which don't filter by entity_type -- so this only ever broke a
+  -- hypothetical future per-entity view, not anything currently built).
+  SELECT
+    'organization'::TEXT,
+    od.org_id,
+    CASE WHEN od.expiry_date < CURRENT_DATE THEN 'doc_expired' ELSE 'doc_expiring' END,
+    CASE
+      WHEN od.expiry_date < CURRENT_DATE THEN 'today'
+      WHEN od.expiry_date <= CURRENT_DATE + INTERVAL '7 days' THEN 'this_week'
+      ELSE 'upcoming'
+    END,
+    CASE WHEN od.expiry_date < CURRENT_DATE THEN 'Compliance document expired' ELSE 'Compliance document expiring' END,
+    COALESCE(od.label, od.doc_type) || ' expires ' || to_char(od.expiry_date, 'Mon DD, YYYY'),
+    od.expiry_date::TIMESTAMPTZ
+  FROM org_documents od
+  WHERE od.org_id = my_org_id()
+    AND od.expiry_date IS NOT NULL
+    AND od.expiry_date <= CURRENT_DATE + INTERVAL '180 days'
+
+  UNION ALL
+
+  -- 3) VEHICLE DOCUMENTS: registration/insurance/DOT authority/annual
+  -- inspection -- a middle horizon (60 days) between CDL (30) and the
+  -- UCR-style org docs (180); these are typically renewed annually but
+  -- carriers plan for them further ahead than a driver's own CDL.
+  SELECT
+    'vehicle'::TEXT,
+    vd.vehicle_id,
+    CASE WHEN vd.expiry_date < CURRENT_DATE THEN 'doc_expired' ELSE 'doc_expiring' END,
+    CASE
+      WHEN vd.expiry_date < CURRENT_DATE THEN 'today'
+      WHEN vd.expiry_date <= CURRENT_DATE + INTERVAL '7 days' THEN 'this_week'
+      ELSE 'upcoming'
+    END,
+    CASE WHEN vd.expiry_date < CURRENT_DATE THEN 'Vehicle document expired' ELSE 'Vehicle document expiring' END,
+    v.nickname || ': ' || COALESCE(vd.label, vd.doc_type) || ' expires ' || to_char(vd.expiry_date, 'Mon DD, YYYY'),
+    vd.expiry_date::TIMESTAMPTZ
+  FROM vehicle_documents vd
+  JOIN vehicles v ON v.id = vd.vehicle_id
+  WHERE vd.carrier_org_id = my_org_id()
+    AND vd.expiry_date IS NOT NULL
+    AND vd.expiry_date <= CURRENT_DATE + INTERVAL '60 days'
+
+  UNION ALL
+
+  -- 4) DRIVER CDL EXPIRY: authoritative structured field (drivers.cdl_expiry),
+  -- not driver_documents -- see function-level note above. 30-day horizon
+  -- per the CDL-specific hint.
+  SELECT
+    'driver'::TEXT,
+    d.id,
+    'cdl_expiring'::TEXT,
+    CASE
+      WHEN d.cdl_expiry < CURRENT_DATE THEN 'today'
+      WHEN d.cdl_expiry <= CURRENT_DATE + INTERVAL '7 days' THEN 'this_week'
+      ELSE 'upcoming'
+    END,
+    'CDL expiring'::TEXT,
+    trim(COALESCE(p.first_name, '') || ' ' || COALESCE(p.last_name, '')) || '''s CDL expires ' || to_char(d.cdl_expiry, 'Mon DD, YYYY'),
+    d.cdl_expiry::TIMESTAMPTZ
+  FROM drivers d
+  JOIN profiles p ON p.id = d.profile_id
+  WHERE d.carrier_org_id = my_org_id()
+    AND d.cdl_expiry IS NOT NULL
+    AND d.cdl_expiry <= CURRENT_DATE + INTERVAL '30 days'
+
+  UNION ALL
+
+  -- 5) DRIVER MEDICAL CERT EXPIRY: same authoritative-field reasoning as CDL
+  -- above, same 30-day horizon (DOT physicals are typically flagged on a
+  -- similarly short runway).
+  SELECT
+    'driver'::TEXT,
+    d.id,
+    'med_cert_expiring'::TEXT,
+    CASE
+      WHEN d.med_cert_expiry < CURRENT_DATE THEN 'today'
+      WHEN d.med_cert_expiry <= CURRENT_DATE + INTERVAL '7 days' THEN 'this_week'
+      ELSE 'upcoming'
+    END,
+    'Medical certificate expiring'::TEXT,
+    trim(COALESCE(p.first_name, '') || ' ' || COALESCE(p.last_name, '')) || '''s medical certificate expires ' || to_char(d.med_cert_expiry, 'Mon DD, YYYY'),
+    d.med_cert_expiry::TIMESTAMPTZ
+  FROM drivers d
+  JOIN profiles p ON p.id = d.profile_id
+  WHERE d.carrier_org_id = my_org_id()
+    AND d.med_cert_expiry IS NOT NULL
+    AND d.med_cert_expiry <= CURRENT_DATE + INTERVAL '30 days'
+
+  UNION ALL
+
+  -- 6) POD MISSING: a load marked delivered with no matching 'pod'-type
+  -- document row. No natural due date to look forward to (delivery already
+  -- happened), so tiering instead reflects how overdue the paperwork is: a
+  -- 2-day grace period after delivery before this escalates from
+  -- 'this_week' to 'today'. due_at is the delivery date (when the POD
+  -- should have been captured), falling back to updated_at if delivery_date
+  -- was never recorded.
+  SELECT
+    'load'::TEXT,
+    l.id,
+    'pod_missing'::TEXT,
+    CASE
+      WHEN l.delivery_date IS NULL OR l.delivery_date <= CURRENT_DATE - INTERVAL '2 days' THEN 'today'
+      ELSE 'this_week'
+    END,
+    'POD missing'::TEXT,
+    'Load ' || l.load_number || ' delivered without a proof of delivery',
+    COALESCE(l.delivery_date::TIMESTAMPTZ, l.updated_at)
+  FROM loads l
+  WHERE l.carrier_org_id = my_org_id()
+    AND l.status = 'delivered'
+    AND NOT EXISTS (
+      SELECT 1 FROM documents doc WHERE doc.load_id = l.id AND doc.type = 'pod'
+    )
+
+  UNION ALL
+
+  -- 7) MAINTENANCE DUE: date-based reminders only -- see function-level note
+  -- on next_due_miles above. entity_type is 'vehicle' (the reminder is about
+  -- the vehicle, not a standalone entity of its own). 30-day horizon, same
+  -- reasoning as CDL: maintenance intervals are usually planned on a
+  -- similarly short runway, not an annual one.
+  SELECT
+    'vehicle'::TEXT,
+    mr.vehicle_id,
+    'maintenance_due'::TEXT,
+    CASE
+      WHEN mr.next_due_date < CURRENT_DATE THEN 'today'
+      WHEN mr.next_due_date <= CURRENT_DATE + INTERVAL '7 days' THEN 'this_week'
+      ELSE 'upcoming'
+    END,
+    'Maintenance due'::TEXT,
+    v.nickname || ': ' || mr.reminder_type || ' due ' || to_char(mr.next_due_date, 'Mon DD, YYYY'),
+    mr.next_due_date::TIMESTAMPTZ
+  FROM maintenance_reminders mr
+  JOIN vehicles v ON v.id = mr.vehicle_id
+  WHERE mr.carrier_org_id = my_org_id()
+    AND mr.is_active = true
+    AND mr.next_due_date IS NOT NULL
+    AND mr.next_due_date <= CURRENT_DATE + INTERVAL '30 days'
+
+$function$;
+REVOKE EXECUTE ON FUNCTION get_exceptions_unchecked() FROM PUBLIC, anon, authenticated;
+
+CREATE OR REPLACE FUNCTION get_exceptions()
+RETURNS TABLE(entity_type TEXT, entity_id BIGINT, exception_type TEXT, tier TEXT, title TEXT, detail TEXT, due_at TIMESTAMPTZ)
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT * FROM get_exceptions_unchecked() WHERE my_role() IN ('owner', 'solo', 'dispatcher', 'finance');
 $$;
