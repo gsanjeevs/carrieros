@@ -1,0 +1,118 @@
+# CI — the enforcement layer that local git hooks can't be (hooks are bypassable
+# with --no-verify and only run on one machine). Mirrors scripts/git-hooks/*
+# plus the DB-backed integration suite and the migration verifier.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  web-static:
+    name: Web — lint, typecheck, architecture
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: carrieros-web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: carrieros-web/package-lock.json
+      - run: npm ci
+      - run: npm run verify:compliance
+
+  mobile:
+    name: Mobile — typecheck, unit tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: carrieros-mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: carrieros-mobile/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm test -- --ci
+
+  integration:
+    name: Migrations + web integration tests (real Postgres)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: carrieros-web/package-lock.json
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # Same local stack developers use. Skip services the suites don't touch.
+      # project_id in supabase/config.toml is "carrieros", so the DB container
+      # is supabase_db_carrieros — exactly what scripts/db/migrate.mjs and
+      # tests/helpers.ts expect.
+      - name: Start local Supabase
+        run: supabase start -x studio,imgproxy,vector,logflare,edge-runtime,realtime,mailpit
+
+      - name: Apply migrations through the tracked runner
+        run: node scripts/db/migrate.mjs
+
+      - name: Verify migrations (clean build, upgrade path, snapshot parity, grants)
+        run: node scripts/db/verify-migrations.mjs
+
+      - name: Write test env from the running stack
+        working-directory: carrieros-web
+        run: |
+          eval "$(supabase status -o env)"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+            # Non-secret placeholders: the default suite never calls Anthropic
+            # (golden extraction tests are excluded from `npm test`).
+            echo "ANTHROPIC_API_KEY=ci-placeholder"
+            echo "CRON_SECRET=ci-cron-secret"
+            echo "INTAKE_WEBHOOK_SECRET=ci-intake-secret"
+          } > .env.local
+
+      - name: Install web dependencies
+        working-directory: carrieros-web
+        run: npm ci
+
+      # Several suites call the running app over HTTP (tests/helpers.ts apiFetch).
+      - name: Build and start the web app
+        working-directory: carrieros-web
+        run: |
+          npm run build
+          nohup npm run start -- -p 3000 > /tmp/web.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fs -o /dev/null http://localhost:3000/login && exit 0
+            sleep 2
+          done
+          echo "web app did not come up"; cat /tmp/web.log; exit 1
+
+      - name: Run integration tests
+        working-directory: carrieros-web
+        run: npm test
+
+      - name: Web app log (on failure)
+        if: failure()
+        run: cat /tmp/web.log || true

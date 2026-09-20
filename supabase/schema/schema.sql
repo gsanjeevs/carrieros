@@ -2873,9 +2873,9 @@ BEGIN
       -- Not found and not-yours are answered identically on purpose: telling a
       -- caller that a load exists but belongs to someone else is itself a
       -- cross-tenant disclosure.
-      RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'P0002';
+      RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404';  -- 0011: PostgREST -> HTTP 404
     END IF;
-    RAISE EXCEPTION 'VERSION_CONFLICT:%', v_load.status USING ERRCODE = '40001';
+    RAISE EXCEPTION 'VERSION_CONFLICT:%', v_load.status USING ERRCODE = 'PT409';  -- 0011: 40001 hangs PostgREST; PT409 -> HTTP 409
   END IF;
 
   SELECT id, status, load_number, driver_id INTO v_load FROM loads WHERE id = p_load_id;
