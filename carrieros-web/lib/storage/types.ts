@@ -20,4 +20,11 @@ export interface StorageProvider {
   // — the first real need for server-side file bytes, not just a signed
   // URL, since an emailed attachment needs the actual content.
   download(path: string): Promise<Blob>
+  /**
+   * A one-shot URL a client can PUT raw bytes to, valid for exactly this path.
+   * Lets big files (phone photos) go straight to storage instead of through an API
+   * body, which serverless hosts cap at a few MB.
+   */
+  createSignedUploadUrl(path: string): Promise<string>
+  exists(path: string): Promise<boolean>
 }

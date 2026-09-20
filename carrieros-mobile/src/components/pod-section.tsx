@@ -2,18 +2,16 @@
 // Proof-of-delivery photo capture for a load. Rendered from
 // src/app/load/[id].tsx for driver + solo roles.
 //
-// Storage contract (must be matched exactly or the upload 403s):
-//   bucket `documents` (PRIVATE) — path `{carrier_org_id}/loads/{load_id}/{file}`
-// RLS on storage.objects keys INSERT/SELECT off the FIRST path segment
-// equalling the caller's org id. DELETE is owner/solo-only via
-// `owner_solo_docs_delete`, but the additional `member_deletes_orphan_docs`
-// policy lets ANY org member delete an object as long as no `documents` row
-// references it — which is exactly the rollback case below, so drivers can
-// now clean up their own failed uploads.
-//
-// The bucket is private, so listing thumbnails uses createSignedUrl() —
-// getPublicUrl() returns a URL that always 400s here.
-import { useCallback, useEffect, useState } from 'react';
+// Data path (ADR 0003): everything goes through the shared API, none of it through
+// supabase.from()/storage. Uploading is three steps so the photo bytes never pass
+// through the API (serverless hosts cap request bodies at a few MB):
+//   1. POST /loads/{id}/document-uploads  -> server-chosen path + signed upload URL
+//   2. PUT the JPEG bytes to that URL (straight to storage)
+//   3. POST /loads/{id}/documents         -> server verifies the object exists at the
+//                                            issued path and records it
+// The server decides who may upload to which load and what path is used; this
+// component never builds a storage path.
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -24,16 +22,14 @@ import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { base64ToArrayBuffer } from '@/lib/base64';
 import { formatDate } from '@/lib/format-date';
-import { supabase } from '@/lib/supabase';
-import { resolveSubmitter } from '@/lib/submitter';
+import { apiClient } from '@/lib/api-client';
+import { keyForSubmission } from '@/lib/idempotency';
+import { logError } from '@/lib/observability';
 
 const ORANGE = BrandColors.orange;
-const BUCKET = 'documents';
-const SIGNED_URL_TTL_SECONDS = 60 * 60; // 1h — plenty for a screen session
 
 type PodDoc = {
   id: number;
-  storage_path: string;
   created_at: string | null;
   signedUrl: string | null;
 };
@@ -46,32 +42,18 @@ export function PodSection({ loadId }: { loadId: number }) {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const submissionKey = useRef<{ key: string; body: string } | null>(null);
 
   const loadDocs = useCallback(async () => {
-    const { data, error: fetchErr } = await supabase
-      .from('documents')
-      .select('id, storage_path, created_at')
-      .eq('load_id', loadId)
-      .eq('type', 'pod')
-      .order('created_at', { ascending: false });
-
-    if (fetchErr || !data) {
+    // The API returns each document with a short-lived signed download URL.
+    try {
+      const { data } = await apiClient.http.GET('/api/v1/loads/{id}/documents', {
+        params: { path: { id: loadId }, query: { type: 'pod' } },
+      });
+      setDocs((data?.documents ?? []).map((d) => ({ id: d.id, created_at: d.created_at, signedUrl: d.url })));
+    } catch {
       setDocs([]);
-      return;
     }
-
-    // One signed URL per object. createSignedUrls() (plural) exists but
-    // returns per-path errors inline; the loop keeps the mapping obvious and
-    // a POD list is small by nature.
-    const withUrls = await Promise.all(
-      data.map(async (d) => {
-        const { data: signed } = await supabase.storage
-          .from(BUCKET)
-          .createSignedUrl(d.storage_path, SIGNED_URL_TTL_SECONDS);
-        return { ...d, signedUrl: signed?.signedUrl ?? null };
-      })
-    );
-    setDocs(withUrls);
   }, [loadId]);
 
   useEffect(() => {
@@ -122,52 +104,48 @@ export function PodSection({ loadId }: { loadId: number }) {
     setError('');
 
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const userId = sessionData.session?.user.id;
-      if (!userId) {
-        setError(t('pod.errorNotSignedIn'));
-        return;
-      }
+      const bytes = base64ToArrayBuffer(base64);
 
-      const submitter = await resolveSubmitter(userId);
-      if (!submitter) {
-        setError(t('pod.errorResolveAccount'));
-        return;
-      }
-
-      const storagePath = `${submitter.carrierOrgId}/loads/${loadId}/pod-${Date.now()}.jpg`;
-      const body = base64ToArrayBuffer(base64);
-
-      const { error: uploadErr } = await supabase.storage
-        .from(BUCKET)
-        .upload(storagePath, body, { contentType: 'image/jpeg', upsert: false });
-
-      if (uploadErr) {
+      // 1. Ask for an upload slot. The server authorizes this actor for THIS load and chooses the path.
+      const slot = await apiClient.http.POST('/api/v1/loads/{id}/document-uploads', {
+        params: { path: { id: loadId } },
+        body: { type: 'pod', content_type: 'image/jpeg', size_bytes: bytes.byteLength },
+      });
+      if (!slot.data) {
+        logError({ where: 'pod-upload', step: 'request-slot', status: slot.response.status, bytes: bytes.byteLength }, slot.error);
         setError(t('pod.errorUploadFailed'));
         return;
       }
 
-      const { error: insertErr } = await supabase.from('documents').insert({
-        load_id: loadId,
-        carrier_org_id: submitter.carrierOrgId,
-        type: 'pod',
-        storage_path: storagePath,
-        uploaded_by: userId,
+      // 2. Bytes go straight to storage. An ArrayBuffer (not a Blob) is required on RN, see lib/base64.ts.
+      const put = await fetch(slot.data.upload_url, {
+        method: 'PUT',
+        headers: { 'Content-Type': slot.data.content_type },
+        body: bytes,
       });
+      if (!put.ok) {
+        logError({ where: 'pod-upload', step: 'put-bytes', status: put.status, bytes: bytes.byteLength }, await put.text().catch(() => ''));
+        setError(t('pod.errorUploadFailed'));
+        return;
+      }
 
-      if (insertErr) {
-        // Don't leave a silent orphan in the bucket. The insert failed, so no
-        // `documents` row points at this object and `member_deletes_orphan_docs`
-        // permits the delete for every role — the rollback is expected to
-        // succeed. It's still best-effort (a network drop could strand the
-        // file), so a failed cleanup is logged rather than claimed as clean.
-        const { error: removeErr } = await supabase.storage.from(BUCKET).remove([storagePath]);
-        if (removeErr) console.warn('POD rollback failed to remove', storagePath, removeErr);
+      // 3. Record it. The server verifies the object is really there; a retry with the same key applies once.
+      const body = { type: 'pod' as const, storage_path: slot.data.storage_path };
+      const { response } = await apiClient.http.POST('/api/v1/loads/{id}/documents', {
+        params: { path: { id: loadId }, header: { 'Idempotency-Key': keyForSubmission(submissionKey, body) } },
+        body,
+      });
+      if (!response.ok) {
+        logError({ where: 'pod-upload', step: 'finalize', status: response.status }, await response.text().catch(() => ''));
         setError(t('pod.errorSaveFailed'));
         return;
       }
 
+      submissionKey.current = null;
       await loadDocs();
+    } catch (e) {
+      logError({ where: 'pod-upload', step: 'exception' }, e); // no signal, etc.
+      setError(t('pod.errorUploadFailed'));
     } finally {
       setUploading(false);
     }

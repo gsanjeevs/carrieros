@@ -27,7 +27,8 @@ export interface LoadCommand<B> {
 export async function parseLoadCommand<B>(
   request: NextRequest,
   context: { params: Promise<{ id: string }> },
-  bodySchema: ZodType<B>
+  bodySchema: ZodType<B>,
+  options: { requireIdempotencyKey?: boolean } = {}
 ): Promise<LoadCommand<B> | NextResponse> {
   const authed = await getAuthedContext(request)
   if (isErrorResponse(authed)) return authed
@@ -35,8 +36,9 @@ export async function parseLoadCommand<B>(
   const params = LoadIdParamsSchema.safeParse({ id: Number((await context.params).id) })
   if (!params.success) return apiError('VALIDATION_ERROR', 'Invalid load id', 400)
 
+  const requireKey = options.requireIdempotencyKey ?? true
   const header = IdempotencyKeyHeaderSchema.safeParse({ 'Idempotency-Key': request.headers.get('idempotency-key') ?? '' })
-  if (!header.success) return apiError('VALIDATION_ERROR', 'Idempotency-Key header is required (8-128 characters)', 400)
+  if (requireKey && !header.success) return apiError('VALIDATION_ERROR', 'Idempotency-Key header is required (8-128 characters)', 400)
 
   let json: unknown
   try {
@@ -56,7 +58,7 @@ export async function parseLoadCommand<B>(
     userId: authed.user.id,
     actor: actor.value,
     loadId: params.data.id,
-    idempotencyKey: header.data['Idempotency-Key'],
+    idempotencyKey: header.success ? header.data['Idempotency-Key'] : '',
     body: body.data,
     requestId,
   }

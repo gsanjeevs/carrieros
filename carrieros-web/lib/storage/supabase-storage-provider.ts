@@ -41,4 +41,21 @@ export class SupabaseStorageProvider implements StorageProvider {
     if (error || !data) throw error ?? new Error('download returned no data')
     return data
   }
+
+  async createSignedUploadUrl(path: string): Promise<string> {
+    const { data, error } = await this.supabase.storage.from(this.bucket).createSignedUploadUrl(path)
+    if (error || !data) throw error ?? new Error('createSignedUploadUrl returned no data')
+    return data.signedUrl
+  }
+
+  async exists(path: string): Promise<boolean> {
+    // A folder listing filtered by filename, not storage.exists(): for a missing object under
+    // a caller's RLS, exists() surfaces "Bad Request" as an error instead of returning false.
+    const slash = path.lastIndexOf('/')
+    const dir = slash === -1 ? '' : path.slice(0, slash)
+    const name = slash === -1 ? path : path.slice(slash + 1)
+    const { data, error } = await this.supabase.storage.from(this.bucket).list(dir, { search: name, limit: 5 })
+    if (error) throw error
+    return (data ?? []).some((entry) => entry.name === name)
+  }
 }

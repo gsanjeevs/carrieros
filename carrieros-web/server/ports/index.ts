@@ -281,3 +281,26 @@ export interface DriverActionRepository {
   createFuelStop(actor: ActorContext, load: ShipmentAccess, record: FuelStopRecord): Promise<Result<{ id: number }>>
   createProblemReport(actor: ActorContext, load: ShipmentAccess, record: ProblemReportRecord): Promise<Result<{ id: number }>>
 }
+
+// ── Documents ───────────────────────────────────────────────────────────────
+
+export interface DocumentRecord {
+  readonly id: number
+  readonly type: string
+  readonly storagePath: string
+  readonly createdAt: string | null
+}
+
+export interface DocumentRepository {
+  findByPath(actor: ActorContext, storagePath: string): Promise<Result<DocumentRecord | null>>
+  insert(actor: ActorContext, input: { loadId: number; type: string; storagePath: string }): Promise<Result<DocumentRecord>>
+  listForLoad(actor: ActorContext, loadId: number, type: string): Promise<Result<readonly DocumentRecord[]>>
+}
+
+/** Object bytes never pass through the application; it only mints and checks access. */
+export interface ObjectStorage {
+  createUploadUrl(path: string): Promise<Result<string>>
+  exists(path: string): Promise<Result<boolean>>
+  createDownloadUrl(path: string, ttlSeconds: number): Promise<Result<string>>
+  remove(paths: readonly string[]): Promise<Result<void>>
+}

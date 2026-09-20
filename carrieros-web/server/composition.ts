@@ -55,3 +55,18 @@ export function createDriverActionService(supabase: SupabaseClient<Database>): D
     clock: { now: () => new Date() },
   })
 }
+
+import { DocumentService } from './application/document-service'
+import { SupabaseDocumentRepository } from './infrastructure/supabase/document-repository'
+import { SupabaseObjectStorage } from './infrastructure/supabase/object-storage'
+import { createStorageProvider } from '@/lib/storage'
+
+export function createDocumentService(supabase: SupabaseClient<Database>): DocumentService {
+  return new DocumentService({
+    shipments: new SupabaseShipmentCommandRepository(supabase),
+    documents: new SupabaseDocumentRepository(supabase),
+    storage: new SupabaseObjectStorage(createStorageProvider(supabase)),
+    ids: { uuid: () => crypto.randomUUID() },
+    idempotency: new SupabaseIdempotencyRepository(createAdminClient()),
+  })
+}

@@ -10,6 +10,7 @@
 import { z } from 'zod'
 import { CHANGE_ENTITIES } from '../domain/events/entities'
 import { LOAD_STATUS_GROUP_KEYS } from '../domain/load/status-groups'
+import { DOCUMENT_TYPES, UPLOAD_CONTENT_TYPES, MAX_UPLOAD_BYTES } from '../domain/documents/upload'
 import { PROBLEM_REASONS } from '../domain/driver-actions/problem-report'
 import { DATE_FORMATS, LANGUAGES, THEMES, TIME_FORMATS, UOM_SYSTEMS } from '../domain/profile/preferences'
 
@@ -129,6 +130,34 @@ export const ReportProblemBodySchema = z.object({
   note: z.string().max(1000).nullable().optional(),
 })
 export const ReportProblemResponseSchema = z.object({ id: z.number().int() })
+
+export const DocumentTypeSchema = z.enum(DOCUMENT_TYPES)
+
+export const RequestUploadBodySchema = z.object({
+  type: DocumentTypeSchema,
+  content_type: z.enum(UPLOAD_CONTENT_TYPES),
+  size_bytes: z.number().int().positive().max(MAX_UPLOAD_BYTES),
+})
+export const RequestUploadResponseSchema = z.object({
+  upload_url: z.string().describe('PUT the raw file bytes here with the Content-Type header below. Valid for this path only.'),
+  storage_path: z.string().describe('Chosen by the server. Pass it back to finalize the upload.'),
+  content_type: z.string(),
+})
+
+export const FinalizeDocumentBodySchema = z.object({ type: DocumentTypeSchema, storage_path: z.string().min(1).max(300) })
+export const DocumentResponseSchema = z.object({ id: z.number().int(), type: z.string(), storage_path: z.string() })
+
+export const ListDocumentsQuerySchema = z.object({ type: DocumentTypeSchema })
+export const ListDocumentsResponseSchema = z.object({
+  documents: z.array(
+    z.object({
+      id: z.number().int(),
+      type: z.string(),
+      created_at: z.string().nullable(),
+      url: z.string().nullable().describe('Short-lived signed download URL.'),
+    })
+  ),
+})
 
 export type ListLoadsQuery = z.infer<typeof ListLoadsQuerySchema>
 export type ListLoadsResponse = z.infer<typeof ListLoadsResponseSchema>

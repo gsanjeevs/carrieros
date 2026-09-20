@@ -25,3 +25,13 @@ describe('mobile observability', () => {
     spy.mockRestore();
   });
 });
+
+describe('logError with non-Error values', () => {
+  it('keeps the content of an object (e.g. an API error body) instead of "[object Object]"', () => {
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    logError({ where: 'test' }, { error_code: 'AUTH_REQUIRED', error: 'Unauthorized' });
+    const line = JSON.parse(spy.mock.calls[0][0] as string);
+    expect(line.error.message).toContain('AUTH_REQUIRED');
+    spy.mockRestore();
+  });
+});

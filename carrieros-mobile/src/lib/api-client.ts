@@ -7,6 +7,7 @@
 import { fetch as streamFetch } from 'expo/fetch';
 
 import { createApiClient } from '@/lib/generated/api-client';
+import { handleUnauthorized } from '@/lib/session-recovery';
 import { supabase } from '@/lib/supabase';
 
 export const apiClient = createApiClient({
@@ -15,4 +16,5 @@ export const apiClient = createApiClient({
   // live-update SSE stream).
   streamFetch: streamFetch as unknown as typeof fetch,
   getAccessToken: async () => (await supabase.auth.getSession()).data.session?.access_token,
+  onUnauthorized: () => void handleUnauthorized(),
 });

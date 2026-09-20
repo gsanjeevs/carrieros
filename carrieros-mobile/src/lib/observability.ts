@@ -21,7 +21,8 @@ function serializeError(error: unknown) {
   if (error instanceof Error) {
     return { message: error.message, name: error.name, stack: error.stack };
   }
-  return { message: String(error) };
+  // Non-Error values (an API error body, a string) must not collapse to "[object Object]".
+  return { message: typeof error === 'object' && error !== null ? JSON.stringify(error) : String(error) };
 }
 
 // Wire the tracker SDK here (Sentry.captureException(error, { extra: context })).

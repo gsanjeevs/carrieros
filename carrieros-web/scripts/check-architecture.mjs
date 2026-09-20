@@ -202,6 +202,7 @@ const API_ONLY = new Set([
   '../carrieros-mobile/src/hooks/use-register-push-token.ts',
   '../carrieros-mobile/src/lib/offline-queue.ts',
   '../carrieros-mobile/src/lib/profile-api.ts',
+  '../carrieros-mobile/src/components/pod-section.tsx',
 ])
 const DIRECT_DB = /\.from\(\s*['"`][A-Za-z_]+['"`]\s*\)|\.rpc\(\s*['"`]|supabase\s*\.\s*storage\b/
 const debt = { web: { files: new Set(), sites: 0 }, mobile: { files: new Set(), sites: 0 } }
