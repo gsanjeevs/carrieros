@@ -184,12 +184,53 @@ for (const [table, severity] of Object.entries(QUERY_ENCAPSULATION_SEVERITY)) {
   })
 }
 
+// ── ADR 0003: no frontend data access except through the API ────────────────
+//
+// Every screen reads and writes through /api/v1 (mobile via the generated
+// client; web Server Components via the same application services, called
+// in-process). A direct `.from('table')` / `.rpc('fn')` / `.storage` call in UI
+// code is a second data path with its own rules -- the source of the drift this
+// architecture exists to end.
+//
+// Ratchet, like the UI guard: legacy call sites are counted and reported as
+// debt (see architecture/inventory/*), and a file that has been migrated is
+// added to API_ONLY below, after which any new direct call in it is an ERROR.
+// Migrate a screen, add it here, and the regression is locked out.
+const API_ONLY = new Set([
+  'app/(app)/loads/page.tsx',
+  '../carrieros-mobile/src/app/(tabs)/loads.tsx',
+])
+const DIRECT_DB = /\.from\(\s*['"`][A-Za-z_]+['"`]\s*\)|\.rpc\(\s*['"`]|supabase\s*\.\s*storage\b/
+const debt = { web: { files: new Set(), sites: 0 }, mobile: { files: new Set(), sites: 0 } }
+
+function scanFrontend(kind, dirs, exclude) {
+  for (const dir of dirs) {
+    for (const file of filesMatching(dir, ['ts', 'tsx'])) {
+      if (exclude.some((e) => file.startsWith(e))) continue
+      const lines = readFileSync(path.join(ROOT, file), 'utf8').split('\n')
+      lines.forEach((line, i) => {
+        if (!DIRECT_DB.test(line) || /^\s*(\/\/|\*)/.test(line)) return
+        if (API_ONLY.has(file)) {
+          violations.push(`[api-only-frontend] ${file}:${i + 1}: ${line.trim()}\n  → This file is API-only (ADR 0003): read/write through /api/v1 (mobile: apiClient; web: the application services), not a direct table/RPC/storage call.`)
+        } else {
+          debt[kind].files.add(file)
+          debt[kind].sites += 1
+        }
+      })
+    }
+  }
+}
+scanFrontend('web', ['app', 'components'], ['app/api', 'app/(admin)'])
+scanFrontend('mobile', ['../carrieros-mobile/src'], ['../carrieros-mobile/src/lib/supabase.ts', '../carrieros-mobile/src/lib/api-client.ts', '../carrieros-mobile/src/types'])
+
 if (violations.length > 0) {
   console.error(`\n✗ Architecture check failed (${violations.length} violation(s)):\n`)
   console.error(violations.join('\n\n'))
   console.error('')
   process.exit(1)
 }
+
+console.log(`\nAPI-only migration (ADR 0003) — remaining direct DB call sites: web ${debt.web.sites} in ${debt.web.files.size} files (excl. app/api, admin), mobile ${debt.mobile.sites} in ${debt.mobile.files.size} files. Migrated: ${API_ONLY.size} files.`)
 
 if (warnings.length > 0) {
   console.log(`\n⚠ Architecture check: ${warnings.length} warning(s) (non-blocking, Rule B query-encapsulation debt):`)

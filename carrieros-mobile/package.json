@@ -33,6 +33,7 @@
     "expo-task-manager": "~57.0.6",
     "expo-web-browser": "~57.0.1",
     "i18n-js": "^4.5.3",
+    "openapi-fetch": "^0.17.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.86.0",

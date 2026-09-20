@@ -9,7 +9,9 @@ import { BrandColors, LOAD_STATUS_PILL, Spacing, StatusColors } from '@/constant
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
+import { supabase } from '@/lib/supabase'; // auth only (sign-out); data goes through apiClient
+import { useLiveRefresh } from '@/lib/generated/live-refresh';
 
 type Role = 'owner' | 'solo' | 'driver' | 'dispatcher' | 'finance';
 
@@ -55,20 +57,17 @@ export default function MyLoadsScreen() {
     if (!session?.user.id) return;
     setError('');
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', session.user.id)
-      .single();
+    // Both calls go through the shared API. `rate` and the driver-only
+    // restriction are decided server-side, so this screen no longer has to know
+    // about loads_driver_view.
+    const [me, loadsResult] = await Promise.all([
+      apiClient.http.GET('/api/v1/me'),
+      apiClient.http.GET('/api/v1/loads'),
+    ]);
 
-    const currentRole = (profile?.role ?? 'solo') as Role;
-    setRole(currentRole);
-
-    const cols = 'id, load_number, status, customer_name_raw, pickup_city, pickup_state, delivery_city, delivery_state';
-    const { data, error: loadsErr } =
-      currentRole === 'driver'
-        ? await supabase.from('loads_driver_view').select(cols).order('created_at', { ascending: false })
-        : await supabase.from('loads').select(cols).order('created_at', { ascending: false });
+    setRole((me.data?.role ?? 'solo') as Role);
+    const loadsErr = loadsResult.error;
+    const data = loadsResult.data?.loads;
 
     if (loadsErr) setError(t('common.loadErrorRetry'));
     setLoads((data as LoadRow[]) ?? []);
@@ -77,6 +76,10 @@ export default function MyLoadsScreen() {
   useEffect(() => {
     load().finally(() => setLoading(false));
   }, [load]);
+
+  // Backend changes (dispatcher assigns a load, status moves) update this list
+  // without a pull-to-refresh.
+  useLiveRefresh(apiClient, ['loads'], () => void load());
 
   async function onRefresh() {
     setRefreshing(true);
