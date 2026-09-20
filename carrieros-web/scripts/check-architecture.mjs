@@ -221,6 +221,19 @@ const API_ONLY = new Set([
   '../carrieros-mobile/src/hooks/use-profile-role.ts',
   '../carrieros-mobile/src/lib/submitter.ts',
   '../carrieros-mobile/src/lib/entitlements.ts',
+  '../carrieros-mobile/src/app/(tabs)/alerts.tsx',
+  '../carrieros-mobile/src/lib/exceptions.ts',
+  '../carrieros-mobile/src/app/(tabs)/customers.tsx',
+  '../carrieros-mobile/src/app/customers/index.tsx',
+  '../carrieros-mobile/src/app/customers/[id].tsx',
+  '../carrieros-mobile/src/app/billing/index.tsx',
+  '../carrieros-mobile/src/app/maintenance/index.tsx',
+  '../carrieros-mobile/src/app/settlements/index.tsx',
+  '../carrieros-mobile/src/components/ifta-section.tsx',
+  '../carrieros-mobile/src/components/ifta-summary.tsx',
+  '../carrieros-mobile/src/components/fuel-stops-section.tsx',
+  '../carrieros-mobile/src/components/driver-chat-section.tsx',
+  '../carrieros-mobile/src/app/(tabs)/home.tsx',
 ])
 const DIRECT_DB = /\.from\(\s*['"`][A-Za-z_]+['"`]\s*\)|\.rpc\(\s*['"`]|supabase\s*\.\s*storage\b/
 const debt = { web: { files: new Set(), sites: 0 }, mobile: { files: new Set(), sites: 0 } }

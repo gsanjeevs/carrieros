@@ -19,7 +19,7 @@ import { useLocale } from '@/hooks/use-locale';
 import { useSession } from '@/hooks/use-session';
 import { hasFeature } from '@/lib/entitlements';
 import { startIftaTracking, stopIftaTracking, type StartResult } from '@/lib/ifta-tracking';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase'; // entitlements.ts still takes it as a parameter; no direct table/RPC calls here
 import { apiClient } from '@/lib/api-client';
 
 const AMBER = '#d97706';
@@ -58,12 +58,8 @@ export function IftaSection({
   const isActive = ['dispatched', 'picked_up', 'in_transit'].includes(loadStatus);
 
   const fetchCrossings = useCallback(async () => {
-    const { data } = await supabase
-      .from('ifta_state_crossings')
-      .select('id, state, odometer_est, source')
-      .eq('load_id', loadId)
-      .order('crossed_at', { ascending: true });
-    setCrossings(data ?? []);
+    const { data } = await apiClient.http.GET('/api/v1/loads/{id}/ifta-crossings', { params: { path: { id: loadId } } });
+    setCrossings((data?.crossings as Crossing[] | undefined) ?? []);
   }, [loadId]);
 
   useEffect(() => {
@@ -82,12 +78,7 @@ export function IftaSection({
     if (isActive && !startedRef.current) {
       startedRef.current = true;
       (async () => {
-        const { data: driver } = await supabase
-          .from('drivers')
-          .select('id')
-          .eq('carrier_org_id', carrierOrgId)
-          .eq('profile_id', session.user.id)
-          .maybeSingle();
+        const { data: driver } = await apiClient.http.GET('/api/v1/me/driver-profile');
         if (!driver) return;
         const result = await startIftaTracking({ loadId, vehicleId, driverId: driver.id, carrierOrgId });
         setTrackingResult(result);
@@ -105,8 +96,8 @@ export function IftaSection({
     if (!entitled || loadStatus !== 'delivered' || checkedCompletenessRef.current) return;
     checkedCompletenessRef.current = true;
     (async () => {
-      const { data: complete } = await supabase.rpc('check_ifta_completeness', { p_load_id: loadId });
-      if (complete === false) {
+      const { data } = await apiClient.http.GET('/api/v1/loads/{id}/ifta-completeness', { params: { path: { id: loadId } } });
+      if (data?.complete === false) {
         setFallbackNeeded(true);
         setFallbackRows(
           crossings.length > 0

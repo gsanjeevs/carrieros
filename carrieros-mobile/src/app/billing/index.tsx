@@ -1,8 +1,10 @@
 // src/app/billing/index.tsx
 // Billing — view-only, owner/solo. Tier, trial status, payment-method-on-
-// file, and truck-count/overage are plain RLS-safe reads (carrier_details,
-// tiers — no service-role secret needed), same tables web's billing/page.tsx
-// reads. Add-Payment-Method / Change-Tier stay web-only: both are demo-mode
+// file, and truck-count/overage come from GET /api/v1/billing
+// (carrier_details + tiers + vehicle count, gated server-side by the
+// subscription_management capability — carrier_details RLS itself has no
+// role restriction, see server/application/billing-query-service.ts).
+// Add-Payment-Method / Change-Tier stay web-only: both are demo-mode
 // stubs today (see billing/page.tsx's header comment — no real Stripe
 // account exists yet) and a tier change is exactly the kind of considered
 // action better made with full context on web, not from a phone.
@@ -16,7 +18,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 
 const TIER_PRICE: Record<string, string> = {
   starter: '$49/mo',
@@ -48,39 +50,20 @@ export default function BillingScreen() {
   const load = useCallback(async () => {
     if (!session?.user.id) return;
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('org_id')
-      .eq('id', session.user.id)
-      .single();
+    const { data } = await apiClient.http.GET('/api/v1/billing');
+    if (!data) return;
 
-    if (!profile?.org_id) return;
-
-    const [{ data: d }, { count }] = await Promise.all([
-      supabase
-        .from('carrier_details')
-        .select('tier, billing_status, trial_ends_at, stripe_customer_id, card_brand, card_last4')
-        .eq('org_id', profile.org_id)
-        .single(),
-      supabase
-        .from('vehicles')
-        .select('*', { count: 'exact', head: true })
-        .eq('carrier_org_id', profile.org_id)
-        .eq('is_active', true),
-    ]);
-
-    setDetails(d ?? null);
-    setVehicleCount(count ?? 0);
-
-    if (d?.tier) {
-      const { data: currentTierRow } = await supabase
-        .from('tiers')
-        .select('included_trucks, price_per_additional_truck')
-        .eq('code', d.tier)
-        .single();
-      setIncludedTrucks(currentTierRow?.included_trucks ?? 0);
-      setPricePerAdditional(Number(currentTierRow?.price_per_additional_truck ?? 0));
-    }
+    setDetails({
+      tier: data.tier,
+      billing_status: data.billing_status,
+      trial_ends_at: data.trial_ends_at,
+      stripe_customer_id: data.stripe_customer_id,
+      card_brand: data.card_brand,
+      card_last4: data.card_last4,
+    });
+    setVehicleCount(data.vehicle_count);
+    setIncludedTrucks(data.included_trucks);
+    setPricePerAdditional(data.price_per_additional_truck);
   }, [session?.user.id]);
 
   useEffect(() => {

@@ -635,9 +635,9 @@ export interface SettlementRecord {
   readonly gross_revenue: number | null
   readonly net_pay: number | null
   readonly payment_status: string
-  readonly period_start: string
-  readonly period_end: string
-  readonly driver: { readonly driver_number: string; readonly first_name: string | null; readonly last_name: string | null } | null
+  readonly period_start: string | null
+  readonly period_end: string | null
+  readonly driver: { readonly driver_number: string | null; readonly first_name: string | null; readonly last_name: string | null } | null
 }
 
 /** driver_settlements reads. driverId non-null narrows to that driver's own rows

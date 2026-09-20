@@ -11764,9 +11764,11 @@
                             "type": "string"
                           },
                           "period_start": {
+                            "nullable": true,
                             "type": "string"
                           },
                           "period_end": {
+                            "nullable": true,
                             "type": "string"
                           },
                           "driver": {
@@ -11774,6 +11776,7 @@
                             "type": "object",
                             "properties": {
                               "driver_number": {
+                                "nullable": true,
                                 "type": "string"
                               },
                               "first_name": {

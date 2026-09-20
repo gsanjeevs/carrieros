@@ -1,12 +1,13 @@
 // src/app/settlements/index.tsx
 // Settlements — view-only. Owner/solo/finance see the full org list; driver
-// sees only their own rows (driver_own_settlements_select RLS does the
-// scoping, same as web's settlements/page.tsx). "Run Settlement" stays
-// web-only — it's a deliberate, infrequent, higher-stakes compute-then-write
-// action best done with full context, not from a phone. Staff additionally
-// need the driver_settlements Growth+ entitlement, same gate as web
-// (staff && !entitled shows an upgrade prompt instead of the list) —
-// mirrored via src/lib/entitlements.ts's hasFeature().
+// sees only their own rows. GET /api/v1/settlements does this scoping
+// server-side (driver_own_settlements_select RLS-equivalent, same as web's
+// settlements/page.tsx), and returns `entitled: false` instead of rows when
+// staff lack the driver_settlements Growth+ entitlement — same "upgrade
+// prompt instead of the list" shape this screen already rendered.
+// "Run Settlement" stays web-only — it's a deliberate, infrequent,
+// higher-stakes compute-then-write action best done with full context, not
+// from a phone.
 //
 // "Staff" is no longer a hand-written role array here: it comes from the
 // generated `settlements_manage` capability (src/lib/generated/role-capabilities.ts,
@@ -23,8 +24,7 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
-import { supabase } from '@/lib/supabase';
-import { hasFeature } from '@/lib/entitlements';
+import { apiClient } from '@/lib/api-client';
 import { formatMoney } from '@/lib/format-money';
 import { roleHasCapability } from '@/lib/generated/role-capabilities';
 
@@ -36,7 +36,7 @@ type SettlementRow = {
   payment_status: string;
   period_start: string;
   period_end: string;
-  drivers: { driver_number: string; profiles: { first_name: string | null; last_name: string | null } | null } | null;
+  driver: { driver_number: string | null; first_name: string | null; last_name: string | null } | null;
 };
 
 export default function SettlementsScreen() {
@@ -53,17 +53,10 @@ export default function SettlementsScreen() {
   const isStaff = roleHasCapability(role, 'settlements_manage');
 
   const load = useCallback(async () => {
-    if (isStaff) {
-      const ok = await hasFeature(supabase, 'driver_settlements');
-      setEntitled(ok);
-      if (!ok) return;
-    }
-    const { data } = await supabase
-      .from('driver_settlements')
-      .select('id, pay_method, gross_revenue, net_pay, payment_status, period_start, period_end, drivers(driver_number, profiles(first_name, last_name))')
-      .order('created_at', { ascending: false });
-    setSettlements((data as unknown as SettlementRow[] | null) ?? []);
-  }, [isStaff]);
+    const { data } = await apiClient.http.GET('/api/v1/settlements');
+    setEntitled(data?.entitled ?? true);
+    setSettlements((data?.settlements as unknown as SettlementRow[] | undefined) ?? []);
+  }, []);
 
   useEffect(() => {
     if (roleLoading) return;
@@ -108,9 +101,9 @@ export default function SettlementsScreen() {
               </ThemedText>
             }
             renderItem={({ item }) => {
-              const driverName = item.drivers?.profiles
-                ? [item.drivers.profiles.first_name, item.drivers.profiles.last_name].filter(Boolean).join(' ')
-                : item.drivers?.driver_number;
+              const driverName = item.driver
+                ? [item.driver.first_name, item.driver.last_name].filter(Boolean).join(' ') || item.driver.driver_number
+                : undefined;
               return (
                 <ThemedView style={[styles.card, { backgroundColor: theme.card }, styles.cardShadow]}>
                   <ThemedView type="transparent" style={styles.rowBetween}>

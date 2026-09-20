@@ -4930,10 +4930,10 @@ export interface operations {
                             gross_revenue: number | null;
                             net_pay: number | null;
                             payment_status: string;
-                            period_start: string;
-                            period_end: string;
+                            period_start: string | null;
+                            period_end: string | null;
                             driver: {
-                                driver_number: string;
+                                driver_number: string | null;
                                 first_name: string | null;
                                 last_name: string | null;
                             } | null;

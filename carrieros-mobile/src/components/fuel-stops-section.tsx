@@ -2,11 +2,10 @@
 // Fuel stop logging (mockup-18) -- Critical gap: fuel_stops has a mature web
 // UI (components/FuelStopsSection.tsx, per-vehicle) but was completely
 // absent from carrieros-mobile, where the mockup's whole flow actually
-// lives (a driver logging a stop mid-trip). RLS already has
-// driver_fuel_stops_insert (schema.sql) scoped to the driver's own
-// drivers.id -- no schema change needed, this is a pure UI addition.
-// Direct table insert/select (R3b category 2 -- plain RLS-protected CRUD),
-// same as the web component, not a Next.js route.
+// lives (a driver logging a stop mid-trip). Reads go through
+// GET /api/v1/loads/{id}/fuel-stops (gated by the fuel_log capability, same
+// as logging one); the write already went through the API in an earlier
+// batch.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput } from 'react-native';
 
@@ -18,7 +17,6 @@ import { useLocale } from '@/hooks/use-locale';
 import { useSession } from '@/hooks/use-session';
 import { formatMoney } from '@/lib/format-money';
 import { formatNumber } from '@/lib/format-number';
-import { supabase } from '@/lib/supabase'; // reads only; the write goes through the API
 import { apiClient } from '@/lib/api-client';
 import { keyForSubmission } from '@/lib/idempotency';
 
@@ -54,12 +52,8 @@ export function FuelStopsSection({
   const [pricePerGallon, setPricePerGallon] = useState('');
 
   const fetchStops = useCallback(async () => {
-    const { data } = await supabase
-      .from('fuel_stops')
-      .select('id, state, station, gallons, total_cost')
-      .eq('load_id', loadId)
-      .order('stop_date', { ascending: true });
-    setStops(data ?? []);
+    const { data } = await apiClient.http.GET('/api/v1/loads/{id}/fuel-stops', { params: { path: { id: loadId } } });
+    setStops((data?.fuel_stops as FuelStop[] | undefined) ?? []);
     setLoading(false);
   }, [loadId]);
 

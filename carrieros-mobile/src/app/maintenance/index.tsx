@@ -5,8 +5,9 @@
 // fleet in one place the way carrieros-web/app/(app)/maintenance/page.tsx
 // does. Read-only here (log-service stays on the per-vehicle screen this
 // pushes to, matching that screen's own "full reminder authoring stays a
-// web-only action for now" scope note) — same carrier_reminders_select RLS
-// (owner/solo/dispatcher, no write here).
+// web-only action for now" scope note) — GET /api/v1/maintenance-reminders,
+// org scoped only, same as carrier_reminders_select RLS (no role
+// restriction) and batch 1's own per-vehicle fleet reads.
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,7 +20,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 
 import { formatNumber } from '@/lib/format-number';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 
 type ReminderRow = {
   id: number;
@@ -27,7 +28,7 @@ type ReminderRow = {
   reminder_type: string;
   next_due_date: string | null;
   next_due_miles: number | null;
-  vehicles: { vehicle_number: string | null; nickname: string | null } | null;
+  vehicle: { vehicle_number: string | null; nickname: string | null } | null;
 };
 
 type Status = 'overdue' | 'dueSoon' | 'ok' | 'noDate';
@@ -63,12 +64,9 @@ export default function MaintenanceOverviewScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
-    const { data } = await supabase
-      .from('maintenance_reminders')
-      .select('id, vehicle_id, reminder_type, next_due_date, next_due_miles, vehicles(vehicle_number, nickname)')
-      .eq('is_active', true);
+    const { data } = await apiClient.http.GET('/api/v1/maintenance-reminders');
 
-    const rows = (data as unknown as ReminderRow[] | null) ?? [];
+    const rows = (data?.reminders as unknown as ReminderRow[] | undefined) ?? [];
     rows.sort((a, b) => {
       const orderDiff = STATUS_SORT_ORDER[computeStatus(a.next_due_date)] - STATUS_SORT_ORDER[computeStatus(b.next_due_date)];
       if (orderDiff !== 0) return orderDiff;
@@ -116,7 +114,7 @@ export default function MaintenanceOverviewScreen() {
           renderItem={({ item }) => {
             const status = computeStatus(item.next_due_date);
             const pill = STATUS_PILL[status];
-            const vehicleLabel = item.vehicles?.nickname || item.vehicles?.vehicle_number || '—';
+            const vehicleLabel = item.vehicle?.nickname || item.vehicle?.vehicle_number || '—';
             const dueLabel = [
               item.next_due_date ?? null,
               item.next_due_miles ? t('maintenanceOverview.milesValue', { miles: formatNumber(item.next_due_miles, locale) }) : null,

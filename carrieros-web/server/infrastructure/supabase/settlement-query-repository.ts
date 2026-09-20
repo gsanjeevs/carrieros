@@ -17,7 +17,7 @@ type Row = {
   payment_status: string
   period_start: string
   period_end: string
-  drivers: { driver_number: string; profiles: { first_name: string | null; last_name: string | null } | null } | null
+  drivers: { driver_number: string | null; profiles: { first_name: string | null; last_name: string | null } | null } | null
 }
 
 export class SupabaseSettlementQueryRepository implements SettlementQueryRepository {

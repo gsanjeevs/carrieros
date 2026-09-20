@@ -1,9 +1,8 @@
 // src/app/(tabs)/customers.tsx
 // "Customers" tab (Dispatcher tab 5, Finance tab 3) — read-only list of the
-// carrier's customer orgs. customer_details.carrier_org_id is the carrier
-// scoping join (per-carrier customer roster, not a global org directory);
-// RLS's carrier_customer_select policy already limits rows to this
-// carrier's own customers, so no client-side org filter is needed.
+// carrier's customer orgs, via GET /api/v1/customers (customer_details +
+// organizations, org scoped and gated by the customers_view capability
+// server-side — see server/application/customer-query-service.ts).
 import { useCallback, useEffect, useState } from 'react';
 import { FlatList, ActivityIndicator, Pressable, RefreshControl, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,13 +14,13 @@ import { ExceptionChip } from '@/components/exception-chip';
 import { Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 import { fetchExceptions, topExceptionByEntity, type ExceptionRow } from '@/lib/exceptions';
 
 type CustomerRow = {
   org_id: number;
   contact_name: string | null;
-  organizations: { name: string; phone: string | null; email: string | null } | null;
+  organization: { name: string; phone: string | null; email: string | null } | null;
 };
 
 export default function CustomersScreen() {
@@ -37,21 +36,14 @@ export default function CustomersScreen() {
   const load = useCallback(async () => {
     setError('');
     const [{ data, error: queryErr }, exceptionRows] = await Promise.all([
-      supabase
-        .from('customer_details')
-        // See src/app/customers/index.tsx's comment — customer_details has
-        // two FKs to organizations, so this embed needs the explicit fkey
-        // hint or PostgREST returns an ambiguous-relationship error that
-        // silently came back here as an empty list.
-        .select('org_id, contact_name, organizations!customer_details_org_id_fkey(name, phone, email)')
-        .order('org_id', { ascending: true }),
+      apiClient.http.GET('/api/v1/customers'),
       fetchExceptions(),
     ]);
     if (queryErr) {
-      console.error('[customers tab] list query failed:', queryErr.message);
+      console.error('[customers tab] list query failed:', queryErr);
       setError(t('common.loadErrorRetry'));
     }
-    setCustomers((data as unknown as CustomerRow[] | null) ?? []);
+    setCustomers((data?.customers as unknown as CustomerRow[] | undefined) ?? []);
     setExceptions(exceptionRows);
   }, [t]);
 
@@ -94,14 +86,14 @@ export default function CustomersScreen() {
             </ThemedText>
           }
           renderItem={({ item }) => {
-            const contact = item.organizations?.phone ?? item.organizations?.email;
+            const contact = item.organization?.phone ?? item.organization?.email;
             const topException = topExceptionByCustomer.get(item.org_id);
             return (
               <Pressable
                 style={[styles.card, { backgroundColor: theme.card }, styles.cardShadow]}
                 onPress={() => router.push({ pathname: '/customers/[id]', params: { id: String(item.org_id) } })}
               >
-                <ThemedText type="smallBold">{item.organizations?.name ?? t('common.unknownCustomer')}</ThemedText>
+                <ThemedText type="smallBold">{item.organization?.name ?? t('common.unknownCustomer')}</ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
                   {contact ?? t('customers.noContact')}
                 </ThemedText>

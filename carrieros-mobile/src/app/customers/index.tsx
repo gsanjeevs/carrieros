@@ -4,8 +4,7 @@
 // already at 5 tabs (Home, Loads, Alerts, Fleet, More); a 6th tab would
 // trigger iOS's native tab-bar overflow ("More") and collide with this
 // app's own More tab, so this reuses (tabs)/customers.tsx's read — same
-// customer_details/organizations query, same carrier_customer_select RLS
-// scoping — via a stack route instead.
+// GET /api/v1/customers call — via a stack route instead.
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,13 +16,13 @@ import { ExceptionChip } from '@/components/exception-chip';
 import { Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 import { fetchExceptions, topExceptionByEntity, type ExceptionRow } from '@/lib/exceptions';
 
 type CustomerRow = {
   org_id: number;
   contact_name: string | null;
-  organizations: { name: string; phone: string | null; email: string | null } | null;
+  organization: { name: string; phone: string | null; email: string | null } | null;
 };
 
 export default function CustomersScreen() {
@@ -39,22 +38,14 @@ export default function CustomersScreen() {
   const load = useCallback(async () => {
     setError('');
     const [{ data, error: queryErr }, exceptionRows] = await Promise.all([
-      supabase
-        .from('customer_details')
-        // customer_details has two FKs to organizations (its own carrier_org_id
-        // and this org_id) -- PostgREST can't infer which one without an
-        // explicit hint and returns 300 Multiple Choices otherwise, which
-        // silently came back as an empty list here. Same fkey name web's
-        // customers/page.tsx already had to specify.
-        .select('org_id, contact_name, organizations!customer_details_org_id_fkey(name, phone, email)')
-        .order('org_id', { ascending: true }),
+      apiClient.http.GET('/api/v1/customers'),
       fetchExceptions(),
     ]);
     if (queryErr) {
-      console.error('[customers] list query failed:', queryErr.message);
+      console.error('[customers] list query failed:', queryErr);
       setError(t('common.loadErrorRetry'));
     }
-    setCustomers((data as unknown as CustomerRow[] | null) ?? []);
+    setCustomers((data?.customers as unknown as CustomerRow[] | undefined) ?? []);
     setExceptions(exceptionRows);
   }, [t]);
 
@@ -100,14 +91,14 @@ export default function CustomersScreen() {
             </ThemedText>
           }
           renderItem={({ item }) => {
-            const contact = item.organizations?.phone ?? item.organizations?.email;
+            const contact = item.organization?.phone ?? item.organization?.email;
             const topException = topExceptionByCustomer.get(item.org_id);
             return (
               <Pressable
                 style={[styles.card, { backgroundColor: theme.card }, styles.cardShadow]}
                 onPress={() => router.push({ pathname: '/customers/[id]', params: { id: String(item.org_id) } })}
               >
-                <ThemedText type="smallBold">{item.organizations?.name ?? t('common.unknownCustomer')}</ThemedText>
+                <ThemedText type="smallBold">{item.organization?.name ?? t('common.unknownCustomer')}</ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
                   {contact ?? t('customers.noContact')}
                 </ThemedText>

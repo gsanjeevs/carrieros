@@ -3,7 +3,11 @@
 // behind one route, branching on profiles.role (see
 // src/hooks/use-profile-role.ts). This is NOT the old (tabs)/index.tsx
 // (that content moved to loads.tsx unchanged) — this is a real dashboard
-// per role, per the mobile-parity design pass.
+// per role, per the mobile-parity design pass. All content comes from one
+// GET /api/v1/dashboard call (server/application/dashboard-query-service.ts
+// assembles the same per-role reads this screen used to make as 3-5
+// separate round trips) instead of querying loads/vehicles/drivers/invoices
+// directly.
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,16 +17,12 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { LOAD_STATUS_PILL, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
 import { formatDate } from '@/lib/format-date';
 import { formatMoney } from '@/lib/format-money';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 
-// A load actively in progress — same set used for the Dispatcher ops board
-// and the Solo "My Load Today" hybrid check.
-const ACTIVE_LOAD_STATUSES = ['dispatched', 'picked_up', 'in_transit'];
 // Stale-load threshold (decisions.md, mobile-parity plan): a load whose
 // `loads.updated_at` hasn't moved in 4+ hours is flagged on the Dispatcher
 // ops board. `updated_at` is the timestamp this schema actually exposes on
@@ -42,8 +42,6 @@ type LoadRow = {
 };
 
 type OpsLoadRow = LoadRow & { driver_id: number | null; vehicle_id: number | null; updated_at: string | null };
-
-type VehicleStatusRow = { status: string };
 
 type InvoiceRow = {
   id: number;
@@ -111,7 +109,6 @@ function SectionHeading({ text }: { text: string }) {
 export default function HomeScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { session } = useSession();
   const { t, locale } = useLocale();
   const { role, loading: roleLoading } = useProfileRole();
 
@@ -140,129 +137,30 @@ export default function HomeScreen() {
   const [mostOverdue, setMostOverdue] = useState<InvoiceRow[]>([]);
   const [recentPayments, setRecentPayments] = useState<InvoiceRow[]>([]);
 
-  const loadOwnerSoloContent = useCallback(async () => {
-    const [
-      { count: activeCount, error: activeErr },
-      { data: vehicles, error: vehiclesErr },
-      { data: recent, error: recentErr },
-    ] = await Promise.all([
-      supabase.from('loads').select('id', { count: 'exact', head: true }).in('status', ACTIVE_LOAD_STATUSES),
-      supabase.from('vehicles').select('status').eq('is_active', true),
-      supabase
-        .from('loads')
-        .select('id, load_number, status, customer_name_raw, pickup_city, pickup_state, delivery_city, delivery_state')
-        .order('created_at', { ascending: false })
-        .limit(5),
-    ]);
-    if (activeErr || vehiclesErr || recentErr) setError(t('common.loadErrorRetry'));
-
-    setActiveLoadsCount(activeCount ?? 0);
-
-    const counts = { active: 0, idle: 0, in_shop: 0 };
-    for (const v of (vehicles as VehicleStatusRow[] | null) ?? []) {
-      if (v.status === 'active') counts.active++;
-      else if (v.status === 'idle') counts.idle++;
-      else if (v.status === 'in_shop') counts.in_shop++;
-    }
-    setFleetCounts(counts);
-    setRecentLoads((recent as LoadRow[]) ?? []);
-  }, [t]);
-
-  const loadSoloDriverCard = useCallback(async () => {
-    if (!session?.user.id) return;
-    const { data: driver, error: driverErr } = await supabase
-      .from('drivers')
-      .select('id')
-      .eq('profile_id', session.user.id)
-      .single();
-    if (driverErr) setError(t('common.loadErrorRetry'));
-    if (!driver) return;
-
-    const { data: activeLoad, error: activeLoadErr } = await supabase
-      .from('loads_driver_view')
-      .select('id, load_number, status, customer_name_raw, pickup_city, pickup_state, delivery_city, delivery_state')
-      .eq('driver_id', driver.id)
-      .in('status', ACTIVE_LOAD_STATUSES)
-      .order('created_at', { ascending: false })
-      .maybeSingle();
-    if (activeLoadErr) setError(t('common.loadErrorRetry'));
-
-    setSoloActiveLoad((activeLoad as LoadRow | null) ?? null);
-  }, [session?.user.id, t]);
-
-  const loadDispatcherContent = useCallback(async () => {
-    const [
-      { data: active, error: activeErr },
-      { data: drivers, error: driversErr },
-      { data: vehicles, error: vehiclesErr },
-    ] = await Promise.all([
-      supabase
-        .from('loads')
-        .select('id, load_number, status, customer_name_raw, pickup_city, pickup_state, delivery_city, delivery_state, driver_id, vehicle_id, updated_at')
-        .in('status', ACTIVE_LOAD_STATUSES)
-        .order('updated_at', { ascending: true }),
-      supabase.from('drivers').select('id').eq('is_active', true),
-      supabase.from('vehicles').select('id, status').eq('is_active', true),
-    ]);
-    if (activeErr || driversErr || vehiclesErr) setError(t('common.loadErrorRetry'));
-
-    const activeLoads = (active as OpsLoadRow[] | null) ?? [];
-    setOpsLoads(activeLoads);
-
-    const assignedDriverIds = new Set(activeLoads.map((l) => l.driver_id).filter((id): id is number => id != null));
-    const assignedVehicleIds = new Set(activeLoads.map((l) => l.vehicle_id).filter((id): id is number => id != null));
-
-    const allDrivers = (drivers as { id: number }[] | null) ?? [];
-    setAvailableDrivers(allDrivers.filter((d) => !assignedDriverIds.has(d.id)).length);
-
-    const allVehicles = (vehicles as { id: number; status: string }[] | null) ?? [];
-    setAvailableVehicles(
-      allVehicles.filter((v) => v.status === 'active' && !assignedVehicleIds.has(v.id)).length
-    );
-  }, [t]);
-
-  const loadFinanceContent = useCallback(async () => {
-    const [
-      { data: outstanding, error: outstandingErr },
-      { data: overdue, error: overdueErr },
-      { data: payments, error: paymentsErr },
-    ] = await Promise.all([
-      supabase.from('invoices').select('amount').in('status', ['sent', 'overdue']),
-      supabase
-        .from('invoices')
-        .select('id, invoice_number, amount, due_date, paid_at')
-        .in('status', ['sent', 'overdue'])
-        .order('due_date', { ascending: true })
-        .limit(5),
-      supabase
-        .from('invoices')
-        .select('id, invoice_number, amount, due_date, paid_at')
-        .eq('status', 'paid')
-        .order('paid_at', { ascending: false })
-        .limit(5),
-    ]);
-    if (outstandingErr || overdueErr || paymentsErr) setError(t('common.loadErrorRetry'));
-
-    const outstandingRows = (outstanding as { amount: number }[] | null) ?? [];
-    setOutstandingCount(outstandingRows.length);
-    setOutstandingTotal(outstandingRows.reduce((sum, r) => sum + Number(r.amount ?? 0), 0));
-    setMostOverdue((overdue as InvoiceRow[] | null) ?? []);
-    setRecentPayments((payments as InvoiceRow[] | null) ?? []);
-  }, [t]);
-
   const load = useCallback(async () => {
     if (!role) return;
     setError('');
-    if (role === 'owner') {
-      await loadOwnerSoloContent();
-    } else if (role === 'solo') {
-      await Promise.all([loadOwnerSoloContent(), loadSoloDriverCard()]);
-    } else if (role === 'dispatcher') {
-      await loadDispatcherContent();
-    } else if (role === 'finance') {
-      await loadFinanceContent();
+
+    const { data, error: err } = await apiClient.http.GET('/api/v1/dashboard');
+    if (err || !data) {
+      setError(t('common.loadErrorRetry'));
+      return;
     }
-  }, [role, loadOwnerSoloContent, loadSoloDriverCard, loadDispatcherContent, loadFinanceContent]);
+
+    setActiveLoadsCount(data.active_loads_count ?? 0);
+    setFleetCounts(data.fleet_counts ?? { active: 0, idle: 0, in_shop: 0 });
+    setRecentLoads((data.recent_loads as LoadRow[] | undefined) ?? []);
+    setSoloActiveLoad((data.solo_active_load as LoadRow | null | undefined) ?? null);
+
+    setOpsLoads((data.ops_loads as OpsLoadRow[] | undefined) ?? []);
+    setAvailableDrivers(data.available_drivers ?? 0);
+    setAvailableVehicles(data.available_vehicles ?? 0);
+
+    setOutstandingCount(data.outstanding_count ?? 0);
+    setOutstandingTotal(data.outstanding_total ?? 0);
+    setMostOverdue((data.most_overdue_invoices as InvoiceRow[] | undefined) ?? []);
+    setRecentPayments((data.recent_payments as InvoiceRow[] | undefined) ?? []);
+  }, [role, t]);
 
   useEffect(() => {
     if (roleLoading) return;

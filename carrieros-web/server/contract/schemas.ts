@@ -466,9 +466,9 @@ export const SettlementSchema = z.object({
   gross_revenue: z.number().nullable(),
   net_pay: z.number().nullable(),
   payment_status: z.string(),
-  period_start: z.string(),
-  period_end: z.string(),
-  driver: z.object({ driver_number: z.string(), first_name: z.string().nullable(), last_name: z.string().nullable() }).nullable(),
+  period_start: z.string().nullable(),
+  period_end: z.string().nullable(),
+  driver: z.object({ driver_number: z.string().nullable(), first_name: z.string().nullable(), last_name: z.string().nullable() }).nullable(),
 })
 export const ListSettlementsResponseSchema = z.object({ entitled: z.boolean(), settlements: z.array(SettlementSchema) })
 
