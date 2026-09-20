@@ -69,6 +69,7 @@ makes it the *only* way UI code touches data, and adds live updates.
 | Ports / adapters | `server/ports`, `server/infrastructure/supabase/*`, `server/composition.ts` |
 | Endpoints | `GET /api/v1/{loads,me,events}` |
 | Migrated screens | web `app/(app)/loads/page.tsx`, mobile `(tabs)/loads.tsx` |
+| Writes migrated (batch 1) | `POST /api/v1/loads/{id}/milestones` (atomic status+timeline+audit+outbox, idempotent, CAS), `PATCH /api/v1/me/preferences`, `PUT /api/v1/me/push-token`; mobile offline queue is now a typed command queue over the same endpoint |
 | Tests | `v1-loads`, `v1-events`, `api-client` (Vitest), CI drift check |
 
 The pilot also fixed a real inconsistency: mobile enforced "drivers never see
@@ -81,7 +82,7 @@ without the `invoice_actions` capability.
 Remaining debt is printed by `check-architecture.mjs` on every run and itemised
 in `architecture/inventory/*`. Suggested order (highest risk first):
 
-1. **Writes** — 26 mobile table writes, ~19 web client components that write
+1. **Writes** — (batch 1 done: load status, preferences, push token = 7 of 26 mobile writes) 26 mobile table writes, ~19 web client components that write
    directly. Each becomes a command endpoint; multi-step ones (load status +
    timeline) route through `submit_shipment_milestone` (0006–0011), which is
    already built but not yet called.
