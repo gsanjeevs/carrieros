@@ -95,7 +95,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** A load's fuel stops */
+        get: operations["listFuelStops"];
         put?: never;
         /** Log a fuel purchase against a load (retry-safe) */
         post: operations["logFuelStop"];
@@ -268,7 +269,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** A load's recorded IFTA state crossings */
+        get: operations["listIftaCrossings"];
         put?: never;
         /** Record a GPS state crossing for IFTA (retry-safe; requires the ifta_mileage_log entitlement) */
         post: operations["recordIftaCrossing"];
@@ -441,6 +443,176 @@ export interface paths {
         };
         /** DVIR history: the caller's own inspections if a driver, the whole organization's otherwise */
         get: operations["listDvirInspections"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/exceptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The org's exception feed (get_exceptions()), grouped by tier */
+        get: operations["listExceptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the carrier's customer orgs (requires the customers_view capability) */
+        get: operations["listCustomers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A single customer, its recent loads, and its health score (requires the customers_view capability) */
+        get: operations["getCustomer"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/billing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Tier, trial status, payment method and fleet-overage pricing (requires the subscription_management capability) */
+        get: operations["getBilling"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/maintenance-reminders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Fleet-wide active maintenance reminders */
+        get: operations["listMaintenanceReminders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/settlements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Driver settlements: the caller's own if a driver, the whole organization's if staff (requires driver_settlements entitlement for staff) */
+        get: operations["listSettlements"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/loads/{id}/ifta-completeness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Whether GPS-recorded miles cover at least 60% of the load's total_miles (check_ifta_completeness()) */
+        get: operations["getIftaCompleteness"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reports/ifta-quarterly": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Org-wide quarterly IFTA state mileage summary (requires the finance capability) */
+        get: operations["getIftaQuarterlySummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/loads/{id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A load's driver <-> back-office message thread */
+        get: operations["listMessages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Role-branched Home tab content (owner/solo, dispatcher, or finance) */
+        get: operations["getDashboard"];
         put?: never;
         post?: never;
         delete?: never;
@@ -967,6 +1139,104 @@ export interface operations {
             };
             /** @description Error */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+        };
+    };
+    listFuelStops: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        fuel_stops: {
+                            id: number;
+                            state: string;
+                            station: string | null;
+                            gallons: number;
+                            total_cost: number;
+                        }[];
+                    };
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2658,6 +2928,103 @@ export interface operations {
             };
         };
     };
+    listIftaCrossings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        crossings: {
+                            id: number;
+                            state: string;
+                            odometer_est: number | null;
+                            source: string;
+                        }[];
+                    };
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+        };
+    };
     recordIftaCrossing: {
         parameters: {
             query?: never;
@@ -4027,6 +4394,966 @@ export interface operations {
                                 /** @enum {string|null} */
                                 severity: "minor" | "major" | null;
                             }[];
+                        }[];
+                    };
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+        };
+    };
+    listExceptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        exceptions: {
+                            entity_type: string;
+                            entity_id: number;
+                            exception_type: string;
+                            tier: string;
+                            title: string;
+                            detail: string;
+                            due_at: string | null;
+                        }[];
+                    };
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+        };
+    };
+    listCustomers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        customers: {
+                            org_id: number;
+                            contact_name: string | null;
+                            organization: {
+                                name: string;
+                                phone: string | null;
+                                email: string | null;
+                            } | null;
+                        }[];
+                    };
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getCustomer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        customer: {
+                            org_id: number;
+                            customer_number: string | null;
+                            contact_name: string | null;
+                            tags: string[] | null;
+                            notes: string | null;
+                            organization: {
+                                name: string;
+                                phone: string | null;
+                                email: string | null;
+                                city: string | null;
+                                state: string | null;
+                            } | null;
+                        };
+                        recent_loads: {
+                            id: number;
+                            load_number: string;
+                            status: string | null;
+                            rate: number | null;
+                            delivery_date: string | null;
+                        }[];
+                        health_score: number | null;
+                    };
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getBilling: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        tier: string | null;
+                        billing_status: string | null;
+                        trial_ends_at: string | null;
+                        stripe_customer_id: string | null;
+                        card_brand: string | null;
+                        card_last4: string | null;
+                        vehicle_count: number;
+                        included_trucks: number;
+                        price_per_additional_truck: number;
+                    };
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+        };
+    };
+    listMaintenanceReminders: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        reminders: {
+                            id: number;
+                            vehicle_id: number;
+                            reminder_type: string;
+                            next_due_date: string | null;
+                            next_due_miles: number | null;
+                            vehicle: {
+                                vehicle_number: string | null;
+                                nickname: string | null;
+                            } | null;
+                        }[];
+                    };
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+        };
+    };
+    listSettlements: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        entitled: boolean;
+                        settlements: {
+                            id: number;
+                            pay_method: string;
+                            gross_revenue: number | null;
+                            net_pay: number | null;
+                            payment_status: string;
+                            period_start: string;
+                            period_end: string;
+                            driver: {
+                                driver_number: string;
+                                first_name: string | null;
+                                last_name: string | null;
+                            } | null;
+                        }[];
+                    };
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getIftaCompleteness: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        complete: boolean;
+                    };
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getIftaQuarterlySummary: {
+        parameters: {
+            query: {
+                quarter: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        entitled: boolean;
+                        rows: {
+                            state: string;
+                            total_miles: number;
+                        }[];
+                    };
+                };
+            };
+            /** @description Error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+        };
+    };
+    listMessages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        messages: {
+                            id: number;
+                            sender_id: string | null;
+                            body: string;
+                            original_language: string | null;
+                            sent_at: string;
+                            read_at: string | null;
+                        }[];
+                    };
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getDashboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        role: string;
+                        active_loads_count?: number;
+                        fleet_counts?: {
+                            active: number;
+                            idle: number;
+                            in_shop: number;
+                        };
+                        recent_loads?: {
+                            id: number;
+                            load_number: string;
+                            status: string;
+                            customer_name_raw: string | null;
+                            pickup_city: string | null;
+                            pickup_state: string | null;
+                            delivery_city: string | null;
+                            delivery_state: string | null;
+                        }[];
+                        solo_active_load?: {
+                            id: number;
+                            load_number: string;
+                            status: string;
+                            customer_name_raw: string | null;
+                            pickup_city: string | null;
+                            pickup_state: string | null;
+                            delivery_city: string | null;
+                            delivery_state: string | null;
+                        } | null;
+                        ops_loads?: {
+                            id: number;
+                            load_number: string;
+                            status: string;
+                            customer_name_raw: string | null;
+                            pickup_city: string | null;
+                            pickup_state: string | null;
+                            delivery_city: string | null;
+                            delivery_state: string | null;
+                            driver_id: number | null;
+                            vehicle_id: number | null;
+                            updated_at: string | null;
+                        }[];
+                        available_drivers?: number;
+                        available_vehicles?: number;
+                        outstanding_total?: number;
+                        outstanding_count?: number;
+                        most_overdue_invoices?: {
+                            id: number;
+                            invoice_number: string;
+                            amount: number;
+                            due_date: string | null;
+                            paid_at: string | null;
+                        }[];
+                        recent_payments?: {
+                            id: number;
+                            invoice_number: string;
+                            amount: number;
+                            due_date: string | null;
+                            paid_at: string | null;
                         }[];
                     };
                 };

@@ -52,6 +52,13 @@ export class DriverActionService {
     })
   }
 
+  /** A load's fuel stops. Same 'fuel_log' gate as logFuelStop. */
+  async listFuelStops(actor: ActorContext, loadId: number) {
+    const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, 'fuel_log', 'view fuel stops')
+    if (!access.ok) return access
+    return this.deps.actions.listFuelStopsForLoad(actor, loadId)
+  }
+
   async reportProblem(
     actor: ActorContext,
     loadId: number,

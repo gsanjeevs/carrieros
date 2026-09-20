@@ -284,9 +284,19 @@ export interface ProblemReportRecord {
   readonly detail: string | null
 }
 
+export interface FuelStopReadRecord {
+  readonly id: number
+  readonly state: string
+  readonly station: string | null
+  readonly gallons: number
+  readonly total_cost: number
+}
+
 export interface DriverActionRepository {
   createFuelStop(actor: ActorContext, load: ShipmentAccess, record: FuelStopRecord): Promise<Result<{ id: number }>>
   createProblemReport(actor: ActorContext, load: ShipmentAccess, record: ProblemReportRecord): Promise<Result<{ id: number }>>
+  /** A load's fuel stops, oldest first. */
+  listFuelStopsForLoad(actor: ActorContext, loadId: number): Promise<Result<readonly FuelStopReadRecord[]>>
 }
 
 // ── Documents ───────────────────────────────────────────────────────────────
@@ -329,9 +339,20 @@ export interface InvoiceWriteRepository {
 
 // ── Messages, location, driver profile, fleet service ───────────────────────
 
+export interface DriverMessageRecord {
+  readonly id: number
+  readonly sender_id: string | null
+  readonly body: string
+  readonly original_language: string | null
+  readonly sent_at: string
+  readonly read_at: string | null
+}
+
 export interface MessageRepository {
   /** Marks the given messages read, but only those on this load that the actor did not send. Returns how many changed. */
   markRead(actor: ActorContext, loadId: number, messageIds: readonly number[], readAt: Date): Promise<Result<number>>
+  /** A load's message thread, oldest first. */
+  listForLoad(actor: ActorContext, loadId: number): Promise<Result<readonly DriverMessageRecord[]>>
 }
 
 export interface LoadLocationRepository {
@@ -421,12 +442,23 @@ export interface MaintenanceReminderRecord {
   readonly triggerMiles: number | null
 }
 
+export interface FleetReminderRecord {
+  readonly id: number
+  readonly vehicleId: number
+  readonly reminderType: string
+  readonly nextDueDate: string | null
+  readonly nextDueMiles: number | null
+  readonly vehicle: { readonly vehicle_number: string | null; readonly nickname: string | null } | null
+}
+
 export interface FleetQueryRepository {
   listActiveForOrg(actor: ActorContext): Promise<Result<readonly VehicleSummaryRecord[]>>
   getDetailForActor(
     actor: ActorContext,
     vehicleId: number
   ): Promise<Result<{ vehicle: VehicleSummaryRecord; serviceLogs: readonly ServiceLogRecord[]; reminders: readonly MaintenanceReminderRecord[] } | null>>
+  /** Fleet-wide active reminders, org scoped. Matches `carrier_reminders_select` (no role restriction). */
+  listActiveReminders(actor: ActorContext): Promise<Result<readonly FleetReminderRecord[]>>
 }
 
 // ── Invoice reads ───────────────────────────────────────────────────────────
@@ -478,6 +510,18 @@ export interface DvirQueryRepository {
   listForActor(actor: ActorContext, driverId: number | null): Promise<Result<readonly DvirHistoryItem[]>>
 }
 
+export interface IftaCrossingRecord {
+  readonly id: number
+  readonly state: string
+  readonly odometer_est: number | null
+  readonly source: string
+}
+
+export interface IftaStateMiles {
+  readonly state: string
+  readonly total_miles: number
+}
+
 export interface IftaRepository {
   insertGpsCrossing(
     actor: ActorContext,
@@ -486,6 +530,12 @@ export interface IftaRepository {
   ): Promise<Result<{ id: number }>>
   /** Atomic: delete the load's GPS crossings, insert the manual rows. Returns rows written. */
   replaceWithManual(actor: ActorContext, loadId: number, rows: readonly { state: string; miles: number }[]): Promise<Result<number>>
+  /** A load's recorded crossings, earliest first. */
+  listCrossingsForLoad(actor: ActorContext, loadId: number): Promise<Result<readonly IftaCrossingRecord[]>>
+  /** check_ifta_completeness(): whether GPS-recorded miles cover >= 60% of the load's total_miles. */
+  checkCompleteness(actor: ActorContext, loadId: number): Promise<Result<boolean>>
+  /** get_ifta_quarterly_summary(): state mileage totals for the org's whole fleet in one quarter (e.g. "2026-Q3"). */
+  quarterlySummary(actor: ActorContext, quarter: string): Promise<Result<readonly IftaStateMiles[]>>
 }
 
 // ── DVIR ────────────────────────────────────────────────────────────────────
@@ -493,6 +543,151 @@ export interface IftaRepository {
 export interface InspectionAccess {
   readonly id: number
   readonly driverId: number | null
+}
+
+// ── Exceptions ──────────────────────────────────────────────────────────────
+
+export interface ExceptionRow {
+  readonly entity_type: string
+  readonly entity_id: number
+  readonly exception_type: string
+  readonly tier: string
+  readonly title: string
+  readonly detail: string
+  readonly due_at: string | null
+}
+
+/** get_exceptions(): org-scoped and role-filtered entirely inside the SECURITY DEFINER RPC. */
+export interface ExceptionQueryRepository {
+  list(actor: ActorContext): Promise<Result<readonly ExceptionRow[]>>
+}
+
+// ── Customers ───────────────────────────────────────────────────────────────
+
+export interface CustomerOrgInfo {
+  readonly name: string
+  readonly phone: string | null
+  readonly email: string | null
+}
+
+export interface CustomerSummaryRecord {
+  readonly org_id: number
+  readonly contact_name: string | null
+  readonly organization: CustomerOrgInfo | null
+}
+
+export interface CustomerDetailRecord {
+  readonly org_id: number
+  readonly customer_number: string | null
+  readonly contact_name: string | null
+  readonly tags: readonly string[] | null
+  readonly notes: string | null
+  readonly organization: (CustomerOrgInfo & { readonly city: string | null; readonly state: string | null }) | null
+}
+
+export interface CustomerLoadRecord {
+  readonly id: number
+  readonly load_number: string
+  readonly status: string | null
+  readonly rate: number | null
+  readonly delivery_date: string | null
+}
+
+/** customer_details/organizations reads, matching `carrier_customer_select` (owner/solo/dispatcher/finance). */
+export interface CustomerQueryRepository {
+  listForOrg(actor: ActorContext): Promise<Result<readonly CustomerSummaryRecord[]>>
+  getForActor(actor: ActorContext, customerOrgId: number): Promise<Result<CustomerDetailRecord | null>>
+  recentLoadsForCustomer(actor: ActorContext, customerOrgId: number, limit: number): Promise<Result<readonly CustomerLoadRecord[]>>
+  /** get_customer_health_score(); null when the org isn't entitled (customer_health_score feature). */
+  healthScore(actor: ActorContext, customerOrgId: number): Promise<Result<number | null>>
+}
+
+// ── Billing ─────────────────────────────────────────────────────────────────
+
+export interface BillingDetailsRecord {
+  readonly tier: string | null
+  readonly billing_status: string | null
+  readonly trial_ends_at: string | null
+  readonly stripe_customer_id: string | null
+  readonly card_brand: string | null
+  readonly card_last4: string | null
+}
+
+export interface TierPricingRecord {
+  readonly included_trucks: number
+  readonly price_per_additional_truck: number
+}
+
+/** carrier_details/tiers/vehicles reads. RLS on carrier_details has no role check; the
+ * `subscription_management` capability (owner/solo) is enforced by the application layer. */
+export interface BillingQueryRepository {
+  getForOrg(actor: ActorContext): Promise<Result<BillingDetailsRecord | null>>
+  activeVehicleCount(actor: ActorContext): Promise<Result<number>>
+  /** Global tier catalog row (not org-scoped — `tiers_select` is `USING (true)`). */
+  tierPricing(code: string): Promise<Result<TierPricingRecord | null>>
+}
+
+// ── Settlements ─────────────────────────────────────────────────────────────
+
+export interface SettlementRecord {
+  readonly id: number
+  readonly pay_method: string
+  readonly gross_revenue: number | null
+  readonly net_pay: number | null
+  readonly payment_status: string
+  readonly period_start: string
+  readonly period_end: string
+  readonly driver: { readonly driver_number: string; readonly first_name: string | null; readonly last_name: string | null } | null
+}
+
+/** driver_settlements reads. driverId non-null narrows to that driver's own rows
+ * (driver_own_settlements_select); null relies on org-wide staff access (owner/solo/finance). */
+export interface SettlementQueryRepository {
+  listForActor(actor: ActorContext, driverId: number | null): Promise<Result<readonly SettlementRecord[]>>
+}
+
+// ── Dashboard ───────────────────────────────────────────────────────────────
+
+/** Deliberately narrower than LoadSummary: the dashboard card only ever
+ * shows these 8 fields (mobile home.tsx's LoadRow), never rate/commodity/dates. */
+export interface DashboardLoadRecord {
+  readonly id: number
+  readonly load_number: string
+  readonly status: string
+  readonly customer_name_raw: string | null
+  readonly pickup_city: string | null
+  readonly pickup_state: string | null
+  readonly delivery_city: string | null
+  readonly delivery_state: string | null
+}
+
+export interface DashboardOpsLoad extends DashboardLoadRecord {
+  readonly driver_id: number | null
+  readonly vehicle_id: number | null
+  readonly updated_at: string | null
+}
+
+export interface DashboardInvoiceRecord {
+  readonly id: number
+  readonly invoice_number: string
+  readonly amount: number
+  readonly due_date: string | null
+  readonly paid_at: string | null
+}
+
+/** One purpose-built read per role's dashboard content, org scoped throughout. */
+export interface DashboardQueryRepository {
+  activeLoadsCount(actor: ActorContext): Promise<Result<number>>
+  fleetStatusCounts(actor: ActorContext): Promise<Result<{ active: number; idle: number; in_shop: number }>>
+  recentLoads(actor: ActorContext, limit: number): Promise<Result<readonly DashboardLoadRecord[]>>
+  /** The caller's own in-progress load, when they are a driver (solo's "My Load Today" card). */
+  ownActiveLoad(actor: ActorContext): Promise<Result<DashboardLoadRecord | null>>
+  opsLoads(actor: ActorContext): Promise<Result<readonly DashboardOpsLoad[]>>
+  availableDriversCount(actor: ActorContext, assignedDriverIds: readonly number[]): Promise<Result<number>>
+  availableVehiclesCount(actor: ActorContext, assignedVehicleIds: readonly number[]): Promise<Result<number>>
+  outstandingInvoices(actor: ActorContext): Promise<Result<readonly { amount: number }[]>>
+  overdueInvoices(actor: ActorContext, limit: number): Promise<Result<readonly DashboardInvoiceRecord[]>>
+  recentPayments(actor: ActorContext, limit: number): Promise<Result<readonly DashboardInvoiceRecord[]>>
 }
 
 export interface DvirRepository {

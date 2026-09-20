@@ -32,6 +32,14 @@ export class FieldActionsService {
     return updated.ok ? ok({ updated: updated.value }) : updated
   }
 
+  /** A load's message thread. Same 'chat_participate' gate as markMessagesRead — driver
+   * restricted to their own load, owner/solo/dispatcher org-wide; finance gets neither. */
+  async listMessages(actor: ActorContext, loadId: number) {
+    const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, 'chat_participate', 'read messages')
+    if (!access.ok) return access
+    return this.deps.messages.listForLoad(actor, loadId)
+  }
+
   async shareLocation(actor: ActorContext, loadId: number, sample: { latitude: number; longitude: number; recordedAt?: Date }): Promise<Result<void>> {
     const valid = validateLocation(sample.latitude, sample.longitude)
     if (!valid.ok) return valid

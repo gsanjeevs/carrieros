@@ -10,7 +10,7 @@
 // repository, same as everywhere else.
 import { ok, err, notFound, type Result } from '../domain/shared/result'
 import type { ActorContext } from '../domain/shared/identity'
-import type { FleetQueryRepository, MaintenanceReminderRecord, ServiceLogRecord } from '../ports'
+import type { FleetQueryRepository, FleetReminderRecord, MaintenanceReminderRecord, ServiceLogRecord } from '../ports'
 
 export interface VehicleSummaryOutput {
   readonly id: number
@@ -41,6 +41,12 @@ export class FleetQueryService {
       }))
     )
     return ok(withUrls)
+  }
+
+  /** Fleet-wide reminders. Org scoped only, matching `carrier_reminders_select` — same
+   * "no extra capability gate beyond org scoping" posture as list()/getDetail() above. */
+  async listReminders(actor: ActorContext): Promise<Result<readonly FleetReminderRecord[]>> {
+    return this.deps.fleet.listActiveReminders(actor)
   }
 
   async getDetail(

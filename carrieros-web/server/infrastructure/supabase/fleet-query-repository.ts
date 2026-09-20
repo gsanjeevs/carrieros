@@ -7,7 +7,7 @@ import type { Database } from '@/types/supabase'
 import { createStorageProvider } from '@/lib/storage'
 import { domainError, err, ok, type Result } from '../../domain/shared/result'
 import type { ActorContext } from '../../domain/shared/identity'
-import type { FleetQueryRepository, MaintenanceReminderRecord, ServiceLogRecord, VehicleSummaryRecord } from '../../ports'
+import type { FleetQueryRepository, FleetReminderRecord, MaintenanceReminderRecord, ServiceLogRecord, VehicleSummaryRecord } from '../../ports'
 
 const PHOTO_URL_TTL_SECONDS = 3600
 
@@ -65,6 +65,33 @@ export class SupabaseFleetQueryRepository implements FleetQueryRepository {
         triggerMiles: r.trigger_miles,
       })),
     })
+  }
+
+  async listActiveReminders(actor: ActorContext): Promise<Result<readonly FleetReminderRecord[]>> {
+    const { data, error } = await (this.supabase as unknown as SupabaseClient)
+      .from('maintenance_reminders')
+      .select('id, vehicle_id, reminder_type, next_due_date, next_due_miles, vehicles(vehicle_number, nickname)')
+      .eq('carrier_org_id', actor.orgId)
+      .eq('is_active', true)
+    if (error) return err(domainError('PRECONDITION_FAILED', `reminder list failed: ${error.message}`))
+    const rows = (data ?? []) as unknown as {
+      id: number
+      vehicle_id: number
+      reminder_type: string
+      next_due_date: string | null
+      next_due_miles: number | null
+      vehicles: { vehicle_number: string | null; nickname: string | null } | null
+    }[]
+    return ok(
+      rows.map((r) => ({
+        id: Number(r.id),
+        vehicleId: Number(r.vehicle_id),
+        reminderType: r.reminder_type,
+        nextDueDate: r.next_due_date,
+        nextDueMiles: r.next_due_miles,
+        vehicle: r.vehicles ? { vehicle_number: r.vehicles.vehicle_number, nickname: r.vehicles.nickname } : null,
+      }))
+    )
   }
 
   async photoUrl(photoPath: string): Promise<string | null> {

@@ -5,9 +5,10 @@
 import { IFTA_FEATURE_KEY, validateGpsCrossing, validateManualRows, type GpsCrossingInput } from '../domain/compliance/ifta'
 import { domainError, err, ok, type Result } from '../domain/shared/result'
 import type { ActorContext } from '../domain/shared/identity'
-import type { Clock, FeatureGate, IdempotencyRepository, IftaRepository, ShipmentAccessRepository } from '../ports'
+import type { Clock, FeatureGate, IdempotencyRepository, IftaCrossingRecord, IftaRepository, IftaStateMiles, ShipmentAccessRepository } from '../ports'
 import { withIdempotency } from './idempotency'
 import { authorizeLoadAction } from './load-access'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 // Roles come from role_capabilities ('ifta_record'), mirroring RLS: owner/solo/dispatcher (ALL) and
 // drivers (INSERT on their own driver id).
@@ -55,5 +56,32 @@ export class IftaService {
     if (!gate.ok) return gate
     const written = await this.deps.ifta.replaceWithManual(actor, loadId, valid.value)
     return written.ok ? ok({ written: written.value }) : written
+  }
+
+  /** A load's recorded crossings. Same 'ifta_record' gate as writing them — not tier-gated (a plan
+   * downgrade must not hide mileage already captured). */
+  async listCrossings(actor: ActorContext, loadId: number): Promise<Result<readonly IftaCrossingRecord[]>> {
+    const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, 'ifta_record', 'view IFTA crossings')
+    if (!access.ok) return access
+    return this.deps.ifta.listCrossingsForLoad(actor, loadId)
+  }
+
+  /** check_ifta_completeness(): GPS coverage vs the load's total_miles. Same 'ifta_record' gate. */
+  async checkCompleteness(actor: ActorContext, loadId: number): Promise<Result<boolean>> {
+    const access = await authorizeLoadAction(this.deps.shipments, actor, loadId, 'ifta_record', 'view IFTA completeness')
+    if (!access.ok) return access
+    return this.deps.ifta.checkCompleteness(actor, loadId)
+  }
+
+  /** Org-wide quarterly state-mileage summary. Restricted to the 'finance' capability
+   * (owner/solo/finance) — the only roles the mobile/web reports surfaces reach this from. */
+  async quarterlySummary(actor: ActorContext, quarter: string): Promise<Result<{ entitled: boolean; rows: readonly IftaStateMiles[] }>> {
+    if (!roleHasCapability(actor.role, 'finance')) return err(domainError('FORBIDDEN', 'This role cannot view IFTA reports', { meta: { role: actor.role } }))
+    const entitled = await this.deps.features.hasFeature(actor, IFTA_FEATURE_KEY)
+    if (!entitled.ok) return entitled
+    if (!entitled.value) return ok({ entitled: false, rows: [] })
+    const rows = await this.deps.ifta.quarterlySummary(actor, quarter)
+    if (!rows.ok) return rows
+    return ok({ entitled: true, rows: rows.value })
   }
 }

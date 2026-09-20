@@ -152,3 +152,42 @@ import { SupabaseInvoiceQueryRepository } from './infrastructure/supabase/invoic
 export function createInvoiceQueryService(supabase: SupabaseClient<Database>): InvoiceQueryService {
   return new InvoiceQueryService({ invoices: new SupabaseInvoiceQueryRepository(supabase) })
 }
+
+import { ExceptionQueryService } from './application/exception-query-service'
+import { SupabaseExceptionQueryRepository } from './infrastructure/supabase/exception-query-repository'
+
+export function createExceptionQueryService(supabase: SupabaseClient<Database>): ExceptionQueryService {
+  return new ExceptionQueryService({ exceptions: new SupabaseExceptionQueryRepository(supabase) })
+}
+
+import { CustomerQueryService } from './application/customer-query-service'
+import { SupabaseCustomerQueryRepository } from './infrastructure/supabase/customer-query-repository'
+
+export function createCustomerQueryService(supabase: SupabaseClient<Database>): CustomerQueryService {
+  return new CustomerQueryService({ customers: new SupabaseCustomerQueryRepository(supabase) })
+}
+
+import { BillingQueryService } from './application/billing-query-service'
+import { SupabaseBillingQueryRepository } from './infrastructure/supabase/billing-query-repository'
+
+export function createBillingQueryService(supabase: SupabaseClient<Database>): BillingQueryService {
+  return new BillingQueryService({ billing: new SupabaseBillingQueryRepository(supabase) })
+}
+
+import { SettlementQueryService } from './application/settlement-query-service'
+import { SupabaseSettlementQueryRepository } from './infrastructure/supabase/settlement-query-repository'
+
+export function createSettlementQueryService(supabase: SupabaseClient<Database>): SettlementQueryService {
+  return new SettlementQueryService({
+    settlements: new SupabaseSettlementQueryRepository(supabase),
+    shipments: new SupabaseShipmentCommandRepository(supabase),
+    features: new SupabaseFeatureGate(supabase),
+  })
+}
+
+import { DashboardQueryService } from './application/dashboard-query-service'
+import { SupabaseDashboardQueryRepository } from './infrastructure/supabase/dashboard-query-repository'
+
+export function createDashboardQueryService(supabase: SupabaseClient<Database>): DashboardQueryService {
+  return new DashboardQueryService({ dashboard: new SupabaseDashboardQueryRepository(supabase) })
+}

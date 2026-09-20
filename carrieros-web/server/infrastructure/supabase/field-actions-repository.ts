@@ -6,7 +6,7 @@ import type { Database } from '@/types/supabase'
 import { domainError, err, ok, type Result } from '../../domain/shared/result'
 import type { ActorContext } from '../../domain/shared/identity'
 import type { DriverProfilePatch } from '../../domain/driver/self-profile'
-import type { DriverProfileRecord, DriverSelfRepository, FleetRepository, LoadLocationRepository, MessageRepository, ReminderRecord } from '../../ports'
+import type { DriverMessageRecord, DriverProfileRecord, DriverSelfRepository, FleetRepository, LoadLocationRepository, MessageRepository, ReminderRecord } from '../../ports'
 
 const fail = (what: string, message: string) => err(domainError('PRECONDITION_FAILED', `${what} failed: ${message}`))
 
@@ -24,6 +24,17 @@ export class SupabaseMessageRepository implements MessageRepository {
       .select('id')
     if (error) return fail('mark read', error.message)
     return ok((data ?? []).length)
+  }
+
+  async listForLoad(actor: ActorContext, loadId: number): Promise<Result<readonly DriverMessageRecord[]>> {
+    const { data, error } = await this.supabase
+      .from('driver_messages')
+      .select('id, sender_id, body, original_language, sent_at, read_at')
+      .eq('load_id', loadId)
+      .eq('carrier_org_id', actor.orgId)
+      .order('sent_at', { ascending: true })
+    if (error) return fail('message list', error.message)
+    return ok((data ?? []) as unknown as DriverMessageRecord[])
   }
 }
 

@@ -386,5 +386,170 @@ export const DvirHistoryItemSchema = z.object({
 })
 export const ListDvirInspectionsResponseSchema = z.object({ inspections: z.array(DvirHistoryItemSchema) })
 
+// ── Exceptions ──────────────────────────────────────────────────────────────
+
+export const ExceptionRowSchema = z.object({
+  entity_type: z.string(),
+  entity_id: z.number().int(),
+  exception_type: z.string(),
+  tier: z.string(),
+  title: z.string(),
+  detail: z.string(),
+  due_at: z.string().nullable(),
+})
+export const ListExceptionsResponseSchema = z.object({ exceptions: z.array(ExceptionRowSchema) })
+
+// ── Customers ───────────────────────────────────────────────────────────────
+
+export const CustomerOrgInfoSchema = z.object({ name: z.string(), phone: z.string().nullable(), email: z.string().nullable() })
+export const CustomerSummarySchema = z.object({
+  org_id: z.number().int(),
+  contact_name: z.string().nullable(),
+  organization: CustomerOrgInfoSchema.nullable(),
+})
+export const ListCustomersResponseSchema = z.object({ customers: z.array(CustomerSummarySchema) })
+
+export const CustomerIdParamsSchema = z.object({ id: z.number().int().positive() })
+
+export const CustomerDetailSchema = z.object({
+  org_id: z.number().int(),
+  customer_number: z.string().nullable(),
+  contact_name: z.string().nullable(),
+  tags: z.array(z.string()).nullable(),
+  notes: z.string().nullable(),
+  organization: CustomerOrgInfoSchema.extend({ city: z.string().nullable(), state: z.string().nullable() }).nullable(),
+})
+export const CustomerLoadSchema = z.object({
+  id: z.number().int(),
+  load_number: z.string(),
+  status: z.string().nullable(),
+  rate: z.number().nullable(),
+  delivery_date: z.string().nullable(),
+})
+export const GetCustomerResponseSchema = z.object({
+  customer: CustomerDetailSchema,
+  recent_loads: z.array(CustomerLoadSchema),
+  health_score: z.number().nullable(),
+})
+
+// ── Billing ─────────────────────────────────────────────────────────────────
+
+export const GetBillingResponseSchema = z.object({
+  tier: z.string().nullable(),
+  billing_status: z.string().nullable(),
+  trial_ends_at: z.string().nullable(),
+  stripe_customer_id: z.string().nullable(),
+  card_brand: z.string().nullable(),
+  card_last4: z.string().nullable(),
+  vehicle_count: z.number().int(),
+  included_trucks: z.number().int(),
+  price_per_additional_truck: z.number(),
+})
+
+// ── Maintenance reminders (fleet-wide) ──────────────────────────────────────
+
+export const FleetReminderSchema = z.object({
+  id: z.number().int(),
+  vehicle_id: z.number().int(),
+  reminder_type: z.string(),
+  next_due_date: z.string().nullable(),
+  next_due_miles: z.number().int().nullable(),
+  vehicle: z.object({ vehicle_number: z.string().nullable(), nickname: z.string().nullable() }).nullable(),
+})
+export const ListMaintenanceRemindersResponseSchema = z.object({ reminders: z.array(FleetReminderSchema) })
+
+// ── Settlements ─────────────────────────────────────────────────────────────
+
+export const SettlementSchema = z.object({
+  id: z.number().int(),
+  pay_method: z.string(),
+  gross_revenue: z.number().nullable(),
+  net_pay: z.number().nullable(),
+  payment_status: z.string(),
+  period_start: z.string(),
+  period_end: z.string(),
+  driver: z.object({ driver_number: z.string(), first_name: z.string().nullable(), last_name: z.string().nullable() }).nullable(),
+})
+export const ListSettlementsResponseSchema = z.object({ entitled: z.boolean(), settlements: z.array(SettlementSchema) })
+
+// ── IFTA reads ──────────────────────────────────────────────────────────────
+
+export const IftaCrossingSchema = z.object({
+  id: z.number().int(),
+  state: z.string(),
+  odometer_est: z.number().nullable(),
+  source: z.string(),
+})
+export const ListIftaCrossingsResponseSchema = z.object({ crossings: z.array(IftaCrossingSchema) })
+export const IftaCompletenessResponseSchema = z.object({ complete: z.boolean() })
+
+export const IftaQuarterlySummaryQuerySchema = z.object({
+  quarter: z.string().regex(/^\d{4}-Q[1-4]$/).describe('YYYY-Qn'),
+})
+export const IftaStateMilesSchema = z.object({ state: z.string(), total_miles: z.number() })
+export const IftaQuarterlySummaryResponseSchema = z.object({ entitled: z.boolean(), rows: z.array(IftaStateMilesSchema) })
+
+// ── Fuel stops (read) ───────────────────────────────────────────────────────
+
+export const FuelStopSchema = z.object({
+  id: z.number().int(),
+  state: z.string(),
+  station: z.string().nullable(),
+  gallons: z.number(),
+  total_cost: z.number(),
+})
+export const ListFuelStopsResponseSchema = z.object({ fuel_stops: z.array(FuelStopSchema) })
+
+// ── Driver messages (read) ──────────────────────────────────────────────────
+
+export const DriverMessageSchema = z.object({
+  id: z.number().int(),
+  sender_id: z.string().nullable(),
+  body: z.string(),
+  original_language: z.string().nullable(),
+  sent_at: z.string(),
+  read_at: z.string().nullable(),
+})
+export const ListMessagesResponseSchema = z.object({ messages: z.array(DriverMessageSchema) })
+
+// ── Dashboard ───────────────────────────────────────────────────────────────
+
+export const DashboardLoadCardSchema = z.object({
+  id: z.number().int(),
+  load_number: z.string(),
+  status: z.string(),
+  customer_name_raw: z.string().nullable(),
+  pickup_city: z.string().nullable(),
+  pickup_state: z.string().nullable(),
+  delivery_city: z.string().nullable(),
+  delivery_state: z.string().nullable(),
+})
+export const DashboardOpsLoadSchema = DashboardLoadCardSchema.extend({
+  driver_id: z.number().int().nullable(),
+  vehicle_id: z.number().int().nullable(),
+  updated_at: z.string().nullable(),
+})
+export const DashboardInvoiceSchema = z.object({
+  id: z.number().int(),
+  invoice_number: z.string(),
+  amount: z.number(),
+  due_date: z.string().nullable(),
+  paid_at: z.string().nullable(),
+})
+export const GetDashboardResponseSchema = z.object({
+  role: z.string(),
+  active_loads_count: z.number().int().optional(),
+  fleet_counts: z.object({ active: z.number().int(), idle: z.number().int(), in_shop: z.number().int() }).optional(),
+  recent_loads: z.array(DashboardLoadCardSchema).optional(),
+  solo_active_load: DashboardLoadCardSchema.nullable().optional(),
+  ops_loads: z.array(DashboardOpsLoadSchema).optional(),
+  available_drivers: z.number().int().optional(),
+  available_vehicles: z.number().int().optional(),
+  outstanding_total: z.number().optional(),
+  outstanding_count: z.number().int().optional(),
+  most_overdue_invoices: z.array(DashboardInvoiceSchema).optional(),
+  recent_payments: z.array(DashboardInvoiceSchema).optional(),
+})
+
 export type ListLoadsQuery = z.infer<typeof ListLoadsQuerySchema>
 export type ListLoadsResponse = z.infer<typeof ListLoadsResponseSchema>

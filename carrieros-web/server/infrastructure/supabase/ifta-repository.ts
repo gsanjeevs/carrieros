@@ -4,7 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase'
 import { domainError, err, ok, validationFailed, type Result } from '../../domain/shared/result'
 import type { ActorContext } from '../../domain/shared/identity'
-import type { FeatureGate, IftaRepository, ShipmentAccess } from '../../ports'
+import type { FeatureGate, IftaCrossingRecord, IftaRepository, IftaStateMiles, ShipmentAccess } from '../../ports'
 
 export class SupabaseFeatureGate implements FeatureGate {
   constructor(private readonly supabase: SupabaseClient<Database>) {}
@@ -52,5 +52,31 @@ export class SupabaseIftaRepository implements IftaRepository {
       return err(domainError('PRECONDITION_FAILED', `replace crossings failed: ${error.message}`))
     }
     return ok(Number(data))
+  }
+
+  async listCrossingsForLoad(actor: ActorContext, loadId: number): Promise<Result<readonly IftaCrossingRecord[]>> {
+    const { data, error } = await this.supabase
+      .from('ifta_state_crossings')
+      .select('id, state, odometer_est, source')
+      .eq('load_id', loadId)
+      .eq('carrier_org_id', actor.orgId)
+      .order('crossed_at', { ascending: true })
+    if (error) return err(domainError('PRECONDITION_FAILED', `crossing list failed: ${error.message}`))
+    return ok((data ?? []) as unknown as IftaCrossingRecord[])
+  }
+
+  async checkCompleteness(actor: ActorContext, loadId: number): Promise<Result<boolean>> {
+    const { data, error } = await this.supabase.rpc('check_ifta_completeness', { p_load_id: loadId })
+    if (error) return err(domainError('PRECONDITION_FAILED', `completeness check failed: ${error.message}`))
+    return ok(data === true)
+  }
+
+  async quarterlySummary(actor: ActorContext, quarter: string): Promise<Result<readonly IftaStateMiles[]>> {
+    const { data, error } = await this.supabase.rpc('get_ifta_quarterly_summary', {
+      p_carrier_org_id: actor.orgId,
+      p_quarter: quarter,
+    })
+    if (error) return err(domainError('PRECONDITION_FAILED', `quarterly summary failed: ${error.message}`))
+    return ok(((data ?? []) as { state: string; total_miles: number }[]).map((r) => ({ state: r.state, total_miles: Number(r.total_miles) })))
   }
 }

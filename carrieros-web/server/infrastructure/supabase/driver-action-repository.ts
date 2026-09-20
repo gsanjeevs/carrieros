@@ -6,7 +6,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase'
 import { domainError, err, ok, type Result } from '../../domain/shared/result'
 import type { ActorContext } from '../../domain/shared/identity'
-import type { DriverActionRepository, FuelStopRecord, ProblemReportRecord, ShipmentAccess } from '../../ports'
+import type { DriverActionRepository, FuelStopReadRecord, FuelStopRecord, ProblemReportRecord, ShipmentAccess } from '../../ports'
 
 export class SupabaseDriverActionRepository implements DriverActionRepository {
   constructor(private readonly supabase: SupabaseClient<Database>) {}
@@ -52,5 +52,16 @@ export class SupabaseDriverActionRepository implements DriverActionRepository {
       .maybeSingle()
     if (error) return err(domainError('PRECONDITION_FAILED', `problem report insert failed: ${error.message}`))
     return ok({ id: data ? Number(data.id) : 0 })
+  }
+
+  async listFuelStopsForLoad(actor: ActorContext, loadId: number): Promise<Result<readonly FuelStopReadRecord[]>> {
+    const { data, error } = await this.supabase
+      .from('fuel_stops')
+      .select('id, state, station, gallons, total_cost')
+      .eq('load_id', loadId)
+      .eq('carrier_org_id', actor.orgId)
+      .order('stop_date', { ascending: true })
+    if (error) return err(domainError('PRECONDITION_FAILED', `fuel stop list failed: ${error.message}`))
+    return ok((data ?? []) as unknown as FuelStopReadRecord[])
   }
 }
