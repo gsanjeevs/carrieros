@@ -212,7 +212,8 @@
     "iftaFallbackWarning": "Los datos de GPS parecen incompletos para este viaje. Ingresa tus millas por estado para que el millaje IFTA sea preciso.",
     "iftaAddState": "+ Agregar otro estado",
     "iftaSaveFallback": "Guardar millaje por estado",
-    "iftaTripTotal": "Total del viaje: %{miles} mi"
+    "iftaTripTotal": "Total del viaje: %{miles} mi",
+    "statusConflict": "Alguien acaba de actualizar esta carga. Mostrando lo más reciente."
   },
   "loadNew": {
     "heading": "Nueva Carga",

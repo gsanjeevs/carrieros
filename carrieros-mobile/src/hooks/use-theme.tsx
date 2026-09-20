@@ -35,6 +35,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '@/constants/theme';
 import { useSession } from '@/hooks/use-session';
 import { supabase } from '@/lib/supabase';
+import { savePreferences } from '@/lib/profile-api';
 
 export type ThemePreference = 'light' | 'dark' | 'system';
 export type ResolvedTheme = 'light' | 'dark';
@@ -111,7 +112,7 @@ export function AppThemeProvider({ children }: { children: ReactNode }) {
       setPreferenceState(next);
       await AsyncStorage.setItem(STORAGE_KEY, next).catch(() => {});
       if (userId) {
-        await supabase.from('profiles').update({ theme_preference: next }).eq('id', userId);
+        await savePreferences({ theme_preference: next });
       }
     },
     [userId]

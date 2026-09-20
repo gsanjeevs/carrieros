@@ -20,8 +20,10 @@ const CODE: Record<string, ErrorCode> = {
   FORBIDDEN: 'FORBIDDEN',
   NOT_FOUND: 'NOT_FOUND',
   ENTITLEMENT_REQUIRED: 'TIER_UPGRADE_REQUIRED',
+  VERSION_CONFLICT: 'VERSION_CONFLICT',
+  ILLEGAL_TRANSITION: 'ILLEGAL_TRANSITION',
 }
 
 export function domainErrorResponse(error: DomainError) {
-  return apiError(CODE[error.code] ?? 'SERVER_ERROR', error.detail, STATUS[error.code] ?? 500)
+  return apiError(CODE[error.code] ?? 'SERVER_ERROR', error.detail, STATUS[error.code] ?? 500, error.meta)
 }

@@ -212,7 +212,8 @@
     "iftaFallbackWarning": "GPS data looks incomplete for this trip. Enter your miles per state so IFTA mileage is accurate.",
     "iftaAddState": "+ Add another state",
     "iftaSaveFallback": "Save State Mileage",
-    "iftaTripTotal": "Trip total: %{miles} mi"
+    "iftaTripTotal": "Trip total: %{miles} mi",
+    "statusConflict": "This load was just updated by someone else. Showing the latest."
   },
   "loadNew": {
     "heading": "New Load",

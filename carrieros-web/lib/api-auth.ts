@@ -45,14 +45,22 @@ export type ErrorCode =
   | 'LAST_OWNER'
   | 'MANAGE_DRIVER_ELSEWHERE'
   | 'TIER_UPGRADE_REQUIRED'
+  // Shipment commands (/api/v1)
+  | 'VERSION_CONFLICT'
+  | 'ILLEGAL_TRANSITION'
   | 'SERVER_ERROR'
 
 // message is an English fallback for logs/devs only — never render it
 // directly to end users. Each client maps `error_code` to a localized
 // string via its own messages/{locale}.json (next-intl on web, i18n-js
 // on mobile).
-export function apiError(error_code: ErrorCode, message: string, status: number) {
-  return NextResponse.json({ error_code, error: message }, { status })
+export function apiError(
+  error_code: ErrorCode,
+  message: string,
+  status: number,
+  meta?: Record<string, string | number | boolean | null>
+) {
+  return NextResponse.json({ error_code, error: message, ...(meta ? { meta } : {}) }, { status })
 }
 
 type AuthedContext = {

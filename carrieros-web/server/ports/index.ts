@@ -14,6 +14,7 @@ import type { EntitlementSnapshot } from '../domain/entitlement/model'
 import type { Result } from '../domain/shared/result'
 import type { LoadSummary } from '../domain/load/read-model'
 import type { ChangeEntity } from '../domain/events/entities'
+import type { PreferencesPatch } from '../domain/profile/preferences'
 
 // ── Cross-cutting ───────────────────────────────────────────────────────────
 
@@ -205,4 +206,49 @@ export interface ChangeFeedRepository {
   readAfter(orgId: number, afterId: number, limit: number): Promise<Result<readonly ChangeSignal[]>>
   /** Housekeeping: the feed is short-lived by design. */
   pruneOlderThan(cutoff: Date): Promise<Result<void>>
+}
+
+// ── Shipment commands ───────────────────────────────────────────────────────
+
+export interface ShipmentAccess {
+  readonly id: number
+  readonly status: string
+  readonly driverId: number | null
+}
+
+export interface MilestoneCommand {
+  readonly loadId: number
+  readonly expectedStatus: string
+  readonly newStatus: string
+  readonly eventType: string
+  readonly reason: string | null
+  readonly idempotencyKey: string
+  readonly occurredAt: Date
+}
+
+export interface MilestoneOutcome {
+  readonly outcome: 'APPLIED' | 'REPLAYED'
+  readonly loadId: number
+  readonly status: string
+  readonly loadNumber: string | null
+}
+
+export interface ShipmentCommandRepository {
+  /** The shipment, only if it belongs to the actor's organization. */
+  findForActor(actor: ActorContext, loadId: number): Promise<Result<ShipmentAccess | null>>
+  /** The drivers row for a driver actor, or null. */
+  findDriverIdForActor(actor: ActorContext): Promise<Result<number | null>>
+  /**
+   * Persist status + timeline event + outbox + audit atomically with a
+   * compare-and-swap on `expectedStatus`. Idempotent on `idempotencyKey`.
+   */
+  submitMilestone(actor: ActorContext, command: MilestoneCommand): Promise<Result<MilestoneOutcome>>
+}
+
+// ── Profile ─────────────────────────────────────────────────────────────────
+
+/** Writes to the ACTOR'S OWN profile only: the row is chosen from actor.userId, never from a caller-supplied id. */
+export interface ProfileWriteRepository {
+  updatePreferences(actor: ActorContext, patch: PreferencesPatch): Promise<Result<void>>
+  setPushToken(actor: ActorContext, token: string): Promise<Result<void>>
 }

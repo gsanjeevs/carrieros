@@ -212,7 +212,8 @@
     "iftaFallbackWarning": "اس سفر کے لیے GPS ڈیٹا نامکمل لگتا ہے۔ درست IFTA مائلیج کے لیے فی ریاست اپنے میل درج کریں۔",
     "iftaAddState": "+ ایک اور ریاست شامل کریں",
     "iftaSaveFallback": "ریاستی مائلیج محفوظ کریں",
-    "iftaTripTotal": "سفر کل: %{miles} میل"
+    "iftaTripTotal": "سفر کل: %{miles} میل",
+    "statusConflict": "اس لوڈ کو ابھی کسی اور نے اپ ڈیٹ کیا ہے۔ تازہ ترین معلومات دکھائی جا رہی ہیں۔"
   },
   "loadNew": {
     "heading": "نیا لوڈ",

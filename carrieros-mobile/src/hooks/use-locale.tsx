@@ -30,6 +30,7 @@ import {
 import { useSession } from '@/hooks/use-session';
 import { i18n, isRTLLocale, isSupportedLocale, setI18nLocale, t as translate, type Locale } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
+import { savePreferences } from '@/lib/profile-api';
 
 type LocaleFontFamily = { regular: string; bold: string } | null;
 
@@ -174,7 +175,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     async (next: Locale) => {
       applyLocale(next);
       if (session?.user.id) {
-        await supabase.from('profiles').update({ preferred_language: next }).eq('id', session.user.id);
+        await savePreferences({ preferred_language: next });
       }
     },
     [session?.user.id, applyLocale]
@@ -184,7 +185,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     async (uom: Uom | null) => {
       setPrefs((p) => ({ ...p, uomSystem: uom }));
       if (session?.user.id) {
-        await supabase.from('profiles').update({ uom_system: uom }).eq('id', session.user.id);
+        await savePreferences({ uom_system: uom });
       }
     },
     [session?.user.id]
@@ -194,7 +195,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     async (format: DateFormat) => {
       setPrefs((p) => ({ ...p, dateFormat: format }));
       if (session?.user.id) {
-        await supabase.from('profiles').update({ date_format: format }).eq('id', session.user.id);
+        await savePreferences({ date_format: format });
       }
     },
     [session?.user.id]
@@ -204,7 +205,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     async (format: TimeFormat) => {
       setPrefs((p) => ({ ...p, timeFormat: format }));
       if (session?.user.id) {
-        await supabase.from('profiles').update({ time_format: format }).eq('id', session.user.id);
+        await savePreferences({ time_format: format });
       }
     },
     [session?.user.id]

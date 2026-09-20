@@ -212,7 +212,8 @@
     "iftaFallbackWarning": "ਇਸ ਯਾਤਰਾ ਲਈ GPS ਡਾਟਾ ਅਧੂਰਾ ਲੱਗਦਾ ਹੈ। ਸਹੀ IFTA ਮਾਈਲੇਜ ਲਈ ਪ੍ਰਤੀ ਰਾਜ ਆਪਣੇ ਮੀਲ ਦਰਜ ਕਰੋ।",
     "iftaAddState": "+ ਇੱਕ ਹੋਰ ਰਾਜ ਸ਼ਾਮਲ ਕਰੋ",
     "iftaSaveFallback": "ਰਾਜ ਮਾਈਲੇਜ ਸੰਭਾਲੋ",
-    "iftaTripTotal": "ਯਾਤਰਾ ਕੁੱਲ: %{miles} ਮੀਲ"
+    "iftaTripTotal": "ਯਾਤਰਾ ਕੁੱਲ: %{miles} ਮੀਲ",
+    "statusConflict": "ਇਸ ਲੋਡ ਨੂੰ ਹੁਣੇ ਕਿਸੇ ਹੋਰ ਨੇ ਅੱਪਡੇਟ ਕੀਤਾ ਹੈ। ਤਾਜ਼ਾ ਜਾਣਕਾਰੀ ਦਿਖਾਈ ਜਾ ਰਹੀ ਹੈ।"
   },
   "loadNew": {
     "heading": "ਨਵਾਂ ਲੋਡ",

@@ -24,3 +24,20 @@ export function createChangeFeedService(): ChangeFeedService {
     clock: { now: () => new Date() },
   })
 }
+
+import { ShipmentMilestoneService } from './application/shipment-milestone-service'
+import { SupabaseShipmentCommandRepository } from './infrastructure/supabase/shipment-command-repository'
+
+export function createShipmentMilestoneService(supabase: SupabaseClient<Database>): ShipmentMilestoneService {
+  return new ShipmentMilestoneService({
+    shipments: new SupabaseShipmentCommandRepository(supabase),
+    clock: { now: () => new Date() },
+  })
+}
+
+import { ProfilePreferencesService } from './application/profile-preferences-service'
+import { SupabaseProfileWriteRepository } from './infrastructure/supabase/profile-write-repository'
+
+export function createProfilePreferencesService(supabase: SupabaseClient<Database>): ProfilePreferencesService {
+  return new ProfilePreferencesService({ profiles: new SupabaseProfileWriteRepository(supabase) })
+}
