@@ -45,6 +45,20 @@ After browser-testing changes their language/units/date/time prefs, run
 `./scripts/reset-demo.sh` to put them back to defaults rather than resetting
 by hand.
 
+## Conventions added with the foundations work (2026-09-20)
+- Errors: API routes return `apiError(code, msg, status)` (`lib/api-auth.ts`,
+  typed `ErrorCode`); log failures with `logError` (`lib/observability.ts`),
+  not `console.error`, passing `requestId: request.headers.get('x-request-id')`.
+  `proxy.ts` puts an `x-request-id` on every response. Sentry is wired but
+  inert until `SENTRY_DSN` is set.
+- RPCs must not raise SQLSTATE `40001`: PostgREST v14 hangs on it. Use a
+  `PTnnn` code to pick the HTTP status (`PT409` conflict, `PT404` not found).
+- Passwords: 12+ chars with upper/lower/digit, set in `supabase/config.toml`
+  and mirrored by `lib/password-policy.ts` (web) / `src/lib/password-policy.ts`
+  (mobile); a test fails if they drift. Hosted projects need the same settings.
+- Mobile sessions live in the keychain (`src/lib/secure-session-storage.ts`).
+- Env vars: see `carrieros-web/.env.example` / `carrieros-mobile/.env.example`.
+
 ## After any schema change
 Write a new numbered file in `supabase/migrations/` (never edit a merged
 one — see `architecture/database-migrations.md`), apply it locally with
@@ -87,7 +101,13 @@ React-Native-Web, which renders deeply nested non-semantic `<div>`s).
   is simpler and more reliable than clicking the submit button.
 
 ## Gated checks (enforcement, not just documentation)
-There is no CI in this repo — git hooks are the actual enforcement mechanism
+CI exists as of 2026-09-20 (`.github/workflows/ci.yml`: web lint/typecheck/
+architecture/tokens, mobile typecheck + Jest, and an integration job that
+starts a real Supabase stack, applies + verifies migrations, builds the web
+app and runs the full Vitest suite; `deploy.yml` migrates then deploys
+staging -> production; see `architecture/deployment.md`). Neither workflow
+has run on GitHub yet, and CI only becomes *enforcement* once branch
+protection requires it. Until then git hooks remain the local mechanism
 for `docs/architecture-principles.md` (Rules A-G, decoupling) and
 `docs/design/carrieros-design-system.md` (component-library adoption). A doc
 alone did not stop a real regression once already (SuperAdmin UI's first
