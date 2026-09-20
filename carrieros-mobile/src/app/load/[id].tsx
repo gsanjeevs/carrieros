@@ -464,13 +464,13 @@ export default function LoadDetailScreen() {
           )}
 
           {(role === 'driver' || role === 'solo') && ACTIVE_LOAD_STATUSES.includes(load.status) && orgId && (
-            <ReportProblemSection loadId={load.id} carrierOrgId={orgId} />
+            <ReportProblemSection loadId={load.id} />
           )}
 
           {(role === 'driver' || role === 'solo') && <PodSection loadId={load.id} />}
 
           {(role === 'driver' || role === 'solo') && orgId && (
-            <FuelStopsSection loadId={load.id} vehicleId={load.vehicle_id} carrierOrgId={orgId} />
+            <FuelStopsSection loadId={load.id} />
           )}
 
           {(role === 'driver' || role === 'solo') && orgId && (

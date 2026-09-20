@@ -10,6 +10,7 @@
 import { z } from 'zod'
 import { CHANGE_ENTITIES } from '../domain/events/entities'
 import { LOAD_STATUS_GROUP_KEYS } from '../domain/load/status-groups'
+import { PROBLEM_REASONS } from '../domain/driver-actions/problem-report'
 import { DATE_FORMATS, LANGUAGES, THEMES, TIME_FORMATS, UOM_SYSTEMS } from '../domain/profile/preferences'
 
 export const ChangeEntitySchema = z.enum(CHANGE_ENTITIES)
@@ -111,6 +112,23 @@ export const UpdatePreferencesBodySchema = z
 export const SetPushTokenBodySchema = z.object({ token: z.string().min(1).max(512) })
 
 export const OkResponseSchema = z.object({ ok: z.literal(true) })
+
+export const LogFuelStopBodySchema = z.object({
+  state: z.string().length(2).describe('2-letter state/province code (IFTA aggregates gallons by state).'),
+  station: z.string().max(120).nullable().optional(),
+  gallons: z.number().positive().max(1000),
+  price_per_gallon: z.number().min(0).max(100).nullable().optional(),
+  total_cost: z.number().min(0).nullable().optional().describe('Receipt total; otherwise computed as gallons x price.'),
+  odometer: z.number().int().min(0).nullable().optional(),
+  stop_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional().describe('YYYY-MM-DD; defaults to today.'),
+})
+export const LogFuelStopResponseSchema = z.object({ id: z.number().int(), total_cost: z.number() })
+
+export const ReportProblemBodySchema = z.object({
+  reason: z.enum(PROBLEM_REASONS),
+  note: z.string().max(1000).nullable().optional(),
+})
+export const ReportProblemResponseSchema = z.object({ id: z.number().int() })
 
 export type ListLoadsQuery = z.infer<typeof ListLoadsQuerySchema>
 export type ListLoadsResponse = z.infer<typeof ListLoadsResponseSchema>

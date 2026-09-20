@@ -41,3 +41,17 @@ import { SupabaseProfileWriteRepository } from './infrastructure/supabase/profil
 export function createProfilePreferencesService(supabase: SupabaseClient<Database>): ProfilePreferencesService {
   return new ProfilePreferencesService({ profiles: new SupabaseProfileWriteRepository(supabase) })
 }
+
+import { DriverActionService } from './application/driver-action-service'
+import { SupabaseDriverActionRepository } from './infrastructure/supabase/driver-action-repository'
+import { SupabaseIdempotencyRepository } from './infrastructure/supabase/idempotency-repository'
+
+export function createDriverActionService(supabase: SupabaseClient<Database>): DriverActionService {
+  return new DriverActionService({
+    shipments: new SupabaseShipmentCommandRepository(supabase),
+    actions: new SupabaseDriverActionRepository(supabase),
+    // Idempotency runs as service_role, scoped by the verified actor in every statement.
+    idempotency: new SupabaseIdempotencyRepository(createAdminClient()),
+    clock: { now: () => new Date() },
+  })
+}

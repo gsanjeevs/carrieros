@@ -16,13 +16,18 @@ export class SupabaseShipmentCommandRepository implements ShipmentCommandReposit
   async findForActor(actor: ActorContext, loadId: number): Promise<Result<ShipmentAccess | null>> {
     const { data, error } = await this.supabase
       .from('loads')
-      .select('id, status, driver_id')
+      .select('id, status, driver_id, vehicle_id')
       .eq('id', loadId)
       .eq('carrier_org_id', actor.orgId)
       .maybeSingle()
     if (error) return err(domainError('PRECONDITION_FAILED', `shipment lookup failed: ${error.message}`))
     if (!data) return ok(null)
-    return ok({ id: Number(data.id), status: data.status ?? '', driverId: data.driver_id === null ? null : Number(data.driver_id) })
+    return ok({
+      id: Number(data.id),
+      status: data.status ?? '',
+      driverId: data.driver_id === null ? null : Number(data.driver_id),
+      vehicleId: data.vehicle_id === null ? null : Number(data.vehicle_id),
+    })
   }
 
   async findDriverIdForActor(actor: ActorContext): Promise<Result<number | null>> {

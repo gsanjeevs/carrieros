@@ -391,6 +391,25 @@ try {
       throw new Error(`deny-all table granted to a client role:\n    ${reachable.split('\n').join('\n    ')}`)
     }
   })
+
+  check('no client role holds TRUNCATE on any public table', () => {
+    // TRUNCATE ignores RLS. 0003 revoked it from tables that existed at the time, but
+    // default privileges re-grant it to every table created later, which is how audit_events
+    // (append-only) ended up with it. This fails the next migration that creates a table and
+    // forgets, instead of leaving it for an audit to find.
+    const leaked = sh(
+      [
+        '-t',
+        '-A',
+        '-c',
+        `select table_name||':'||grantee from information_schema.role_table_grants
+          where table_schema='public' and privilege_type='TRUNCATE'
+            and grantee in ('anon','authenticated') order by 1`,
+      ],
+      { db: dbFromMigrations }
+    ).trim()
+    if (leaked) throw new Error(`TRUNCATE granted to a client role:\n    ${leaked.split('\n').join('\n    ')}`)
+  })
 } finally {
   if (!KEEP) {
     for (const db of [dbFromMigrations, dbFromSnapshot, dbUpgrade]) dropScratch(db)

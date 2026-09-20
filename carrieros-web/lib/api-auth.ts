@@ -48,6 +48,8 @@ export type ErrorCode =
   // Shipment commands (/api/v1)
   | 'VERSION_CONFLICT'
   | 'ILLEGAL_TRANSITION'
+  | 'IDEMPOTENCY_KEY_REUSED'
+  | 'REQUEST_IN_PROGRESS'
   | 'SERVER_ERROR'
 
 // message is an English fallback for logs/devs only — never render it

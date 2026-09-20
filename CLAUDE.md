@@ -77,7 +77,9 @@ Write a new numbered file in `supabase/migrations/` (never edit a merged
 one — see `architecture/database-migrations.md`), apply it locally with
 `node scripts/db/migrate.mjs`, and hand-update `supabase/schema/schema.sql`
 to match — `node scripts/db/verify-migrations.mjs` checks the two agree but
-does not generate the snapshot for you. Then run `./scripts/regen-types.sh`
+does not generate the snapshot for you. Regenerate the ERD with
+`node scripts/db/gen-erd.mjs` (writes `architecture/erd.md`; CI fails if stale).
+Then run `./scripts/regen-types.sh`
 to regenerate both apps' generated types, then `npx tsc --noEmit` in each
 app. Don't run `supabase gen types ... > file` directly — the CLI sometimes
 writes a log line to stdout before the real output, and `2>&1 | tail`

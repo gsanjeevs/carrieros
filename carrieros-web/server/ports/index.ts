@@ -129,26 +129,24 @@ export interface EntitlementRepository {
 }
 
 /**
- * Idempotency-Key storage for retriable commands.
+ * Idempotency-Key lifecycle for retriable commands: reserve -> complete, or
+ * reserve -> abandon when the work fails (so the client may retry).
  *
- * Semantics that matter: the same key replayed with the SAME request body
- * returns the original response; the same key with a DIFFERENT body is an
- * error, not a silent overwrite — otherwise a client bug turns into
- * inconsistent server state that nobody can reconstruct.
+ * The RESERVATION is what makes it safe under concurrency: the key is inserted
+ * first and the UNIQUE constraint arbitrates, so two simultaneous requests with
+ * one key cannot both run. The same key replayed with the SAME body returns the
+ * stored response; with a DIFFERENT body it is an error, not a silent overwrite.
  */
-export interface IdempotencyRepository {
-  find(
-    actor: ActorContext,
-    key: string
-  ): Promise<Result<{ requestHash: string; responseBody: unknown; statusCode: number } | null>>
+export type IdempotencyBegin =
+  | { readonly kind: 'proceed' }
+  | { readonly kind: 'replay'; readonly responseBody: unknown }
+  | { readonly kind: 'in_progress' }
+  | { readonly kind: 'key_reused' }
 
-  record(
-    actor: ActorContext,
-    key: string,
-    requestHash: string,
-    responseBody: unknown,
-    statusCode: number
-  ): Promise<Result<void>>
+export interface IdempotencyRepository {
+  begin(actor: ActorContext, endpoint: string, key: string, requestBody: unknown): Promise<Result<IdempotencyBegin>>
+  complete(actor: ActorContext, endpoint: string, key: string, responseBody: unknown): Promise<Result<void>>
+  abandon(actor: ActorContext, endpoint: string, key: string): Promise<Result<void>>
 }
 
 /** Append-only audit trail. */
@@ -214,6 +212,7 @@ export interface ShipmentAccess {
   readonly id: number
   readonly status: string
   readonly driverId: number | null
+  readonly vehicleId: number | null
 }
 
 export interface MilestoneCommand {
@@ -233,11 +232,15 @@ export interface MilestoneOutcome {
   readonly loadNumber: string | null
 }
 
-export interface ShipmentCommandRepository {
+/** Lookups shared by every command that acts on one load. */
+export interface ShipmentAccessRepository {
   /** The shipment, only if it belongs to the actor's organization. */
   findForActor(actor: ActorContext, loadId: number): Promise<Result<ShipmentAccess | null>>
   /** The drivers row for a driver actor, or null. */
   findDriverIdForActor(actor: ActorContext): Promise<Result<number | null>>
+}
+
+export interface ShipmentCommandRepository extends ShipmentAccessRepository {
   /**
    * Persist status + timeline event + outbox + audit atomically with a
    * compare-and-swap on `expectedStatus`. Idempotent on `idempotencyKey`.
@@ -251,4 +254,30 @@ export interface ShipmentCommandRepository {
 export interface ProfileWriteRepository {
   updatePreferences(actor: ActorContext, patch: PreferencesPatch): Promise<Result<void>>
   setPushToken(actor: ActorContext, token: string): Promise<Result<void>>
+}
+
+// ── Driver actions ──────────────────────────────────────────────────────────
+
+export interface FuelStopRecord {
+  readonly state: string
+  readonly station: string | null
+  readonly stopDate: string
+  readonly gallons: number
+  readonly pricePerGallon: number | null
+  readonly totalCost: number
+  readonly odometer: number | null
+  /** Resolved by the application layer; the adapter writes it verbatim. */
+  readonly driverId: number | null
+}
+
+export interface ProblemReportRecord {
+  readonly eventType: 'driver_reported_problem'
+  readonly severity: 'urgent'
+  readonly title: string
+  readonly detail: string | null
+}
+
+export interface DriverActionRepository {
+  createFuelStop(actor: ActorContext, load: ShipmentAccess, record: FuelStopRecord): Promise<Result<{ id: number }>>
+  createProblemReport(actor: ActorContext, load: ShipmentAccess, record: ProblemReportRecord): Promise<Result<{ id: number }>>
 }
