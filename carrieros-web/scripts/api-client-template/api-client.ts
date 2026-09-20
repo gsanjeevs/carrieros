@@ -44,15 +44,18 @@ function parseSseBlock(block: string): { event: string; id?: string; data: strin
 export function createApiClient(options: ApiClientOptions) {
   const http = createClient<paths>({ baseUrl: options.baseUrl })
 
+  // Middleware deliberately returns nothing. openapi-fetch requires a returned
+  // value to be `instanceof Request/Response`, and in React Native the global
+  // Response is a different class from the one fetch yields, so returning the
+  // object we were handed throws there (found on the iOS simulator). Mutating
+  // request.headers in place needs no return value.
   http.use({
     async onRequest({ request }) {
       const token = await options.getAccessToken?.()
       if (token) request.headers.set('Authorization', `Bearer ${token}`)
-      return request
     },
     onResponse({ response }) {
       if (response.status === 401) options.onUnauthorized?.()
-      return response
     },
   })
 
