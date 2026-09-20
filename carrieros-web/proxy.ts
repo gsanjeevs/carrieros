@@ -3,6 +3,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { roleHasCapability, type RoleCapability } from '@/lib/generated/role-capabilities'
 
 // Role → default landing route after login
 const ROLE_HOME: Record<string, string> = {
@@ -16,14 +17,18 @@ const ROLE_HOME: Record<string, string> = {
   sx_support: '/admin',
 }
 
-// Routes that require a specific minimum role
+// Routes that require a specific minimum role, expressed as the
+// RoleCapability each prefix needs (lib/generated/role-capabilities.ts,
+// backed by supabase/migrations/0009_role_capabilities.sql — the same
+// table carrieros-mobile consumes, so the two apps can't drift the way
+// hand-written role arrays already did once).
 // (checked AFTER auth — unauthenticated users hit the auth guard above)
-const ROLE_ROUTES: { prefix: string; allowed: string[] }[] = [
-  { prefix: '/dispatch', allowed: ['owner', 'solo', 'dispatcher'] },
-  { prefix: '/finance',  allowed: ['owner', 'solo', 'finance'] },
-  { prefix: '/my-loads', allowed: ['owner', 'solo', 'driver'] },
-  { prefix: '/drivers',  allowed: ['owner', 'solo', 'dispatcher'] },
-  { prefix: '/team',     allowed: ['owner', 'solo'] },
+const ROLE_ROUTES: { prefix: string; capability: RoleCapability }[] = [
+  { prefix: '/dispatch', capability: 'dispatch' },
+  { prefix: '/finance',  capability: 'finance' },
+  { prefix: '/my-loads', capability: 'my_loads' },
+  { prefix: '/drivers',  capability: 'drivers' },
+  { prefix: '/team',     capability: 'team' },
   // /dashboard itself has no per-tenant-role guard (dashboard/page.tsx
   // branches internally per role, per task #49's fallback fix) — but it was
   // never guarded against sx_* roles landing there at all. Since
@@ -34,14 +39,14 @@ const ROLE_ROUTES: { prefix: string; allowed: string[] }[] = [
   // placeholder instead of /admin — found via this session's admin-UI
   // browser verification, not a security issue (no cross-org data exposed)
   // but a real broken-landing-page regression.
-  { prefix: '/dashboard', allowed: ['owner', 'solo', 'driver', 'dispatcher', 'finance'] },
+  { prefix: '/dashboard', capability: 'dashboard' },
   // ShipmentX platform staff only — see lib/admin-auth.ts's SX_ROLES.
   // Symmetric with /team above: any non-sx_* role hitting /admin bounces
   // to their own tenant home, and (unlisted here, but implied) an sx_*
   // role hitting any tenant-only prefix above simply fails that prefix's
   // allowlist and bounces to /admin — no tenant data is exposed either way
   // since RLS scopes sx_* profiles to the platform org regardless.
-  { prefix: '/admin',    allowed: ['sx_owner', 'sx_finance', 'sx_support'] },
+  { prefix: '/admin',    capability: 'admin' },
 ]
 
 // Public routes — no auth required
@@ -160,7 +165,7 @@ export async function proxy(request: NextRequest) {
       const profile = await getProfileForUser(supabase, user.id)
 
       const role = profile.data?.role ?? 'solo'
-      if (!matched.allowed.includes(role)) {
+      if (!roleHasCapability(role, matched.capability)) {
         const home = ROLE_HOME[role] ?? '/dashboard'
         return NextResponse.redirect(new URL(home, request.url))
       }

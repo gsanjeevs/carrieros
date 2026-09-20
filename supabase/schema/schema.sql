@@ -244,6 +244,56 @@ INSERT INTO roles (code, label, abbreviation, color_token, scope, display_order)
   ('sx_finance','SX Finance','SF','purple','platform',9),
   ('sx_support','SX Support','SS','info','platform',10);
 
+-- Single source of truth for role -> capability gating (migration 0009),
+-- consumed identically by carrieros-web and carrieros-mobile via
+-- scripts/gen-role-capabilities.mjs, instead of hand-duplicated TS arrays
+-- (BILLING_ROLES already drifted once between web files, and mobile had no
+-- shared source at all). NOT a security boundary -- RLS on the data tables
+-- is what enforces access; this only drives navigation/UI gating. Presence
+-- of a row = allowed, absence = denied.
+CREATE TABLE role_capabilities (
+  role       TEXT NOT NULL REFERENCES roles(code),
+  capability TEXT NOT NULL,
+  PRIMARY KEY (role, capability)
+);
+
+COMMENT ON TABLE role_capabilities IS
+  'Role -> capability gating, single-sourced for web + mobile via scripts/gen-role-capabilities.mjs. UI/navigation gating only, not a security boundary -- see migration 0009 header comment.';
+
+INSERT INTO role_capabilities (role, capability) VALUES
+  ('owner',      'dashboard'),
+  ('owner',      'dispatch'),
+  ('owner',      'finance'),
+  ('owner',      'my_loads'),
+  ('owner',      'drivers'),
+  ('owner',      'team'),
+  ('owner',      'invoice_actions'),
+  ('owner',      'subscription_management'),
+
+  ('solo',       'dashboard'),
+  ('solo',       'dispatch'),
+  ('solo',       'finance'),
+  ('solo',       'my_loads'),
+  ('solo',       'drivers'),
+  ('solo',       'team'),
+  ('solo',       'invoice_actions'),
+  ('solo',       'subscription_management'),
+
+  ('dispatcher', 'dashboard'),
+  ('dispatcher', 'dispatch'),
+  ('dispatcher', 'drivers'),
+
+  ('finance',    'dashboard'),
+  ('finance',    'finance'),
+  ('finance',    'invoice_actions'),
+
+  ('driver',     'dashboard'),
+  ('driver',     'my_loads'),
+
+  ('sx_owner',   'admin'),
+  ('sx_finance', 'admin'),
+  ('sx_support', 'admin');
+
 -- Language reference/display data — NOT a foreign key, profiles.preferred_language
 -- and carrier_details.default_language keep their own CHECKs. native_name IS the
 -- correct display value regardless of UI locale (a language's own name in its own
@@ -1407,6 +1457,9 @@ CREATE POLICY "vehicle_type_classifications_select" ON vehicle_type_classificati
 ALTER TABLE roles ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "roles_select" ON roles FOR SELECT TO authenticated USING (true);
 
+ALTER TABLE role_capabilities ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "role_capabilities_select" ON role_capabilities FOR SELECT TO authenticated USING (true);
+
 ALTER TABLE languages ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "languages_select" ON languages FOR SELECT TO authenticated USING (true);
 -- Also readable by logged-out visitors: LanguageSwitcher renders on /login
@@ -2492,10 +2545,12 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated, service_
 -- Kept in sync with 0002 by scripts/db/verify-migrations.mjs, which builds a
 -- database from migrations and diffs its grants against a replay of this file.
 REVOKE INSERT, UPDATE, DELETE ON tiers, features, languages, ifta_tax_rates, roles,
-  vehicle_types, vehicle_classifications, vehicle_type_classifications, platform_flags
+  vehicle_types, vehicle_classifications, vehicle_type_classifications, platform_flags,
+  role_capabilities
   FROM authenticated;
 GRANT SELECT ON tiers, features, languages, ifta_tax_rates, roles,
-  vehicle_types, vehicle_classifications, vehicle_type_classifications, platform_flags
+  vehicle_types, vehicle_classifications, vehicle_type_classifications, platform_flags,
+  role_capabilities
   TO authenticated;
 
 -- TRUNCATE is not subject to row-level security — a policy limiting DELETE to

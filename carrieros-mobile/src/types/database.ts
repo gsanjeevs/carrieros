@@ -1993,6 +1993,29 @@ export type Database = {
           },
         ]
       }
+      role_capabilities: {
+        Row: {
+          capability: string
+          role: string
+        }
+        Insert: {
+          capability: string
+          role: string
+        }
+        Update: {
+          capability?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_capabilities_role_fkey"
+            columns: ["role"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       roles: {
         Row: {
           abbreviation: string

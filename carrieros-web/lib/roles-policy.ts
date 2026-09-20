@@ -15,5 +15,21 @@
 // `INVOICE_ROLES` and `SUBSCRIPTION_ROLES` were actually meant to be
 // identical, that's a one-line fix here — flag it for confirmation rather
 // than assuming.
-export const INVOICE_ROLES: string[] = ['owner', 'solo', 'finance']
-export const SUBSCRIPTION_ROLES: string[] = ['owner', 'solo']
+//
+// Now derived from the generated `role_capabilities` table
+// (lib/generated/role-capabilities.ts, backed by
+// supabase/migrations/0009_role_capabilities.sql) instead of hand-maintained
+// arrays, so this file and the migration can't drift the way BILLING_ROLES
+// did. Kept as a thin re-export shim — rather than updating each call site
+// to `roleHasCapability(...)` directly — because ~10 call sites across
+// unrelated route/page files just do `INVOICE_ROLES.includes(role)` /
+// `SUBSCRIPTION_ROLES.includes(role)`; re-deriving the same array here keeps
+// those call sites untouched and confines the diff to this one file.
+import { ROLE_CAPABILITIES, roleHasCapability } from '@/lib/generated/role-capabilities'
+
+export const INVOICE_ROLES: string[] = Object.keys(ROLE_CAPABILITIES).filter((role) =>
+  roleHasCapability(role, 'invoice_actions')
+)
+export const SUBSCRIPTION_ROLES: string[] = Object.keys(ROLE_CAPABILITIES).filter((role) =>
+  roleHasCapability(role, 'subscription_management')
+)
