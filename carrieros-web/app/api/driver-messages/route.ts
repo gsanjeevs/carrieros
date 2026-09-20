@@ -13,6 +13,7 @@ import { hasFeature } from '@/lib/entitlements'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { getLoadById } from '@/lib/queries/loads'
 import { getDriverIdForProfile } from '@/lib/queries/drivers'
+import { logError } from '@/lib/observability'
 
 const DISPATCH_ROLES = ['owner', 'solo', 'dispatcher']
 
@@ -124,7 +125,7 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (error || !inserted) {
-    console.error('[api/driver-messages POST]', error)
+    logError({ route: 'api/driver-messages POST', requestId: request.headers.get('x-request-id') }, error)
     return apiError('SERVER_ERROR', error?.message ?? 'Failed to send message', 500)
   }
 

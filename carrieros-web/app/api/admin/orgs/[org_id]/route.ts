@@ -9,6 +9,7 @@ import { createAuthAdminProvider } from '@/lib/auth-admin'
 import { listProfilesForOrg } from '@/lib/queries/profiles'
 import { listRecentLoadsForOrg } from '@/lib/queries/loads'
 import { listDriverIdsForOrgs } from '@/lib/queries/drivers'
+import { logError } from '@/lib/observability'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ org_id: string }> }) {
   const ctx = await requireAdminRole(request)
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     .maybeSingle()
 
   if (orgErr) {
-    console.error('[admin/orgs/:id] org:', orgErr)
+    logError({ route: 'admin/orgs/:id', requestId: request.headers.get('x-request-id') }, orgErr, { step: 'org' })
     return apiError('SERVER_ERROR', orgErr.message, 500)
   }
   if (!org) return apiError('NOT_FOUND', 'Carrier org not found', 404)

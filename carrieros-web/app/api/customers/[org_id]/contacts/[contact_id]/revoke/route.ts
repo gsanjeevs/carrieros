@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'
 import { getProfileForUser, setProfileActive } from '@/lib/queries/profiles'
+import { logError } from '@/lib/observability'
 
 export async function POST(
   request: NextRequest,
@@ -42,7 +43,7 @@ export async function POST(
   const { error: deactivateErr } = await setProfileActive(admin, contact.portal_profile_id, false)
 
   if (deactivateErr) {
-    console.error('[customers/contacts/revoke] deactivate:', deactivateErr)
+    logError({ route: 'customers/contacts/revoke', requestId: request.headers.get('x-request-id') }, deactivateErr, { step: 'deactivate' })
     return apiError('SERVER_ERROR', deactivateErr.message, 500)
   }
 
@@ -52,7 +53,7 @@ export async function POST(
     .eq('id', contact.id)
 
   if (unlinkErr) {
-    console.error('[customers/contacts/revoke] unlink:', unlinkErr)
+    logError({ route: 'customers/contacts/revoke', requestId: request.headers.get('x-request-id') }, unlinkErr, { step: 'unlink' })
     return apiError('SERVER_ERROR', unlinkErr.message, 500)
   }
 

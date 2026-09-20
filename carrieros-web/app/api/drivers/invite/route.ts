@@ -17,6 +17,7 @@ import { generateDriverNumber } from '@/lib/generate-number'
 import { getProfileForUser, insertProfile } from '@/lib/queries/profiles'
 import { createDriver } from '@/lib/queries/drivers'
 import { createAuthAdminProvider } from '@/lib/auth-admin'
+import { logError } from '@/lib/observability'
 
 export async function POST(request: NextRequest) {
   const ctx = await getAuthedContext(request)
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
   })
 
   if (inviteErr || !inviteData?.user) {
-    console.error('[drivers/invite] invite:', inviteErr)
+    logError({ route: 'drivers/invite', requestId: request.headers.get('x-request-id') }, inviteErr, { step: 'invite' })
     return apiError('SERVER_ERROR', inviteErr?.message ?? 'Failed to send invite', 500)
   }
 
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
   })
 
   if (profileErr) {
-    console.error('[drivers/invite] profile:', profileErr)
+    logError({ route: 'drivers/invite', requestId: request.headers.get('x-request-id') }, profileErr, { step: 'profile' })
     return apiError('SERVER_ERROR', `[step1] ${profileErr.message}`, 500)
   }
 
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
   })
 
   if (driverErr) {
-    console.error('[drivers/invite] drivers row:', driverErr)
+    logError({ route: 'drivers/invite', requestId: request.headers.get('x-request-id') }, driverErr, { step: 'drivers row' })
     return apiError('SERVER_ERROR', `[step2] ${driverErr.message}`, 500)
   }
 

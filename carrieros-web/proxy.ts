@@ -65,7 +65,18 @@ const CORS_HEADERS = {
   'Access-Control-Max-Age': '86400',
 }
 
+// Every request gets an id (honouring one supplied by an upstream proxy/load
+// balancer). It is forwarded to route handlers as the `x-request-id` request
+// header -- lib/observability.ts logs it -- and echoed on the response so a
+// user-reported failure can be matched to a log line and a tracker event.
 export async function proxy(request: NextRequest) {
+  const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
+  const response = await handle(request, requestId)
+  response.headers.set('x-request-id', requestId)
+  return response
+}
+
+async function handle(request: NextRequest, requestId: string) {
   const { pathname } = request.nextUrl
   const isPublic = PUBLIC_PREFIXES.some((p) => pathname.startsWith(p))
   const isApiRoute = pathname.startsWith('/api/')
@@ -86,8 +97,11 @@ export async function proxy(request: NextRequest) {
       })
     }
 
-    const apiResponse = NextResponse.next({ request })
+    const forwardedHeaders = new Headers(request.headers)
+    forwardedHeaders.set('x-request-id', requestId)
+    const apiResponse = NextResponse.next({ request: { headers: forwardedHeaders } })
     apiResponse.headers.set('Access-Control-Allow-Origin', origin)
+    apiResponse.headers.set('Access-Control-Expose-Headers', 'x-request-id')
     for (const [key, value] of Object.entries(CORS_HEADERS)) {
       apiResponse.headers.set(key, value)
     }

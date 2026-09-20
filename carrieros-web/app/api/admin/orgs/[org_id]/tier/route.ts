@@ -4,6 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isErrorResponse, apiError } from '@/lib/api-auth'
 import { requireAdminRole } from '@/lib/admin-auth'
+import { logError } from '@/lib/observability'
 
 const VALID_TIERS = ['starter', 'growth', 'pro', 'enterprise'] as const
 
@@ -25,7 +26,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   const { error } = await admin.from('carrier_details').update({ tier }).eq('org_id', orgId)
   if (error) {
-    console.error('[admin/orgs/:id/tier] update:', error)
+    logError({ route: 'admin/orgs/:id/tier', requestId: request.headers.get('x-request-id') }, error, { step: 'update' })
     return apiError('SERVER_ERROR', error.message, 500)
   }
 

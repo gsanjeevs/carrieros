@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { isErrorResponse, apiError } from '@/lib/api-auth'
 import { requireAdminRole } from '@/lib/admin-auth'
 import { countActiveDriversForOrg } from '@/lib/queries/drivers'
+import { logError } from '@/lib/observability'
 
 const UPGRADE_LOAD_THRESHOLD = 8
 
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
     .eq('tier', 'starter')
 
   if (trialingError || starterError) {
-    console.error('[admin/pipeline GET]', trialingError ?? starterError)
+    logError({ route: 'admin/pipeline GET', requestId: request.headers.get('x-request-id') }, trialingError ?? starterError)
     return apiError('SERVER_ERROR', (trialingError ?? starterError)?.message ?? 'Failed to load pipeline data', 500)
   }
 

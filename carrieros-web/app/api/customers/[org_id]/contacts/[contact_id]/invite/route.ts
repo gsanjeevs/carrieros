@@ -13,6 +13,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'
 import { getProfileForUser, insertProfile } from '@/lib/queries/profiles'
 import { createAuthAdminProvider } from '@/lib/auth-admin'
+import { logError } from '@/lib/observability'
 
 const INVITABLE_PORTAL_ROLES = ['customer_admin', 'customer_viewer'] as const
 
@@ -69,7 +70,7 @@ export async function POST(
     const msg = inviteErr?.message ?? ''
     if (inviteErr?.status === 422 || /already/i.test(msg))
       return apiError('EMAIL_EXISTS', msg || 'That email is already registered', 409)
-    console.error('[customers/contacts/invite] invite:', inviteErr)
+    logError({ route: 'customers/contacts/invite', requestId: request.headers.get('x-request-id') }, inviteErr, { step: 'invite' })
     return apiError('SERVER_ERROR', msg || 'Failed to send invite', 500)
   }
 
@@ -86,7 +87,7 @@ export async function POST(
   })
 
   if (profileErr) {
-    console.error('[customers/contacts/invite] profile:', profileErr)
+    logError({ route: 'customers/contacts/invite', requestId: request.headers.get('x-request-id') }, profileErr, { step: 'profile' })
     await authAdmin.deleteUser(newUserId).catch(() => {})
     return apiError('SERVER_ERROR', profileErr.message, 500)
   }
@@ -98,7 +99,7 @@ export async function POST(
     .eq('id', contact.id)
 
   if (linkErr) {
-    console.error('[customers/contacts/invite] link:', linkErr)
+    logError({ route: 'customers/contacts/invite', requestId: request.headers.get('x-request-id') }, linkErr, { step: 'link' })
     return apiError('SERVER_ERROR', linkErr.message, 500)
   }
 

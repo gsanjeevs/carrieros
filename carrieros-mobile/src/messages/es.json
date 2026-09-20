@@ -6,7 +6,8 @@
     "loadErrorRetry": "Algo salió mal al cargar esto. Desliza hacia abajo para volver a intentarlo.",
     "somethingWentWrongTitle": "Algo salió mal",
     "connectionError": "No se puede conectar con el servidor de CarrierOS. Revisa tu conexión e inténtalo de nuevo.",
-    "retry": "Intentar de nuevo"
+    "retry": "Intentar de nuevo",
+    "unexpectedError": "Ocurrió un problema inesperado. Inténtalo de nuevo."
   },
   "welcome": {
     "title": "Bienvenido a CarrierOS",

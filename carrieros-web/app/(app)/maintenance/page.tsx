@@ -22,6 +22,7 @@ import LogServiceButton from './LogServiceButton'
 import { getMaintenanceIcon } from '@/components/icons/maintenance'
 import { Card, CardHeader, StatusBadge, type StatusBadgeVariant, Table, TableHeaderCell, TableRow, TableCell, ProgressBar, EmptyState } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { logError } from '@/lib/observability'
 
 const VIEW_ROLES   = ['owner', 'solo', 'dispatcher']
 const MANAGE_ROLES = ['owner', 'solo']
@@ -166,7 +167,7 @@ export default async function MaintenancePage({
       .limit(20),
   ])
 
-  if (remindersError) console.error('[maintenance] reminders query failed:', remindersError.message)
+  if (remindersError) logError({ route: 'maintenance' }, remindersError.message, { step: 'reminders query failed' })
 
   const vehicles = (vehiclesData ?? []) as Vehicle[]
   const reminders = (remindersData ?? []) as unknown as Reminder[]

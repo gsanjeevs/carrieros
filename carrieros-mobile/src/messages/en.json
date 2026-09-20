@@ -6,7 +6,8 @@
     "loadErrorRetry": "Something went wrong loading this. Pull down to try again.",
     "somethingWentWrongTitle": "Something went wrong",
     "connectionError": "Can't reach the CarrierOS server. Check your connection and try again.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "unexpectedError": "An unexpected problem occurred. Please try again."
   },
   "welcome": {
     "title": "Welcome to CarrierOS",

@@ -25,6 +25,7 @@ import { INVOICE_ROLES } from '@/lib/roles-policy'
 import { SCORE_CRITICAL, SCORE_WARNING, SUCCESS } from '@/lib/design-tokens'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { listLoadsForCustomer } from '@/lib/queries/loads'
+import { logError } from '@/lib/observability'
 
 const VIEW_ROLES = ['owner', 'solo', 'dispatcher', 'finance']
 
@@ -144,7 +145,7 @@ export default async function CustomerDetailPage({
     const { data: scoreData, error: scoreError } = await supabase.rpc('get_customer_health_score', {
       customer_org_id: org.id,
     })
-    if (scoreError) console.error('[customer detail] get_customer_health_score failed:', scoreError.message)
+    if (scoreError) logError({ route: 'customer detail' }, scoreError.message, { step: 'get_customer_health_score failed' })
     healthScore = scoreData != null ? Number(scoreData) : null
   }
 

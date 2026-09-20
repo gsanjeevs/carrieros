@@ -1199,5 +1199,14 @@
       "confidenceCheck": "⚠ verificar",
       "back": "Atrás"
     }
+  },
+  "errorPage": {
+    "title": "Algo salió mal",
+    "body": "Encontramos un problema inesperado. Ya fue reportado. Puedes intentarlo de nuevo o volver a tu panel.",
+    "retry": "Intentar de nuevo",
+    "home": "Ir al panel",
+    "reference": "Referencia",
+    "notFoundTitle": "Página no encontrada",
+    "notFoundBody": "La página que buscas no existe o no tienes acceso a ella."
   }
 }

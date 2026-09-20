@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isErrorResponse, apiError } from '@/lib/api-auth'
 import { requireAdminRole } from '@/lib/admin-auth'
+import { logError } from '@/lib/observability'
 
 export async function GET(request: NextRequest) {
   const ctx = await requireAdminRole(request, ['sx_owner', 'sx_finance'])
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
   ])
 
   if (atRiskError || eventsError) {
-    console.error('[admin/billing GET]', atRiskError ?? eventsError)
+    logError({ route: 'admin/billing GET', requestId: request.headers.get('x-request-id') }, atRiskError ?? eventsError)
     return apiError('SERVER_ERROR', (atRiskError ?? eventsError)?.message ?? 'Failed to load billing data', 500)
   }
 

@@ -8,6 +8,7 @@ import { isErrorResponse, apiError } from '@/lib/api-auth'
 import { requireAdminRole } from '@/lib/admin-auth'
 import { createAuthAdminProvider } from '@/lib/auth-admin'
 import { getOrgOwnerOrSolo } from '@/lib/queries/profiles'
+import { logError } from '@/lib/observability'
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ org_id: string }> }) {
   const ctx = await requireAdminRole(request, ['sx_owner', 'sx_support'])
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const { data: owner, error: ownerErr } = await getOrgOwnerOrSolo(admin, orgId)
 
   if (ownerErr) {
-    console.error('[admin/orgs/:id/impersonate] owner lookup:', ownerErr)
+    logError({ route: 'admin/orgs/:id/impersonate', requestId: request.headers.get('x-request-id') }, ownerErr, { step: 'owner lookup' })
     return apiError('SERVER_ERROR', ownerErr.message, 500)
   }
   if (!owner) return apiError('NOT_FOUND', 'No owner/solo profile found for this org', 404)
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const { data: link, error: linkErr } = await authAdmin.generateMagicLink(ownerEmail)
 
   if (linkErr || !link) {
-    console.error('[admin/orgs/:id/impersonate] generateLink:', linkErr)
+    logError({ route: 'admin/orgs/:id/impersonate', requestId: request.headers.get('x-request-id') }, linkErr, { step: 'generateLink' })
     return apiError('SERVER_ERROR', linkErr?.message ?? 'Failed to generate impersonation link', 500)
   }
 

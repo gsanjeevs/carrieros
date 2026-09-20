@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { logError } from '@/lib/observability'
 
 export async function GET(request: NextRequest) {
   const ctx = await getAuthedContext(request)
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
     .order('org_id')
 
   if (error) {
-    console.error('[api/customers GET]', error)
+    logError({ route: 'api/customers GET', requestId: request.headers.get('x-request-id') }, error)
     return apiError('SERVER_ERROR', error.message, 500)
   }
 

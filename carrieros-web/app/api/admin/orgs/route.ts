@@ -17,6 +17,7 @@ import { requireAdminRole } from '@/lib/admin-auth'
 import { createAuthAdminProvider } from '@/lib/auth-admin'
 import { listProfilesForOrgs } from '@/lib/queries/profiles'
 import { listDriverIdsForOrgs } from '@/lib/queries/drivers'
+import { logError } from '@/lib/observability'
 
 function loginRecencyScore(lastSignInAt: string | null | undefined): number {
   if (!lastSignInAt) return 0
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest) {
     .eq('type', 'carrier')
 
   if (orgsErr) {
-    console.error('[admin/orgs] orgs:', orgsErr)
+    logError({ route: 'admin/orgs', requestId: request.headers.get('x-request-id') }, orgsErr, { step: 'orgs' })
     return apiError('SERVER_ERROR', orgsErr.message, 500)
   }
 

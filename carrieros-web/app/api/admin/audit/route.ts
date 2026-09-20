@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isErrorResponse, apiError } from '@/lib/api-auth'
 import { requireAdminRole } from '@/lib/admin-auth'
+import { logError } from '@/lib/observability'
 
 const PAGE_SIZE = 100
 
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
     .limit(PAGE_SIZE)
 
   if (error) {
-    console.error('[admin/audit GET]', error)
+    logError({ route: 'admin/audit GET', requestId: request.headers.get('x-request-id') }, error)
     return apiError('SERVER_ERROR', error.message, 500)
   }
 

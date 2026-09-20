@@ -12,8 +12,16 @@ import { OfflineBanner } from '@/components/offline-banner';
 import { OnboardingStatusError } from '@/components/onboarding-status-error';
 import WelcomeScreen from './welcome';
 import OnboardingScreen from './onboarding';
+import { AppErrorScreen } from '@/components/app-error-screen';
+import { installGlobalErrorHandler } from '@/lib/observability';
 
 SplashScreen.preventAutoHideAsync();
+installGlobalErrorHandler();
+
+// expo-router renders this in place of any screen that throws while rendering.
+export function ErrorBoundary(props: { error: Error; retry: () => Promise<unknown> }) {
+  return <AppErrorScreen {...props} />;
+}
 
 // Unauthenticated routes: /welcome (mockup-06 Screen 1 — the actual entry
 // point now, replacing the old hardcoded "/login only" rule), /login, and

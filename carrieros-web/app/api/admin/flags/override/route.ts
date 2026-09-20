@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isErrorResponse, apiError } from '@/lib/api-auth'
 import { requireAdminRole } from '@/lib/admin-auth'
+import { logError } from '@/lib/observability'
 
 export async function POST(request: NextRequest) {
   const ctx = await requireAdminRole(request, ['sx_owner'])
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
     .upsert({ org_id: orgId, flag_key: flagKey, enabled, set_by: userId, set_at: new Date().toISOString() })
 
   if (error) {
-    console.error('[admin/flags/override POST]', error)
+    logError({ route: 'admin/flags/override POST', requestId: request.headers.get('x-request-id') }, error)
     return apiError('SERVER_ERROR', error.message, 500)
   }
 

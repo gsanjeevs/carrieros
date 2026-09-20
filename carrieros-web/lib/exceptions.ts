@@ -6,6 +6,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase'
 import { getLoadsByIds } from '@/lib/queries/loads'
+import { logError } from '@/lib/observability'
 
 export type ExceptionTier = 'today' | 'this_week' | 'upcoming'
 
@@ -90,7 +91,7 @@ export async function getExceptions(
 
   const { data, error } = await supabase.rpc('get_exceptions')
   if (error) {
-    console.error('[exceptions] get_exceptions failed:', error.message)
+    logError({ route: 'exceptions' }, error.message, { step: 'get_exceptions failed' })
     return []
   }
   const rows = (data ?? []) as ExceptionRow[]

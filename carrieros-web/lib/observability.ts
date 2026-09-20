@@ -1,11 +1,7 @@
 // lib/observability.ts
 // Structured logging / error-tracking seam — Gate 0→1 (docs/production-gates.md).
 //
-// No external error-tracking account (Sentry or equivalent) exists yet.
-// Same demo-seam-first philosophy as lib/stripe.ts's createStripeCustomer():
-// this is the ONE place a real integration gets wired in later, once a real
-// account/DSN exists — every call site below stays unchanged when that
-// happens. Until then, every event logs as structured JSON (one line,
+// Every event logs as structured JSON (one line,
 // greppable/parseable by whatever log aggregator sits in front of the
 // deployment) instead of the ad hoc `console.error('[route] context:', err)`
 // strings scattered across routes today.
@@ -13,8 +9,12 @@
 // Usage: pass a stable `route` name and whatever identifying context is
 // available (userId/orgId) — never a raw secret/token/full request body.
 
+import * as Sentry from '@sentry/nextjs'
+
 export interface LogContext {
   route: string
+  /** Pass `request.headers.get('x-request-id')` (set by proxy.ts) to correlate a log line with a response and tracker event. */
+  requestId?: string | null
   userId?: string
   orgId?: number
   [key: string]: unknown
@@ -36,9 +36,12 @@ export function logError(context: LogContext, error: unknown, extra?: Record<str
     ...extra,
   }
   console.error(JSON.stringify(payload))
-  // TODO(observability, Gate 1→2): once a real error-tracking service is
-  // configured (e.g. an ERROR_TRACKING_DSN env var), report `payload` there
-  // too. Until then this structured console line is the only sink.
+  // No-op unless a DSN is configured (lib/sentry-options.ts), so this is safe
+  // in every environment. Context goes in as tags/extra, never raw bodies.
+  Sentry.captureException(error, {
+    tags: { route: context.route, ...(context.requestId ? { request_id: context.requestId } : {}) },
+    extra: { orgId: context.orgId, userId: context.userId, ...extra },
+  })
 }
 
 export function logEvent(context: LogContext, extra?: Record<string, unknown>) {

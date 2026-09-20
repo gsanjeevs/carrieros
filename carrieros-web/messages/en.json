@@ -1199,5 +1199,14 @@
       "confidenceCheck": "⚠ check",
       "back": "Back"
     }
+  },
+  "errorPage": {
+    "title": "Something went wrong",
+    "body": "We hit an unexpected problem. It has been reported. You can try again, or go back to your dashboard.",
+    "retry": "Try again",
+    "home": "Go to dashboard",
+    "reference": "Reference",
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "The page you're looking for doesn't exist, or you don't have access to it."
   }
 }

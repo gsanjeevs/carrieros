@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isErrorResponse, apiError } from '@/lib/api-auth'
 import { requireAdminRole } from '@/lib/admin-auth'
+import { logError } from '@/lib/observability'
 
 const MAX_DAYS = 90
 
@@ -35,7 +36,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   const { error } = await admin.from('carrier_details').update({ trial_ends_at: newTrialEndsAt }).eq('org_id', orgId)
   if (error) {
-    console.error('[admin/orgs/:id/trial] update:', error)
+    logError({ route: 'admin/orgs/:id/trial', requestId: request.headers.get('x-request-id') }, error, { step: 'update' })
     return apiError('SERVER_ERROR', error.message, 500)
   }
 

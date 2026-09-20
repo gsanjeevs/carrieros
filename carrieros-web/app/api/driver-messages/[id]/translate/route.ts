@@ -11,6 +11,7 @@ import { SUPPORTED_LOCALES } from '@/i18n/request'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { getLoadById } from '@/lib/queries/loads'
 import { getDriverIdForProfile } from '@/lib/queries/drivers'
+import { logError } from '@/lib/observability'
 
 const DISPATCH_ROLES = ['owner', 'solo', 'dispatcher']
 
@@ -133,7 +134,7 @@ export async function POST(request: NextRequest, { params }: Ctx) {
     .single()
 
   if (error || !inserted) {
-    console.error('[api/driver-messages/:id/translate POST]', error)
+    logError({ route: 'api/driver-messages/:id/translate POST', requestId: request.headers.get('x-request-id') }, error)
     return apiError('SERVER_ERROR', error?.message ?? 'Failed to translate message', 500)
   }
 

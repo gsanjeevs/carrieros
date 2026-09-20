@@ -4,6 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isErrorResponse, apiError } from '@/lib/api-auth'
 import { requireAdminRole } from '@/lib/admin-auth'
+import { logError } from '@/lib/observability'
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ org_id: string }> }) {
   const ctx = await requireAdminRole(request)
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     .single()
 
   if (error) {
-    console.error('[admin/orgs/:id/notes] insert:', error)
+    logError({ route: 'admin/orgs/:id/notes', requestId: request.headers.get('x-request-id') }, error, { step: 'insert' })
     return apiError('SERVER_ERROR', error.message, 500)
   }
 

@@ -23,6 +23,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/send-email'
 import { createAuthAdminProvider } from '@/lib/auth-admin'
 import { getOrgOwnersAndSolos } from '@/lib/queries/profiles'
+import { logError } from '@/lib/observability'
 
 function isAuthorized(request: NextRequest): boolean {
   const secret = process.env.CRON_SECRET
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
   const { data: newCount, error: rpcError } = await admin.rpc('send_expiry_reminders')
 
   if (rpcError) {
-    console.error('[cron/send-reminders] send_expiry_reminders() failed:', rpcError.message)
+    logError({ route: 'cron/send-reminders', requestId: request.headers.get('x-request-id') }, rpcError.message, { step: 'send_expiry_reminders() failed' })
     return NextResponse.json(
       { error_code: 'SERVER_ERROR', error: rpcError.message },
       { status: 500 }
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
     .order('created_at', { ascending: false })
 
   if (eventsError) {
-    console.error('[cron/send-reminders] Failed to read back new events:', eventsError.message)
+    logError({ route: 'cron/send-reminders', requestId: request.headers.get('x-request-id') }, eventsError.message, { step: 'Failed to read back new events' })
     return NextResponse.json(
       { reminders_created: createdCount, emails_sent: 0, emails_failed: 0, warning: 'EVENTS_READBACK_FAILED' },
       { status: 200 }

@@ -11,6 +11,7 @@ import { INVOICE_ROLES } from '@/lib/roles-policy'
 import { invoiceStatusVariant, type InvoiceStatus } from '@/lib/domain/invoice-status'
 import { Card, EmptyState, StatusBadge, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { logError } from '@/lib/observability'
 
 const STATUSES = ['draft', 'sent', 'paid', 'overdue'] as const
 
@@ -51,7 +52,7 @@ export default async function InvoicesPage({
   // extension, or a Vercel Cron hitting an API route) once the project has a
   // home for scheduled jobs.
   const { error: overdueError } = await supabase.rpc('mark_overdue_invoices')
-  if (overdueError) console.error('[invoices] mark_overdue_invoices failed:', overdueError.message)
+  if (overdueError) logError({ route: 'invoices' }, overdueError.message, { step: 'mark_overdue_invoices failed' })
 
   let query = supabase
     .from('invoices')
@@ -67,7 +68,7 @@ export default async function InvoicesPage({
   if (activeStatus) query = query.eq('status', activeStatus)
 
   const { data: invoices, error } = await query
-  if (error) console.error('[invoices] list query failed:', error.message)
+  if (error) logError({ route: 'invoices' }, error.message, { step: 'list query failed' })
 
   const total = (invoices ?? []).reduce((sum, i) => sum + Number(i.amount ?? 0), 0)
 

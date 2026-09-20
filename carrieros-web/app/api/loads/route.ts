@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { createLoad } from '@/lib/queries/loads'
+import { logError } from '@/lib/observability'
 
 // The request body is untrusted JSON, so every field is narrowed to the
 // column's actual type before it reaches the insert. Absent/empty means null;
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest) {
   })
 
   if (error) {
-    console.error('[api/loads POST]', error)
+    logError({ route: 'api/loads POST', requestId: request.headers.get('x-request-id') }, error)
     return apiError('SERVER_ERROR', error.message, 500)
   }
 

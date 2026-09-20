@@ -17,6 +17,7 @@ import { getProfileForUser } from '@/lib/queries/profiles'
 import { createStorageProvider } from '@/lib/storage'
 import { formatMoney } from '@/lib/format-money'
 import { Avatar, Card, EmptyState, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
+import { logError } from '@/lib/observability'
 
 const VIEW_ROLES   = ['owner', 'solo', 'dispatcher', 'finance']
 const MANAGE_ROLES = ['owner', 'solo', 'dispatcher']
@@ -85,7 +86,7 @@ export default async function CustomersPage({
     getExceptions(supabase, profile.org_id),
   ])
 
-  if (error) console.error('[customers] list query failed:', error.message)
+  if (error) logError({ route: 'customers' }, error.message, { step: 'list query failed' })
   const customers = (customersData ?? []) as unknown as Customer[]
 
   const loadCounts = new Map<number, number>()

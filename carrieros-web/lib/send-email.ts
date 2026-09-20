@@ -12,6 +12,7 @@
 // to Resend's SMTP endpoint) — this file does not change, only env vars do.
 
 import nodemailer from 'nodemailer'
+import { logError } from '@/lib/observability'
 
 const DEFAULT_SMTP_HOST = '127.0.0.1'
 const DEFAULT_SMTP_PORT = 54325
@@ -57,7 +58,7 @@ export async function sendEmail({ to, subject, html, attachments }: SendEmailArg
     return { ok: true }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown SMTP error'
-    console.error('[send-email] SMTP send failed:', message)
+    logError({ route: 'send-email' }, message, { step: 'SMTP send failed' })
     return { ok: false, error: message }
   }
 }

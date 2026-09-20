@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isErrorResponse, apiError } from '@/lib/api-auth'
 import { requireAdminRole } from '@/lib/admin-auth'
+import { logError } from '@/lib/observability'
 
 export async function GET(request: NextRequest) {
   const ctx = await requireAdminRole(request)
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
   ])
 
   if (flagsError || overridesError) {
-    console.error('[admin/flags GET]', flagsError ?? overridesError)
+    logError({ route: 'admin/flags GET', requestId: request.headers.get('x-request-id') }, flagsError ?? overridesError)
     return apiError('SERVER_ERROR', (flagsError ?? overridesError)?.message ?? 'Failed to load flags', 500)
   }
 
@@ -51,7 +52,7 @@ export async function PATCH(request: NextRequest) {
 
   const { error } = await admin.from('platform_flags').update({ default_enabled: defaultEnabled }).eq('flag_key', flagKey)
   if (error) {
-    console.error('[admin/flags PATCH]', error)
+    logError({ route: 'admin/flags PATCH', requestId: request.headers.get('x-request-id') }, error)
     return apiError('SERVER_ERROR', error.message, 500)
   }
 

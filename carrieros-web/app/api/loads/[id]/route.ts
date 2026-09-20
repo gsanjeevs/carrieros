@@ -6,6 +6,7 @@ import { hasFeature } from '@/lib/entitlements'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { getLoadById } from '@/lib/queries/loads'
 import { sendPushNotification } from '@/lib/send-push'
+import { logError } from '@/lib/observability'
 
 const VALID_STATUSES = ['draft','scheduled','dispatched','picked_up','in_transit','delivered','invoiced','paid','cancelled','declined']
 
@@ -111,7 +112,7 @@ export async function PATCH(
         { p_load_id: Number(id) }
       )
       if (iftaError) {
-        console.error('[api/loads/[id] PATCH] check_ifta_completeness failed', iftaError)
+        logError({ route: 'api/loads/[id', requestId: request.headers.get('x-request-id') }, iftaError, { step: 'PATCH] check_ifta_completeness failed' })
       } else {
         iftaMileageComplete = completeness ?? null
       }

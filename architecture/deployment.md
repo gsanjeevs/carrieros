@@ -44,6 +44,12 @@ exercised locally first. The deploy workflow has not been exercised at all
    `carrieros-mobile/eas.json`. Store the anon key as an EAS environment
    variable (`EXPO_PUBLIC_SUPABASE_ANON_KEY`) per profile.
 6. **Email**: set `SMTP_*` for staging and production (local uses Mailpit).
+7. **Error tracking**: create a Sentry project, set `SENTRY_DSN` and
+   `NEXT_PUBLIC_SENTRY_DSN` (and `SENTRY_ENVIRONMENT`) per Vercel environment.
+   Add `SENTRY_AUTH_TOKEN`/`SENTRY_ORG`/`SENTRY_PROJECT` to enable source-map
+   upload. With no DSN the web SDK is inert. Mobile has only a logging seam
+   (`src/lib/observability.ts`); installing `@sentry/react-native` needs a
+   native rebuild and is a separate step.
 
 ## Not covered yet
 

@@ -12,6 +12,7 @@ import { invoiceStatusVariant, type InvoiceStatus } from '@/lib/domain/invoice-s
 import StatusBadge from '@/components/ui/StatusBadge'
 import { Card, CardHeader, CardBody, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { logError } from '@/lib/observability'
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -56,7 +57,7 @@ export default async function InvoiceDetailPage({
     .eq('carrier_org_id', profile.org_id)
     .maybeSingle()
 
-  if (error) console.error('[invoices] detail query failed:', error.message)
+  if (error) logError({ route: 'invoices' }, error.message, { step: 'detail query failed' })
   if (!invoice) notFound()
 
   const { data: org } = await supabase
