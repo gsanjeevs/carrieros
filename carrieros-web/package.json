@@ -14,7 +14,8 @@
     "test:watch": "vitest",
     "test:extraction": "vitest run --config vitest.extraction.config.ts",
     "gen:api": "tsx scripts/gen-api-client.ts",
-    "check:api": "tsx scripts/gen-api-client.ts --check"
+    "check:api": "tsx scripts/gen-api-client.ts --check",
+    "test:audit": "vitest run --exclude '' tests/audit"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.112.3",

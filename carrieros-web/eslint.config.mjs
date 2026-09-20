@@ -240,6 +240,8 @@ const eslintConfig = defineConfig([
     // Sources copied verbatim into both apps by scripts/gen-api-client.ts; they
     // only resolve inside a generated/ directory.
     "scripts/api-client-template/**",
+    // Black-box audit probes (2026-09-20): deliberately loose, many red on purpose, run via `npm run test:audit`.
+    "tests/audit/**",
     // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",

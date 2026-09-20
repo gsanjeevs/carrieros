@@ -17,6 +17,7 @@
 // — there is no card field in the request body and none should ever be
 // added (see lib/stripe.ts's safety-boundary note).
 
+import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { createStripeCustomer } from '@/lib/stripe'
@@ -43,7 +44,8 @@ export async function POST(request: NextRequest) {
 
   const result = await createStripeCustomer({ id: profile.org_id, name: org?.name ?? null })
 
-  const { data: updated, error: updateError } = await supabase
+  // carrier_details is server-write-only (migration 0019); the role + own-org check above is the authority.
+  const { data: updated, error: updateError } = await createAdminClient()
     .from('carrier_details')
     .update({
       stripe_customer_id: result.stripe_customer_id,

@@ -62,6 +62,16 @@ export async function POST(
   if (!body.name || typeof body.name !== 'string' || !body.name.trim())
     return apiError('VALIDATION_ERROR', 'name is required', 400)
 
+  // The customer must be one of THIS carrier's. Without this, a carrier could attach a contact to any
+  // org id and then invite it, minting a portal login inside another tenant (the database also refuses).
+  const { data: customer } = await supabase
+    .from('customer_details')
+    .select('org_id')
+    .eq('org_id', Number(org_id))
+    .eq('carrier_org_id', profile.org_id)
+    .maybeSingle()
+  if (!customer) return apiError('NOT_FOUND', 'Customer not found', 404)
+
   const { data, error } = await supabase
     .from('customer_contacts')
     .insert({

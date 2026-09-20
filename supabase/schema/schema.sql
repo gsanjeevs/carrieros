@@ -1486,8 +1486,7 @@ CREATE POLICY "ifta_tax_rates_select" ON ifta_tax_rates FOR SELECT TO authentica
 
 -- ORGANIZATIONS
 ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "auth_user_create_carrier_org" ON organizations
-  FOR INSERT WITH CHECK (type = 'carrier' AND auth.uid() IS NOT NULL);
+-- No client INSERT policy: tenants are created only by the server (onboarding, service role). Migration 0019.
 -- Covers: (a) reading your own org, (b) if you're a customer-portal user,
 -- reading your carrier's org.
 CREATE POLICY "org_member_select" ON organizations FOR SELECT USING (
@@ -1509,14 +1508,9 @@ CREATE POLICY "owner_solo_org_update" ON organizations FOR UPDATE USING (
 
 -- CARRIER DETAILS
 ALTER TABLE carrier_details ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "auth_user_create_carrier_details" ON carrier_details
-  FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+-- Read-only to clients: tier/billing state is written only by the server (migration 0019, see SECTION 19).
 CREATE POLICY "carrier_details_select" ON carrier_details FOR SELECT USING (
   org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-);
-CREATE POLICY "owner_solo_carrier_update" ON carrier_details FOR UPDATE USING (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
 );
 
 -- CUSTOMER DETAILS
@@ -1582,7 +1576,7 @@ CREATE POLICY "org_sequences_own_org" ON org_sequences FOR ALL TO authenticated
 CREATE POLICY "own_profile_update" ON profiles FOR UPDATE TO authenticated
   USING (id = auth.uid())
   WITH CHECK (id = auth.uid() AND role = my_role() AND org_id = my_org_id());
-CREATE POLICY "own_profile_insert" ON profiles FOR INSERT WITH CHECK (id = auth.uid());
+-- No client INSERT policy: profiles are created only by the server (onboarding/invites, service role). 0019.
 
 -- LOADS
 ALTER TABLE loads ENABLE ROW LEVEL SECURITY;
@@ -1688,11 +1682,23 @@ CREATE POLICY "owner_solo_dispatcher_ifta_crossings_all" ON ifta_state_crossings
 -- DRIVER MESSAGES (Phase 7D, 2026-07-21) -- Finance gets ZERO access per
 -- BR-2/FR-119, not even SELECT -- no policy below grants finance anything.
 ALTER TABLE driver_messages ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "driver_own_thread_messages" ON driver_messages FOR ALL TO authenticated USING (
-  load_id IN (SELECT id FROM loads WHERE driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid()))
-) WITH CHECK (
-  load_id IN (SELECT id FROM loads WHERE driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid()))
+CREATE POLICY "driver_thread_messages_select" ON driver_messages FOR SELECT TO authenticated USING (
+  carrier_org_id = my_org_id()
+  AND load_id IN (SELECT id FROM loads WHERE driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid()))
 );
+CREATE POLICY "driver_thread_messages_insert" ON driver_messages FOR INSERT TO authenticated WITH CHECK (
+  carrier_org_id = my_org_id()
+  AND sender_id = auth.uid()
+  AND load_id IN (SELECT id FROM loads WHERE driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid()))
+);
+CREATE POLICY "driver_thread_messages_update" ON driver_messages FOR UPDATE TO authenticated USING (
+  carrier_org_id = my_org_id()
+  AND load_id IN (SELECT id FROM loads WHERE driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid()))
+) WITH CHECK (
+  carrier_org_id = my_org_id()
+  AND load_id IN (SELECT id FROM loads WHERE driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid()))
+);
+-- Drivers may only flip read_at on an update: trigger driver_messages_columns (SECTION 20, migration 0020).
 CREATE POLICY "owner_solo_dispatcher_messages_all" ON driver_messages FOR ALL TO authenticated USING (
   carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher')
 );
@@ -3231,3 +3237,237 @@ END $$;
 
 CREATE TRIGGER loads_driver_columns BEFORE UPDATE ON loads
   FOR EACH ROW EXECUTE FUNCTION enforce_driver_load_columns();
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 19: CLOSE PRIVILEGE-ESCALATION PATHS (migration 0019)
+-- Policy removals above (profiles/organizations/carrier_details inserts, carrier_details update) live next to
+-- their tables. CREATE OR REPLACE below supersedes the earlier submit_shipment_milestone /
+-- replace_ifta_crossings_with_manual / check_ifta_completeness definitions.
+-- ────────────────────────────────────────────────────────────
+-- 3. carrier_details is read-only to clients. Subscription state is written only by the server (admin
+--    routes now, the billing provider's webhook later). The policy is dropped as well as the privilege so a
+--    future blanket GRANT cannot silently re-open it.
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON carrier_details FROM anon, authenticated;
+
+-- 4. Who may act on a load, decided once in the database for every SECURITY DEFINER command.
+--    Mirrors authorizeLoadAction: owner/solo/dispatcher act on their org's loads, a driver only on a load
+--    assigned to them. Everyone else (finance, portal, sx_*) is refused. Not-yours and missing look alike.
+CREATE OR REPLACE FUNCTION caller_may_act_on_load(p_load_id BIGINT) RETURNS BOOLEAN
+LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public AS $$
+  SELECT CASE my_role()
+    WHEN 'driver' THEN EXISTS (
+      SELECT 1 FROM loads l JOIN drivers d ON d.id = l.driver_id
+       WHERE l.id = p_load_id AND l.carrier_org_id = my_org_id() AND d.profile_id = auth.uid())
+    WHEN 'owner' THEN EXISTS (SELECT 1 FROM loads WHERE id = p_load_id AND carrier_org_id = my_org_id())
+    WHEN 'solo' THEN EXISTS (SELECT 1 FROM loads WHERE id = p_load_id AND carrier_org_id = my_org_id())
+    WHEN 'dispatcher' THEN EXISTS (SELECT 1 FROM loads WHERE id = p_load_id AND carrier_org_id = my_org_id())
+    ELSE FALSE
+  END;
+$$;
+REVOKE EXECUTE ON FUNCTION caller_may_act_on_load(BIGINT) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION caller_may_act_on_load(BIGINT) TO authenticated;
+
+CREATE OR REPLACE FUNCTION submit_shipment_milestone(
+  p_load_id          BIGINT,
+  p_expected_status  TEXT,
+  p_new_status       TEXT,
+  p_event_type       TEXT,
+  p_reason           TEXT,
+  p_correlation_id   TEXT,
+  p_idempotency_key  TEXT,
+  p_occurred_at      TIMESTAMPTZ
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_org_id     BIGINT;
+  v_actor      UUID;
+  v_updated    INTEGER;
+  v_load       RECORD;
+  v_existing   BIGINT;
+BEGIN
+  v_actor  := auth.uid();
+  v_org_id := my_org_id();
+
+  IF v_actor IS NULL OR v_org_id IS NULL THEN
+    RAISE EXCEPTION 'AUTH_REQUIRED' USING ERRCODE = '28000';
+  END IF;
+
+  IF NOT caller_may_act_on_load(p_load_id) THEN
+    RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404';
+  END IF;
+
+  SELECT id INTO v_existing FROM outbox_events WHERE idempotency_key = p_idempotency_key;
+  IF v_existing IS NOT NULL THEN
+    SELECT id, status, load_number INTO v_load FROM loads WHERE id = p_load_id;
+    RETURN jsonb_build_object(
+      'outcome',     'REPLAYED',
+      'load_id',     p_load_id,
+      'status',      v_load.status,
+      'load_number', v_load.load_number
+    );
+  END IF;
+
+  UPDATE loads
+     SET status = p_new_status
+   WHERE id = p_load_id
+     AND carrier_org_id = v_org_id
+     AND status = p_expected_status;
+
+  GET DIAGNOSTICS v_updated = ROW_COUNT;
+
+  IF v_updated = 0 THEN
+    SELECT id, status, carrier_org_id INTO v_load FROM loads WHERE id = p_load_id;
+    IF NOT FOUND OR v_load.carrier_org_id <> v_org_id THEN
+      RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404';
+    END IF;
+    RAISE EXCEPTION 'VERSION_CONFLICT:%', v_load.status USING ERRCODE = 'PT409';
+  END IF;
+
+  SELECT id, status, load_number, driver_id INTO v_load FROM loads WHERE id = p_load_id;
+
+  INSERT INTO load_events (load_id, event_type, note, created_by)
+  VALUES (p_load_id, p_event_type, p_reason, v_actor);
+
+  INSERT INTO outbox_events (
+    event_type, aggregate_type, aggregate_id, org_id,
+    payload, correlation_id, idempotency_key
+  ) VALUES (
+    'MilestoneSubmitted', 'Shipment', p_load_id::TEXT, v_org_id,
+    jsonb_build_object(
+      'loadId',      p_load_id,
+      'loadNumber',  v_load.load_number,
+      'priorStatus', p_expected_status,
+      'newStatus',   p_new_status,
+      'driverId',    v_load.driver_id,
+      'occurredAt',  p_occurred_at
+    ),
+    p_correlation_id, p_idempotency_key
+  );
+
+  INSERT INTO audit_events (
+    org_id, actor_user_id, action, aggregate_type, aggregate_id,
+    prior_state, new_state, reason, correlation_id, occurred_at
+  ) VALUES (
+    v_org_id, v_actor, 'shipment.milestone.submitted', 'Shipment', p_load_id::TEXT,
+    p_expected_status, p_new_status, p_reason, p_correlation_id, p_occurred_at
+  );
+
+  RETURN jsonb_build_object(
+    'outcome',     'APPLIED',
+    'load_id',     p_load_id,
+    'status',      v_load.status,
+    'load_number', v_load.load_number
+  );
+END $$;
+
+CREATE OR REPLACE FUNCTION replace_ifta_crossings_with_manual(
+  p_load_id BIGINT,
+  p_rows    JSONB          -- [{ "state": "NV", "miles": 120 }, ...]
+)
+RETURNS INTEGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_org     BIGINT := my_org_id();
+  v_vehicle BIGINT;
+  v_driver  BIGINT;
+  v_count   INTEGER;
+BEGIN
+  IF v_org IS NULL OR auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'AUTH_REQUIRED' USING ERRCODE = '28000';
+  END IF;
+
+  IF NOT caller_may_act_on_load(p_load_id) THEN
+    RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404';
+  END IF;
+
+  SELECT vehicle_id, driver_id INTO v_vehicle, v_driver
+    FROM loads WHERE id = p_load_id AND carrier_org_id = v_org;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404';
+  END IF;
+
+  IF jsonb_typeof(p_rows) IS DISTINCT FROM 'array' OR jsonb_array_length(p_rows) = 0 THEN
+    RAISE EXCEPTION 'VALIDATION: rows must be a non-empty array' USING ERRCODE = 'PT400';
+  END IF;
+
+  DELETE FROM ifta_state_crossings WHERE load_id = p_load_id AND carrier_org_id = v_org AND source = 'gps';
+
+  INSERT INTO ifta_state_crossings (carrier_org_id, vehicle_id, driver_id, load_id, state, odometer_est, crossed_at, source)
+  SELECT v_org, v_vehicle, v_driver, p_load_id, upper(r.state), r.miles, now(), 'manual'
+    FROM jsonb_to_recordset(p_rows) AS r(state TEXT, miles INTEGER)
+   WHERE r.state ~ '^[A-Za-z]{2}$' AND r.miles IS NOT NULL AND r.miles > 0;
+  GET DIAGNOSTICS v_count = ROW_COUNT;
+
+  IF v_count = 0 THEN
+    RAISE EXCEPTION 'VALIDATION: no valid rows' USING ERRCODE = 'PT400';  -- rolls the delete back too
+  END IF;
+  RETURN v_count;
+END $$;
+
+-- 6. No anon access, and no cross-tenant answers: a foreign or missing load both read as "no data".
+CREATE OR REPLACE FUNCTION check_ifta_completeness(p_load_id BIGINT)
+RETURNS BOOLEAN LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
+  SELECT COALESCE(
+    (SELECT SUM(odometer_est) FROM ifta_state_crossings WHERE load_id = p_load_id AND carrier_org_id = my_org_id()), 0
+  ) >= 0.6 * COALESCE((SELECT total_miles FROM loads WHERE id = p_load_id AND carrier_org_id = my_org_id()), 0);
+$$;
+REVOKE EXECUTE ON FUNCTION check_ifta_completeness(BIGINT) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION check_ifta_completeness(BIGINT) TO authenticated;
+
+-- 7. Tenant guards on foreign keys that RLS cannot express (RLS checks the row being written, not what
+--    its ids point at). Applies to every caller including service_role: the data must be consistent.
+CREATE OR REPLACE FUNCTION enforce_load_reference_tenancy() RETURNS trigger
+LANGUAGE plpgsql SET search_path = public AS $$
+BEGIN
+  IF NEW.driver_id IS NOT NULL AND (TG_OP = 'INSERT' OR NEW.driver_id IS DISTINCT FROM OLD.driver_id)
+     AND NOT EXISTS (SELECT 1 FROM drivers WHERE id = NEW.driver_id AND carrier_org_id = NEW.carrier_org_id) THEN
+    RAISE EXCEPTION 'driver does not belong to this carrier' USING ERRCODE = '23514';
+  END IF;
+  IF NEW.vehicle_id IS NOT NULL AND (TG_OP = 'INSERT' OR NEW.vehicle_id IS DISTINCT FROM OLD.vehicle_id)
+     AND NOT EXISTS (SELECT 1 FROM vehicles WHERE id = NEW.vehicle_id AND carrier_org_id = NEW.carrier_org_id) THEN
+    RAISE EXCEPTION 'vehicle does not belong to this carrier' USING ERRCODE = '23514';
+  END IF;
+  IF NEW.customer_org_id IS NOT NULL AND (TG_OP = 'INSERT' OR NEW.customer_org_id IS DISTINCT FROM OLD.customer_org_id)
+     AND NOT EXISTS (SELECT 1 FROM customer_details WHERE org_id = NEW.customer_org_id AND carrier_org_id = NEW.carrier_org_id) THEN
+    RAISE EXCEPTION 'customer does not belong to this carrier' USING ERRCODE = '23514';
+  END IF;
+  RETURN NEW;
+END $$;
+
+CREATE TRIGGER loads_reference_tenancy BEFORE INSERT OR UPDATE ON loads
+  FOR EACH ROW EXECUTE FUNCTION enforce_load_reference_tenancy();
+
+CREATE OR REPLACE FUNCTION enforce_contact_customer_tenancy() RETURNS trigger
+LANGUAGE plpgsql SET search_path = public AS $$
+BEGIN
+  IF (TG_OP = 'INSERT' OR NEW.org_id IS DISTINCT FROM OLD.org_id OR NEW.carrier_org_id IS DISTINCT FROM OLD.carrier_org_id)
+     AND NOT EXISTS (SELECT 1 FROM customer_details WHERE org_id = NEW.org_id AND carrier_org_id = NEW.carrier_org_id) THEN
+    RAISE EXCEPTION 'customer does not belong to this carrier' USING ERRCODE = '23514';
+  END IF;
+  RETURN NEW;
+END $$;
+
+CREATE TRIGGER customer_contacts_tenancy BEFORE INSERT OR UPDATE ON customer_contacts
+  FOR EACH ROW EXECUTE FUNCTION enforce_contact_customer_tenancy();
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 20: DRIVER MESSAGE COLUMN GUARD (migration 0020; the split policies are on driver_messages above)
+-- ────────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION enforce_driver_message_columns() RETURNS trigger
+LANGUAGE plpgsql SET search_path = public AS $$
+BEGIN
+  IF my_role() = 'driver' AND (to_jsonb(NEW) - 'read_at') IS DISTINCT FROM (to_jsonb(OLD) - 'read_at') THEN
+    RAISE EXCEPTION 'drivers may only mark messages read' USING ERRCODE = '42501';
+  END IF;
+  RETURN NEW;
+END $$;
+
+CREATE TRIGGER driver_messages_columns BEFORE UPDATE ON driver_messages
+  FOR EACH ROW EXECUTE FUNCTION enforce_driver_message_columns();

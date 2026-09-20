@@ -16,6 +16,7 @@
 // hardcoded array, so a future tier addition (a 5th plan) doesn't require
 // touching this route.
 
+import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { SUBSCRIPTION_ROLES } from '@/lib/roles-policy'
@@ -47,7 +48,8 @@ export async function POST(request: NextRequest) {
 
   if (!tierRow) return apiError('VALIDATION_ERROR', 'Unknown tier', 400)
 
-  const { data: updated, error: updateError } = await supabase
+  // carrier_details is server-write-only (migration 0019); the role + own-org check above is the authority.
+  const { data: updated, error: updateError } = await createAdminClient()
     .from('carrier_details')
     .update({ tier })
     .eq('org_id', profile.org_id)

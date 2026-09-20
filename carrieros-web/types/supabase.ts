@@ -2620,6 +2620,7 @@ export type Database = {
           row_name: string
         }[]
       }
+      caller_may_act_on_load: { Args: { p_load_id: number }; Returns: boolean }
       check_ifta_completeness: { Args: { p_load_id: number }; Returns: boolean }
       create_customer_org: {
         Args: {
