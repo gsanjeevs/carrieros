@@ -93,6 +93,30 @@ describe('the rules that must not change by accident', () => {
     expect(roleHasCapability('solo', 'driver_profile_edit_own')).toBe(true)
   })
 
+  it('never shows a driver the money (decisions.md BR-1)', () => {
+    // The UI counterpart of the loads_driver_view that omits the rate column. A driver gaining this
+    // capability would put commercial rates on screen for the person hauling the load.
+    expect(rolesWithCapability('rate_visibility')).toEqual(['finance', 'owner', 'solo'])
+    expect(roleHasCapability('driver', 'rate_visibility')).toBe(false)
+    expect(roleHasCapability('dispatcher', 'rate_visibility')).toBe(false)
+  })
+
+  it('lets finance see what it bills against without giving it dispatch', () => {
+    for (const capability of ['loads_view', 'customers_view', 'settlements_view'] as const) {
+      expect(roleHasCapability('finance', capability), capability).toBe(true)
+    }
+    expect(roleHasCapability('finance', 'exceptions_view')).toBe(false)
+    expect(roleHasCapability('finance', 'maintenance_view')).toBe(false)
+  })
+
+  it('shows a driver only their own settlements and their settings', () => {
+    expect(roleHasCapability('driver', 'settlements_view')).toBe(true) // RLS scopes the rows to their own
+    expect(roleHasCapability('driver', 'settings_view')).toBe(true)
+    for (const capability of ['loads_view', 'customers_view', 'exceptions_view', 'maintenance_view', 'org_documents_view'] as const) {
+      expect(roleHasCapability('driver', capability), capability).toBe(false)
+    }
+  })
+
   it('splits the ShipmentX console so support cannot reach billing or kill switches', () => {
     expect(rolesWithCapability('admin_billing')).toEqual(['sx_finance', 'sx_owner'])
     expect(rolesWithCapability('admin_flags')).toEqual(['sx_owner'])

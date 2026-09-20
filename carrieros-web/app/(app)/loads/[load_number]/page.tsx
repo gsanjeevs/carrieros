@@ -152,13 +152,13 @@ export default async function LoadDetailPage({
 
   // Rate visibility is money-visibility, not a named capability: no
   // role_capabilities row means "may see the rate", so this stays explicit.
-  const showRate    = ['owner', 'solo', 'finance'].includes(profile.role)
+  const showRate    = roleHasCapability(profile.role, 'rate_visibility')
   const canDispatch = roleHasCapability(profile.role, 'loads_manage')
   // Upload/delete stay explicit: `documents_upload` also includes the driver
   // (who uploads from the truck), and no capability covers deleting a
   // document — converting either would widen access.
   const canUploadDoc = ['owner', 'solo', 'dispatcher'].includes(profile.role)
-  const canDeleteDoc = ['owner', 'solo'].includes(profile.role)
+  const canDeleteDoc = roleHasCapability(profile.role, 'documents_delete')
   // Driver chat (audit gap #13): finance gets none of it, by design (BR-2/
   // FR-119) — `chat_participate` is the same role set the API routes' own
   // explicit access checks use.

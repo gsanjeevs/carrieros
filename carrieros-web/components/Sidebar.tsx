@@ -11,18 +11,17 @@ import { roleHasCapability, type RoleCapability } from '@/lib/generated/role-cap
 // role_capabilities table (migrations 0009 + 0023) already has a row set that
 // means exactly this nav item — same pattern proxy.ts's ROLE_ROUTES uses for
 // the matching route guard, so the sidebar and the middleware cannot drift.
-// A few items have no capability whose role set matches them today; those
-// keep an explicit `roles` list with a note saying why.
+// Migration 0024 added the view capabilities the remaining items needed, so every
+// item is capability-gated and the sidebar holds no role literal at all.
 interface NavItem {
   labelKey: string
   href: string
   icon: string
-  capability?: RoleCapability
-  roles?: string[]
+  capability: RoleCapability
 }
 
 function canSee(item: NavItem, role: string): boolean {
-  return item.capability ? roleHasCapability(role, item.capability) : (item.roles ?? []).includes(role)
+  return roleHasCapability(role, item.capability)
 }
 
 interface NavSection {
@@ -38,19 +37,11 @@ const NAV_SECTIONS: NavSection[] = [
     sectionKey: 'main',
     items: [
       { labelKey: 'dashboard', href: '/dashboard', icon: 'dashboard',         capability: 'dashboard' },
-      // No capability's role set is {owner,solo,dispatcher} *and* means
-      // "exception queue" — `dispatch`/`loads_manage` share the set but not
-      // the meaning, so this stays explicit until a capability exists for it.
-      { labelKey: 'exceptions', href: '/exceptions', icon: 'warning',         roles: ['owner','solo','dispatcher'] },
-      // {owner,solo,dispatcher,finance} (finance reads loads it bills
-      // against) matches no capability's role set today.
-      { labelKey: 'loads',     href: '/loads',      icon: 'local_shipping',    roles: ['owner','solo','dispatcher','finance'] },
+      { labelKey: 'exceptions', href: '/exceptions', icon: 'warning',         capability: 'exceptions_view' },
+      { labelKey: 'loads',     href: '/loads',      icon: 'local_shipping',    capability: 'loads_view' },
       { labelKey: 'dispatch',  href: '/dispatch',   icon: 'swap_driving_apps',capability: 'dispatch' },
-      // Wider than `customers_manage` — finance sees the directory read-only.
-      { labelKey: 'customers', href: '/customers',  icon: 'business',         roles: ['owner','solo','dispatcher','finance'] },
-      // Company compliance docs, not load paperwork: narrower than
-      // `documents_read` (which includes dispatcher/driver).
-      { labelKey: 'documents', href: '/documents',  icon: 'folder',           roles: ['owner','solo','finance'] },
+      { labelKey: 'customers', href: '/customers',  icon: 'business',         capability: 'customers_view' },
+      { labelKey: 'documents', href: '/documents',  icon: 'folder',           capability: 'org_documents_view' },
     ],
   },
   {
@@ -58,9 +49,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { labelKey: 'drivers',     href: '/drivers',     icon: 'person',     capability: 'drivers' },
       { labelKey: 'vehicles',    href: '/vehicles',    icon: 'fire_truck', capability: 'vehicles_manage' },
-      // Viewing maintenance is wider than `service_log` (which is the
-      // owner/solo write capability) and matches no capability's role set.
-      { labelKey: 'maintenance', href: '/maintenance', icon: 'build',      roles: ['owner','solo','dispatcher'] },
+      { labelKey: 'maintenance', href: '/maintenance', icon: 'build',      capability: 'maintenance_view' },
     ],
   },
   {
@@ -70,7 +59,7 @@ const NAV_SECTIONS: NavSection[] = [
       { labelKey: 'invoices', href: '/invoices', icon: 'receipt_long', capability: 'invoice_actions' },
       // Drivers see their own settlements too, so this is wider than
       // `settlements_manage`.
-      { labelKey: 'settlements', href: '/settlements', icon: 'payments', roles: ['owner','solo','finance','driver'] },
+      { labelKey: 'settlements', href: '/settlements', icon: 'payments', capability: 'settlements_view' },
       { labelKey: 'billing',  href: '/billing',  icon: 'credit_card',  capability: 'subscription_management' },
     ],
   },
@@ -79,7 +68,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { labelKey: 'team',     href: '/team',     icon: 'group',    capability: 'team' },
       // Everyone with a tenant role has settings; no capability covers that.
-      { labelKey: 'settings', href: '/settings', icon: 'settings', roles: ['owner','solo','driver','dispatcher','finance'] },
+      { labelKey: 'settings', href: '/settings', icon: 'settings', capability: 'settings_view' },
     ],
   },
 ]

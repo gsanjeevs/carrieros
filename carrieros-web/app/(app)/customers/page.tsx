@@ -23,7 +23,6 @@ import { roleHasCapability } from '@/lib/generated/role-capabilities'
 // Viewing is deliberately wider than `customers_manage` (finance reads the
 // directory it bills against) and matches no capability's role set, so it
 // stays an explicit list; managing goes through the generated source.
-const VIEW_ROLES   = ['owner', 'solo', 'dispatcher', 'finance']
 
 // "Going cold" threshold (mockup-07's relationship-intelligence banner) —
 // no BRD-specified number, so this picks a plain, documented judgment call
@@ -65,7 +64,7 @@ export default async function CustomersPage({
   const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) redirect('/onboarding')
-  if (!VIEW_ROLES.includes(profile.role)) redirect('/dashboard')
+  if (!roleHasCapability(profile.role, 'customers_view')) redirect('/dashboard')
 
   const canManage = roleHasCapability(profile.role, 'customers_manage')
   const params = await searchParams

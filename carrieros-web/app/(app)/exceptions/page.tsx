@@ -11,8 +11,7 @@ import { hasFeature } from '@/lib/entitlements'
 import { getExceptions, TIER_ORDER, TIER_COLOR, type ExceptionItem, type ExceptionTier } from '@/lib/exceptions'
 import { Card } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
-
-const EXCEPTION_ROLES = ['owner', 'solo', 'dispatcher']
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 export default async function ExceptionsPage() {
   const supabase = await createClient()
@@ -22,7 +21,7 @@ export default async function ExceptionsPage() {
   const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) redirect('/onboarding')
-  if (!EXCEPTION_ROLES.includes(profile.role)) redirect('/dashboard')
+  if (!roleHasCapability(profile.role, 'exceptions_view')) redirect('/dashboard')
 
   const t = await getTranslations('exceptions')
 

@@ -5,12 +5,12 @@ import { getTranslations } from 'next-intl/server'
 import { formatDateTime } from '@/lib/format-datetime'
 import CompanyDocuments, { type CompanyDocType, type CompanyDocument } from '@/components/CompanyDocuments'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 // RLS (owner_solo_org_docs_all / finance_org_docs_select): owner/solo have
 // full read-write, finance is read-only, dispatchers and drivers have no
 // access to org_documents at all — matches the PRD's company-compliance
 // scope (COI, MC authority, DOT cert, UCR, W-9, business license).
-const VIEW_ROLES = ['owner', 'solo', 'finance']
 
 export default async function DocumentsPage() {
   const supabase = await createClient()
@@ -22,7 +22,7 @@ export default async function DocumentsPage() {
 
   const t = await getTranslations('companyDocuments')
 
-  if (!VIEW_ROLES.includes(profile.role)) {
+  if (!roleHasCapability(profile.role, 'org_documents_view')) {
     return (
       <div className="p-8">
         <h1 className="text-2xl font-semibold text-white">{t('title')}</h1>
@@ -31,7 +31,7 @@ export default async function DocumentsPage() {
     )
   }
 
-  const canManage = ['owner', 'solo'].includes(profile.role)
+  const canManage = roleHasCapability(profile.role, 'org_documents_manage')
 
   const { data: docRows } = await supabase
     .from('org_documents')

@@ -61,7 +61,7 @@ export default async function DriverDetailPage({
   const canManage = roleHasCapability(profile.role, 'drivers_manage')
   // Pay-rate visibility is money-visibility, not a named capability — no
   // role_capabilities row means "may see rates", so this stays explicit.
-  const showRate = ['owner', 'solo', 'finance'].includes(profile.role)
+  const showRate = roleHasCapability(profile.role, 'rate_visibility')
 
   const driverName = [driver.profiles?.first_name, driver.profiles?.last_name].filter(Boolean).join(' ') || driver.driver_number || '—'
   const initials = driverName

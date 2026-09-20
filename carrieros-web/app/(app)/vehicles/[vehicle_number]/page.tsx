@@ -132,7 +132,7 @@ export default async function VehicleDetailPage({
   }
   // Purchase/financial figures — money-visibility, which has no
   // role_capabilities row of its own, so this stays explicit.
-  const showRate = ['owner', 'solo', 'finance'].includes(profile.role)
+  const showRate = roleHasCapability(profile.role, 'rate_visibility')
 
   // ─── Documents ───
   const { data: docRows } = await supabase

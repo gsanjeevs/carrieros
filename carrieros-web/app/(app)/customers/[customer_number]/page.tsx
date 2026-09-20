@@ -30,7 +30,6 @@ import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 // Matches customers/page.tsx's list gate — wider than `customers_manage`
 // (finance reads the directory), so no capability's role set covers it.
-const VIEW_ROLES = ['owner', 'solo', 'dispatcher', 'finance']
 
 const SEVERITY_COLOR: Record<string, string> = {
   info:    'bg-blue-500/20 text-blue-400',
@@ -104,7 +103,7 @@ export default async function CustomerDetailPage({
   const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) redirect('/onboarding')
-  if (!VIEW_ROLES.includes(profile.role)) redirect('/dashboard')
+  if (!roleHasCapability(profile.role, 'customers_view')) redirect('/dashboard')
 
   const t = await getTranslations('customers')
   const tLoads = await getTranslations('loads')
@@ -128,7 +127,7 @@ export default async function CustomerDetailPage({
     .maybeSingle()
   const currency = carrierOrg?.currency ?? 'USD'
 
-  const canSeeRevenue = ['owner', 'solo', 'finance'].includes(profile.role)
+  const canSeeRevenue = roleHasCapability(profile.role, 'rate_visibility')
   const canBill = INVOICE_ROLES.includes(profile.role)
 
   // Loads for this customer.
