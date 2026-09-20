@@ -18,6 +18,7 @@
 // no component reuse); fixed per that doc's own recipe.
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Card, KpiTile, StatusBadge, Button, EmptyState } from '@/components/ui'
 
 interface Org {
@@ -48,19 +49,20 @@ function urgencyOf(org: Org): Urgency {
   return 'low'
 }
 
-// §6.2/§6.3: Critical → danger/border-l-danger, High → brand/border-l-brand-orange
-// (urgent-but-not-broken), Medium → warning/border-l-warning, Low → info/border-l-info.
-const URGENCY_STYLE: Record<Urgency, { border: string; label: string; badgeVariant: 'danger' | 'brand' | 'warning' | 'info' }> = {
-  critical: { border: 'border-l-danger', label: 'Critical', badgeVariant: 'danger' },
-  high:     { border: 'border-l-brand-orange', label: 'High', badgeVariant: 'brand' },
-  medium:   { border: 'border-l-warning', label: 'Medium', badgeVariant: 'warning' },
-  low:      { border: 'border-l-info', label: 'Low', badgeVariant: 'info' },
-}
-
 export default function TriageQueuePage() {
+  const t = useTranslations('admin.triage')
   const [orgs, setOrgs] = useState<Org[] | null>(null)
   const [error, setError] = useState('')
   const [extending, setExtending] = useState<number | null>(null)
+
+  // §6.2/§6.3: Critical → danger/border-l-danger, High → brand/border-l-brand-orange
+  // (urgent-but-not-broken), Medium → warning/border-l-warning, Low → info/border-l-info.
+  const URGENCY_STYLE: Record<Urgency, { border: string; label: string; badgeVariant: 'danger' | 'brand' | 'warning' | 'info' }> = {
+    critical: { border: 'border-l-danger', label: t('urgencyCritical'), badgeVariant: 'danger' },
+    high:     { border: 'border-l-brand-orange', label: t('urgencyHigh'), badgeVariant: 'brand' },
+    medium:   { border: 'border-l-warning', label: t('urgencyMedium'), badgeVariant: 'warning' },
+    low:      { border: 'border-l-info', label: t('urgencyLow'), badgeVariant: 'info' },
+  }
 
   async function load() {
     try {
@@ -69,12 +71,15 @@ export default function TriageQueuePage() {
       const json = await res.json()
       setOrgs(json.orgs)
     } catch {
-      setError('Could not load organizations.')
+      setError(t('error'))
     }
   }
 
   useEffect(() => {
-    load()
+    // Deferred a microtask so the initial fetch's state updates are not a
+    // synchronous setState in the effect body (react-hooks/set-state-in-effect).
+    void Promise.resolve().then(load)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function extendTrial(orgId: number) {
@@ -89,7 +94,7 @@ export default function TriageQueuePage() {
   }
 
   if (error) return <div className="p-8 text-danger text-sm">{error}</div>
-  if (!orgs) return <div className="p-8 text-text-sec text-sm">Loading…</div>
+  if (!orgs) return <div className="p-8 text-text-sec text-sm">{t('loading')}</div>
 
   const flagged = orgs
     .map((o) => ({ ...o, urgency: urgencyOf(o) }))
@@ -105,19 +110,19 @@ export default function TriageQueuePage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-semibold text-text-pri mb-1">Triage Queue</h1>
-      <p className="text-text-sec text-sm mb-6">Organizations needing attention, most urgent first.</p>
+      <h1 className="text-2xl font-semibold text-text-pri mb-1">{t('title')}</h1>
+      <p className="text-text-sec text-sm mb-6">{t('subtitle')}</p>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <KpiTile label="Total Orgs" value={kpis.total} />
-        <KpiTile label="Past Due" value={kpis.pastDue} />
-        <KpiTile label="Trials Ending ≤7d" value={kpis.trialsEndingSoon} />
-        <KpiTile label="At Risk (health<40)" value={kpis.atRisk} />
+        <KpiTile label={t('kpiTotalOrgs')} value={kpis.total} />
+        <KpiTile label={t('kpiPastDue')} value={kpis.pastDue} />
+        <KpiTile label={t('kpiTrialsEnding')} value={kpis.trialsEndingSoon} />
+        <KpiTile label={t('kpiAtRisk')} value={kpis.atRisk} />
       </div>
 
       {flagged.length === 0 ? (
         <Card>
-          <EmptyState icon="check_circle" title="Nothing needs attention right now." />
+          <EmptyState icon="check_circle" title={t('nothingNeedsAttention')} />
         </Card>
       ) : (
         <div className="space-y-2">
@@ -135,20 +140,20 @@ export default function TriageQueuePage() {
                   </div>
                   <p className="text-text-mut text-xs mt-0.5">
                     {o.tier ?? '—'} · health {o.health_score} · {o.billing_status ?? '—'}
-                    {o.billing_status === 'trialing' && trialDays !== null && ` · trial ends in ${trialDays}d`}
+                    {o.billing_status === 'trialing' && trialDays !== null && t('trialEndsIn', { days: trialDays })}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {o.billing_status === 'trialing' && (
                     <Button variant="secondary" size="sm" onClick={() => extendTrial(o.org_id)} loading={extending === o.org_id}>
-                      Extend Trial +7d
+                      {t('extendTrial')}
                     </Button>
                   )}
                   <Link
                     href={`/admin/orgs/${o.org_id}`}
                     className="inline-flex items-center justify-center rounded-md font-semibold transition-colors px-2 py-1 text-[11px] bg-brand-orange text-white hover:bg-brand-orange/90"
                   >
-                    View
+                    {t('view')}
                   </Link>
                 </div>
               </Card>

@@ -4,10 +4,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Button, Input } from '@/components/ui'
 
 export default function PastePage() {
   const router = useRouter()
+  const t = useTranslations('loadIntake.paste')
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -26,7 +28,7 @@ export default function PastePage() {
 
       if (!res.ok) {
         const data = await res.json()
-        setError(data.error ?? 'Extraction failed. Try again.')
+        setError(data.error ?? t('extractionFailed'))
         return
       }
 
@@ -35,7 +37,7 @@ export default function PastePage() {
       sessionStorage.setItem('extracted_load', JSON.stringify({ ...extracted, raw_text: text }))
       router.push('/loads/new/review')
     } catch {
-      setError('Network error. Check your connection.')
+      setError(t('networkError'))
     } finally {
       setLoading(false)
     }
@@ -47,10 +49,10 @@ export default function PastePage() {
       <div className="mb-8">
         <Link href="/loads/new" className="text-text-sec text-sm hover:text-text-pri flex items-center gap-1.5 mb-4">
           <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-          Back
+          {t('back')}
         </Link>
-        <h1 className="text-2xl font-semibold text-text-pri">Paste Rate Confirmation</h1>
-        <p className="text-text-sec text-sm mt-1">Paste the rate con text below — we&apos;ll extract pickup, delivery, rate, and commodity.</p>
+        <h1 className="text-2xl font-semibold text-text-pri">{t('title')}</h1>
+        <p className="text-text-sec text-sm mt-1">{t('subtitle')}</p>
       </div>
 
       {error && (
@@ -79,11 +81,11 @@ Rate: $2,850.00"
 
       <div className="flex items-center justify-between mt-4">
         <p className="text-text-mut text-xs">
-          {text.length > 0 ? `${text.length} characters` : 'Paste any text format — emails, PDFs, broker portals'}
+          {text.length > 0 ? t('charactersCount', { count: text.length }) : t('pasteHint')}
         </p>
         <Button onClick={handleExtract} disabled={!text.trim() || loading} loading={loading}>
           <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
-          {loading ? 'Extracting...' : 'Extract Load'}
+          {loading ? t('extracting') : t('extract')}
         </Button>
       </div>
 

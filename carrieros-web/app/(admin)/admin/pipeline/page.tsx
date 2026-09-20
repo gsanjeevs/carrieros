@@ -8,6 +8,7 @@
 // docs/design/carrieros-design-system.md §5 rather than hand-rolled Tailwind.
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Card, CardHeader, Button, StatusBadge, EmptyState } from '@/components/ui'
 
 interface TrialOrg {
@@ -29,6 +30,7 @@ function daysLeft(dateStr: string | null): number | null {
 }
 
 export default function PipelinePage() {
+  const t = useTranslations('admin.pipeline')
   const [trialing, setTrialing] = useState<TrialOrg[] | null>(null)
   const [candidates, setCandidates] = useState<UpgradeCandidate[] | null>(null)
   const [error, setError] = useState('')
@@ -42,12 +44,15 @@ export default function PipelinePage() {
       setTrialing(json.trialing)
       setCandidates(json.upgrade_candidates)
     } catch {
-      setError('Could not load pipeline data.')
+      setError(t('error'))
     }
   }
 
   useEffect(() => {
-    load()
+    // Deferred a microtask so the initial fetch's state updates are not a
+    // synchronous setState in the effect body (react-hooks/set-state-in-effect).
+    void Promise.resolve().then(load)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function extendTrial(orgId: number) {
@@ -62,19 +67,19 @@ export default function PipelinePage() {
   }
 
   if (error) return <div className="p-8 text-danger text-sm">{error}</div>
-  if (!trialing || !candidates) return <div className="p-8 text-text-sec text-sm">Loading…</div>
+  if (!trialing || !candidates) return <div className="p-8 text-text-sec text-sm">{t('loading')}</div>
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-semibold text-text-pri mb-1">Sales Pipeline</h1>
-      <p className="text-text-sec text-sm mb-6">Trials ending soon, and Starter orgs that look ready to upgrade.</p>
+      <h1 className="text-2xl font-semibold text-text-pri mb-1">{t('title')}</h1>
+      <p className="text-text-sec text-sm mb-6">{t('subtitle')}</p>
 
       <Card className="mb-6">
         <CardHeader>
-          <h2 className="text-text-pri font-medium text-sm">Trials ({trialing.length})</h2>
+          <h2 className="text-text-pri font-medium text-sm">{t('trials', { count: trialing.length })}</h2>
         </CardHeader>
         {trialing.length === 0 ? (
-          <EmptyState icon="trending_up" title="No orgs currently trialing." />
+          <EmptyState icon="trending_up" title={t('noTrials')} />
         ) : (
           <div className="divide-y divide-divider-ui">
             {trialing.map((o) => {
@@ -85,12 +90,12 @@ export default function PipelinePage() {
                     {o.org_name}
                   </Link>
                   {days !== null && days <= 7 ? (
-                    <StatusBadge variant="warning" size="sm">{days}d left</StatusBadge>
+                    <StatusBadge variant="warning" size="sm">{t('daysLeft', { days })}</StatusBadge>
                   ) : (
-                    <span className="text-text-sec text-xs">{days !== null ? `${days}d left` : '—'}</span>
+                    <span className="text-text-sec text-xs">{days !== null ? t('daysLeft', { days }) : '—'}</span>
                   )}
                   <Button variant="secondary" size="sm" onClick={() => extendTrial(o.org_id)} loading={extending === o.org_id}>
-                    Extend +7d
+                    {t('extend')}
                   </Button>
                 </div>
               )
@@ -102,19 +107,19 @@ export default function PipelinePage() {
       <Card>
         <CardHeader>
           <div>
-            <h2 className="text-text-pri font-medium text-sm">Upgrade Candidates ({candidates.length})</h2>
-            <p className="text-text-mut text-xs mt-0.5">Starter orgs with ≥8 loads in 30 days or more than one active driver.</p>
+            <h2 className="text-text-pri font-medium text-sm">{t('upgradeCandidates', { count: candidates.length })}</h2>
+            <p className="text-text-mut text-xs mt-0.5">{t('upgradeCandidatesDesc')}</p>
           </div>
         </CardHeader>
         {candidates.length === 0 ? (
-          <EmptyState icon="trending_up" title="No Starter orgs currently look ready to upgrade." />
+          <EmptyState icon="trending_up" title={t('noCandidates')} />
         ) : (
           <div className="divide-y divide-divider-ui">
             {candidates.map((c) => (
               <Link key={c.org_id} href={`/admin/orgs/${c.org_id}`} className="flex items-center justify-between px-5 py-3 hover:bg-surface-subtle transition-colors">
                 <span className="text-text-pri text-sm font-medium">{c.org_name}</span>
-                <span className="text-text-sec text-xs">{c.loads_last_30d} loads/30d</span>
-                <span className="text-text-sec text-xs">{c.active_drivers} drivers</span>
+                <span className="text-text-sec text-xs">{t('loadsPer30d', { count: c.loads_last_30d })}</span>
+                <span className="text-text-sec text-xs">{t('drivers', { count: c.active_drivers })}</span>
               </Link>
             ))}
           </div>

@@ -1,6 +1,7 @@
 // app/(app)/layout.tsx
 // Shared layout for all authenticated pages — provides dark shell + sidebar
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import Sidebar from '@/components/Sidebar'
 import { getProfileForUser } from '@/lib/queries/profiles'
@@ -16,9 +17,10 @@ export default async function AppLayout({
   if (!user) redirect('/login')
 
   const { data: profile } = await getProfileForUser(supabase, user.id)
+  const t = await getTranslations('common')
 
   const role = profile?.role ?? 'solo'
-  const name = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || user.email || 'User'
+  const name = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || user.email || t('userFallback')
   const preferredLanguage = profile?.preferred_language ?? 'en'
 
   // roles is master data (abbreviation + color_token for the sidebar badge) —

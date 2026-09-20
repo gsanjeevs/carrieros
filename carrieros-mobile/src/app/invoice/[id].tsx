@@ -29,6 +29,8 @@ import { useLocale } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
 import { supabase } from '@/lib/supabase';
 import { apiFetch } from '@/lib/api';
+import { formatDateTime } from '@/lib/format-date';
+import { formatMoney } from '@/lib/format-money';
 
 const ORANGE = BrandColors.orange;const WRITE_ROLES = ['owner', 'solo', 'finance'];
 
@@ -48,7 +50,7 @@ type InvoiceDetail = {
 export default function InvoiceDetailScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { role } = useProfileRole();
   const { id } = useLocalSearchParams<{ id: string }>();
 
@@ -184,11 +186,11 @@ export default function InvoiceDetailScreen() {
           </ThemedView>
 
           <ThemedView type="backgroundElement" style={styles.section}>
-            <InfoRow label={t('invoices.amount')} value={`$${Number(invoice.amount).toLocaleString()}`} />
+            <InfoRow label={t('invoices.amount')} value={formatMoney(Number(invoice.amount), locale)} />
             <InfoRow label={t('invoices.due')} value={invoice.due_date ?? '—'} />
-            <InfoRow label={t('invoices.sentAt')} value={invoice.sent_at ? new Date(invoice.sent_at).toLocaleString() : t('invoices.notSentYet')} />
-            <InfoRow label={t('invoices.openedAt')} value={invoice.opened_at ? new Date(invoice.opened_at).toLocaleString() : t('invoices.notOpenedYet')} />
-            <InfoRow label={t('invoices.paidAt')} value={invoice.paid_at ? new Date(invoice.paid_at).toLocaleString() : t('invoices.notPaidYet')} />
+            <InfoRow label={t('invoices.sentAt')} value={invoice.sent_at ? formatDateTime(invoice.sent_at, locale) : t('invoices.notSentYet')} />
+            <InfoRow label={t('invoices.openedAt')} value={invoice.opened_at ? formatDateTime(invoice.opened_at, locale) : t('invoices.notOpenedYet')} />
+            <InfoRow label={t('invoices.paidAt')} value={invoice.paid_at ? formatDateTime(invoice.paid_at, locale) : t('invoices.notPaidYet')} />
           </ThemedView>
 
           {canWrite && invoice.status === 'draft' && (

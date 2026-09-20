@@ -20,6 +20,7 @@ import { useLocale } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
 import { supabase } from '@/lib/supabase';
 import { hasFeature } from '@/lib/entitlements';
+import { formatMoney } from '@/lib/format-money';
 const STAFF_ROLES = ['owner', 'solo', 'finance'];
 
 type SettlementRow = {
@@ -36,7 +37,7 @@ type SettlementRow = {
 export default function SettlementsScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { role, loading: roleLoading } = useProfileRole();
 
   const [settlements, setSettlements] = useState<SettlementRow[]>([]);
@@ -115,7 +116,7 @@ export default function SettlementsScreen() {
                     {item.period_start} – {item.period_end}
                   </ThemedText>
                   <ThemedText type="default">
-                    {item.net_pay != null ? `$${item.net_pay.toFixed(2)}` : '—'}
+                    {item.net_pay != null ? formatMoney(item.net_pay, locale) : '—'}
                   </ThemedText>
                 </ThemedView>
               );

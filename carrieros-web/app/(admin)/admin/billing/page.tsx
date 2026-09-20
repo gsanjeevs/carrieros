@@ -7,6 +7,7 @@
 // carrieros-design-system.md §5 rather than hand-rolled Tailwind.
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Card, CardHeader, EmptyState } from '@/components/ui'
 
 interface AtRiskOrg {
@@ -29,6 +30,7 @@ interface BillingEvent {
 }
 
 export default function BillingPage() {
+  const t = useTranslations('admin.billing')
   const [atRisk, setAtRisk] = useState<AtRiskOrg[] | null>(null)
   const [events, setEvents] = useState<BillingEvent[] | null>(null)
   const [error, setError] = useState('')
@@ -43,23 +45,24 @@ export default function BillingPage() {
         setAtRisk(json.at_risk_orgs)
         setEvents(json.events)
       })
-      .catch(() => setError('Could not load billing data.'))
+      .catch(() => setError(t('error')))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   if (error) return <div className="p-8 text-danger text-sm">{error}</div>
-  if (!atRisk || !events) return <div className="p-8 text-text-sec text-sm">Loading…</div>
+  if (!atRisk || !events) return <div className="p-8 text-text-sec text-sm">{t('loading')}</div>
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-semibold text-text-pri mb-1">Billing &amp; Payments</h1>
-      <p className="text-text-sec text-sm mb-6">Orgs past due or in a grace period, and recent billing events.</p>
+      <h1 className="text-2xl font-semibold text-text-pri mb-1">{t('title')}</h1>
+      <p className="text-text-sec text-sm mb-6">{t('subtitle')}</p>
 
       <Card className="mb-6">
         <CardHeader>
-          <h2 className="text-text-pri font-medium text-sm">At Risk ({atRisk.length})</h2>
+          <h2 className="text-text-pri font-medium text-sm">{t('atRisk', { count: atRisk.length })}</h2>
         </CardHeader>
         {atRisk.length === 0 ? (
-          <EmptyState icon="check_circle" title="No orgs are past due or in a grace period." />
+          <EmptyState icon="check_circle" title={t('noAtRisk')} />
         ) : (
           <div className="divide-y divide-divider-ui">
             {atRisk.map((o) => (
@@ -67,10 +70,10 @@ export default function BillingPage() {
                 <span className="text-text-pri text-sm font-medium">{o.org_name}</span>
                 <span className="text-text-sec text-xs capitalize">{o.billing_status}</span>
                 <span className="text-text-mut text-xs">
-                  {o.card_brand ? `${o.card_brand} •••• ${o.card_last4}` : 'No card on file'}
+                  {o.card_brand ? `${o.card_brand} •••• ${o.card_last4}` : t('noCardOnFile')}
                 </span>
                 <span className="text-text-sec text-xs">
-                  {o.grace_period_until ? `Grace until ${new Date(o.grace_period_until).toLocaleDateString()}` : '—'}
+                  {o.grace_period_until ? t('graceUntil', { date: new Date(o.grace_period_until).toLocaleDateString() }) : '—'}
                 </span>
               </Link>
             ))}
@@ -80,13 +83,13 @@ export default function BillingPage() {
 
       <Card>
         <CardHeader>
-          <h2 className="text-text-pri font-medium text-sm">Recent Billing Events</h2>
+          <h2 className="text-text-pri font-medium text-sm">{t('recentEvents')}</h2>
         </CardHeader>
         {events.length === 0 ? (
           <EmptyState
             icon="receipt_long"
-            title="No billing events yet"
-            description="Real Stripe webhooks aren't configured in this environment."
+            title={t('noEventsTitle')}
+            description={t('noEventsDescription')}
           />
         ) : (
           <div className="divide-y divide-divider-ui">

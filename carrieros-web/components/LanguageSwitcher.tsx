@@ -81,7 +81,7 @@ export default function LanguageSwitcher({
 
   if (compact) {
     return (
-      <div className="flex items-center gap-1.5" role="group" aria-label="Language">
+      <div className="flex items-center gap-1.5" role="group" aria-label={t('groupLabel')}>
         {languages.map((l) => {
           const selected = l.code === current
           return (
@@ -114,7 +114,7 @@ export default function LanguageSwitcher({
 
   return (
     <div>
-      <div className="grid grid-cols-2 gap-2.5" role="group" aria-label="Language">
+      <div className="grid grid-cols-2 gap-2.5" role="group" aria-label={t('groupLabel')}>
         {languages.map((l) => {
           const selected = l.code === current
           return (

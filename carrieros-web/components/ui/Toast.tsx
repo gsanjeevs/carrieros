@@ -13,6 +13,7 @@
 // own `open` state.
 import { useEffect } from 'react'
 import type { ReactNode } from 'react'
+import { useTranslations } from 'next-intl'
 import { cn } from './cn'
 
 export type ToastVariant = 'success' | 'warning' | 'danger' | 'info'
@@ -42,6 +43,7 @@ const VARIANT_ICON: Record<ToastVariant, string> = {
 }
 
 export default function Toast({ variant, open, onClose, children, duration = 5000, className }: ToastProps) {
+  const t = useTranslations('common')
   useEffect(() => {
     if (!open || duration <= 0) return
     const timer = setTimeout(onClose, duration)
@@ -70,7 +72,7 @@ export default function Toast({ variant, open, onClose, children, duration = 500
       <button
         type="button"
         onClick={onClose}
-        aria-label="Dismiss"
+        aria-label={t('dismiss')}
         className="flex-shrink-0 text-current/70 hover:text-current focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/50 rounded"
       >
         <span className="material-symbols-outlined text-[16px] leading-none" aria-hidden="true">

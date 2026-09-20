@@ -9,7 +9,15 @@
     "comingSoon": "جلد آ رہا ہے۔",
     "signOut": "سائن آؤٹ",
     "selectPlaceholder": "منتخب کریں…",
-    "somethingWentWrong": "کچھ غلط ہو گیا"
+    "somethingWentWrong": "کچھ غلط ہو گیا",
+    "dismiss": "برخاست کریں",
+    "close": "بند کریں",
+    "confirm": "تصدیق کریں",
+    "copy": "کاپی کریں",
+    "copied": "کاپی ہو گیا",
+    "typeToConfirm": "تصدیق کے لیے \"{phrase}\" لکھیں",
+    "userFallback": "صارف",
+    "adminFallback": "ایڈمن"
   },
   "errors": {
     "AUTH_REQUIRED": "جاری رکھنے کے لیے براہ کرم سائن ان کریں۔",
@@ -297,7 +305,8 @@
     "shareViaSms": "ٹیکسٹ کے ذریعے شیئر کریں",
     "shareViaEmail": "ای میل کے ذریعے شیئر کریں",
     "shareMessage": "لوڈ {loadNumber} ٹریک کریں:",
-    "shareEmailSubject": "لوڈ {loadNumber} کے لیے ٹریکنگ لنک"
+    "shareEmailSubject": "لوڈ {loadNumber} کے لیے ٹریکنگ لنک",
+    "myLoadsTitle": "میرے لوڈز"
   },
   "drivers": {
     "title": "ڈرائیورز",
@@ -671,7 +680,8 @@
     "queueTitle": "ڈسپیچ درکار ہے",
     "noQueue": "ڈسپیچ ہونے کے انتظار میں کچھ نہیں۔",
     "dispatchAction": "ڈسپیچ →",
-    "dispatchModalTitle": "{loadNumber} ڈسپیچ کریں"
+    "dispatchModalTitle": "{loadNumber} ڈسپیچ کریں",
+    "loadingMap": "نقشہ لوڈ ہو رہا ہے…"
   },
   "settings": {
     "title": "پروفائل کی ترتیبات",
@@ -908,7 +918,8 @@
     "customer_viewer": "کسٹمر ویور"
   },
   "language": {
-    "appliesEverywhere": "آپ کی زبان کی ترجیح پوری ایپ پر لاگو ہوتی ہے۔"
+    "appliesEverywhere": "آپ کی زبان کی ترجیح پوری ایپ پر لاگو ہوتی ہے۔",
+    "groupLabel": "زبان"
   },
   "signup": {
     "tagline": "اپنے فون سے اپنا ٹرکنگ کاروبار چلائیں۔ کوئی اسپریڈشیٹ نہیں۔",
@@ -974,5 +985,219 @@
     "invoiceAgingTitle": "انوائس کی عمر",
     "invoiceAgingSub": "واجب الادا انوائسز تاخیر کے دنوں کے مطابق",
     "invoiceOpened": "کھولا گیا"
+  },
+  "admin": {
+    "nav": {
+      "triage": "ترجیحی قطار",
+      "health": "کسٹمر ہیلتھ",
+      "billing": "بلنگ اور ادائیگیاں",
+      "pipeline": "سیلز پائپ لائن",
+      "audit": "آڈٹ اور سرگرمی",
+      "flags": "فیچر فلیگز"
+    },
+    "roleLabels": {
+      "sx_owner": "SX مالک",
+      "sx_finance": "SX فنانس",
+      "sx_support": "SX سپورٹ"
+    },
+    "triage": {
+      "title": "ترجیحی قطار",
+      "subtitle": "توجہ کی ضرورت والی تنظیمیں، سب سے زیادہ فوری پہلے۔",
+      "loading": "لوڈ ہو رہا ہے…",
+      "error": "تنظیمیں لوڈ نہیں ہو سکیں۔",
+      "kpiTotalOrgs": "کل تنظیمیں",
+      "kpiPastDue": "زائد المیعاد",
+      "kpiTrialsEnding": "٧ دن میں ختم ہونے والے ٹرائلز",
+      "kpiAtRisk": "خطرے میں (ہیلتھ<40)",
+      "nothingNeedsAttention": "فی الحال کسی چیز کو توجہ کی ضرورت نہیں۔",
+      "extendTrial": "ٹرائل میں 7 دن کا اضافہ کریں",
+      "view": "دیکھیں",
+      "trialEndsIn": " · ٹرائل {days} دن میں ختم ہو رہا ہے",
+      "urgencyCritical": "نازک",
+      "urgencyHigh": "زیادہ",
+      "urgencyMedium": "درمیانہ",
+      "urgencyLow": "کم"
+    },
+    "audit": {
+      "title": "آڈٹ اور سرگرمی",
+      "subtitle": "صرف ایڈمن کی جانب سے شروع کی گئی کارروائیاں — یہ مکمل کراس ٹیننٹ آڈٹ ٹریل نہیں ہے (ابھی تک لاگ ان/لوڈ/بلنگ ایونٹ لاگنگ موجود نہیں)۔",
+      "loading": "لوڈ ہو رہا ہے…",
+      "error": "آڈٹ ایونٹس لوڈ نہیں ہو سکے۔",
+      "noEvents": "ابھی تک کوئی ایڈمن کارروائی درج نہیں ہوئی۔",
+      "colAction": "کارروائی",
+      "colOrg": "تنظیم",
+      "colAdmin": "ایڈمن",
+      "colDetails": "تفصیلات",
+      "colWhen": "کب",
+      "eventNoteAdd": "نوٹ شامل کیا گیا",
+      "eventImpersonate": "مالک کے طور پر رسائی حاصل کی",
+      "eventChangeTier": "ٹیئر تبدیل کیا",
+      "eventExtendTrial": "ٹرائل میں توسیع کی",
+      "eventGracePeriod": "گریس پیریڈ مقرر کیا",
+      "eventFlagEdit": "فیچر فلیگ میں ترمیم کی"
+    },
+    "billing": {
+      "title": "بلنگ اور ادائیگیاں",
+      "subtitle": "زائد المیعاد یا گریس پیریڈ میں موجود تنظیمیں، اور حالیہ بلنگ ایونٹس۔",
+      "loading": "لوڈ ہو رہا ہے…",
+      "error": "بلنگ ڈیٹا لوڈ نہیں ہو سکا۔",
+      "atRisk": "خطرے میں ({count})",
+      "noAtRisk": "کوئی بھی تنظیم زائد المیعاد یا گریس پیریڈ میں نہیں ہے۔",
+      "noCardOnFile": "کوئی کارڈ درج نہیں",
+      "graceUntil": "{date} تک گریس",
+      "recentEvents": "حالیہ بلنگ ایونٹس",
+      "noEventsTitle": "ابھی تک کوئی بلنگ ایونٹ نہیں",
+      "noEventsDescription": "اس ماحول میں حقیقی Stripe webhooks ترتیب نہیں دیے گئے۔"
+    },
+    "flags": {
+      "title": "فیچر فلیگز",
+      "subtitle": "آپریشنل کِل سوئچز — تجارتی ٹیئر/انٹائٹلمنٹ نظام سے الگ۔",
+      "loading": "لوڈ ہو رہا ہے…",
+      "error": "فیچر فلیگز لوڈ نہیں ہو سکے۔",
+      "enabledByDefault": "بطور ڈیفالٹ فعال",
+      "disabledByDefault": "بطور ڈیفالٹ غیر فعال",
+      "addOverride": "تنظیم کے لیے اوور رائیڈ شامل کریں",
+      "orgPlaceholder": "تنظیم…",
+      "flagPlaceholder": "فلیگ…",
+      "enabled": "فعال",
+      "disabled": "غیر فعال",
+      "addOverrideButton": "اوور رائیڈ شامل کریں",
+      "activeOverrides": "فعال اوور رائیڈز ({count})",
+      "noOverrides": "کوئی تنظیم کے لیے اوور رائیڈ مقرر نہیں کیا گیا۔"
+    },
+    "health": {
+      "title": "کسٹمر ہیلتھ",
+      "subtitle": "{count} تنظیمیں، بدترین صحت سے پہلے ترتیب دی گئیں۔",
+      "loading": "لوڈ ہو رہا ہے…",
+      "error": "تنظیمیں لوڈ نہیں ہو سکیں۔",
+      "filterAll": "تمام",
+      "colOrg": "تنظیم",
+      "colTier": "ٹیئر",
+      "colBilling": "بلنگ",
+      "colLoads30d": "لوڈز/30 دن",
+      "colHealth": "صحت",
+      "healthScoreLabel": "صحت اسکور {score}"
+    },
+    "pipeline": {
+      "title": "سیلز پائپ لائن",
+      "subtitle": "جلد ختم ہونے والے ٹرائلز، اور اپ گریڈ کے لیے تیار اسٹارٹر تنظیمیں۔",
+      "loading": "لوڈ ہو رہا ہے…",
+      "error": "پائپ لائن ڈیٹا لوڈ نہیں ہو سکا۔",
+      "trials": "ٹرائلز ({count})",
+      "noTrials": "فی الحال کوئی تنظیم ٹرائل پر نہیں۔",
+      "daysLeft": "{days} دن باقی",
+      "extend": "7 دن کا اضافہ کریں",
+      "upgradeCandidates": "اپ گریڈ کے امیدوار ({count})",
+      "upgradeCandidatesDesc": "30 دنوں میں ≥8 لوڈز یا ایک سے زیادہ فعال ڈرائیورز والی اسٹارٹر تنظیمیں۔",
+      "noCandidates": "فی الحال کوئی اسٹارٹر تنظیم اپ گریڈ کے لیے تیار نظر نہیں آتی۔",
+      "loadsPer30d": "{count} لوڈز/30 دن",
+      "drivers": "{count} ڈرائیورز"
+    },
+    "orgDetail": {
+      "backToHealth": "کسٹمر ہیلتھ پر واپس جائیں",
+      "impersonateOwner": "مالک کے طور پر رسائی حاصل کریں",
+      "magicLink": "میجک لنک (ایک بار استعمال):",
+      "loading": "لوڈ ہو رہا ہے…",
+      "error": "یہ تنظیم لوڈ نہیں ہو سکی۔",
+      "kpisTitle": "کے پی آئیز",
+      "loadsPer30d": "لوڈز / 30 دن",
+      "uninvoicedRevenue": "غیر انوائس شدہ آمدنی",
+      "lastActive": "آخری سرگرمی",
+      "never": "کبھی نہیں",
+      "adoptionTitle": "اپنانا",
+      "usersTitle": "صارفین ({count})",
+      "recentLoadsTitle": "حالیہ لوڈز",
+      "noLoadsYet": "ابھی تک کوئی لوڈ نہیں۔",
+      "tierTitle": "ٹیئر",
+      "trialGraceTitle": "ٹرائل اور گریس پیریڈ",
+      "extendTrial7": "ٹرائل میں 7 دن کا اضافہ کریں",
+      "gracePeriodLabel": "گریس پیریڈ: {date}",
+      "none": "کوئی نہیں",
+      "set7d": "7 دن مقرر کریں",
+      "clear": "صاف کریں",
+      "notesTitle": "نوٹس",
+      "noNotesYet": "ابھی تک کوئی نوٹ نہیں۔",
+      "addNotePlaceholder": "ایک نوٹ شامل کریں…",
+      "addNote": "نوٹ شامل کریں",
+      "adoptionCompletedOnboarding": "آن بورڈنگ مکمل ہوئی",
+      "adoptionAddedFirstVehicle": "پہلی گاڑی شامل کی",
+      "adoptionAddedFirstDriver": "پہلا ڈرائیور شامل کیا",
+      "adoptionCreatedFirstLoad": "پہلا لوڈ بنایا",
+      "adoptionDispatchedLoad": "لوڈ ڈسپیچ کیا",
+      "adoptionSentFirstInvoice": "پہلا انوائس بھیجا",
+      "adoptionReceivedFirstPayment": "پہلی ادائیگی موصول ہوئی",
+      "trialEndsLabel": " · ٹرائل {date} کو ختم ہو رہا ہے"
+    }
+  },
+  "loadIntake": {
+    "newLoad": {
+      "backToLoads": "لوڈز پر واپس جائیں",
+      "title": "لوڈ شامل کریں",
+      "subtitle": "آپ یہ لوڈ کیسے درج کرنا چاہتے ہیں؟",
+      "pasteTitle": "ریٹ کنفرمیشن پیسٹ کریں",
+      "pasteDesc": "ای میل یا دستاویز سے متن کاپی کریں — ہم خودکار طور پر تفصیلات نکال لیں گے",
+      "uploadTitle": "PDF اپ لوڈ کریں",
+      "uploadDesc": "ریٹ کون PDF اپ لوڈ کریں — ہم پڑھ کر لوڈ کی تفصیلات نکال لیں گے",
+      "comingSoon": "جلد آ رہا ہے",
+      "manualTitle": "دستی طور پر درج کریں",
+      "manualDesc": "لوڈ کی تفصیلات خود لکھیں",
+      "forwardTitle": "ای میل کے ذریعے فارورڈ کریں",
+      "forwardDesc": "اس پتے پر ریٹ کنفرمیشن فارورڈ کریں اور یہ خودکار طور پر نکالی جائے گی"
+    },
+    "paste": {
+      "back": "واپس",
+      "title": "ریٹ کنفرمیشن پیسٹ کریں",
+      "subtitle": "نیچے ریٹ کون کا متن پیسٹ کریں — ہم پک اپ، ڈلیوری، ریٹ اور سامان نکال لیں گے۔",
+      "extractionFailed": "نکالنے میں ناکامی۔ دوبارہ کوشش کریں۔",
+      "networkError": "نیٹ ورک کی خرابی۔ اپنا کنکشن چیک کریں۔",
+      "charactersCount": "{count} حروف",
+      "pasteHint": "کسی بھی متن کی صورت پیسٹ کریں — ای میلز، PDFs، بروکر پورٹلز",
+      "extract": "لوڈ نکالیں",
+      "extracting": "نکالا جا رہا ہے..."
+    },
+    "sections": {
+      "customerReference": "کسٹمر اور حوالہ",
+      "pickup": "پک اپ",
+      "delivery": "ڈلیوری",
+      "loadDetails": "لوڈ کی تفصیلات"
+    },
+    "fields": {
+      "customerBroker": "کسٹمر / بروکر",
+      "loadReference": "لوڈ / حوالہ نمبر",
+      "address": "پتہ",
+      "city": "شہر",
+      "state": "ریاست",
+      "zip": "زپ کوڈ",
+      "date": "تاریخ",
+      "time": "وقت",
+      "commodity": "سامان",
+      "weight": "وزن (lbs)",
+      "rate": "ریٹ ($)",
+      "miles": "میل"
+    },
+    "manual": {
+      "back": "واپس",
+      "title": "لوڈ دستی طور پر درج کریں",
+      "subtitle": "آپ کے پاس جو بھی تفصیلات ہیں بھریں — آپ بعد میں اس لوڈ میں ترمیم کر سکتے ہیں۔",
+      "errorMinimum": "اس لوڈ کو محفوظ کرنے کے لیے کم از کم ایک کسٹمر، پک اپ یا ڈلیوری درج کریں۔",
+      "failedToSave": "لوڈ محفوظ کرنے میں ناکامی۔",
+      "networkError": "نیٹ ورک کی خرابی۔ دوبارہ کوشش کریں۔",
+      "saving": "محفوظ ہو رہا ہے...",
+      "createLoad": "لوڈ بنائیں"
+    },
+    "review": {
+      "title": "نکالے گئے لوڈ کا جائزہ لیں",
+      "subtitle": "نیچے دی گئی تفصیلات کی جانچ کریں — جو کچھ درست نہ لگے اسے تبدیل کریں۔",
+      "aiExtracted": "AI کے ذریعے نکالا گیا",
+      "failedToSave": "لوڈ محفوظ کرنے میں ناکامی۔",
+      "networkError": "نیٹ ورک کی خرابی۔ دوبارہ کوشش کریں۔",
+      "reExtract": "دوبارہ نکالیں",
+      "saving": "محفوظ ہو رہا ہے...",
+      "confirmCreateLoad": "تصدیق کریں اور لوڈ بنائیں",
+      "confidenceConfident": "✓ قابل اعتماد",
+      "confidenceReview": "~ جائزہ لیں",
+      "confidenceCheck": "⚠ چیک کریں",
+      "back": "واپس"
+    }
   }
 }

@@ -16,6 +16,7 @@ import { BrandColors, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { hasFeature } from '@/lib/entitlements';
+import { formatMoney } from '@/lib/format-money';
 import { supabase } from '@/lib/supabase';
 
 type CustomerDetail = {
@@ -44,7 +45,7 @@ function healthColor(score: number): string {
 export default function CustomerDetailScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const [customer, setCustomer] = useState<CustomerDetail | null>(null);
@@ -147,7 +148,7 @@ export default function CustomerDetailScreen() {
 
           <ThemedView type="transparent" style={styles.statsRow}>
             <StatBox label={t('customers.loads')} value={String(loads.length)} />
-            <StatBox label={t('customers.revenue')} value={`$${totalRevenue.toLocaleString()}`} />
+            <StatBox label={t('customers.revenue')} value={formatMoney(totalRevenue, locale)} />
           </ThemedView>
 
           {customer.notes && (
@@ -164,7 +165,7 @@ export default function CustomerDetailScreen() {
             loads.map((l) => (
               <ThemedView key={l.id} type="backgroundElement" style={styles.loadRow}>
                 <ThemedText type="small">{l.load_number}</ThemedText>
-                <ThemedText type="small">{l.rate != null ? `$${Number(l.rate).toLocaleString()}` : '—'}</ThemedText>
+                <ThemedText type="small">{l.rate != null ? formatMoney(Number(l.rate), locale) : '—'}</ThemedText>
               </ThemedView>
             ))
           )}

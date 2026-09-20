@@ -17,6 +17,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useSession } from '@/hooks/use-session';
 import { formatMoney } from '@/lib/format-money';
+import { formatNumber } from '@/lib/format-number';
 import { supabase } from '@/lib/supabase';
 
 const ORANGE = BrandColors.orange;
@@ -39,7 +40,7 @@ export function FuelStopsSection({
   carrierOrgId: number;
 }) {
   const theme = useTheme();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { session } = useSession();
 
   const [stops, setStops] = useState<FuelStop[]>([]);
@@ -142,8 +143,8 @@ export function FuelStopsSection({
 
       {stops.length > 0 && (
         <ThemedView type="transparent" style={styles.summaryRow}>
-          <SummaryCell label={t('loadDetail.fuelTotalCost')} value={formatMoney(totalCost)} />
-          <SummaryCell label={t('loadDetail.fuelGallons')} value={totalGallons.toLocaleString()} />
+          <SummaryCell label={t('loadDetail.fuelTotalCost')} value={formatMoney(totalCost, locale)} />
+          <SummaryCell label={t('loadDetail.fuelGallons')} value={formatNumber(totalGallons, locale)} />
           <SummaryCell label={t('loadDetail.fuelStops')} value={String(stops.length)} />
         </ThemedView>
       )}
@@ -155,7 +156,7 @@ export function FuelStopsSection({
       {stops.map((s) => (
         <ThemedView type="transparent" key={s.id} style={styles.stopRow}>
           <ThemedText type="small">{s.state} — {s.station || '—'}</ThemedText>
-          <ThemedText type="small">{formatMoney(Number(s.total_cost))} · {Number(s.gallons)} gal</ThemedText>
+          <ThemedText type="small">{formatMoney(Number(s.total_cost), locale)} · {Number(s.gallons)} gal</ThemedText>
         </ThemedView>
       ))}
 
@@ -200,7 +201,7 @@ export function FuelStopsSection({
 
           {computedTotal != null && (
             <ThemedText type="small" themeColor="textSecondary">
-              {t('loadDetail.fuelComputedTotal', { amount: formatMoney(computedTotal) })}
+              {t('loadDetail.fuelComputedTotal', { amount: formatMoney(computedTotal, locale) })}
             </ThemedText>
           )}
 

@@ -8,6 +8,7 @@
 // carrieros-design-system.md §5 rather than hand-rolled Tailwind.
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Card, Table, TableHeaderCell, TableRow, TableCell, ProgressBar } from '@/components/ui'
 
 interface Org {
@@ -31,6 +32,7 @@ function healthVariant(score: number): 'success' | 'warning' | 'danger' {
 const TIER_FILTERS = ['all', 'starter', 'growth', 'pro', 'enterprise'] as const
 
 export default function CustomerHealthPage() {
+  const t = useTranslations('admin.health')
   const [orgs, setOrgs] = useState<Org[] | null>(null)
   const [error, setError] = useState('')
   const [tierFilter, setTierFilter] = useState<(typeof TIER_FILTERS)[number]>('all')
@@ -42,7 +44,8 @@ export default function CustomerHealthPage() {
         return r.json()
       })
       .then((json) => setOrgs(json.orgs))
-      .catch(() => setError('Could not load organizations.'))
+      .catch(() => setError(t('error')))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const filtered = useMemo(() => {
@@ -52,23 +55,23 @@ export default function CustomerHealthPage() {
   }, [orgs, tierFilter])
 
   if (error) return <div className="p-8 text-danger text-sm">{error}</div>
-  if (!orgs) return <div className="p-8 text-text-sec text-sm">Loading…</div>
+  if (!orgs) return <div className="p-8 text-text-sec text-sm">{t('loading')}</div>
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-semibold text-text-pri mb-1">Customer Health</h1>
-      <p className="text-text-sec text-sm mb-6">{orgs.length} organizations, sorted worst-health-first.</p>
+      <h1 className="text-2xl font-semibold text-text-pri mb-1">{t('title')}</h1>
+      <p className="text-text-sec text-sm mb-6">{t('subtitle', { count: orgs.length })}</p>
 
       <div className="flex items-center gap-2 mb-4">
-        {TIER_FILTERS.map((t) => (
+        {TIER_FILTERS.map((tf) => (
           <button
-            key={t}
-            onClick={() => setTierFilter(t)}
+            key={tf}
+            onClick={() => setTierFilter(tf)}
             className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
-              tierFilter === t ? 'bg-brand-orange text-white' : 'bg-surface-subtle text-text-sec hover:bg-surface-subtle/70'
+              tierFilter === tf ? 'bg-brand-orange text-white' : 'bg-surface-subtle text-text-sec hover:bg-surface-subtle/70'
             }`}
           >
-            {t === 'all' ? 'All' : t.charAt(0).toUpperCase() + t.slice(1)}
+            {tf === 'all' ? t('filterAll') : tf.charAt(0).toUpperCase() + tf.slice(1)}
           </button>
         ))}
       </div>
@@ -77,11 +80,11 @@ export default function CustomerHealthPage() {
         <Table>
           <thead>
             <tr>
-              <TableHeaderCell>Org</TableHeaderCell>
-              <TableHeaderCell>Tier</TableHeaderCell>
-              <TableHeaderCell>Billing</TableHeaderCell>
-              <TableHeaderCell numeric>Loads/30d</TableHeaderCell>
-              <TableHeaderCell>Health</TableHeaderCell>
+              <TableHeaderCell>{t('colOrg')}</TableHeaderCell>
+              <TableHeaderCell>{t('colTier')}</TableHeaderCell>
+              <TableHeaderCell>{t('colBilling')}</TableHeaderCell>
+              <TableHeaderCell numeric>{t('colLoads30d')}</TableHeaderCell>
+              <TableHeaderCell>{t('colHealth')}</TableHeaderCell>
             </tr>
           </thead>
           <tbody>
@@ -98,7 +101,7 @@ export default function CustomerHealthPage() {
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <div className="w-16">
-                      <ProgressBar value={o.health_score} variant={healthVariant(o.health_score)} thin label={`Health score ${o.health_score}`} />
+                      <ProgressBar value={o.health_score} variant={healthVariant(o.health_score)} thin label={t('healthScoreLabel', { score: o.health_score })} />
                     </div>
                     <span className="text-text-sec text-xs w-6">{o.health_score}</span>
                   </div>

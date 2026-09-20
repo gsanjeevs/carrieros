@@ -9,7 +9,15 @@
     "comingSoon": "Próximamente.",
     "signOut": "Cerrar sesión",
     "selectPlaceholder": "Seleccionar…",
-    "somethingWentWrong": "Algo salió mal"
+    "somethingWentWrong": "Algo salió mal",
+    "dismiss": "Cerrar",
+    "close": "Cerrar",
+    "confirm": "Confirmar",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "typeToConfirm": "Escribe «{phrase}» para confirmar",
+    "userFallback": "Usuario",
+    "adminFallback": "Administrador"
   },
   "errors": {
     "AUTH_REQUIRED": "Inicia sesión para continuar.",
@@ -297,7 +305,8 @@
     "shareViaSms": "Compartir por Mensaje",
     "shareViaEmail": "Compartir por Correo",
     "shareMessage": "Rastrea la carga {loadNumber}:",
-    "shareEmailSubject": "Enlace de rastreo para la carga {loadNumber}"
+    "shareEmailSubject": "Enlace de rastreo para la carga {loadNumber}",
+    "myLoadsTitle": "Mis cargas"
   },
   "drivers": {
     "title": "Conductores",
@@ -671,7 +680,8 @@
     "queueTitle": "Necesita Despacho",
     "noQueue": "No hay nada esperando ser despachado.",
     "dispatchAction": "Despachar →",
-    "dispatchModalTitle": "Despachar {loadNumber}"
+    "dispatchModalTitle": "Despachar {loadNumber}",
+    "loadingMap": "Cargando mapa…"
   },
   "settings": {
     "title": "Configuración de perfil",
@@ -908,7 +918,8 @@
     "customer_viewer": "Visor de cliente"
   },
   "language": {
-    "appliesEverywhere": "Tu preferencia de idioma se aplica a toda la aplicación."
+    "appliesEverywhere": "Tu preferencia de idioma se aplica a toda la aplicación.",
+    "groupLabel": "Idioma"
   },
   "signup": {
     "tagline": "Administra tu empresa de transporte desde tu teléfono. Sin hojas de cálculo.",
@@ -974,5 +985,219 @@
     "invoiceAgingTitle": "Antigüedad de Facturas",
     "invoiceAgingSub": "Facturas pendientes por días de retraso",
     "invoiceOpened": "Abierta"
+  },
+  "admin": {
+    "nav": {
+      "triage": "Cola de prioridades",
+      "health": "Salud del cliente",
+      "billing": "Facturación y pagos",
+      "pipeline": "Embudo de ventas",
+      "audit": "Auditoría y actividad",
+      "flags": "Funciones experimentales"
+    },
+    "roleLabels": {
+      "sx_owner": "Propietario SX",
+      "sx_finance": "Finanzas SX",
+      "sx_support": "Soporte SX"
+    },
+    "triage": {
+      "title": "Cola de prioridades",
+      "subtitle": "Organizaciones que necesitan atención, las más urgentes primero.",
+      "loading": "Cargando…",
+      "error": "No se pudieron cargar las organizaciones.",
+      "kpiTotalOrgs": "Total de organizaciones",
+      "kpiPastDue": "Con pagos vencidos",
+      "kpiTrialsEnding": "Pruebas que terminan ≤7 días",
+      "kpiAtRisk": "En riesgo (salud<40)",
+      "nothingNeedsAttention": "Nada necesita atención en este momento.",
+      "extendTrial": "Extender prueba +7 días",
+      "view": "Ver",
+      "trialEndsIn": " · la prueba termina en {days}d",
+      "urgencyCritical": "Crítico",
+      "urgencyHigh": "Alto",
+      "urgencyMedium": "Medio",
+      "urgencyLow": "Bajo"
+    },
+    "audit": {
+      "title": "Auditoría y actividad",
+      "subtitle": "Solo acciones iniciadas por administradores — no es un registro de auditoría completo entre organizaciones (aún no existe registro de inicio de sesión, cargas o facturación).",
+      "loading": "Cargando…",
+      "error": "No se pudieron cargar los eventos de auditoría.",
+      "noEvents": "Aún no se han registrado acciones administrativas.",
+      "colAction": "Acción",
+      "colOrg": "Organización",
+      "colAdmin": "Administrador",
+      "colDetails": "Detalles",
+      "colWhen": "Cuándo",
+      "eventNoteAdd": "Nota añadida",
+      "eventImpersonate": "Propietario suplantado",
+      "eventChangeTier": "Nivel cambiado",
+      "eventExtendTrial": "Prueba extendida",
+      "eventGracePeriod": "Período de gracia establecido",
+      "eventFlagEdit": "Función experimental editada"
+    },
+    "billing": {
+      "title": "Facturación y pagos",
+      "subtitle": "Organizaciones con pagos vencidos o en período de gracia, y eventos de facturación recientes.",
+      "loading": "Cargando…",
+      "error": "No se pudieron cargar los datos de facturación.",
+      "atRisk": "En riesgo ({count})",
+      "noAtRisk": "Ninguna organización tiene pagos vencidos ni está en período de gracia.",
+      "noCardOnFile": "Sin tarjeta registrada",
+      "graceUntil": "Gracia hasta {date}",
+      "recentEvents": "Eventos de facturación recientes",
+      "noEventsTitle": "Aún no hay eventos de facturación",
+      "noEventsDescription": "Los webhooks reales de Stripe no están configurados en este entorno."
+    },
+    "flags": {
+      "title": "Funciones experimentales",
+      "subtitle": "Interruptores operativos — independientes del sistema comercial de niveles y derechos.",
+      "loading": "Cargando…",
+      "error": "No se pudieron cargar las funciones experimentales.",
+      "enabledByDefault": "Activada de forma predeterminada",
+      "disabledByDefault": "Desactivada de forma predeterminada",
+      "addOverride": "Agregar excepción por organización",
+      "orgPlaceholder": "Organización…",
+      "flagPlaceholder": "Función…",
+      "enabled": "Activada",
+      "disabled": "Desactivada",
+      "addOverrideButton": "Agregar excepción",
+      "activeOverrides": "Excepciones activas ({count})",
+      "noOverrides": "No se han definido excepciones por organización."
+    },
+    "health": {
+      "title": "Salud del cliente",
+      "subtitle": "{count} organizaciones, ordenadas de peor a mejor salud.",
+      "loading": "Cargando…",
+      "error": "No se pudieron cargar las organizaciones.",
+      "filterAll": "Todas",
+      "colOrg": "Organización",
+      "colTier": "Nivel",
+      "colBilling": "Facturación",
+      "colLoads30d": "Cargas/30d",
+      "colHealth": "Salud",
+      "healthScoreLabel": "Puntaje de salud {score}"
+    },
+    "pipeline": {
+      "title": "Embudo de ventas",
+      "subtitle": "Pruebas que terminan pronto y organizaciones Starter listas para actualizar.",
+      "loading": "Cargando…",
+      "error": "No se pudieron cargar los datos del embudo.",
+      "trials": "Pruebas ({count})",
+      "noTrials": "Ninguna organización está en período de prueba actualmente.",
+      "daysLeft": "quedan {days}d",
+      "extend": "Extender +7d",
+      "upgradeCandidates": "Candidatas para actualizar ({count})",
+      "upgradeCandidatesDesc": "Organizaciones Starter con ≥8 cargas en 30 días o más de un conductor activo.",
+      "noCandidates": "Ninguna organización Starter parece lista para actualizar por ahora.",
+      "loadsPer30d": "{count} cargas/30d",
+      "drivers": "{count} conductores"
+    },
+    "orgDetail": {
+      "backToHealth": "Volver a Salud del cliente",
+      "impersonateOwner": "Suplantar al propietario",
+      "magicLink": "Enlace mágico (un solo uso):",
+      "loading": "Cargando…",
+      "error": "No se pudo cargar esta organización.",
+      "kpisTitle": "Indicadores clave",
+      "loadsPer30d": "Cargas / 30d",
+      "uninvoicedRevenue": "Ingresos sin facturar",
+      "lastActive": "Última actividad",
+      "never": "Nunca",
+      "adoptionTitle": "Adopción",
+      "usersTitle": "Usuarios ({count})",
+      "recentLoadsTitle": "Cargas recientes",
+      "noLoadsYet": "Aún no hay cargas.",
+      "tierTitle": "Nivel",
+      "trialGraceTitle": "Prueba y período de gracia",
+      "extendTrial7": "Extender prueba +7 días",
+      "gracePeriodLabel": "Período de gracia: {date}",
+      "none": "Ninguno",
+      "set7d": "Establecer 7d",
+      "clear": "Borrar",
+      "notesTitle": "Notas",
+      "noNotesYet": "Aún no hay notas.",
+      "addNotePlaceholder": "Agregar una nota…",
+      "addNote": "Agregar nota",
+      "adoptionCompletedOnboarding": "Incorporación completada",
+      "adoptionAddedFirstVehicle": "Primer vehículo agregado",
+      "adoptionAddedFirstDriver": "Primer conductor agregado",
+      "adoptionCreatedFirstLoad": "Primera carga creada",
+      "adoptionDispatchedLoad": "Carga despachada",
+      "adoptionSentFirstInvoice": "Primera factura enviada",
+      "adoptionReceivedFirstPayment": "Primer pago recibido",
+      "trialEndsLabel": " · la prueba termina el {date}"
+    }
+  },
+  "loadIntake": {
+    "newLoad": {
+      "backToLoads": "Volver a Cargas",
+      "title": "Agregar carga",
+      "subtitle": "¿Cómo quieres ingresar esta carga?",
+      "pasteTitle": "Pegar confirmación de tarifa",
+      "pasteDesc": "Copia el texto de un correo o documento — extraeremos los detalles automáticamente",
+      "uploadTitle": "Subir PDF",
+      "uploadDesc": "Sube un PDF de confirmación de tarifa — leeremos y extraeremos los detalles de la carga",
+      "comingSoon": "Próximamente",
+      "manualTitle": "Ingresar manualmente",
+      "manualDesc": "Escribe tú mismo los detalles de la carga",
+      "forwardTitle": "Reenviar por correo",
+      "forwardDesc": "Reenvía una confirmación de tarifa a esta dirección y se extraerá automáticamente"
+    },
+    "paste": {
+      "back": "Atrás",
+      "title": "Pegar confirmación de tarifa",
+      "subtitle": "Pega el texto de la confirmación de tarifa abajo — extraeremos recogida, entrega, tarifa y mercancía.",
+      "extractionFailed": "Error al extraer. Inténtalo de nuevo.",
+      "networkError": "Error de red. Revisa tu conexión.",
+      "charactersCount": "{count} caracteres",
+      "pasteHint": "Pega cualquier formato de texto — correos, PDFs, portales de brokers",
+      "extract": "Extraer carga",
+      "extracting": "Extrayendo..."
+    },
+    "sections": {
+      "customerReference": "Cliente y referencia",
+      "pickup": "Recogida",
+      "delivery": "Entrega",
+      "loadDetails": "Detalles de la carga"
+    },
+    "fields": {
+      "customerBroker": "Cliente / Broker",
+      "loadReference": "Carga / Referencia n.º",
+      "address": "Dirección",
+      "city": "Ciudad",
+      "state": "Estado",
+      "zip": "Código postal",
+      "date": "Fecha",
+      "time": "Hora",
+      "commodity": "Mercancía",
+      "weight": "Peso (lbs)",
+      "rate": "Tarifa ($)",
+      "miles": "Millas"
+    },
+    "manual": {
+      "back": "Atrás",
+      "title": "Ingresar carga manualmente",
+      "subtitle": "Completa los detalles que tengas — puedes editar esta carga más tarde.",
+      "errorMinimum": "Ingresa al menos un cliente, recogida o entrega para guardar esta carga.",
+      "failedToSave": "No se pudo guardar la carga.",
+      "networkError": "Error de red. Inténtalo de nuevo.",
+      "saving": "Guardando...",
+      "createLoad": "Crear carga"
+    },
+    "review": {
+      "title": "Revisar carga extraída",
+      "subtitle": "Revisa los detalles a continuación — edita lo que no se vea bien.",
+      "aiExtracted": "Extraído por IA",
+      "failedToSave": "No se pudo guardar la carga.",
+      "networkError": "Error de red. Inténtalo de nuevo.",
+      "reExtract": "Volver a extraer",
+      "saving": "Guardando...",
+      "confirmCreateLoad": "Confirmar y crear carga",
+      "confidenceConfident": "✓ confiable",
+      "confidenceReview": "~ revisar",
+      "confidenceCheck": "⚠ verificar",
+      "back": "Atrás"
+    }
   }
 }

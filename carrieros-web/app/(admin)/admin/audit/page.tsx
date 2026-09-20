@@ -8,6 +8,7 @@
 // Uses components/ui/* (Card/Table/EmptyState) per docs/design/
 // carrieros-design-system.md §5 rather than hand-rolled Tailwind.
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Card, Table, TableHeaderCell, TableRow, TableCell, EmptyState } from '@/components/ui'
 
 interface AuditEvent {
@@ -19,18 +20,19 @@ interface AuditEvent {
   admin_name: string | null
 }
 
-const EVENT_LABELS: Record<string, string> = {
-  'admin.note_add': 'Note added',
-  'admin.impersonate': 'Impersonated owner',
-  'admin.change_tier': 'Changed tier',
-  'admin.extend_trial': 'Extended trial',
-  'admin.grace_period': 'Set grace period',
-  'admin.flag_edit': 'Edited feature flag',
-}
-
 export default function AuditPage() {
+  const t = useTranslations('admin.audit')
   const [events, setEvents] = useState<AuditEvent[] | null>(null)
   const [error, setError] = useState('')
+
+  const EVENT_LABELS: Record<string, string> = {
+    'admin.note_add': t('eventNoteAdd'),
+    'admin.impersonate': t('eventImpersonate'),
+    'admin.change_tier': t('eventChangeTier'),
+    'admin.extend_trial': t('eventExtendTrial'),
+    'admin.grace_period': t('eventGracePeriod'),
+    'admin.flag_edit': t('eventFlagEdit'),
+  }
 
   useEffect(() => {
     fetch('/api/admin/audit')
@@ -39,31 +41,32 @@ export default function AuditPage() {
         return r.json()
       })
       .then((json) => setEvents(json.events))
-      .catch(() => setError('Could not load audit events.'))
+      .catch(() => setError(t('error')))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   if (error) return <div className="p-8 text-danger text-sm">{error}</div>
-  if (!events) return <div className="p-8 text-text-sec text-sm">Loading…</div>
+  if (!events) return <div className="p-8 text-text-sec text-sm">{t('loading')}</div>
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-semibold text-text-pri mb-1">Audit &amp; Activity</h1>
+      <h1 className="text-2xl font-semibold text-text-pri mb-1">{t('title')}</h1>
       <p className="text-text-sec text-sm mb-6">
-        Admin-initiated actions only — not a full cross-tenant audit trail (no login/load/billing event logging exists yet).
+        {t('subtitle')}
       </p>
 
       <Card>
         {events.length === 0 ? (
-          <EmptyState icon="history" title="No admin actions logged yet." />
+          <EmptyState icon="history" title={t('noEvents')} />
         ) : (
           <Table>
             <thead>
               <tr>
-                <TableHeaderCell>Action</TableHeaderCell>
-                <TableHeaderCell>Org</TableHeaderCell>
-                <TableHeaderCell>Admin</TableHeaderCell>
-                <TableHeaderCell>Details</TableHeaderCell>
-                <TableHeaderCell numeric>When</TableHeaderCell>
+                <TableHeaderCell>{t('colAction')}</TableHeaderCell>
+                <TableHeaderCell>{t('colOrg')}</TableHeaderCell>
+                <TableHeaderCell>{t('colAdmin')}</TableHeaderCell>
+                <TableHeaderCell>{t('colDetails')}</TableHeaderCell>
+                <TableHeaderCell numeric>{t('colWhen')}</TableHeaderCell>
               </tr>
             </thead>
             <tbody>

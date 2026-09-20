@@ -8,6 +8,7 @@
 // check server-side as defense in depth (matching every other role gate
 // in this codebase — proxy.ts is not the only place a check lives).
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import AdminSidebar from '@/components/AdminSidebar'
 import { getProfileForUser } from '@/lib/queries/profiles'
@@ -27,7 +28,8 @@ export default async function AdminLayout({
 
   if (!profile || !SX_ROLES.includes(profile.role)) redirect('/dashboard')
 
-  const name = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || user.email || 'Admin'
+  const t = await getTranslations('common')
+  const name = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || user.email || t('adminFallback')
 
   return (
     <div className="flex h-screen bg-surface-page overflow-hidden">

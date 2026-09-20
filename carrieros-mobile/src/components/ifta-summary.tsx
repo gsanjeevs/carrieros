@@ -18,6 +18,7 @@ import { Spacing } from '@/constants/theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useSession } from '@/hooks/use-session';
 import { hasFeature } from '@/lib/entitlements';
+import { formatNumber } from '@/lib/format-number';
 import { supabase } from '@/lib/supabase';
 
 type StateMiles = { state: string; total_miles: number };
@@ -29,7 +30,7 @@ function currentQuarter(): string {
 }
 
 export function IftaSummary() {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { session } = useSession();
 
   const [loading, setLoading] = useState(true);
@@ -100,7 +101,7 @@ export function IftaSummary() {
       </ThemedText>
 
       <ThemedView type="backgroundElement" style={styles.summaryStrip}>
-        <ThemedText type="title">{totalMiles.toLocaleString()}</ThemedText>
+        <ThemedText type="title">{formatNumber(totalMiles, locale)}</ThemedText>
         <ThemedText type="small" themeColor="textSecondary">{t('reports.iftaTotalMiles')}</ThemedText>
       </ThemedView>
 
@@ -114,7 +115,7 @@ export function IftaSummary() {
             <ThemedView type="transparent" key={r.state} style={styles.stateRow}>
               <ThemedText type="smallBold">{r.state}</ThemedText>
               <ThemedText type="small">
-                {Number(r.total_miles).toLocaleString()} {t('loadDetail.unitMi')}
+                {formatNumber(Number(r.total_miles), locale)} {t('loadDetail.unitMi')}
                 {' · '}
                 {totalMiles > 0 ? Math.round((Number(r.total_miles) / totalMiles) * 100) : 0}%
               </ThemedText>

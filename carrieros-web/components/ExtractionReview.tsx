@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Card, CardBody, Input, Button } from '@/components/ui'
 
 interface ExtractedLoad {
@@ -48,6 +49,7 @@ function Field({
   type = 'text',
   confidence,
   placeholder,
+  confidenceLabels,
 }: {
   label: string
   name: string
@@ -56,6 +58,7 @@ function Field({
   type?: string
   confidence?: 'high' | 'medium' | 'low'
   placeholder?: string
+  confidenceLabels: { high: string; medium: string; low: string }
 }) {
   return (
     <div>
@@ -63,7 +66,7 @@ function Field({
         <label className="text-xs font-medium text-slate-400 uppercase tracking-wide">{label}</label>
         {confidence && (
           <span className={`text-xs ${CONFIDENCE_COLOR[confidence]}`}>
-            {confidence === 'high' ? '✓ confident' : confidence === 'medium' ? '~ review' : '⚠ check'}
+            {confidenceLabels[confidence]}
           </span>
         )}
       </div>
@@ -119,6 +122,14 @@ function fieldsFromExtractedLoad(parsed: ExtractedLoad | null): Record<string, s
 
 export default function ExtractionReview() {
   const router = useRouter()
+  const t = useTranslations('loadIntake.review')
+  const tSections = useTranslations('loadIntake.sections')
+  const tFields = useTranslations('loadIntake.fields')
+  const confidenceLabels = {
+    high: t('confidenceConfident'),
+    medium: t('confidenceReview'),
+    low: t('confidenceCheck'),
+  }
   const [data] = useState<ExtractedLoad | null>(() => readExtractedLoad())
   const [fields, setFields] = useState<Record<string, string>>(() => fieldsFromExtractedLoad(readExtractedLoad()))
   const [saving, setSaving] = useState(false)
@@ -153,14 +164,14 @@ export default function ExtractionReview() {
       })
       if (!res.ok) {
         const d = await res.json()
-        setError(d.error ?? 'Failed to save load.')
+        setError(d.error ?? t('failedToSave'))
         return
       }
       const { load_number } = await res.json()
       sessionStorage.removeItem('extracted_load')
       router.push(`/loads?created=${load_number}`)
     } catch {
-      setError('Network error. Try again.')
+      setError(t('networkError'))
     } finally {
       setSaving(false)
     }
@@ -176,16 +187,16 @@ export default function ExtractionReview() {
       <div className="mb-8">
         <Link href="/loads/new/paste" className="text-slate-400 text-sm hover:text-white flex items-center gap-1.5 mb-4">
           <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-          Back
+          {t('back')}
         </Link>
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-text-pri">Review Extracted Load</h1>
-            <p className="text-slate-400 text-sm mt-1">Check the details below — edit anything that looks off.</p>
+            <h1 className="text-2xl font-semibold text-text-pri">{t('title')}</h1>
+            <p className="text-slate-400 text-sm mt-1">{t('subtitle')}</p>
           </div>
           <div className="flex items-center gap-2 text-xs text-slate-400 bg-surface-card border border-border-ui rounded-lg px-3 py-1.5">
             <span className="material-symbols-outlined text-[14px] text-brand-orange">auto_awesome</span>
-            AI extracted
+            {t('aiExtracted')}
           </div>
         </div>
       </div>
@@ -201,10 +212,10 @@ export default function ExtractionReview() {
         {/* Customer + reference */}
         <Card>
           <CardBody>
-          <h2 className="text-text-pri text-sm font-medium mb-4">Customer & Reference</h2>
+          <h2 className="text-text-pri text-sm font-medium mb-4">{tSections('customerReference')}</h2>
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Customer / Broker" name="customer_name_raw" value={fields.customer_name_raw ?? ''} onChange={update} placeholder="Company name" />
-            <Field label="Load / Reference #" name="load_number_raw" value={fields.load_number_raw ?? ''} onChange={update} placeholder="RC-12345" />
+            <Field label={tFields('customerBroker')} name="customer_name_raw" value={fields.customer_name_raw ?? ''} onChange={update} placeholder="Company name" confidenceLabels={confidenceLabels} />
+            <Field label={tFields('loadReference')} name="load_number_raw" value={fields.load_number_raw ?? ''} onChange={update} placeholder="RC-12345" confidenceLabels={confidenceLabels} />
           </div>
           </CardBody>
         </Card>
@@ -214,20 +225,20 @@ export default function ExtractionReview() {
           <CardBody>
           <h2 className="text-text-pri text-sm font-medium mb-4 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-brand-orange"></span>
-            Pickup
+            {tSections('pickup')}
           </h2>
           <div className="grid grid-cols-1 gap-4">
-            <Field label="Address" name="pickup_address" value={fields.pickup_address ?? ''} onChange={update} confidence={c.pickup} />
+            <Field label={tFields('address')} name="pickup_address" value={fields.pickup_address ?? ''} onChange={update} confidence={c.pickup} confidenceLabels={confidenceLabels} />
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-1">
-                <Field label="City" name="pickup_city" value={fields.pickup_city ?? ''} onChange={update} />
+                <Field label={tFields('city')} name="pickup_city" value={fields.pickup_city ?? ''} onChange={update} confidenceLabels={confidenceLabels} />
               </div>
-              <Field label="State" name="pickup_state" value={fields.pickup_state ?? ''} onChange={update} placeholder="IL" />
-              <Field label="ZIP" name="pickup_zip" value={fields.pickup_zip ?? ''} onChange={update} placeholder="60601" />
+              <Field label={tFields('state')} name="pickup_state" value={fields.pickup_state ?? ''} onChange={update} placeholder="IL" confidenceLabels={confidenceLabels} />
+              <Field label={tFields('zip')} name="pickup_zip" value={fields.pickup_zip ?? ''} onChange={update} placeholder="60601" confidenceLabels={confidenceLabels} />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Date" name="pickup_date" value={fields.pickup_date ?? ''} onChange={update} type="date" confidence={c.dates} />
-              <Field label="Time" name="pickup_time" value={fields.pickup_time ?? ''} onChange={update} type="time" />
+              <Field label={tFields('date')} name="pickup_date" value={fields.pickup_date ?? ''} onChange={update} type="date" confidence={c.dates} confidenceLabels={confidenceLabels} />
+              <Field label={tFields('time')} name="pickup_time" value={fields.pickup_time ?? ''} onChange={update} type="time" confidenceLabels={confidenceLabels} />
             </div>
           </div>
           </CardBody>
@@ -238,20 +249,20 @@ export default function ExtractionReview() {
           <CardBody>
           <h2 className="text-text-pri text-sm font-medium mb-4 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-success"></span>
-            Delivery
+            {tSections('delivery')}
           </h2>
           <div className="grid grid-cols-1 gap-4">
-            <Field label="Address" name="delivery_address" value={fields.delivery_address ?? ''} onChange={update} confidence={c.delivery} />
+            <Field label={tFields('address')} name="delivery_address" value={fields.delivery_address ?? ''} onChange={update} confidence={c.delivery} confidenceLabels={confidenceLabels} />
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-1">
-                <Field label="City" name="delivery_city" value={fields.delivery_city ?? ''} onChange={update} />
+                <Field label={tFields('city')} name="delivery_city" value={fields.delivery_city ?? ''} onChange={update} confidenceLabels={confidenceLabels} />
               </div>
-              <Field label="State" name="delivery_state" value={fields.delivery_state ?? ''} onChange={update} placeholder="TN" />
-              <Field label="ZIP" name="delivery_zip" value={fields.delivery_zip ?? ''} onChange={update} placeholder="38101" />
+              <Field label={tFields('state')} name="delivery_state" value={fields.delivery_state ?? ''} onChange={update} placeholder="TN" confidenceLabels={confidenceLabels} />
+              <Field label={tFields('zip')} name="delivery_zip" value={fields.delivery_zip ?? ''} onChange={update} placeholder="38101" confidenceLabels={confidenceLabels} />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Date" name="delivery_date" value={fields.delivery_date ?? ''} onChange={update} type="date" confidence={c.dates} />
-              <Field label="Time" name="delivery_time" value={fields.delivery_time ?? ''} onChange={update} type="time" />
+              <Field label={tFields('date')} name="delivery_date" value={fields.delivery_date ?? ''} onChange={update} type="date" confidence={c.dates} confidenceLabels={confidenceLabels} />
+              <Field label={tFields('time')} name="delivery_time" value={fields.delivery_time ?? ''} onChange={update} type="time" confidenceLabels={confidenceLabels} />
             </div>
           </div>
           </CardBody>
@@ -260,12 +271,12 @@ export default function ExtractionReview() {
         {/* Load details */}
         <Card>
           <CardBody>
-          <h2 className="text-text-pri text-sm font-medium mb-4">Load Details</h2>
+          <h2 className="text-text-pri text-sm font-medium mb-4">{tSections('loadDetails')}</h2>
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Commodity" name="commodity" value={fields.commodity ?? ''} onChange={update} placeholder="General freight" />
-            <Field label="Weight (lbs)" name="weight_lbs" value={fields.weight_lbs ?? ''} onChange={update} type="number" placeholder="42000" />
-            <Field label="Rate ($)" name="rate" value={fields.rate ?? ''} onChange={update} type="number" confidence={c.rate} placeholder="2850" />
-            <Field label="Miles" name="total_miles" value={fields.total_miles ?? ''} onChange={update} type="number" placeholder="530" />
+            <Field label={tFields('commodity')} name="commodity" value={fields.commodity ?? ''} onChange={update} placeholder="General freight" confidenceLabels={confidenceLabels} />
+            <Field label={tFields('weight')} name="weight_lbs" value={fields.weight_lbs ?? ''} onChange={update} type="number" placeholder="42000" confidenceLabels={confidenceLabels} />
+            <Field label={tFields('rate')} name="rate" value={fields.rate ?? ''} onChange={update} type="number" confidence={c.rate} placeholder="2850" confidenceLabels={confidenceLabels} />
+            <Field label={tFields('miles')} name="total_miles" value={fields.total_miles ?? ''} onChange={update} type="number" placeholder="530" confidenceLabels={confidenceLabels} />
           </div>
           </CardBody>
         </Card>
@@ -278,7 +289,7 @@ export default function ExtractionReview() {
           href="/loads/new/paste"
           className="text-slate-400 text-sm hover:text-white transition"
         >
-          Re-extract
+          {t('reExtract')}
         </Link>
         <Button
           onClick={handleSave}
@@ -286,11 +297,11 @@ export default function ExtractionReview() {
           loading={saving}
         >
           {saving ? (
-            <>Saving...</>
+            <>{t('saving')}</>
           ) : (
             <>
               <span className="material-symbols-outlined text-[16px]">check</span>
-              Confirm & Create Load
+              {t('confirmCreateLoad')}
             </>
           )}
         </Button>

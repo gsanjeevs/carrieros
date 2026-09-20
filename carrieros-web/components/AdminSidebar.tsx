@@ -8,32 +8,30 @@
 // a drill-down from Health, not its own nav item).
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { signOut } from '@/app/login/actions'
 
 interface NavItem {
-  label: string
+  labelKey: string
   href: string
   icon: string
   roles: string[]
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Triage Queue',        href: '/admin',         icon: 'inbox',         roles: ['sx_owner', 'sx_finance', 'sx_support'] },
-  { label: 'Customer Health',     href: '/admin/health',   icon: 'monitor_heart', roles: ['sx_owner', 'sx_finance', 'sx_support'] },
-  { label: 'Billing & Payments',  href: '/admin/billing',  icon: 'payments',      roles: ['sx_owner', 'sx_finance'] },
-  { label: 'Sales Pipeline',      href: '/admin/pipeline', icon: 'trending_up',   roles: ['sx_owner', 'sx_finance'] },
-  { label: 'Audit & Activity',    href: '/admin/audit',    icon: 'history',       roles: ['sx_owner', 'sx_finance', 'sx_support'] },
-  { label: 'Feature Flags',       href: '/admin/flags',    icon: 'flag',          roles: ['sx_owner'] },
+  { labelKey: 'triage',  href: '/admin',         icon: 'inbox',         roles: ['sx_owner', 'sx_finance', 'sx_support'] },
+  { labelKey: 'health',  href: '/admin/health',   icon: 'monitor_heart', roles: ['sx_owner', 'sx_finance', 'sx_support'] },
+  { labelKey: 'billing', href: '/admin/billing',  icon: 'payments',      roles: ['sx_owner', 'sx_finance'] },
+  { labelKey: 'pipeline', href: '/admin/pipeline', icon: 'trending_up',  roles: ['sx_owner', 'sx_finance'] },
+  { labelKey: 'audit',   href: '/admin/audit',    icon: 'history',       roles: ['sx_owner', 'sx_finance', 'sx_support'] },
+  { labelKey: 'flags',   href: '/admin/flags',    icon: 'flag',          roles: ['sx_owner'] },
 ]
-
-const ROLE_LABEL: Record<string, string> = {
-  sx_owner: 'SX Owner',
-  sx_finance: 'SX Finance',
-  sx_support: 'SX Support',
-}
 
 export default function AdminSidebar({ role, userName }: { role: string; userName: string }) {
   const pathname = usePathname()
+  const t = useTranslations('admin.nav')
+  const tRole = useTranslations('admin.roleLabels')
+  const tCommon = useTranslations('common')
   const items = NAV_ITEMS.filter((item) => item.roles.includes(role))
 
   const initials = userName
@@ -42,6 +40,8 @@ export default function AdminSidebar({ role, userName }: { role: string; userNam
     .join('')
     .toUpperCase()
     .slice(0, 2)
+
+  const roleLabel = ['sx_owner', 'sx_finance', 'sx_support'].includes(role) ? tRole(role as 'sx_owner' | 'sx_finance' | 'sx_support') : role
 
   return (
     <aside className="w-64 flex-shrink-0 flex flex-col bg-navy border-r border-divider-ui">
@@ -66,7 +66,7 @@ export default function AdminSidebar({ role, userName }: { role: string; userNam
               }`}
             >
               <span className="material-symbols-outlined text-[18px] leading-none">{item.icon}</span>
-              {item.label}
+              {t(item.labelKey as 'triage' | 'health' | 'billing' | 'pipeline' | 'audit' | 'flags')}
             </Link>
           )
         })}
@@ -79,7 +79,7 @@ export default function AdminSidebar({ role, userName }: { role: string; userNam
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-white text-xs font-medium truncate">{userName}</p>
-            <p className="text-slate-500 text-xs truncate">{ROLE_LABEL[role] ?? role}</p>
+            <p className="text-slate-500 text-xs truncate">{roleLabel}</p>
           </div>
         </div>
         <form action={signOut}>
@@ -88,7 +88,7 @@ export default function AdminSidebar({ role, userName }: { role: string; userNam
             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-surface-subtle transition-colors focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
           >
             <span className="material-symbols-outlined text-[18px] leading-none">logout</span>
-            Sign out
+            {tCommon('signOut')}
           </button>
         </form>
       </div>

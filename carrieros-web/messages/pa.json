@@ -9,7 +9,15 @@
     "comingSoon": "ਜਲਦੀ ਆ ਰਿਹਾ ਹੈ।",
     "signOut": "ਸਾਈਨ ਆਊਟ",
     "selectPlaceholder": "ਚੁਣੋ…",
-    "somethingWentWrong": "ਕੁਝ ਗਲਤ ਹੋ ਗਿਆ"
+    "somethingWentWrong": "ਕੁਝ ਗਲਤ ਹੋ ਗਿਆ",
+    "dismiss": "ਖਾਰਜ ਕਰੋ",
+    "close": "ਬੰਦ ਕਰੋ",
+    "confirm": "ਪੁਸ਼ਟੀ ਕਰੋ",
+    "copy": "ਕਾਪੀ ਕਰੋ",
+    "copied": "ਕਾਪੀ ਹੋ ਗਿਆ",
+    "typeToConfirm": "ਪੁਸ਼ਟੀ ਕਰਨ ਲਈ \"{phrase}\" ਲਿਖੋ",
+    "userFallback": "ਵਰਤੋਂਕਾਰ",
+    "adminFallback": "ਐਡਮਿਨ"
   },
   "errors": {
     "AUTH_REQUIRED": "ਜਾਰੀ ਰੱਖਣ ਲਈ ਕਿਰਪਾ ਕਰਕੇ ਸਾਈਨ ਇਨ ਕਰੋ।",
@@ -297,7 +305,8 @@
     "shareViaSms": "ਟੈਕਸਟ ਰਾਹੀਂ ਸਾਂਝਾ ਕਰੋ",
     "shareViaEmail": "ਈਮੇਲ ਰਾਹੀਂ ਸਾਂਝਾ ਕਰੋ",
     "shareMessage": "ਲੋਡ {loadNumber} ਟਰੈਕ ਕਰੋ:",
-    "shareEmailSubject": "ਲੋਡ {loadNumber} ਲਈ ਟਰੈਕਿੰਗ ਲਿੰਕ"
+    "shareEmailSubject": "ਲੋਡ {loadNumber} ਲਈ ਟਰੈਕਿੰਗ ਲਿੰਕ",
+    "myLoadsTitle": "ਮੇਰੇ ਲੋਡ"
   },
   "drivers": {
     "title": "ਡਰਾਈਵਰ",
@@ -671,7 +680,8 @@
     "queueTitle": "ਡਿਸਪੈਚ ਦੀ ਲੋੜ ਹੈ",
     "noQueue": "ਡਿਸਪੈਚ ਹੋਣ ਦੀ ਉਡੀਕ ਵਿੱਚ ਕੁਝ ਨਹੀਂ।",
     "dispatchAction": "ਡਿਸਪੈਚ →",
-    "dispatchModalTitle": "{loadNumber} ਡਿਸਪੈਚ ਕਰੋ"
+    "dispatchModalTitle": "{loadNumber} ਡਿਸਪੈਚ ਕਰੋ",
+    "loadingMap": "ਨਕਸ਼ਾ ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ…"
   },
   "settings": {
     "title": "ਪ੍ਰੋਫਾਈਲ ਸੈਟਿੰਗਾਂ",
@@ -908,7 +918,8 @@
     "customer_viewer": "ਗਾਹਕ ਦਰਸ਼ਕ"
   },
   "language": {
-    "appliesEverywhere": "ਤੁਹਾਡੀ ਭਾਸ਼ਾ ਦੀ ਤਰਜੀਹ ਪੂਰੀ ਐਪ 'ਤੇ ਲਾਗੂ ਹੁੰਦੀ ਹੈ।"
+    "appliesEverywhere": "ਤੁਹਾਡੀ ਭਾਸ਼ਾ ਦੀ ਤਰਜੀਹ ਪੂਰੀ ਐਪ 'ਤੇ ਲਾਗੂ ਹੁੰਦੀ ਹੈ।",
+    "groupLabel": "ਭਾਸ਼ਾ"
   },
   "signup": {
     "tagline": "ਆਪਣੇ ਫ਼ੋਨ ਤੋਂ ਆਪਣਾ ਟਰੱਕਿੰਗ ਕਾਰੋਬਾਰ ਚਲਾਓ। ਕੋਈ ਸਪ੍ਰੈਡਸ਼ੀਟ ਨਹੀਂ।",
@@ -974,5 +985,219 @@
     "invoiceAgingTitle": "ਇਨਵੌਇਸ ਉਮਰ",
     "invoiceAgingSub": "ਬਕਾਇਆ ਇਨਵੌਇਸ ਦੇਰੀ ਦੇ ਦਿਨਾਂ ਅਨੁਸਾਰ",
     "invoiceOpened": "ਖੋਲ੍ਹਿਆ ਗਿਆ"
+  },
+  "admin": {
+    "nav": {
+      "triage": "ਤਰਜੀਹ ਕਤਾਰ",
+      "health": "ਗਾਹਕ ਸਿਹਤ",
+      "billing": "ਬਿਲਿੰਗ ਅਤੇ ਭੁਗਤਾਨ",
+      "pipeline": "ਵਿਕਰੀ ਪਾਈਪਲਾਈਨ",
+      "audit": "ਆਡਿਟ ਅਤੇ ਗਤੀਵਿਧੀ",
+      "flags": "ਫੀਚਰ ਫਲੈਗ"
+    },
+    "roleLabels": {
+      "sx_owner": "SX ਮਾਲਕ",
+      "sx_finance": "SX ਵਿੱਤ",
+      "sx_support": "SX ਸਹਾਇਤਾ"
+    },
+    "triage": {
+      "title": "ਤਰਜੀਹ ਕਤਾਰ",
+      "subtitle": "ਧਿਆਨ ਦੀ ਲੋੜ ਵਾਲੀਆਂ ਸੰਸਥਾਵਾਂ, ਸਭ ਤੋਂ ਜ਼ਰੂਰੀ ਪਹਿਲਾਂ।",
+      "loading": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ…",
+      "error": "ਸੰਸਥਾਵਾਂ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀਆਂ।",
+      "kpiTotalOrgs": "ਕੁੱਲ ਸੰਸਥਾਵਾਂ",
+      "kpiPastDue": "ਬਕਾਇਆ",
+      "kpiTrialsEnding": "ਟ੍ਰਾਇਲ ≤7 ਦਿਨਾਂ ਵਿੱਚ ਖਤਮ",
+      "kpiAtRisk": "ਜੋਖਮ ਵਿੱਚ (ਸਿਹਤ<40)",
+      "nothingNeedsAttention": "ਇਸ ਵੇਲੇ ਕਿਸੇ ਵੀ ਚੀਜ਼ ਨੂੰ ਧਿਆਨ ਦੀ ਲੋੜ ਨਹੀਂ।",
+      "extendTrial": "ਟ੍ਰਾਇਲ +7 ਦਿਨ ਵਧਾਓ",
+      "view": "ਵੇਖੋ",
+      "trialEndsIn": " · ਟ੍ਰਾਇਲ {days} ਦਿਨਾਂ ਵਿੱਚ ਖਤਮ ਹੁੰਦਾ ਹੈ",
+      "urgencyCritical": "ਨਾਜ਼ੁਕ",
+      "urgencyHigh": "ਉੱਚ",
+      "urgencyMedium": "ਦਰਮਿਆਨਾ",
+      "urgencyLow": "ਘੱਟ"
+    },
+    "audit": {
+      "title": "ਆਡਿਟ ਅਤੇ ਗਤੀਵਿਧੀ",
+      "subtitle": "ਸਿਰਫ਼ ਐਡਮਿਨ ਵੱਲੋਂ ਸ਼ੁਰੂ ਕੀਤੀਆਂ ਕਾਰਵਾਈਆਂ — ਇਹ ਇੱਕ ਪੂਰਾ ਕ੍ਰਾਸ-ਟੈਨੈਂਟ ਆਡਿਟ ਟ੍ਰੇਲ ਨਹੀਂ ਹੈ (ਹਾਲੇ ਕੋਈ ਲੌਗਇਨ/ਲੋਡ/ਬਿਲਿੰਗ ਈਵੈਂਟ ਲਾਗਿੰਗ ਮੌਜੂਦ ਨਹੀਂ)।",
+      "loading": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ…",
+      "error": "ਆਡਿਟ ਈਵੈਂਟ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੇ।",
+      "noEvents": "ਹਾਲੇ ਕੋਈ ਐਡਮਿਨ ਕਾਰਵਾਈ ਦਰਜ ਨਹੀਂ ਹੋਈ।",
+      "colAction": "ਕਾਰਵਾਈ",
+      "colOrg": "ਸੰਸਥਾ",
+      "colAdmin": "ਐਡਮਿਨ",
+      "colDetails": "ਵੇਰਵੇ",
+      "colWhen": "ਕਦੋਂ",
+      "eventNoteAdd": "ਨੋਟ ਸ਼ਾਮਲ ਕੀਤਾ",
+      "eventImpersonate": "ਮਾਲਕ ਵਜੋਂ ਪਹੁੰਚ ਕੀਤੀ",
+      "eventChangeTier": "ਪੱਧਰ ਬਦਲਿਆ",
+      "eventExtendTrial": "ਟ੍ਰਾਇਲ ਵਧਾਇਆ",
+      "eventGracePeriod": "ਗ੍ਰੇਸ ਪੀਰੀਅਡ ਸੈੱਟ ਕੀਤਾ",
+      "eventFlagEdit": "ਫੀਚਰ ਫਲੈਗ ਸੋਧਿਆ"
+    },
+    "billing": {
+      "title": "ਬਿਲਿੰਗ ਅਤੇ ਭੁਗਤਾਨ",
+      "subtitle": "ਬਕਾਇਆ ਜਾਂ ਗ੍ਰੇਸ ਪੀਰੀਅਡ ਵਿੱਚ ਸੰਸਥਾਵਾਂ, ਅਤੇ ਹਾਲੀਆ ਬਿਲਿੰਗ ਈਵੈਂਟ।",
+      "loading": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ…",
+      "error": "ਬਿਲਿੰਗ ਡਾਟਾ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕਿਆ।",
+      "atRisk": "ਜੋਖਮ ਵਿੱਚ ({count})",
+      "noAtRisk": "ਕੋਈ ਵੀ ਸੰਸਥਾ ਬਕਾਇਆ ਜਾਂ ਗ੍ਰੇਸ ਪੀਰੀਅਡ ਵਿੱਚ ਨਹੀਂ।",
+      "noCardOnFile": "ਕੋਈ ਕਾਰਡ ਦਰਜ ਨਹੀਂ",
+      "graceUntil": "{date} ਤੱਕ ਗ੍ਰੇਸ",
+      "recentEvents": "ਹਾਲੀਆ ਬਿਲਿੰਗ ਈਵੈਂਟ",
+      "noEventsTitle": "ਹਾਲੇ ਕੋਈ ਬਿਲਿੰਗ ਈਵੈਂਟ ਨਹੀਂ",
+      "noEventsDescription": "ਇਸ ਵਾਤਾਵਰਣ ਵਿੱਚ ਅਸਲੀ Stripe webhooks ਸੈੱਟ ਨਹੀਂ ਕੀਤੇ ਗਏ।"
+    },
+    "flags": {
+      "title": "ਫੀਚਰ ਫਲੈਗ",
+      "subtitle": "ਓਪਰੇਸ਼ਨਲ ਕਿੱਲ-ਸਵਿੱਚ — ਵਪਾਰਕ ਪੱਧਰ/ਅਧਿਕਾਰ ਸਿਸਟਮ ਤੋਂ ਵੱਖਰੇ।",
+      "loading": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ…",
+      "error": "ਫੀਚਰ ਫਲੈਗ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੇ।",
+      "enabledByDefault": "ਮੂਲ ਰੂਪ ਵਿੱਚ ਚਾਲੂ",
+      "disabledByDefault": "ਮੂਲ ਰੂਪ ਵਿੱਚ ਬੰਦ",
+      "addOverride": "ਸੰਸਥਾ ਓਵਰਰਾਈਡ ਸ਼ਾਮਲ ਕਰੋ",
+      "orgPlaceholder": "ਸੰਸਥਾ…",
+      "flagPlaceholder": "ਫਲੈਗ…",
+      "enabled": "ਚਾਲੂ",
+      "disabled": "ਬੰਦ",
+      "addOverrideButton": "ਓਵਰਰਾਈਡ ਸ਼ਾਮਲ ਕਰੋ",
+      "activeOverrides": "ਸਰਗਰਮ ਓਵਰਰਾਈਡ ({count})",
+      "noOverrides": "ਕੋਈ ਸੰਸਥਾ-ਵਾਰ ਓਵਰਰਾਈਡ ਸੈੱਟ ਨਹੀਂ।"
+    },
+    "health": {
+      "title": "ਗਾਹਕ ਸਿਹਤ",
+      "subtitle": "{count} ਸੰਸਥਾਵਾਂ, ਸਭ ਤੋਂ ਮਾੜੀ ਸਿਹਤ ਤੋਂ ਪਹਿਲਾਂ ਲੜੀਬੱਧ।",
+      "loading": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ…",
+      "error": "ਸੰਸਥਾਵਾਂ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀਆਂ।",
+      "filterAll": "ਸਾਰੇ",
+      "colOrg": "ਸੰਸਥਾ",
+      "colTier": "ਪੱਧਰ",
+      "colBilling": "ਬਿਲਿੰਗ",
+      "colLoads30d": "ਲੋਡ/30ਦਿਨ",
+      "colHealth": "ਸਿਹਤ",
+      "healthScoreLabel": "ਸਿਹਤ ਸਕੋਰ {score}"
+    },
+    "pipeline": {
+      "title": "ਵਿਕਰੀ ਪਾਈਪਲਾਈਨ",
+      "subtitle": "ਜਲਦੀ ਖਤਮ ਹੋ ਰਹੇ ਟ੍ਰਾਇਲ, ਅਤੇ ਅੱਪਗ੍ਰੇਡ ਲਈ ਤਿਆਰ ਸਟਾਰਟਰ ਸੰਸਥਾਵਾਂ।",
+      "loading": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ…",
+      "error": "ਪਾਈਪਲਾਈਨ ਡਾਟਾ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕਿਆ।",
+      "trials": "ਟ੍ਰਾਇਲ ({count})",
+      "noTrials": "ਇਸ ਵੇਲੇ ਕੋਈ ਸੰਸਥਾ ਟ੍ਰਾਇਲ 'ਤੇ ਨਹੀਂ।",
+      "daysLeft": "{days} ਦਿਨ ਬਾਕੀ",
+      "extend": "+7 ਦਿਨ ਵਧਾਓ",
+      "upgradeCandidates": "ਅੱਪਗ੍ਰੇਡ ਉਮੀਦਵਾਰ ({count})",
+      "upgradeCandidatesDesc": "30 ਦਿਨਾਂ ਵਿੱਚ ≥8 ਲੋਡ ਜਾਂ ਇੱਕ ਤੋਂ ਵੱਧ ਸਰਗਰਮ ਡਰਾਈਵਰ ਵਾਲੀਆਂ ਸਟਾਰਟਰ ਸੰਸਥਾਵਾਂ।",
+      "noCandidates": "ਇਸ ਵੇਲੇ ਕੋਈ ਸਟਾਰਟਰ ਸੰਸਥਾ ਅੱਪਗ੍ਰੇਡ ਲਈ ਤਿਆਰ ਨਹੀਂ ਲੱਗਦੀ।",
+      "loadsPer30d": "{count} ਲੋਡ/30ਦਿਨ",
+      "drivers": "{count} ਡਰਾਈਵਰ"
+    },
+    "orgDetail": {
+      "backToHealth": "ਗਾਹਕ ਸਿਹਤ 'ਤੇ ਵਾਪਸ ਜਾਓ",
+      "impersonateOwner": "ਮਾਲਕ ਵਜੋਂ ਪਹੁੰਚ ਕਰੋ",
+      "magicLink": "ਮੈਜਿਕ ਲਿੰਕ (ਇੱਕ-ਵਾਰ ਵਰਤੋਂ):",
+      "loading": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ…",
+      "error": "ਇਹ ਸੰਸਥਾ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀ।",
+      "kpisTitle": "KPIs",
+      "loadsPer30d": "ਲੋਡ / 30ਦਿਨ",
+      "uninvoicedRevenue": "ਗੈਰ-ਇਨਵੌਇਸ ਆਮਦਨ",
+      "lastActive": "ਆਖਰੀ ਸਰਗਰਮੀ",
+      "never": "ਕਦੇ ਨਹੀਂ",
+      "adoptionTitle": "ਅਪਣਾਉਣ",
+      "usersTitle": "ਵਰਤੋਂਕਾਰ ({count})",
+      "recentLoadsTitle": "ਹਾਲੀਆ ਲੋਡ",
+      "noLoadsYet": "ਹਾਲੇ ਕੋਈ ਲੋਡ ਨਹੀਂ।",
+      "tierTitle": "ਪੱਧਰ",
+      "trialGraceTitle": "ਟ੍ਰਾਇਲ ਅਤੇ ਗ੍ਰੇਸ ਪੀਰੀਅਡ",
+      "extendTrial7": "ਟ੍ਰਾਇਲ +7 ਦਿਨ ਵਧਾਓ",
+      "gracePeriodLabel": "ਗ੍ਰੇਸ ਪੀਰੀਅਡ: {date}",
+      "none": "ਕੋਈ ਨਹੀਂ",
+      "set7d": "7ਦਿਨ ਸੈੱਟ ਕਰੋ",
+      "clear": "ਸਾਫ਼ ਕਰੋ",
+      "notesTitle": "ਨੋਟਸ",
+      "noNotesYet": "ਹਾਲੇ ਕੋਈ ਨੋਟ ਨਹੀਂ।",
+      "addNotePlaceholder": "ਇੱਕ ਨੋਟ ਸ਼ਾਮਲ ਕਰੋ…",
+      "addNote": "ਨੋਟ ਸ਼ਾਮਲ ਕਰੋ",
+      "adoptionCompletedOnboarding": "ਆਨਬੋਰਡਿੰਗ ਪੂਰੀ ਹੋਈ",
+      "adoptionAddedFirstVehicle": "ਪਹਿਲਾ ਵਾਹਨ ਸ਼ਾਮਲ ਕੀਤਾ",
+      "adoptionAddedFirstDriver": "ਪਹਿਲਾ ਡਰਾਈਵਰ ਸ਼ਾਮਲ ਕੀਤਾ",
+      "adoptionCreatedFirstLoad": "ਪਹਿਲਾ ਲੋਡ ਬਣਾਇਆ",
+      "adoptionDispatchedLoad": "ਲੋਡ ਡਿਸਪੈਚ ਕੀਤਾ",
+      "adoptionSentFirstInvoice": "ਪਹਿਲਾ ਇਨਵੌਇਸ ਭੇਜਿਆ",
+      "adoptionReceivedFirstPayment": "ਪਹਿਲਾ ਭੁਗਤਾਨ ਪ੍ਰਾਪਤ ਹੋਇਆ",
+      "trialEndsLabel": " · ਟ੍ਰਾਇਲ {date} ਨੂੰ ਖਤਮ ਹੁੰਦਾ ਹੈ"
+    }
+  },
+  "loadIntake": {
+    "newLoad": {
+      "backToLoads": "ਲੋਡ 'ਤੇ ਵਾਪਸ ਜਾਓ",
+      "title": "ਲੋਡ ਸ਼ਾਮਲ ਕਰੋ",
+      "subtitle": "ਤੁਸੀਂ ਇਹ ਲੋਡ ਕਿਵੇਂ ਦਰਜ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?",
+      "pasteTitle": "ਰੇਟ ਪੁਸ਼ਟੀ ਪੇਸਟ ਕਰੋ",
+      "pasteDesc": "ਈਮੇਲ ਜਾਂ ਦਸਤਾਵੇਜ਼ ਤੋਂ ਟੈਕਸਟ ਕਾਪੀ ਕਰੋ — ਅਸੀਂ ਵੇਰਵੇ ਆਪਣੇ ਆਪ ਕੱਢ ਲਵਾਂਗੇ",
+      "uploadTitle": "PDF ਅੱਪਲੋਡ ਕਰੋ",
+      "uploadDesc": "ਰੇਟ ਕੌਨ PDF ਅੱਪਲੋਡ ਕਰੋ — ਅਸੀਂ ਲੋਡ ਦੇ ਵੇਰਵੇ ਪੜ੍ਹ ਕੇ ਕੱਢ ਲਵਾਂਗੇ",
+      "comingSoon": "ਜਲਦੀ ਆ ਰਿਹਾ ਹੈ",
+      "manualTitle": "ਖੁਦ ਦਰਜ ਕਰੋ",
+      "manualDesc": "ਲੋਡ ਦੇ ਵੇਰਵੇ ਖੁਦ ਲਿਖੋ",
+      "forwardTitle": "ਈਮੇਲ ਰਾਹੀਂ ਫਾਰਵਰਡ ਕਰੋ",
+      "forwardDesc": "ਇਸ ਪਤੇ 'ਤੇ ਰੇਟ ਪੁਸ਼ਟੀ ਫਾਰਵਰਡ ਕਰੋ ਅਤੇ ਇਹ ਆਪਣੇ ਆਪ ਕੱਢੀ ਜਾਵੇਗੀ"
+    },
+    "paste": {
+      "back": "ਪਿੱਛੇ",
+      "title": "ਰੇਟ ਪੁਸ਼ਟੀ ਪੇਸਟ ਕਰੋ",
+      "subtitle": "ਹੇਠਾਂ ਰੇਟ ਕੌਨ ਟੈਕਸਟ ਪੇਸਟ ਕਰੋ — ਅਸੀਂ ਪਿਕਅੱਪ, ਡਿਲੀਵਰੀ, ਰੇਟ ਅਤੇ ਸਮਾਨ ਕੱਢ ਲਵਾਂਗੇ।",
+      "extractionFailed": "ਕੱਢਣ ਵਿੱਚ ਅਸਫਲ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+      "networkError": "ਨੈੱਟਵਰਕ ਗਲਤੀ। ਆਪਣਾ ਕਨੈਕਸ਼ਨ ਜਾਂਚੋ।",
+      "charactersCount": "{count} ਅੱਖਰ",
+      "pasteHint": "ਕੋਈ ਵੀ ਟੈਕਸਟ ਫਾਰਮੈਟ ਪੇਸਟ ਕਰੋ — ਈਮੇਲ, PDF, ਬਰੋਕਰ ਪੋਰਟਲ",
+      "extract": "ਲੋਡ ਕੱਢੋ",
+      "extracting": "ਕੱਢਿਆ ਜਾ ਰਿਹਾ ਹੈ..."
+    },
+    "sections": {
+      "customerReference": "ਗਾਹਕ ਅਤੇ ਹਵਾਲਾ",
+      "pickup": "ਪਿਕਅੱਪ",
+      "delivery": "ਡਿਲੀਵਰੀ",
+      "loadDetails": "ਲੋਡ ਵੇਰਵੇ"
+    },
+    "fields": {
+      "customerBroker": "ਗਾਹਕ / ਬਰੋਕਰ",
+      "loadReference": "ਲੋਡ / ਹਵਾਲਾ #",
+      "address": "ਪਤਾ",
+      "city": "ਸ਼ਹਿਰ",
+      "state": "ਰਾਜ",
+      "zip": "ਜ਼ਿਪ",
+      "date": "ਮਿਤੀ",
+      "time": "ਸਮਾਂ",
+      "commodity": "ਸਮਾਨ",
+      "weight": "ਭਾਰ (lbs)",
+      "rate": "ਰੇਟ ($)",
+      "miles": "ਮੀਲ"
+    },
+    "manual": {
+      "back": "ਪਿੱਛੇ",
+      "title": "ਲੋਡ ਖੁਦ ਦਰਜ ਕਰੋ",
+      "subtitle": "ਤੁਹਾਡੇ ਕੋਲ ਜੋ ਵੀ ਵੇਰਵੇ ਹਨ ਭਰੋ — ਤੁਸੀਂ ਇਹ ਲੋਡ ਬਾਅਦ ਵਿੱਚ ਸੋਧ ਸਕਦੇ ਹੋ।",
+      "errorMinimum": "ਇਸ ਲੋਡ ਨੂੰ ਸੇਵ ਕਰਨ ਲਈ ਘੱਟੋ-ਘੱਟ ਇੱਕ ਗਾਹਕ, ਪਿਕਅੱਪ ਜਾਂ ਡਿਲੀਵਰੀ ਦਰਜ ਕਰੋ।",
+      "failedToSave": "ਲੋਡ ਸੇਵ ਕਰਨ ਵਿੱਚ ਅਸਫਲ।",
+      "networkError": "ਨੈੱਟਵਰਕ ਗਲਤੀ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+      "saving": "ਸੇਵ ਹੋ ਰਿਹਾ ਹੈ...",
+      "createLoad": "ਲੋਡ ਬਣਾਓ"
+    },
+    "review": {
+      "title": "ਕੱਢੇ ਗਏ ਲੋਡ ਦੀ ਸਮੀਖਿਆ ਕਰੋ",
+      "subtitle": "ਹੇਠਾਂ ਦਿੱਤੇ ਵੇਰਵਿਆਂ ਦੀ ਜਾਂਚ ਕਰੋ — ਜੋ ਵੀ ਗਲਤ ਲੱਗੇ ਉਸਨੂੰ ਸੋਧੋ।",
+      "aiExtracted": "AI ਦੁਆਰਾ ਕੱਢਿਆ ਗਿਆ",
+      "failedToSave": "ਲੋਡ ਸੇਵ ਕਰਨ ਵਿੱਚ ਅਸਫਲ।",
+      "networkError": "ਨੈੱਟਵਰਕ ਗਲਤੀ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+      "reExtract": "ਦੁਬਾਰਾ ਕੱਢੋ",
+      "saving": "ਸੇਵ ਹੋ ਰਿਹਾ ਹੈ...",
+      "confirmCreateLoad": "ਪੁਸ਼ਟੀ ਕਰੋ ਅਤੇ ਲੋਡ ਬਣਾਓ",
+      "confidenceConfident": "✓ ਭਰੋਸੇਯੋਗ",
+      "confidenceReview": "~ ਸਮੀਖਿਆ ਕਰੋ",
+      "confidenceCheck": "⚠ ਜਾਂਚੋ",
+      "back": "ਪਿੱਛੇ"
+    }
   }
 }

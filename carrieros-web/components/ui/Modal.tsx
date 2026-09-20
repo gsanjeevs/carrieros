@@ -8,6 +8,7 @@
 // the highest-risk tier before its confirm action enables).
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import { useTranslations } from 'next-intl'
 import { cn } from './cn'
 import Button from './Button'
 
@@ -50,10 +51,12 @@ export default function Modal({
   footer,
   variant = 'default',
   confirmPhrase,
-  confirmLabel = 'Confirm',
+  confirmLabel,
   onConfirm,
   className,
 }: ModalProps) {
+  const t = useTranslations('common')
+  const resolvedConfirmLabel = confirmLabel ?? t('confirm')
   const dialogRef = useRef<HTMLDivElement>(null)
   const previouslyFocused = useRef<HTMLElement | null>(null)
   const [typedPhrase, setTypedPhrase] = useState('')
@@ -95,9 +98,14 @@ export default function Modal({
     }
   }, [open, onClose])
 
-  useEffect(() => {
+  // Reset the typed confirmation each time the modal opens. Done during render
+  // (React's "adjust state when a prop changes" pattern) rather than in an
+  // effect, which would be a synchronous setState in an effect body.
+  const [wasOpen, setWasOpen] = useState(open)
+  if (open !== wasOpen) {
+    setWasOpen(open)
     if (open) setTypedPhrase('')
-  }, [open])
+  }
 
   if (!open) return null
 
@@ -126,7 +134,7 @@ export default function Modal({
             <button
               type="button"
               onClick={onClose}
-              aria-label="Close"
+              aria-label={t('close')}
               className="text-text-sec hover:text-text-pri focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/50 rounded"
             >
               <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
@@ -142,7 +150,7 @@ export default function Modal({
           {isConfirmDestructive && confirmPhrase && (
             <div className="mt-4">
               <label htmlFor="modal-confirm-phrase" className="block text-xs font-medium text-text-sec mb-1.5">
-                Type &ldquo;{confirmPhrase}&rdquo; to confirm
+                {t('typeToConfirm', { phrase: confirmPhrase })}
               </label>
               <input
                 id="modal-confirm-phrase"
@@ -159,7 +167,7 @@ export default function Modal({
           {footer ?? (
             <>
               <Button variant="secondary" size="sm" onClick={onClose}>
-                Cancel
+                {t('cancel')}
               </Button>
               {onConfirm && (
                 <Button
@@ -168,7 +176,7 @@ export default function Modal({
                   disabled={confirmDisabled}
                   onClick={onConfirm}
                 >
-                  {confirmLabel}
+                  {resolvedConfirmLabel}
                 </Button>
               )}
             </>

@@ -9,6 +9,7 @@
 // EmptyState) per docs/design/carrieros-design-system.md §5 rather than
 // hand-rolled Tailwind.
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Card, CardHeader, Button, Input, StatusBadge, EmptyState } from '@/components/ui'
 
 interface Flag {
@@ -31,6 +32,7 @@ interface OrgOption {
 }
 
 export default function FeatureFlagsPage() {
+  const t = useTranslations('admin.flags')
   const [flags, setFlags] = useState<Flag[] | null>(null)
   const [overrides, setOverrides] = useState<Override[] | null>(null)
   const [orgs, setOrgs] = useState<OrgOption[]>([])
@@ -57,12 +59,15 @@ export default function FeatureFlagsPage() {
         setOrgs(orgsJson.orgs.map((o: { org_id: number; name: string }) => ({ org_id: o.org_id, name: o.name })))
       }
     } catch {
-      setError('Could not load feature flags.')
+      setError(t('error'))
     }
   }
 
   useEffect(() => {
-    load()
+    // Deferred a microtask so the initial fetch's state updates are not a
+    // synchronous setState in the effect body (react-hooks/set-state-in-effect).
+    void Promise.resolve().then(load)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function toggleDefault(flagKey: string, current: boolean) {
@@ -91,12 +96,12 @@ export default function FeatureFlagsPage() {
   }
 
   if (error) return <div className="p-8 text-danger text-sm">{error}</div>
-  if (!flags || !overrides) return <div className="p-8 text-text-sec text-sm">Loading…</div>
+  if (!flags || !overrides) return <div className="p-8 text-text-sec text-sm">{t('loading')}</div>
 
   return (
     <div className="p-8 max-w-3xl">
-      <h1 className="text-2xl font-semibold text-text-pri mb-1">Feature Flags</h1>
-      <p className="text-text-sec text-sm mb-6">Operational kill-switches — separate from the commercial tier/entitlement system.</p>
+      <h1 className="text-2xl font-semibold text-text-pri mb-1">{t('title')}</h1>
+      <p className="text-text-sec text-sm mb-6">{t('subtitle')}</p>
 
       <Card className="mb-6">
         {flags.map((f) => (
@@ -107,7 +112,7 @@ export default function FeatureFlagsPage() {
             </div>
             <button onClick={() => toggleDefault(f.flag_key, f.default_enabled)} disabled={toggling === f.flag_key} className="disabled:opacity-40">
               <StatusBadge variant={f.default_enabled ? 'success' : 'neutral'}>
-                {f.default_enabled ? 'Enabled by default' : 'Disabled by default'}
+                {f.default_enabled ? t('enabledByDefault') : t('disabledByDefault')}
               </StatusBadge>
             </button>
           </div>
@@ -115,39 +120,39 @@ export default function FeatureFlagsPage() {
       </Card>
 
       <Card className="p-5 mb-6">
-        <h2 className="text-text-pri font-medium text-sm mb-3">Add Org Override</h2>
+        <h2 className="text-text-pri font-medium text-sm mb-3">{t('addOverride')}</h2>
         <div className="grid grid-cols-3 gap-3 mb-3">
           <Input as="select" value={overrideOrgId} onChange={(e) => setOverrideOrgId(e.target.value)}>
-            <option value="">Org…</option>
+            <option value="">{t('orgPlaceholder')}</option>
             {orgs.map((o) => <option key={o.org_id} value={o.org_id}>{o.name}</option>)}
           </Input>
           <Input as="select" value={overrideFlagKey} onChange={(e) => setOverrideFlagKey(e.target.value)}>
-            <option value="">Flag…</option>
+            <option value="">{t('flagPlaceholder')}</option>
             {flags.map((f) => <option key={f.flag_key} value={f.flag_key}>{f.flag_key}</option>)}
           </Input>
           <Input as="select" value={overrideEnabled ? 'true' : 'false'} onChange={(e) => setOverrideEnabled(e.target.value === 'true')}>
-            <option value="true">Enabled</option>
-            <option value="false">Disabled</option>
+            <option value="true">{t('enabled')}</option>
+            <option value="false">{t('disabled')}</option>
           </Input>
         </div>
         <Button onClick={addOverride} disabled={!overrideOrgId || !overrideFlagKey} loading={savingOverride}>
-          Add Override
+          {t('addOverrideButton')}
         </Button>
       </Card>
 
       <Card>
         <CardHeader>
-          <h2 className="text-text-pri font-medium text-sm">Active Overrides ({overrides.length})</h2>
+          <h2 className="text-text-pri font-medium text-sm">{t('activeOverrides', { count: overrides.length })}</h2>
         </CardHeader>
         {overrides.length === 0 ? (
-          <EmptyState icon="flag" title="No per-org overrides set." />
+          <EmptyState icon="flag" title={t('noOverrides')} />
         ) : (
           <div className="divide-y divide-divider-ui">
             {overrides.map((o, i) => (
               <div key={i} className="flex items-center justify-between px-5 py-3 text-sm">
                 <span className="text-text-pri">{o.org_name ?? o.org_id}</span>
                 <span className="text-text-sec">{o.flag_key}</span>
-                <StatusBadge variant={o.enabled ? 'success' : 'neutral'} size="sm">{o.enabled ? 'Enabled' : 'Disabled'}</StatusBadge>
+                <StatusBadge variant={o.enabled ? 'success' : 'neutral'} size="sm">{o.enabled ? t('enabled') : t('disabled')}</StatusBadge>
               </div>
             ))}
           </div>

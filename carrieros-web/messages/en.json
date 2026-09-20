@@ -9,7 +9,15 @@
     "comingSoon": "Coming soon.",
     "signOut": "Sign out",
     "selectPlaceholder": "Select…",
-    "somethingWentWrong": "Something went wrong"
+    "somethingWentWrong": "Something went wrong",
+    "dismiss": "Dismiss",
+    "close": "Close",
+    "confirm": "Confirm",
+    "copy": "Copy",
+    "copied": "Copied",
+    "typeToConfirm": "Type \"{phrase}\" to confirm",
+    "userFallback": "User",
+    "adminFallback": "Admin"
   },
   "errors": {
     "AUTH_REQUIRED": "Please sign in to continue.",
@@ -297,7 +305,8 @@
     "shareViaSms": "Share via Text",
     "shareViaEmail": "Share via Email",
     "shareMessage": "Track load {loadNumber}:",
-    "shareEmailSubject": "Tracking link for load {loadNumber}"
+    "shareEmailSubject": "Tracking link for load {loadNumber}",
+    "myLoadsTitle": "My Loads"
   },
   "drivers": {
     "title": "Drivers",
@@ -671,7 +680,8 @@
     "queueTitle": "Needs Dispatch",
     "noQueue": "Nothing waiting to be dispatched.",
     "dispatchAction": "Dispatch →",
-    "dispatchModalTitle": "Dispatch {loadNumber}"
+    "dispatchModalTitle": "Dispatch {loadNumber}",
+    "loadingMap": "Loading map…"
   },
   "settings": {
     "title": "Profile settings",
@@ -908,7 +918,8 @@
     "customer_viewer": "Customer Viewer"
   },
   "language": {
-    "appliesEverywhere": "Your language preference applies to the entire app."
+    "appliesEverywhere": "Your language preference applies to the entire app.",
+    "groupLabel": "Language"
   },
   "signup": {
     "tagline": "Run your trucking business from your phone. No spreadsheets.",
@@ -974,5 +985,219 @@
     "invoiceAgingTitle": "Invoice Aging",
     "invoiceAgingSub": "Outstanding invoices by days past due",
     "invoiceOpened": "Opened"
+  },
+  "admin": {
+    "nav": {
+      "triage": "Triage Queue",
+      "health": "Customer Health",
+      "billing": "Billing & Payments",
+      "pipeline": "Sales Pipeline",
+      "audit": "Audit & Activity",
+      "flags": "Feature Flags"
+    },
+    "roleLabels": {
+      "sx_owner": "SX Owner",
+      "sx_finance": "SX Finance",
+      "sx_support": "SX Support"
+    },
+    "triage": {
+      "title": "Triage Queue",
+      "subtitle": "Organizations needing attention, most urgent first.",
+      "loading": "Loading…",
+      "error": "Could not load organizations.",
+      "kpiTotalOrgs": "Total Orgs",
+      "kpiPastDue": "Past Due",
+      "kpiTrialsEnding": "Trials Ending ≤7d",
+      "kpiAtRisk": "At Risk (health<40)",
+      "nothingNeedsAttention": "Nothing needs attention right now.",
+      "extendTrial": "Extend Trial +7d",
+      "view": "View",
+      "trialEndsIn": " · trial ends in {days}d",
+      "urgencyCritical": "Critical",
+      "urgencyHigh": "High",
+      "urgencyMedium": "Medium",
+      "urgencyLow": "Low"
+    },
+    "audit": {
+      "title": "Audit & Activity",
+      "subtitle": "Admin-initiated actions only — not a full cross-tenant audit trail (no login/load/billing event logging exists yet).",
+      "loading": "Loading…",
+      "error": "Could not load audit events.",
+      "noEvents": "No admin actions logged yet.",
+      "colAction": "Action",
+      "colOrg": "Org",
+      "colAdmin": "Admin",
+      "colDetails": "Details",
+      "colWhen": "When",
+      "eventNoteAdd": "Note added",
+      "eventImpersonate": "Impersonated owner",
+      "eventChangeTier": "Changed tier",
+      "eventExtendTrial": "Extended trial",
+      "eventGracePeriod": "Set grace period",
+      "eventFlagEdit": "Edited feature flag"
+    },
+    "billing": {
+      "title": "Billing & Payments",
+      "subtitle": "Orgs past due or in a grace period, and recent billing events.",
+      "loading": "Loading…",
+      "error": "Could not load billing data.",
+      "atRisk": "At Risk ({count})",
+      "noAtRisk": "No orgs are past due or in a grace period.",
+      "noCardOnFile": "No card on file",
+      "graceUntil": "Grace until {date}",
+      "recentEvents": "Recent Billing Events",
+      "noEventsTitle": "No billing events yet",
+      "noEventsDescription": "Real Stripe webhooks aren't configured in this environment."
+    },
+    "flags": {
+      "title": "Feature Flags",
+      "subtitle": "Operational kill-switches — separate from the commercial tier/entitlement system.",
+      "loading": "Loading…",
+      "error": "Could not load feature flags.",
+      "enabledByDefault": "Enabled by default",
+      "disabledByDefault": "Disabled by default",
+      "addOverride": "Add Org Override",
+      "orgPlaceholder": "Org…",
+      "flagPlaceholder": "Flag…",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "addOverrideButton": "Add Override",
+      "activeOverrides": "Active Overrides ({count})",
+      "noOverrides": "No per-org overrides set."
+    },
+    "health": {
+      "title": "Customer Health",
+      "subtitle": "{count} organizations, sorted worst-health-first.",
+      "loading": "Loading…",
+      "error": "Could not load organizations.",
+      "filterAll": "All",
+      "colOrg": "Org",
+      "colTier": "Tier",
+      "colBilling": "Billing",
+      "colLoads30d": "Loads/30d",
+      "colHealth": "Health",
+      "healthScoreLabel": "Health score {score}"
+    },
+    "pipeline": {
+      "title": "Sales Pipeline",
+      "subtitle": "Trials ending soon, and Starter orgs that look ready to upgrade.",
+      "loading": "Loading…",
+      "error": "Could not load pipeline data.",
+      "trials": "Trials ({count})",
+      "noTrials": "No orgs currently trialing.",
+      "daysLeft": "{days}d left",
+      "extend": "Extend +7d",
+      "upgradeCandidates": "Upgrade Candidates ({count})",
+      "upgradeCandidatesDesc": "Starter orgs with ≥8 loads in 30 days or more than one active driver.",
+      "noCandidates": "No Starter orgs currently look ready to upgrade.",
+      "loadsPer30d": "{count} loads/30d",
+      "drivers": "{count} drivers"
+    },
+    "orgDetail": {
+      "backToHealth": "Back to Customer Health",
+      "impersonateOwner": "Impersonate Owner",
+      "magicLink": "Magic link (single use):",
+      "loading": "Loading…",
+      "error": "Could not load this organization.",
+      "kpisTitle": "KPIs",
+      "loadsPer30d": "Loads / 30d",
+      "uninvoicedRevenue": "Uninvoiced Revenue",
+      "lastActive": "Last Active",
+      "never": "Never",
+      "adoptionTitle": "Adoption",
+      "usersTitle": "Users ({count})",
+      "recentLoadsTitle": "Recent Loads",
+      "noLoadsYet": "No loads yet.",
+      "tierTitle": "Tier",
+      "trialGraceTitle": "Trial & Grace Period",
+      "extendTrial7": "Extend Trial +7 days",
+      "gracePeriodLabel": "Grace period: {date}",
+      "none": "None",
+      "set7d": "Set 7d",
+      "clear": "Clear",
+      "notesTitle": "Notes",
+      "noNotesYet": "No notes yet.",
+      "addNotePlaceholder": "Add a note…",
+      "addNote": "Add Note",
+      "adoptionCompletedOnboarding": "Completed onboarding",
+      "adoptionAddedFirstVehicle": "Added first vehicle",
+      "adoptionAddedFirstDriver": "Added first driver",
+      "adoptionCreatedFirstLoad": "Created first load",
+      "adoptionDispatchedLoad": "Dispatched a load",
+      "adoptionSentFirstInvoice": "Sent first invoice",
+      "adoptionReceivedFirstPayment": "Received first payment",
+      "trialEndsLabel": " · trial ends {date}"
+    }
+  },
+  "loadIntake": {
+    "newLoad": {
+      "backToLoads": "Back to Loads",
+      "title": "Add Load",
+      "subtitle": "How do you want to enter this load?",
+      "pasteTitle": "Paste rate confirmation",
+      "pasteDesc": "Copy text from an email or document — we'll extract the details automatically",
+      "uploadTitle": "Upload PDF",
+      "uploadDesc": "Upload a rate con PDF — we'll read and extract the load details",
+      "comingSoon": "Coming soon",
+      "manualTitle": "Enter manually",
+      "manualDesc": "Type in the load details yourself",
+      "forwardTitle": "Forward by email",
+      "forwardDesc": "Forward a rate confirmation to this address and it's extracted automatically"
+    },
+    "paste": {
+      "back": "Back",
+      "title": "Paste Rate Confirmation",
+      "subtitle": "Paste the rate con text below — we'll extract pickup, delivery, rate, and commodity.",
+      "extractionFailed": "Extraction failed. Try again.",
+      "networkError": "Network error. Check your connection.",
+      "charactersCount": "{count} characters",
+      "pasteHint": "Paste any text format — emails, PDFs, broker portals",
+      "extract": "Extract Load",
+      "extracting": "Extracting..."
+    },
+    "sections": {
+      "customerReference": "Customer & Reference",
+      "pickup": "Pickup",
+      "delivery": "Delivery",
+      "loadDetails": "Load Details"
+    },
+    "fields": {
+      "customerBroker": "Customer / Broker",
+      "loadReference": "Load / Reference #",
+      "address": "Address",
+      "city": "City",
+      "state": "State",
+      "zip": "ZIP",
+      "date": "Date",
+      "time": "Time",
+      "commodity": "Commodity",
+      "weight": "Weight (lbs)",
+      "rate": "Rate ($)",
+      "miles": "Miles"
+    },
+    "manual": {
+      "back": "Back",
+      "title": "Enter Load Manually",
+      "subtitle": "Fill in whatever details you have — you can edit this load later.",
+      "errorMinimum": "Enter at least a customer, pickup, or delivery to save this load.",
+      "failedToSave": "Failed to save load.",
+      "networkError": "Network error. Try again.",
+      "saving": "Saving...",
+      "createLoad": "Create Load"
+    },
+    "review": {
+      "title": "Review Extracted Load",
+      "subtitle": "Check the details below — edit anything that looks off.",
+      "aiExtracted": "AI extracted",
+      "failedToSave": "Failed to save load.",
+      "networkError": "Network error. Try again.",
+      "reExtract": "Re-extract",
+      "saving": "Saving...",
+      "confirmCreateLoad": "Confirm & Create Load",
+      "confidenceConfident": "✓ confident",
+      "confidenceReview": "~ review",
+      "confidenceCheck": "⚠ check",
+      "back": "Back"
+    }
   }
 }

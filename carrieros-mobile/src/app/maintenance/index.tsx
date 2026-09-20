@@ -18,6 +18,7 @@ import { Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 
+import { formatNumber } from '@/lib/format-number';
 import { supabase } from '@/lib/supabase';
 
 type ReminderRow = {
@@ -55,7 +56,7 @@ const STATUS_SORT_ORDER: Record<Status, number> = { overdue: 0, dueSoon: 1, ok: 
 export default function MaintenanceOverviewScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
 
   const [reminders, setReminders] = useState<ReminderRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -118,7 +119,7 @@ export default function MaintenanceOverviewScreen() {
             const vehicleLabel = item.vehicles?.nickname || item.vehicles?.vehicle_number || '—';
             const dueLabel = [
               item.next_due_date ?? null,
-              item.next_due_miles ? t('maintenanceOverview.milesValue', { miles: item.next_due_miles.toLocaleString() }) : null,
+              item.next_due_miles ? t('maintenanceOverview.milesValue', { miles: formatNumber(item.next_due_miles, locale) }) : null,
             ].filter(Boolean).join(' · ') || t('maintenanceOverview.noDueDate');
             return (
               <Pressable

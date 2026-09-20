@@ -21,6 +21,8 @@ import { Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
+import { formatDate } from '@/lib/format-date';
+import { formatNumber } from '@/lib/format-number';
 import { supabase } from '@/lib/supabase';
 import { resolveSubmitter } from '@/lib/submitter';
 const GREEN = '#16a34a';
@@ -155,12 +157,12 @@ export default function DvirHistoryScreen() {
                     </ThemedView>
                   </ThemedView>
                   <ThemedText type="small" themeColor="textSecondary">
-                    {new Date(item.submitted_at).toLocaleDateString(locale)}
+                    {formatDate(item.submitted_at, locale)}
                   </ThemedText>
                 </ThemedView>
 
                 <ThemedText type="small" themeColor="textSecondary">
-                  {[driverName, vehicleLabel, item.odometer != null ? `${item.odometer.toLocaleString()} mi` : null]
+                  {[driverName, vehicleLabel, item.odometer != null ? `${formatNumber(item.odometer, locale)} mi` : null]
                     .filter(Boolean)
                     .join(' · ')}
                 </ThemedText>

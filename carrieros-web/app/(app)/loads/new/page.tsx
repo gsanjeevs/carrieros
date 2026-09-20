@@ -1,6 +1,7 @@
 // app/loads/new/page.tsx
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { intakeEmailForOrg } from '@/lib/domain/intake-email'
 import CopyIntakeEmailButton from './CopyIntakeEmailButton'
@@ -13,6 +14,7 @@ export default async function NewLoadPage() {
   if (!user) redirect('/login')
 
   const { data: profile } = await getProfileForUser(supabase, user.id)
+  const t = await getTranslations('loadIntake.newLoad')
 
   let intakeEmail: string | null = null
   if (profile?.org_id) {
@@ -30,10 +32,10 @@ export default async function NewLoadPage() {
       <div className="mb-8">
         <Link href="/loads" className="text-text-sec text-sm hover:text-text-pri flex items-center gap-1.5 mb-4 rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
           <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-          Back to Loads
+          {t('backToLoads')}
         </Link>
-        <h1 className="text-2xl font-semibold text-text-pri">Add Load</h1>
-        <p className="text-text-sec text-sm mt-1">How do you want to enter this load?</p>
+        <h1 className="text-2xl font-semibold text-text-pri">{t('title')}</h1>
+        <p className="text-text-sec text-sm mt-1">{t('subtitle')}</p>
       </div>
 
       <div className="grid gap-4">
@@ -45,8 +47,8 @@ export default async function NewLoadPage() {
               <span className="material-symbols-outlined text-brand-orange text-[20px]">content_paste</span>
             </div>
             <div className="flex-1">
-              <p className="text-text-pri font-medium text-sm">Paste rate confirmation</p>
-              <p className="text-text-sec text-sm mt-0.5">Copy text from an email or document — we&apos;ll extract the details automatically</p>
+              <p className="text-text-pri font-medium text-sm">{t('pasteTitle')}</p>
+              <p className="text-text-sec text-sm mt-0.5">{t('pasteDesc')}</p>
             </div>
             <span className="material-symbols-outlined text-text-mut group-hover:text-text-sec text-[20px] mt-0.5 transition-colors">chevron_right</span>
           </Card>
@@ -61,10 +63,10 @@ export default async function NewLoadPage() {
             <span className="material-symbols-outlined text-teal text-[20px]">upload_file</span>
           </div>
           <div className="flex-1">
-            <p className="text-text-pri font-medium text-sm">Upload PDF</p>
-            <p className="text-text-sec text-sm mt-0.5">Upload a rate con PDF — we&apos;ll read and extract the load details</p>
+            <p className="text-text-pri font-medium text-sm">{t('uploadTitle')}</p>
+            <p className="text-text-sec text-sm mt-0.5">{t('uploadDesc')}</p>
           </div>
-          <span className="text-text-sec text-xs font-medium">Coming soon</span>
+          <span className="text-text-sec text-xs font-medium">{t('comingSoon')}</span>
         </Card>
 
         {/* Manual entry */}
@@ -74,8 +76,8 @@ export default async function NewLoadPage() {
               <span className="material-symbols-outlined text-text-sec text-[20px]">edit</span>
             </div>
             <div className="flex-1">
-              <p className="text-text-pri font-medium text-sm">Enter manually</p>
-              <p className="text-text-sec text-sm mt-0.5">Type in the load details yourself</p>
+              <p className="text-text-pri font-medium text-sm">{t('manualTitle')}</p>
+              <p className="text-text-sec text-sm mt-0.5">{t('manualDesc')}</p>
             </div>
             <span className="material-symbols-outlined text-text-mut group-hover:text-text-sec text-[20px] mt-0.5 transition-colors">chevron_right</span>
           </Card>
@@ -92,8 +94,8 @@ export default async function NewLoadPage() {
               <span className="material-symbols-outlined text-sky-400 text-[20px]">forward_to_inbox</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-text-pri font-medium text-sm">Forward by email</p>
-              <p className="text-text-sec text-sm mt-0.5">Forward a rate confirmation to this address and it&apos;s extracted automatically</p>
+              <p className="text-text-pri font-medium text-sm">{t('forwardTitle')}</p>
+              <p className="text-text-sec text-sm mt-0.5">{t('forwardDesc')}</p>
               <div className="flex items-center gap-2 mt-2">
                 <code className="text-text-sec text-xs bg-black/20 px-2 py-1 rounded truncate">{intakeEmail}</code>
                 <CopyIntakeEmailButton email={intakeEmail} />

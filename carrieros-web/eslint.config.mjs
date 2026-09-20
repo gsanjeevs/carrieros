@@ -151,12 +151,90 @@ const libHexPatternGuard = {
   },
 };
 
+
+// Hardcoded-JSX-text guard (i18n audit, 2026-09-19) — a prior audit found
+// dozens of untranslated English strings shipped straight in JSX (headings,
+// button labels, aria-labels) instead of going through next-intl's
+// useTranslations()/getTranslations() + messages/{en,es,pa,ur}.json, same
+// class of "doc alone didn't stop it" regression as the card-pattern guard
+// above. No i18n-lint plugin (e.g. eslint-plugin-i18next) was already
+// installed, so this mirrors the card-pattern guard's own
+// no-restricted-syntax/AST-selector approach rather than pulling in a new
+// dependency for one rule shape.
+//
+// Heuristic: flag a JSXText child, or an aria-label/title/alt attribute
+// literal (direct-child combinator only, so a `title={t('key')}` expression
+// container is never inspected — only a literal string value), that looks
+// like a real sentence-case English phrase — two or more alphabetic words
+// of 3+ letters separated by a space. Uses a literal `[ ]` rather than
+// `\s+` in the embedded regex: the no-restricted-syntax selector string is
+// re-parsed by ESLint's bundled esquery, which mangles a `\s` escape inside
+// a selector's own regex literal (silently drops the backslash, so it
+// matched a bare `s` instead — caught this INSIDE this same pass, when
+// component prop names like `noEventsTitle` and even `auto_awesome` false-
+// positived on a stray "...s+letters..." substring). Deliberately does NOT
+// cover `placeholder` — illustrative sample values (`"Big Red"`,
+// `"Jane Doe"`, example rate-con placeholder text) are real, intentional,
+// non-UI-copy content per docs' own placeholder-vs-copy distinction, and
+// flagging them would make the ERROR_SURFACES tier fight the sample data
+// the design intentionally left alone. Also does not fire on short
+// all-caps tokens (SX, PDF, IL) or single words, which are far more likely
+// to be an abbreviation/status code than untranslated copy.
+const TEXT_PATTERN_SELECTOR_JSXTEXT =
+  "JSXElement > JSXText[value=/[A-Za-z]{3,}[ ][A-Za-z]{3,}/]";
+const TEXT_PATTERN_SELECTOR_ATTR =
+  "JSXAttribute[name.name=/^(aria-label|title|alt)$/] > Literal[value=/[A-Za-z]{3,}[ ][A-Za-z]{3,}/]";
+const TEXT_PATTERN_MESSAGE =
+  "Hardcoded UI text — use useTranslations()/getTranslations() and messages/{en,es,pa,ur}.json instead of a literal string. See messages/en.json for the existing namespace layout.";
+
+function textPatternRule(severity) {
+  return [
+    "no-restricted-syntax",
+    severity,
+    { selector: TEXT_PATTERN_SELECTOR_JSXTEXT, message: TEXT_PATTERN_MESSAGE },
+    { selector: TEXT_PATTERN_SELECTOR_ATTR, message: TEXT_PATTERN_MESSAGE },
+  ];
+}
+
+// Warn repo-wide first — this is a large, real, pre-existing debt (the
+// audit found ~60+ strings just in the surfaces fixed today; there's more
+// outside that scope) — same ratchet posture as the card-pattern guard.
+const textPatternGuardWarn = {
+  files: ["app/**/*.tsx", "components/**/*.tsx"],
+  rules: { "no-restricted-syntax": textPatternRule("warn").slice(1) },
+};
+
+// Surfaces wired into next-intl in the 2026-09-19 i18n pass — a regression
+// here is a real bug, not pre-existing debt, so these fail the build.
+const TEXT_ERROR_SURFACES = [
+  "app/(admin)/**/*.tsx",
+  "app/(app)/loads/new/page.tsx",
+  "app/(app)/loads/new/paste/page.tsx",
+  "app/(app)/loads/new/CopyIntakeEmailButton.tsx",
+  "app/(app)/my-loads/page.tsx",
+  "app/(app)/dispatch/DispatchMapClient.tsx",
+  "app/(app)/invoices/[invoice_number]/print/PrintButton.tsx",
+  "app/(app)/layout.tsx",
+  "components/AdminSidebar.tsx",
+  "components/ManualLoadForm.tsx",
+  "components/ExtractionReview.tsx",
+  "components/ui/Toast.tsx",
+  "components/ui/Modal.tsx",
+  "components/LanguageSwitcher.tsx",
+];
+const textPatternGuardError = {
+  files: TEXT_ERROR_SURFACES,
+  rules: { "no-restricted-syntax": textPatternRule("error").slice(1) },
+};
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   uiComponentPatternGuardWarn,
   uiComponentPatternGuardError,
   libHexPatternGuard,
+  textPatternGuardWarn,
+  textPatternGuardError,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

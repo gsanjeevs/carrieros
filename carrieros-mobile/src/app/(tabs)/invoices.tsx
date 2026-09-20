@@ -12,6 +12,7 @@ import { ThemedView } from '@/components/themed-view';
 import { INVOICE_STATUS_PILL, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
+import { formatMoney } from '@/lib/format-money';
 import { supabase } from '@/lib/supabase';
 
 type InvoiceRow = {
@@ -26,7 +27,7 @@ type InvoiceRow = {
 export default function InvoicesScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const [invoices, setInvoices] = useState<InvoiceRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -87,7 +88,7 @@ export default function InvoicesScreen() {
                   </ThemedView>
                 </ThemedView>
                 <ThemedText type="small" themeColor="textSecondary">
-                  ${Number(item.amount).toLocaleString()}
+                  {formatMoney(Number(item.amount), locale)}
                   {item.due_date ? `  ·  ${t('invoices.due')} ${item.due_date}` : ''}
                   {item.opened_at ? `  ·  ${t('invoices.opened')}` : ''}
                 </ThemedText>

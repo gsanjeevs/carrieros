@@ -16,6 +16,8 @@ import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
+import { formatDate } from '@/lib/format-date';
+import { formatMoney } from '@/lib/format-money';
 import { supabase } from '@/lib/supabase';
 
 // A load actively in progress — same set used for the Dispatcher ops board
@@ -110,7 +112,7 @@ export default function HomeScreen() {
   const theme = useTheme();
   const router = useRouter();
   const { session } = useSession();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { role, loading: roleLoading } = useProfileRole();
 
   const [loading, setLoading] = useState(true);
@@ -369,7 +371,7 @@ export default function HomeScreen() {
           {role === 'finance' && (
             <>
               <ThemedView style={styles.statRow} type="transparent">
-                <StatTile label={t('home.outstanding')} value={`$${outstandingTotal.toLocaleString()} (${outstandingCount})`} />
+                <StatTile label={t('home.outstanding')} value={`${formatMoney(outstandingTotal, locale)} (${outstandingCount})`} />
               </ThemedView>
 
               <SectionHeading text={t('home.mostOverdue')} />
@@ -382,7 +384,7 @@ export default function HomeScreen() {
                   <ThemedView key={inv.id} style={[styles.invoiceRow, { backgroundColor: theme.card }, styles.cardShadow]}>
                     <ThemedText type="smallBold">{inv.invoice_number}</ThemedText>
                     <ThemedText type="small" themeColor="textSecondary">
-                      ${Number(inv.amount).toLocaleString()} · {t('home.due')} {inv.due_date ?? '—'}
+                      {formatMoney(Number(inv.amount), locale)} · {t('home.due')} {inv.due_date ?? '—'}
                     </ThemedText>
                   </ThemedView>
                 ))
@@ -398,7 +400,7 @@ export default function HomeScreen() {
                   <ThemedView key={inv.id} style={[styles.invoiceRow, { backgroundColor: theme.card }, styles.cardShadow]}>
                     <ThemedText type="smallBold">{inv.invoice_number}</ThemedText>
                     <ThemedText type="small" themeColor="textSecondary">
-                      ${Number(inv.amount).toLocaleString()} · {inv.paid_at ? inv.paid_at.slice(0, 10) : '—'}
+                      {formatMoney(Number(inv.amount), locale)} · {inv.paid_at ? formatDate(inv.paid_at, locale) : '—'}
                     </ThemedText>
                   </ThemedView>
                 ))

@@ -21,6 +21,8 @@ import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
 import { useOfflineSync } from '@/hooks/use-offline-sync';
 import { enqueueUpdate } from '@/lib/offline-queue';
+import { formatDateTime } from '@/lib/format-date';
+import { formatNumber } from '@/lib/format-number';
 import { supabase } from '@/lib/supabase';
 import { apiFetch } from '@/lib/api';
 
@@ -102,7 +104,7 @@ export default function LoadDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { session } = useSession();
-  const { t, prefs } = useLocale();
+  const { t, locale, prefs } = useLocale();
   const { isOnline, refreshQueueLength } = useOfflineSync();
 
   const [role, setRole] = useState<Role | null>(null);
@@ -322,8 +324,8 @@ export default function LoadDetailScreen() {
               value={
                 load.weight_lbs
                   ? prefs.uomSystem === 'metric'
-                    ? `${Math.round(load.weight_lbs * LBS_PER_KG).toLocaleString()} ${t('loadDetail.unitKg')}`
-                    : `${load.weight_lbs.toLocaleString()} ${t('loadDetail.unitLbs')}`
+                    ? `${formatNumber(Math.round(load.weight_lbs * LBS_PER_KG), locale)} ${t('loadDetail.unitKg')}`
+                    : `${formatNumber(load.weight_lbs, locale)} ${t('loadDetail.unitLbs')}`
                   : '—'
               }
             />
@@ -476,7 +478,7 @@ export default function LoadDetailScreen() {
                 <ThemedView type="transparent" key={e.id} style={styles.eventRow}>
                   <ThemedText type="small">{statusLabel(e.event_type.replace('status_', ''))}</ThemedText>
                   <ThemedText type="small" themeColor="textSecondary">
-                    {e.created_at ? new Date(e.created_at).toLocaleString() : ''}
+                    {e.created_at ? formatDateTime(e.created_at, locale) : ''}
                   </ThemedText>
                 </ThemedView>
               ))}

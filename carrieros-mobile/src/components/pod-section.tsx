@@ -23,6 +23,7 @@ import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { base64ToArrayBuffer } from '@/lib/base64';
+import { formatDate } from '@/lib/format-date';
 import { supabase } from '@/lib/supabase';
 import { resolveSubmitter } from '@/lib/submitter';
 
@@ -38,7 +39,7 @@ type PodDoc = {
 };
 
 export function PodSection({ loadId }: { loadId: number }) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const theme = useTheme();
 
   const [docs, setDocs] = useState<PodDoc[]>([]);
@@ -218,7 +219,7 @@ export function PodSection({ loadId }: { loadId: number }) {
                 <View style={[styles.thumb, { backgroundColor: theme.backgroundElement }, styles.thumbMissing]} />
               )}
               <ThemedText type="small" themeColor="textSecondary" style={styles.thumbCaption}>
-                {d.created_at ? new Date(d.created_at).toLocaleDateString() : ''}
+                {d.created_at ? formatDate(d.created_at, locale) : ''}
               </ThemedText>
             </View>
           ))}
