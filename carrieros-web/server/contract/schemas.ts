@@ -11,6 +11,7 @@ import { z } from 'zod'
 import { CHANGE_ENTITIES } from '../domain/events/entities'
 import { LOAD_STATUS_GROUP_KEYS } from '../domain/load/status-groups'
 import { DOCUMENT_TYPES, UPLOAD_CONTENT_TYPES, MAX_UPLOAD_BYTES } from '../domain/documents/upload'
+import { CDL_CLASSES, ENDORSEMENT_CODES } from '../domain/driver/self-profile'
 import { PROBLEM_REASONS } from '../domain/driver-actions/problem-report'
 import { DATE_FORMATS, LANGUAGES, THEMES, TIME_FORMATS, UOM_SYSTEMS } from '../domain/profile/preferences'
 
@@ -172,6 +173,37 @@ export const MarkPaidResponseSchema = z.object({
   outcome: z.enum(['APPLIED', 'ALREADY_PAID']),
   invoice_id: z.number().int(),
 })
+
+export const MarkMessagesReadBodySchema = z.object({ message_ids: z.array(z.number().int().positive()).min(1).max(200) })
+export const MarkMessagesReadResponseSchema = z.object({ updated: z.number().int() })
+
+export const ShareLocationBodySchema = z.object({
+  latitude: z.number().min(-90).max(90),
+  longitude: z.number().min(-180).max(180),
+  recorded_at: z.string().datetime().optional().describe('When the phone took the sample; ignored if in the future.'),
+})
+
+export const UpdateDriverProfileBodySchema = z.object({
+  cdl_number: z.string().max(40).nullable().optional(),
+  cdl_class: z.enum(CDL_CLASSES).nullable().optional(),
+  cdl_state: z.string().length(2).nullable().optional(),
+  endorsements: z.array(z.enum(ENDORSEMENT_CODES)).optional(),
+  emergency_contact_name: z.string().max(100).nullable().optional(),
+  emergency_contact_phone: z.string().max(30).nullable().optional(),
+  emergency_contact_relation: z.string().max(50).nullable().optional(),
+  default_vehicle_id: z.number().int().positive().nullable().optional(),
+})
+
+export const LogServiceBodySchema = z.object({
+  service_type: z.string().min(1).max(100),
+  service_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  odometer: z.number().int().min(0).nullable().optional(),
+  cost: z.number().min(0).nullable().optional(),
+  shop_name: z.string().max(120).nullable().optional(),
+  notes: z.string().max(1000).nullable().optional(),
+  reminder_id: z.number().int().positive().nullable().optional().describe('The maintenance reminder this service satisfies; its next-due date/miles are recomputed server-side.'),
+})
+export const LogServiceResponseSchema = z.object({ id: z.number().int() })
 
 export type ListLoadsQuery = z.infer<typeof ListLoadsQuerySchema>
 export type ListLoadsResponse = z.infer<typeof ListLoadsResponseSchema>

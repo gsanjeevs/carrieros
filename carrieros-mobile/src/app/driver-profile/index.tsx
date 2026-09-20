@@ -28,6 +28,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
 import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 const ORANGE = BrandColors.orange;
 const CDL_CLASSES = ['A', 'B', 'C'] as const;
 const ENDORSEMENT_CODES = ['hazmat', 'tanker', 'doubles', 'airbrakes', 'passenger'] as const;
@@ -120,20 +121,26 @@ export default function DriverProfileScreen() {
     // Deliberately omits cdl_expiry/med_cert_expiry/is_active/driver_number —
     // driver_self_update_allowed() requires those stay unchanged, which an
     // UPDATE naturally satisfies as long as this payload never sets them.
-    const { error: updateErr } = await supabase
-      .from('drivers')
-      .update({
-        cdl_number: cdlNumber.trim() || null,
-        cdl_class: cdlClass,
-        cdl_state: cdlState.trim() || null,
-        endorsements,
-        emergency_contact_name: emergencyName.trim() || null,
-        emergency_contact_phone: emergencyPhone.trim() || null,
-        emergency_contact_relation: emergencyRelation.trim() || null,
-        default_vehicle_id: defaultVehicleId,
-        invite_status: 'accepted',
-      })
-      .eq('profile_id', session.user.id);
+    // The server updates only the caller's own record and only these fields; protected ones
+    // (CDL/medical expiry, active flag, driver number) are not accepted at all.
+    let updateErr: boolean;
+    try {
+      const { response } = await apiClient.http.PATCH('/api/v1/me/driver-profile', {
+        body: {
+          cdl_number: cdlNumber.trim() || null,
+          cdl_class: cdlClass,
+          cdl_state: cdlState.trim() || null,
+          endorsements: endorsements as ('hazmat' | 'tanker' | 'doubles' | 'airbrakes' | 'passenger')[],
+          emergency_contact_name: emergencyName.trim() || null,
+          emergency_contact_phone: emergencyPhone.trim() || null,
+          emergency_contact_relation: emergencyRelation.trim() || null,
+          default_vehicle_id: defaultVehicleId,
+        },
+      });
+      updateErr = !response.ok;
+    } catch {
+      updateErr = true;
+    }
 
     setSaving(false);
     if (updateErr) {

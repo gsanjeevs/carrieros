@@ -11,7 +11,7 @@
 // "create a new reminder" sub-form — mobile only lets you log against an
 // existing reminder or with none, keeping the picker to one screen's worth
 // of UI. Full reminder authoring stays a web-only action for now.
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -23,7 +23,9 @@ import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase'; // reads only; writes go through the API
+import { apiClient } from '@/lib/api-client';
+import { keyForSubmission } from '@/lib/idempotency';
 
 const ORANGE = BrandColors.orange;
 
@@ -43,11 +45,6 @@ function todayISO() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-function addMonths(dateStr: string, months: number): string {
-  const d = new Date(dateStr);
-  d.setMonth(d.getMonth() + months);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
 
 const NO_REMINDER = '';
 
@@ -99,6 +96,7 @@ export default function VehicleDetailScreen() {
     fetchAll().finally(() => setLoading(false));
   }, [fetchAll]);
 
+  const submissionKey = useRef<{ key: string; body: string } | null>(null);
   const selectedReminder = reminders.find((r) => String(r.id) === reminderId);
 
   async function submitService() {
@@ -113,55 +111,36 @@ export default function VehicleDetailScreen() {
     setSubmitting(true);
     setError('');
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('org_id')
-      .eq('id', session.user.id)
-      .single();
-
-    if (!profile?.org_id) {
-      setError(t('vehicleDetail.logServiceFailed'));
-      setSubmitting(false);
-      return;
-    }
-
     const odometerNum = odometer ? Number(odometer) : null;
     const costNum = cost ? Number(cost) : null;
 
-    const { error: insertErr } = await supabase.from('service_logs').insert({
-      vehicle_id: vehicle.id,
-      carrier_org_id: profile.org_id,
+    // Service log + the reminder it satisfies are ONE atomic call. Org, logger and the reminder's
+    // next-due date/miles (including month-end handling) are all computed server-side.
+    const body = {
       service_type: type,
       service_date: serviceDate,
       odometer: odometerNum,
       cost: costNum,
       shop_name: shopName.trim() || null,
       notes: notes.trim() || null,
-      logged_by: session.user.id,
-    });
-
-    if (insertErr) {
+      reminder_id: selectedReminder?.id ?? null,
+    };
+    let failed: boolean;
+    try {
+      const { response } = await apiClient.http.POST('/api/v1/vehicles/{id}/service-logs', {
+        params: { path: { id: vehicle.id }, header: { 'Idempotency-Key': keyForSubmission(submissionKey, body) } },
+        body,
+      });
+      failed = !response.ok;
+    } catch {
+      failed = true;
+    }
+    if (failed) {
       setError(t('vehicleDetail.logServiceFailed'));
       setSubmitting(false);
       return;
     }
-
-    if (selectedReminder) {
-      const nextDueDate = selectedReminder.trigger_months
-        ? addMonths(serviceDate, selectedReminder.trigger_months)
-        : null;
-      const nextDueMiles =
-        selectedReminder.trigger_miles && odometerNum ? odometerNum + selectedReminder.trigger_miles : null;
-      await supabase
-        .from('maintenance_reminders')
-        .update({
-          last_service_date: serviceDate,
-          last_odometer: odometerNum,
-          next_due_date: nextDueDate,
-          next_due_miles: nextDueMiles,
-        })
-        .eq('id', selectedReminder.id);
-    }
+    submissionKey.current = null;
 
     setSubmitting(false);
     setFormOpen(false);

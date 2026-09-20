@@ -2714,6 +2714,21 @@ export type Database = {
         }[]
       }
       has_feature: { Args: { feature_key: string }; Returns: boolean }
+      log_vehicle_service: {
+        Args: {
+          p_cost: number
+          p_next_due_date: string
+          p_next_due_miles: number
+          p_notes: string
+          p_odometer: number
+          p_reminder_id: number
+          p_service_date: string
+          p_service_type: string
+          p_shop_name: string
+          p_vehicle_id: number
+        }
+        Returns: number
+      }
       mark_invoice_paid: {
         Args: { p_invoice_id: number; p_paid_at: string }
         Returns: Json

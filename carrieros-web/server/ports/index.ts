@@ -15,6 +15,7 @@ import type { Result } from '../domain/shared/result'
 import type { LoadSummary } from '../domain/load/read-model'
 import type { ChangeEntity } from '../domain/events/entities'
 import type { PreferencesPatch } from '../domain/profile/preferences'
+import type { DriverProfilePatch } from '../domain/driver/self-profile'
 
 // ── Cross-cutting ───────────────────────────────────────────────────────────
 
@@ -318,4 +319,48 @@ export interface InvoiceWriteRepository {
   updateDraft(actor: ActorContext, invoiceId: number, patch: InvoiceDraftPatch): Promise<Result<boolean>>
   /** Atomic: invoice paid + its load paid. Idempotent. */
   markPaid(actor: ActorContext, invoiceId: number, paidAt: Date): Promise<Result<{ outcome: 'APPLIED' | 'ALREADY_PAID'; invoiceId: number }>>
+}
+
+// ── Messages, location, driver profile, fleet service ───────────────────────
+
+export interface MessageRepository {
+  /** Marks the given messages read, but only those on this load that the actor did not send. Returns how many changed. */
+  markRead(actor: ActorContext, loadId: number, messageIds: readonly number[], readAt: Date): Promise<Result<number>>
+}
+
+export interface LoadLocationRepository {
+  /** Writes ONLY the three location columns, and only if the sample is newer than what is stored. */
+  updateLocation(actor: ActorContext, loadId: number, sample: { latitude: number; longitude: number; recordedAt: Date }): Promise<Result<void>>
+}
+
+export interface DriverSelfRepository {
+  /** Updates the actor's OWN drivers row. Ok(false) = the actor has no driver record. */
+  updateOwnProfile(actor: ActorContext, patch: DriverProfilePatch): Promise<Result<boolean>>
+  vehicleInOrg(actor: ActorContext, vehicleId: number): Promise<Result<boolean>>
+}
+
+export interface ReminderRecord {
+  readonly id: number
+  readonly triggerMonths: number | null
+  readonly triggerMiles: number | null
+}
+
+export interface FleetRepository {
+  findReminder(actor: ActorContext, vehicleId: number, reminderId: number): Promise<Result<ReminderRecord | null>>
+  /** Insert the service log and (optionally) update its reminder in ONE transaction. */
+  logService(
+    actor: ActorContext,
+    input: {
+      vehicleId: number
+      serviceType: string
+      serviceDate: string
+      odometer: number | null
+      cost: number | null
+      shopName: string | null
+      notes: string | null
+      reminderId: number | null
+      nextDueDate: string | null
+      nextDueMiles: number | null
+    }
+  ): Promise<Result<{ id: number }>>
 }

@@ -16,6 +16,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useSession } from '@/hooks/use-session';
 import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 import { apiFetch } from '@/lib/api';
 
 const ORANGE = BrandColors.orange;
@@ -53,7 +54,16 @@ export function DriverChatSection({ loadId }: { loadId: number }) {
     // ever set it) — same rule as web's DriverMessageThread.tsx.
     const unreadIds = rows.filter((m) => m.sender_id !== session?.user.id && !m.read_at).map((m) => m.id);
     if (unreadIds.length > 0) {
-      await supabase.from('driver_messages').update({ read_at: new Date().toISOString() }).in('id', unreadIds);
+      // Best effort: a read receipt that fails to send must never break the chat. The server
+      // only marks other people's messages on THIS load, so the ids are a request, not an authority.
+      try {
+        await apiClient.http.POST('/api/v1/loads/{id}/messages/read', {
+          params: { path: { id: loadId } },
+          body: { message_ids: unreadIds },
+        });
+      } catch {
+        /* retried on the next load() */
+      }
     }
   }, [loadId, session?.user.id]);
 

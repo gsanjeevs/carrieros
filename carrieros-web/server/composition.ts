@@ -77,3 +77,23 @@ import { SupabaseInvoiceWriteRepository } from './infrastructure/supabase/invoic
 export function createInvoiceService(supabase: SupabaseClient<Database>): InvoiceService {
   return new InvoiceService({ invoices: new SupabaseInvoiceWriteRepository(supabase), clock: { now: () => new Date() } })
 }
+
+import { FieldActionsService } from './application/field-actions-service'
+import {
+  SupabaseDriverSelfRepository,
+  SupabaseFleetRepository,
+  SupabaseLoadLocationRepository,
+  SupabaseMessageRepository,
+} from './infrastructure/supabase/field-actions-repository'
+
+export function createFieldActionsService(supabase: SupabaseClient<Database>): FieldActionsService {
+  return new FieldActionsService({
+    shipments: new SupabaseShipmentCommandRepository(supabase),
+    messages: new SupabaseMessageRepository(supabase),
+    locations: new SupabaseLoadLocationRepository(supabase),
+    driverSelf: new SupabaseDriverSelfRepository(supabase),
+    fleet: new SupabaseFleetRepository(supabase),
+    idempotency: new SupabaseIdempotencyRepository(createAdminClient()),
+    clock: { now: () => new Date() },
+  })
+}
