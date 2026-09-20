@@ -15,6 +15,7 @@
 // messages_all), so this can't leak another load's messages. Falls back to
 // the initial `load()` fetch for anything sent before the subscription was
 // established; the channel only carries messages inserted after it opens.
+import { apiClient } from '@/lib/api-client'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
@@ -28,6 +29,16 @@ interface MessageRow {
   sent_at: string
   read_at: string | null
   profiles: { first_name: string | null; last_name: string | null } | null
+}
+
+// Read receipts go through the shared API (same endpoint the mobile chat uses): the server marks only
+// OTHER people's unread messages on THIS load, so the ids here are a request, not an authority.
+async function markRead(loadId: number, messageIds: number[]) {
+  try {
+    await apiClient.http.POST('/api/v1/loads/{id}/messages/read', { params: { path: { id: loadId } }, body: { message_ids: messageIds } })
+  } catch {
+    /* best effort: retried the next time the thread loads */
+  }
 }
 
 export default function DriverMessageThread({
@@ -64,7 +75,7 @@ export default function DriverMessageThread({
       .filter((m) => m.sender_id !== currentUserId && !m.read_at)
       .map((m) => m.id)
     if (unreadIds.length > 0) {
-      await supabase.from('driver_messages').update({ read_at: new Date().toISOString() }).in('id', unreadIds)
+      await markRead(loadId, unreadIds)
     }
   }, [loadId, currentUserId])
 
@@ -89,7 +100,7 @@ export default function DriverMessageThread({
         setMessages(rows)
         const unreadIds = rows.filter((m) => m.sender_id !== currentUserId && !m.read_at).map((m) => m.id)
         if (unreadIds.length > 0) {
-          supabase.from('driver_messages').update({ read_at: new Date().toISOString() }).in('id', unreadIds)
+          void markRead(loadId, unreadIds)
         }
       })
 

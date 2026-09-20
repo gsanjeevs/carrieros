@@ -131,7 +131,7 @@ export async function cleanupTestUser(admin: SupabaseClient<Database>, userId: s
 // cleared first, in this order: org/driver/load-scoped rows that block
 // `drivers`/`loads` themselves, then `drivers`/`loads`, then any remaining
 // profiles(id) references, then `profiles`, then `organizations`.
-const ORG_SCOPED_BLOCKERS = ['dvir_inspections', 'ifta_state_crossings', 'driver_settlements', 'fuel_stops'] as const
+const ORG_SCOPED_BLOCKERS = ['dvir_inspections', 'ifta_state_crossings', 'driver_settlements', 'fuel_stops', 'maintenance_reminders'] as const
 
 // Every profiles(id) FK below is "no action" — none cascade. A live row in
 // any of them blocks deleting the profile, which in turn blocks deleting

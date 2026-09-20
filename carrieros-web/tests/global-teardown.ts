@@ -40,7 +40,7 @@ export default async function globalSetup() {
     // back to one of those that blocks deletion unless cleared first. See
     // tests/helpers.ts's cleanupTestOrg for the single-org version and the
     // pg_constraint query that found these.
-    for (const table of ['dvir_inspections', 'ifta_state_crossings', 'driver_settlements', 'fuel_stops'] as const) {
+    for (const table of ['dvir_inspections', 'ifta_state_crossings', 'driver_settlements', 'fuel_stops', 'maintenance_reminders'] as const) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (admin.from(table as any).delete().in('carrier_org_id', ids) as any)
     }
