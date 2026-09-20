@@ -936,11 +936,11 @@
     "yourName": "Your name",
     "email": "Email address",
     "password": "Password",
-    "passwordHint": "Min 8 characters",
+    "passwordHint": "At least 12 characters with upper- and lowercase letters and a number",
     "createAccountBtn": "Create account",
     "creatingAccount": "Creating account…",
     "missingFields": "Please fill in all fields.",
-    "weakPassword": "Password must be at least 8 characters.",
+    "weakPassword": "Password must be at least 12 characters and include upper- and lowercase letters and a number.",
     "emailExists": "An account with this email already exists.",
     "signupFailed": "Something went wrong creating your account. Please try again."
   },

@@ -7,6 +7,7 @@
 // is the only place that actually writes carrier_details.tier).
 'use server'
 
+import { passwordMeetsPolicy } from '@/lib/password-policy'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
@@ -23,7 +24,7 @@ export async function signUpWithEmail(formData: FormData) {
   if (!name || !email || !password) {
     redirect(`/signup?error=missing_fields&tier=${tier}`)
   }
-  if (password.length < 8) {
+  if (!passwordMeetsPolicy(password)) {
     redirect(`/signup?error=weak_password&tier=${tier}`)
   }
 
@@ -40,7 +41,10 @@ export async function signUpWithEmail(formData: FormData) {
 
   if (error) {
     console.error('[signup] error:', error.message)
-    const code = error.message.toLowerCase().includes('already registered') ? 'email_exists' : 'signup_failed'
+    const code =
+      error.code === 'weak_password' ? 'weak_password'
+      : error.message.toLowerCase().includes('already registered') ? 'email_exists'
+      : 'signup_failed'
     redirect(`/signup?error=${code}&tier=${tier}`)
   }
 

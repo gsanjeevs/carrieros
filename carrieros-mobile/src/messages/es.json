@@ -28,7 +28,7 @@
     "name": "Tu nombre",
     "email": "Correo electrónico",
     "password": "Contraseña",
-    "passwordHint": "Al menos 8 caracteres",
+    "passwordHint": "Al menos 12 caracteres, con mayúsculas, minúsculas y un número",
     "createAccount": "Crear cuenta",
     "emailExists": "Ya existe una cuenta con ese correo electrónico",
     "signupFailed": "Error al crear la cuenta — inténtalo de nuevo"

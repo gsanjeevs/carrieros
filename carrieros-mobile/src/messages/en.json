@@ -28,7 +28,7 @@
     "name": "Your name",
     "email": "Email",
     "password": "Password",
-    "passwordHint": "At least 8 characters",
+    "passwordHint": "At least 12 characters with upper- and lowercase letters and a number",
     "createAccount": "Create account",
     "emailExists": "An account with that email already exists",
     "signupFailed": "Signup failed — please try again"

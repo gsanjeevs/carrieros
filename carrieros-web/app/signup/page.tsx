@@ -9,6 +9,7 @@
 // existing onboarding BillingStep's demo "Add Payment Method" button is what
 // runs after this.
 
+import { MIN_PASSWORD_LENGTH } from '@/lib/password-policy'
 import { Suspense, useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useSearchParams } from 'next/navigation'
@@ -156,7 +157,7 @@ function SignupForm() {
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-1.5">{t('password')}</label>
                 <input
-                  name="password" type="password" required autoComplete="new-password" minLength={8} placeholder="••••••••"
+                  name="password" type="password" required autoComplete="new-password" minLength={MIN_PASSWORD_LENGTH} placeholder="••••••••"
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3.5 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition"
                 />
                 <p className="text-[11px] text-slate-500 mt-1">{t('passwordHint')}</p>

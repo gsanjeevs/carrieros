@@ -1,11 +1,14 @@
 // src/lib/supabase.ts
 // Same Supabase project as carrieros-web — same schema, same auth, same RLS.
-// Session persists in AsyncStorage (not cookies — this is a native client,
-// not a browser). API routes that need this session read it from an
+// Session persists in the OS keychain via secure-session-storage.ts on
+// native (AsyncStorage/localStorage only on Expo web, which has no keychain).
+// Not cookies — this is a native client, not a browser. API routes that need this session read it from an
 // `Authorization: Bearer <token>` header (see carrieros-web/lib/api-auth.ts).
 import 'react-native-url-polyfill/auto'
 import { createClient } from '@supabase/supabase-js'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Platform } from 'react-native'
+import { secureSessionStorage } from '@/lib/secure-session-storage'
 import type { Database } from '@/types/database'
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!
@@ -24,7 +27,9 @@ const storage = isServer
       setItem: async () => {},
       removeItem: async () => {},
     }
-  : AsyncStorage
+  : Platform.OS === 'web'
+    ? AsyncStorage
+    : secureSessionStorage
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {

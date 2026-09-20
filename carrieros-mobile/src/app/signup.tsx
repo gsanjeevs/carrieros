@@ -9,6 +9,7 @@
 // already uses for signInWithPassword. No tier/plan picker: mockup-06 (what
 // was asked to be implemented) has no plan-picker screen; POST /api/onboarding
 // already defaults an omitted tier to 'starter'.
+import { passwordMeetsPolicy } from '@/lib/password-policy';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -34,7 +35,7 @@ export default function SignupScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const canSubmit = name.trim().length > 0 && email.trim().length > 0 && password.length >= 8;
+  const canSubmit = name.trim().length > 0 && email.trim().length > 0 && passwordMeetsPolicy(password);
 
   async function handleSignUp() {
     if (!canSubmit) return;
