@@ -3212,3 +3212,22 @@ END $$;
 
 REVOKE EXECUTE ON FUNCTION submit_dvir_inspection(BIGINT, BIGINT, BIGINT, TEXT, TEXT, INTEGER, JSONB) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION submit_dvir_inspection(BIGINT, BIGINT, BIGINT, TEXT, TEXT, INTEGER, JSONB) TO authenticated;
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 18: DRIVER LOAD COLUMN GUARD (migration 0018)
+-- ────────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION enforce_driver_load_columns() RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+DECLARE
+  v_ignored TEXT[] := ARRAY['status', 'last_location_lat', 'last_location_lng', 'last_location_at', 'updated_at'];
+BEGIN
+  IF my_role() = 'driver' AND (to_jsonb(NEW) - v_ignored) IS DISTINCT FROM (to_jsonb(OLD) - v_ignored) THEN
+    RAISE EXCEPTION 'drivers may only change a load''s status and location' USING ERRCODE = '42501';
+  END IF;
+  RETURN NEW;
+END $$;
+
+CREATE TRIGGER loads_driver_columns BEFORE UPDATE ON loads
+  FOR EACH ROW EXECUTE FUNCTION enforce_driver_load_columns();
