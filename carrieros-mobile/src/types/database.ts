@@ -2714,6 +2714,10 @@ export type Database = {
         }[]
       }
       has_feature: { Args: { feature_key: string }; Returns: boolean }
+      mark_invoice_paid: {
+        Args: { p_invoice_id: number; p_paid_at: string }
+        Returns: Json
+      }
       mark_overdue_invoices: { Args: never; Returns: number }
       my_org_id: { Args: never; Returns: number }
       my_role: { Args: never; Returns: string }

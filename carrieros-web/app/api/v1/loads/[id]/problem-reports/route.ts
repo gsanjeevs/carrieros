@@ -5,16 +5,16 @@ import { isErrorResponse } from '@/lib/api-auth'
 import { logError } from '@/lib/observability'
 import { createDriverActionService } from '@/server/composition'
 import { domainErrorResponse } from '@/server/http-errors'
-import { parseLoadCommand } from '@/server/http-command'
+import { parseCommand } from '@/server/http-command'
 import { ReportProblemBodySchema, ReportProblemResponseSchema } from '@/server/contract/schemas'
 
 export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
-  const cmd = await parseLoadCommand(request, context, ReportProblemBodySchema)
+  const cmd = await parseCommand(request, context, ReportProblemBodySchema)
   if (cmd instanceof NextResponse || isErrorResponse(cmd)) return cmd
 
   const result = await createDriverActionService(cmd.supabase).reportProblem(
     cmd.actor,
-    cmd.loadId,
+    cmd.id,
     { reason: cmd.body.reason, note: cmd.body.note },
     cmd.idempotencyKey
   )

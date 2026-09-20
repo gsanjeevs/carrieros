@@ -70,3 +70,10 @@ export function createDocumentService(supabase: SupabaseClient<Database>): Docum
     idempotency: new SupabaseIdempotencyRepository(createAdminClient()),
   })
 }
+
+import { InvoiceService } from './application/invoice-service'
+import { SupabaseInvoiceWriteRepository } from './infrastructure/supabase/invoice-write-repository'
+
+export function createInvoiceService(supabase: SupabaseClient<Database>): InvoiceService {
+  return new InvoiceService({ invoices: new SupabaseInvoiceWriteRepository(supabase), clock: { now: () => new Date() } })
+}

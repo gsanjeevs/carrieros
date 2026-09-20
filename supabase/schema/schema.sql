@@ -3026,3 +3026,40 @@ BEGIN
     EXECUTE format('REVOKE TRUNCATE ON public.%I FROM authenticated', t.relname);
   END LOOP;
 END $$;
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 14: ATOMIC MARK-INVOICE-PAID (migration 0014)
+-- ────────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION mark_invoice_paid(p_invoice_id BIGINT, p_paid_at TIMESTAMPTZ)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path = public
+AS $$
+DECLARE
+  v_load_id BIGINT;
+  v_exists  BOOLEAN;
+BEGIN
+  UPDATE invoices
+     SET status = 'paid', paid_at = p_paid_at
+   WHERE id = p_invoice_id AND status <> 'paid'
+  RETURNING load_id INTO v_load_id;
+
+  IF NOT FOUND THEN
+    SELECT EXISTS (SELECT 1 FROM invoices WHERE id = p_invoice_id) INTO v_exists;
+    IF NOT v_exists THEN
+      -- Missing and not-visible-to-you are the same answer on purpose.
+      RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404';
+    END IF;
+    RETURN jsonb_build_object('outcome', 'ALREADY_PAID', 'invoice_id', p_invoice_id);
+  END IF;
+
+  IF v_load_id IS NOT NULL THEN
+    UPDATE loads SET status = 'paid' WHERE id = v_load_id;
+  END IF;
+
+  RETURN jsonb_build_object('outcome', 'APPLIED', 'invoice_id', p_invoice_id, 'load_id', v_load_id);
+END $$;
+
+REVOKE EXECUTE ON FUNCTION mark_invoice_paid(BIGINT, TIMESTAMPTZ) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION mark_invoice_paid(BIGINT, TIMESTAMPTZ) TO authenticated;

@@ -4,16 +4,16 @@ import { isErrorResponse } from '@/lib/api-auth'
 import { logError } from '@/lib/observability'
 import { createDriverActionService } from '@/server/composition'
 import { domainErrorResponse } from '@/server/http-errors'
-import { parseLoadCommand } from '@/server/http-command'
+import { parseCommand } from '@/server/http-command'
 import { LogFuelStopBodySchema, LogFuelStopResponseSchema } from '@/server/contract/schemas'
 
 export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
-  const cmd = await parseLoadCommand(request, context, LogFuelStopBodySchema)
+  const cmd = await parseCommand(request, context, LogFuelStopBodySchema)
   if (cmd instanceof NextResponse || isErrorResponse(cmd)) return cmd
 
   const result = await createDriverActionService(cmd.supabase).logFuelStop(
     cmd.actor,
-    cmd.loadId,
+    cmd.id,
     {
       state: cmd.body.state,
       station: cmd.body.station,

@@ -159,5 +159,19 @@ export const ListDocumentsResponseSchema = z.object({
   ),
 })
 
+export const InvoiceIdParamsSchema = z.object({ id: z.number().int().positive() })
+
+export const UpdateInvoiceBodySchema = z.object({
+  amount: z.number().positive().max(10_000_000),
+  due_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional().describe('YYYY-MM-DD'),
+  notes: z.string().max(1000).nullable().optional(),
+})
+export const UpdateInvoiceResponseSchema = z.object({ id: z.number().int() })
+
+export const MarkPaidResponseSchema = z.object({
+  outcome: z.enum(['APPLIED', 'ALREADY_PAID']),
+  invoice_id: z.number().int(),
+})
+
 export type ListLoadsQuery = z.infer<typeof ListLoadsQuerySchema>
 export type ListLoadsResponse = z.infer<typeof ListLoadsResponseSchema>

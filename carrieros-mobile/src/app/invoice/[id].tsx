@@ -29,6 +29,7 @@ import { useLocale } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
 import { supabase } from '@/lib/supabase';
 import { apiFetch } from '@/lib/api';
+import { apiClient } from '@/lib/api-client';
 import { formatDateTime } from '@/lib/format-date';
 import { formatMoney } from '@/lib/format-money';
 
@@ -99,11 +100,17 @@ export default function InvoiceDetailScreen() {
       return;
     }
 
-    const { error: updateErr } = await supabase
-      .from('invoices')
-      .update({ amount: numericAmount, due_date: dueDate || null, notes: notes || null })
-      .eq('id', invoice.id)
-      .eq('status', 'draft');
+    // Draft-only editing, and who may edit, are decided server-side.
+    let updateErr: boolean;
+    try {
+      const { response } = await apiClient.http.PATCH('/api/v1/invoices/{id}', {
+        params: { path: { id: invoice.id } },
+        body: { amount: numericAmount, due_date: dueDate || null, notes: notes || null },
+      });
+      updateErr = !response.ok;
+    } catch {
+      updateErr = true; // offline etc.
+    }
 
     setBusy(false);
     if (updateErr) {
@@ -133,13 +140,16 @@ export default function InvoiceDetailScreen() {
     setBusy(true);
     setError('');
 
-    const { error: updateErr } = await supabase
-      .from('invoices')
-      .update({ status: 'paid', paid_at: new Date().toISOString() })
-      .eq('id', invoice.id);
-
-    if (!updateErr && invoice.load_id) {
-      await supabase.from('loads').update({ status: 'paid' }).eq('id', invoice.load_id);
+    // Invoice paid AND its load paid, in ONE atomic call (was two separate writes, so a failure
+    // between them left an invoice paid with its load still 'invoiced'). Safe to repeat.
+    let updateErr: boolean;
+    try {
+      const { response } = await apiClient.http.POST('/api/v1/invoices/{id}/mark-paid', {
+        params: { path: { id: invoice.id } },
+      });
+      updateErr = !response.ok;
+    } catch {
+      updateErr = true;
     }
 
     setBusy(false);

@@ -6,7 +6,7 @@ import { logError } from '@/lib/observability'
 import { createDocumentService } from '@/server/composition'
 import { buildActorContext } from '@/server/infrastructure/supabase/actor-context'
 import { domainErrorResponse } from '@/server/http-errors'
-import { parseLoadCommand } from '@/server/http-command'
+import { parseCommand } from '@/server/http-command'
 import {
   DocumentResponseSchema,
   FinalizeDocumentBodySchema,
@@ -16,12 +16,12 @@ import {
 } from '@/server/contract/schemas'
 
 export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
-  const cmd = await parseLoadCommand(request, context, FinalizeDocumentBodySchema)
+  const cmd = await parseCommand(request, context, FinalizeDocumentBodySchema)
   if (cmd instanceof NextResponse || isErrorResponse(cmd)) return cmd
 
   const result = await createDocumentService(cmd.supabase).finalize(
     cmd.actor,
-    cmd.loadId,
+    cmd.id,
     { type: cmd.body.type, storagePath: cmd.body.storage_path },
     cmd.idempotencyKey
   )

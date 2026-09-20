@@ -5,14 +5,14 @@ import { isErrorResponse } from '@/lib/api-auth'
 import { logError } from '@/lib/observability'
 import { createDocumentService } from '@/server/composition'
 import { domainErrorResponse } from '@/server/http-errors'
-import { parseLoadCommand } from '@/server/http-command'
+import { parseCommand } from '@/server/http-command'
 import { RequestUploadBodySchema, RequestUploadResponseSchema } from '@/server/contract/schemas'
 
 export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
-  const cmd = await parseLoadCommand(request, context, RequestUploadBodySchema, { requireIdempotencyKey: false })
+  const cmd = await parseCommand(request, context, RequestUploadBodySchema, { requireIdempotencyKey: false })
   if (cmd instanceof NextResponse || isErrorResponse(cmd)) return cmd
 
-  const result = await createDocumentService(cmd.supabase).requestUpload(cmd.actor, cmd.loadId, {
+  const result = await createDocumentService(cmd.supabase).requestUpload(cmd.actor, cmd.id, {
     type: cmd.body.type,
     contentType: cmd.body.content_type,
   })

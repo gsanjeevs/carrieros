@@ -304,3 +304,18 @@ export interface ObjectStorage {
   createDownloadUrl(path: string, ttlSeconds: number): Promise<Result<string>>
   remove(paths: readonly string[]): Promise<Result<void>>
 }
+
+// ── Invoices ────────────────────────────────────────────────────────────────
+
+export interface InvoiceDraftPatch {
+  readonly amount: number
+  readonly dueDate: string | null
+  readonly notes: string | null
+}
+
+export interface InvoiceWriteRepository {
+  /** Updates the invoice only while it is still a draft. Ok(false) = no draft matched (missing, not yours, or already sent). */
+  updateDraft(actor: ActorContext, invoiceId: number, patch: InvoiceDraftPatch): Promise<Result<boolean>>
+  /** Atomic: invoice paid + its load paid. Idempotent. */
+  markPaid(actor: ActorContext, invoiceId: number, paidAt: Date): Promise<Result<{ outcome: 'APPLIED' | 'ALREADY_PAID'; invoiceId: number }>>
+}
