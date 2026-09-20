@@ -9,14 +9,15 @@
 // Imports only domain, ports, and the generated (pure-data) capability table.
 
 import { LOAD_STATUS_GROUPS, type LoadStatusGroup } from '../domain/load/status-groups'
-import type { LoadSummary } from '../domain/load/read-model'
+import type { LoadDetail, LoadEvent, LoadSummary } from '../domain/load/read-model'
 import { roleHasCapability } from '../../lib/generated/role-capabilities'
-import { ok, type Result } from '../domain/shared/result'
+import { notFound, ok, type Result } from '../domain/shared/result'
 import type { ActorContext } from '../domain/shared/identity'
 import type { LoadReadRepository } from '../ports'
 
 export interface ListLoadsInput {
-  readonly statusGroup?: LoadStatusGroup
+  /** One or more groups; the union of their statuses is queried in one call. */
+  readonly statusGroups?: readonly LoadStatusGroup[]
   readonly limit?: number
 }
 
@@ -35,13 +36,25 @@ export class LoadQueryService {
     const canSeeRate = roleHasCapability(actor.role, 'invoice_actions')
     const limit = Math.min(Math.max(input.limit ?? DEFAULT_LIMIT, 1), MAX_LIMIT)
 
+    const statuses = input.statusGroups?.length
+      ? [...new Set(input.statusGroups.flatMap((g) => LOAD_STATUS_GROUPS[g]))]
+      : undefined
+
     const result = await this.deps.loads.listForActor(actor, {
-      statuses: input.statusGroup ? LOAD_STATUS_GROUPS[input.statusGroup] : undefined,
+      statuses,
       limit,
       includeRate: canSeeRate,
     })
     if (!result.ok) return result
 
     return ok({ loads: result.value, canSeeRate })
+  }
+
+  async getDetail(actor: ActorContext, loadId: number): Promise<Result<{ load: LoadDetail; events: readonly LoadEvent[] }>> {
+    const canSeeRate = roleHasCapability(actor.role, 'invoice_actions')
+    const result = await this.deps.loads.getDetailForActor(actor, loadId, canSeeRate)
+    if (!result.ok) return result
+    if (!result.value) return { ok: false, error: notFound('Shipment') }
+    return ok(result.value)
   }
 }

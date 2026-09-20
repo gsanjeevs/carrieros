@@ -12,7 +12,7 @@
 import type { ActorContext, OrgId, UserId, CorrelationId } from '../domain/shared/identity'
 import type { EntitlementSnapshot } from '../domain/entitlement/model'
 import type { Result } from '../domain/shared/result'
-import type { LoadSummary } from '../domain/load/read-model'
+import type { LoadDetail, LoadEvent, LoadSummary } from '../domain/load/read-model'
 import type { ChangeEntity } from '../domain/events/entities'
 import type { PreferencesPatch } from '../domain/profile/preferences'
 import type { DriverProfilePatch } from '../domain/driver/self-profile'
@@ -186,6 +186,12 @@ export interface ListLoadsCriteria {
  */
 export interface LoadReadRepository {
   listForActor(actor: ActorContext, criteria: ListLoadsCriteria): Promise<Result<readonly LoadSummary[]>>
+  /** One load plus its timeline. Null when missing, someone else's org, or (for a driver) not theirs. */
+  getDetailForActor(
+    actor: ActorContext,
+    loadId: number,
+    includeRate: boolean
+  ): Promise<Result<{ load: LoadDetail; events: readonly LoadEvent[] } | null>>
 }
 
 // ── Change feed ─────────────────────────────────────────────────────────────
@@ -333,10 +339,26 @@ export interface LoadLocationRepository {
   updateLocation(actor: ActorContext, loadId: number, sample: { latitude: number; longitude: number; recordedAt: Date }): Promise<Result<void>>
 }
 
+export interface DriverProfileRecord {
+  readonly id: number
+  readonly cdl_number: string | null
+  readonly cdl_class: string | null
+  readonly cdl_state: string | null
+  readonly cdl_expiry: string | null
+  readonly med_cert_expiry: string | null
+  readonly endorsements: readonly string[]
+  readonly emergency_contact_name: string | null
+  readonly emergency_contact_phone: string | null
+  readonly emergency_contact_relation: string | null
+  readonly default_vehicle_id: number | null
+}
+
 export interface DriverSelfRepository {
   /** Updates the actor's OWN drivers row. Ok(false) = the actor has no driver record. */
   updateOwnProfile(actor: ActorContext, patch: DriverProfilePatch): Promise<Result<boolean>>
   vehicleInOrg(actor: ActorContext, vehicleId: number): Promise<Result<boolean>>
+  /** The actor's OWN drivers row, or null when they have none (e.g. a solo owner). */
+  getOwnProfile(actor: ActorContext): Promise<Result<DriverProfileRecord | null>>
 }
 
 export interface ReminderRecord {
@@ -369,6 +391,91 @@ export interface FleetRepository {
 
 export interface FeatureGate {
   hasFeature(actor: ActorContext, featureKey: string): Promise<Result<boolean>>
+  /** Every feature key the actor's org currently has (get_my_entitlements()). */
+  list(actor: ActorContext): Promise<Result<readonly string[]>>
+}
+
+// ── Fleet reads ─────────────────────────────────────────────────────────────
+
+export interface VehicleSummaryRecord {
+  readonly id: number
+  readonly vehicle_number: string | null
+  readonly nickname: string
+  readonly status: string
+  readonly photo_path: string | null
+}
+
+export interface ServiceLogRecord {
+  readonly id: number
+  readonly service_type: string
+  readonly service_date: string
+  readonly odometer: number | null
+  readonly cost: number | null
+  readonly shop_name: string | null
+}
+
+export interface MaintenanceReminderRecord {
+  readonly id: number
+  readonly reminderType: string
+  readonly triggerMonths: number | null
+  readonly triggerMiles: number | null
+}
+
+export interface FleetQueryRepository {
+  listActiveForOrg(actor: ActorContext): Promise<Result<readonly VehicleSummaryRecord[]>>
+  getDetailForActor(
+    actor: ActorContext,
+    vehicleId: number
+  ): Promise<Result<{ vehicle: VehicleSummaryRecord; serviceLogs: readonly ServiceLogRecord[]; reminders: readonly MaintenanceReminderRecord[] } | null>>
+}
+
+// ── Invoice reads ───────────────────────────────────────────────────────────
+
+export interface InvoiceSummaryRecord {
+  readonly id: number
+  readonly invoice_number: string
+  readonly amount: number
+  readonly status: string
+  readonly due_date: string | null
+  readonly opened_at: string | null
+}
+
+export interface InvoiceDetailRecord extends InvoiceSummaryRecord {
+  readonly notes: string | null
+  readonly sent_at: string | null
+  readonly paid_at: string | null
+  readonly load_id: number | null
+}
+
+export interface InvoiceQueryRepository {
+  listForOrg(actor: ActorContext): Promise<Result<readonly InvoiceSummaryRecord[]>>
+  getForActor(actor: ActorContext, invoiceId: number): Promise<Result<InvoiceDetailRecord | null>>
+}
+
+// ── DVIR reads ──────────────────────────────────────────────────────────────
+
+export interface DvirInspectionBrief {
+  readonly id: number
+  readonly type: string
+  readonly created_at: string | null
+}
+
+export interface DvirHistoryItem {
+  readonly id: number
+  readonly type: string
+  readonly condition: string
+  readonly odometer: number | null
+  readonly submitted_at: string
+  readonly signature_url: string | null // already a short-lived signed url, or null if unsigned
+  readonly vehicle: { readonly vehicle_number: string | null; readonly nickname: string } | null
+  readonly driver_name: string | null
+  readonly defects: readonly { readonly id: number; readonly area: string; readonly description: string | null; readonly severity: string | null }[]
+}
+
+export interface DvirQueryRepository {
+  listForLoad(actor: ActorContext, loadId: number, type?: string): Promise<Result<readonly DvirInspectionBrief[]>>
+  /** Scoped to the actor's own inspections when they are a driver, the whole org otherwise. */
+  listForActor(actor: ActorContext, driverId: number | null): Promise<Result<readonly DvirHistoryItem[]>>
 }
 
 export interface IftaRepository {

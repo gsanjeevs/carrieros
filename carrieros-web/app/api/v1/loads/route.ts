@@ -10,6 +10,7 @@ import { createLoadQueryService } from '@/server/composition'
 import { buildActorContext } from '@/server/infrastructure/supabase/actor-context'
 import { domainErrorResponse } from '@/server/http-errors'
 import { ListLoadsQuerySchema, ListLoadsResponseSchema } from '@/server/contract/schemas'
+import type { LoadStatusGroup } from '@/server/domain/load/status-groups'
 
 export async function GET(request: NextRequest) {
   const authed = await getAuthedContext(request)
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
   if (!actor.ok) return domainErrorResponse(actor.error)
 
   const result = await createLoadQueryService(authed.supabase).list(actor.value, {
-    statusGroup: parsed.data.status_group as never,
+    statusGroups: parsed.data.status_group?.split(',') as LoadStatusGroup[] | undefined,
     limit: parsed.data.limit,
   })
   if (!result.ok) {

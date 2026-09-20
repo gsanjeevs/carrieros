@@ -111,6 +111,10 @@ export function createIftaService(supabase: SupabaseClient<Database>): IftaServi
   })
 }
 
+export function createFeatureGate(supabase: SupabaseClient<Database>): SupabaseFeatureGate {
+  return new SupabaseFeatureGate(supabase)
+}
+
 import { DvirService } from './application/dvir-service'
 import { SupabaseDvirRepository } from './infrastructure/supabase/dvir-repository'
 
@@ -122,4 +126,29 @@ export function createDvirService(supabase: SupabaseClient<Database>): DvirServi
     ids: { uuid: () => crypto.randomUUID() },
     idempotency: new SupabaseIdempotencyRepository(createAdminClient()),
   })
+}
+
+import { DvirQueryService } from './application/dvir-query-service'
+import { SupabaseDvirQueryRepository } from './infrastructure/supabase/dvir-query-repository'
+
+export function createDvirQueryService(supabase: SupabaseClient<Database>): DvirQueryService {
+  return new DvirQueryService({
+    dvir: new SupabaseDvirQueryRepository(supabase),
+    shipments: new SupabaseShipmentCommandRepository(supabase),
+  })
+}
+
+import { FleetQueryService } from './application/fleet-query-service'
+import { SupabaseFleetQueryRepository } from './infrastructure/supabase/fleet-query-repository'
+
+export function createFleetQueryService(supabase: SupabaseClient<Database>): FleetQueryService {
+  const fleet = new SupabaseFleetQueryRepository(supabase)
+  return new FleetQueryService({ fleet, signPhoto: (path) => fleet.photoUrl(path) })
+}
+
+import { InvoiceQueryService } from './application/invoice-query-service'
+import { SupabaseInvoiceQueryRepository } from './infrastructure/supabase/invoice-query-repository'
+
+export function createInvoiceQueryService(supabase: SupabaseClient<Database>): InvoiceQueryService {
+  return new InvoiceQueryService({ invoices: new SupabaseInvoiceQueryRepository(supabase) })
 }

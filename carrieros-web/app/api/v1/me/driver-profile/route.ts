@@ -6,7 +6,22 @@ import { logError } from '@/lib/observability'
 import { createFieldActionsService } from '@/server/composition'
 import { buildActorContext } from '@/server/infrastructure/supabase/actor-context'
 import { domainErrorResponse } from '@/server/http-errors'
-import { OkResponseSchema, UpdateDriverProfileBodySchema } from '@/server/contract/schemas'
+import { DriverProfileResponseSchema, OkResponseSchema, UpdateDriverProfileBodySchema } from '@/server/contract/schemas'
+
+// GET /api/v1/me/driver-profile — the caller's own driver record.
+export async function GET(request: NextRequest) {
+  const authed = await getAuthedContext(request)
+  if (isErrorResponse(authed)) return authed
+
+  const requestId = request.headers.get('x-request-id')
+  const actor = await buildActorContext(authed.supabase, authed.user, requestId ?? crypto.randomUUID())
+  if (!actor.ok) return domainErrorResponse(actor.error)
+
+  const result = await createFieldActionsService(authed.supabase).getOwnDriverProfile(actor.value)
+  if (!result.ok) return domainErrorResponse(result.error)
+
+  return NextResponse.json(DriverProfileResponseSchema.parse(result.value))
+}
 
 export async function PATCH(request: NextRequest) {
   const authed = await getAuthedContext(request)

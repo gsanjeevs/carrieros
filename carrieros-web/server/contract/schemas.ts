@@ -50,13 +50,57 @@ export const LoadSummarySchema = z.object({
 })
 
 export const ListLoadsQuerySchema = z.object({
-  status_group: LoadStatusGroupSchema.optional(),
+  // Comma-separated list of one or more groups (e.g. "completed,cancelled"),
+  // so a screen that needs a union of groups (mobile history: completed +
+  // cancelled) can still get one correctly-ordered, correctly-limited query
+  // instead of merging several client-side with no shared sort key.
+  status_group: z
+    .string()
+    .optional()
+    .refine(
+      (v) => !v || v.split(',').every((g) => (LOAD_STATUS_GROUP_KEYS as readonly string[]).includes(g)),
+      { message: `status_group must be one or more of, comma-separated: ${LOAD_STATUS_GROUP_KEYS.join(', ')}` }
+    ),
   limit: z.number().int().min(1).max(100).optional(),
 })
 
 export const ListLoadsResponseSchema = z.object({
   loads: z.array(LoadSummarySchema),
   can_see_rate: z.boolean(),
+})
+
+export const LoadEventSchema = z.object({
+  id: z.number().int(),
+  event_type: z.string(),
+  created_at: z.string().nullable(),
+})
+
+export const LoadDetailSchema = z.object({
+  id: z.number().int(),
+  load_number: z.string(),
+  status: z.string(),
+  customer_name_raw: z.string().nullable(),
+  pickup_address: z.string().nullable(),
+  pickup_city: z.string().nullable(),
+  pickup_state: z.string().nullable(),
+  pickup_date: z.string().nullable(),
+  pickup_time: z.string().nullable(),
+  delivery_address: z.string().nullable(),
+  delivery_city: z.string().nullable(),
+  delivery_state: z.string().nullable(),
+  delivery_date: z.string().nullable(),
+  delivery_time: z.string().nullable(),
+  commodity: z.string().nullable(),
+  weight_lbs: z.number().nullable(),
+  total_miles: z.number().nullable(),
+  driver_id: z.number().int().nullable(),
+  vehicle_id: z.number().int().nullable(),
+  rate: z.number().nullable().optional().describe('Present only when the caller\'s role may see money.'),
+})
+
+export const GetLoadResponseSchema = z.object({
+  load: LoadDetailSchema,
+  events: z.array(LoadEventSchema),
 })
 
 export const StreamEventsQuerySchema = z.object({
@@ -241,6 +285,106 @@ export const FinalizeAttachmentBodySchema = z.object({
   area: z.enum(DVIR_AREAS).nullable().optional(),
   storage_path: z.string().min(1).max(300),
 })
+
+export const EntitlementsResponseSchema = z.object({
+  keys: z.array(z.string()).describe('Feature keys the caller\'s organization currently has, per get_my_entitlements().'),
+})
+
+export const DriverProfileResponseSchema = z.object({
+  id: z.number().int(),
+  cdl_number: z.string().nullable(),
+  cdl_class: z.enum(CDL_CLASSES).nullable(),
+  cdl_state: z.string().nullable(),
+  cdl_expiry: z.string().nullable(),
+  med_cert_expiry: z.string().nullable(),
+  endorsements: z.array(z.string()),
+  emergency_contact_name: z.string().nullable(),
+  emergency_contact_phone: z.string().nullable(),
+  emergency_contact_relation: z.string().nullable(),
+  default_vehicle_id: z.number().int().nullable(),
+})
+
+export const VehicleSummarySchema = z.object({
+  id: z.number().int(),
+  vehicle_number: z.string().nullable(),
+  nickname: z.string(),
+  status: z.string(),
+  photo_url: z.string().nullable().describe('Short-lived signed URL, present only when the vehicle has a photo.'),
+})
+export const ListVehiclesResponseSchema = z.object({ vehicles: z.array(VehicleSummarySchema) })
+
+export const ServiceLogSchema = z.object({
+  id: z.number().int(),
+  service_type: z.string(),
+  service_date: z.string(),
+  odometer: z.number().int().nullable(),
+  cost: z.number().nullable(),
+  shop_name: z.string().nullable(),
+})
+export const MaintenanceReminderSchema = z.object({
+  id: z.number().int(),
+  reminder_type: z.string(),
+  trigger_miles: z.number().int().nullable(),
+  trigger_months: z.number().int().nullable(),
+})
+export const VehicleDetailResponseSchema = z.object({
+  id: z.number().int(),
+  vehicle_number: z.string().nullable(),
+  nickname: z.string(),
+  status: z.string(),
+  service_logs: z.array(ServiceLogSchema),
+  maintenance_reminders: z.array(MaintenanceReminderSchema),
+})
+
+export const InvoiceSummarySchema = z.object({
+  id: z.number().int(),
+  invoice_number: z.string(),
+  amount: z.number(),
+  status: z.string(),
+  due_date: z.string().nullable(),
+  opened_at: z.string().nullable(),
+})
+export const ListInvoicesResponseSchema = z.object({ invoices: z.array(InvoiceSummarySchema) })
+
+export const InvoiceDetailResponseSchema = z.object({
+  id: z.number().int(),
+  invoice_number: z.string(),
+  amount: z.number(),
+  status: z.string(),
+  due_date: z.string().nullable(),
+  notes: z.string().nullable(),
+  sent_at: z.string().nullable(),
+  paid_at: z.string().nullable(),
+  opened_at: z.string().nullable(),
+  load_id: z.number().int().nullable(),
+})
+
+export const ListLoadDvirInspectionsQuerySchema = z.object({ type: z.enum(DVIR_TYPES).optional() })
+export const DvirInspectionBriefSchema = z.object({
+  id: z.number().int(),
+  type: z.enum(DVIR_TYPES),
+  created_at: z.string().nullable(),
+})
+export const ListLoadDvirInspectionsResponseSchema = z.object({ inspections: z.array(DvirInspectionBriefSchema) })
+
+export const DvirDefectSchema = z.object({
+  id: z.number().int(),
+  area: z.string(),
+  description: z.string().nullable(),
+  severity: z.enum(DEFECT_SEVERITIES).nullable(),
+})
+export const DvirHistoryItemSchema = z.object({
+  id: z.number().int(),
+  type: z.enum(DVIR_TYPES),
+  condition: z.string(),
+  odometer: z.number().int().nullable(),
+  submitted_at: z.string(),
+  signature_url: z.string().nullable().describe('Short-lived signed URL, present only when signed.'),
+  vehicle: z.object({ vehicle_number: z.string().nullable(), nickname: z.string() }).nullable(),
+  driver_name: z.string().nullable(),
+  defects: z.array(DvirDefectSchema),
+})
+export const ListDvirInspectionsResponseSchema = z.object({ inspections: z.array(DvirHistoryItemSchema) })
 
 export type ListLoadsQuery = z.infer<typeof ListLoadsQuerySchema>
 export type ListLoadsResponse = z.infer<typeof ListLoadsResponseSchema>

@@ -13,6 +13,11 @@ export class SupabaseFeatureGate implements FeatureGate {
     if (error) return err(domainError('PRECONDITION_FAILED', `entitlement check failed: ${error.message}`))
     return ok(data === true)
   }
+  async list(_actor: ActorContext): Promise<Result<readonly string[]>> {
+    const { data, error } = await this.supabase.rpc('get_my_entitlements')
+    if (error) return err(domainError('PRECONDITION_FAILED', `entitlement list failed: ${error.message}`))
+    return ok((data ?? []).map((row: { key: string }) => row.key))
+  }
 }
 
 export class SupabaseIftaRepository implements IftaRepository {

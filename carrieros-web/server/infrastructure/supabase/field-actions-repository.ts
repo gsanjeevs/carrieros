@@ -6,7 +6,7 @@ import type { Database } from '@/types/supabase'
 import { domainError, err, ok, type Result } from '../../domain/shared/result'
 import type { ActorContext } from '../../domain/shared/identity'
 import type { DriverProfilePatch } from '../../domain/driver/self-profile'
-import type { DriverSelfRepository, FleetRepository, LoadLocationRepository, MessageRepository, ReminderRecord } from '../../ports'
+import type { DriverProfileRecord, DriverSelfRepository, FleetRepository, LoadLocationRepository, MessageRepository, ReminderRecord } from '../../ports'
 
 const fail = (what: string, message: string) => err(domainError('PRECONDITION_FAILED', `${what} failed: ${message}`))
 
@@ -59,6 +59,19 @@ export class SupabaseDriverSelfRepository implements DriverSelfRepository {
     const { data, error } = await this.supabase.from('vehicles').select('id').eq('id', vehicleId).eq('carrier_org_id', actor.orgId).eq('is_active', true).maybeSingle()
     if (error) return fail('vehicle lookup', error.message)
     return ok(!!data)
+  }
+  async getOwnProfile(actor: ActorContext): Promise<Result<DriverProfileRecord | null>> {
+    const { data, error } = await this.supabase
+      .from('drivers')
+      .select(
+        'id, cdl_number, cdl_class, cdl_state, cdl_expiry, med_cert_expiry, endorsements, emergency_contact_name, emergency_contact_phone, emergency_contact_relation, default_vehicle_id'
+      )
+      .eq('profile_id', actor.userId)
+      .eq('carrier_org_id', actor.orgId)
+      .maybeSingle()
+    if (error) return fail('driver profile lookup', error.message)
+    if (!data) return ok(null)
+    return ok({ ...data, id: Number(data.id), endorsements: data.endorsements ?? [] } as DriverProfileRecord)
   }
 }
 

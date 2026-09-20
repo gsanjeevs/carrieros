@@ -7,7 +7,7 @@ import { buildServiceLog, nextDue, type ServiceLogInput } from '../domain/fleet/
 import { ACTIVE_LOAD_STATUSES, validateLocation } from '../domain/messaging/location'
 import { err, forbidden, notFound, ok, validationFailed, type Result } from '../domain/shared/result'
 import type { ActorContext } from '../domain/shared/identity'
-import type { Clock, DriverSelfRepository, FleetRepository, IdempotencyRepository, LoadLocationRepository, MessageRepository, ShipmentAccessRepository } from '../ports'
+import type { Clock, DriverProfileRecord, DriverSelfRepository, FleetRepository, IdempotencyRepository, LoadLocationRepository, MessageRepository, ShipmentAccessRepository } from '../ports'
 import { withIdempotency } from './idempotency'
 import { authorizeLoadAction } from './load-access'
 import { roleHasCapability } from '@/lib/generated/role-capabilities'
@@ -44,6 +44,14 @@ export class FieldActionsService {
     // A phone clock in the future would pin the "last seen" timestamp and make every later sample look stale.
     const recordedAt = sample.recordedAt && sample.recordedAt.getTime() <= now.getTime() + 5 * 60_000 ? sample.recordedAt : now
     return this.deps.locations.updateLocation(actor, loadId, { ...valid.value, recordedAt })
+  }
+
+  /** The caller's own drivers row. NOT_FOUND for a solo/owner/dispatcher/finance actor, who has none. */
+  async getOwnDriverProfile(actor: ActorContext): Promise<Result<DriverProfileRecord>> {
+    const found = await this.deps.driverSelf.getOwnProfile(actor)
+    if (!found.ok) return found
+    if (!found.value) return err(notFound('Driver record'))
+    return ok(found.value)
   }
 
   async updateOwnDriverProfile(actor: ActorContext, input: DriverProfileInput): Promise<Result<void>> {

@@ -206,6 +206,21 @@ const API_ONLY = new Set([
   '../carrieros-mobile/src/components/share-location-section.tsx',
   '../carrieros-mobile/src/lib/ifta-tracking.ts',
   '../carrieros-mobile/src/lib/dvir-attachments.ts',
+  '../carrieros-mobile/src/app/(tabs)/dvir-start.tsx',
+  '../carrieros-mobile/src/app/(tabs)/history.tsx',
+  '../carrieros-mobile/src/app/(tabs)/invoices.tsx',
+  '../carrieros-mobile/src/app/(tabs)/my-load.tsx',
+  '../carrieros-mobile/src/app/(tabs)/fleet.tsx',
+  '../carrieros-mobile/src/app/dvir-history/index.tsx',
+  '../carrieros-mobile/src/app/dvir/[loadId].tsx',
+  '../carrieros-mobile/src/app/invoice/[id].tsx',
+  '../carrieros-mobile/src/app/load/[id].tsx',
+  '../carrieros-mobile/src/app/driver-profile/index.tsx',
+  '../carrieros-mobile/src/app/vehicle/[id].tsx',
+  '../carrieros-mobile/src/hooks/use-onboarding-status.tsx',
+  '../carrieros-mobile/src/hooks/use-profile-role.ts',
+  '../carrieros-mobile/src/lib/submitter.ts',
+  '../carrieros-mobile/src/lib/entitlements.ts',
 ])
 const DIRECT_DB = /\.from\(\s*['"`][A-Za-z_]+['"`]\s*\)|\.rpc\(\s*['"`]|supabase\s*\.\s*storage\b/
 const debt = { web: { files: new Set(), sites: 0 }, mobile: { files: new Set(), sites: 0 } }
