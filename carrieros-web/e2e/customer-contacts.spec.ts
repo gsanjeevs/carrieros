@@ -5,9 +5,8 @@ import { login, OWNER } from './helpers'
 // spec. Demo customer C-1 (Sierra Steel Fabricators) starts with no
 // contacts, so this test adds one (with a unique name/email per run) and
 // then invites it to portal access, rather than depending on seeded contact
-// data. The magic-link email itself isn't asserted here (see
-// mailpit.spec.ts for that); this only asserts the API call succeeded and
-// the UI reflects it, per the task's scope.
+// data. The bonus check below confirms the magic-link email actually landed
+// in the local Mailpit capture inbox; it doesn't assert the email body.
 test('owner adds a customer contact and invites them to portal access', async ({ page }) => {
   await login(page, OWNER.email, OWNER.password)
 
