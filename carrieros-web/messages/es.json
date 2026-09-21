@@ -59,7 +59,8 @@
     "section_main": "Principal",
     "section_fleet": "Flota",
     "section_billing": "Facturación",
-    "section_team": "Equipo"
+    "section_team": "Equipo",
+    "developerApi": "API de desarrollador"
   },
   "login": {
     "title": "Inicia sesión en tu cuenta",
@@ -778,6 +779,33 @@
     "downgrade": "Bajar de plan",
     "changingPlan": "Actualizando…",
     "changeTierFailed": "No se pudo cambiar tu plan. Inténtalo de nuevo."
+  },
+  "developerApi": {
+    "title": "API para desarrolladores",
+    "subtitle": "Administra las credenciales de la API pública de CarrierOS.",
+    "tierNote": "Requiere el plan Growth o superior. Los clientes creados aquí pueden leer las cargas y facturas de tu organización.",
+    "createClient": "Nuevo cliente",
+    "create": "Crear",
+    "clientName": "Nombre del cliente",
+    "clientNamePlaceholder": "p. ej. Integración de almacén",
+    "clientNameHelp": "Una etiqueta para distinguir tus clientes de API — no se muestra a nadie más.",
+    "name": "Nombre",
+    "clientId": "ID de cliente",
+    "clientSecret": "Secreto del cliente",
+    "created": "Creado",
+    "lastUsed": "Último uso",
+    "neverUsed": "Nunca usado",
+    "status": "Estado",
+    "statusActive": "Activo",
+    "statusRevoked": "Revocado",
+    "revoke": "Revocar",
+    "revokeTitle": "Revocar cliente de API",
+    "revokeConfirm": "¿Revocar \"{name}\"? Cualquier aplicación que use las credenciales de este cliente dejará de funcionar de inmediato. Esta acción no se puede deshacer.",
+    "secretRevealTitle": "Cliente creado",
+    "secretRevealWarning": "Esta es la única vez que se muestra el secreto del cliente. Cópialo ahora y guárdalo de forma segura — CarrierOS no conserva una copia.",
+    "secretRevealDone": "He guardado estas credenciales",
+    "emptyTitle": "Aún no hay clientes de API",
+    "emptyDescription": "Crea un cliente para que otra aplicación pueda leer las cargas y facturas de tu organización mediante la API pública de CarrierOS."
   },
   "customers": {
     "title": "Clientes",

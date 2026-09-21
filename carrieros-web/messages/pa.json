@@ -59,7 +59,8 @@
     "section_main": "ਮੁੱਖ",
     "section_fleet": "ਫਲੀਟ",
     "section_billing": "ਬਿਲਿੰਗ",
-    "section_team": "ਟੀਮ"
+    "section_team": "ਟੀਮ",
+    "developerApi": "ਡੈਵਲਪਰ API"
   },
   "login": {
     "title": "ਆਪਣੇ ਖਾਤੇ ਵਿੱਚ ਸਾਈਨ ਇਨ ਕਰੋ",
@@ -778,6 +779,33 @@
     "downgrade": "ਡਾਊਨਗ੍ਰੇਡ ਕਰੋ",
     "changingPlan": "ਅੱਪਡੇਟ ਹੋ ਰਿਹਾ ਹੈ…",
     "changeTierFailed": "ਤੁਹਾਡਾ ਪਲਾਨ ਬਦਲਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
+  },
+  "developerApi": {
+    "title": "ਡੈਵਲਪਰ API",
+    "subtitle": "CarrierOS ਦੀ ਪਬਲਿਕ ਡੈਵਲਪਰ API ਲਈ ਕ੍ਰੈਡੰਸ਼ੀਅਲਜ਼ ਦਾ ਪ੍ਰਬੰਧ ਕਰੋ਼।",
+    "tierNote": "Growth ਪਲਾਨ ਜਾਂ ਇਸ ਤੋਂ ਉੱਪਰ ਦੀ ਲੋੜ ਹੈ। ਇੱਥੇ ਬਣਾਏ ਗਏ ਕ੍ਲਾਈਂਟ ਤੁਹਾਡੀ ਸੰਸਥਾ ਦੇ ਲੋਡ਼ ਅਤੇ ਇਨਵਾਇਸ ਪੜ਼਼ ਸਕਦੇ ਹਨ।",
+    "createClient": "ਨਵਾਂ ਕ੍ਲਾਈਂਟ",
+    "create": "ਬਣਾਓ",
+    "clientName": "ਕ੍ਲਾਈਂਟ ਦਾ ਨਾਮ",
+    "clientNamePlaceholder": "ਉਦਾਹਰਣ ਵਜੋਂ ਵਜੋਂ ਗੋਦਾਮ ਇੰਟੀਗਰੇਸ਼ਨ",
+    "clientNameHelp": "ਤੁਹਾਡੇ API ਕ੍ਲਾਈਂਟਸ ਨੂੰ ਵਕਦਾ ਕਰਨ ਲਈ ਇੱਕ ਲੇਬਲ — ਕਿਸੇ ਮ 2ਙ ਨੂੰ ਨਹੀਂ ਦਿੱਖਾਇਆ ਜਾਂਦਾ।",
+    "name": "ਨਾਮ",
+    "clientId": "ਕ੍ਲਾਈਂਟ ID",
+    "clientSecret": "ਕ੍ਲਾਈਂਟ ਗੁਪਤ",
+    "created": "ਬਣਾਇਆ ਗਿਆ",
+    "lastUsed": "ਆਖਰੀ ਵਰਤੋਂ",
+    "neverUsed": "ਕਦੇ ਵਰਤੋਂ ਨਹੀਂ ਗਿਆ",
+    "status": "ਸਥਿਤੀ",
+    "statusActive": "ਸਰਗਰਮ",
+    "statusRevoked": "ਰਦ੍ਦ ਕੀਤਾ",
+    "revoke": "ਰਦ੍ਦ ਕਰੋ",
+    "revokeTitle": "API ਕ੍ਲਾਈਂਟ ਰਦ੍ਦ ਕਰੋ",
+    "revokeConfirm": "\"{name}\" ਨੂੰ ਰਦ੍ਦ ਕਰਨਾ ਹੈ? ਇਸ ਕ੍ਲਾਈਂਟ ਦੀ ਵਰਤੋਂ ਕਰਨ ਵਾਲੀ ਕੋਈ ਵੀ ਐਪ ਫੌਰਨ ਚੱਲਣ ਬੰਦ ਕਰ ਦੇਵੇਗੀ। ਇਸ ਨੂੰ ਵਾਪਸ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ।",
+    "secretRevealTitle": "ਕ੍ਲਾਈਂਟ ਬਣ ਗਿਆ",
+    "secretRevealWarning": "ਇਹ ਇਕੌਤਾ ਸਮਾਂ ਹੈ ਜਦੋਂ ਕ੍ਲਾਈਂਟ ਗੁਪਤ ਦਿੱਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਇਸਨੂੰ ਹੁਣੇ ਕਾਪੀ ਕਰੋ ਅਤੇ ਸੁਰੱਚਿਤ ਥਾਂ ਰੱਖੋ — CarrierOS ਇਸਦੀ ਕਾਪੀ ਨਹੀਂ ਰੱਖਦਾ।",
+    "secretRevealDone": "ਮੈਂ ਇਹ ਕ੍ਰੈਡੰਸ਼ੀਅਲਜ਼ ਸੰਭਾਲ ਲਈਆਂ ਹਨ",
+    "emptyTitle": "ਅਜੇ ਤੱਕ ਕੋਈ API ਕ੍ਲਾਈਂਟ ਨਹੀਂ",
+    "emptyDescription": "ਕਿਸੇ ਥਾਂ ਐਪ ਨੂੰ CarrierOS ਦੀ ਪਬਲਿਕ API ਰਾਹੀਂ ਤੁਹਾਡੀ ਸੰਸਥਾ ਦੇ ਲੋਡ਼ ਅਤੇ ਇਨਵਾਇਸ ਪੜ਼ਨ ਦਿੰਦਾ ਹੈ ਗੈਦ ਗਏ ਇੱਕ ਕ੍ਲਾਈਂਟ ਬਣਾਓ।"
   },
   "customers": {
     "title": "ਗਾਹਕ",

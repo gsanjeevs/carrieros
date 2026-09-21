@@ -59,7 +59,8 @@
     "section_main": "مرکزی",
     "section_fleet": "فلیٹ",
     "section_billing": "بلنگ",
-    "section_team": "ٹیم"
+    "section_team": "ٹیم",
+    "developerApi": "ڈولپر API"
   },
   "login": {
     "title": "اپنے اکاؤنٹ میں سائن ان کریں",
@@ -778,6 +779,33 @@
     "downgrade": "ڈاؤن گریڈ کریں",
     "changingPlan": "اپ ڈیٹ ہو رہا ہے…",
     "changeTierFailed": "آپ کا پلان تبدیل نہیں ہو سکا۔ دوبارہ کوشش کریں۔"
+  },
+  "developerApi": {
+    "title": "ڈولپر API",
+    "subtitle": "CarrierOS کے عوامی API کے اسناد کا انتظام کریں۔",
+    "tierNote": "Growth پلین یا اس سے اوپر درکار ہے۔ یہاں بنائے گئے کلائنٹس آپ کے ادارے کے لوڈز اور انوائسز پڑھ سکتے ہیں۔",
+    "createClient": "نیا کلائنٹ",
+    "create": "بنائیں",
+    "clientName": "کلائنٹ کا نام",
+    "clientNamePlaceholder": "مثال کے طور پر گودام انٹیگریشن",
+    "clientNameHelp": "آپ کے API کلائنٹس کو پہچاننے کے لئے ایک لیبل — کسی اور کو نہیں دکھایا جاتا۔",
+    "name": "نام",
+    "clientId": "کلائنٹ ID",
+    "clientSecret": "کلائنٹ سیکریٹ",
+    "created": "بنایا گیا",
+    "lastUsed": "آخری بار استعمال",
+    "neverUsed": "کبھی استعمال نہیں ہوا",
+    "status": "حیثیت",
+    "statusActive": "فعال",
+    "statusRevoked": "منسوخ",
+    "revoke": "منسوخ کریں",
+    "revokeTitle": "API کلائنٹ منسوخ کریں",
+    "revokeConfirm": "\"{name}\" کو منسوخ کریں؟ اس کلائنٹ کے اسناد استعمال کرنے والی کوئی بھی ایپلی کیشن فوراً کام کرنا بند کر دے گی‌وگی۔ یہ واپس نہیں کیا جا سکتا۔",
+    "secretRevealTitle": "کلائنٹ بن گیا",
+    "secretRevealWarning": "یہ واحد مرتبہ ہے جب کلائنٹ سیکریٹ دکھایا جائے گا۔ اسے ابھی کاپی کرکے محفوظ رکھیں — CarrierOS اس کی کوئی کاپی محفوظ نہیں رکھتا۔",
+    "secretRevealDone": "میں نے یہ اسناد محفوظ کر لیے ہیں",
+    "emptyTitle": "ابھی تک کوئی API کلائنٹ نہیں",
+    "emptyDescription": "کسی دوسرے ایپلیکیشن کو CarrierOS کے عوامی API کے ذریعے آپ کے ادارے کے لوڈز اور انوائسز پڑھنے کی اجازت دینے کے لئے ایک کلائنٹ بنائیں۔"
   },
   "customers": {
     "title": "کسٹمرز",

@@ -69,6 +69,8 @@ const NAV_SECTIONS: NavSection[] = [
       { labelKey: 'team',     href: '/team',     icon: 'group',    capability: 'team' },
       // Everyone with a tenant role has settings; no capability covers that.
       { labelKey: 'settings', href: '/settings', icon: 'settings', capability: 'settings_view' },
+      // Public developer API (Phase 9) client management — same gate as billing (subscription_management).
+      { labelKey: 'developerApi', href: '/settings/developer-api', icon: 'api', capability: 'subscription_management' },
     ],
   },
 ]
