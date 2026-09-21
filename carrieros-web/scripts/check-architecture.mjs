@@ -37,7 +37,7 @@ function filesMatching(dir, exts) {
 const violations = []
 const warnings = []
 
-function checkPattern({ label, dirs, exts, forbiddenPattern, message, exclude, severity = 'error' }) {
+function checkPattern({ label, dirs, exts, forbiddenPattern, message, exclude, severity = 'error', skipComments = false }) {
   const sink = severity === 'warn' ? warnings : violations
   for (const dir of dirs) {
     for (const file of filesMatching(dir, exts)) {
@@ -45,6 +45,7 @@ function checkPattern({ label, dirs, exts, forbiddenPattern, message, exclude, s
       const content = readFileSync(path.join(ROOT, file), 'utf8')
       const lines = content.split('\n')
       lines.forEach((line, i) => {
+        if (skipComments && /^\s*(\/\/|\*)/.test(line)) return
         if (forbiddenPattern.test(line)) {
           sink.push(`[${label}] ${file}:${i + 1}: ${line.trim()}\n  → ${message}`)
         }
@@ -183,6 +184,83 @@ for (const [table, severity] of Object.entries(QUERY_ENCAPSULATION_SEVERITY)) {
     severity,
   })
 }
+
+// Rule A — shared enum/status modules with exhaustive handling. Migrated
+// fully on 2026-07-22/23 (see architecture-principles.md §4 and its
+// changelog) — this check verifies that stays true by flagging a hand-
+// written status-color map (a `<status literal>: '<tailwind-or-hex-color>'`
+// line) outside lib/domain (web) or constants/theme.ts (mobile), the
+// designated shared modules found by grepping for the existing Rule A
+// modules before writing this check. Scoped to loads.status's specific,
+// highly-distinctive vocabulary (picked_up/in_transit/dispatched don't
+// collide with unrelated UI-state enums) and to color-shaped values
+// (`bg-`/`text-`/`#`) rather than every status word, after an earlier, looser
+// draft of this pattern false-positived on components/ui/ChecklistItem.tsx's
+// unrelated `'active'`/`'pending'` checklist-row states — same
+// false-positive-avoidance discipline as Rule C's precedent below. Run
+// against the current tree before this was added: it found ONE real hit,
+// app/track/[token]/page.tsx's STATUS_COLOR map (deliberately not sharing
+// the authenticated pages' module per that file's own header comment, but
+// still the exact duplication shape Rule A exists to prevent) — so this
+// stays `warn`, not the hard gate the zero-violations precedent (Rule G)
+// would otherwise justify.
+checkPattern({
+  label: 'rule-a-status-color-duplication',
+  dirs: ['app', 'components', '../carrieros-mobile/src'],
+  exts: ['ts', 'tsx'],
+  exclude: ['../carrieros-mobile/src/constants/theme.ts'],
+  forbiddenPattern: /^\s*(draft|scheduled|dispatched|picked_up|in_transit|delivered|invoiced|paid|cancelled|declined)\s*:\s*['"](#|bg-|text-)/,
+  message: "Hand-written status-color mapping outside the shared Rule A module (lib/domain/load-status.ts web, constants/theme.ts mobile). See architecture-principles.md Rule A. (warn-only — one pre-existing, documented exception found; see check-architecture.mjs comment.)",
+  severity: 'warn',
+})
+
+// Rule H — cross-client business/gating logic must not be hand-duplicated
+// TypeScript; role_capabilities + scripts/gen-role-capabilities.mjs is the
+// generated single source. This does not stop a NEW hand-rolled role-list
+// array from being introduced elsewhere (role-capabilities-drift.test.ts
+// only protects the generated file itself) — flags an array literal of 2+
+// role-name string literals outside the generated files in either app.
+// Necessarily a heuristic (an array of role names looks like any other
+// string array to a regex) — comment lines are skipped after an early draft
+// flagged lib/roles-policy.ts's own header comment, which quotes a role
+// array as prose while explaining the BILLING_ROLES drift incident. Run
+// against the current tree: found violations (existing hand-rolled arrays
+// predating this check, e.g. team/InviteMemberButton.tsx's ROLES,
+// api/onboarding/route.ts's SELF_SERVE_ROLES) — a new ratchet, so `warn`,
+// not `error`; see the task report for the full count.
+checkPattern({
+  label: 'rule-h-role-list-literal',
+  dirs: ['app', 'lib', 'components', 'server', '../carrieros-mobile/src'],
+  exts: ['ts', 'tsx'],
+  exclude: ['lib/generated', '../carrieros-mobile/src/lib/generated'],
+  forbiddenPattern: /\[\s*'(owner|solo|dispatcher|finance|driver)'(\s*,\s*'(owner|solo|dispatcher|finance|driver)')+\s*\]/,
+  skipComments: true,
+  message: "Hand-rolled array of role-name literals outside the generated lib/generated/role-capabilities.ts. Prefer role_capabilities/roleHasCapability()/rolesWithCapability() (or lib/roles-policy.ts's thin re-export shim) so this can't drift the way BILLING_ROLES already did once. See architecture-principles.md Rule H. (warn-only — new ratchet, pre-existing hits reported, not yet fixed.)",
+  severity: 'warn',
+})
+
+// Rule I — every locale-varying value resolves through one inheritance
+// chain, never a literal fallback. Flags a literal 'USD'/'CAD'/'MXN' used as
+// a `??`/`?:` fallback or branch result outside lib/format-money.ts's own
+// default parameter (formatMoney's `currency = 'USD'` is a generic
+// formatter's last-resort default, not a per-call-site duplication of an
+// org's actual currency — the thing Rule I's entry 1 is actually about).
+// Run against the current tree: found the ~20-site pattern architecture-
+// principles.md's Rule I entry 1 describes (`carrierOrg?.currency ?? 'USD'`
+// repeated per page, plus api/onboarding/route.ts's country->currency
+// ternary computing it inline instead of through a shared resolver) — not
+// yet fixed, so `warn`; see the task report for the exact count and a note
+// on how it compares to the doc's approximate figure.
+checkPattern({
+  label: 'rule-i-currency-literal-fallback',
+  dirs: ['app', 'lib', 'components', 'server', '../carrieros-mobile/src'],
+  exts: ['ts', 'tsx'],
+  exclude: ['lib/format-money.ts', '../carrieros-mobile/src/lib/format-money.ts'],
+  forbiddenPattern: /(\?\?|\?|:)\s*'(USD|CAD|MXN)'/,
+  skipComments: true,
+  message: "Literal currency fallback outside a single designated resolver. Every locale-varying value must resolve through one inheritance chain, the same shape already correctly used for preferred_language/uom_system — never a literal default typed inline at each call site. See architecture-principles.md Rule I. (warn-only — not yet fixed, tracked as a living list per Rule I's own text.)",
+  severity: 'warn',
+})
 
 // ── ADR 0003: no frontend data access except through the API ────────────────
 //
