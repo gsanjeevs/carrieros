@@ -83,12 +83,14 @@ async function main() {
   const carrierOrgId = await createOrg('carrier', 'Sierra Freight Co')
 
   console.log('Creating demo@carrieros.dev (owner)...')
-  await createUser('demo@carrieros.dev', carrierOrgId, 'owner', 'Demo', 'Owner')
+  // Name matches e2e/auth.spec.ts's hardcoded assertion, which mirrors the
+  // name already established for this account in local dev.
+  await createUser('demo@carrieros.dev', carrierOrgId, 'owner', 'Sam', 'Rivera')
 
   console.log('Creating mike.driver@carrieros.dev (driver)...')
   const driverUserId = await createUser('mike.driver@carrieros.dev', carrierOrgId, 'driver', 'Mike', 'Rodriguez')
-  await must(
-    admin.from('drivers').insert({ carrier_org_id: carrierOrgId, profile_id: driverUserId }),
+  const driverRow = await must(
+    admin.from('drivers').insert({ carrier_org_id: carrierOrgId, profile_id: driverUserId }).select('id').single(),
     'drivers row for mike.driver'
   )
 
@@ -103,6 +105,14 @@ async function main() {
   console.log('Creating 2 vehicles...')
   await api(token, 'POST', '/api/vehicles', { nickname: 'Freightliner Cascadia', vehicle_type_id: vehicleType.id, year: 2022, make: 'Freightliner' })
   await api(token, 'POST', '/api/vehicles', { nickname: 'Peterbilt 579', vehicle_type_id: vehicleType.id, year: 2021, make: 'Peterbilt' })
+  const vehicleRows = await must(
+    admin.from('vehicles').select('id, vehicle_number').eq('carrier_org_id', carrierOrgId).order('id'),
+    'list seeded vehicles'
+  )
+
+  console.log('Creating customer (Sierra Steel Fabricators)...')
+  // First customer for a fresh org auto-numbers C-1, matching e2e/customer-contacts.spec.ts.
+  await api(token, 'POST', '/api/customers', { name: 'Sierra Steel Fabricators', city: 'Dallas', state: 'TX' })
 
   console.log('Creating 3 loads...')
   const loadBase = {
@@ -113,6 +123,20 @@ async function main() {
   for (let i = 0; i < 3; i++) {
     await api(token, 'POST', '/api/loads', loadBase)
   }
+  const loadRows = await must(
+    admin.from('loads').select('id, load_number').eq('carrier_org_id', carrierOrgId).order('id'),
+    'list seeded loads'
+  )
+
+  console.log('Advancing L-1 to invoiced (so the invoices e2e test has something to find)...')
+  await api(token, 'PATCH', `/api/loads/${loadRows[0].id}`, {
+    driver_id: driverRow.id, vehicle_id: vehicleRows[0].id, status: 'invoiced',
+  })
+
+  console.log('Dispatching L-2 to the driver (so the driver e2e test has an active load)...')
+  await api(token, 'PATCH', `/api/loads/${loadRows[1].id}`, {
+    driver_id: driverRow.id, vehicle_id: vehicleRows[1].id, status: 'dispatched',
+  })
 
   console.log('\nDone. Demo accounts (all password Demo123!):')
   console.log('  demo@carrieros.dev        owner, Sierra Freight Co')

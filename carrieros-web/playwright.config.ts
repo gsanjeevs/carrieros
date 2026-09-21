@@ -6,7 +6,12 @@ import { defineConfig, devices } from '@playwright/test'
 // Force a port that's actually free instead of assuming 3000 works — see
 // .claude/memory/project_test_port_3000_conflict.md.
 const PORT = process.env.PLAYWRIGHT_PORT ?? '3100'
-const baseURL = `http://localhost:${PORT}`
+
+// PLAYWRIGHT_BASE_URL points the suite at an already-running deployment
+// (e.g. staging) instead of a local dev server -- no webServer to spawn in
+// that case, since nothing here can be launched locally.
+const remoteBaseURL = process.env.PLAYWRIGHT_BASE_URL
+const baseURL = remoteBaseURL ?? `http://localhost:${PORT}`
 
 export default defineConfig({
   testDir: './e2e',
@@ -25,10 +30,12 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: {
-    command: `PORT=${PORT} npm run dev`,
-    url: baseURL,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer: remoteBaseURL
+    ? undefined
+    : {
+        command: `PORT=${PORT} npm run dev`,
+        url: baseURL,
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
+      },
 })
