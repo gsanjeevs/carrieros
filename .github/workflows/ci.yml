@@ -103,6 +103,7 @@ jobs:
             echo "ANTHROPIC_API_KEY=ci-placeholder"
             echo "CRON_SECRET=ci-cron-secret"
             echo "INTAKE_WEBHOOK_SECRET=ci-intake-secret"
+            echo "PUBLIC_API_JWT_SECRET=ci-public-api-jwt-secret-not-for-real-use"
           } > .env.local
 
       - name: Install web dependencies
