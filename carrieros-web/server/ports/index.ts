@@ -16,6 +16,7 @@ import type { LoadDetail, LoadEvent, LoadSummary } from '../domain/load/read-mod
 import type { ChangeEntity } from '../domain/events/entities'
 import type { PreferencesPatch } from '../domain/profile/preferences'
 import type { DriverProfilePatch } from '../domain/driver/self-profile'
+import type { OAuthClientSummary } from '../domain/oauth/model'
 
 // ── Cross-cutting ───────────────────────────────────────────────────────────
 
@@ -720,4 +721,56 @@ export interface DvirRepository {
   findInspection(actor: ActorContext, inspectionId: number): Promise<Result<InspectionAccess | null>>
   /** Point the inspection's signature, or one defect's photo, at an uploaded object. Ok(false) = nothing matched. */
   attach(actor: ActorContext, inspectionId: number, target: { kind: 'signature' } | { kind: 'defect_photo'; area: string }, storagePath: string): Promise<Result<boolean>>
+}
+
+// ── Public developer API (Phase 9) ──────────────────────────────────────────
+// A genuinely different trust boundary: the caller authenticates as an
+// ORGANIZATION via an OAuth 2.0 client-credentials grant, not as a logged-in
+// human with a Supabase session. There is no session for RLS to key off, so
+// every implementation of these runs as service_role and does its own org
+// scoping — same posture as ChangeFeedRepository/IdempotencyRepository.
+
+export interface OAuthCredentialProvider {
+  /** A public, logged-safe identifier, e.g. "pub_client_<hex>". */
+  newClientId(): string
+  /** The RAW secret. Shown to the caller exactly once; never persisted as-is. */
+  newClientSecret(): string
+  hashSecret(secret: string): Promise<string>
+  /** Constant-time comparison against a stored hash. */
+  verifySecret(secret: string, hash: string): Promise<boolean>
+}
+
+/** Only the token-issuance path needs the hash and org id together — the UI-facing type is OAuthClientSummary. */
+export interface OAuthClientRecord {
+  readonly id: number
+  readonly orgId: OrgId
+  readonly clientId: string
+  readonly clientSecretHash: string
+  readonly revokedAt: string | null
+}
+
+export interface OAuthClientRepository {
+  listForOrg(orgId: OrgId): Promise<Result<readonly OAuthClientSummary[]>>
+  create(orgId: OrgId, name: string, clientId: string, secretHash: string): Promise<Result<OAuthClientSummary>>
+  /** Ok(false) = no active client with this id belongs to this org (already revoked, or someone else's). */
+  revoke(orgId: OrgId, clientId: string): Promise<Result<boolean>>
+  /**
+   * Cross-org lookup by client_id alone. The only place this is legitimate: the caller has not yet
+   * proven which org they act for — determining that is this call's entire job.
+   */
+  findActiveByClientId(clientId: string): Promise<Result<OAuthClientRecord | null>>
+  markUsed(clientId: string): Promise<Result<void>>
+}
+
+export interface PublicApiEntitlementGate {
+  /**
+   * entitlement_decision(org_id, 'public_api') directly, bypassing has_feature()'s reliance on
+   * my_org_id() — this caller has no session for that to read. Internal/service_role-only RPC.
+   */
+  checkPublicApiAccess(orgId: OrgId): Promise<Result<{ allowed: boolean; reason: string }>>
+}
+
+export interface PublicApiRateLimiter {
+  /** Atomic check-and-increment against the fixed window. retryAfterSeconds is 0 when allowed. */
+  checkAndIncrement(clientId: string): Promise<Result<{ allowed: boolean; retryAfterSeconds: number }>>
 }

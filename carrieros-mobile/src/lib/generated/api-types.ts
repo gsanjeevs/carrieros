@@ -639,6 +639,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/oauth-clients": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the caller's organization's public developer API clients (owner/solo only) */
+        get: operations["listOAuthClients"];
+        put?: never;
+        /** Create a new public developer API client. The response's client_secret is shown exactly once. */
+        post: operations["createOAuthClient"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/oauth-clients/{client_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Revoke a public developer API client. Its credentials stop working immediately for new token requests. */
+        delete: operations["revokeOAuthClient"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -5522,6 +5557,232 @@ export interface operations {
             };
             /** @description Error */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+        };
+    };
+    listOAuthClients: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        clients: {
+                            id: number;
+                            client_id: string;
+                            name: string;
+                            created_at: string;
+                            last_used_at: string | null;
+                            revoked_at: string | null;
+                        }[];
+                    };
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+        };
+    };
+    createOAuthClient: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        client: {
+                            id: number;
+                            client_id: string;
+                            name: string;
+                            created_at: string;
+                            last_used_at: string | null;
+                            revoked_at: string | null;
+                        };
+                        /** @description Shown once, at creation. Never returned by any other call. */
+                        client_secret: string;
+                    };
+                };
+            };
+            /** @description Error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+        };
+    };
+    revokeOAuthClient: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        ok: boolean;
+                    };
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

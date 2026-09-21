@@ -790,7 +790,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "drivers_default_truck_id_fkey"
+            foreignKeyName: "drivers_default_vehicle_id_fkey"
             columns: ["default_vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
@@ -913,7 +913,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "dvir_inspections_truck_id_fkey"
+            foreignKeyName: "dvir_inspections_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
@@ -1620,7 +1620,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "loads_truck_id_fkey"
+            foreignKeyName: "loads_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
@@ -1680,10 +1680,69 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "maintenance_reminders_truck_id_fkey"
+            foreignKeyName: "maintenance_reminders_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      oauth_client_rate_limits: {
+        Row: {
+          client_id: string
+          request_count: number
+          window_start: string
+        }
+        Insert: {
+          client_id: string
+          request_count?: number
+          window_start: string
+        }
+        Update: {
+          client_id?: string
+          request_count?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
+      oauth_clients: {
+        Row: {
+          client_id: string
+          client_secret_hash: string
+          created_at: string
+          id: number
+          last_used_at: string | null
+          name: string
+          org_id: number
+          revoked_at: string | null
+        }
+        Insert: {
+          client_id: string
+          client_secret_hash: string
+          created_at?: string
+          id?: number
+          last_used_at?: string | null
+          name: string
+          org_id: number
+          revoked_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          client_secret_hash?: string
+          created_at?: string
+          id?: number
+          last_used_at?: string | null
+          name?: string
+          org_id?: number
+          revoked_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oauth_clients_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -2211,7 +2270,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "service_logs_truck_id_fkey"
+            foreignKeyName: "service_logs_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
@@ -2353,24 +2412,24 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "truck_documents_carrier_org_id_fkey"
+            foreignKeyName: "vehicle_documents_carrier_org_id_fkey"
             columns: ["carrier_org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "truck_documents_truck_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "truck_documents_uploaded_by_fkey"
+            foreignKeyName: "vehicle_documents_uploaded_by_fkey"
             columns: ["uploaded_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_documents_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
         ]
@@ -2507,7 +2566,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "trucks_carrier_org_id_fkey"
+            foreignKeyName: "vehicles_carrier_org_id_fkey"
             columns: ["carrier_org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -2656,7 +2715,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "loads_truck_id_fkey"
+            foreignKeyName: "loads_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
@@ -2677,6 +2736,14 @@ export type Database = {
       }
       caller_may_act_on_load: { Args: { p_load_id: number }; Returns: boolean }
       check_ifta_completeness: { Args: { p_load_id: number }; Returns: boolean }
+      check_public_api_rate_limit: {
+        Args: { p_client_id: string; p_limit: number; p_window_seconds: number }
+        Returns: {
+          allowed: boolean
+          current_count: number
+          retry_after_seconds: number
+        }[]
+      }
       create_customer_org: {
         Args: {
           p_address?: string

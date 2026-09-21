@@ -68,6 +68,11 @@ import {
   ListFuelStopsResponseSchema,
   ListMessagesResponseSchema,
   GetDashboardResponseSchema,
+  ListOAuthClientsResponseSchema,
+  CreateOAuthClientBodySchema,
+  CreateOAuthClientResponseSchema,
+  OAuthClientIdParamsSchema,
+  RevokeOAuthClientResponseSchema,
 } from './schemas'
 
 export interface Endpoint {
@@ -539,5 +544,34 @@ export const endpoints: readonly Endpoint[] = [
     response: ErrorResponseSchema, // placeholder body type; real media type is text/event-stream
     errorStatuses: [401, 403],
     stream: true,
+  },
+  {
+    operationId: 'listOAuthClients',
+    method: 'get',
+    path: '/api/v1/oauth-clients',
+    summary: 'List the caller\'s organization\'s public developer API clients (owner/solo only)',
+    tag: 'developer-api',
+    response: ListOAuthClientsResponseSchema,
+    errorStatuses: [401, 403],
+  },
+  {
+    operationId: 'createOAuthClient',
+    method: 'post',
+    path: '/api/v1/oauth-clients',
+    summary: 'Create a new public developer API client. The response\'s client_secret is shown exactly once.',
+    tag: 'developer-api',
+    body: CreateOAuthClientBodySchema,
+    response: CreateOAuthClientResponseSchema,
+    errorStatuses: [400, 401, 403],
+  },
+  {
+    operationId: 'revokeOAuthClient',
+    method: 'delete',
+    path: '/api/v1/oauth-clients/{client_id}',
+    summary: 'Revoke a public developer API client. Its credentials stop working immediately for new token requests.',
+    tag: 'developer-api',
+    params: OAuthClientIdParamsSchema,
+    response: RevokeOAuthClientResponseSchema,
+    errorStatuses: [401, 403, 404],
   },
 ]

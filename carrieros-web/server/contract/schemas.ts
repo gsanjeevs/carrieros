@@ -560,5 +560,25 @@ export const GetDashboardResponseSchema = z.object({
   recent_payments: z.array(DashboardInvoiceSchema).optional(),
 })
 
+// Public developer API (Phase 9) client management — administered by a logged-in owner/solo human on
+// Settings > Developer API, so this is ordinary /api/v1 (session auth), NOT /api/public/v1 (OAuth auth).
+// See server/application/oauth-client-service.ts.
+export const OAuthClientSummarySchema = z.object({
+  id: z.number().int(),
+  client_id: z.string(),
+  name: z.string(),
+  created_at: z.string(),
+  last_used_at: z.string().nullable(),
+  revoked_at: z.string().nullable(),
+})
+export const ListOAuthClientsResponseSchema = z.object({ clients: z.array(OAuthClientSummarySchema) })
+export const CreateOAuthClientBodySchema = z.object({ name: z.string().min(1).max(100) })
+export const CreateOAuthClientResponseSchema = z.object({
+  client: OAuthClientSummarySchema,
+  client_secret: z.string().describe('Shown once, at creation. Never returned by any other call.'),
+})
+export const OAuthClientIdParamsSchema = z.object({ client_id: z.string().min(1) })
+export const RevokeOAuthClientResponseSchema = z.object({ ok: z.boolean() })
+
 export type ListLoadsQuery = z.infer<typeof ListLoadsQuerySchema>
 export type ListLoadsResponse = z.infer<typeof ListLoadsResponseSchema>

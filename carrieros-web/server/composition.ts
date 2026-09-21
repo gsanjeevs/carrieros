@@ -191,3 +191,40 @@ import { SupabaseDashboardQueryRepository } from './infrastructure/supabase/dash
 export function createDashboardQueryService(supabase: SupabaseClient<Database>): DashboardQueryService {
   return new DashboardQueryService({ dashboard: new SupabaseDashboardQueryRepository(supabase) })
 }
+
+// Public developer API (Phase 9). oauth_clients/oauth_client_rate_limits have zero authenticated/anon
+// grants (migration 0025) — there is no Supabase session for either the Settings-page management flow or
+// the external caller's token exchange to key RLS off, so both always run as service_role, same posture as
+// createChangeFeedService above.
+import { OAuthClientService } from './application/oauth-client-service'
+import { PublicApiTokenService } from './application/public-api-token-service'
+import {
+  SupabaseOAuthClientRepository,
+  SupabasePublicApiEntitlementGate,
+  SupabasePublicApiRateLimiter,
+} from './infrastructure/supabase/oauth-client-repository'
+import { NodeOAuthCredentialProvider } from './infrastructure/crypto/oauth-credentials'
+
+export function createOAuthClientService(): OAuthClientService {
+  const admin = createAdminClient()
+  return new OAuthClientService({
+    clients: new SupabaseOAuthClientRepository(admin),
+    credentials: new NodeOAuthCredentialProvider(),
+  })
+}
+
+export function createPublicApiTokenService(): PublicApiTokenService {
+  const admin = createAdminClient()
+  return new PublicApiTokenService({
+    clients: new SupabaseOAuthClientRepository(admin),
+    credentials: new NodeOAuthCredentialProvider(),
+    entitlements: new SupabasePublicApiEntitlementGate(admin),
+    rateLimiter: new SupabasePublicApiRateLimiter(admin),
+  })
+}
+
+// Shared by every /api/public/v1/** data route (not just the token exchange) — a valid JWT still gets
+// rate-limited per request, keyed by the client_id embedded in it at issuance.
+export function createPublicApiRateLimiter(): SupabasePublicApiRateLimiter {
+  return new SupabasePublicApiRateLimiter(createAdminClient())
+}
