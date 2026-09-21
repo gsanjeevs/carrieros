@@ -74,8 +74,11 @@ remaining-work roadmap: `architecture/adr/0003-api-only-data-access.md`.
 
 ## After any schema change
 Write a new numbered file in `supabase/migrations/` (never edit a merged
-one — see `architecture/database-migrations.md`), apply it locally with
-`node scripts/db/migrate.mjs`, and hand-update `supabase/schema/schema.sql`
+one — see `architecture/database-migrations.md`). The file must start with a
+`-- <filename>.sql` header comment followed by a few lines on what changed
+and why (Rule E, `architecture-principles.md`) — `migrate.mjs` and
+`verify-migrations.mjs` both refuse a migration missing one. Apply it locally
+with `node scripts/db/migrate.mjs`, and hand-update `supabase/schema/schema.sql`
 to match — `node scripts/db/verify-migrations.mjs` checks the two agree but
 does not generate the snapshot for you. Regenerate the ERD with
 `node scripts/db/gen-erd.mjs` (writes `architecture/erd.md`; CI fails if stale).
@@ -142,8 +145,12 @@ git config core.hooksPath scripts/git-hooks
   and `carrieros-web/scripts/check-architecture.mjs` (static grep — no DB —
   enforcing Rule B/D "business/query logic must not import React/Next.js/
   components" and Rule G "call sites must go through `lib/storage`/
-  `lib/auth-admin`, not the raw Supabase SDK"). Mobile TS files get
-  `tsc --noEmit` only. Fast (no DB), so it runs on every commit.
+  `lib/auth-admin`, not the raw Supabase SDK", plus `warn`-only checks for
+  Rule A/H/I status-color, role-list-literal, and currency-literal-fallback
+  duplication — see `architecture-principles.md`'s "Enforcement" notes on
+  each of those rules for what each check found and why it's `warn` not
+  `error`). Mobile TS files get `tsc --noEmit` only. Fast (no DB), so it runs
+  on every commit.
 - **`scripts/git-hooks/pre-push`** — runs each app's full test suite
   (DB-backed, slower) if that app changed since `main`. Gated at push, not
   commit, since that's when code actually leaves the machine.
