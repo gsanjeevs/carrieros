@@ -13,7 +13,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'
 import { hasFeature } from '@/lib/entitlements'
-import { logError } from '@/lib/observability'
+import { logError, logEvent } from '@/lib/observability'
 import { getProfileForUser, insertProfile } from '@/lib/queries/profiles'
 import { createAuthAdminProvider } from '@/lib/auth-admin'
 import { roleHasCapability } from '@/lib/generated/role-capabilities'
@@ -31,10 +31,7 @@ export const INVITABLE_ROLES = ['dispatcher', 'finance', 'owner'] as const
 // phone, no password) is real and complete, and a real provider can drop in
 // behind this function without changing anything else in the route.
 function sendPhoneInviteSms(params: { phone: string; role: string }): void {
-  console.log(
-    '[team-invite:sms-stub] no SMS provider is configured — no text was sent.',
-    JSON.stringify(params)
-  )
+  logEvent({ route: 'team/invite:sms-stub' }, { message: 'no SMS provider configured — no text was sent', params })
 }
 
 export async function POST(request: NextRequest) {

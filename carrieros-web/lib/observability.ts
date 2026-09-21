@@ -11,6 +11,13 @@
 
 import * as Sentry from '@sentry/nextjs'
 
+// Same env var lib/sentry-options.ts already uses to tag Sentry events by
+// environment -- reused here rather than a second, competing variable name.
+// Falls back to 'development' (not NODE_ENV directly) so a log line always
+// says something explicit rather than silently omitting the field when
+// unset, which is exactly the gap this was added to close (2026-09-21).
+const ENVIRONMENT = process.env.SENTRY_ENVIRONMENT ?? process.env.NODE_ENV ?? 'development'
+
 export interface LogContext {
   route: string
   /** Pass `request.headers.get('x-request-id')` (set by proxy.ts) to correlate a log line with a response and tracker event. */
@@ -31,6 +38,7 @@ export function logError(context: LogContext, error: unknown, extra?: Record<str
   const payload = {
     level: 'error' as const,
     timestamp: new Date().toISOString(),
+    environment: ENVIRONMENT,
     ...context,
     error: serializeError(error),
     ...extra,
@@ -48,6 +56,7 @@ export function logEvent(context: LogContext, extra?: Record<string, unknown>) {
   const payload = {
     level: 'info' as const,
     timestamp: new Date().toISOString(),
+    environment: ENVIRONMENT,
     ...context,
     ...extra,
   }

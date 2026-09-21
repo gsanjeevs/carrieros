@@ -13,7 +13,7 @@ import { hasFeature } from '@/lib/entitlements'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { getLoadById } from '@/lib/queries/loads'
 import { getDriverIdForProfile } from '@/lib/queries/drivers'
-import { logError } from '@/lib/observability'
+import { logError, logEvent } from '@/lib/observability'
 import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 /**
@@ -26,10 +26,7 @@ import { roleHasCapability } from '@/lib/generated/role-capabilities'
  * durably written by the time this runs.
  */
 function sendPushNotification(params: { loadId: number; senderId: string; body: string }): void {
-  console.log(
-    '[driver-messages:push-stub] would push-notify the other party on this thread',
-    JSON.stringify(params)
-  )
+  logEvent({ route: 'driver-messages:push-stub' }, { message: 'would push-notify the other party on this thread', params })
 }
 
 export async function POST(request: NextRequest) {

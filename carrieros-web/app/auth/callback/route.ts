@@ -6,6 +6,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import type { EmailOtpType } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { logError } from '@/lib/observability'
 
 const ROLE_HOME: Record<string, string> = {
   owner:      '/dashboard',
@@ -58,7 +59,7 @@ export async function GET(request: NextRequest) {
     : await supabase.auth.verifyOtp({ type: type ?? 'invite', token_hash: token_hash! })
 
   if (error) {
-    console.error('[auth/callback] error:', error.message)
+    logError({ route: 'auth/callback', requestId: request.headers.get('x-request-id') }, error)
     return NextResponse.redirect(`${origin}/login?error=auth_failed`)
   }
 

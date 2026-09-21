@@ -3,6 +3,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { logError } from '@/lib/observability'
 
 export async function signInWithEmail(formData: FormData) {
   const email = formData.get('email') as string
@@ -17,7 +18,10 @@ export async function signInWithEmail(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) {
-    console.error('[login] error:', error.message)
+    // Never log the raw email/password — the error object itself (wrong
+    // password, unknown user, etc.) is enough context, and logging the
+    // attempted identity for every failed login is unnecessary exposure.
+    logError({ route: 'login' }, error)
     redirect('/login?error=invalid_credentials')
   }
 

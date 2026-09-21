@@ -10,6 +10,7 @@
 import { passwordMeetsPolicy } from '@/lib/password-policy'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { logError } from '@/lib/observability'
 
 const VALID_TIERS = ['starter', 'growth'] as const // self-serve signup only offers these two, per mockup-09
 
@@ -40,7 +41,7 @@ export async function signUpWithEmail(formData: FormData) {
   })
 
   if (error) {
-    console.error('[signup] error:', error.message)
+    logError({ route: 'signup' }, error)
     const code =
       error.code === 'weak_password' ? 'weak_password'
       : error.message.toLowerCase().includes('already registered') ? 'email_exists'

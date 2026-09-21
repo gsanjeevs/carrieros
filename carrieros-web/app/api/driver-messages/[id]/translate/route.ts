@@ -11,7 +11,7 @@ import { SUPPORTED_LOCALES } from '@/i18n/request'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { getLoadById } from '@/lib/queries/loads'
 import { getDriverIdForProfile } from '@/lib/queries/drivers'
-import { logError } from '@/lib/observability'
+import { logError, logEvent } from '@/lib/observability'
 import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 type Ctx = { params: Promise<{ id: string }> }
@@ -25,10 +25,7 @@ type Ctx = { params: Promise<{ id: string }> }
  * mistakes it for a working translation.
  */
 async function translateText(body: string, targetLanguage: string): Promise<string> {
-  console.log(
-    '[driver-messages:translate-stub] no translation backend configured — returning the original text',
-    JSON.stringify({ targetLanguage })
-  )
+  logEvent({ route: 'driver-messages/translate:stub' }, { message: 'no translation backend configured — returning the original text', targetLanguage })
   return `[STUB TRANSLATION → ${targetLanguage}] ${body}`
 }
 

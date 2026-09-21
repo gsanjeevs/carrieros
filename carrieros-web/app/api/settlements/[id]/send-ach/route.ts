@@ -21,6 +21,7 @@ import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { hasFeature } from '@/lib/entitlements'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { roleHasCapability } from '@/lib/generated/role-capabilities'
+import { logEvent } from '@/lib/observability'
 
 /**
  * TODO(stripe-connect / ACH partner): replace this body with a real
@@ -31,10 +32,7 @@ import { roleHasCapability } from '@/lib/generated/role-capabilities'
  * documented in lib/stripe.ts's createStripeCustomer().
  */
 function sendAchTransfer(params: { settlementId: number; netPay: number; driverId: number | null }): void {
-  console.log(
-    '[settlements:ach-stub] no ACH/Connect account is configured — no money was moved.',
-    JSON.stringify(params)
-  )
+  logEvent({ route: 'settlements/send-ach:stub' }, { message: 'no ACH/Connect account configured — no money was moved', params })
 }
 
 export async function POST(

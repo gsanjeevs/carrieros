@@ -13,6 +13,8 @@
 // app/(app)/billing/AddPaymentMethodButton.tsx. No input field for a card
 // number exists anywhere in this feature, demo or not.
 
+import { logEvent } from '@/lib/observability'
+
 export interface StripeCustomerResult {
   stripe_customer_id: string
   card_brand: string
@@ -41,10 +43,7 @@ export async function createStripeCustomer(org: {
   id: number
   name?: string | null
 }): Promise<StripeCustomerResult> {
-  console.log(
-    '[billing:stub] no Stripe account is configured — simulating a demo payment method.',
-    JSON.stringify({ org_id: org.id, org_name: org.name ?? null })
-  )
+  logEvent({ route: 'billing:stub' }, { message: 'no Stripe account configured — simulating a demo payment method', orgId: org.id, orgName: org.name ?? null })
 
   return {
     stripe_customer_id: `demo_cus_${org.id}_${Date.now()}`,
