@@ -4,6 +4,8 @@
 *.env
 
 .claude/settings.local.json
+# Local mirror of Claude Code's memory dir; holds demo credentials, keep out of git
+.claude/memory/
 supabase/.temp/
 supabase/.branches/
 
