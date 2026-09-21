@@ -61,7 +61,8 @@
     "section_fleet": "ਫਲੀਟ",
     "section_billing": "ਬਿਲਿੰਗ",
     "section_team": "ਟੀਮ",
-    "developerApi": "ਡੈਵਲਪਰ API"
+    "developerApi": "ਡੈਵਲਪਰ API",
+    "brandingCustomization": "ਬ੍ਰਾਂਡਿੰਗ"
   },
   "login": {
     "title": "ਆਪਣੇ ਖਾਤੇ ਵਿੱਚ ਸਾਈਨ ਇਨ ਕਰੋ",
@@ -836,6 +837,24 @@
     "secretRevealDone": "ਮੈਂ ਇਹ ਕ੍ਰੈਡੰਸ਼ੀਅਲਜ਼ ਸੰਭਾਲ ਲਈਆਂ ਹਨ",
     "emptyTitle": "ਅਜੇ ਤੱਕ ਕੋਈ API ਕ੍ਲਾਈਂਟ ਨਹੀਂ",
     "emptyDescription": "ਕਿਸੇ ਥਾਂ ਐਪ ਨੂੰ CarrierOS ਦੀ ਪਬਲਿਕ API ਰਾਹੀਂ ਤੁਹਾਡੀ ਸੰਸਥਾ ਦੇ ਲੋਡ਼ ਅਤੇ ਇਨਵਾਇਸ ਪੜ਼ਨ ਦਿੰਦਾ ਹੈ ਗੈਦ ਗਏ ਇੱਕ ਕ੍ਲਾਈਂਟ ਬਣਾਓ।"
+  },
+  "brandingSettings": {
+    "title": "ਬ੍ਰਾਂਡਿੰਗ",
+    "subtitle": "ਐਪ ਅਤੇ ਆਪਣੇ ਗਾਹਕਾਂ ਦੇ ਟਰੈਕਿੰਗ ਪੇਜ ਉੱਤੇ ਆਪਣਾ ਲੋਗੋ ਅਤੇ ਬ੍ਰਾਂਡ ਰੰਗ ਕਸਟਮਾਈਜ਼ ਕਰੋ।",
+    "tierNote": "ਇਹ ਤੁਹਾਡੇ ਐਪ ਹੈਡਰ ਅਤੇ ਗਾਹਕਾਂ ਵੱਲੋਂ ਦੇਖੇ ਜਾਂਦੇ ਪਬਲਿਕ ਟਰੈਕਿੰਗ ਪੇਜ ਉੱਤੇ ਲਾਗੂ ਹੁੰਦਾ ਹੈ। Enterprise ਪਲਾਨ ਲੋੜੀਂਦਾ ਹੈ।",
+    "lockedTitle": "Enterprise ਪਲਾਨ ਲੋੜੀਂਦਾ ਹੈ",
+    "lockedDescription": "ਬ੍ਰਾਂਡਿੰਗ ਕਸਟਮਾਈਜ਼ੇਸ਼ਨ — ਐਪ ਅਤੇ ਤੁਹਾਡੇ ਗਾਹਕਾਂ ਦੇ ਟਰੈਕਿੰਗ ਪੇਜ ਉੱਤੇ ਤੁਹਾਡਾ ਆਪਣਾ ਲੋਗੋ ਅਤੇ ਰੰਗ — Enterprise ਪਲਾਨ ਉੱਤੇ ਉਪਲਬਧ ਹੈ।",
+    "upgradeCta": "ਪਲਾਨ ਵੇਖੋ",
+    "logoLabel": "ਲੋਗੋ",
+    "uploadLogo": "ਲੋਗੋ ਅੱਪਲੋਡ ਕਰੋ",
+    "replaceLogo": "ਲੋਗੋ ਬਦਲੋ",
+    "logoTooLarge": "ਲੋਗੋ 5MB ਜਾਂ ਇਸ ਤੋਂ ਛੋਟਾ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।",
+    "primaryColorLabel": "ਪ੍ਰਾਇਮਰੀ ਰੰਗ",
+    "accentColorLabel": "ਐਕਸੈਂਟ ਰੰਗ",
+    "colorHelp": "ਡਿਫਾਲਟ CarrierOS ਰੰਗ ਵਰਤਣ ਲਈ ਰੰਗ ਖਾਲੀ ਛੱਡੋ।",
+    "invalidColor": "ਰੰਗ #RRGGBB ਵਜੋਂ ਦਰਜ ਕਰੋ, ਜਿਵੇਂ #f47920।",
+    "save": "ਬਦਲਾਅ ਸੰਭਾਲੋ",
+    "saved": "ਬ੍ਰਾਂਡਿੰਗ ਅੱਪਡੇਟ ਹੋ ਗਈ।"
   },
   "customers": {
     "title": "ਗਾਹਕ",

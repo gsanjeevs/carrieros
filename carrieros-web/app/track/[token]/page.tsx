@@ -14,9 +14,11 @@
 // Deliberately does not import STATUS_BADGE from the authenticated
 // loads pages — this page must keep working even if that module changes.
 // Text still comes from the tracking.*/loads.status_* message catalogs.
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { toDate } from '@/lib/format-datetime'
+import { createStorageProvider } from '@/lib/storage'
+import { brandingCssVars } from '@/lib/domain/branding'
 
 const STATUS_COLOR: Record<string, string> = {
   draft:       'bg-slate-500/20 text-slate-400',
@@ -74,12 +76,24 @@ function timeAgo(value: string, t: TimeAgoT): string {
   return t('lastUpdated', { time: `${days} ${unit}` })
 }
 
-function Logo() {
+// Enterprise branding customization (decisions.md PR1 amendment) swaps the
+// mark for the carrier's own logo when one is set for a tracking-token's
+// org; the "CarrierOS" wordmark always stays (PR1 is explicitly NOT hiding
+// the CarrierOS name). logoUrl is a signed URL, resolved by the caller via
+// the admin client — see this file's own header comment on why anon can't
+// sign it directly (no storage.objects grant), same reasoning
+// get_public_tracking()'s SECURITY DEFINER already relies on for org data.
+function Logo({ logoUrl }: { logoUrl?: string | null }) {
   return (
     <div className="inline-flex items-center gap-2">
-      <div className="w-8 h-8 rounded-lg bg-brand-orange flex items-center justify-center">
-        <span className="text-white font-bold text-sm">C</span>
-      </div>
+      {logoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element -- signed URL, not a static asset
+        <img src={logoUrl} alt="" className="w-8 h-8 rounded-lg object-cover" />
+      ) : (
+        <div className="w-8 h-8 rounded-lg bg-brand-orange flex items-center justify-center">
+          <span className="text-white font-bold text-sm">C</span>
+        </div>
+      )}
       <span className="text-white font-semibold text-xl tracking-tight">CarrierOS</span>
     </div>
   )
@@ -129,12 +143,31 @@ export default async function TrackingPage({
   const { data: events } = await supabase.rpc('get_public_tracking_events', { p_token: token })
   const timeline = events ?? []
 
+  // Enterprise branding customization (decisions.md PR1 amendment). Already
+  // NULL from get_public_tracking() unless the carrier's org is Enterprise-
+  // entitled (checked in Postgres via entitlement_decision — migration
+  // 0026), so no has_feature() check is needed here. The signed URL uses the
+  // ADMIN client, not the anon `supabase` client above: anon has no
+  // storage.objects grant on the private `documents` bucket (decisions.md
+  // T11), so this is the one place a visitor sees a carrier's logo without
+  // being a member of that org — same trust boundary get_public_tracking()
+  // itself already crosses for name/phone/email via SECURITY DEFINER.
+  let brandLogoUrl: string | null = null
+  if (load.brand_logo_path) {
+    const admin = createAdminClient()
+    brandLogoUrl = await createStorageProvider(admin).getSignedUrl(load.brand_logo_path, 60 * 10).catch(() => null)
+  }
+  const brandingStyle = brandingCssVars({
+    primaryColor: load.brand_primary_color,
+    accentColor: load.brand_accent_color,
+  })
+
   return (
-    <div className="min-h-screen bg-navy px-4 py-10 sm:py-16">
+    <div className="min-h-screen bg-navy px-4 py-10 sm:py-16" style={brandingStyle as React.CSSProperties}>
       <div className="w-full max-w-md mx-auto">
 
         <div className="mb-8 flex justify-center">
-          <Logo />
+          <Logo logoUrl={brandLogoUrl} />
         </div>
 
         <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
