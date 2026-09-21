@@ -5,6 +5,8 @@ import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import Sidebar from '@/components/Sidebar'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { getOrgBranding } from '@/lib/branding'
+import { brandingCssVars } from '@/lib/domain/branding'
 
 export default async function AppLayout({
   children,
@@ -33,8 +35,21 @@ export default async function AppLayout({
     .eq('code', role)
     .single()
 
+  // Enterprise branding customization (decisions.md PR1 amendment) — the
+  // ONE resolver (lib/branding.ts) for the app shell's logo/brand colors.
+  // brandingCssVars() maps them onto the same --color-brand-orange/
+  // --color-teal custom properties app/globals.css's @theme block already
+  // generates bg-brand-orange/text-brand-orange/bg-teal/text-teal utilities
+  // from, so setting them here on the outer wrapper cascades to every
+  // authenticated page without touching a single component.
+  const branding = await getOrgBranding(supabase)
+  const brandingStyle = brandingCssVars(branding)
+
   return (
-    <div className="flex h-screen bg-navy overflow-hidden">
+    <div
+      className="flex h-screen bg-navy overflow-hidden"
+      style={brandingStyle as React.CSSProperties}
+    >
       <Sidebar
         role={role}
         userName={name}
@@ -42,6 +57,7 @@ export default async function AppLayout({
         preferredLanguage={preferredLanguage}
         roleAbbreviation={roleRow?.abbreviation}
         roleColorToken={roleRow?.color_token}
+        logoUrl={branding.logoUrl}
       />
       <main className="flex-1 overflow-y-auto">
         {children}

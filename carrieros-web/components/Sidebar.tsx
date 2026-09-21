@@ -71,6 +71,10 @@ const NAV_SECTIONS: NavSection[] = [
       { labelKey: 'settings', href: '/settings', icon: 'settings', capability: 'settings_view' },
       // Public developer API (Phase 9) client management — same gate as billing (subscription_management).
       { labelKey: 'developerApi', href: '/settings/developer-api', icon: 'api', capability: 'subscription_management' },
+      // Enterprise branding customization (decisions.md PR1 amendment, migration 0026) — owner/solo only,
+      // same shape as the other org-administration nav items above. The Enterprise tier gate itself is
+      // enforced on the page (a locked upsell state, not hidden nav) — same pattern developerApi uses.
+      { labelKey: 'brandingCustomization', href: '/settings/branding', icon: 'palette', capability: 'org_branding_manage' },
     ],
   },
 ]
@@ -92,9 +96,17 @@ interface Props {
   preferredLanguage: string
   roleAbbreviation?: string
   roleColorToken?: string
+  // Enterprise branding customization (decisions.md PR1 amendment) — a
+  // signed URL for the org's logo, resolved server-side by the ONE
+  // lib/branding.ts resolver (app/(app)/layout.tsx) and passed down as a
+  // prop, never fetched here (components/* must not talk to Supabase
+  // directly — architecture-principles.md Rule G / check-architecture.mjs's
+  // ui-db-boundary check). null/undefined falls back to the default "C"
+  // mark, same as every non-Enterprise org sees today.
+  logoUrl?: string | null
 }
 
-export default function Sidebar({ role, userName, userId, preferredLanguage, roleAbbreviation, roleColorToken }: Props) {
+export default function Sidebar({ role, userName, userId, preferredLanguage, roleAbbreviation, roleColorToken, logoUrl }: Props) {
   const pathname = usePathname()
   const t = useTranslations('nav')
   const tCommon = useTranslations('common')
@@ -122,11 +134,18 @@ export default function Sidebar({ role, userName, userId, preferredLanguage, rol
   return (
     <aside className="w-64 flex-shrink-0 flex flex-col bg-navy border-r border-divider-ui">
 
-      {/* Logo */}
+      {/* Logo — Enterprise branding customization (decisions.md PR1 amendment) swaps the mark for the
+          org's own uploaded logo when one is set; every other tier keeps the default "C" mark. The
+          "CarrierOS" wordmark always stays (PR1 is explicitly NOT hiding the CarrierOS name). */}
       <div className="flex items-center gap-2.5 px-5 py-5 border-b border-divider-ui">
-        <div className="w-7 h-7 rounded-md bg-brand-orange flex items-center justify-center flex-shrink-0">
-          <span className="text-white font-bold text-xs">C</span>
-        </div>
+        {logoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element -- signed URL, not a static asset
+          <img src={logoUrl} alt="" className="w-7 h-7 rounded-md object-cover flex-shrink-0" />
+        ) : (
+          <div className="w-7 h-7 rounded-md bg-brand-orange flex items-center justify-center flex-shrink-0">
+            <span className="text-white font-bold text-xs">C</span>
+          </div>
+        )}
         <span className="text-white font-extrabold text-xl tracking-tight">CarrierOS</span>
       </div>
 

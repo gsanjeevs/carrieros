@@ -57,6 +57,7 @@
     "billing": "Billing",
     "settings": "Settings",
     "developerApi": "Developer API",
+    "brandingCustomization": "Branding",
     "section_main": "Main",
     "section_fleet": "Fleet",
     "section_billing": "Billing",
@@ -806,6 +807,24 @@
     "secretRevealDone": "I've saved these credentials",
     "emptyTitle": "No API clients yet",
     "emptyDescription": "Create a client to let another application read your loads and invoices via the CarrierOS public API."
+  },
+  "brandingSettings": {
+    "title": "Branding",
+    "subtitle": "Customize your logo and brand colors on the app and your customers' tracking page.",
+    "tierNote": "Applies to your app header and the public tracking page your customers see. Requires the Enterprise plan.",
+    "lockedTitle": "Enterprise plan required",
+    "lockedDescription": "Branding customization — your own logo and colors across the app and your customers' tracking page — is available on the Enterprise plan.",
+    "upgradeCta": "View plans",
+    "logoLabel": "Logo",
+    "uploadLogo": "Upload logo",
+    "replaceLogo": "Replace logo",
+    "logoTooLarge": "Logo must be 5MB or smaller.",
+    "primaryColorLabel": "Primary color",
+    "accentColorLabel": "Accent color",
+    "colorHelp": "Leave a color blank to use the default CarrierOS color.",
+    "invalidColor": "Enter a color as #RRGGBB, e.g. #f47920.",
+    "save": "Save changes",
+    "saved": "Branding updated."
   },
   "customers": {
     "title": "Customers",

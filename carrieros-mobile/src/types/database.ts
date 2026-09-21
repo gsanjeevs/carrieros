@@ -218,6 +218,8 @@ export type Database = {
       carrier_details: {
         Row: {
           billing_status: string
+          brand_accent_color: string | null
+          brand_primary_color: string | null
           card_brand: string | null
           card_last4: string | null
           default_language: string
@@ -237,6 +239,8 @@ export type Database = {
         }
         Insert: {
           billing_status?: string
+          brand_accent_color?: string | null
+          brand_primary_color?: string | null
           card_brand?: string | null
           card_last4?: string | null
           default_language?: string
@@ -256,6 +260,8 @@ export type Database = {
         }
         Update: {
           billing_status?: string
+          brand_accent_color?: string | null
+          brand_primary_color?: string | null
           card_brand?: string | null
           card_last4?: string | null
           default_language?: string
@@ -2836,9 +2842,21 @@ export type Database = {
           key: string
         }[]
       }
+      get_org_branding: {
+        Args: never
+        Returns: {
+          accent_color: string
+          enabled: boolean
+          logo_path: string
+          primary_color: string
+        }[]
+      }
       get_public_tracking: {
         Args: { p_token: string }
         Returns: {
+          brand_accent_color: string
+          brand_logo_path: string
+          brand_primary_color: string
           carrier_email: string
           carrier_name: string
           carrier_phone: string

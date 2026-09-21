@@ -38,6 +38,8 @@ erDiagram
   carrier_details {
     bigint org_id PK
     text billing_status
+    text brand_accent_color
+    text brand_primary_color
     text card_brand
     text card_last4
     text default_language

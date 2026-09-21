@@ -60,7 +60,8 @@
     "section_fleet": "فلیٹ",
     "section_billing": "بلنگ",
     "section_team": "ٹیم",
-    "developerApi": "ڈولپر API"
+    "developerApi": "ڈولپر API",
+    "brandingCustomization": "برانڈنگ"
   },
   "login": {
     "title": "اپنے اکاؤنٹ میں سائن ان کریں",
@@ -806,6 +807,24 @@
     "secretRevealDone": "میں نے یہ اسناد محفوظ کر لیے ہیں",
     "emptyTitle": "ابھی تک کوئی API کلائنٹ نہیں",
     "emptyDescription": "کسی دوسرے ایپلیکیشن کو CarrierOS کے عوامی API کے ذریعے آپ کے ادارے کے لوڈز اور انوائسز پڑھنے کی اجازت دینے کے لئے ایک کلائنٹ بنائیں۔"
+  },
+  "brandingSettings": {
+    "title": "برانڈنگ",
+    "subtitle": "ایپ اور اپنے کسٹمرز کے ٹریکنگ پیج پر اپنا لوگو اور برانڈ رنگ حسبِ ضرورت بنائیں۔",
+    "tierNote": "یہ آپ کے ایپ ہیڈر اور کسٹمرز کو نظر آنے والے پبلک ٹریکنگ پیج پر لاگو ہوتا ہے۔ Enterprise پلان درکار ہے۔",
+    "lockedTitle": "Enterprise پلان درکار ہے",
+    "lockedDescription": "برانڈنگ کسٹمائزیشن — ایپ اور اپنے کسٹمرز کے ٹریکنگ پیج پر اپنا لوگو اور رنگ — Enterprise پلان پر دستیاب ہے۔",
+    "upgradeCta": "پلانز دیکھیں",
+    "logoLabel": "لوگو",
+    "uploadLogo": "لوگو اپلوڈ کریں",
+    "replaceLogo": "لوگو تبدیل کریں",
+    "logoTooLarge": "لوگو 5MB یا اس سے چھوٹا ہونا چاہیے۔",
+    "primaryColorLabel": "بنیادی رنگ",
+    "accentColorLabel": "ایکسنٹ رنگ",
+    "colorHelp": "ڈیفالٹ CarrierOS رنگ استعمال کرنے کے لیے رنگ خالی چھوڑ دیں۔",
+    "invalidColor": "رنگ #RRGGBB کی صورت میں درج کریں، مثلاً #f47920۔",
+    "save": "تبدیلیاں محفوظ کریں",
+    "saved": "برانڈنگ اپڈیٹ ہو گئی۔"
   },
   "customers": {
     "title": "کسٹمرز",

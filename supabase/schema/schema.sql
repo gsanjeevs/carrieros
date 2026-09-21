@@ -79,7 +79,14 @@ CREATE TABLE carrier_details (
   -- ShipmentX admin action (see SECTION 3c's admin_events) or, once real
   -- Stripe webhooks exist, by billing automation. Scaffolded now even
   -- though billing_events/Stripe webhooks are demo-only today (lib/stripe.ts).
-  grace_period_until  TIMESTAMPTZ
+  grace_period_until  TIMESTAMPTZ,
+  -- Enterprise branding customization (added 2026-09-21, migration 0026,
+  -- decisions.md PR1 amendment) -- overrides --color-brand-orange/
+  -- --color-teal for this org's app shell + public tracking page when
+  -- has_feature('branding_customization') is true. NULL = default theme.
+  -- Logo reuses organizations.logo_path (S10) rather than a second column.
+  brand_primary_color TEXT CHECK (brand_primary_color ~ '^#[0-9A-Fa-f]{6}$'),
+  brand_accent_color  TEXT CHECK (brand_accent_color  ~ '^#[0-9A-Fa-f]{6}$')
 );
 
 -- Customer-only fields (shipper/broker, per carrier)
@@ -298,6 +305,8 @@ INSERT INTO role_capabilities (role, capability) VALUES
   ('owner',      'org_documents_manage'),
   ('owner',      'documents_delete'),
   ('owner',      'rate_visibility'),
+  -- Migration 0026: Enterprise branding customization (decisions.md PR1 amendment) -- owner/solo only.
+  ('owner',      'org_branding_manage'),
 
   ('solo',       'dashboard'),
   ('solo',       'dispatch'),
@@ -337,6 +346,7 @@ INSERT INTO role_capabilities (role, capability) VALUES
   ('solo',       'org_documents_manage'),
   ('solo',       'documents_delete'),
   ('solo',       'rate_visibility'),
+  ('solo',       'org_branding_manage'),
 
   ('dispatcher', 'dashboard'),
   ('dispatcher', 'dispatch'),
@@ -471,6 +481,12 @@ INSERT INTO features (key, label, min_tier, display_order) VALUES
 -- every other gated capability. Starter-tier orgs cannot use the public API at all.
 INSERT INTO features (key, label, min_tier, display_order) VALUES
   ('public_api', 'Public Developer API', 'growth', 15);
+
+-- Migration 0026 (2026-09-21): the first feature to actually use min_tier = 'enterprise' --
+-- decisions.md PR1's amended, scoped-down "branding customization" (logo + brand colors), not the
+-- originally-undefined "white-label".
+INSERT INTO features (key, label, min_tier, display_order) VALUES
+  ('branding_customization', 'Branding Customization', 'enterprise', 16);
 
 -- ────────────────────────────────────────────────────────────
 -- SECTION 2: PROFILES — ALL users in the system
@@ -1351,6 +1367,21 @@ CREATE UNIQUE INDEX idx_vehicle_number  ON vehicles(carrier_org_id, vehicle_numb
 -- sanctioned way to expose a carrier's public-facing contact info to a
 -- tracking-link visitor. Do not add a general anon policy on organizations
 -- instead — that would expose it more broadly than just via a valid token.
+--
+-- This is the BASIC version (pre-branding). Migration 0026 (decisions.md
+-- PR1 amendment) replaces this definition further down (SECTION 19, right
+-- after entitlement_decision is defined) with one that also returns
+-- brand_logo_path/brand_primary_color/brand_accent_color — deliberately
+-- placed after, not edited in place here, for the same reason has_feature()
+-- itself has an early definition and a later CREATE OR REPLACE below: a
+-- LANGUAGE SQL function body IS resolved against its referenced objects at
+-- CREATE time (unlike PL/pgSQL), so a get_public_tracking() defined THIS
+-- early that already called entitlement_decision() (not defined until much
+-- later in this file) would fail a fresh top-to-bottom replay even though
+-- it works fine applied incrementally through supabase/migrations, where
+-- entitlement_decision already exists by migration 0026's turn. Confirmed
+-- by running node scripts/db/verify-migrations.mjs, which replays this file
+-- alone into a scratch database.
 CREATE OR REPLACE FUNCTION get_public_tracking(p_token TEXT)
 RETURNS TABLE(
   load_number       TEXT,
@@ -3696,6 +3727,74 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
 $$;
 REVOKE EXECUTE ON FUNCTION get_my_entitlement(TEXT) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION get_my_entitlement(TEXT) TO authenticated;
+
+-- Migration 0026: single resolver for the AUTHENTICATED app shell's branding tokens (Rule A's "one
+-- resolver, not scattered" principle, architecture-principles.md, applied to branding rather than
+-- status colors). NULLs every field when the org isn't entitled, so lib/branding.ts never re-derives
+-- the has_feature() check itself.
+CREATE OR REPLACE FUNCTION get_org_branding()
+RETURNS TABLE(enabled BOOLEAN, logo_path TEXT, primary_color TEXT, accent_color TEXT)
+LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public AS $$
+  SELECT
+    has_feature('branding_customization'),
+    CASE WHEN has_feature('branding_customization') THEN o.logo_path ELSE NULL END,
+    CASE WHEN has_feature('branding_customization') THEN cd.brand_primary_color ELSE NULL END,
+    CASE WHEN has_feature('branding_customization') THEN cd.brand_accent_color ELSE NULL END
+  FROM organizations o
+  LEFT JOIN carrier_details cd ON cd.org_id = o.id
+  WHERE o.id = my_org_id();
+$$;
+GRANT EXECUTE ON FUNCTION get_org_branding() TO authenticated;
+
+-- The public tracking page (app/track/[token]/page.tsx) has NO auth session, so my_org_id() (which
+-- has_feature()/get_org_branding() above depend on) resolves to NULL there. This replaces the BASIC
+-- get_public_tracking() defined earlier in this file with one that also resolves branding, via
+-- entitlement_decision(org_id, key) -- the org-id-parameterized primitive has_feature() itself now
+-- delegates to (just above) -- since it's now defined and anon has no session to key my_org_id() off.
+-- DROP + CREATE (not CREATE OR REPLACE) because the column list changed; Postgres refuses to replace a
+-- function's OUT-parameter row type in place. Deliberately does not add a general anon SELECT policy on
+-- carrier_details for this -- same reasoning get_public_tracking()'s original header comment already
+-- gives for organizations.
+DROP FUNCTION IF EXISTS get_public_tracking(TEXT);
+CREATE FUNCTION get_public_tracking(p_token TEXT)
+RETURNS TABLE(
+  load_number          TEXT,
+  status               TEXT,
+  pickup_city          TEXT,
+  pickup_state         TEXT,
+  delivery_city        TEXT,
+  delivery_state       TEXT,
+  pickup_date          DATE,
+  delivery_date        DATE,
+  last_location_lat    NUMERIC,
+  last_location_lng    NUMERIC,
+  last_location_at     TIMESTAMPTZ,
+  carrier_name         TEXT,
+  carrier_phone        TEXT,
+  carrier_email        TEXT,
+  brand_logo_path      TEXT,
+  brand_primary_color  TEXT,
+  brand_accent_color   TEXT
+)
+LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public AS $$
+  SELECT
+    l.load_number, l.status,
+    l.pickup_city, l.pickup_state, l.delivery_city, l.delivery_state,
+    l.pickup_date, l.delivery_date,
+    l.last_location_lat, l.last_location_lng, l.last_location_at,
+    o.name, o.phone, o.email,
+    CASE WHEN (SELECT d.allowed FROM entitlement_decision(o.id, 'branding_customization') d)
+         THEN o.logo_path ELSE NULL END,
+    CASE WHEN (SELECT d.allowed FROM entitlement_decision(o.id, 'branding_customization') d)
+         THEN cd.brand_primary_color ELSE NULL END,
+    CASE WHEN (SELECT d.allowed FROM entitlement_decision(o.id, 'branding_customization') d)
+         THEN cd.brand_accent_color ELSE NULL END
+  FROM loads l
+  JOIN organizations o ON o.id = l.carrier_org_id
+  LEFT JOIN carrier_details cd ON cd.org_id = o.id
+  WHERE l.tracking_token = p_token
+$$;
+GRANT EXECUTE ON FUNCTION get_public_tracking(TEXT) TO anon;
 
 -- Write gates in the database, so a direct PostgREST call cannot skip what the API routes enforce. RESTRICTIVE
 -- policies are ANDed with the existing permissive ones (no rewrite). Writes only: after a downgrade or lapse the

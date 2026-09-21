@@ -60,7 +60,8 @@
     "section_fleet": "Flota",
     "section_billing": "Facturación",
     "section_team": "Equipo",
-    "developerApi": "API de desarrollador"
+    "developerApi": "API de desarrollador",
+    "brandingCustomization": "Marca"
   },
   "login": {
     "title": "Inicia sesión en tu cuenta",
@@ -806,6 +807,24 @@
     "secretRevealDone": "He guardado estas credenciales",
     "emptyTitle": "Aún no hay clientes de API",
     "emptyDescription": "Crea un cliente para que otra aplicación pueda leer las cargas y facturas de tu organización mediante la API pública de CarrierOS."
+  },
+  "brandingSettings": {
+    "title": "Marca",
+    "subtitle": "Personaliza tu logotipo y los colores de tu marca en la aplicación y en la página de seguimiento de tus clientes.",
+    "tierNote": "Se aplica al encabezado de la aplicación y a la página pública de seguimiento que ven tus clientes. Requiere el plan Enterprise.",
+    "lockedTitle": "Se requiere el plan Enterprise",
+    "lockedDescription": "La personalización de marca — tu propio logotipo y colores en la aplicación y en la página de seguimiento de tus clientes — está disponible en el plan Enterprise.",
+    "upgradeCta": "Ver planes",
+    "logoLabel": "Logotipo",
+    "uploadLogo": "Subir logotipo",
+    "replaceLogo": "Reemplazar logotipo",
+    "logoTooLarge": "El logotipo debe pesar 5MB o menos.",
+    "primaryColorLabel": "Color principal",
+    "accentColorLabel": "Color de acento",
+    "colorHelp": "Deja un color en blanco para usar el color predeterminado de CarrierOS.",
+    "invalidColor": "Ingresa un color como #RRGGBB, por ejemplo #f47920.",
+    "save": "Guardar cambios",
+    "saved": "Marca actualizada."
   },
   "customers": {
     "title": "Clientes",
