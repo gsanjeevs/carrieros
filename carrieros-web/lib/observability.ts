@@ -31,6 +31,15 @@ function serializeError(error: unknown) {
   if (error instanceof Error) {
     return { message: error.message, name: error.name, stack: error.stack }
   }
+  // AuthAdminProvider errors (lib/auth-admin/types.ts's AuthAdminError) are a
+  // plain `{ message, status }` object, not an Error instance -- without this
+  // branch String(error) collapses to the useless "[object Object]" for
+  // every logError() call downstream of an admin auth failure (invite,
+  // impersonate, cron reminders, ...).
+  if (error && typeof error === 'object' && 'message' in error) {
+    const { message, ...rest } = error as { message: unknown; [key: string]: unknown }
+    return { message: String(message), ...rest }
+  }
   return { message: String(error) }
 }
 
