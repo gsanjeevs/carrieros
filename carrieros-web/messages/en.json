@@ -56,6 +56,7 @@
     "team": "Team",
     "billing": "Billing",
     "settings": "Settings",
+    "security": "Security",
     "developerApi": "Developer API",
     "section_main": "Main",
     "section_fleet": "Fleet",
@@ -71,7 +72,11 @@
     "needAccess": "Need access? Contact your administrator",
     "invalidCredentials": "Invalid email or password",
     "noAccount": "Don't have an account?",
-    "signUpFree": "Sign up free"
+    "signUpFree": "Sign up free",
+    "or": "or",
+    "signInWithPasskey": "Sign in with a passkey",
+    "passkeySigningIn": "Signing in…",
+    "passkeyError": "Couldn't sign in with a passkey. Try again, or use your password above."
   },
   "onboarding": {
     "heading": "Let's get your carrier set up",
@@ -702,6 +707,31 @@
     "saving": "Saving…",
     "saved": "Saved",
     "saveError": "Could not save your settings. Please try again."
+  },
+  "security": {
+    "title": "Security",
+    "subtitle": "Manage the passkeys you use to sign in.",
+    "description": "A passkey lets you sign in with your device's fingerprint, face, or screen lock — no password to type or remember.",
+    "addPasskey": "Add a passkey",
+    "registering": "Adding…",
+    "registerError": "Couldn't add a passkey. Try again.",
+    "loading": "Loading your passkeys…",
+    "loadError": "Couldn't load your passkeys. Try again.",
+    "emptyTitle": "No passkeys yet",
+    "emptyDescription": "Add a passkey to sign in without a password.",
+    "unnamedPasskey": "Passkey",
+    "createdOn": "Added {date}",
+    "lastUsed": "last used {date}",
+    "rename": "Rename",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleting": "Deleting…",
+    "deleteTitle": "Delete this passkey?",
+    "deleteConfirm": "\"{name}\" will no longer be able to sign you in. This can't be undone.",
+    "deleteError": "Couldn't delete this passkey. Try again.",
+    "renameError": "Couldn't rename this passkey. Try again.",
+    "unsupportedBrowser": "Passkeys aren't supported in this browser. Try a recent version of Chrome, Safari, or Edge over HTTPS."
   },
   "team": {
     "title": "Team",

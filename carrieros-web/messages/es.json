@@ -56,6 +56,7 @@
     "team": "Equipo",
     "billing": "Facturación",
     "settings": "Configuración",
+    "security": "Seguridad",
     "section_main": "Principal",
     "section_fleet": "Flota",
     "section_billing": "Facturación",
@@ -71,7 +72,11 @@
     "needAccess": "¿Necesitas acceso? Contacta a tu administrador",
     "invalidCredentials": "Correo o contraseña incorrectos",
     "noAccount": "¿No tienes una cuenta?",
-    "signUpFree": "Regístrate gratis"
+    "signUpFree": "Regístrate gratis",
+    "or": "o",
+    "signInWithPasskey": "Iniciar sesión con una passkey",
+    "passkeySigningIn": "Iniciando sesión…",
+    "passkeyError": "No se pudo iniciar sesión con una passkey. Inténtalo de nuevo, o usa tu contraseña arriba."
   },
   "onboarding": {
     "heading": "Configuremos tu empresa transportista",
@@ -702,6 +707,31 @@
     "saving": "Guardando…",
     "saved": "Guardado",
     "saveError": "No se pudo guardar tu configuración. Inténtalo de nuevo."
+  },
+  "security": {
+    "title": "Seguridad",
+    "subtitle": "Administra las passkeys que usas para iniciar sesión.",
+    "description": "Una passkey te permite iniciar sesión con la huella, el rostro o el bloqueo de pantalla de tu dispositivo — sin contraseña que escribir ni recordar.",
+    "addPasskey": "Agregar una passkey",
+    "registering": "Agregando…",
+    "registerError": "No se pudo agregar la passkey. Inténtalo de nuevo.",
+    "loading": "Cargando tus passkeys…",
+    "loadError": "No se pudieron cargar tus passkeys. Inténtalo de nuevo.",
+    "emptyTitle": "Aún no hay passkeys",
+    "emptyDescription": "Agrega una passkey para iniciar sesión sin contraseña.",
+    "unnamedPasskey": "Passkey",
+    "createdOn": "Agregada el {date}",
+    "lastUsed": "último uso {date}",
+    "rename": "Renombrar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "deleting": "Eliminando…",
+    "deleteTitle": "¿Eliminar esta passkey?",
+    "deleteConfirm": "\"{name}\" ya no podrá iniciar tu sesión. Esta acción no se puede deshacer.",
+    "deleteError": "No se pudo eliminar la passkey. Inténtalo de nuevo.",
+    "renameError": "No se pudo renombrar la passkey. Inténtalo de nuevo.",
+    "unsupportedBrowser": "Las passkeys no son compatibles con este navegador. Prueba una versión reciente de Chrome, Safari o Edge por HTTPS."
   },
   "team": {
     "title": "Equipo",

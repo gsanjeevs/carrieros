@@ -2,6 +2,7 @@
 import { getTranslations, getLocale } from 'next-intl/server'
 import { signInWithEmail } from './actions'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
+import PasskeySignInButton from '@/components/passkey/PasskeySignInButton'
 
 interface Props {
   searchParams: Promise<{ error?: string; next?: string }>
@@ -93,6 +94,11 @@ export default async function LoginPage({ searchParams }: Props) {
             {t('signIn')}
           </button>
         </form>
+
+        {/* Additive — never replaces the password form above (decisions.md
+            T15). Renders nothing on browsers/contexts without WebAuthn
+            support. */}
+        <PasskeySignInButton />
 
         <p className="mt-6 text-center text-xs text-slate-500">
           {t('noAccount')} <a href="/signup" className="text-brand-orange hover:underline">{t('signUpFree')}</a>
