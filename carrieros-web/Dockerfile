@@ -32,7 +32,9 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 USER nextjs
-# ECS Express Mode's console wizard defaults to container port 80.
-ENV PORT=80
-EXPOSE 80
+# Port 3000, not 80: the non-root `nextjs` user can't bind to a privileged
+# port (<1024) on Linux without extra capabilities. The ALB's public URL is
+# unaffected -- set the ECS/Express service's container port to 3000 to match.
+ENV PORT=3000
+EXPOSE 3000
 CMD ["node", "server.js"]
