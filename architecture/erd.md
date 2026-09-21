@@ -3,7 +3,7 @@
 > **Generated** by `node scripts/db/gen-erd.mjs` from the live schema. Do not edit by hand:
 > change the database via a migration, then re-run the generator. CI runs it with `--check`.
 
-47 tables, 88 foreign keys, split into 6 domain diagrams (one diagram of every table is unreadable).
+49 tables, 89 foreign keys, split into 6 domain diagrams (one diagram of every table is unreadable).
 A box drawn without columns belongs to another domain; find it in its own section.
 `||` = the FK is required (NOT NULL); `|o` = the FK is optional (nullable). `PK`/`FK` mark keys.
 
@@ -616,9 +616,9 @@ erDiagram
 
 ## Platform & infrastructure
 
-SuperAdmin activity, the tenant audit trail, transactional outbox, live-update change feed, idempotency keys and migration bookkeeping.
+SuperAdmin activity, the tenant audit trail, transactional outbox, live-update change feed, idempotency keys, the public developer API's OAuth clients/rate limits, and migration bookkeeping.
 
-Tables: `admin_events`, `admin_notes`, `audit_events`, `outbox_events`, `change_events`, `idempotency_keys`, `schema_migrations`
+Tables: `admin_events`, `admin_notes`, `audit_events`, `outbox_events`, `change_events`, `idempotency_keys`, `oauth_clients`, `oauth_client_rate_limits`, `schema_migrations`
 
 ```mermaid
 erDiagram
@@ -692,6 +692,21 @@ erDiagram
     integer status_code
     uuid user_id FK
   }
+  oauth_clients {
+    bigint id PK
+    text client_id
+    text client_secret_hash
+    timestamptz created_at
+    timestamptz last_used_at
+    text name
+    bigint org_id FK
+    timestamptz revoked_at
+  }
+  oauth_client_rate_limits {
+    text client_id PK
+    timestamptz window_start PK
+    integer request_count
+  }
   schema_migrations {
     text version PK
     timestamptz applied_at
@@ -707,6 +722,7 @@ erDiagram
   organizations ||--o{ audit_events : "org_id"
   organizations ||--o{ idempotency_keys : "org_id"
   auth_users ||--o{ idempotency_keys : "user_id"
+  organizations ||--o{ oauth_clients : "org_id"
   organizations ||--o{ outbox_events : "org_id"
   auth_users |o--o{ outbox_events : "replayed_by"
   outbox_events |o--o{ outbox_events : "replayed_from_id"

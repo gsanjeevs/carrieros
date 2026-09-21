@@ -36,8 +36,8 @@ const DOMAINS = [
     ['invoices', 'driver_settlements', 'settlement_deductions', 'billing_events']],
   ['Compliance & IFTA', 'Fuel purchases and state crossings for IFTA reporting, and driver vehicle inspection reports (DVIR).',
     ['fuel_stops', 'ifta_state_crossings', 'ifta_tax_rates', 'dvir_inspections', 'dvir_defects']],
-  ['Platform & infrastructure', 'SuperAdmin activity, the tenant audit trail, transactional outbox, live-update change feed, idempotency keys and migration bookkeeping.',
-    ['admin_events', 'admin_notes', 'audit_events', 'outbox_events', 'change_events', 'idempotency_keys', 'schema_migrations']],
+  ['Platform & infrastructure', 'SuperAdmin activity, the tenant audit trail, transactional outbox, live-update change feed, idempotency keys, the public developer API\'s OAuth clients/rate limits, and migration bookkeeping.',
+    ['admin_events', 'admin_notes', 'audit_events', 'outbox_events', 'change_events', 'idempotency_keys', 'oauth_clients', 'oauth_client_rate_limits', 'schema_migrations']],
 ]
 
 function psql(sql) {
