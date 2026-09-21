@@ -49,8 +49,8 @@ export default async function InvoicesPage({
   // here, on every load of this page, as a pragmatic stopgap rather than a
   // real scheduled job. mark_overdue_invoices() is scoped to the caller's own
   // org server-side. Replace this with a real schedule (Supabase's pg_cron
-  // extension, or a Vercel Cron hitting an API route) once the project has a
-  // home for scheduled jobs.
+  // extension, or AWS EventBridge Scheduler hitting an API route, since the
+  // app runs on ECS) once the project has a home for scheduled jobs.
   const { error: overdueError } = await supabase.rpc('mark_overdue_invoices')
   if (overdueError) logError({ route: 'invoices' }, overdueError.message, { step: 'mark_overdue_invoices failed' })
 

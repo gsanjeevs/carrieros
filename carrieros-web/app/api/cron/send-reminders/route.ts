@@ -8,9 +8,9 @@
 // CURRENT STATE: the logic here is real and callable end-to-end (DB write +
 // email send), but nothing calls this route on a schedule yet. This
 // Postgres instance does not have pg_cron installed, and installing it (or
-// picking an external scheduler — Vercel Cron, a hosted cron hitting this
-// route, etc.) is a deployment-environment decision deferred to later, not
-// made by this change. Until then, trigger manually:
+// picking an external scheduler — e.g. AWS EventBridge Scheduler hitting
+// this route, since the app runs on ECS — is a deployment-environment
+// decision deferred to later, not made by this change. Until then, trigger manually:
 //   curl -X POST http://localhost:3000/api/cron/send-reminders \
 //     -H "Authorization: Bearer $CRON_SECRET"
 //
