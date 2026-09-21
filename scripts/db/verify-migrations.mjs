@@ -184,6 +184,34 @@ try {
     if (ordinals[0] !== 0) throw new Error(`first migration must be 0000, got ${files[0]}`)
   })
 
+  // Rule E (docs/architecture-principles.md) — a schema change needs an
+  // impact-analysis step, not just a passing typecheck. Requires the SAME
+  // header-comment practice every existing migration already follows
+  // (shortest today, 0003, is 5 lines) rather than leaving it to habit.
+  // Mirrors scripts/db/migrate.mjs's validateMigrationHeader, so a migration
+  // is rejected the same way whether it's applied with the migrate script or
+  // only ever exercised through this verifier (e.g. in CI).
+  check('every migration has a header comment (Rule E impact-analysis note)', () => {
+    const MIN_HEADER_LINES = 3
+    const problems = []
+    for (const f of files) {
+      const lines = readFileSync(path.join(MIGRATIONS_DIR, f), 'utf8').split('\n')
+      if (lines[0] !== `-- ${f}`) {
+        problems.push(`${f}: must start with "-- ${f}"`)
+        continue
+      }
+      let headerLines = 0
+      for (const line of lines) {
+        if (line.startsWith('--')) headerLines++
+        else break
+      }
+      if (headerLines < MIN_HEADER_LINES) {
+        problems.push(`${f}: header is only ${headerLines} line(s), need >= ${MIN_HEADER_LINES}`)
+      }
+    }
+    if (problems.length) throw new Error(problems.join('\n  '))
+  })
+
   check('a clean database can be built from migrations alone', () => {
     createScratch(dbFromMigrations)
     applyFiles(dbFromMigrations, files)
@@ -346,6 +374,8 @@ try {
       'outbox_events', // relayed by the worker's own connection (0005)
       'change_events', // read only by the API's SSE stream via service_role (0012)
       'org_feature_overrides', // per-org feature grants/denies, server-only (0021)
+      'oauth_clients', // public API client credentials, server-only via admin client (0025)
+      'oauth_client_rate_limits', // public API rate-limit counters, server-only (0025)
     ])
 
     const orphans = sh(
@@ -382,7 +412,7 @@ try {
         `select table_name||':'||grantee||':'||privilege_type
            from information_schema.role_table_grants
           where table_schema='public'
-            and table_name in ('schema_migrations','outbox_events','change_events','org_feature_overrides')
+            and table_name in ('schema_migrations','outbox_events','change_events','org_feature_overrides','oauth_clients','oauth_client_rate_limits')
             and grantee in ('anon','authenticated')
           order by 1`,
       ],

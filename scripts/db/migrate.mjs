@@ -76,6 +76,38 @@ function psql(sql, { file = null } = {}) {
   }
 }
 
+// Rule E (docs/architecture-principles.md) — a schema change needs an
+// impact-analysis step, not just a passing typecheck. Every migration in this
+// repo already carries a header comment explaining what changed and why (the
+// shortest today, 0003, is 5 lines) — this requires the SAME already-common
+// practice going forward instead of leaving it to habit. Not a new format:
+// no migration in the repo needs editing to satisfy this.
+const MIN_HEADER_LINES = 3
+
+function validateMigrationHeader(file, body) {
+  const lines = body.split('\n')
+  const expectedFirstLine = `-- ${file}`
+  if (lines[0] !== expectedFirstLine) {
+    throw new Error(
+      `${file} must start with the header comment "${expectedFirstLine}" (Rule E, docs/architecture-principles.md). ` +
+        `Every migration names itself on its first line — see any existing file under supabase/migrations/.`
+    )
+  }
+  let headerLines = 0
+  for (const line of lines) {
+    if (line.startsWith('--')) headerLines++
+    else break
+  }
+  if (headerLines < MIN_HEADER_LINES) {
+    throw new Error(
+      `${file}'s header comment is only ${headerLines} line(s) before the first SQL statement. Rule E ` +
+        `(docs/architecture-principles.md) requires a short header describing the change's impact — what changed ` +
+        `and why — the same way every existing migration does (shortest today: ` +
+        `0003_revoke_anon_truncate_and_definer_execute.sql, 5 lines). Add a couple of lines of context above the SQL.`
+    )
+  }
+}
+
 function discoverMigrations() {
   const files = readdirSync(MIGRATIONS_DIR).filter((f) => f.endsWith('.sql'))
 
@@ -88,6 +120,7 @@ function discoverMigrations() {
       )
     }
     const body = readFileSync(path.join(MIGRATIONS_DIR, file), 'utf8')
+    validateMigrationHeader(file, body)
     return {
       file,
       ordinal: Number(m[1]),
