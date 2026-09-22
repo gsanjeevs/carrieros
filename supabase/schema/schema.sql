@@ -402,6 +402,9 @@ INSERT INTO role_capabilities (role, capability) VALUES
   ('sx_owner',   'admin_billing'),
   ('sx_owner',   'admin_flags'),
   ('sx_owner',   'admin_impersonate'),
+  -- Migration 0028: fix-forward capability for staffing ShipmentX's own carrieros_support queue
+  -- (decisions.md T16) -- sx_owner/sx_support only, matching 0027's RLS policies; NOT sx_finance.
+  ('sx_owner',   'admin_support'),
   -- Migration 0031: LLM provider abstraction (decisions.md T17) -- sx_owner only, NOT sx_finance/
   -- sx_support despite being cost-adjacent, since it also decides which outside vendor sees
   -- ticket/load content.
@@ -409,7 +412,10 @@ INSERT INTO role_capabilities (role, capability) VALUES
   ('sx_finance', 'admin'),
   ('sx_finance', 'admin_billing'),
   ('sx_support', 'admin'),
-  ('sx_support', 'admin_impersonate');
+  ('sx_support', 'admin_impersonate'),
+  -- Migration 0028: fix-forward capability for staffing ShipmentX's own carrieros_support queue
+  -- (decisions.md T16) -- sx_owner/sx_support only, matching 0027's RLS policies; NOT sx_finance.
+  ('sx_support', 'admin_support');
 
 -- Language reference/display data — NOT a foreign key, profiles.preferred_language
 -- and carrier_details.default_language keep their own CHECKs. native_name IS the
