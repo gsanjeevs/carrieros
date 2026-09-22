@@ -2479,16 +2479,20 @@ ALTER TABLE dvir_inspections ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_dvir_select" ON dvir_inspections FOR SELECT USING (
   carrier_org_id = my_org_id()
 );
+-- Fixed 2026-09-21 (migration 0029): originally driver_id only -- a driver's own driver_id doesn't
+-- vary by which org a submitted row claims, so any driver could INSERT a foreign-org-tagged row.
+-- Both this and driver_dvir_modify below now also require carrier_org_id = my_org_id().
 CREATE POLICY "driver_dvir_insert" ON dvir_inspections FOR INSERT WITH CHECK (
   driver_id = my_driver_id()
+  AND carrier_org_id = my_org_id()
 );
 
 -- Added 2026-07-20 (audit finding 6): driver had INSERT only, so a two-step
 -- submit (insert inspection, then attach signature/odometer) was impossible —
 -- the update failed silently as UPDATE 0.
 CREATE POLICY "driver_dvir_modify" ON dvir_inspections FOR UPDATE TO authenticated
-  USING (driver_id = (SELECT d.id FROM drivers d WHERE d.profile_id = auth.uid()))
-  WITH CHECK (driver_id = (SELECT d.id FROM drivers d WHERE d.profile_id = auth.uid()));
+  USING (driver_id = my_driver_id() AND carrier_org_id = my_org_id())
+  WITH CHECK (driver_id = my_driver_id() AND carrier_org_id = my_org_id());
 CREATE POLICY "owner_solo_dvir_all" ON dvir_inspections FOR ALL USING (
   carrier_org_id = my_org_id()
   AND my_role() IN ('owner','solo')

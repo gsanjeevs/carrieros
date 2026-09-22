@@ -189,6 +189,70 @@ describe('cross-tenant isolation — org B cannot see org A data', () => {
     expect(stillIntact?.condition).toBe('satisfactory')
   })
 
+  // SECURITY REGRESSION (migration 0029): driver_dvir_insert/_modify originally checked ONLY
+  // driver_id = my_driver_id() — a driver's own driver_id doesn't vary by which org a submitted row
+  // claims, so any authenticated driver could INSERT (and UPDATE) a dvir_inspections row tagged with a
+  // FOREIGN org's carrier_org_id, injecting a fabricated safety-inspection record into another
+  // carrier's DVIR compliance history. Confirmed exploitable against a live instance before the fix
+  // (raw REST POST with no .select()/RETURNING returned 201 and the row persisted, visible to the
+  // victim org). Both policies now also require carrier_org_id = my_org_id() — this test proves that
+  // holds and stays closed.
+  describe('SECURITY REGRESSION — a driver cannot forge a dvir_inspections row into another org', () => {
+    let driverB: TestUser
+    let driverBSession: Awaited<ReturnType<typeof signInAs>>
+    let driverBRowId: number
+    let vehicleBId: number
+
+    beforeAll(async () => {
+      driverB = await createTestUser(admin, orgB.orgId, 'driver')
+      driverBSession = await signInAs(driverB)
+      const { data: row } = await admin
+        .from('drivers')
+        .insert({ carrier_org_id: orgB.orgId, profile_id: driverB.userId })
+        .select('id')
+        .single()
+      driverBRowId = Number(row!.id)
+
+      const { data: vehicleType } = await admin.from('vehicle_types').select('id').eq('code', 'semi').single()
+      const { data: vehicle } = await admin
+        .from('vehicles')
+        .insert({ carrier_org_id: orgB.orgId, nickname: 'Org B Test Vehicle', vehicle_type_id: vehicleType!.id })
+        .select('id')
+        .single()
+      vehicleBId = Number(vehicle!.id)
+    })
+
+    afterAll(async () => {
+      await admin.from('drivers').delete().eq('id', driverBRowId)
+      await admin.from('vehicles').delete().eq('id', vehicleBId)
+    })
+
+    it('a driver cannot INSERT an inspection tagged with a foreign carrier_org_id, even using their own driver_id', async () => {
+      const { data, error } = await driverBSession.client
+        .from('dvir_inspections')
+        .insert({ carrier_org_id: orgA.orgId, vehicle_id: vehicleAId, driver_id: driverBRowId, type: 'pre_trip', condition: 'satisfactory' })
+        .select()
+      expect(data).toBeNull()
+      expect(error).not.toBeNull()
+      expect(error?.code).toBe('42501') // RLS violation, not a silent no-op
+
+      // Confirm nothing leaked into org A regardless of the client-side error.
+      const { data: leaked } = await admin.from('dvir_inspections').select('id').eq('carrier_org_id', orgA.orgId).eq('driver_id', driverBRowId)
+      expect(leaked).toEqual([])
+    })
+
+    it('the same driver CAN still insert a legitimate inspection in their own org', async () => {
+      const { data, error } = await driverBSession.client
+        .from('dvir_inspections')
+        .insert({ carrier_org_id: orgB.orgId, vehicle_id: vehicleBId, driver_id: driverBRowId, type: 'pre_trip', condition: 'satisfactory' })
+        .select('id')
+        .single()
+      expect(error).toBeNull()
+      expect(data?.id).toBeTruthy()
+      if (data?.id) await admin.from('dvir_inspections').delete().eq('id', data.id)
+    })
+  })
+
   // maintenance_reminders: carrier_reminders_select (SELECT) and
   // owner_solo_reminders_all (ALL) both gate on carrier_org_id = my_org_id().
   it('maintenance_reminders: org B session sees zero rows for org A reminder', async () => {
