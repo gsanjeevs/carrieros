@@ -142,12 +142,21 @@ export default function Sidebar({ role, userName, userId, preferredLanguage, rol
     .slice(0, 2)
 
   return (
-    <aside className="w-64 flex-shrink-0 flex flex-col bg-navy border-r border-divider-ui">
+    // Every class in this file is a literal palette token (bg-navy,
+    // text-white, border-navy-light, ...), never a semantic `--color-
+    // surface-*`/`--color-text-*` token — decisions.md V3 requires the
+    // sidebar to stay fixed dark navy in both Light and Dark content mode,
+    // so it must render identically regardless of whether an ancestor
+    // carries the `dark` class app/layout.tsx now toggles. `border-divider-
+    // ui`/`hover:bg-surface-subtle` used to appear here (both semantic-
+    // token classes) before the theme toggle existed to expose the risk —
+    // swapped for the literal border-navy-light equivalent everywhere below.
+    <aside className="w-64 flex-shrink-0 flex flex-col bg-navy border-r border-navy-light">
 
       {/* Logo — Enterprise branding customization (decisions.md PR1 amendment) swaps the mark for the
           org's own uploaded logo when one is set; every other tier keeps the default "C" mark. The
           "CarrierOS" wordmark always stays (PR1 is explicitly NOT hiding the CarrierOS name). */}
-      <div className="flex items-center gap-2.5 px-5 py-5 border-b border-divider-ui">
+      <div className="flex items-center gap-2.5 px-5 py-5 border-b border-navy-light">
         {logoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- signed URL, not a static asset
           <img src={logoUrl} alt="" className="w-7 h-7 rounded-md object-cover flex-shrink-0" />
@@ -176,7 +185,7 @@ export default function Sidebar({ role, userName, userId, preferredLanguage, rol
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
                       active
                         ? 'bg-brand-orange/10 text-brand-orange'
-                        : 'text-slate-400 hover:text-white hover:bg-surface-subtle'
+                        : 'text-slate-400 hover:text-white hover:bg-navy-light'
                     }`}
                   >
                     <span className="material-symbols-outlined text-[18px] leading-none">{item.icon}</span>
@@ -190,7 +199,7 @@ export default function Sidebar({ role, userName, userId, preferredLanguage, rol
       </nav>
 
       {/* User + Language + Sign out */}
-      <div className="px-3 py-4 border-t border-divider-ui">
+      <div className="px-3 py-4 border-t border-navy-light">
         <div className="flex items-center gap-3 px-3 py-2 mb-1">
           <div className="w-7 h-7 rounded-full bg-navy-light flex items-center justify-center flex-shrink-0">
             <span className="text-avatar-text text-xs font-semibold">{initials}</span>
@@ -217,7 +226,7 @@ export default function Sidebar({ role, userName, userId, preferredLanguage, rol
         <form action={signOut}>
           <button
             type="submit"
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-surface-subtle transition-colors focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-navy-light transition-colors focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
           >
             <span className="material-symbols-outlined text-[18px] leading-none">logout</span>
             {tCommon('signOut')}

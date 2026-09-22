@@ -30,7 +30,7 @@ type AnySupabaseClient = SupabaseClient<Database> | ReturnType<typeof import('@s
 // doesn't use every column just ignores the extras; cheaper than 25 near-
 // identical hand-written selects.
 const PROFILE_SELF_COLUMNS =
-  'id, org_id, role, is_active, first_name, last_name, preferred_language, uom_system, date_format, time_format, timezone'
+  'id, org_id, role, is_active, first_name, last_name, preferred_language, uom_system, date_format, time_format, timezone, theme_preference'
 
 export async function getProfileForUser(supabase: AnySupabaseClient, userId: string) {
   return supabase

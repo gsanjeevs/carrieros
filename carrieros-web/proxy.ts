@@ -145,7 +145,7 @@ async function handle(request: NextRequest, requestId: string) {
   if (user && !isPublic && !pathname.startsWith('/onboarding')) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('org_id, preferred_language')
+      .select('org_id, preferred_language, theme_preference')
       .eq('id', user.id)
       .maybeSingle()
 
@@ -160,6 +160,18 @@ async function handle(request: NextRequest, requestId: string) {
     const locale = profile.preferred_language ?? 'en'
     if (request.cookies.get('locale')?.value !== locale) {
       response.cookies.set('locale', locale, { path: '/', maxAge: 60 * 60 * 24 * 365 })
+    }
+
+    // Same sync for `theme` (decisions.md V3/V6, profiles.theme_preference) —
+    // app/layout.tsx reads this cookie the exact same way i18n/request.ts
+    // reads `locale`, so a theme change made on one device/tab is picked up
+    // on the next server render everywhere else without a client-side DB
+    // round trip. ThemeSwitcher.tsx also sets this cookie directly on
+    // selection (same as LanguageSwitcher does for `locale`) so the change
+    // is instant; this sync is the cross-device/cross-session backstop.
+    const theme = profile.theme_preference ?? 'system'
+    if (request.cookies.get('theme')?.value !== theme) {
+      response.cookies.set('theme', theme, { path: '/', maxAge: 60 * 60 * 24 * 365 })
     }
   }
 
