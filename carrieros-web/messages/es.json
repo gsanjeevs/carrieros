@@ -1080,6 +1080,7 @@
       "pipeline": "Embudo de ventas",
       "audit": "Auditoría y actividad",
       "flags": "Funciones experimentales",
+      "aiConfig": "Proveedor de LLM",
       "security": "Seguridad"
     },
     "roleLabels": {
@@ -1155,6 +1156,25 @@
       "addOverrideButton": "Agregar excepción",
       "activeOverrides": "Excepciones activas ({count})",
       "noOverrides": "No se han definido excepciones por organización."
+    },
+    "aiConfig": {
+      "title": "Proveedor de LLM",
+      "subtitle": "Qué proveedor usa cada llamada de IA en la aplicación (extracción de cargas, clasificación de tickets de soporte). Es a nivel de plataforma, no por organización.",
+      "loading": "Cargando…",
+      "error": "No se pudo cargar la configuración del proveedor de IA.",
+      "saveError": "No se pudo guardar la configuración del proveedor de IA.",
+      "saveSuccess": "Guardado.",
+      "providerLabel": "Proveedor",
+      "providerOpenai": "OpenAI",
+      "providerAnthropic": "Anthropic",
+      "providerOpenaiCompatible": "Compatible con OpenAI (autoalojado / código abierto)",
+      "modelLabel": "Modelo",
+      "modelHint": "Nombre del modelo específico del proveedor, p. ej. gpt-5-mini, claude-haiku-4-5.",
+      "baseUrlLabel": "URL base",
+      "baseUrlHint": "La URL base del endpoint compatible con OpenAI (Ollama, vLLM, LM Studio, OpenRouter, etc).",
+      "envVarNotice": "Requiere que {envVar} esté configurada en el entorno. Las claves de API nunca se ingresan aquí — solo viven en variables de entorno.",
+      "lastUpdated": "Última actualización {date}",
+      "saveButton": "Guardar"
     },
     "health": {
       "title": "Salud del cliente",

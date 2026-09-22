@@ -1,7 +1,7 @@
 // lib/support-triage.ts
 // AI triage for in-app support tickets (decisions.md T16). Mirrors lib/extract-load.ts's structure
-// exactly, per T6/T16's explicit "reuse the existing pattern" instruction: same model
-// (claude-haiku-4-5), same @anthropic-ai/sdk usage, same "throw a typed error if the key isn't
+// exactly, per T6/T16's explicit "reuse the existing pattern" instruction: same transport (now
+// lib/ai/'s provider abstraction, decisions.md T17), same "throw a typed error if the provider isn't
 // configured" convention, structured output via a system prompt + JSON schema.
 //
 // What this decides, per ticket:
@@ -31,12 +31,8 @@
 // or compliance question is a real support failure (and a compliance/legal exposure for a trucking
 // SaaS), where a false negative (a human answers an easy question that AI could have handled) costs
 // only a few minutes of staff time. Revisit downward only once real resolution-quality data exists.
-import Anthropic from '@anthropic-ai/sdk'
+import { getActiveLLMProvider, LLMCallError, LLMProviderNotConfiguredError } from '@/lib/ai'
 import { logError, logEvent, type LogContext } from '@/lib/observability'
-
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-})
 
 export const AI_RESOLVED_CONFIDENCE_THRESHOLD = 0.85
 
@@ -119,30 +115,32 @@ export async function classifySupportTicket(
   input: TriageInput,
   logContext: LogContext
 ): Promise<TriageResult> {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new TriageFailedError('ANTHROPIC_API_KEY not configured', 500)
+  let provider: Awaited<ReturnType<typeof getActiveLLMProvider>>
+  try {
+    provider = await getActiveLLMProvider()
+  } catch (err) {
+    if (err instanceof LLMProviderNotConfiguredError) {
+      throw new TriageFailedError(err.message, 500)
+    }
+    throw err
   }
 
-  let message: Anthropic.Message
+  let result: Awaited<ReturnType<typeof provider.provider.call>>
   try {
-    message = await client.messages.create({
-      model: 'claude-haiku-4-5',
-      max_tokens: 1024,
+    result = await provider.provider.call({
+      model: provider.model,
+      maxTokens: 1024,
       system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: buildUserMessage(input) }],
+      userContent: buildUserMessage(input),
     })
   } catch (err) {
-    const status = err instanceof Anthropic.APIError ? err.status : undefined
-    const failureMode =
-      status === 429 ? 'rate_limited' :
-      status === 401 || status === 403 ? 'auth_error' :
-      status && status >= 500 ? 'provider_outage' :
-      'unknown'
+    const failureMode = err instanceof LLMCallError ? err.failureMode : 'unknown'
+    const status = err instanceof LLMCallError ? err.status : undefined
     logError(logContext, err, { failure_mode: failureMode, status })
     throw new TriageFailedError('Triage classification failed. Please try again shortly.', 502)
   }
 
-  const raw = message.content[0].type === 'text' ? message.content[0].text : ''
+  const raw = result.text
   const cleaned = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
 
   let parsed: { target_queue?: unknown; can_auto_resolve?: unknown; confidence?: unknown; auto_answer?: unknown }
@@ -154,8 +152,8 @@ export async function classifySupportTicket(
   }
 
   logEvent(logContext, {
-    input_tokens: message.usage.input_tokens,
-    output_tokens: message.usage.output_tokens,
+    input_tokens: result.inputTokens,
+    output_tokens: result.outputTokens,
   })
 
   const modelTargetQueue: HumanQueue = parsed.target_queue === 'org_support' ? 'org_support' : 'carrieros_support'

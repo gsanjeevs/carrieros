@@ -1080,6 +1080,7 @@
       "pipeline": "ਵਿਕਰੀ ਪਾਈਪਲਾਈਨ",
       "audit": "ਆਡਿਟ ਅਤੇ ਗਤੀਵਿਧੀ",
       "flags": "ਫੀਚਰ ਫਲੈਗ",
+      "aiConfig": "LLM ਪ੍ਰਦਾਤਾ",
       "security": "ਸੁਰੱਖਿਆ"
     },
     "roleLabels": {
@@ -1155,6 +1156,25 @@
       "addOverrideButton": "ਓਵਰਰਾਈਡ ਸ਼ਾਮਲ ਕਰੋ",
       "activeOverrides": "ਸਰਗਰਮ ਓਵਰਰਾਈਡ ({count})",
       "noOverrides": "ਕੋਈ ਸੰਸਥਾ-ਵਾਰ ਓਵਰਰਾਈਡ ਸੈੱਟ ਨਹੀਂ।"
+    },
+    "aiConfig": {
+      "title": "LLM ਪ੍ਰਦਾਤਾ",
+      "subtitle": "ਐਪ ਵਿੱਚ ਹਰ AI ਕਾਲ (ਲੋਡ ਐਕਸਟਰੈਕਸ਼ਨ, ਸਹਾਇਤਾ ਟਿਕਟ ਟ੍ਰਾਇਜ) ਕਿਹੜਾ ਪ੍ਰਦਾਤਾ ਵਰਤਦੀ ਹੈ। ਇਹ ਪਲੇਟਫਾਰਮ-ਵਿਆਪੀ ਹੈ, ਹਰ ਸੰਸਥਾ ਲਈ ਵੱਖਰਾ ਨਹੀਂ।",
+      "loading": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ…",
+      "error": "AI ਪ੍ਰਦਾਤਾ ਸੰਰਚਨਾ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀ।",
+      "saveError": "AI ਪ੍ਰਦਾਤਾ ਸੰਰਚਨਾ ਸੰਭਾਲੀ ਨਹੀਂ ਜਾ ਸਕੀ।",
+      "saveSuccess": "ਸੰਭਾਲਿਆ ਗਿਆ।",
+      "providerLabel": "ਪ੍ਰਦਾਤਾ",
+      "providerOpenai": "OpenAI",
+      "providerAnthropic": "Anthropic",
+      "providerOpenaiCompatible": "OpenAI-ਅਨੁਕੂਲ (ਸਵੈ-ਹੋਸਟ / ਓਪਨ ਸੋਰਸ)",
+      "modelLabel": "ਮਾਡਲ",
+      "modelHint": "ਪ੍ਰਦਾਤਾ-ਵਿਸ਼ੇਸ਼ ਮਾਡਲ ਨਾਮ, ਜਿਵੇਂ gpt-5-mini, claude-haiku-4-5।",
+      "baseUrlLabel": "ਬੇਸ URL",
+      "baseUrlHint": "OpenAI-ਅਨੁਕੂਲ ਐਂਡਪੁਆਇੰਟ ਦਾ ਬੇਸ URL (Ollama, vLLM, LM Studio, OpenRouter, ਆਦਿ)।",
+      "envVarNotice": "ਵਾਤਾਵਰਣ ਵਿੱਚ {envVar} ਸੈੱਟ ਹੋਣਾ ਜ਼ਰੂਰੀ ਹੈ। API ਕੁੰਜੀਆਂ ਕਦੇ ਵੀ ਇੱਥੇ ਦਰਜ ਨਹੀਂ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ — ਇਹ ਸਿਰਫ਼ ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲਾਂ ਵਿੱਚ ਰਹਿੰਦੀਆਂ ਹਨ।",
+      "lastUpdated": "ਆਖਰੀ ਵਾਰ ਅੱਪਡੇਟ {date}",
+      "saveButton": "ਸੰਭਾਲੋ"
     },
     "health": {
       "title": "ਗਾਹਕ ਸਿਹਤ",

@@ -115,6 +115,41 @@ export type Database = {
           },
         ]
       }
+      ai_provider_config: {
+        Row: {
+          compatible_base_url: string | null
+          id: number
+          model: string
+          provider: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          compatible_base_url?: string | null
+          id?: number
+          model?: string
+          provider?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          compatible_base_url?: string | null
+          id?: number
+          model?: string
+          provider?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_provider_config_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_events: {
         Row: {
           action: string
@@ -2316,6 +2351,130 @@ export type Database = {
           },
         ]
       }
+      support_ticket_messages: {
+        Row: {
+          body: string
+          carrier_org_id: number
+          created_at: string
+          id: number
+          is_ai_generated: boolean
+          sender_id: string | null
+          ticket_id: number
+        }
+        Insert: {
+          body: string
+          carrier_org_id: number
+          created_at?: string
+          id?: number
+          is_ai_generated?: boolean
+          sender_id?: string | null
+          ticket_id: number
+        }
+        Update: {
+          body?: string
+          carrier_org_id?: number
+          created_at?: string
+          id?: number
+          is_ai_generated?: boolean
+          sender_id?: string | null
+          ticket_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_ticket_messages_carrier_org_id_fkey"
+            columns: ["carrier_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_ticket_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          ai_answer: string | null
+          ai_confidence: number | null
+          body: string
+          carrier_org_id: number
+          category: string
+          created_at: string
+          fallback_queue: string | null
+          id: number
+          queue: string
+          related_load_number: string | null
+          resolved_at: string | null
+          status: string
+          submitted_by: string
+          submitter_role: string
+          submitter_tier: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_answer?: string | null
+          ai_confidence?: number | null
+          body: string
+          carrier_org_id: number
+          category: string
+          created_at?: string
+          fallback_queue?: string | null
+          id?: number
+          queue: string
+          related_load_number?: string | null
+          resolved_at?: string | null
+          status?: string
+          submitted_by: string
+          submitter_role: string
+          submitter_tier?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_answer?: string | null
+          ai_confidence?: number | null
+          body?: string
+          carrier_org_id?: number
+          category?: string
+          created_at?: string
+          fallback_queue?: string | null
+          id?: number
+          queue?: string
+          related_load_number?: string | null
+          resolved_at?: string | null
+          status?: string
+          submitted_by?: string
+          submitter_role?: string
+          submitter_tier?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_carrier_org_id_fkey"
+            columns: ["carrier_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tiers: {
         Row: {
           code: string
@@ -2785,6 +2944,33 @@ export type Database = {
           allowed: boolean
           reason: string
         }[]
+      }
+      escalate_support_ticket: {
+        Args: { p_ticket_id: number }
+        Returns: {
+          ai_answer: string | null
+          ai_confidence: number | null
+          body: string
+          carrier_org_id: number
+          category: string
+          created_at: string
+          fallback_queue: string | null
+          id: number
+          queue: string
+          related_load_number: string | null
+          resolved_at: string | null
+          status: string
+          submitted_by: string
+          submitter_role: string
+          submitter_tier: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "support_tickets"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_customer_health_score: {
         Args: { customer_org_id: number }

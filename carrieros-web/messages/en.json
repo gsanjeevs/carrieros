@@ -1080,6 +1080,7 @@
       "pipeline": "Sales Pipeline",
       "audit": "Audit & Activity",
       "flags": "Feature Flags",
+      "aiConfig": "LLM Provider",
       "security": "Security"
     },
     "roleLabels": {
@@ -1155,6 +1156,25 @@
       "addOverrideButton": "Add Override",
       "activeOverrides": "Active Overrides ({count})",
       "noOverrides": "No per-org overrides set."
+    },
+    "aiConfig": {
+      "title": "LLM Provider",
+      "subtitle": "Which provider every LLM call in the app (load extraction, support-ticket triage) uses. Platform-wide, not per-org.",
+      "loading": "Loading…",
+      "error": "Could not load the AI provider configuration.",
+      "saveError": "Could not save the AI provider configuration.",
+      "saveSuccess": "Saved.",
+      "providerLabel": "Provider",
+      "providerOpenai": "OpenAI",
+      "providerAnthropic": "Anthropic",
+      "providerOpenaiCompatible": "OpenAI-compatible (self-hosted / open source)",
+      "modelLabel": "Model",
+      "modelHint": "Provider-specific model name, e.g. gpt-5-mini, claude-haiku-4-5.",
+      "baseUrlLabel": "Base URL",
+      "baseUrlHint": "The OpenAI-compatible endpoint's base URL (Ollama, vLLM, LM Studio, OpenRouter, etc).",
+      "envVarNotice": "Requires {envVar} to be set in the environment. API keys are never entered here — they live in environment variables only.",
+      "lastUpdated": "Last updated {date}",
+      "saveButton": "Save"
     },
     "health": {
       "title": "Customer Health",

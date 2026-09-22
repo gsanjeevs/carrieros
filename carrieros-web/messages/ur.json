@@ -1080,6 +1080,7 @@
       "pipeline": "سیلز پائپ لائن",
       "audit": "آڈٹ اور سرگرمی",
       "flags": "فیچر فلیگز",
+      "aiConfig": "LLM فراہم کنندہ",
       "security": "سیکیورٹی"
     },
     "roleLabels": {
@@ -1155,6 +1156,25 @@
       "addOverrideButton": "اوور رائیڈ شامل کریں",
       "activeOverrides": "فعال اوور رائیڈز ({count})",
       "noOverrides": "کوئی تنظیم کے لیے اوور رائیڈ مقرر نہیں کیا گیا۔"
+    },
+    "aiConfig": {
+      "title": "LLM فراہم کنندہ",
+      "subtitle": "ایپ میں ہر AI کال (لوڈ ایکسٹریکشن، سپورٹ ٹکٹ ٹرائیج) کون سا فراہم کنندہ استعمال کرتی ہے۔ یہ پلیٹ فارم وائیڈ ہے، ہر تنظیم کے لیے الگ نہیں۔",
+      "loading": "لوڈ ہو رہا ہے…",
+      "error": "AI فراہم کنندہ کنفیگریشن لوڈ نہیں ہو سکی۔",
+      "saveError": "AI فراہم کنندہ کنفیگریشن محفوظ نہیں ہو سکی۔",
+      "saveSuccess": "محفوظ ہو گیا۔",
+      "providerLabel": "فراہم کنندہ",
+      "providerOpenai": "OpenAI",
+      "providerAnthropic": "Anthropic",
+      "providerOpenaiCompatible": "OpenAI-مطابق (سیلف ہوسٹڈ / اوپن سورس)",
+      "modelLabel": "ماڈل",
+      "modelHint": "فراہم کنندہ کے مطابق ماڈل کا نام، مثلاً gpt-5-mini, claude-haiku-4-5۔",
+      "baseUrlLabel": "بیس URL",
+      "baseUrlHint": "OpenAI-مطابق اینڈ پوائنٹ کا بیس URL (Ollama, vLLM, LM Studio, OpenRouter، وغیرہ)۔",
+      "envVarNotice": "ماحول میں {envVar} کا سیٹ ہونا ضروری ہے۔ API کیز کبھی بھی یہاں درج نہیں کی جاتیں — یہ صرف انوائرمنٹ ویریایبلز میں رہتی ہیں۔",
+      "lastUpdated": "آخری اپ ڈیٹ {date}",
+      "saveButton": "محفوظ کریں"
     },
     "health": {
       "title": "کسٹمر ہیلتھ",

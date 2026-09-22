@@ -402,6 +402,10 @@ INSERT INTO role_capabilities (role, capability) VALUES
   ('sx_owner',   'admin_billing'),
   ('sx_owner',   'admin_flags'),
   ('sx_owner',   'admin_impersonate'),
+  -- Migration 0031: LLM provider abstraction (decisions.md T17) -- sx_owner only, NOT sx_finance/
+  -- sx_support despite being cost-adjacent, since it also decides which outside vendor sees
+  -- ticket/load content.
+  ('sx_owner',   'admin_ai_config'),
   ('sx_finance', 'admin'),
   ('sx_finance', 'admin_billing'),
   ('sx_support', 'admin'),
@@ -4490,3 +4494,52 @@ END;
 $$;
 GRANT EXECUTE ON FUNCTION escalate_support_ticket(BIGINT) TO authenticated;
 GRANT EXECUTE ON FUNCTION check_public_api_rate_limit(TEXT, INT, INT) TO service_role;
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 25: AI PROVIDER CONFIG (migration 0031)
+--
+-- Platform-wide LLM provider abstraction (decisions.md T17). Both real LLM integrations (T6 load
+-- extraction, T16 support-ticket triage) move off a hardcoded `@anthropic-ai/sdk` call onto the new
+-- lib/ai/ provider abstraction -- this table is the config side: a single, platform-wide (NOT
+-- per-org) row picking which provider is active. See lib/ai/index.ts (getActiveLLMProvider()).
+--
+-- Singleton-row pattern (id BIGINT PRIMARY KEY DEFAULT 1 CHECK (id = 1)) -- exactly one row, ever,
+-- enforced by the CHECK rather than just convention.
+--
+-- Where credentials live -- never here. Every provider's actual API key stays in an environment
+-- variable (ANTHROPIC_API_KEY / OPENAI_API_KEY / OPENAI_COMPATIBLE_API_KEY, the last one optional),
+-- read directly by lib/ai/* provider classes. This table holds a provider name, a model string, and
+-- (openai_compatible only) a base URL -- never a credential.
+--
+-- Default provider 'openai' (T17's new default), default model 'gpt-5-mini' (the fast/cheap tier,
+-- same reasoning T6 originally picked claude-haiku-4-5 over a larger Claude model for).
+--
+-- Server-only, same posture as change_events/idempotency_keys/oauth_clients (SECTION 23) -- no
+-- authenticated/anon grant at all; read via lib/ai/index.ts's service-role admin client, written via
+-- app/api/admin/ai-config/route.ts (requireAdminRole(request, 'admin_ai_config'), sx_owner only).
+-- ────────────────────────────────────────────────────────────
+
+CREATE TABLE ai_provider_config (
+  id                   BIGINT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  provider             TEXT NOT NULL DEFAULT 'openai' CHECK (provider IN ('anthropic', 'openai', 'openai_compatible')),
+  model                TEXT NOT NULL DEFAULT 'gpt-5-mini',
+  compatible_base_url  TEXT,
+  updated_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_by           UUID REFERENCES profiles(id),
+  CONSTRAINT compatible_base_url_required_for_openai_compatible CHECK (
+    (provider = 'openai_compatible' AND compatible_base_url IS NOT NULL AND compatible_base_url <> '')
+    OR (provider <> 'openai_compatible')
+  )
+);
+
+COMMENT ON TABLE ai_provider_config IS
+  'Singleton row (id always 1) selecting the platform-wide active LLM provider (decisions.md T17). Never holds a credential -- provider API keys live in environment variables only, read by lib/ai/*. Changed only via PUT /api/admin/ai-config, sx_owner only (admin_ai_config capability).';
+
+INSERT INTO ai_provider_config (id) VALUES (1);
+
+CREATE TRIGGER ai_provider_config_updated_at
+  BEFORE UPDATE ON ai_provider_config FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+ALTER TABLE ai_provider_config ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON ai_provider_config FROM anon, authenticated;
+GRANT SELECT, UPDATE ON ai_provider_config TO service_role;
