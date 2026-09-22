@@ -4502,7 +4502,7 @@ GRANT EXECUTE ON FUNCTION escalate_support_ticket(BIGINT) TO authenticated;
 GRANT EXECUTE ON FUNCTION check_public_api_rate_limit(TEXT, INT, INT) TO service_role;
 
 -- ────────────────────────────────────────────────────────────
--- SECTION 25: AI PROVIDER CONFIG (migration 0031)
+-- SECTION 25: AI PROVIDER CONFIG (migrations 0031, 0032)
 --
 -- Platform-wide LLM provider abstraction (decisions.md T17). Both real LLM integrations (T6 load
 -- extraction, T16 support-ticket triage) move off a hardcoded `@anthropic-ai/sdk` call onto the new
@@ -4512,10 +4512,16 @@ GRANT EXECUTE ON FUNCTION check_public_api_rate_limit(TEXT, INT, INT) TO service
 -- Singleton-row pattern (id BIGINT PRIMARY KEY DEFAULT 1 CHECK (id = 1)) -- exactly one row, ever,
 -- enforced by the CHECK rather than just convention.
 --
--- Where credentials live -- never here. Every provider's actual API key stays in an environment
--- variable (ANTHROPIC_API_KEY / OPENAI_API_KEY / OPENAI_COMPATIBLE_API_KEY, the last one optional),
--- read directly by lib/ai/* provider classes. This table holds a provider name, a model string, and
--- (openai_compatible only) a base URL -- never a credential.
+-- Where credentials live (migration 0031, amended by 0032 per T17's 2026-09-22 amendment): a
+-- provider's key can now be set from the SuperAdmin console, stored ENCRYPTED (AES-256-GCM, app-layer
+-- via lib/crypto/secrets.ts, never Postgres pgcrypto -- the plaintext never crosses into a SQL
+-- statement) in the `*_api_key_encrypted` columns below. An environment variable
+-- (ANTHROPIC_API_KEY / OPENAI_API_KEY / OPENAI_COMPATIBLE_API_KEY, the last one optional) remains a
+-- valid FALLBACK, checked only when no encrypted DB value is set -- additive, not a replacement. The
+-- `*_api_key_preview` columns hold only the plaintext key's last 4 characters, so GET
+-- /api/admin/ai-config can render a masked preview without ever decrypting -- decryption happens only
+-- in lib/ai/*-provider.ts at actual LLM-call time, never in the admin route (T17 amendment: no
+-- "reveal" affordance anywhere). This table still holds no full credential in readable form anywhere.
 --
 -- Default provider 'openai' (T17's new default), default model 'gpt-5-mini' (the fast/cheap tier,
 -- same reasoning T6 originally picked claude-haiku-4-5 over a larger Claude model for).
@@ -4526,20 +4532,51 @@ GRANT EXECUTE ON FUNCTION check_public_api_rate_limit(TEXT, INT, INT) TO service
 -- ────────────────────────────────────────────────────────────
 
 CREATE TABLE ai_provider_config (
-  id                   BIGINT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
-  provider             TEXT NOT NULL DEFAULT 'openai' CHECK (provider IN ('anthropic', 'openai', 'openai_compatible')),
-  model                TEXT NOT NULL DEFAULT 'gpt-5-mini',
-  compatible_base_url  TEXT,
-  updated_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_by           UUID REFERENCES profiles(id),
+  id                                    BIGINT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  provider                              TEXT NOT NULL DEFAULT 'openai' CHECK (provider IN ('anthropic', 'openai', 'openai_compatible')),
+  model                                 TEXT NOT NULL DEFAULT 'gpt-5-mini',
+  compatible_base_url                   TEXT,
+  -- Encrypted-at-rest provider API keys (migration 0032) -- see SECTION header above for the full
+  -- scheme. *_api_key_encrypted is AES-256-GCM ciphertext (base64(IV||authTag||ciphertext));
+  -- *_api_key_preview is the plaintext last 4 characters only, for masked display. Each pair is
+  -- always both NULL or both set together (CHECK below).
+  anthropic_api_key_encrypted           TEXT,
+  anthropic_api_key_preview             TEXT,
+  openai_api_key_encrypted              TEXT,
+  openai_api_key_preview                TEXT,
+  openai_compatible_api_key_encrypted   TEXT,
+  openai_compatible_api_key_preview     TEXT,
+  updated_at                            TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_by                            UUID REFERENCES profiles(id),
   CONSTRAINT compatible_base_url_required_for_openai_compatible CHECK (
     (provider = 'openai_compatible' AND compatible_base_url IS NOT NULL AND compatible_base_url <> '')
     OR (provider <> 'openai_compatible')
+  ),
+  CONSTRAINT anthropic_api_key_preview_matches_encrypted CHECK (
+    (anthropic_api_key_encrypted IS NULL) = (anthropic_api_key_preview IS NULL)
+  ),
+  CONSTRAINT openai_api_key_preview_matches_encrypted CHECK (
+    (openai_api_key_encrypted IS NULL) = (openai_api_key_preview IS NULL)
+  ),
+  CONSTRAINT openai_compatible_api_key_preview_matches_encrypted CHECK (
+    (openai_compatible_api_key_encrypted IS NULL) = (openai_compatible_api_key_preview IS NULL)
   )
 );
 
 COMMENT ON TABLE ai_provider_config IS
-  'Singleton row (id always 1) selecting the platform-wide active LLM provider (decisions.md T17). Never holds a credential -- provider API keys live in environment variables only, read by lib/ai/*. Changed only via PUT /api/admin/ai-config, sx_owner only (admin_ai_config capability).';
+  'Singleton row (id always 1) selecting the platform-wide active LLM provider (decisions.md T17). Provider API keys may be set encrypted-at-rest from the admin console (migration 0032, AES-256-GCM via lib/crypto/secrets.ts) or fall back to an environment variable when unset -- never a plaintext credential in this table. Changed only via PUT /api/admin/ai-config, sx_owner only (admin_ai_config capability).';
+COMMENT ON COLUMN ai_provider_config.anthropic_api_key_encrypted IS
+  'AES-256-GCM ciphertext (lib/crypto/secrets.ts), base64(IV||authTag||ciphertext). NULL means "no DB-stored key -- fall back to ANTHROPIC_API_KEY env var". Decrypted only by lib/ai/anthropic-provider.ts at LLM-call time, never in the admin route.';
+COMMENT ON COLUMN ai_provider_config.anthropic_api_key_preview IS
+  'Plaintext last 4 characters of the currently-stored key, for GET /api/admin/ai-config''s masked preview ("••••••••" + this). Never the full key. NULL iff anthropic_api_key_encrypted is NULL.';
+COMMENT ON COLUMN ai_provider_config.openai_api_key_encrypted IS
+  'Same scheme as anthropic_api_key_encrypted. NULL falls back to OPENAI_API_KEY env var.';
+COMMENT ON COLUMN ai_provider_config.openai_api_key_preview IS
+  'Same scheme as anthropic_api_key_preview, for the openai provider.';
+COMMENT ON COLUMN ai_provider_config.openai_compatible_api_key_encrypted IS
+  'Same scheme as anthropic_api_key_encrypted. NULL falls back to the optional OPENAI_COMPATIBLE_API_KEY env var (self-hosted endpoints often need no key at all, unchanged from migration 0031).';
+COMMENT ON COLUMN ai_provider_config.openai_compatible_api_key_preview IS
+  'Same scheme as anthropic_api_key_preview, for the openai_compatible provider.';
 
 INSERT INTO ai_provider_config (id) VALUES (1);
 

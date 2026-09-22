@@ -1172,7 +1172,19 @@
       "modelHint": "Provider-specific model name, e.g. gpt-5-mini, claude-haiku-4-5.",
       "baseUrlLabel": "Base URL",
       "baseUrlHint": "The OpenAI-compatible endpoint's base URL (Ollama, vLLM, LM Studio, OpenRouter, etc).",
-      "envVarNotice": "Requires {envVar} to be set in the environment. API keys are never entered here — they live in environment variables only.",
+      "envVarNotice": "Falls back to {envVar} when no key is set below. A key entered below (encrypted at rest) takes priority over the environment variable.",
+      "keysHeading": "API Keys",
+      "keyLabel": {
+        "anthropic": "Anthropic API Key",
+        "openai": "OpenAI API Key",
+        "openai_compatible": "OpenAI-Compatible API Key"
+      },
+      "keyConfiguredHint": "A key is configured and encrypted at rest. Leave blank to keep it, or Clear to remove it and fall back to {envVar}.",
+      "keyNotConfiguredHint": "No key stored — falls back to {envVar}. Enter one to set it here instead.",
+      "keyNotSet": "Not set",
+      "keyWillClear": "Will be cleared on save",
+      "keyClearButton": "Clear",
+      "keyClearing": "Clearing…",
       "lastUpdated": "Last updated {date}",
       "saveButton": "Save"
     },

@@ -1172,7 +1172,19 @@
       "modelHint": "فراہم کنندہ کے مطابق ماڈل کا نام، مثلاً gpt-5-mini, claude-haiku-4-5۔",
       "baseUrlLabel": "بیس URL",
       "baseUrlHint": "OpenAI-مطابق اینڈ پوائنٹ کا بیس URL (Ollama, vLLM, LM Studio, OpenRouter، وغیرہ)۔",
-      "envVarNotice": "ماحول میں {envVar} کا سیٹ ہونا ضروری ہے۔ API کیز کبھی بھی یہاں درج نہیں کی جاتیں — یہ صرف انوائرمنٹ ویریایبلز میں رہتی ہیں۔",
+      "envVarNotice": "اگر نیچے کوئی کلید سیٹ نہ ہو تو {envVar} استعمال ہوتی ہے۔ نیچے درج کی گئی کلید (اسٹوریج میں انکرپٹڈ) انوائرمنٹ ویریایبل پر ترجیح رکھتی ہے۔",
+      "keysHeading": "API کیز",
+      "keyLabel": {
+        "anthropic": "Anthropic API کلید",
+        "openai": "OpenAI API کلید",
+        "openai_compatible": "OpenAI-مطابق API کلید"
+      },
+      "keyConfiguredHint": "ایک کلید کنفیگر اور انکرپٹڈ محفوظ ہے۔ اسے برقرار رکھنے کے لیے خالی چھوڑیں، یا اسے ہٹا کر {envVar} پر واپس جانے کے لیے Clear دبائیں۔",
+      "keyNotConfiguredHint": "کوئی کلید محفوظ نہیں — {envVar} استعمال ہو گی۔ یہاں سیٹ کرنے کے لیے ایک درج کریں۔",
+      "keyNotSet": "سیٹ نہیں",
+      "keyWillClear": "محفوظ کرنے پر صاف ہو جائے گی",
+      "keyClearButton": "صاف کریں",
+      "keyClearing": "صاف ہو رہی ہے…",
       "lastUpdated": "آخری اپ ڈیٹ {date}",
       "saveButton": "محفوظ کریں"
     },

@@ -9,22 +9,28 @@
 // baseURL, and (2) the API key is OPTIONAL — many self-hosted endpoints require none at all, so
 // this is the one provider type that must NOT throw "not configured" for a missing key. It DOES
 // throw for a missing base URL, since there is no sensible default to fall back to.
+//
+// Key resolution (T17's 2026-09-22 amendment): same DB-first, env-fallback order as the other two
+// providers, decrypted here (the only place decryption happens for this provider) — but since the
+// key stays optional, an absent value on both sides is not an error, unlike anthropic/openai.
 import OpenAI from 'openai'
 import type { LLMCallOptions, LLMCallResult, LLMProvider } from './types'
 import { LLMCallError, LLMProviderNotConfiguredError } from './types'
 import { classifyOpenAIError, toOpenAIContent } from './openai-provider'
+import { decryptSecret } from '../crypto/secrets'
 
 export class OpenAICompatibleProvider implements LLMProvider {
   private client: OpenAI
 
-  constructor(baseURL: string | null | undefined) {
+  constructor(baseURL: string | null | undefined, encryptedApiKey?: string | null) {
     if (!baseURL) {
       throw new LLMProviderNotConfiguredError('compatible_base_url not configured for openai_compatible provider')
     }
     // OPENAI_COMPATIBLE_API_KEY is optional by design -- see header comment. The `openai` SDK
     // requires SOME string for `apiKey`, so an unset key becomes an empty placeholder rather than
     // a thrown error; self-hosted endpoints that don't check the Authorization header ignore it.
-    this.client = new OpenAI({ apiKey: process.env.OPENAI_COMPATIBLE_API_KEY || 'not-required', baseURL })
+    const apiKey = encryptedApiKey ? decryptSecret(encryptedApiKey) : process.env.OPENAI_COMPATIBLE_API_KEY
+    this.client = new OpenAI({ apiKey: apiKey || 'not-required', baseURL })
   }
 
   async call(opts: LLMCallOptions): Promise<LLMCallResult> {

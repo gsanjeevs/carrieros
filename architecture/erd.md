@@ -738,8 +738,14 @@ erDiagram
   }
   ai_provider_config {
     bigint id PK
+    text anthropic_api_key_encrypted
+    text anthropic_api_key_preview
     text compatible_base_url
     text model
+    text openai_api_key_encrypted
+    text openai_api_key_preview
+    text openai_compatible_api_key_encrypted
+    text openai_compatible_api_key_preview
     text provider
     timestamptz updated_at
     uuid updated_by FK

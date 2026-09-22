@@ -117,25 +117,43 @@ export type Database = {
       }
       ai_provider_config: {
         Row: {
+          anthropic_api_key_encrypted: string | null
+          anthropic_api_key_preview: string | null
           compatible_base_url: string | null
           id: number
           model: string
+          openai_api_key_encrypted: string | null
+          openai_api_key_preview: string | null
+          openai_compatible_api_key_encrypted: string | null
+          openai_compatible_api_key_preview: string | null
           provider: string
           updated_at: string
           updated_by: string | null
         }
         Insert: {
+          anthropic_api_key_encrypted?: string | null
+          anthropic_api_key_preview?: string | null
           compatible_base_url?: string | null
           id?: number
           model?: string
+          openai_api_key_encrypted?: string | null
+          openai_api_key_preview?: string | null
+          openai_compatible_api_key_encrypted?: string | null
+          openai_compatible_api_key_preview?: string | null
           provider?: string
           updated_at?: string
           updated_by?: string | null
         }
         Update: {
+          anthropic_api_key_encrypted?: string | null
+          anthropic_api_key_preview?: string | null
           compatible_base_url?: string | null
           id?: number
           model?: string
+          openai_api_key_encrypted?: string | null
+          openai_api_key_preview?: string | null
+          openai_compatible_api_key_encrypted?: string | null
+          openai_compatible_api_key_preview?: string | null
           provider?: string
           updated_at?: string
           updated_by?: string | null

@@ -1172,7 +1172,19 @@
       "modelHint": "ਪ੍ਰਦਾਤਾ-ਵਿਸ਼ੇਸ਼ ਮਾਡਲ ਨਾਮ, ਜਿਵੇਂ gpt-5-mini, claude-haiku-4-5।",
       "baseUrlLabel": "ਬੇਸ URL",
       "baseUrlHint": "OpenAI-ਅਨੁਕੂਲ ਐਂਡਪੁਆਇੰਟ ਦਾ ਬੇਸ URL (Ollama, vLLM, LM Studio, OpenRouter, ਆਦਿ)।",
-      "envVarNotice": "ਵਾਤਾਵਰਣ ਵਿੱਚ {envVar} ਸੈੱਟ ਹੋਣਾ ਜ਼ਰੂਰੀ ਹੈ। API ਕੁੰਜੀਆਂ ਕਦੇ ਵੀ ਇੱਥੇ ਦਰਜ ਨਹੀਂ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ — ਇਹ ਸਿਰਫ਼ ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲਾਂ ਵਿੱਚ ਰਹਿੰਦੀਆਂ ਹਨ।",
+      "envVarNotice": "ਜੇ ਹੇਠਾਂ ਕੋਈ ਕੁੰਜੀ ਸੈੱਟ ਨਹੀਂ ਕੀਤੀ ਜਾਂਦੀ ਤਾਂ {envVar} ਵਰਤੀ ਜਾਂਦੀ ਹੈ। ਹੇਠਾਂ ਦਰਜ ਕੀਤੀ ਕੁੰਜੀ (ਸਟੋਰੇਜ ਵਿੱਚ ਇਨਕ੍ਰਿਪਟਡ) ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲ ਨਾਲੋਂ ਤਰਜੀਹੀ ਹੈ।",
+      "keysHeading": "API ਕੁੰਜੀਆਂ",
+      "keyLabel": {
+        "anthropic": "Anthropic API ਕੁੰਜੀ",
+        "openai": "OpenAI API ਕੁੰਜੀ",
+        "openai_compatible": "OpenAI-ਅਨੁਕੂਲ API ਕੁੰਜੀ"
+      },
+      "keyConfiguredHint": "ਇੱਕ ਕੁੰਜੀ ਸੰਰਚਿਤ ਅਤੇ ਇਨਕ੍ਰਿਪਟਡ ਸਟੋਰ ਹੈ। ਇਸਨੂੰ ਰੱਖਣ ਲਈ ਖਾਲੀ ਛੱਡੋ, ਜਾਂ {envVar} ਤੇ ਵਾਪਸ ਜਾਣ ਲਈ Clear ਦਬਾਓ।",
+      "keyNotConfiguredHint": "ਕੋਈ ਕੁੰਜੀ ਸਟੋਰ ਨਹੀਂ — {envVar} ਵਰਤੀ ਜਾਵੇਗੀ। ਇੱਥੇ ਸੈੱਟ ਕਰਨ ਲਈ ਇੱਕ ਦਰਜ ਕਰੋ।",
+      "keyNotSet": "ਸੈੱਟ ਨਹੀਂ",
+      "keyWillClear": "ਸੰਭਾਲਣ ਤੇ ਸਾਫ਼ ਹੋ ਜਾਵੇਗੀ",
+      "keyClearButton": "ਸਾਫ਼ ਕਰੋ",
+      "keyClearing": "ਸਾਫ਼ ਹੋ ਰਹੀ ਹੈ…",
       "lastUpdated": "ਆਖਰੀ ਵਾਰ ਅੱਪਡੇਟ {date}",
       "saveButton": "ਸੰਭਾਲੋ"
     },

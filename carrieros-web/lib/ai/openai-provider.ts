@@ -3,9 +3,15 @@
 // provider. Uses the standard chat completions API. Failure classification mirrors the Anthropic
 // provider's status->failureMode mapping exactly (429/401|403/5xx/unknown), just against
 // OpenAI.APIError instead of Anthropic.APIError.
+//
+// Key resolution (T17's 2026-09-22 amendment): same pattern as anthropic-provider.ts — the
+// constructor takes the ai_provider_config row's `openai_api_key_encrypted` value and decrypts it
+// here (the only place decryption happens for this provider), falling back to OPENAI_API_KEY when
+// unset.
 import OpenAI from 'openai'
 import type { LLMCallOptions, LLMCallResult, LLMContentBlock, LLMProvider } from './types'
 import { LLMCallError, LLMProviderNotConfiguredError } from './types'
+import { decryptSecret } from '../crypto/secrets'
 
 export function toOpenAIContent(userContent: string | LLMContentBlock[]): string | OpenAI.Chat.Completions.ChatCompletionContentPart[] {
   if (typeof userContent === 'string') return userContent
@@ -28,11 +34,12 @@ export function classifyOpenAIError(err: unknown): { message: string; status?: n
 export class OpenAIProvider implements LLMProvider {
   protected client: OpenAI
 
-  constructor() {
-    if (!process.env.OPENAI_API_KEY) {
+  constructor(encryptedApiKey?: string | null) {
+    const apiKey = encryptedApiKey ? decryptSecret(encryptedApiKey) : process.env.OPENAI_API_KEY
+    if (!apiKey) {
       throw new LLMProviderNotConfiguredError('OPENAI_API_KEY not configured')
     }
-    this.client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+    this.client = new OpenAI({ apiKey })
   }
 
   async call(opts: LLMCallOptions): Promise<LLMCallResult> {

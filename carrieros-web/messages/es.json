@@ -1172,7 +1172,19 @@
       "modelHint": "Nombre del modelo específico del proveedor, p. ej. gpt-5-mini, claude-haiku-4-5.",
       "baseUrlLabel": "URL base",
       "baseUrlHint": "La URL base del endpoint compatible con OpenAI (Ollama, vLLM, LM Studio, OpenRouter, etc).",
-      "envVarNotice": "Requiere que {envVar} esté configurada en el entorno. Las claves de API nunca se ingresan aquí — solo viven en variables de entorno.",
+      "envVarNotice": "Si no se define una clave abajo, se usa {envVar}. Una clave ingresada abajo (cifrada en reposo) tiene prioridad sobre la variable de entorno.",
+      "keysHeading": "Claves de API",
+      "keyLabel": {
+        "anthropic": "Clave de API de Anthropic",
+        "openai": "Clave de API de OpenAI",
+        "openai_compatible": "Clave de API compatible con OpenAI"
+      },
+      "keyConfiguredHint": "Hay una clave configurada y cifrada en reposo. Déjala en blanco para conservarla, o usa Borrar para quitarla y volver a {envVar}.",
+      "keyNotConfiguredHint": "No hay clave guardada — se usa {envVar}. Ingresa una para configurarla aquí.",
+      "keyNotSet": "No configurada",
+      "keyWillClear": "Se borrará al guardar",
+      "keyClearButton": "Borrar",
+      "keyClearing": "Borrando…",
       "lastUpdated": "Última actualización {date}",
       "saveButton": "Guardar"
     },
