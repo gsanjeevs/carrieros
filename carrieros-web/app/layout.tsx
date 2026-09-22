@@ -32,13 +32,14 @@ export default async function RootLayout({
   // Light/Dark/System theme preference (decisions.md V3/V6). `theme` is
   // synced onto a cookie by proxy.ts from profiles.theme_preference — same
   // mechanism as the `locale` cookie above, see lib/theme.ts. Defaulting to
-  // 'system' for a visitor with no cookie yet (never logged in, or an
-  // existing user whose row already carries the DB's own
-  // NOT NULL DEFAULT 'system' — see schema.sql) matches the value every
-  // profile row already has today; serverResolvedClass() below still
-  // renders that as `dark` server-side (this app's actual current look),
-  // so nothing changes for anyone until THEME_BOOTSTRAP_SCRIPT corrects it
-  // client-side against the visitor's real OS preference.
+  // 'system' here is specifically for a visitor with NO cookie at all
+  // (never authenticated — the marketing/login pages) — not a claim about
+  // what a real profile row defaults to (that's 'dark' as of migration
+  // 0030, per V3's explicit requirement). serverResolvedClass() below still
+  // renders 'system' as `dark` server-side (this app's actual look), so
+  // nothing changes for an anonymous visitor until THEME_BOOTSTRAP_SCRIPT
+  // corrects it client-side against their real OS preference — a minor,
+  // pre-auth-only nicety, not the "existing/new user" case V3 is about.
   const cookieStore = await cookies();
   const rawTheme = cookieStore.get("theme")?.value;
   const themePreference = isThemePreference(rawTheme) ? rawTheme : "system";

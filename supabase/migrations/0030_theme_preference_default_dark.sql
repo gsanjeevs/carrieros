@@ -1,0 +1,26 @@
+-- 0030_theme_preference_default_dark.sql
+--
+-- profiles.theme_preference (migration 0001) is NOT NULL DEFAULT 'system'. decisions.md V3
+-- (2026-07-21, never amended) explicitly decided the default must be 'dark' -- "no visible change for
+-- any existing/new user until they explicitly opt in." A 'system' default violates that directly: any
+-- new signup whose OS is set to light mode gets a visibly different app on first login, with no opt-in
+-- at all. Confirmed live (Playwright, this session): an untouched 'system' value rendered light-mode
+-- content purely because the test browser's OS preference was light.
+--
+-- schema.sql's existing comment on this column explains why it's NOT NULL rather than nullable-means-
+-- inherit (no org-level theme to inherit from, unlike uom_system) -- that reasoning is sound and
+-- unchanged by this migration. It does not actually address why 'system' was chosen over 'dark' as the
+-- literal default value; that appears to be an unreviewed drift from V3's explicit text, not a
+-- considered override of it, so this migration restores what V3 actually specified.
+--
+-- Zero retroactive impact: this only changes what a brand-new profiles row gets on INSERT. No existing
+-- row's stored value changes -- the column is NOT NULL, so every already-provisioned profile already
+-- has an explicit value on file (never inherited a default at read time the way uom_system/
+-- preferred_language do). This is the cheapest possible moment to fix a default-value drift: before any
+-- real production user exists to be affected by it either way.
+--
+-- Anonymous/pre-auth theming (web's proxy.ts cookie fallback, mobile's pre-login AsyncStorage bootstrap)
+-- is a separate concern from this column -- there is no profile row to violate "no visible change" for
+-- a visitor who has never signed up, so those stay 'system' deliberately; only the persisted per-user
+-- default changes here.
+ALTER TABLE profiles ALTER COLUMN theme_preference SET DEFAULT 'dark';
