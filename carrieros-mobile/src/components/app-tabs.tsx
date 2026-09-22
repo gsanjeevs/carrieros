@@ -1,11 +1,10 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
-import { useColorScheme } from 'react-native';
 import type { SFSymbol } from 'sf-symbols-typescript';
 
-import { Colors } from '@/constants/theme';
 import { TAB_SETS } from '@/constants/tab-sets';
 import { useLocale } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
+import { useTheme } from '@/hooks/use-theme';
 
 // Icon metadata per tab route name — see src/constants/tab-sets.ts for the
 // shared (name, labelKey) list this keys off of. Native-only concern (SF
@@ -42,8 +41,16 @@ const ICON_SRC = {
 } as const;
 
 export default function AppTabs() {
-  const scheme = useColorScheme();
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  // useTheme() resolves the user's own Settings -> Appearance choice
+  // (light/dark/system), not just the raw OS scheme — this used to read
+  // react-native's useColorScheme() directly, which bypassed that choice
+  // entirely: a user who explicitly picked Dark while their device was set
+  // to light-mode would still get a light native tab bar here, while every
+  // other themed screen in the app (all built on useTheme()) correctly
+  // showed dark. Found while wiring up the web equivalent of this same
+  // preference (decisions.md V3/V6) and auditing every place OS-level
+  // scheme was read directly instead of through the shared preference.
+  const colors = useTheme();
   const { t } = useLocale();
   const { role, loading } = useProfileRole();
 
