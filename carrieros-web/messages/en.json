@@ -1074,7 +1074,8 @@
       "billing": "Billing & Payments",
       "pipeline": "Sales Pipeline",
       "audit": "Audit & Activity",
-      "flags": "Feature Flags"
+      "flags": "Feature Flags",
+      "security": "Security"
     },
     "roleLabels": {
       "sx_owner": "SX Owner",

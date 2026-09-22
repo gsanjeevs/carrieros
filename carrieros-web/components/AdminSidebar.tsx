@@ -29,6 +29,13 @@ const NAV_ITEMS: NavItem[] = [
   { labelKey: 'pipeline', href: '/admin/pipeline', icon: 'trending_up',  capability: 'admin_billing' },
   { labelKey: 'audit',   href: '/admin/audit',    icon: 'history',       capability: 'admin' },
   { labelKey: 'flags',   href: '/admin/flags',    icon: 'flag',          capability: 'admin_flags' },
+  // Passkey/WebAuthn management (decisions.md T15) — the tenant Sidebar links
+  // to the same /settings/security page the same way (labelKey 'security',
+  // icon 'passkey'). Gated on 'admin' rather than settings_view (sx_* roles
+  // don't hold that tenant capability) since all three sx_* roles hold
+  // 'admin', same as triage/health/audit above — every platform-staff user
+  // manages their own credentials, not just some.
+  { labelKey: 'security', href: '/settings/security', icon: 'passkey',   capability: 'admin' },
 ]
 
 export default function AdminSidebar({ role, userName }: { role: string; userName: string }) {
@@ -70,7 +77,7 @@ export default function AdminSidebar({ role, userName }: { role: string; userNam
               }`}
             >
               <span className="material-symbols-outlined text-[18px] leading-none">{item.icon}</span>
-              {t(item.labelKey as 'triage' | 'health' | 'billing' | 'pipeline' | 'audit' | 'flags')}
+              {t(item.labelKey as 'triage' | 'health' | 'billing' | 'pipeline' | 'audit' | 'flags' | 'security')}
             </Link>
           )
         })}

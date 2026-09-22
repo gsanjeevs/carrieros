@@ -1074,7 +1074,8 @@
       "billing": "Facturación y pagos",
       "pipeline": "Embudo de ventas",
       "audit": "Auditoría y actividad",
-      "flags": "Funciones experimentales"
+      "flags": "Funciones experimentales",
+      "security": "Seguridad"
     },
     "roleLabels": {
       "sx_owner": "Propietario SX",
