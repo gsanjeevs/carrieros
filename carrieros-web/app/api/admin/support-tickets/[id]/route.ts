@@ -12,7 +12,7 @@ import { logError } from '@/lib/observability'
 const VALID_STATUSES = ['open', 'resolved', 'closed'] as const
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const ctx = await requireAdminRole(request)
+  const ctx = await requireAdminRole(request, 'admin_support')
   if (isErrorResponse(ctx)) return ctx
   const { admin } = ctx
 
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const ctx = await requireAdminRole(request)
+  const ctx = await requireAdminRole(request, 'admin_support')
   if (isErrorResponse(ctx)) return ctx
   const { admin, userId } = ctx
 

@@ -143,3 +143,68 @@ describe('GET /api/support/org-queue — Enterprise-gated staff console list', (
     expect((await res.json()).tickets).toEqual([])
   })
 })
+
+describe('/api/admin/support-tickets/** — restricted to admin_support (sx_owner/sx_support), not every sx_* role', () => {
+  // Regression coverage for a real gap caught in review: these three routes originally called
+  // requireAdminRole(request) with no capability argument, which defaults to the bare 'admin'
+  // capability — sx_finance holds that too (see lib/generated/role-capabilities.ts), so finance staff
+  // could read/reply to carrieros_support tickets despite migration 0027's own RLS policies (defense
+  // in depth only, since these routes use the service-role admin client) explicitly restricting to
+  // sx_owner/sx_support. Fixed by adding a dedicated 'admin_support' capability (sx_owner/sx_support
+  // only) and passing it explicitly, same pattern as admin_billing/admin_flags/admin_impersonate.
+  let platformOrg: number
+  let ticketId: number
+  let sxOwnerToken: string, sxSupportToken: string, sxFinanceToken: string
+
+  beforeAll(async () => {
+    platformOrg = (await createTestOrg(admin, 'carrier')).orgId
+    await admin.from('organizations').update({ type: 'platform' }).eq('id', platformOrg)
+    ;[sxOwnerToken, sxSupportToken, sxFinanceToken] = await Promise.all([
+      signInAs(await createTestUser(admin, platformOrg, 'sx_owner')).then(s => s.accessToken),
+      signInAs(await createTestUser(admin, platformOrg, 'sx_support')).then(s => s.accessToken),
+      signInAs(await createTestUser(admin, platformOrg, 'sx_finance')).then(s => s.accessToken),
+    ])
+    const { data, error } = await admin.from('support_tickets').insert({
+      submitted_by: driver.userId, carrier_org_id: org.orgId, submitter_role: 'driver',
+      category: 'technical_issue', body: 'seeded ticket for admin-route capability testing',
+      queue: 'carrieros_support', status: 'open',
+    }).select('id').single()
+    if (error || !data) throw new Error(error?.message)
+    ticketId = Number(data.id)
+  }, 60_000)
+
+  afterAll(async () => {
+    await admin.from('support_ticket_messages').delete().eq('ticket_id', ticketId)
+    await admin.from('support_tickets').delete().eq('id', ticketId)
+    await cleanupTestOrg(admin, platformOrg)
+  })
+
+  it('sx_finance is FORBIDDEN on GET/PATCH/reply — the gap this test exists to close', async () => {
+    expect((await apiFetch(`/api/admin/support-tickets/${ticketId}`, sxFinanceToken)).status).toBe(403)
+    expect((await apiFetch(`/api/admin/support-tickets/${ticketId}`, sxFinanceToken, { method: 'PATCH', body: JSON.stringify({ status: 'resolved' }) })).status).toBe(403)
+    expect((await apiFetch(`/api/admin/support-tickets/${ticketId}/reply`, sxFinanceToken, { method: 'POST', body: JSON.stringify({ body: 'should not be allowed' }) })).status).toBe(403)
+  })
+
+  it('an ordinary carrier owner (not sx_*) is also FORBIDDEN', async () => {
+    expect((await apiFetch(`/api/admin/support-tickets/${ticketId}`, ownerSession.accessToken)).status).toBe(403)
+  })
+
+  it('sx_owner and sx_support can both read and reply', async () => {
+    for (const token of [sxOwnerToken, sxSupportToken]) {
+      const getRes = await apiFetch(`/api/admin/support-tickets/${ticketId}`, token)
+      expect(getRes.status).toBe(200)
+      const replyRes = await apiFetch(`/api/admin/support-tickets/${ticketId}/reply`, token, {
+        method: 'POST', body: JSON.stringify({ body: 'a real staff reply' }),
+      })
+      expect(replyRes.status).toBe(201)
+    }
+  })
+
+  it('sx_owner can update ticket status', async () => {
+    const res = await apiFetch(`/api/admin/support-tickets/${ticketId}`, sxOwnerToken, {
+      method: 'PATCH', body: JSON.stringify({ status: 'resolved' }),
+    })
+    expect(res.status).toBe(200)
+    expect((await res.json()).ticket.status).toBe('resolved')
+  })
+})
