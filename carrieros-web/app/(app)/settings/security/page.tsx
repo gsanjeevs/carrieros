@@ -7,8 +7,8 @@
 // credentials, same as ProfileSettingsForm. ShipmentX platform-staff (sx_*)
 // profiles reach this URL too (nothing in proxy.ts's ROLE_ROUTES guards
 // /settings), which matters for T15's "every role, including SuperAdmin"
-// framing — though there's currently no admin-console nav link to it; see
-// this session's report for that gap.
+// framing — AdminSidebar.tsx links here too, so it's discoverable from the
+// SuperAdmin console, not just reachable by URL.
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
