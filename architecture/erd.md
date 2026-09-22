@@ -3,7 +3,7 @@
 > **Generated** by `node scripts/db/gen-erd.mjs` from the live schema. Do not edit by hand:
 > change the database via a migration, then re-run the generator. CI runs it with `--check`.
 
-49 tables, 89 foreign keys, split into 6 domain diagrams (one diagram of every table is unreadable).
+52 tables, 95 foreign keys, split into 6 domain diagrams (one diagram of every table is unreadable).
 A box drawn without columns belongs to another domain; find it in its own section.
 `||` = the FK is required (NOT NULL); `|o` = the FK is optional (nullable). `PK`/`FK` mark keys.
 
@@ -618,9 +618,9 @@ erDiagram
 
 ## Platform & infrastructure
 
-SuperAdmin activity, the tenant audit trail, transactional outbox, live-update change feed, idempotency keys, the public developer API's OAuth clients/rate limits, and migration bookkeeping.
+SuperAdmin activity, the tenant audit trail, transactional outbox, live-update change feed, idempotency keys, the public developer API's OAuth clients/rate limits, in-app support ticketing (decisions.md T16), the platform-wide LLM provider config (decisions.md T17), and migration bookkeeping.
 
-Tables: `admin_events`, `admin_notes`, `audit_events`, `outbox_events`, `change_events`, `idempotency_keys`, `oauth_clients`, `oauth_client_rate_limits`, `schema_migrations`
+Tables: `admin_events`, `admin_notes`, `audit_events`, `outbox_events`, `change_events`, `idempotency_keys`, `oauth_clients`, `oauth_client_rate_limits`, `support_tickets`, `support_ticket_messages`, `ai_provider_config`, `schema_migrations`
 
 ```mermaid
 erDiagram
@@ -709,6 +709,41 @@ erDiagram
     timestamptz window_start PK
     integer request_count
   }
+  support_tickets {
+    bigint id PK
+    text ai_answer
+    numeric ai_confidence
+    text body
+    bigint carrier_org_id FK
+    text category
+    timestamptz created_at
+    text fallback_queue
+    text queue
+    text related_load_number
+    timestamptz resolved_at
+    text status
+    uuid submitted_by FK
+    text submitter_role
+    text submitter_tier
+    timestamptz updated_at
+  }
+  support_ticket_messages {
+    bigint id PK
+    text body
+    bigint carrier_org_id FK
+    timestamptz created_at
+    boolean is_ai_generated
+    uuid sender_id FK
+    bigint ticket_id FK
+  }
+  ai_provider_config {
+    bigint id PK
+    text compatible_base_url
+    text model
+    text provider
+    timestamptz updated_at
+    uuid updated_by FK
+  }
   schema_migrations {
     text version PK
     timestamptz applied_at
@@ -720,6 +755,7 @@ erDiagram
   organizations |o--o{ admin_events : "org_id"
   profiles |o--o{ admin_notes : "admin_id"
   organizations ||--o{ admin_notes : "org_id"
+  profiles |o--o{ ai_provider_config : "updated_by"
   auth_users |o--o{ audit_events : "actor_user_id"
   organizations ||--o{ audit_events : "org_id"
   organizations ||--o{ idempotency_keys : "org_id"
@@ -728,4 +764,9 @@ erDiagram
   organizations ||--o{ outbox_events : "org_id"
   auth_users |o--o{ outbox_events : "replayed_by"
   outbox_events |o--o{ outbox_events : "replayed_from_id"
+  organizations ||--o{ support_ticket_messages : "carrier_org_id"
+  profiles |o--o{ support_ticket_messages : "sender_id"
+  support_tickets ||--o{ support_ticket_messages : "ticket_id"
+  organizations ||--o{ support_tickets : "carrier_org_id"
+  profiles ||--o{ support_tickets : "submitted_by"
 ```
