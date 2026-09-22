@@ -9,6 +9,14 @@
 // in docs/architecture-principles.md (loads, invoices, vehicles, drivers)
 // plus the Phase 8 platform-admin tables (which must deny ALL non-sx_*
 // sessions, not just other tenants).
+//
+// customer_contacts/dvir_inspections/maintenance_reminders/vehicle_documents
+// (added this session to close scripts/check-architecture.mjs's Rule L gap)
+// follow the exact same carrier_org_id = my_org_id() shape for SELECT, read
+// straight from supabase/migrations/0001_baseline_schema.sql +
+// 0022_role_scoped_reads.sql (the latter is what actually left
+// carrier_*_select's final form -- 0001's versions were superseded). See
+// each describe block below for the specific policy asserted.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import {
   adminClient, createTestOrg, createTestUser, signInAs, cleanupTestOrg,
@@ -18,6 +26,7 @@ import {
 const admin = adminClient()
 
 let orgA: TestOrg, orgB: TestOrg
+let custOrgA: TestOrg
 let userA: TestUser, userB: TestUser
 let sessionB: Awaited<ReturnType<typeof signInAs>>
 
@@ -25,6 +34,10 @@ let loadAId: number
 let invoiceAId: number
 let vehicleAId: number
 let driverAId: number
+let dvirAId: number
+let maintenanceReminderAId: number
+let vehicleDocAId: number
+let customerContactAId: number
 
 beforeAll(async () => {
   orgA = await createTestOrg(admin, 'carrier')
@@ -61,11 +74,54 @@ beforeAll(async () => {
     .select('id')
     .single()
   driverAId = Number(driver!.id)
+
+  // dvir_inspections (0001 L838 + 0022 L111 "carrier_dvir_select": SELECT
+  // requires carrier_org_id = my_org_id()). vehicle_id/driver_id point at
+  // orgA's own vehicle/driver created above.
+  const { data: dvir } = await admin
+    .from('dvir_inspections')
+    .insert({ carrier_org_id: orgA.orgId, vehicle_id: vehicleAId, driver_id: driverAId, type: 'pre_trip', condition: 'satisfactory' })
+    .select('id')
+    .single()
+  dvirAId = Number(dvir!.id)
+
+  // maintenance_reminders (0001 L880 + 0022 L191 "carrier_reminders_select":
+  // SELECT requires carrier_org_id = my_org_id()).
+  const { data: reminder } = await admin
+    .from('maintenance_reminders')
+    .insert({ carrier_org_id: orgA.orgId, vehicle_id: vehicleAId, reminder_type: 'oil_change' })
+    .select('id')
+    .single()
+  maintenanceReminderAId = Number(reminder!.id)
+
+  // vehicle_documents (0001 L898 + 0022 L246 "carrier_vehicle_docs_select":
+  // SELECT requires carrier_org_id = my_org_id()).
+  const { data: vehicleDoc } = await admin
+    .from('vehicle_documents')
+    .insert({ carrier_org_id: orgA.orgId, vehicle_id: vehicleAId, doc_type: 'registration', storage_path: `test/${orgA.orgId}.pdf` })
+    .select('id')
+    .single()
+  vehicleDocAId = Number(vehicleDoc!.id)
+
+  // customer_contacts (0001 L1509 "carrier_customer_contacts_select": SELECT
+  // requires carrier_org_id = my_org_id()). Needs a real customer org linked
+  // to orgA via customer_details -- the enforce_contact_customer_tenancy
+  // trigger (0019) rejects an org_id/carrier_org_id pair that customer_details
+  // doesn't already have on file, same setup as tests/audit/roles-fixture.ts.
+  custOrgA = await createTestOrg(admin, 'customer')
+  await admin.from('customer_details').update({ carrier_org_id: orgA.orgId }).eq('org_id', custOrgA.orgId)
+  const { data: contact } = await admin
+    .from('customer_contacts')
+    .insert({ org_id: custOrgA.orgId, carrier_org_id: orgA.orgId, name: 'Test Contact' })
+    .select('id')
+    .single()
+  customerContactAId = Number(contact!.id)
 })
 
 afterAll(async () => {
   await cleanupTestOrg(admin, orgA.orgId)
   await cleanupTestOrg(admin, orgB.orgId)
+  await cleanupTestOrg(admin, custOrgA.orgId)
 })
 
 describe('cross-tenant isolation — org B cannot see org A data', () => {
@@ -108,6 +164,93 @@ describe('cross-tenant isolation — org B cannot see org A data', () => {
   it("org B's own queries (no filter) never include org A's rows", async () => {
     const { data } = await sessionB.client.from('loads').select('id')
     expect(data?.some(l => l.id === loadAId)).toBe(false)
+  })
+
+  // dvir_inspections: carrier_dvir_select (SELECT) and owner_solo_dvir_all
+  // (ALL) both gate on carrier_org_id = my_org_id() for an owner session --
+  // the table ALSO has driver-scoped policies (driver_dvir_insert/modify,
+  // keyed on driver_id = my_driver_id()) that this owner session never hits,
+  // since it has no drivers row at all.
+  it('dvir_inspections: org B session sees zero rows for org A inspection', async () => {
+    const { data, error } = await sessionB.client.from('dvir_inspections').select('id').eq('id', dvirAId)
+    expect(error).toBeNull()
+    expect(data).toEqual([])
+  })
+
+  it('dvir_inspections: org B session cannot update org A inspection', async () => {
+    const { data, error } = await sessionB.client
+      .from('dvir_inspections')
+      .update({ condition: 'defects_noted' })
+      .eq('id', dvirAId)
+      .select()
+    expect(error).toBeNull()
+    expect(data).toEqual([]) // RLS silently filters, doesn't error — 0 rows affected
+    const { data: stillIntact } = await admin.from('dvir_inspections').select('condition').eq('id', dvirAId).single()
+    expect(stillIntact?.condition).toBe('satisfactory')
+  })
+
+  // maintenance_reminders: carrier_reminders_select (SELECT) and
+  // owner_solo_reminders_all (ALL) both gate on carrier_org_id = my_org_id().
+  it('maintenance_reminders: org B session sees zero rows for org A reminder', async () => {
+    const { data, error } = await sessionB.client.from('maintenance_reminders').select('id').eq('id', maintenanceReminderAId)
+    expect(error).toBeNull()
+    expect(data).toEqual([])
+  })
+
+  it('maintenance_reminders: org B session cannot update org A reminder', async () => {
+    const { data, error } = await sessionB.client
+      .from('maintenance_reminders')
+      .update({ reminder_type: 'hijacked' })
+      .eq('id', maintenanceReminderAId)
+      .select()
+    expect(error).toBeNull()
+    expect(data).toEqual([])
+    const { data: stillIntact } = await admin.from('maintenance_reminders').select('reminder_type').eq('id', maintenanceReminderAId).single()
+    expect(stillIntact?.reminder_type).toBe('oil_change')
+  })
+
+  // vehicle_documents: carrier_vehicle_docs_select (SELECT) and
+  // owner_solo_vehicle_docs_all (ALL) both gate on carrier_org_id = my_org_id().
+  it('vehicle_documents: org B session sees zero rows for org A document', async () => {
+    const { data, error } = await sessionB.client.from('vehicle_documents').select('id').eq('id', vehicleDocAId)
+    expect(error).toBeNull()
+    expect(data).toEqual([])
+  })
+
+  it('vehicle_documents: org B session cannot update org A document', async () => {
+    const { data, error } = await sessionB.client
+      .from('vehicle_documents')
+      .update({ label: 'hijacked' })
+      .eq('id', vehicleDocAId)
+      .select()
+    expect(error).toBeNull()
+    expect(data).toEqual([])
+    const { data: stillIntact } = await admin.from('vehicle_documents').select('label').eq('id', vehicleDocAId).single()
+    expect(stillIntact?.label).not.toBe('hijacked')
+  })
+
+  // customer_contacts: carrier_customer_contacts_select (SELECT) and
+  // carrier_customer_contacts_write (ALL) both gate on carrier_org_id =
+  // my_org_id() -- distinct from the *other* SELECT policy on this table,
+  // portal_contact_own_row_select (portal_profile_id = auth.uid()), which
+  // this test doesn't exercise since org B's owner has no portal_profile_id
+  // link to this contact either way.
+  it('customer_contacts: org B session sees zero rows for org A contact', async () => {
+    const { data, error } = await sessionB.client.from('customer_contacts').select('id').eq('id', customerContactAId)
+    expect(error).toBeNull()
+    expect(data).toEqual([])
+  })
+
+  it('customer_contacts: org B session cannot update org A contact', async () => {
+    const { data, error } = await sessionB.client
+      .from('customer_contacts')
+      .update({ name: 'hijacked' })
+      .eq('id', customerContactAId)
+      .select()
+    expect(error).toBeNull()
+    expect(data).toEqual([])
+    const { data: stillIntact } = await admin.from('customer_contacts').select('name').eq('id', customerContactAId).single()
+    expect(stillIntact?.name).toBe('Test Contact')
   })
 })
 
