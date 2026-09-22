@@ -38,7 +38,9 @@
     "LAST_OWNER": "Tu empresa debe conservar al menos un propietario.",
     "MANAGE_DRIVER_ELSEWHERE": "Administra las cuentas de conductores desde la página Conductores.",
     "EMAIL_SEND_FAILED": "No pudimos enviar el correo de la factura. Inténtalo de nuevo.",
-    "TIER_UPGRADE_REQUIRED": "Esto requiere una actualización al plan Growth o superior."
+    "TIER_UPGRADE_REQUIRED": "Esto requiere una actualización al plan Growth o superior.",
+    "TRIAGE_FAILED": "No se pudo clasificar ese ticket. Inténtalo de nuevo.",
+    "NOT_ELIGIBLE": "Esto no está disponible en tu plan actual."
   },
   "nav": {
     "dashboard": "Panel",
@@ -62,7 +64,9 @@
     "section_billing": "Facturación",
     "section_team": "Equipo",
     "developerApi": "API de desarrollador",
-    "brandingCustomization": "Marca"
+    "brandingCustomization": "Marca",
+    "support": "Soporte",
+    "supportDesk": "Mesa de Soporte"
   },
   "login": {
     "title": "Inicia sesión en tu cuenta",
@@ -1093,7 +1097,11 @@
       "urgencyCritical": "Crítico",
       "urgencyHigh": "Alto",
       "urgencyMedium": "Medio",
-      "urgencyLow": "Bajo"
+      "urgencyLow": "Bajo",
+      "openTicket": "Ticket de soporte abierto",
+      "unresponded": "Sin responder",
+      "viewTicket": "Ver Ticket",
+      "replyNow": "Responder Ahora"
     },
     "audit": {
       "title": "Auditoría y actividad",
@@ -1204,6 +1212,23 @@
       "adoptionSentFirstInvoice": "Primera factura enviada",
       "adoptionReceivedFirstPayment": "Primer pago recibido",
       "trialEndsLabel": " · la prueba termina el {date}"
+    },
+    "supportTickets": {
+      "title": "Ticket de Soporte",
+      "backToTriage": "Volver a la Cola de Triage",
+      "statusLabel": "Estado",
+      "categoryLabel": "Categoría",
+      "submitterLabel": "Enviado por",
+      "orgLabel": "Organización",
+      "confidenceLabel": "Confianza de la IA",
+      "replyPlaceholder": "Escribe una respuesta…",
+      "sendReply": "Enviar Respuesta",
+      "markResolved": "Marcar como Resuelto",
+      "markClosed": "Cerrar Ticket",
+      "loading": "Cargando…",
+      "error": "No se pudo cargar este ticket.",
+      "notFound": "Ticket no encontrado.",
+      "aiAnswerLabel": "Respuesta automática de IA"
     }
   },
   "loadIntake": {
@@ -1285,5 +1310,62 @@
     "reference": "Referencia",
     "notFoundTitle": "Página no encontrada",
     "notFoundBody": "La página que buscas no existe o no tienes acceso a ella."
+  },
+  "support": {
+    "title": "Soporte",
+    "subtitle": "Obtén ayuda o haz una pregunta — la enviaremos al lugar correcto.",
+    "newTicket": "Nuevo Ticket",
+    "myTickets": "Mis Tickets",
+    "noTickets": "Aún no has enviado ningún ticket.",
+    "categoryLabel": "¿De qué se trata?",
+    "bodyLabel": "Cuéntanos más",
+    "bodyPlaceholder": "Describe tu pregunta o problema…",
+    "relatedLoadLabel": "Número de carga (opcional)",
+    "submit": "Enviar Ticket",
+    "submitting": "Enviando…",
+    "categories": {
+      "technical_issue": "Problema técnico",
+      "load_dispatch": "Una carga específica",
+      "account_billing": "Facturación y suscripción",
+      "compliance_safety": "Cumplimiento y seguridad",
+      "driver_pay_hr": "Pago y RR.HH. de conductores",
+      "feature_request": "Solicitud de función",
+      "other": "Otra cosa"
+    },
+    "statusOpen": "Abierto",
+    "statusResolved": "Resuelto",
+    "statusClosed": "Cerrado",
+    "queueAiResolved": "Respondido automáticamente",
+    "queueCarrierosSupport": "Soporte de CarrierOS",
+    "queueOrgSupport": "El Equipo de Soporte de tu Empresa",
+    "aiAnswerLabel": "Respuesta",
+    "stillNeedHelp": "¿Aún necesitas ayuda?",
+    "escalate": "Hablar con una persona",
+    "escalating": "Escalando…",
+    "escalated": "Escalado — una persona te dará seguimiento.",
+    "replyPlaceholder": "Escribe una respuesta…",
+    "sendReply": "Enviar",
+    "backToTickets": "Volver a Mis Tickets",
+    "ticketSubmitted": "Ticket enviado.",
+    "loading": "Cargando…",
+    "error": "Algo salió mal.",
+    "notFound": "Ticket no encontrado."
+  },
+  "supportDesk": {
+    "title": "Mesa de Soporte",
+    "subtitle": "Los tickets de soporte de tu organización — visibles solo para tu propio equipo.",
+    "lockedTitle": "Se requiere el plan Enterprise",
+    "lockedDescription": "Una mesa de soporte dedicada para tus propios conductores y personal — con tickets clasificados por IA enviados directamente a tu equipo — está disponible en el plan Enterprise.",
+    "upgradeCta": "Ver planes",
+    "noTickets": "No hay tickets abiertos en este momento.",
+    "statusLabel": "Estado",
+    "categoryLabel": "Categoría",
+    "submitterLabel": "De",
+    "replyPlaceholder": "Escribe una respuesta…",
+    "sendReply": "Enviar Respuesta",
+    "markResolved": "Marcar como Resuelto",
+    "markClosed": "Cerrar Ticket",
+    "loading": "Cargando…",
+    "error": "No se pudieron cargar los tickets."
   }
 }

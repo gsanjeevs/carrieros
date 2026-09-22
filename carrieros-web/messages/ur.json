@@ -38,7 +38,9 @@
     "LAST_OWNER": "آپ کی کمپنی میں کم از کم ایک مالک ہونا ضروری ہے۔",
     "MANAGE_DRIVER_ELSEWHERE": "ڈرائیور اکاؤنٹس ڈرائیورز کے صفحے سے منظم کریں۔",
     "EMAIL_SEND_FAILED": "ہم وہ انوائس ای میل نہیں بھیج سکے۔ براہ کرم دوبارہ کوشش کریں۔",
-    "TIER_UPGRADE_REQUIRED": "اس کے لیے Growth پلان یا اس سے اوپر کے پلان میں اپ گریڈ درکار ہے۔"
+    "TIER_UPGRADE_REQUIRED": "اس کے لیے Growth پلان یا اس سے اوپر کے پلان میں اپ گریڈ درکار ہے۔",
+    "TRIAGE_FAILED": "اس ٹکٹ کی درجہ بندی نہیں ہو سکی۔ براہ کرم دوبارہ کوشش کریں۔",
+    "NOT_ELIGIBLE": "یہ آپ کے موجودہ پلان پر دستیاب نہیں ہے۔"
   },
   "nav": {
     "dashboard": "ڈیش بورڈ",
@@ -62,7 +64,9 @@
     "section_billing": "بلنگ",
     "section_team": "ٹیم",
     "developerApi": "ڈولپر API",
-    "brandingCustomization": "برانڈنگ"
+    "brandingCustomization": "برانڈنگ",
+    "support": "معاونت",
+    "supportDesk": "معاونتی ڈیسک"
   },
   "login": {
     "title": "اپنے اکاؤنٹ میں سائن ان کریں",
@@ -1093,7 +1097,11 @@
       "urgencyCritical": "نازک",
       "urgencyHigh": "زیادہ",
       "urgencyMedium": "درمیانہ",
-      "urgencyLow": "کم"
+      "urgencyLow": "کم",
+      "openTicket": "کھلی معاونتی ٹکٹ",
+      "unresponded": "جواب طلب",
+      "viewTicket": "ٹکٹ دیکھیں",
+      "replyNow": "ابھی جواب دیں"
     },
     "audit": {
       "title": "آڈٹ اور سرگرمی",
@@ -1204,6 +1212,23 @@
       "adoptionSentFirstInvoice": "پہلا انوائس بھیجا",
       "adoptionReceivedFirstPayment": "پہلی ادائیگی موصول ہوئی",
       "trialEndsLabel": " · ٹرائل {date} کو ختم ہو رہا ہے"
+    },
+    "supportTickets": {
+      "title": "معاونتی ٹکٹ",
+      "backToTriage": "ٹرائیج قطار پر واپس",
+      "statusLabel": "حیثیت",
+      "categoryLabel": "زمرہ",
+      "submitterLabel": "بھیجنے والا",
+      "orgLabel": "ادارہ",
+      "confidenceLabel": "اے آئی اعتماد",
+      "replyPlaceholder": "جواب لکھیں…",
+      "sendReply": "جواب بھیجیں",
+      "markResolved": "حل شدہ کے طور پر نشان زد کریں",
+      "markClosed": "ٹکٹ بند کریں",
+      "loading": "لوڈ ہو رہا ہے…",
+      "error": "یہ ٹکٹ لوڈ نہیں ہو سکا۔",
+      "notFound": "ٹکٹ نہیں ملا۔",
+      "aiAnswerLabel": "اے آئی خودکار جواب"
     }
   },
   "loadIntake": {
@@ -1285,5 +1310,62 @@
     "reference": "حوالہ",
     "notFoundTitle": "صفحہ نہیں ملا",
     "notFoundBody": "جو صفحہ آپ تلاش کر رہے ہیں وہ موجود نہیں ہے یا آپ کو اس تک رسائی حاصل نہیں ہے۔"
+  },
+  "support": {
+    "title": "معاونت",
+    "subtitle": "مدد حاصل کریں یا سوال پوچھیں — ہم اسے صحیح جگہ بھیجیں گے۔",
+    "newTicket": "نئی ٹکٹ",
+    "myTickets": "میری ٹکٹیں",
+    "noTickets": "آپ نے ابھی تک کوئی ٹکٹ جمع نہیں کروائی۔",
+    "categoryLabel": "یہ کس بارے میں ہے؟",
+    "bodyLabel": "ہمیں مزید بتائیں",
+    "bodyPlaceholder": "اپنا سوال یا مسئلہ بیان کریں…",
+    "relatedLoadLabel": "لوڈ نمبر (اختیاری)",
+    "submit": "ٹکٹ جمع کروائیں",
+    "submitting": "جمع ہو رہا ہے…",
+    "categories": {
+      "technical_issue": "تکنیکی مسئلہ",
+      "load_dispatch": "ایک مخصوص لوڈ",
+      "account_billing": "بلنگ اور سبسکرپشن",
+      "compliance_safety": "تعمیل اور حفاظت",
+      "driver_pay_hr": "تنخواہ اور ڈرائیور ایچ آر",
+      "feature_request": "فیچر کی درخواست",
+      "other": "کچھ اور"
+    },
+    "statusOpen": "کھلا",
+    "statusResolved": "حل شدہ",
+    "statusClosed": "بند",
+    "queueAiResolved": "خود بخود جواب دیا گیا",
+    "queueCarrierosSupport": "CarrierOS معاونت",
+    "queueOrgSupport": "آپ کی کمپنی کی معاونتی ٹیم",
+    "aiAnswerLabel": "جواب",
+    "stillNeedHelp": "کیا آپ کو اب بھی مدد چاہیے؟",
+    "escalate": "ایک انسان سے بات کریں",
+    "escalating": "بڑھایا جا رہا ہے…",
+    "escalated": "بڑھا دیا گیا — ایک انسان پیروی کرے گا۔",
+    "replyPlaceholder": "جواب لکھیں…",
+    "sendReply": "بھیجیں",
+    "backToTickets": "میری ٹکٹوں پر واپس",
+    "ticketSubmitted": "ٹکٹ جمع ہو گئی۔",
+    "loading": "لوڈ ہو رہا ہے…",
+    "error": "کچھ غلط ہو گیا۔",
+    "notFound": "ٹکٹ نہیں ملی۔"
+  },
+  "supportDesk": {
+    "title": "معاونتی ڈیسک",
+    "subtitle": "آپ کے ادارے کی معاونتی ٹکٹیں — صرف آپ کی اپنی ٹیم کو نظر آتی ہیں۔",
+    "lockedTitle": "انٹرپرائز پلان درکار ہے",
+    "lockedDescription": "آپ کے اپنے ڈرائیوروں اور عملے کے لیے ایک مخصوص معاونتی ڈیسک — اے آئی سے درجہ بند ٹکٹیں سیدھا آپ کی ٹیم کو بھیجی جاتی ہیں — انٹرپرائز پلان پر دستیاب ہے۔",
+    "upgradeCta": "پلان دیکھیں",
+    "noTickets": "اس وقت کوئی کھلی ٹکٹ نہیں۔",
+    "statusLabel": "حیثیت",
+    "categoryLabel": "زمرہ",
+    "submitterLabel": "کی طرف سے",
+    "replyPlaceholder": "جواب لکھیں…",
+    "sendReply": "جواب بھیجیں",
+    "markResolved": "حل شدہ کے طور پر نشان زد کریں",
+    "markClosed": "ٹکٹ بند کریں",
+    "loading": "لوڈ ہو رہا ہے…",
+    "error": "ٹکٹیں لوڈ نہیں ہو سکیں۔"
   }
 }

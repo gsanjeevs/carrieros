@@ -67,6 +67,9 @@ const NAV_SECTIONS: NavSection[] = [
     sectionKey: 'team',
     items: [
       { labelKey: 'team',     href: '/team',     icon: 'group',    capability: 'team' },
+      // In-app support ticketing (decisions.md T16) — any authenticated user, any role, any tier can
+      // submit a ticket, so this is gated the same as settings itself: everyone with a tenant role.
+      { labelKey: 'support', href: '/support', icon: 'help', capability: 'settings_view' },
       // Everyone with a tenant role has settings; no capability covers that.
       { labelKey: 'settings', href: '/settings', icon: 'settings', capability: 'settings_view' },
       // Passkey/WebAuthn management (decisions.md T15) — same gate as
@@ -78,6 +81,10 @@ const NAV_SECTIONS: NavSection[] = [
       // same shape as the other org-administration nav items above. The Enterprise tier gate itself is
       // enforced on the page (a locked upsell state, not hidden nav) — same pattern developerApi uses.
       { labelKey: 'brandingCustomization', href: '/settings/branding', icon: 'palette', capability: 'org_branding_manage' },
+      // Enterprise org_support ticket queue staff console (decisions.md T16, migration 0027) —
+      // owner/solo only, same shape as brandingCustomization above. Tier gate is enforced on the
+      // page itself (locked upsell state), not by hiding the nav item.
+      { labelKey: 'supportDesk', href: '/settings/support-desk', icon: 'support_agent', capability: 'org_support_manage' },
     ],
   },
 ]

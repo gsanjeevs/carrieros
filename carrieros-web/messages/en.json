@@ -38,7 +38,9 @@
     "LAST_OWNER": "Your company must keep at least one owner.",
     "MANAGE_DRIVER_ELSEWHERE": "Manage driver accounts from the Drivers page.",
     "EMAIL_SEND_FAILED": "We couldn't send that invoice email. Please try again.",
-    "TIER_UPGRADE_REQUIRED": "This requires an upgrade to the Growth plan or above."
+    "TIER_UPGRADE_REQUIRED": "This requires an upgrade to the Growth plan or above.",
+    "TRIAGE_FAILED": "Couldn't classify that ticket. Please try again.",
+    "NOT_ELIGIBLE": "This isn't available on your current plan."
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -62,7 +64,9 @@
     "section_main": "Main",
     "section_fleet": "Fleet",
     "section_billing": "Billing",
-    "section_team": "Team"
+    "section_team": "Team",
+    "support": "Support",
+    "supportDesk": "Support Desk"
   },
   "login": {
     "title": "Sign in to your account",
@@ -1093,7 +1097,11 @@
       "urgencyCritical": "Critical",
       "urgencyHigh": "High",
       "urgencyMedium": "Medium",
-      "urgencyLow": "Low"
+      "urgencyLow": "Low",
+      "openTicket": "Open support ticket",
+      "unresponded": "Unresponded",
+      "viewTicket": "View Ticket",
+      "replyNow": "Reply Now"
     },
     "audit": {
       "title": "Audit & Activity",
@@ -1204,6 +1212,23 @@
       "adoptionSentFirstInvoice": "Sent first invoice",
       "adoptionReceivedFirstPayment": "Received first payment",
       "trialEndsLabel": " · trial ends {date}"
+    },
+    "supportTickets": {
+      "title": "Support Ticket",
+      "backToTriage": "Back to Triage Queue",
+      "statusLabel": "Status",
+      "categoryLabel": "Category",
+      "submitterLabel": "Submitted by",
+      "orgLabel": "Organization",
+      "confidenceLabel": "AI confidence",
+      "replyPlaceholder": "Write a reply…",
+      "sendReply": "Send Reply",
+      "markResolved": "Mark Resolved",
+      "markClosed": "Close Ticket",
+      "loading": "Loading…",
+      "error": "Could not load this ticket.",
+      "notFound": "Ticket not found.",
+      "aiAnswerLabel": "AI auto-answer"
     }
   },
   "loadIntake": {
@@ -1285,5 +1310,62 @@
     "reference": "Reference",
     "notFoundTitle": "Page not found",
     "notFoundBody": "The page you're looking for doesn't exist, or you don't have access to it."
+  },
+  "support": {
+    "title": "Support",
+    "subtitle": "Get help or ask a question — we'll route it to the right place.",
+    "newTicket": "New Ticket",
+    "myTickets": "My Tickets",
+    "noTickets": "You haven't submitted any tickets yet.",
+    "categoryLabel": "What's this about?",
+    "bodyLabel": "Tell us more",
+    "bodyPlaceholder": "Describe your question or issue…",
+    "relatedLoadLabel": "Load number (optional)",
+    "submit": "Submit Ticket",
+    "submitting": "Submitting…",
+    "categories": {
+      "technical_issue": "Technical issue",
+      "load_dispatch": "A specific load",
+      "account_billing": "Billing & subscription",
+      "compliance_safety": "Compliance & safety",
+      "driver_pay_hr": "Pay & driver HR",
+      "feature_request": "Feature request",
+      "other": "Something else"
+    },
+    "statusOpen": "Open",
+    "statusResolved": "Resolved",
+    "statusClosed": "Closed",
+    "queueAiResolved": "Answered automatically",
+    "queueCarrierosSupport": "CarrierOS Support",
+    "queueOrgSupport": "Your Company's Support Team",
+    "aiAnswerLabel": "Answer",
+    "stillNeedHelp": "Still need help?",
+    "escalate": "Talk to a human",
+    "escalating": "Escalating…",
+    "escalated": "Escalated — a human will follow up.",
+    "replyPlaceholder": "Write a reply…",
+    "sendReply": "Send",
+    "backToTickets": "Back to My Tickets",
+    "ticketSubmitted": "Ticket submitted.",
+    "loading": "Loading…",
+    "error": "Something went wrong.",
+    "notFound": "Ticket not found."
+  },
+  "supportDesk": {
+    "title": "Support Desk",
+    "subtitle": "Your organization's support tickets — visible only to your own team.",
+    "lockedTitle": "Enterprise plan required",
+    "lockedDescription": "A dedicated support desk for your own drivers and staff — with AI-triaged tickets routed straight to your team — is available on the Enterprise plan.",
+    "upgradeCta": "View plans",
+    "noTickets": "No open tickets right now.",
+    "statusLabel": "Status",
+    "categoryLabel": "Category",
+    "submitterLabel": "From",
+    "replyPlaceholder": "Write a reply…",
+    "sendReply": "Send Reply",
+    "markResolved": "Mark Resolved",
+    "markClosed": "Close Ticket",
+    "loading": "Loading…",
+    "error": "Could not load tickets."
   }
 }

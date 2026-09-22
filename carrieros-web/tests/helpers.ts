@@ -131,7 +131,11 @@ export async function cleanupTestUser(admin: SupabaseClient<Database>, userId: s
 // cleared first, in this order: org/driver/load-scoped rows that block
 // `drivers`/`loads` themselves, then `drivers`/`loads`, then any remaining
 // profiles(id) references, then `profiles`, then `organizations`.
-const ORG_SCOPED_BLOCKERS = ['dvir_inspections', 'ifta_state_crossings', 'driver_settlements', 'fuel_stops', 'maintenance_reminders'] as const
+// support_tickets (migration 0027) added here too: its submitted_by/carrier_org_id FKs are both "no
+// action" from profiles/organizations. Deleting it by carrier_org_id here, before the profile-cleanup
+// step below, also CASCADEs support_ticket_messages (ticket_id ON DELETE CASCADE) — no separate entry
+// needed for that table.
+const ORG_SCOPED_BLOCKERS = ['dvir_inspections', 'ifta_state_crossings', 'driver_settlements', 'fuel_stops', 'maintenance_reminders', 'support_tickets'] as const
 
 // Every profiles(id) FK below is "no action" — none cascade. A live row in
 // any of them blocks deleting the profile, which in turn blocks deleting

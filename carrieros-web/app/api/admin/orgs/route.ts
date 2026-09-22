@@ -62,13 +62,20 @@ export async function GET(request: NextRequest) {
 
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86_400_000).toISOString()
 
-  const [{ data: profiles }, { data: recentLoads }, { data: drivers }, { data: invoices }, { data: vehicles }] =
+  const [{ data: profiles }, { data: recentLoads }, { data: drivers }, { data: invoices }, { data: vehicles }, { data: openTickets }] =
     await Promise.all([
       listProfilesForOrgs(admin, orgIds),
       admin.from('loads').select('id, carrier_org_id').in('carrier_org_id', orgIds).gte('created_at', thirtyDaysAgo),
       listDriverIdsForOrgs(admin, orgIds),
       admin.from('invoices').select('id, carrier_org_id').in('carrier_org_id', orgIds),
       admin.from('vehicles').select('id, carrier_org_id').in('carrier_org_id', orgIds),
+      // SA5's Triage Queue severity spec named "open support ticket" as a Medium signal before
+      // support_tickets existed (decisions.md T16) — surfaced here as a real signal now, in the SAME
+      // triage page rather than a second admin screen. Only carrieros_support-queue tickets: this
+      // page is ShipmentX's own queue, not a window into any org's org_support tickets.
+      admin.from('support_tickets').select('id, carrier_org_id, created_at')
+        .in('carrier_org_id', orgIds).eq('queue', 'carrieros_support').eq('status', 'open')
+        .order('created_at', { ascending: true }),
     ])
 
   // last_sign_in_at isn't in a public table — pull it from the Admin Auth
@@ -94,6 +101,15 @@ export async function GET(request: NextRequest) {
   const driverCount = countByOrg(drivers)
   const invoiceCount = countByOrg(invoices)
   const vehicleCount = countByOrg(vehicles)
+
+  // Earliest-open ticket id per org (oldest first) — the one the triage card links to when an org
+  // has more than one open ticket, same "worst/oldest first" bias the rest of this page already uses.
+  const openTicketCountByOrg = new Map<number, number>()
+  const earliestOpenTicketIdByOrg = new Map<number, number>()
+  for (const t of openTickets ?? []) {
+    openTicketCountByOrg.set(t.carrier_org_id, (openTicketCountByOrg.get(t.carrier_org_id) ?? 0) + 1)
+    if (!earliestOpenTicketIdByOrg.has(t.carrier_org_id)) earliestOpenTicketIdByOrg.set(t.carrier_org_id, t.id)
+  }
 
   const result = (orgs ?? []).map(org => {
     const details = Array.isArray(org.carrier_details) ? org.carrier_details[0] : org.carrier_details
@@ -122,6 +138,8 @@ export async function GET(request: NextRequest) {
       last_active: lastActive,
       loads_this_month: loadsThisMonth.get(org.id) ?? 0,
       health_score: healthScore,
+      open_ticket_count: openTicketCountByOrg.get(org.id) ?? 0,
+      earliest_open_ticket_id: earliestOpenTicketIdByOrg.get(org.id) ?? null,
     }
   })
 
