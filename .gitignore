@@ -13,3 +13,4 @@ supabase/.branches/
 
 # Claude Code worktree checkouts (nested copies of this repo)
 **/.claude/worktrees/
+.ci-watch/
