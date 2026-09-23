@@ -11,10 +11,10 @@ for how it was built and the real gotchas hit along the way).
 | production | not set up | not set up | not set up |
 
 `carrieros-web` runs as a **container** (`Dockerfile`, multi-stage, `output: "standalone"`), not on a
-serverless platform — this project moved off an original Vercel plan mid-build because the account
-owner wanted to stay on AWS and avoid hand-wiring IAM/OIDC for a CI-driven deploy. ECS Express Mode
-was chosen over the (now EOL-for-new-customers, since 2026-04-30) App Runner and over Amplify Hosting
-(doesn't support Next.js 16's managed SSR yet, only up to 15).
+serverless hosting platform — this project moved off an earlier managed-hosting plan mid-build because
+the account owner wanted to stay entirely on AWS and avoid hand-wiring IAM/OIDC for a CI-driven deploy
+to a third party. ECS Express Mode was chosen over the (now EOL-for-new-customers, since 2026-04-30)
+App Runner and over Amplify Hosting (doesn't support Next.js 16's managed SSR yet, only up to 15).
 
 ## Current state: staging deploy is manual, not automated
 
