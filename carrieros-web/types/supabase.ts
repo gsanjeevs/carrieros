@@ -2946,6 +2946,36 @@ export type Database = {
           org_id: number
         }[]
       }
+      create_driver_settlement_command: {
+        Args: {
+          p_correlation_id: string
+          p_driver_id: number
+          p_gross_revenue: number
+          p_idempotency_key: string
+          p_loads_count: number
+          p_net_pay: number
+          p_pay_method: string
+          p_period_end: string
+          p_period_start: string
+          p_rate_value: number
+        }
+        Returns: Json
+      }
+      create_invoice_command: {
+        Args: {
+          p_advance_load_status: boolean
+          p_amount: number
+          p_correlation_id: string
+          p_customer_org_id: number
+          p_due_date: string
+          p_factoring_company: string
+          p_idempotency_key: string
+          p_invoice_number: string
+          p_load_id: number
+          p_payment_method: string
+        }
+        Returns: Json
+      }
       driver_self_update_allowed: {
         Args: {
           p_active: boolean
@@ -3101,7 +3131,21 @@ export type Database = {
         Returns: number
       }
       mark_invoice_paid: {
-        Args: { p_invoice_id: number; p_paid_at: string }
+        Args: {
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_invoice_id: number
+          p_paid_at: string
+        }
+        Returns: Json
+      }
+      mark_invoice_sent_command: {
+        Args: {
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_invoice_id: number
+          p_sent_at: string
+        }
         Returns: Json
       }
       mark_overdue_invoices: { Args: never; Returns: number }
@@ -3111,6 +3155,17 @@ export type Database = {
       next_entity_val: {
         Args: { carrier_org_bigint: number; entity_name: string }
         Returns: number
+      }
+      record_load_expense_command: {
+        Args: {
+          p_amount: number
+          p_correlation_id: string
+          p_expense_type: string
+          p_idempotency_key: string
+          p_load_id: number
+          p_note: string
+        }
+        Returns: Json
       }
       replace_ifta_crossings_with_manual: {
         Args: { p_load_id: number; p_rows: Json }
@@ -3139,6 +3194,16 @@ export type Database = {
           p_new_status: string
           p_occurred_at: string
           p_reason: string
+        }
+        Returns: Json
+      }
+      update_settlement_payment_status_command: {
+        Args: {
+          p_correlation_id: string
+          p_expected_status: string
+          p_idempotency_key: string
+          p_new_status: string
+          p_settlement_id: number
         }
         Returns: Json
       }
