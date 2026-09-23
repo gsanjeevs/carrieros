@@ -205,7 +205,18 @@ async function sendDvirAttachments(inspectionId: number, attachments: DvirAttach
       base64ToArrayBuffer(base64)
     )
     if (!ok) {
+      // Do NOT delete the local file here. There is no automatic retry for a single
+      // attachment (the parent DVIR submission is already 'synced' by the time this
+      // runs, per the module comment), so this is the only remaining copy of a
+      // compliance-relevant photo (a defect photo or the inspection signature). Deleting
+      // it on a transient failure (rather than only on confirmed success) would silently
+      // destroy the one thing this whole offline-queue feature exists to protect, for
+      // the sake of reclaiming a few KB of disk. Orphaned failed-upload photos accumulate
+      // under Paths.document/offline-queue-photos -- accepted tradeoff for now; a
+      // future pass could add a manual "retry attachment" affordance or a periodic sweep
+      // that finds and re-uploads orphans, neither of which exists yet.
       logError({ where: 'offline-queue', step: 'dvir-attachment-upload-failed', kind: attachment.kind, inspectionId }, null)
+      continue
     }
     deletePhotoLocally(attachment.localUri)
   }

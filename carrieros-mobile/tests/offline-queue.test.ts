@@ -242,7 +242,7 @@ describe('offline-queue (command queue over the shared API)', () => {
       expect(await flushQueue()).toEqual({ synced: 0, rejected: 1, remaining: 0 });
     });
 
-    it('does not undo or re-queue an already-filed inspection when an attachment upload is refused', async () => {
+    it('does not undo or re-queue an already-filed inspection when an attachment upload is refused, and does NOT delete the local photo it could not upload', async () => {
       mockPhotoStore.set('file:///offline-queue-photos/sig.png', 'AAAA');
       mockHandlers['/api/v1/loads/{id}/dvir-inspections'] = respond(200, { id: 9, defects: [] });
       mockHandlers['/api/v1/dvir-inspections/{id}/attachment-uploads'] = respond(403);
@@ -253,6 +253,12 @@ describe('offline-queue (command queue over the shared API)', () => {
       );
 
       expect(await flushQueue()).toEqual({ synced: 1, rejected: 0, remaining: 0 });
+      // The inspection itself synced (it's the compliance record), but its attachment
+      // upload was refused -- there is no automatic retry for a single attachment, so
+      // the local file must survive. Deleting it here would permanently destroy the
+      // only remaining copy of the signature/defect photo for no functional benefit.
+      expect(mockDeleted).not.toContain('file:///offline-queue-photos/sig.png');
+      expect(mockPhotoStore.has('file:///offline-queue-photos/sig.png')).toBe(true);
     });
 
     it('skips (never crashes on) an attachment whose local photo file is missing at replay', async () => {

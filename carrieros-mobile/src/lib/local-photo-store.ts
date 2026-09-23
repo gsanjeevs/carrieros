@@ -47,7 +47,10 @@ export async function readPhotoLocally(localUri: string): Promise<string | null>
   }
 }
 
-/** Best-effort cleanup once a photo has been uploaded (or permanently given up on). */
+/** Cleanup after a CONFIRMED successful upload only. Callers must not call this on a failed
+ *  or skipped upload attempt -- there is no automatic retry for an individual attachment/photo,
+ *  so deleting on anything less than confirmed success would permanently destroy the only
+ *  remaining copy of a compliance-relevant photo with no way to recover it. */
 export function deletePhotoLocally(localUri: string): void {
   try {
     const file = new File(localUri);
