@@ -8,6 +8,7 @@ import DriverView from './DriverView'
 import DispatcherView from './DispatcherView'
 import FinanceView from './FinanceView'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -29,9 +30,10 @@ export default async function DashboardPage() {
   // sx_support ShipmentX roles, and pre-existing: customer_admin/
   // customer_viewer) silently rendered a blank page body below the header,
   // no error anywhere. `hasKnownView` makes the missing case visible instead.
-  const hasKnownView =
-    role === 'owner' || role === 'solo' || role === 'driver' ||
-    role === 'dispatcher' || role === 'finance'
+  // `dashboard` is exactly "which roles have a dashboard" in the generated
+  // role_capabilities table — the same capability proxy.ts guards
+  // /dashboard with, so the two cannot disagree about this case.
+  const hasKnownView = roleHasCapability(role, 'dashboard')
 
   return (
     <div>

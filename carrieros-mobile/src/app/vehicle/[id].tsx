@@ -11,19 +11,23 @@
 // "create a new reminder" sub-form — mobile only lets you log against an
 // existing reminder or with none, keeping the picker to one screen's worth
 // of UI. Full reminder authoring stays a web-only action for now.
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Figure } from '@/components/figure-text';
 import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
+import { roleHasCapability } from '@/lib/generated/role-capabilities';
+import { keyForSubmission } from '@/lib/idempotency';
+import { formatMoney } from '@/lib/format-money';
 
 const ORANGE = BrandColors.orange;
 
@@ -43,20 +47,15 @@ function todayISO() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-function addMonths(dateStr: string, months: number): string {
-  const d = new Date(dateStr);
-  d.setMonth(d.getMonth() + months);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
 
 const NO_REMINDER = '';
 
 export default function VehicleDetailScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, logService: logServiceParam } = useLocalSearchParams<{ id: string; logService?: string }>();
   const { session } = useSession();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { role } = useProfileRole();
 
   const [vehicle, setVehicle] = useState<VehicleDetail | null>(null);
@@ -64,7 +63,10 @@ export default function VehicleDetailScreen() {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [formOpen, setFormOpen] = useState(false);
+  // Maintenance overview's swipe-left-to-"Log Service" action (spec §2.1)
+  // deep-links here with ?logService=1 so the form opens immediately instead
+  // of landing on the vehicle detail screen and requiring a second tap.
+  const [formOpen, setFormOpen] = useState(logServiceParam === '1');
   const [reminderId, setReminderId] = useState(NO_REMINDER);
   const [serviceType, setServiceType] = useState('');
   const [serviceDate, setServiceDate] = useState(todayISO());
@@ -77,28 +79,17 @@ export default function VehicleDetailScreen() {
 
   const fetchAll = useCallback(async () => {
     if (!id) return;
-    const [{ data: v }, { data: l }, { data: r }] = await Promise.all([
-      supabase.from('vehicles').select('id, vehicle_number, nickname, status').eq('id', Number(id)).single(),
-      supabase
-        .from('service_logs')
-        .select('id, service_type, service_date, odometer, cost, shop_name')
-        .eq('vehicle_id', Number(id))
-        .order('service_date', { ascending: false }),
-      supabase
-        .from('maintenance_reminders')
-        .select('id, reminder_type, trigger_miles, trigger_months')
-        .eq('vehicle_id', Number(id))
-        .eq('is_active', true),
-    ]);
-    setVehicle(v ?? null);
-    setLogs(l ?? []);
-    setReminders(r ?? []);
+    const { data } = await apiClient.http.GET('/api/v1/vehicles/{id}', { params: { path: { id: Number(id) } } });
+    setVehicle(data ? { id: data.id, vehicle_number: data.vehicle_number, nickname: data.nickname, status: data.status } : null);
+    setLogs(data?.service_logs ?? []);
+    setReminders(data?.maintenance_reminders ?? []);
   }, [id]);
 
   useEffect(() => {
     fetchAll().finally(() => setLoading(false));
   }, [fetchAll]);
 
+  const submissionKey = useRef<{ key: string; body: string } | null>(null);
   const selectedReminder = reminders.find((r) => String(r.id) === reminderId);
 
   async function submitService() {
@@ -113,55 +104,36 @@ export default function VehicleDetailScreen() {
     setSubmitting(true);
     setError('');
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('org_id')
-      .eq('id', session.user.id)
-      .single();
-
-    if (!profile?.org_id) {
-      setError(t('vehicleDetail.logServiceFailed'));
-      setSubmitting(false);
-      return;
-    }
-
     const odometerNum = odometer ? Number(odometer) : null;
     const costNum = cost ? Number(cost) : null;
 
-    const { error: insertErr } = await supabase.from('service_logs').insert({
-      vehicle_id: vehicle.id,
-      carrier_org_id: profile.org_id,
+    // Service log + the reminder it satisfies are ONE atomic call. Org, logger and the reminder's
+    // next-due date/miles (including month-end handling) are all computed server-side.
+    const body = {
       service_type: type,
       service_date: serviceDate,
       odometer: odometerNum,
       cost: costNum,
       shop_name: shopName.trim() || null,
       notes: notes.trim() || null,
-      logged_by: session.user.id,
-    });
-
-    if (insertErr) {
+      reminder_id: selectedReminder?.id ?? null,
+    };
+    let failed: boolean;
+    try {
+      const { response } = await apiClient.http.POST('/api/v1/vehicles/{id}/service-logs', {
+        params: { path: { id: vehicle.id }, header: { 'Idempotency-Key': keyForSubmission(submissionKey, body) } },
+        body,
+      });
+      failed = !response.ok;
+    } catch {
+      failed = true;
+    }
+    if (failed) {
       setError(t('vehicleDetail.logServiceFailed'));
       setSubmitting(false);
       return;
     }
-
-    if (selectedReminder) {
-      const nextDueDate = selectedReminder.trigger_months
-        ? addMonths(serviceDate, selectedReminder.trigger_months)
-        : null;
-      const nextDueMiles =
-        selectedReminder.trigger_miles && odometerNum ? odometerNum + selectedReminder.trigger_miles : null;
-      await supabase
-        .from('maintenance_reminders')
-        .update({
-          last_service_date: serviceDate,
-          last_odometer: odometerNum,
-          next_due_date: nextDueDate,
-          next_due_miles: nextDueMiles,
-        })
-        .eq('id', selectedReminder.id);
-    }
+    submissionKey.current = null;
 
     setSubmitting(false);
     setFormOpen(false);
@@ -194,7 +166,10 @@ export default function VehicleDetailScreen() {
     );
   }
 
-  const canLogService = role === 'owner' || role === 'solo';
+  // Same capability the server checks in carrieros-web's
+  // server/application/field-actions-service.ts (`service_log`), read from the
+  // generated role_capabilities table — owner/solo today.
+  const canLogService = roleHasCapability(role, 'service_log');
 
   return (
     <ThemedView style={styles.container}>
@@ -212,7 +187,11 @@ export default function VehicleDetailScreen() {
           ) : null}
 
           {canLogService && !formOpen && (
-            <Pressable onPress={() => setFormOpen(true)} style={styles.logServiceButton}>
+            <Pressable
+              onPress={() => setFormOpen(true)}
+              style={({ pressed }) => [styles.logServiceButton, pressed && styles.logServiceButtonPressed]}
+              android_ripple={{ color: 'rgba(255,255,255,0.15)' }}
+            >
               <ThemedText type="smallBold" style={{ color: '#ffffff' }}>{t('vehicleDetail.logService')}</ThemedText>
             </Pressable>
           )}
@@ -276,7 +255,7 @@ export default function VehicleDetailScreen() {
                   style={[styles.input, { color: theme.text, borderColor: theme.border }]}
                   value={odometer}
                   onChangeText={setOdometer}
-                  keyboardType="numeric"
+                  keyboardType="number-pad"
                   placeholderTextColor={theme.textSecondary}
                 />
               </ThemedView>
@@ -289,7 +268,7 @@ export default function VehicleDetailScreen() {
                   style={[styles.input, { color: theme.text, borderColor: theme.border }]}
                   value={cost}
                   onChangeText={setCost}
-                  keyboardType="numeric"
+                  keyboardType="decimal-pad"
                   placeholderTextColor={theme.textSecondary}
                 />
               </ThemedView>
@@ -353,7 +332,7 @@ export default function VehicleDetailScreen() {
                     <ThemedText type="small">{l.service_type}</ThemedText>
                     <ThemedText type="small" themeColor="textSecondary">{l.service_date}</ThemedText>
                   </ThemedView>
-                  {l.cost ? <ThemedText type="small" themeColor="textSecondary">${l.cost.toFixed(2)}</ThemedText> : null}
+                  {l.cost ? <Figure type="small" themeColor="textSecondary">{formatMoney(l.cost, locale)}</Figure> : null}
                 </ThemedView>
               ))
             )}
@@ -390,6 +369,7 @@ const styles = StyleSheet.create({
   cancelButton: { flex: 1, borderRadius: 8, paddingVertical: 12, alignItems: 'center', borderWidth: 1 },
   submitButton: { flex: 1, backgroundColor: ORANGE, borderRadius: 8, paddingVertical: 12, alignItems: 'center' },
   submitButtonDisabled: { opacity: 0.5 },
+  logServiceButtonPressed: { opacity: 0.85 },
   error: { color: StatusColors.danger },
   logRow: {
     flexDirection: 'row',

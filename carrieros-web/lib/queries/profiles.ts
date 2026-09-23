@@ -12,6 +12,7 @@
 // column combination that theoretically exists.
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase'
+import { rolesWithCapability } from '@/lib/generated/role-capabilities'
 
 type AnySupabaseClient = SupabaseClient<Database> | ReturnType<typeof import('@supabase/supabase-js').createClient<Database>>
 
@@ -29,7 +30,7 @@ type AnySupabaseClient = SupabaseClient<Database> | ReturnType<typeof import('@s
 // doesn't use every column just ignores the extras; cheaper than 25 near-
 // identical hand-written selects.
 const PROFILE_SELF_COLUMNS =
-  'id, org_id, role, is_active, first_name, last_name, preferred_language, uom_system, date_format, time_format, timezone'
+  'id, org_id, role, is_active, first_name, last_name, preferred_language, uom_system, date_format, time_format, timezone, theme_preference'
 
 export async function getProfileForUser(supabase: AnySupabaseClient, userId: string) {
   return supabase
@@ -87,7 +88,7 @@ export async function getOrgOwnerOrSolo(supabase: AnySupabaseClient, orgId: numb
     .from('profiles')
     .select('id')
     .eq('org_id', orgId)
-    .in('role', ['owner', 'solo'])
+    .in('role', rolesWithCapability('team_manage'))
     .limit(1)
     .maybeSingle()
 }
@@ -97,7 +98,7 @@ export async function getOrgOwnersAndSolos(supabase: AnySupabaseClient, orgId: n
     .from('profiles')
     .select('id, first_name, last_name, role')
     .eq('org_id', orgId)
-    .in('role', ['owner', 'solo'])
+    .in('role', rolesWithCapability('team_manage'))
 }
 
 export async function countOrgAdmins(supabase: AnySupabaseClient, orgId: number) {
@@ -105,7 +106,7 @@ export async function countOrgAdmins(supabase: AnySupabaseClient, orgId: number)
     .from('profiles')
     .select('id', { count: 'exact', head: true })
     .eq('org_id', orgId)
-    .in('role', ['owner', 'solo'])
+    .in('role', rolesWithCapability('team_manage'))
 }
 
 export async function updateProfileRole(supabase: AnySupabaseClient, profileId: string, role: string) {

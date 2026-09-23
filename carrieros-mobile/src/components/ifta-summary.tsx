@@ -19,7 +19,8 @@ import { useLocale } from '@/hooks/use-locale';
 import { useSession } from '@/hooks/use-session';
 import { hasFeature } from '@/lib/entitlements';
 import { formatNumber } from '@/lib/format-number';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase'; // entitlements.ts still takes it as a parameter; no direct table/RPC calls here
+import { apiClient } from '@/lib/api-client';
 
 type StateMiles = { state: string; total_miles: number };
 
@@ -43,6 +44,10 @@ export function IftaSummary() {
       setLoading(false);
       return;
     }
+
+    // The endpoint derives the org from the caller's own verified session
+    // server-side and re-checks the entitlement itself; this client-side
+    // gate is just to skip the round trip and show the upgrade prompt.
     const gate = await hasFeature(supabase, 'ifta_mileage_log');
     setEntitled(gate);
     if (!gate) {
@@ -50,21 +55,9 @@ export function IftaSummary() {
       return;
     }
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('org_id')
-      .eq('id', session.user.id)
-      .single();
-    if (!profile?.org_id) {
-      setLoading(false);
-      return;
-    }
-
-    const { data } = await supabase.rpc('get_ifta_quarterly_summary', {
-      p_carrier_org_id: profile.org_id,
-      p_quarter: quarter,
-    });
-    setRows((data ?? []).sort((a: StateMiles, b: StateMiles) => b.total_miles - a.total_miles));
+    const { data } = await apiClient.http.GET('/api/v1/reports/ifta-quarterly', { params: { query: { quarter } } });
+    const rows = (data?.rows as StateMiles[] | undefined) ?? [];
+    setRows([...rows].sort((a, b) => b.total_miles - a.total_miles));
     setLoading(false);
   }, [session?.user.id, quarter]);
 

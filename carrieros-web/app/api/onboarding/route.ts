@@ -104,6 +104,13 @@ export async function POST(request: NextRequest) {
   if (!company_name || !state || !first_name || !last_name)
     return apiError('VALIDATION_ERROR', 'Missing required fields', 400)
 
+  // Self-serve onboarding creates a NEW company, so the caller can only ever be its owner or a solo
+  // operator. The role used to be taken from the body verbatim, which let anyone become sx_owner
+  // (ShipmentX platform staff) and reach /api/admin/*. Staff and invited roles come from other flows.
+  const SELF_SERVE_ROLES = ['owner', 'solo']
+  if (role !== undefined && !SELF_SERVE_ROLES.includes(role))
+    return apiError('VALIDATION_ERROR', `role must be one of ${SELF_SERVE_ROLES.join(', ')}`, 400)
+
   const VALID_NET_TERMS = [7, 15, 30, 45, 60]
   const resolvedNetTerms = VALID_NET_TERMS.includes(Number(default_net_terms_days)) ? Number(default_net_terms_days) : 30
 

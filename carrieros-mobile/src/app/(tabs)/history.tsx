@@ -14,8 +14,7 @@ import { LOAD_STATUS_PILL, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
-import { supabase } from '@/lib/supabase';
-const HISTORY_STATUSES = ['delivered', 'invoiced', 'paid', 'cancelled'];
+import { apiClient } from '@/lib/api-client';
 
 type LoadRow = {
   id: number;
@@ -39,21 +38,10 @@ export default function HistoryScreen() {
 
   const load = useCallback(async () => {
     if (!session?.user.id) return;
-    const { data: driver } = await supabase
-      .from('drivers')
-      .select('id')
-      .eq('profile_id', session.user.id)
-      .single();
-    if (!driver) return;
-
-    const { data } = await supabase
-      .from('loads_driver_view')
-      .select('id, load_number, status, customer_name_raw, pickup_city, pickup_state, delivery_city, delivery_state')
-      .eq('driver_id', driver.id)
-      .in('status', HISTORY_STATUSES)
-      .order('created_at', { ascending: false });
-
-    setLoads((data as LoadRow[] | null) ?? []);
+    // /api/v1/loads already restricts a driver to their own loads. "completed,cancelled" is a
+    // comma-separated union of status groups, resolved server-side into one correctly-ordered query.
+    const { data } = await apiClient.http.GET('/api/v1/loads', { params: { query: { status_group: 'completed,cancelled' } } });
+    setLoads((data?.loads as LoadRow[] | undefined) ?? []);
   }, [session?.user.id]);
 
   useEffect(() => {

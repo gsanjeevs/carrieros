@@ -212,7 +212,8 @@
     "iftaFallbackWarning": "Los datos de GPS parecen incompletos para este viaje. Ingresa tus millas por estado para que el millaje IFTA sea preciso.",
     "iftaAddState": "+ Agregar otro estado",
     "iftaSaveFallback": "Guardar millaje por estado",
-    "iftaTripTotal": "Total del viaje: %{miles} mi"
+    "iftaTripTotal": "Total del viaje: %{miles} mi",
+    "statusConflict": "Alguien acaba de actualizar esta carga. Mostrando lo más reciente."
   },
   "loadNew": {
     "heading": "Nueva Carga",
@@ -292,6 +293,12 @@
     "errorDefectsSaveFailed": "Inspección guardada, pero los detalles del defecto no se guardaron. Notifica directamente a tu despachador.",
     "takePhoto": "Tomar foto",
     "chooseFromLibrary": "Elegir de la galería",
+    "addPhoto": "Agregar foto",
+    "addPhotoSheetTitle": "Agregar foto del defecto",
+    "discardTitle": "¿Descartar detalles del defecto?",
+    "discardMessage": "Marcaste un defecto pero aún no lo has descrito. Si regresas, perderás esa descripción.",
+    "discardCancel": "Seguir editando",
+    "discardConfirm": "Descartar",
     "photoAttached": "Foto adjunta",
     "removePhoto": "Quitar foto",
     "errorCameraDenied": "Se denegó el acceso a la cámara. Habilite el permiso de cámara en los ajustes de su dispositivo para tomar una foto.",
@@ -302,7 +309,8 @@
     "signHere": "Firme aquí",
     "clearSignature": "Borrar",
     "errorMustSign": "Debes firmar esta inspección antes de enviarla.",
-    "signatureUploadFailedWarning": "La inspección se guardó, pero la firma no se pudo subir. Contacta a tu despachador si se requiere una copia firmada."
+    "signatureUploadFailedWarning": "La inspección se guardó, pero la firma no se pudo subir. Contacta a tu despachador si se requiere una copia firmada.",
+    "queuedOffline": "Inspección guardada en este dispositivo. Se enviará automáticamente cuando vuelvas a estar en línea."
   },
   "settings": {
     "title": "Configuración",
@@ -508,6 +516,7 @@
   },
   "settlements": {
     "title": "Liquidaciones",
+    "copied": "Copiado",
     "upgradeRequired": "Las liquidaciones de conductores requieren el plan Growth o superior.",
     "empty": "Aún no hay liquidaciones.",
     "status_pending": "Pendiente",
@@ -526,7 +535,8 @@
     "errorNotSignedIn": "Su sesión se cerró. Inicie sesión de nuevo para subir archivos.",
     "errorResolveAccount": "No se pudo determinar su cuenta de transportista.",
     "errorUploadFailed": "Error al subir. Verifique su conexión e inténtelo de nuevo.",
-    "errorSaveFailed": "La foto no se pudo guardar en esta carga. La subida se eliminó; inténtelo de nuevo."
+    "errorSaveFailed": "La foto no se pudo guardar en esta carga. La subida se eliminó; inténtelo de nuevo.",
+    "queuedOffline": "Foto guardada en este dispositivo. Se subirá automáticamente cuando vuelvas a estar en línea."
   },
   "dvirHistory": {
     "title": "Historial de DVIR",
@@ -569,6 +579,8 @@
   },
   "maintenanceOverview": {
     "title": "Mantenimiento",
+    "filterAll": "Todos (%{count})",
+    "logAction": "Registrar",
     "empty": "No hay recordatorios de mantenimiento activos.",
     "noDueDate": "Sin fecha de vencimiento",
     "milesValue": "%{miles} mi",

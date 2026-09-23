@@ -8,14 +8,14 @@ import { ErrorResponseSchema } from './schemas'
 const toSchema = (schema: ZodType, io: 'input' | 'output' = 'output') =>
   z.toJSONSchema(schema, { target: 'openapi-3.0', io, unrepresentable: 'any' }) as Record<string, unknown>
 
-function parametersFor(query: ZodType) {
-  const json = toSchema(query, 'input') as { properties?: Record<string, unknown>; required?: string[] }
+function parametersFor(where: 'query' | 'path' | 'header', schema: ZodType) {
+  const json = toSchema(schema, 'input') as { properties?: Record<string, unknown>; required?: string[] }
   const required = new Set(json.required ?? [])
-  return Object.entries(json.properties ?? {}).map(([name, schema]) => ({
+  return Object.entries(json.properties ?? {}).map(([name, propSchema]) => ({
     name,
-    in: 'query',
-    required: required.has(name),
-    schema,
+    in: where,
+    required: where === 'path' ? true : required.has(name),
+    schema: propSchema,
   }))
 }
 
@@ -31,7 +31,15 @@ function operationFor(e: Endpoint) {
     operationId: e.operationId,
     summary: e.summary,
     tags: [e.tag],
-    ...(e.query ? { parameters: parametersFor(e.query) } : {}),
+    ...(e.params || e.query || e.headers
+      ? {
+          parameters: [
+            ...(e.params ? parametersFor('path', e.params) : []),
+            ...(e.query ? parametersFor('query', e.query) : []),
+            ...(e.headers ? parametersFor('header', e.headers) : []),
+          ],
+        }
+      : {}),
     ...(e.body ? { requestBody: { required: true, content: { 'application/json': { schema: toSchema(e.body, 'input') } } } } : {}),
     responses,
   }

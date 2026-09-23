@@ -212,7 +212,8 @@
     "iftaFallbackWarning": "GPS data looks incomplete for this trip. Enter your miles per state so IFTA mileage is accurate.",
     "iftaAddState": "+ Add another state",
     "iftaSaveFallback": "Save State Mileage",
-    "iftaTripTotal": "Trip total: %{miles} mi"
+    "iftaTripTotal": "Trip total: %{miles} mi",
+    "statusConflict": "This load was just updated by someone else. Showing the latest."
   },
   "loadNew": {
     "heading": "New Load",
@@ -292,6 +293,12 @@
     "errorDefectsSaveFailed": "Inspection saved, but defect details failed to save. Notify your dispatcher directly.",
     "takePhoto": "Take Photo",
     "chooseFromLibrary": "Choose from Library",
+    "addPhoto": "Add Photo",
+    "addPhotoSheetTitle": "Add Defect Photo",
+    "discardTitle": "Discard defect details?",
+    "discardMessage": "You flagged a defect but haven't described it yet. Going back will lose that description.",
+    "discardCancel": "Keep Editing",
+    "discardConfirm": "Discard",
     "photoAttached": "Photo attached",
     "removePhoto": "Remove photo",
     "errorCameraDenied": "Camera access was denied. Enable camera permission in your device settings to take a photo.",
@@ -302,7 +309,8 @@
     "signHere": "Sign here",
     "clearSignature": "Clear",
     "errorMustSign": "You must sign this inspection before submitting.",
-    "signatureUploadFailedWarning": "The inspection was saved, but the signature could not be uploaded. Contact your dispatcher if a signed copy is required."
+    "signatureUploadFailedWarning": "The inspection was saved, but the signature could not be uploaded. Contact your dispatcher if a signed copy is required.",
+    "queuedOffline": "Inspection saved on this device. It will submit automatically when you're back online."
   },
   "settings": {
     "title": "Settings",
@@ -508,6 +516,7 @@
   },
   "settlements": {
     "title": "Settlements",
+    "copied": "Copied",
     "upgradeRequired": "Driver settlements require the Growth plan or above.",
     "empty": "No settlements yet.",
     "status_pending": "Pending",
@@ -526,7 +535,8 @@
     "errorNotSignedIn": "You are signed out. Sign in again to upload.",
     "errorResolveAccount": "Could not resolve your carrier account.",
     "errorUploadFailed": "Upload failed. Check your connection and try again.",
-    "errorSaveFailed": "The photo could not be saved to this load. The upload was removed — please try again."
+    "errorSaveFailed": "The photo could not be saved to this load. The upload was removed — please try again.",
+    "queuedOffline": "Photo saved on this device. It will upload automatically when you're back online."
   },
   "dvirHistory": {
     "title": "DVIR History",
@@ -569,6 +579,8 @@
   },
   "maintenanceOverview": {
     "title": "Maintenance",
+    "filterAll": "All (%{count})",
+    "logAction": "Log",
     "empty": "No active maintenance reminders.",
     "noDueDate": "No due date set",
     "milesValue": "%{miles} mi",

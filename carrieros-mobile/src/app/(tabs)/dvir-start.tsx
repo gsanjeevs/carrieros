@@ -5,7 +5,7 @@
 // explains why it can't yet. Named "dvir-start" (not "dvir") to avoid any
 // ambiguity with the app/dvir/[loadId] route segment outside this group.
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
@@ -14,9 +14,8 @@ import { ThemedView } from '@/components/themed-view';
 import { BrandColors, Spacing } from '@/constants/theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 const ORANGE = BrandColors.orange;
-const ACTIVE_LOAD_STATUSES = ['dispatched', 'picked_up', 'in_transit'];
 
 export default function DvirStartScreen() {
   const router = useRouter();
@@ -27,22 +26,10 @@ export default function DvirStartScreen() {
 
   const load = useCallback(async () => {
     if (!session?.user.id) return;
-    const { data: driver } = await supabase
-      .from('drivers')
-      .select('id')
-      .eq('profile_id', session.user.id)
-      .single();
-    if (!driver) return;
-
-    const { data: activeLoad } = await supabase
-      .from('loads_driver_view')
-      .select('id')
-      .eq('driver_id', driver.id)
-      .in('status', ACTIVE_LOAD_STATUSES)
-      .order('created_at', { ascending: false })
-      .maybeSingle();
-
-    setActiveLoadId(activeLoad?.id ?? null);
+    // /api/v1/loads already restricts a driver to their own loads (loads_driver_view under the hood),
+    // so this screen no longer resolves its own drivers row first.
+    const { data } = await apiClient.http.GET('/api/v1/loads', { params: { query: { status_group: 'in_progress' } } });
+    setActiveLoadId(data?.loads[0]?.id ?? null);
   }, [session?.user.id]);
 
   useEffect(() => {
@@ -64,14 +51,21 @@ export default function DvirStartScreen() {
 
         {activeLoadId ? (
           <ThemedView type="transparent" style={styles.buttonGroup}>
+            {/* iOS/Android deliberately diverge here (spec §1.1): Android
+                gets a visible ripple over the orange fill on press, iOS
+                relies on Pressable's platform-default opacity dim -- making
+                iOS ripple-less isn't a bug to "fix" by disabling Android's,
+                it's the correct per-platform default. */}
             <Pressable
-              style={styles.actionButton}
+              style={({ pressed }) => [styles.actionButton, pressed && Platform.OS === 'ios' && styles.actionButtonPressed]}
+              android_ripple={{ color: 'rgba(255,255,255,0.15)' }}
               onPress={() => router.push({ pathname: '/dvir/[loadId]', params: { loadId: String(activeLoadId), type: 'pre_trip' } })}
             >
               <ThemedText type="smallBold" style={styles.actionButtonText}>{t('dvirTab.startPreTrip')}</ThemedText>
             </Pressable>
             <Pressable
-              style={[styles.actionButton, styles.actionButtonSecondary]}
+              style={({ pressed }) => [styles.actionButton, styles.actionButtonSecondary, pressed && Platform.OS === 'ios' && styles.actionButtonPressed]}
+              android_ripple={{ color: `${ORANGE}22` }}
               onPress={() => router.push({ pathname: '/dvir/[loadId]', params: { loadId: String(activeLoadId), type: 'post_trip' } })}
             >
               <ThemedText type="smallBold" style={styles.actionButtonSecondaryText}>{t('dvirTab.startPostTrip')}</ThemedText>
@@ -107,6 +101,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   actionButtonText: { color: '#ffffff' },
+  actionButtonPressed: { opacity: 0.85 },
   actionButtonSecondary: { backgroundColor: 'transparent', borderWidth: 1, borderColor: ORANGE },
   actionButtonSecondaryText: { color: ORANGE },
   empty: { alignItems: 'center', marginTop: Spacing.six, gap: Spacing.two, paddingHorizontal: Spacing.three },

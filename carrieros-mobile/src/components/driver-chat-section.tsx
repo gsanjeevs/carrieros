@@ -1,11 +1,15 @@
 // src/components/driver-chat-section.tsx
 // Driver <-> back-office chat for a load (audit gap #13, Growth+
-// driver_chat feature). Reads driver_messages directly (RLS-scoped, same
-// as PodSection's own direct-table pattern); sending and translating go
-// through carrieros-web's API routes via src/lib/api.ts's bearer-token
-// fetch, since that's where the role/tier gating and language-inheritance
-// logic already lives (see that route's own header comment) — not
-// duplicated here.
+// driver_chat feature). The initial thread load goes through
+// GET /api/v1/loads/{id}/messages (gated by the chat_participate
+// capability, same as the read-receipt endpoint below); new messages still
+// arrive over a direct Postgres Changes subscription (RLS-scoped) rather
+// than the API, since ADR 0003's SSE stream is signal-only and this thread
+// needs the message body itself the instant it lands, not a "something
+// changed, go refetch" nudge. Sending and translating go through
+// carrieros-web's API routes via src/lib/api.ts's bearer-token fetch, since
+// that's where the role/tier gating and language-inheritance logic already
+// lives (see that route's own header comment) — not duplicated here.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 
@@ -16,6 +20,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useSession } from '@/hooks/use-session';
 import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 import { apiFetch } from '@/lib/api';
 
 const ORANGE = BrandColors.orange;
@@ -41,19 +46,24 @@ export function DriverChatSection({ loadId }: { loadId: number }) {
   const scrollRef = useRef<ScrollView>(null);
 
   const load = useCallback(async () => {
-    const { data } = await supabase
-      .from('driver_messages')
-      .select('id, sender_id, body, original_language, sent_at, read_at')
-      .eq('load_id', loadId)
-      .order('sent_at', { ascending: true });
-    const rows = (data as MessageRow[]) ?? [];
+    const { data } = await apiClient.http.GET('/api/v1/loads/{id}/messages', { params: { path: { id: loadId } } });
+    const rows = (data?.messages as MessageRow[] | undefined) ?? [];
     setMessages(rows);
 
     // Mark-as-read (audit gap: driver_messages.read_at existed but nothing
     // ever set it) — same rule as web's DriverMessageThread.tsx.
     const unreadIds = rows.filter((m) => m.sender_id !== session?.user.id && !m.read_at).map((m) => m.id);
     if (unreadIds.length > 0) {
-      await supabase.from('driver_messages').update({ read_at: new Date().toISOString() }).in('id', unreadIds);
+      // Best effort: a read receipt that fails to send must never break the chat. The server
+      // only marks other people's messages on THIS load, so the ids are a request, not an authority.
+      try {
+        await apiClient.http.POST('/api/v1/loads/{id}/messages/read', {
+          params: { path: { id: loadId } },
+          body: { message_ids: unreadIds },
+        });
+      } catch {
+        /* retried on the next load() */
+      }
     }
   }, [loadId, session?.user.id]);
 

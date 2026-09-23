@@ -20,6 +20,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { INVOICE_ROLES } from '@/lib/roles-policy'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { logEvent } from '@/lib/observability'
 
 /** The one thing a real integration replaces. */
 export interface FactoringNotification {
@@ -48,10 +49,7 @@ export interface FactoringNotification {
  * the error_code contract, the client) stays exactly as it is.
  */
 async function notifyFactor(payload: FactoringNotification): Promise<void> {
-  console.log(
-    '[factoring:stub] no factoring partner is configured — nothing was transmitted.',
-    JSON.stringify(payload, null, 2)
-  )
+  logEvent({ route: 'invoices/factor:stub' }, { message: 'no factoring partner configured — nothing was transmitted', payload })
 }
 
 export async function POST(

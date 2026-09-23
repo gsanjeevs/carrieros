@@ -29,7 +29,8 @@ import {
 
 import { useSession } from '@/hooks/use-session';
 import { i18n, isRTLLocale, isSupportedLocale, setI18nLocale, t as translate, type Locale } from '@/lib/i18n';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
+import { savePreferences } from '@/lib/profile-api';
 
 type LocaleFontFamily = { regular: string; bold: string } | null;
 
@@ -138,30 +139,15 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     async function loadProfile() {
       if (!session?.user.id) return;
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('preferred_language, org_id, uom_system, date_format, time_format')
-        .eq('id', session.user.id)
-        .single();
+      const { data: profile } = await apiClient.http.GET('/api/v1/me/preferences');
       if (cancelled) return;
       applyLocale(isSupportedLocale(profile?.preferred_language) ? profile.preferred_language : 'en');
-
-      let orgDefaultUom: Uom = 'imperial';
-      if (profile?.org_id) {
-        const { data: details } = await supabase
-          .from('carrier_details')
-          .select('uom_system')
-          .eq('org_id', profile.org_id)
-          .maybeSingle();
-        if (details?.uom_system) orgDefaultUom = details.uom_system as Uom;
-      }
-      if (cancelled) return;
 
       setPrefs({
         uomSystem: (profile?.uom_system as Uom | null) ?? null,
         dateFormat: (profile?.date_format as DateFormat) ?? 'MM/DD/YYYY',
         timeFormat: (profile?.time_format as TimeFormat) ?? '12h',
-        orgDefaultUom,
+        orgDefaultUom: (profile?.org_default_uom_system as Uom | undefined) ?? 'imperial',
       });
     }
     loadProfile();
@@ -174,7 +160,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     async (next: Locale) => {
       applyLocale(next);
       if (session?.user.id) {
-        await supabase.from('profiles').update({ preferred_language: next }).eq('id', session.user.id);
+        await savePreferences({ preferred_language: next });
       }
     },
     [session?.user.id, applyLocale]
@@ -184,7 +170,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     async (uom: Uom | null) => {
       setPrefs((p) => ({ ...p, uomSystem: uom }));
       if (session?.user.id) {
-        await supabase.from('profiles').update({ uom_system: uom }).eq('id', session.user.id);
+        await savePreferences({ uom_system: uom });
       }
     },
     [session?.user.id]
@@ -194,7 +180,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     async (format: DateFormat) => {
       setPrefs((p) => ({ ...p, dateFormat: format }));
       if (session?.user.id) {
-        await supabase.from('profiles').update({ date_format: format }).eq('id', session.user.id);
+        await savePreferences({ date_format: format });
       }
     },
     [session?.user.id]
@@ -204,7 +190,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     async (format: TimeFormat) => {
       setPrefs((p) => ({ ...p, timeFormat: format }));
       if (session?.user.id) {
-        await supabase.from('profiles').update({ time_format: format }).eq('id', session.user.id);
+        await savePreferences({ time_format: format });
       }
     },
     [session?.user.id]

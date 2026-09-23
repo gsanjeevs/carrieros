@@ -79,7 +79,14 @@ CREATE TABLE carrier_details (
   -- ShipmentX admin action (see SECTION 3c's admin_events) or, once real
   -- Stripe webhooks exist, by billing automation. Scaffolded now even
   -- though billing_events/Stripe webhooks are demo-only today (lib/stripe.ts).
-  grace_period_until  TIMESTAMPTZ
+  grace_period_until  TIMESTAMPTZ,
+  -- Enterprise branding customization (added 2026-09-21, migration 0026,
+  -- decisions.md PR1 amendment) -- overrides --color-brand-orange/
+  -- --color-teal for this org's app shell + public tracking page when
+  -- has_feature('branding_customization') is true. NULL = default theme.
+  -- Logo reuses organizations.logo_path (S10) rather than a second column.
+  brand_primary_color TEXT CHECK (brand_primary_color ~ '^#[0-9A-Fa-f]{6}$'),
+  brand_accent_color  TEXT CHECK (brand_accent_color  ~ '^#[0-9A-Fa-f]{6}$')
 );
 
 -- Customer-only fields (shipper/broker, per carrier)
@@ -258,7 +265,7 @@ CREATE TABLE role_capabilities (
 );
 
 COMMENT ON TABLE role_capabilities IS
-  'Role -> capability gating, single-sourced for web + mobile via scripts/gen-role-capabilities.mjs. UI/navigation gating only, not a security boundary -- see migration 0009 header comment.';
+  'Role -> capability, the single source of truth for role gating in both apps, generated into each by scripts/gen-role-capabilities.mjs. Since 0023 this is an authorization input at the API layer (services and routes), not only navigation gating; RLS on the data tables remains the enforcement backstop beneath it. Presence of a row = allowed, absence = denied.';
 
 INSERT INTO role_capabilities (role, capability) VALUES
   ('owner',      'dashboard'),
@@ -269,6 +276,40 @@ INSERT INTO role_capabilities (role, capability) VALUES
   ('owner',      'team'),
   ('owner',      'invoice_actions'),
   ('owner',      'subscription_management'),
+  ('owner',      'loads_manage'),
+  ('owner',      'loads_advance_status'),
+  ('owner',      'load_intake_extract'),
+  ('owner',      'documents_upload'),
+  ('owner',      'documents_read'),
+  ('owner',      'documents_send'),
+  ('owner',      'customers_manage'),
+  ('owner',      'fuel_log'),
+  ('owner',      'problem_report'),
+  ('owner',      'chat_participate'),
+  ('owner',      'location_share'),
+  ('owner',      'ifta_record'),
+  ('owner',      'dvir_file'),
+  ('owner',      'dvir_attach_any'),
+  ('owner',      'service_log'),
+  ('owner',      'settlements_manage'),
+  ('owner',      'team_manage'),
+  ('owner',      'drivers_manage'),
+  ('owner',      'vehicles_manage'),
+  ('owner',      'loads_view'),
+  ('owner',      'customers_view'),
+  ('owner',      'exceptions_view'),
+  ('owner',      'maintenance_view'),
+  ('owner',      'settlements_view'),
+  ('owner',      'settings_view'),
+  ('owner',      'org_documents_view'),
+  ('owner',      'org_documents_manage'),
+  ('owner',      'documents_delete'),
+  ('owner',      'rate_visibility'),
+  -- Migration 0026: Enterprise branding customization (decisions.md PR1 amendment) -- owner/solo only.
+  ('owner',      'org_branding_manage'),
+  -- Migration 0027: Enterprise org_support ticket queue (decisions.md T16) -- owner/solo only, same
+  -- default-grant shape as org_branding_manage above.
+  ('owner',      'org_support_manage'),
 
   ('solo',       'dashboard'),
   ('solo',       'dispatch'),
@@ -278,21 +319,103 @@ INSERT INTO role_capabilities (role, capability) VALUES
   ('solo',       'team'),
   ('solo',       'invoice_actions'),
   ('solo',       'subscription_management'),
+  ('solo',       'loads_manage'),
+  ('solo',       'loads_advance_status'),
+  ('solo',       'load_intake_extract'),
+  ('solo',       'documents_upload'),
+  ('solo',       'documents_read'),
+  ('solo',       'documents_send'),
+  ('solo',       'customers_manage'),
+  ('solo',       'fuel_log'),
+  ('solo',       'problem_report'),
+  ('solo',       'chat_participate'),
+  ('solo',       'location_share'),
+  ('solo',       'ifta_record'),
+  ('solo',       'dvir_file'),
+  ('solo',       'dvir_attach_any'),
+  ('solo',       'driver_profile_edit_own'),
+  ('solo',       'service_log'),
+  ('solo',       'settlements_manage'),
+  ('solo',       'team_manage'),
+  ('solo',       'drivers_manage'),
+  ('solo',       'vehicles_manage'),
+  ('solo',       'loads_view'),
+  ('solo',       'customers_view'),
+  ('solo',       'exceptions_view'),
+  ('solo',       'maintenance_view'),
+  ('solo',       'settlements_view'),
+  ('solo',       'settings_view'),
+  ('solo',       'org_documents_view'),
+  ('solo',       'org_documents_manage'),
+  ('solo',       'documents_delete'),
+  ('solo',       'rate_visibility'),
+  ('solo',       'org_branding_manage'),
+  ('solo',       'org_support_manage'),
 
   ('dispatcher', 'dashboard'),
   ('dispatcher', 'dispatch'),
   ('dispatcher', 'drivers'),
+  ('dispatcher', 'loads_manage'),
+  ('dispatcher', 'loads_advance_status'),
+  ('dispatcher', 'load_intake_extract'),
+  ('dispatcher', 'documents_upload'),
+  ('dispatcher', 'documents_read'),
+  ('dispatcher', 'documents_send'),
+  ('dispatcher', 'customers_manage'),
+  ('dispatcher', 'fuel_log'),
+  ('dispatcher', 'chat_participate'),
+  ('dispatcher', 'ifta_record'),
+  ('dispatcher', 'loads_view'),
+  ('dispatcher', 'customers_view'),
+  ('dispatcher', 'exceptions_view'),
+  ('dispatcher', 'maintenance_view'),
+  ('dispatcher', 'settings_view'),
 
   ('finance',    'dashboard'),
   ('finance',    'finance'),
   ('finance',    'invoice_actions'),
+  ('finance',    'documents_read'),
+  ('finance',    'settlements_manage'),
+  ('finance',    'loads_view'),
+  ('finance',    'customers_view'),
+  ('finance',    'settlements_view'),
+  ('finance',    'settings_view'),
+  ('finance',    'org_documents_view'),
+  ('finance',    'rate_visibility'),
 
   ('driver',     'dashboard'),
   ('driver',     'my_loads'),
+  ('driver',     'loads_advance_status'),
+  ('driver',     'documents_upload'),
+  ('driver',     'documents_read'),
+  ('driver',     'fuel_log'),
+  ('driver',     'problem_report'),
+  ('driver',     'chat_participate'),
+  ('driver',     'location_share'),
+  ('driver',     'ifta_record'),
+  ('driver',     'dvir_file'),
+  ('driver',     'driver_profile_edit_own'),
+  ('driver',     'settlements_view'),
+  ('driver',     'settings_view'),
 
   ('sx_owner',   'admin'),
+  ('sx_owner',   'admin_billing'),
+  ('sx_owner',   'admin_flags'),
+  ('sx_owner',   'admin_impersonate'),
+  -- Migration 0028: fix-forward capability for staffing ShipmentX's own carrieros_support queue
+  -- (decisions.md T16) -- sx_owner/sx_support only, matching 0027's RLS policies; NOT sx_finance.
+  ('sx_owner',   'admin_support'),
+  -- Migration 0031: LLM provider abstraction (decisions.md T17) -- sx_owner only, NOT sx_finance/
+  -- sx_support despite being cost-adjacent, since it also decides which outside vendor sees
+  -- ticket/load content.
+  ('sx_owner',   'admin_ai_config'),
   ('sx_finance', 'admin'),
-  ('sx_support', 'admin');
+  ('sx_finance', 'admin_billing'),
+  ('sx_support', 'admin'),
+  ('sx_support', 'admin_impersonate'),
+  -- Migration 0028: fix-forward capability for staffing ShipmentX's own carrieros_support queue
+  -- (decisions.md T16) -- sx_owner/sx_support only, matching 0027's RLS policies; NOT sx_finance.
+  ('sx_support', 'admin_support');
 
 -- Language reference/display data — NOT a foreign key, profiles.preferred_language
 -- and carrier_details.default_language keep their own CHECKs. native_name IS the
@@ -337,7 +460,9 @@ CREATE TABLE features (
   key           TEXT PRIMARY KEY,
   label         TEXT NOT NULL,
   min_tier      TEXT NOT NULL REFERENCES tiers(code),
-  display_order INT NOT NULL
+  display_order INT NOT NULL,
+  -- Survives trial expiry / cancellation / past_due (0021): what a customer needs in order to pay or export.
+  retained_when_delinquent BOOLEAN NOT NULL DEFAULT false
 );
 INSERT INTO features (key, label, min_tier, display_order) VALUES
   ('full_exceptions_inbox','Full Exceptions Inbox','growth',1),
@@ -365,6 +490,23 @@ INSERT INTO features (key, label, min_tier, display_order) VALUES
   ('fuel_analytics','Fuel Card Integration & Analytics','pro',12),
   ('settlement_ach','ACH Settlement Payments','pro',13),
   ('driver_performance_analytics','Driver Performance & Lane Analytics','pro',14);
+
+-- Phase 9 (migration 0025): the public developer API's own tier gate, same features/has_feature() model as
+-- every other gated capability. Starter-tier orgs cannot use the public API at all.
+INSERT INTO features (key, label, min_tier, display_order) VALUES
+  ('public_api', 'Public Developer API', 'growth', 15);
+
+-- Migration 0026 (2026-09-21): the first feature to actually use min_tier = 'enterprise' --
+-- decisions.md PR1's amended, scoped-down "branding customization" (logo + brand colors), not the
+-- originally-undefined "white-label".
+INSERT INTO features (key, label, min_tier, display_order) VALUES
+  ('branding_customization', 'Branding Customization', 'enterprise', 16);
+
+-- Migration 0027 (2026-09-21): decisions.md T16 -- in-app support ticketing's org_support queue is
+-- the second feature to use min_tier = 'enterprise'. carrieros_support (the AI-triage + platform-staff
+-- queue) is available on every tier and is NOT gated by this row -- see SECTION 24 below.
+INSERT INTO features (key, label, min_tier, display_order) VALUES
+  ('support_desk', 'Dedicated Support Desk', 'enterprise', 17);
 
 -- ────────────────────────────────────────────────────────────
 -- SECTION 2: PROFILES — ALL users in the system
@@ -397,13 +539,19 @@ CREATE TABLE profiles (
   uom_system         TEXT CHECK (uom_system IN ('imperial','metric')),
   date_format        TEXT DEFAULT 'MM/DD/YYYY' CHECK (date_format IN ('MM/DD/YYYY','DD/MM/YYYY','YYYY-MM-DD')),
   time_format        TEXT DEFAULT '12h' CHECK (time_format IN ('12h','24h')),
-  -- Light/dark appearance (2026-07-26). NOT NULL with a 'system' default
-  -- rather than nullable-means-inherit like uom_system above: there is no
-  -- org-level theme to inherit from, and 'system' already expresses "follow
-  -- the device" explicitly. Mobile mirrors this into AsyncStorage so the
-  -- pre-login screens (welcome/login/signup) and cold start can theme
-  -- themselves before any profile row is readable.
-  theme_preference   TEXT NOT NULL DEFAULT 'system' CHECK (theme_preference IN ('light','dark','system')),
+  -- Light/dark appearance (2026-07-26). NOT NULL rather than nullable-means-
+  -- inherit like uom_system above: there is no org-level theme to inherit
+  -- from. Default 'dark' (fixed 2026-09-21, migration 0030) per
+  -- decisions.md V3's explicit, never-amended requirement -- "no visible
+  -- change for any existing/new user until they explicitly opt in"; the
+  -- default briefly drifted to 'system' unreviewed against that text
+  -- (violates it directly for any new signup on a light-OS device). Mobile
+  -- mirrors this into AsyncStorage so the pre-login screens (welcome/login/
+  -- signup) and cold start can theme themselves before any profile row is
+  -- readable -- that anonymous/pre-auth bootstrap is a separate concern and
+  -- deliberately still resolves to 'system', since there is no profile row
+  -- to violate "no visible change" for a visitor who has never signed up.
+  theme_preference   TEXT NOT NULL DEFAULT 'dark' CHECK (theme_preference IN ('light','dark','system')),
   -- Driver photo (2026-07-21, decisions.md S10) -- mobile-captured only, web
   -- is display-only (signed URL). Same `documents` bucket path convention.
   avatar_path        TEXT,
@@ -1245,6 +1393,21 @@ CREATE UNIQUE INDEX idx_vehicle_number  ON vehicles(carrier_org_id, vehicle_numb
 -- sanctioned way to expose a carrier's public-facing contact info to a
 -- tracking-link visitor. Do not add a general anon policy on organizations
 -- instead — that would expose it more broadly than just via a valid token.
+--
+-- This is the BASIC version (pre-branding). Migration 0026 (decisions.md
+-- PR1 amendment) replaces this definition further down (SECTION 19, right
+-- after entitlement_decision is defined) with one that also returns
+-- brand_logo_path/brand_primary_color/brand_accent_color — deliberately
+-- placed after, not edited in place here, for the same reason has_feature()
+-- itself has an early definition and a later CREATE OR REPLACE below: a
+-- LANGUAGE SQL function body IS resolved against its referenced objects at
+-- CREATE time (unlike PL/pgSQL), so a get_public_tracking() defined THIS
+-- early that already called entitlement_decision() (not defined until much
+-- later in this file) would fail a fresh top-to-bottom replay even though
+-- it works fine applied incrementally through supabase/migrations, where
+-- entitlement_decision already exists by migration 0026's turn. Confirmed
+-- by running node scripts/db/verify-migrations.mjs, which replays this file
+-- alone into a scratch database.
 CREATE OR REPLACE FUNCTION get_public_tracking(p_token TEXT)
 RETURNS TABLE(
   load_number       TEXT,
@@ -1332,6 +1495,19 @@ STABLE
 SET search_path = public
 AS $$
   SELECT role FROM profiles WHERE id = auth.uid() AND is_active = true
+$$;
+
+-- The caller's drivers.id, or NULL when they are not a driver or their profile is deactivated (migration 0022).
+-- Policies used to subquery drivers directly, which ignored profiles.is_active; this is the driver-side twin of
+-- my_org_id()/my_role().
+CREATE OR REPLACE FUNCTION my_driver_id()
+RETURNS BIGINT
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+SET search_path = public
+AS $$
+  SELECT d.id FROM drivers d JOIN profiles p ON p.id = d.profile_id WHERE p.id = auth.uid() AND p.is_active = true
 $$;
 
 -- Tier entitlements gate (2026-07-21, decisions.md S11) — real, RLS-usable
@@ -1486,13 +1662,12 @@ CREATE POLICY "ifta_tax_rates_select" ON ifta_tax_rates FOR SELECT TO authentica
 
 -- ORGANIZATIONS
 ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "auth_user_create_carrier_org" ON organizations
-  FOR INSERT WITH CHECK (type = 'carrier' AND auth.uid() IS NOT NULL);
+-- No client INSERT policy: tenants are created only by the server (onboarding, service role). Migration 0019.
 -- Covers: (a) reading your own org, (b) if you're a customer-portal user,
 -- reading your carrier's org.
 CREATE POLICY "org_member_select" ON organizations FOR SELECT USING (
-  id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  OR id IN (SELECT carrier_org_id FROM customer_details WHERE org_id = (SELECT org_id FROM profiles WHERE id = auth.uid()))
+  id = my_org_id()
+  OR id IN (SELECT carrier_org_id FROM customer_details WHERE org_id = my_org_id())
 );
 -- The reverse direction: a carrier reading the org rows of its OWN
 -- customers. Without this, any query embedding organizations(...) from
@@ -1503,20 +1678,15 @@ CREATE POLICY "carrier_reads_own_customer_orgs" ON organizations FOR SELECT USIN
   type = 'customer' AND id IN (SELECT org_id FROM customer_details WHERE carrier_org_id = my_org_id())
 );
 CREATE POLICY "owner_solo_org_update" ON organizations FOR UPDATE USING (
-  id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 
 -- CARRIER DETAILS
 ALTER TABLE carrier_details ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "auth_user_create_carrier_details" ON carrier_details
-  FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+-- Read-only to clients: tier/billing state is written only by the server (migration 0019, see SECTION 19).
 CREATE POLICY "carrier_details_select" ON carrier_details FOR SELECT USING (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-);
-CREATE POLICY "owner_solo_carrier_update" ON carrier_details FOR UPDATE USING (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  org_id = my_org_id()
 );
 
 -- CUSTOMER DETAILS
@@ -1525,7 +1695,7 @@ CREATE POLICY "owner_solo_carrier_update" ON carrier_details FOR UPDATE USING (
 -- subquery cycle here would recurse into that policy and back again.
 ALTER TABLE customer_details ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_customer_select" ON customer_details FOR SELECT USING (
-  carrier_org_id = my_org_id() OR org_id = my_org_id()
+  carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher','finance')
 );
 CREATE POLICY "carrier_customer_write" ON customer_details FOR ALL USING (
   carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher')
@@ -1582,17 +1752,17 @@ CREATE POLICY "org_sequences_own_org" ON org_sequences FOR ALL TO authenticated
 CREATE POLICY "own_profile_update" ON profiles FOR UPDATE TO authenticated
   USING (id = auth.uid())
   WITH CHECK (id = auth.uid() AND role = my_role() AND org_id = my_org_id());
-CREATE POLICY "own_profile_insert" ON profiles FOR INSERT WITH CHECK (id = auth.uid());
+-- No client INSERT policy: profiles are created only by the server (onboarding/invites, service role). 0019.
 
 -- LOADS
 ALTER TABLE loads ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "owner_solo_loads_all" ON loads FOR ALL USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 CREATE POLICY "dispatcher_loads_select" ON loads FOR SELECT USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) = 'dispatcher'
+  carrier_org_id = my_org_id()
+  AND my_role() = 'dispatcher'
 );
 -- Tightened 2026-07-20: WITH CHECK (true) let the new row be anything,
 -- including a different carrier_org_id (move a load to another tenant).
@@ -1613,14 +1783,14 @@ CREATE POLICY "finance_loads_update" ON loads FOR UPDATE TO authenticated
   USING (carrier_org_id = my_org_id() AND my_role() = 'finance')
   WITH CHECK (carrier_org_id = my_org_id() AND my_role() = 'finance');
 CREATE POLICY "finance_loads_select" ON loads FOR SELECT USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) = 'finance'
+  carrier_org_id = my_org_id()
+  AND my_role() = 'finance'
 );
 CREATE POLICY "driver_own_loads_select" ON loads FOR SELECT USING (
-  driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid())
+  driver_id = my_driver_id()
 );
 CREATE POLICY "driver_loads_update_status" ON loads FOR UPDATE USING (
-  driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid())
+  driver_id = my_driver_id()
 ) WITH CHECK (true);
 -- Explicit is_active check (2026-07-21, Phase 3H) -- this policy predates
 -- my_org_id()/my_role() and subqueries profiles directly, so patching those
@@ -1643,8 +1813,8 @@ CREATE POLICY "customer_loads_select" ON loads FOR SELECT USING (
 -- INVOICES
 ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "billing_invoices_all" ON invoices FOR ALL USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo','finance')
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo','finance')
 );
 -- Explicit is_active check, same reasoning as customer_loads_select above.
 CREATE POLICY "customer_invoices_select" ON invoices FOR SELECT USING (
@@ -1659,7 +1829,7 @@ CREATE POLICY "carrier_fuel_stops_select" ON fuel_stops FOR SELECT TO authentica
   carrier_org_id = my_org_id()
 );
 CREATE POLICY "driver_fuel_stops_insert" ON fuel_stops FOR INSERT TO authenticated WITH CHECK (
-  carrier_org_id = my_org_id() AND driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid())
+  carrier_org_id = my_org_id() AND driver_id = my_driver_id()
 );
 CREATE POLICY "owner_solo_dispatcher_fuel_stops_all" ON fuel_stops FOR ALL TO authenticated USING (
   carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher')
@@ -1667,7 +1837,7 @@ CREATE POLICY "owner_solo_dispatcher_fuel_stops_all" ON fuel_stops FOR ALL TO au
 
 ALTER TABLE load_expenses ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_load_expenses_select" ON load_expenses FOR SELECT TO authenticated USING (
-  carrier_org_id = my_org_id()
+  carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher','finance')
 );
 CREATE POLICY "owner_solo_dispatcher_load_expenses_all" ON load_expenses FOR ALL TO authenticated USING (
   carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher')
@@ -1679,7 +1849,7 @@ CREATE POLICY "carrier_ifta_crossings_select" ON ifta_state_crossings FOR SELECT
   carrier_org_id = my_org_id()
 );
 CREATE POLICY "driver_ifta_crossings_insert" ON ifta_state_crossings FOR INSERT TO authenticated WITH CHECK (
-  carrier_org_id = my_org_id() AND driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid())
+  carrier_org_id = my_org_id() AND driver_id = my_driver_id()
 );
 CREATE POLICY "owner_solo_dispatcher_ifta_crossings_all" ON ifta_state_crossings FOR ALL TO authenticated USING (
   carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher')
@@ -1688,11 +1858,23 @@ CREATE POLICY "owner_solo_dispatcher_ifta_crossings_all" ON ifta_state_crossings
 -- DRIVER MESSAGES (Phase 7D, 2026-07-21) -- Finance gets ZERO access per
 -- BR-2/FR-119, not even SELECT -- no policy below grants finance anything.
 ALTER TABLE driver_messages ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "driver_own_thread_messages" ON driver_messages FOR ALL TO authenticated USING (
-  load_id IN (SELECT id FROM loads WHERE driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid()))
-) WITH CHECK (
-  load_id IN (SELECT id FROM loads WHERE driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid()))
+CREATE POLICY "driver_thread_messages_select" ON driver_messages FOR SELECT TO authenticated USING (
+  carrier_org_id = my_org_id()
+  AND load_id IN (SELECT id FROM loads WHERE driver_id = my_driver_id())
 );
+CREATE POLICY "driver_thread_messages_insert" ON driver_messages FOR INSERT TO authenticated WITH CHECK (
+  carrier_org_id = my_org_id()
+  AND sender_id = auth.uid()
+  AND load_id IN (SELECT id FROM loads WHERE driver_id = my_driver_id())
+);
+CREATE POLICY "driver_thread_messages_update" ON driver_messages FOR UPDATE TO authenticated USING (
+  carrier_org_id = my_org_id()
+  AND load_id IN (SELECT id FROM loads WHERE driver_id = my_driver_id())
+) WITH CHECK (
+  carrier_org_id = my_org_id()
+  AND load_id IN (SELECT id FROM loads WHERE driver_id = my_driver_id())
+);
+-- Drivers may only flip read_at on an update: trigger driver_messages_columns (SECTION 20, migration 0020).
 CREATE POLICY "owner_solo_dispatcher_messages_all" ON driver_messages FOR ALL TO authenticated USING (
   carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher')
 );
@@ -1718,7 +1900,7 @@ CREATE POLICY "same_org_message_translations_insert" ON driver_message_translati
 -- role table).
 ALTER TABLE driver_settlements ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "driver_own_settlements_select" ON driver_settlements FOR SELECT TO authenticated USING (
-  driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid())
+  driver_id = my_driver_id()
 );
 CREATE POLICY "owner_solo_finance_settlements_all" ON driver_settlements FOR ALL TO authenticated USING (
   carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','finance')
@@ -1729,7 +1911,7 @@ CREATE POLICY "same_org_settlement_deductions_select" ON settlement_deductions F
   settlement_id IN (
     SELECT ds.id FROM driver_settlements ds
     WHERE ds.carrier_org_id = my_org_id()
-       OR ds.driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid())
+       OR ds.driver_id = my_driver_id()
   )
 );
 CREATE POLICY "owner_solo_finance_settlement_deductions_all" ON settlement_deductions FOR ALL TO authenticated USING (
@@ -2218,12 +2400,12 @@ GRANT EXECUTE ON FUNCTION get_customer_health_score(BIGINT) TO authenticated;
 -- DRIVERS
 ALTER TABLE drivers ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "owner_solo_drivers_all" ON drivers FOR ALL USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 CREATE POLICY "dispatcher_drivers_select" ON drivers FOR SELECT USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) = 'dispatcher'
+  carrier_org_id = my_org_id()
+  AND my_role() = 'dispatcher'
 );
 
 -- Added 2026-07-20 (audit finding 8): finance could not read drivers at all,
@@ -2265,17 +2447,18 @@ CREATE POLICY "driver_own_record_update" ON drivers FOR UPDATE TO authenticated
 -- VEHICLES (renamed from TRUCKS, 2026-07-21, decisions.md S8)
 ALTER TABLE vehicles ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_vehicles_select" ON vehicles FOR SELECT USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  carrier_org_id = my_org_id()
 );
 CREATE POLICY "owner_solo_vehicles_all" ON vehicles FOR ALL USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 
 -- DOCUMENTS
 ALTER TABLE documents ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_docs_select" ON documents FOR SELECT USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  carrier_org_id = my_org_id()
+  AND (my_role() <> 'driver' OR uploaded_by = auth.uid() OR load_id IN (SELECT id FROM loads WHERE driver_id = my_driver_id()))
 );
 -- CRITICAL (fixed 2026-07-20): checked only that the row claimed the caller's
 -- uid, never the org — any user could plant phantom document rows that render
@@ -2289,14 +2472,14 @@ CREATE POLICY "driver_pod_insert" ON documents FOR INSERT TO authenticated
 CREATE POLICY "uploader_deletes_own_doc" ON documents FOR DELETE TO authenticated
   USING (uploaded_by = auth.uid() AND carrier_org_id = my_org_id());
 CREATE POLICY "owner_solo_docs_all" ON documents FOR ALL USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 
 -- LOAD EVENTS
 ALTER TABLE load_events ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_load_events_select" ON load_events FOR SELECT USING (
-  load_id IN (SELECT id FROM loads WHERE carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid()))
+  load_id IN (SELECT id FROM loads WHERE carrier_org_id = my_org_id())
 );
 -- CRITICAL (fixed 2026-07-20): same shape as driver_pod_insert above — any
 -- authenticated user could inject fake status events into ANY carrier's load
@@ -2310,30 +2493,34 @@ CREATE POLICY "authenticated_load_events_insert" ON load_events FOR INSERT TO au
 -- DVIR INSPECTIONS
 ALTER TABLE dvir_inspections ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_dvir_select" ON dvir_inspections FOR SELECT USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  carrier_org_id = my_org_id()
 );
+-- Fixed 2026-09-21 (migration 0029): originally driver_id only -- a driver's own driver_id doesn't
+-- vary by which org a submitted row claims, so any driver could INSERT a foreign-org-tagged row.
+-- Both this and driver_dvir_modify below now also require carrier_org_id = my_org_id().
 CREATE POLICY "driver_dvir_insert" ON dvir_inspections FOR INSERT WITH CHECK (
-  driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid())
+  driver_id = my_driver_id()
+  AND carrier_org_id = my_org_id()
 );
 
 -- Added 2026-07-20 (audit finding 6): driver had INSERT only, so a two-step
 -- submit (insert inspection, then attach signature/odometer) was impossible —
 -- the update failed silently as UPDATE 0.
 CREATE POLICY "driver_dvir_modify" ON dvir_inspections FOR UPDATE TO authenticated
-  USING (driver_id = (SELECT d.id FROM drivers d WHERE d.profile_id = auth.uid()))
-  WITH CHECK (driver_id = (SELECT d.id FROM drivers d WHERE d.profile_id = auth.uid()));
+  USING (driver_id = my_driver_id() AND carrier_org_id = my_org_id())
+  WITH CHECK (driver_id = my_driver_id() AND carrier_org_id = my_org_id());
 CREATE POLICY "owner_solo_dvir_all" ON dvir_inspections FOR ALL USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 
 -- DVIR DEFECTS
 ALTER TABLE dvir_defects ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "dvir_defects_select" ON dvir_defects FOR SELECT USING (
-  inspection_id IN (SELECT id FROM dvir_inspections WHERE carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid()))
+  inspection_id IN (SELECT id FROM dvir_inspections WHERE carrier_org_id = my_org_id())
 );
 CREATE POLICY "driver_dvir_defects_insert" ON dvir_defects FOR INSERT WITH CHECK (
-  inspection_id IN (SELECT id FROM dvir_inspections WHERE driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid()))
+  inspection_id IN (SELECT id FROM dvir_inspections WHERE driver_id = my_driver_id())
 );
 -- owner/solo counterpart (added 2026-07-20). The policy above keys on driver_id
 -- matching a `drivers` row, but owner/solo accounts have NO drivers row — that
@@ -2365,53 +2552,54 @@ CREATE POLICY "owner_solo_dvir_defects_all" ON dvir_defects FOR ALL TO authentic
 -- SERVICE LOGS
 ALTER TABLE service_logs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_service_logs_select" ON service_logs FOR SELECT USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  carrier_org_id = my_org_id()
 );
 CREATE POLICY "owner_solo_service_logs_all" ON service_logs FOR ALL USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 
 -- MAINTENANCE REMINDERS
 ALTER TABLE maintenance_reminders ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_reminders_select" ON maintenance_reminders FOR SELECT USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  carrier_org_id = my_org_id()
 );
 CREATE POLICY "owner_solo_reminders_all" ON maintenance_reminders FOR ALL USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 
 -- VEHICLE DOCUMENTS (renamed from TRUCK DOCUMENTS, 2026-07-21, decisions.md S8)
 ALTER TABLE vehicle_documents ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_vehicle_docs_select" ON vehicle_documents FOR SELECT USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  carrier_org_id = my_org_id()
 );
 CREATE POLICY "owner_solo_vehicle_docs_all" ON vehicle_documents FOR ALL USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 
 -- ORG DOCUMENTS
 ALTER TABLE org_documents ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "owner_solo_org_docs_all" ON org_documents FOR ALL USING (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 CREATE POLICY "finance_org_docs_select" ON org_documents FOR SELECT USING (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) = 'finance'
+  org_id = my_org_id()
+  AND my_role() = 'finance'
 );
 
 -- DRIVER DOCUMENTS (new, 2026-07-21, decisions.md S10 — mirrors
 -- vehicle_documents' shape exactly, scoped via a direct profiles subquery)
 ALTER TABLE driver_documents ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_driver_docs_select" ON driver_documents FOR SELECT USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  carrier_org_id = my_org_id()
+  AND (my_role() IN ('owner','solo','dispatcher') OR driver_id = my_driver_id())
 );
 CREATE POLICY "owner_solo_driver_docs_all" ON driver_documents FOR ALL USING (
-  carrier_org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
-  AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('owner','solo')
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
 );
 
 -- EXCEPTION EVENTS (new, 2026-07-21, decisions.md P2 amendment) — scoped via
@@ -2435,7 +2623,7 @@ CREATE POLICY "driver_exception_events_insert" ON exception_events FOR INSERT TO
     AND my_role() = 'driver'
     AND entity_type = 'load'
     AND event_type = 'driver_reported_problem'
-    AND entity_id IN (SELECT id FROM loads WHERE driver_id = (SELECT id FROM drivers WHERE profile_id = auth.uid()))
+    AND entity_id IN (SELECT id FROM loads WHERE driver_id = my_driver_id())
   );
 
 -- PLATFORM ADMIN (SHIPMENTX) TABLES (new, 2026-07-22, Phase 8 foundation) --
@@ -3001,3 +3189,1822 @@ CREATE TRIGGER driver_messages_change_event AFTER INSERT OR UPDATE OR DELETE ON 
   FOR EACH ROW EXECUTE FUNCTION emit_change_event('messages', 'carrier_org_id');
 CREATE TRIGGER documents_change_event AFTER INSERT OR UPDATE OR DELETE ON documents
   FOR EACH ROW EXECUTE FUNCTION emit_change_event('documents', 'carrier_org_id');
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 13: IDEMPOTENCY LIFECYCLE GRANTS + TRUNCATE SWEEP (migration 0013)
+-- ────────────────────────────────────────────────────────────
+GRANT SELECT, INSERT, UPDATE, DELETE ON idempotency_keys TO service_role;
+GRANT USAGE, SELECT ON SEQUENCE idempotency_keys_id_seq TO service_role;
+
+-- (2) TRUNCATE is not subject to row-level security. 0003 revoked it from anon and
+-- authenticated on every table that existed then, but default privileges hand it out
+-- again to each table created afterwards -- so outbox_events, idempotency_keys,
+-- audit_events (append-only by design) and change_events all carried it. PostgREST
+-- exposes no TRUNCATE verb, so this was not reachable through the API, but there is no
+-- reason for either role to hold it, and a privilege that is merely unreachable today
+-- is one refactor away from reachable. Re-run the same sweep, and
+-- verify-migrations.mjs now fails if any public table has it granted to a client role.
+DO $$
+DECLARE t RECORD;
+BEGIN
+  FOR t IN SELECT c.relname FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+            WHERE n.nspname = 'public' AND c.relkind IN ('r','p')
+  LOOP
+    EXECUTE format('REVOKE TRUNCATE ON public.%I FROM anon', t.relname);
+    EXECUTE format('REVOKE TRUNCATE ON public.%I FROM authenticated', t.relname);
+  END LOOP;
+END $$;
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 14: ATOMIC MARK-INVOICE-PAID (migration 0014, extended by 0033 --
+-- see SECTION 26 for the rest of 0033's functions)
+-- ────────────────────────────────────────────────────────────
+-- 0033 upgraded this from SECURITY INVOKER (2 args) to SECURITY DEFINER (4
+-- args, +correlation_id/+idempotency_key) so it could also write an
+-- InvoicePaid outbox event -- outbox_events is deny-all to `authenticated`
+-- (SECTION 5), so a DEFINER function is the only way to write it from here.
+-- Because DEFINER bypasses RLS, the tenant + role check billing_invoices_all
+-- used to provide is re-stated explicitly by hand.
+CREATE FUNCTION mark_invoice_paid(
+  p_invoice_id      BIGINT,
+  p_paid_at         TIMESTAMPTZ,
+  p_correlation_id  TEXT,
+  p_idempotency_key TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_org_id   BIGINT;
+  v_actor    UUID;
+  v_load_id  BIGINT;
+  v_amount   NUMERIC;
+  v_exists   BOOLEAN;
+  v_existing BIGINT;
+BEGIN
+  v_actor  := auth.uid();
+  v_org_id := my_org_id();
+
+  IF v_actor IS NULL OR v_org_id IS NULL THEN
+    RAISE EXCEPTION 'AUTH_REQUIRED' USING ERRCODE = '28000';
+  END IF;
+  IF my_role() NOT IN ('owner','solo','finance') THEN
+    RAISE EXCEPTION 'FORBIDDEN' USING ERRCODE = '42501';
+  END IF;
+
+  SELECT id INTO v_existing FROM outbox_events WHERE idempotency_key = p_idempotency_key;
+  IF v_existing IS NOT NULL THEN
+    RETURN jsonb_build_object('outcome', 'REPLAYED', 'invoice_id', p_invoice_id);
+  END IF;
+
+  UPDATE invoices
+     SET status = 'paid', paid_at = p_paid_at
+   WHERE id = p_invoice_id AND carrier_org_id = v_org_id AND status <> 'paid'
+  RETURNING load_id, amount INTO v_load_id, v_amount;
+
+  IF NOT FOUND THEN
+    SELECT EXISTS (SELECT 1 FROM invoices WHERE id = p_invoice_id AND carrier_org_id = v_org_id) INTO v_exists;
+    IF NOT v_exists THEN
+      -- Missing and not-visible-to-you are the same answer on purpose.
+      RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404';
+    END IF;
+    RETURN jsonb_build_object('outcome', 'ALREADY_PAID', 'invoice_id', p_invoice_id);
+  END IF;
+
+  IF v_load_id IS NOT NULL THEN
+    UPDATE loads SET status = 'paid' WHERE id = v_load_id AND carrier_org_id = v_org_id;
+  END IF;
+
+  INSERT INTO outbox_events (event_type, aggregate_type, aggregate_id, org_id, payload, correlation_id, idempotency_key)
+  VALUES (
+    'InvoicePaid', 'Invoice', p_invoice_id::TEXT, v_org_id,
+    jsonb_build_object('invoiceId', p_invoice_id, 'loadId', v_load_id, 'amount', v_amount, 'paidAt', p_paid_at),
+    p_correlation_id, p_idempotency_key
+  );
+
+  RETURN jsonb_build_object('outcome', 'APPLIED', 'invoice_id', p_invoice_id, 'load_id', v_load_id);
+END $$;
+
+REVOKE EXECUTE ON FUNCTION mark_invoice_paid(BIGINT, TIMESTAMPTZ, TEXT, TEXT) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION mark_invoice_paid(BIGINT, TIMESTAMPTZ, TEXT, TEXT) TO authenticated;
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 15: ATOMIC LOG-VEHICLE-SERVICE (migration 0015)
+-- ────────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION log_vehicle_service(
+  p_vehicle_id      BIGINT,
+  p_service_type    TEXT,
+  p_service_date    DATE,
+  p_odometer        INTEGER,
+  p_cost            NUMERIC,
+  p_shop_name       TEXT,
+  p_notes           TEXT,
+  p_reminder_id     BIGINT,
+  p_next_due_date   DATE,
+  p_next_due_miles  INTEGER
+)
+RETURNS BIGINT
+LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path = public
+AS $$
+DECLARE
+  v_org BIGINT := my_org_id();
+  v_log_id BIGINT;
+BEGIN
+  IF v_org IS NULL THEN
+    RAISE EXCEPTION 'AUTH_REQUIRED' USING ERRCODE = '28000';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM vehicles WHERE id = p_vehicle_id AND carrier_org_id = v_org) THEN
+    RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404';
+  END IF;
+
+  INSERT INTO service_logs (vehicle_id, carrier_org_id, service_type, service_date, odometer, cost, shop_name, notes, logged_by)
+  VALUES (p_vehicle_id, v_org, p_service_type, p_service_date, p_odometer, p_cost, p_shop_name, p_notes, auth.uid())
+  RETURNING id INTO v_log_id;
+
+  IF p_reminder_id IS NOT NULL THEN
+    UPDATE maintenance_reminders
+       SET last_service_date = p_service_date,
+           last_odometer     = p_odometer,
+           next_due_date     = p_next_due_date,
+           next_due_miles    = p_next_due_miles
+     WHERE id = p_reminder_id AND vehicle_id = p_vehicle_id AND carrier_org_id = v_org;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404';  -- rolls the log insert back too
+    END IF;
+  END IF;
+
+  RETURN v_log_id;
+END $$;
+
+REVOKE EXECUTE ON FUNCTION log_vehicle_service(BIGINT, TEXT, DATE, INTEGER, NUMERIC, TEXT, TEXT, BIGINT, DATE, INTEGER) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION log_vehicle_service(BIGINT, TEXT, DATE, INTEGER, NUMERIC, TEXT, TEXT, BIGINT, DATE, INTEGER) TO authenticated;
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 16: REPLACE IFTA CROSSINGS WITH MANUAL (migration 0016)
+-- ────────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION replace_ifta_crossings_with_manual(
+  p_load_id BIGINT,
+  p_rows    JSONB          -- [{ "state": "NV", "miles": 120 }, ...]
+)
+RETURNS INTEGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_org     BIGINT := my_org_id();
+  v_vehicle BIGINT;
+  v_driver  BIGINT;
+  v_count   INTEGER;
+BEGIN
+  IF v_org IS NULL OR auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'AUTH_REQUIRED' USING ERRCODE = '28000';
+  END IF;
+
+  SELECT vehicle_id, driver_id INTO v_vehicle, v_driver
+    FROM loads WHERE id = p_load_id AND carrier_org_id = v_org;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404';
+  END IF;
+
+  IF jsonb_typeof(p_rows) IS DISTINCT FROM 'array' OR jsonb_array_length(p_rows) = 0 THEN
+    RAISE EXCEPTION 'VALIDATION: rows must be a non-empty array' USING ERRCODE = 'PT400';
+  END IF;
+
+  DELETE FROM ifta_state_crossings WHERE load_id = p_load_id AND carrier_org_id = v_org AND source = 'gps';
+
+  INSERT INTO ifta_state_crossings (carrier_org_id, vehicle_id, driver_id, load_id, state, odometer_est, crossed_at, source)
+  SELECT v_org, v_vehicle, v_driver, p_load_id, upper(r.state), r.miles, now(), 'manual'
+    FROM jsonb_to_recordset(p_rows) AS r(state TEXT, miles INTEGER)
+   WHERE r.state ~ '^[A-Za-z]{2}$' AND r.miles IS NOT NULL AND r.miles > 0;
+  GET DIAGNOSTICS v_count = ROW_COUNT;
+
+  IF v_count = 0 THEN
+    RAISE EXCEPTION 'VALIDATION: no valid rows' USING ERRCODE = 'PT400';  -- rolls the delete back too
+  END IF;
+  RETURN v_count;
+END $$;
+
+REVOKE EXECUTE ON FUNCTION replace_ifta_crossings_with_manual(BIGINT, JSONB) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION replace_ifta_crossings_with_manual(BIGINT, JSONB) TO authenticated;
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 17: ATOMIC DVIR SUBMISSION (migration 0017)
+-- ────────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION submit_dvir_inspection(
+  p_load_id    BIGINT,
+  p_vehicle_id BIGINT,
+  p_driver_id  BIGINT,
+  p_type       TEXT,
+  p_condition  TEXT,
+  p_odometer   INTEGER,
+  p_defects    JSONB          -- [{ "area": "brakes", "description": "...", "severity": "major" }, ...] (may be empty)
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path = public
+AS $$
+DECLARE
+  v_org BIGINT := my_org_id();
+  v_id  BIGINT;
+  v_defects JSONB;
+BEGIN
+  IF v_org IS NULL THEN
+    RAISE EXCEPTION 'AUTH_REQUIRED' USING ERRCODE = '28000';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM loads WHERE id = p_load_id AND carrier_org_id = v_org) THEN
+    RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404';
+  END IF;
+
+  INSERT INTO dvir_inspections (carrier_org_id, vehicle_id, load_id, driver_id, type, condition, odometer)
+  VALUES (v_org, p_vehicle_id, p_load_id, p_driver_id, p_type, p_condition, p_odometer)
+  RETURNING id INTO v_id;
+
+  WITH ins AS (
+    INSERT INTO dvir_defects (inspection_id, area, description, severity)
+    SELECT v_id, d.area, d.description, d.severity
+      FROM jsonb_to_recordset(COALESCE(p_defects, '[]'::jsonb)) AS d(area TEXT, description TEXT, severity TEXT)
+    RETURNING id, area
+  )
+  SELECT COALESCE(jsonb_agg(jsonb_build_object('id', id, 'area', area)), '[]'::jsonb) INTO v_defects FROM ins;
+
+  RETURN jsonb_build_object('id', v_id, 'defects', v_defects);
+END $$;
+
+REVOKE EXECUTE ON FUNCTION submit_dvir_inspection(BIGINT, BIGINT, BIGINT, TEXT, TEXT, INTEGER, JSONB) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION submit_dvir_inspection(BIGINT, BIGINT, BIGINT, TEXT, TEXT, INTEGER, JSONB) TO authenticated;
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 18: DRIVER LOAD COLUMN GUARD (migration 0018)
+-- ────────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION enforce_driver_load_columns() RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+DECLARE
+  v_ignored TEXT[] := ARRAY['status', 'last_location_lat', 'last_location_lng', 'last_location_at', 'updated_at'];
+BEGIN
+  IF my_role() = 'driver' AND (to_jsonb(NEW) - v_ignored) IS DISTINCT FROM (to_jsonb(OLD) - v_ignored) THEN
+    RAISE EXCEPTION 'drivers may only change a load''s status and location' USING ERRCODE = '42501';
+  END IF;
+  RETURN NEW;
+END $$;
+
+CREATE TRIGGER loads_driver_columns BEFORE UPDATE ON loads
+  FOR EACH ROW EXECUTE FUNCTION enforce_driver_load_columns();
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 19: CLOSE PRIVILEGE-ESCALATION PATHS (migration 0019)
+-- Policy removals above (profiles/organizations/carrier_details inserts, carrier_details update) live next to
+-- their tables. CREATE OR REPLACE below supersedes the earlier submit_shipment_milestone /
+-- replace_ifta_crossings_with_manual / check_ifta_completeness definitions.
+-- ────────────────────────────────────────────────────────────
+-- 3. carrier_details is read-only to clients. Subscription state is written only by the server (admin
+--    routes now, the billing provider's webhook later). The policy is dropped as well as the privilege so a
+--    future blanket GRANT cannot silently re-open it.
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON carrier_details FROM anon, authenticated;
+
+-- 4. Who may act on a load, decided once in the database for every SECURITY DEFINER command.
+--    Mirrors authorizeLoadAction: owner/solo/dispatcher act on their org's loads, a driver only on a load
+--    assigned to them. Everyone else (finance, portal, sx_*) is refused. Not-yours and missing look alike.
+CREATE OR REPLACE FUNCTION caller_may_act_on_load(p_load_id BIGINT) RETURNS BOOLEAN
+LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public AS $$
+  SELECT CASE my_role()
+    WHEN 'driver' THEN EXISTS (
+      SELECT 1 FROM loads l JOIN drivers d ON d.id = l.driver_id
+       WHERE l.id = p_load_id AND l.carrier_org_id = my_org_id() AND d.profile_id = auth.uid())
+    WHEN 'owner' THEN EXISTS (SELECT 1 FROM loads WHERE id = p_load_id AND carrier_org_id = my_org_id())
+    WHEN 'solo' THEN EXISTS (SELECT 1 FROM loads WHERE id = p_load_id AND carrier_org_id = my_org_id())
+    WHEN 'dispatcher' THEN EXISTS (SELECT 1 FROM loads WHERE id = p_load_id AND carrier_org_id = my_org_id())
+    ELSE FALSE
+  END;
+$$;
+REVOKE EXECUTE ON FUNCTION caller_may_act_on_load(BIGINT) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION caller_may_act_on_load(BIGINT) TO authenticated;
+
+CREATE OR REPLACE FUNCTION submit_shipment_milestone(
+  p_load_id          BIGINT,
+  p_expected_status  TEXT,
+  p_new_status       TEXT,
+  p_event_type       TEXT,
+  p_reason           TEXT,
+  p_correlation_id   TEXT,
+  p_idempotency_key  TEXT,
+  p_occurred_at      TIMESTAMPTZ
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_org_id     BIGINT;
+  v_actor      UUID;
+  v_updated    INTEGER;
+  v_load       RECORD;
+  v_existing   BIGINT;
+BEGIN
+  v_actor  := auth.uid();
+  v_org_id := my_org_id();
+
+  IF v_actor IS NULL OR v_org_id IS NULL THEN
+    RAISE EXCEPTION 'AUTH_REQUIRED' USING ERRCODE = '28000';
+  END IF;
+
+  IF NOT caller_may_act_on_load(p_load_id) THEN
+    RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404';
+  END IF;
+
+  SELECT id INTO v_existing FROM outbox_events WHERE idempotency_key = p_idempotency_key;
+  IF v_existing IS NOT NULL THEN
+    SELECT id, status, load_number INTO v_load FROM loads WHERE id = p_load_id;
+    RETURN jsonb_build_object(
+      'outcome',     'REPLAYED',
+      'load_id',     p_load_id,
+      'status',      v_load.status,
+      'load_number', v_load.load_number
+    );
+  END IF;
+
+  UPDATE loads
+     SET status = p_new_status
+   WHERE id = p_load_id
+     AND carrier_org_id = v_org_id
+     AND status = p_expected_status;
+
+  GET DIAGNOSTICS v_updated = ROW_COUNT;
+
+  IF v_updated = 0 THEN
+    SELECT id, status, carrier_org_id INTO v_load FROM loads WHERE id = p_load_id;
+    IF NOT FOUND OR v_load.carrier_org_id <> v_org_id THEN
+      RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404';
+    END IF;
+    RAISE EXCEPTION 'VERSION_CONFLICT:%', v_load.status USING ERRCODE = 'PT409';
+  END IF;
+
+  SELECT id, status, load_number, driver_id INTO v_load FROM loads WHERE id = p_load_id;
+
+  INSERT INTO load_events (load_id, event_type, note, created_by)
+  VALUES (p_load_id, p_event_type, p_reason, v_actor);
+
+  INSERT INTO outbox_events (
+    event_type, aggregate_type, aggregate_id, org_id,
+    payload, correlation_id, idempotency_key
+  ) VALUES (
+    'MilestoneSubmitted', 'Shipment', p_load_id::TEXT, v_org_id,
+    jsonb_build_object(
+      'loadId',      p_load_id,
+      'loadNumber',  v_load.load_number,
+      'priorStatus', p_expected_status,
+      'newStatus',   p_new_status,
+      'driverId',    v_load.driver_id,
+      'occurredAt',  p_occurred_at
+    ),
+    p_correlation_id, p_idempotency_key
+  );
+
+  INSERT INTO audit_events (
+    org_id, actor_user_id, action, aggregate_type, aggregate_id,
+    prior_state, new_state, reason, correlation_id, occurred_at
+  ) VALUES (
+    v_org_id, v_actor, 'shipment.milestone.submitted', 'Shipment', p_load_id::TEXT,
+    p_expected_status, p_new_status, p_reason, p_correlation_id, p_occurred_at
+  );
+
+  RETURN jsonb_build_object(
+    'outcome',     'APPLIED',
+    'load_id',     p_load_id,
+    'status',      v_load.status,
+    'load_number', v_load.load_number
+  );
+END $$;
+
+CREATE OR REPLACE FUNCTION replace_ifta_crossings_with_manual(
+  p_load_id BIGINT,
+  p_rows    JSONB          -- [{ "state": "NV", "miles": 120 }, ...]
+)
+RETURNS INTEGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_org     BIGINT := my_org_id();
+  v_vehicle BIGINT;
+  v_driver  BIGINT;
+  v_count   INTEGER;
+BEGIN
+  IF v_org IS NULL OR auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'AUTH_REQUIRED' USING ERRCODE = '28000';
+  END IF;
+
+  IF NOT caller_may_act_on_load(p_load_id) THEN
+    RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404';
+  END IF;
+
+  SELECT vehicle_id, driver_id INTO v_vehicle, v_driver
+    FROM loads WHERE id = p_load_id AND carrier_org_id = v_org;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404';
+  END IF;
+
+  IF jsonb_typeof(p_rows) IS DISTINCT FROM 'array' OR jsonb_array_length(p_rows) = 0 THEN
+    RAISE EXCEPTION 'VALIDATION: rows must be a non-empty array' USING ERRCODE = 'PT400';
+  END IF;
+
+  DELETE FROM ifta_state_crossings WHERE load_id = p_load_id AND carrier_org_id = v_org AND source = 'gps';
+
+  INSERT INTO ifta_state_crossings (carrier_org_id, vehicle_id, driver_id, load_id, state, odometer_est, crossed_at, source)
+  SELECT v_org, v_vehicle, v_driver, p_load_id, upper(r.state), r.miles, now(), 'manual'
+    FROM jsonb_to_recordset(p_rows) AS r(state TEXT, miles INTEGER)
+   WHERE r.state ~ '^[A-Za-z]{2}$' AND r.miles IS NOT NULL AND r.miles > 0;
+  GET DIAGNOSTICS v_count = ROW_COUNT;
+
+  IF v_count = 0 THEN
+    RAISE EXCEPTION 'VALIDATION: no valid rows' USING ERRCODE = 'PT400';  -- rolls the delete back too
+  END IF;
+  RETURN v_count;
+END $$;
+
+-- 6. No anon access, and no cross-tenant answers: a foreign or missing load both read as "no data".
+CREATE OR REPLACE FUNCTION check_ifta_completeness(p_load_id BIGINT)
+RETURNS BOOLEAN LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
+  SELECT COALESCE(
+    (SELECT SUM(odometer_est) FROM ifta_state_crossings WHERE load_id = p_load_id AND carrier_org_id = my_org_id()), 0
+  ) >= 0.6 * COALESCE((SELECT total_miles FROM loads WHERE id = p_load_id AND carrier_org_id = my_org_id()), 0);
+$$;
+REVOKE EXECUTE ON FUNCTION check_ifta_completeness(BIGINT) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION check_ifta_completeness(BIGINT) TO authenticated;
+
+-- 7. Tenant guards on foreign keys that RLS cannot express (RLS checks the row being written, not what
+--    its ids point at). Applies to every caller including service_role: the data must be consistent.
+CREATE OR REPLACE FUNCTION enforce_load_reference_tenancy() RETURNS trigger
+LANGUAGE plpgsql SET search_path = public AS $$
+BEGIN
+  IF NEW.driver_id IS NOT NULL AND (TG_OP = 'INSERT' OR NEW.driver_id IS DISTINCT FROM OLD.driver_id)
+     AND NOT EXISTS (SELECT 1 FROM drivers WHERE id = NEW.driver_id AND carrier_org_id = NEW.carrier_org_id) THEN
+    RAISE EXCEPTION 'driver does not belong to this carrier' USING ERRCODE = '23514';
+  END IF;
+  IF NEW.vehicle_id IS NOT NULL AND (TG_OP = 'INSERT' OR NEW.vehicle_id IS DISTINCT FROM OLD.vehicle_id)
+     AND NOT EXISTS (SELECT 1 FROM vehicles WHERE id = NEW.vehicle_id AND carrier_org_id = NEW.carrier_org_id) THEN
+    RAISE EXCEPTION 'vehicle does not belong to this carrier' USING ERRCODE = '23514';
+  END IF;
+  IF NEW.customer_org_id IS NOT NULL AND (TG_OP = 'INSERT' OR NEW.customer_org_id IS DISTINCT FROM OLD.customer_org_id)
+     AND NOT EXISTS (SELECT 1 FROM customer_details WHERE org_id = NEW.customer_org_id AND carrier_org_id = NEW.carrier_org_id) THEN
+    RAISE EXCEPTION 'customer does not belong to this carrier' USING ERRCODE = '23514';
+  END IF;
+  RETURN NEW;
+END $$;
+
+CREATE TRIGGER loads_reference_tenancy BEFORE INSERT OR UPDATE ON loads
+  FOR EACH ROW EXECUTE FUNCTION enforce_load_reference_tenancy();
+
+CREATE OR REPLACE FUNCTION enforce_contact_customer_tenancy() RETURNS trigger
+LANGUAGE plpgsql SET search_path = public AS $$
+BEGIN
+  IF (TG_OP = 'INSERT' OR NEW.org_id IS DISTINCT FROM OLD.org_id OR NEW.carrier_org_id IS DISTINCT FROM OLD.carrier_org_id)
+     AND NOT EXISTS (SELECT 1 FROM customer_details WHERE org_id = NEW.org_id AND carrier_org_id = NEW.carrier_org_id) THEN
+    RAISE EXCEPTION 'customer does not belong to this carrier' USING ERRCODE = '23514';
+  END IF;
+  RETURN NEW;
+END $$;
+
+CREATE TRIGGER customer_contacts_tenancy BEFORE INSERT OR UPDATE ON customer_contacts
+  FOR EACH ROW EXECUTE FUNCTION enforce_contact_customer_tenancy();
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 20: DRIVER MESSAGE COLUMN GUARD (migration 0020; the split policies are on driver_messages above)
+-- ────────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION enforce_driver_message_columns() RETURNS trigger
+LANGUAGE plpgsql SET search_path = public AS $$
+BEGIN
+  IF my_role() = 'driver' AND (to_jsonb(NEW) - 'read_at') IS DISTINCT FROM (to_jsonb(OLD) - 'read_at') THEN
+    RAISE EXCEPTION 'drivers may only mark messages read' USING ERRCODE = '42501';
+  END IF;
+  RETURN NEW;
+END $$;
+
+CREATE TRIGGER driver_messages_columns BEFORE UPDATE ON driver_messages
+  FOR EACH ROW EXECUTE FUNCTION enforce_driver_message_columns();
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 21: ENTITLEMENT DECISION + DATABASE-LEVEL TIER GATES (migration 0021)
+-- Supersedes has_feature()/get_my_entitlements() from SECTION 8 and the IFTA/health-score functions above.
+-- Mirrors server/domain/entitlement/model.ts; tests/entitlement-parity.test.ts keeps the two identical.
+-- ────────────────────────────────────────────────────────────
+-- Per-org, per-feature grant or deny, set by ShipmentX staff through the admin API. Server-only: no client role
+-- can read or write it (same posture as change_events).
+CREATE TABLE org_feature_overrides (
+  org_id      BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  feature_key TEXT   NOT NULL REFERENCES features(key) ON DELETE CASCADE,
+  effect      TEXT   NOT NULL CHECK (effect IN ('grant', 'deny')),
+  reason      TEXT   NOT NULL,
+  expires_at  TIMESTAMPTZ,
+  set_by      UUID REFERENCES profiles(id),
+  set_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (org_id, feature_key)
+);
+ALTER TABLE org_feature_overrides ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON org_feature_overrides FROM anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON org_feature_overrides TO service_role;
+
+-- The decision. Internal: takes an org id, so it is callable only by the server (service_role) and by the
+-- SECURITY DEFINER wrappers below, never by a client with someone else's org id.
+CREATE OR REPLACE FUNCTION entitlement_decision(p_org_id BIGINT, p_key TEXT)
+RETURNS TABLE(allowed BOOLEAN, reason TEXT)
+LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_flag_on   BOOLEAN;
+  v_feature   features%ROWTYPE;
+  v_cd        carrier_details%ROWTYPE;
+  v_now       TIMESTAMPTZ := now();
+BEGIN
+  SELECT COALESCE(o.enabled, pf.default_enabled) INTO v_flag_on
+    FROM platform_flags pf
+    LEFT JOIN org_flag_overrides o ON o.flag_key = pf.flag_key AND o.org_id = p_org_id
+   WHERE pf.flag_key = p_key;
+  IF FOUND AND NOT v_flag_on THEN
+    RETURN QUERY SELECT false, 'DISABLED_BY_PLATFORM_FLAG'; RETURN;
+  END IF;
+
+  SELECT * INTO v_feature FROM features WHERE key = p_key;
+  IF NOT FOUND THEN RETURN QUERY SELECT false, 'UNKNOWN_CAPABILITY'; RETURN; END IF;
+
+  SELECT * INTO v_cd FROM carrier_details WHERE org_id = p_org_id;
+  IF NOT FOUND THEN RETURN QUERY SELECT false, 'NOT_A_CARRIER_ORG'; RETURN; END IF;
+
+  IF EXISTS (SELECT 1 FROM org_feature_overrides
+              WHERE org_id = p_org_id AND feature_key = p_key AND effect = 'deny'
+                AND (expires_at IS NULL OR expires_at > v_now)) THEN
+    RETURN QUERY SELECT false, 'DENIED_BY_OVERRIDE'; RETURN;
+  END IF;
+
+  -- Subscription standing. past_due with no grace set still works: the operator has a lever and hasn't pulled it.
+  IF v_cd.billing_status = 'canceled' THEN
+    IF v_feature.retained_when_delinquent THEN RETURN QUERY SELECT true, 'RETAINED_WHILE_DELINQUENT'; RETURN; END IF;
+    RETURN QUERY SELECT false, 'SUBSCRIPTION_CANCELED'; RETURN;
+  ELSIF v_cd.billing_status = 'trialing' AND v_cd.trial_ends_at IS NOT NULL AND v_cd.trial_ends_at <= v_now
+        AND NOT (v_cd.grace_period_until IS NOT NULL AND v_cd.grace_period_until > v_now) THEN
+    IF v_feature.retained_when_delinquent THEN RETURN QUERY SELECT true, 'RETAINED_WHILE_DELINQUENT'; RETURN; END IF;
+    RETURN QUERY SELECT false, 'TRIAL_EXPIRED'; RETURN;
+  ELSIF v_cd.billing_status = 'past_due' AND v_cd.grace_period_until IS NOT NULL AND v_cd.grace_period_until <= v_now THEN
+    IF v_feature.retained_when_delinquent THEN RETURN QUERY SELECT true, 'RETAINED_WHILE_DELINQUENT'; RETURN; END IF;
+    RETURN QUERY SELECT false, 'PAST_DUE_GRACE_EXPIRED'; RETURN;
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM org_feature_overrides
+              WHERE org_id = p_org_id AND feature_key = p_key AND effect = 'grant'
+                AND (expires_at IS NULL OR expires_at > v_now)) THEN
+    RETURN QUERY SELECT true, 'GRANTED_BY_OVERRIDE'; RETURN;
+  END IF;
+
+  IF (SELECT rank FROM tiers WHERE code = v_cd.tier) >= (SELECT rank FROM tiers WHERE code = v_feature.min_tier) THEN
+    RETURN QUERY SELECT true, CASE
+      WHEN v_cd.billing_status = 'trialing' THEN
+        CASE WHEN v_cd.trial_ends_at IS NOT NULL AND v_cd.trial_ends_at <= v_now THEN 'WITHIN_GRACE_PERIOD' ELSE 'WITHIN_TRIAL' END
+      WHEN v_cd.billing_status = 'past_due' THEN 'WITHIN_GRACE_PERIOD'
+      ELSE 'INCLUDED_IN_TIER' END;
+    RETURN;
+  END IF;
+  RETURN QUERY SELECT false, 'TIER_TOO_LOW';
+END $$;
+REVOKE EXECUTE ON FUNCTION entitlement_decision(BIGINT, TEXT) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION entitlement_decision(BIGINT, TEXT) TO service_role;
+
+CREATE OR REPLACE FUNCTION has_feature(feature_key TEXT)
+RETURNS BOOLEAN LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT COALESCE((SELECT d.allowed FROM entitlement_decision(my_org_id(), feature_key) d), false);
+$$;
+
+CREATE OR REPLACE FUNCTION get_my_entitlements()
+RETURNS TABLE(key TEXT)
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT f.key FROM features f WHERE (SELECT d.allowed FROM entitlement_decision(my_org_id(), f.key) d);
+$$;
+
+-- Why a capability is unavailable, so a client can say "your trial ended" instead of a bare false.
+CREATE OR REPLACE FUNCTION get_my_entitlement(p_key TEXT)
+RETURNS TABLE(allowed BOOLEAN, reason TEXT)
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT d.allowed, d.reason FROM entitlement_decision(my_org_id(), p_key) d;
+$$;
+REVOKE EXECUTE ON FUNCTION get_my_entitlement(TEXT) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION get_my_entitlement(TEXT) TO authenticated;
+
+-- Migration 0026: single resolver for the AUTHENTICATED app shell's branding tokens (Rule A's "one
+-- resolver, not scattered" principle, architecture-principles.md, applied to branding rather than
+-- status colors). NULLs every field when the org isn't entitled, so lib/branding.ts never re-derives
+-- the has_feature() check itself.
+CREATE OR REPLACE FUNCTION get_org_branding()
+RETURNS TABLE(enabled BOOLEAN, logo_path TEXT, primary_color TEXT, accent_color TEXT)
+LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public AS $$
+  SELECT
+    has_feature('branding_customization'),
+    CASE WHEN has_feature('branding_customization') THEN o.logo_path ELSE NULL END,
+    CASE WHEN has_feature('branding_customization') THEN cd.brand_primary_color ELSE NULL END,
+    CASE WHEN has_feature('branding_customization') THEN cd.brand_accent_color ELSE NULL END
+  FROM organizations o
+  LEFT JOIN carrier_details cd ON cd.org_id = o.id
+  WHERE o.id = my_org_id();
+$$;
+GRANT EXECUTE ON FUNCTION get_org_branding() TO authenticated;
+
+-- The public tracking page (app/track/[token]/page.tsx) has NO auth session, so my_org_id() (which
+-- has_feature()/get_org_branding() above depend on) resolves to NULL there. This replaces the BASIC
+-- get_public_tracking() defined earlier in this file with one that also resolves branding, via
+-- entitlement_decision(org_id, key) -- the org-id-parameterized primitive has_feature() itself now
+-- delegates to (just above) -- since it's now defined and anon has no session to key my_org_id() off.
+-- DROP + CREATE (not CREATE OR REPLACE) because the column list changed; Postgres refuses to replace a
+-- function's OUT-parameter row type in place. Deliberately does not add a general anon SELECT policy on
+-- carrier_details for this -- same reasoning get_public_tracking()'s original header comment already
+-- gives for organizations.
+DROP FUNCTION IF EXISTS get_public_tracking(TEXT);
+CREATE FUNCTION get_public_tracking(p_token TEXT)
+RETURNS TABLE(
+  load_number          TEXT,
+  status               TEXT,
+  pickup_city          TEXT,
+  pickup_state         TEXT,
+  delivery_city        TEXT,
+  delivery_state       TEXT,
+  pickup_date          DATE,
+  delivery_date        DATE,
+  last_location_lat    NUMERIC,
+  last_location_lng    NUMERIC,
+  last_location_at     TIMESTAMPTZ,
+  carrier_name         TEXT,
+  carrier_phone        TEXT,
+  carrier_email        TEXT,
+  brand_logo_path      TEXT,
+  brand_primary_color  TEXT,
+  brand_accent_color   TEXT
+)
+LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public AS $$
+  SELECT
+    l.load_number, l.status,
+    l.pickup_city, l.pickup_state, l.delivery_city, l.delivery_state,
+    l.pickup_date, l.delivery_date,
+    l.last_location_lat, l.last_location_lng, l.last_location_at,
+    o.name, o.phone, o.email,
+    CASE WHEN (SELECT d.allowed FROM entitlement_decision(o.id, 'branding_customization') d)
+         THEN o.logo_path ELSE NULL END,
+    CASE WHEN (SELECT d.allowed FROM entitlement_decision(o.id, 'branding_customization') d)
+         THEN cd.brand_primary_color ELSE NULL END,
+    CASE WHEN (SELECT d.allowed FROM entitlement_decision(o.id, 'branding_customization') d)
+         THEN cd.brand_accent_color ELSE NULL END
+  FROM loads l
+  JOIN organizations o ON o.id = l.carrier_org_id
+  LEFT JOIN carrier_details cd ON cd.org_id = o.id
+  WHERE l.tracking_token = p_token
+$$;
+GRANT EXECUTE ON FUNCTION get_public_tracking(TEXT) TO anon;
+
+-- Write gates in the database, so a direct PostgREST call cannot skip what the API routes enforce. RESTRICTIVE
+-- policies are ANDed with the existing permissive ones (no rewrite). Writes only: after a downgrade or lapse the
+-- carrier can still READ what they already recorded, which is the behaviour a customer expects.
+CREATE POLICY "tier_gate_driver_chat"       ON driver_messages    AS RESTRICTIVE FOR INSERT TO authenticated WITH CHECK (has_feature('driver_chat'));
+CREATE POLICY "tier_gate_settlements"       ON driver_settlements AS RESTRICTIVE FOR INSERT TO authenticated WITH CHECK (has_feature('driver_settlements'));
+CREATE POLICY "tier_gate_ifta_crossings"    ON ifta_state_crossings AS RESTRICTIVE FOR INSERT TO authenticated WITH CHECK (has_feature('ifta_mileage_log'));
+CREATE POLICY "tier_gate_load_expenses_ins" ON load_expenses      AS RESTRICTIVE FOR INSERT TO authenticated WITH CHECK (has_feature('load_expenses'));
+CREATE POLICY "tier_gate_load_expenses_upd" ON load_expenses      AS RESTRICTIVE FOR UPDATE TO authenticated USING (has_feature('load_expenses')) WITH CHECK (has_feature('load_expenses'));
+
+-- SECURITY DEFINER paths bypass RLS, so they carry the check themselves. PT402 -> HTTP 402.
+CREATE OR REPLACE FUNCTION replace_ifta_crossings_with_manual(
+  p_load_id BIGINT,
+  p_rows    JSONB
+)
+RETURNS INTEGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_org     BIGINT := my_org_id();
+  v_vehicle BIGINT;
+  v_driver  BIGINT;
+  v_count   INTEGER;
+BEGIN
+  IF v_org IS NULL OR auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'AUTH_REQUIRED' USING ERRCODE = '28000';
+  END IF;
+
+  IF NOT caller_may_act_on_load(p_load_id) THEN
+    RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404';
+  END IF;
+
+  IF NOT has_feature('ifta_mileage_log') THEN
+    RAISE EXCEPTION 'TIER_UPGRADE_REQUIRED' USING ERRCODE = 'PT402';
+  END IF;
+
+  SELECT vehicle_id, driver_id INTO v_vehicle, v_driver
+    FROM loads WHERE id = p_load_id AND carrier_org_id = v_org;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404';
+  END IF;
+
+  IF jsonb_typeof(p_rows) IS DISTINCT FROM 'array' OR jsonb_array_length(p_rows) = 0 THEN
+    RAISE EXCEPTION 'VALIDATION: rows must be a non-empty array' USING ERRCODE = 'PT400';
+  END IF;
+
+  DELETE FROM ifta_state_crossings WHERE load_id = p_load_id AND carrier_org_id = v_org AND source = 'gps';
+
+  INSERT INTO ifta_state_crossings (carrier_org_id, vehicle_id, driver_id, load_id, state, odometer_est, crossed_at, source)
+  SELECT v_org, v_vehicle, v_driver, p_load_id, upper(r.state), r.miles, now(), 'manual'
+    FROM jsonb_to_recordset(p_rows) AS r(state TEXT, miles INTEGER)
+   WHERE r.state ~ '^[A-Za-z]{2}$' AND r.miles IS NOT NULL AND r.miles > 0;
+  GET DIAGNOSTICS v_count = ROW_COUNT;
+
+  IF v_count = 0 THEN
+    RAISE EXCEPTION 'VALIDATION: no valid rows' USING ERRCODE = 'PT400';
+  END IF;
+  RETURN v_count;
+END $$;
+
+-- The three read RPCs that were "enforced at the page level" now answer nothing below their tier.
+CREATE OR REPLACE FUNCTION get_ifta_quarterly_summary(p_carrier_org_id BIGINT, p_quarter TEXT)
+RETURNS TABLE(state TEXT, total_miles NUMERIC) LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
+  SELECT c.state, SUM(c.odometer_est)::NUMERIC
+  FROM ifta_state_crossings c
+  WHERE c.carrier_org_id = p_carrier_org_id
+    AND p_carrier_org_id = my_org_id()
+    AND has_feature('ifta_mileage_log')
+    AND to_char(c.crossed_at, '"Q"Q') = split_part(p_quarter, '-', 2)
+    AND to_char(c.crossed_at, 'YYYY') = split_part(p_quarter, '-', 1)
+  GROUP BY c.state;
+$$;
+
+CREATE OR REPLACE FUNCTION get_ifta_tax_summary(p_carrier_org_id BIGINT, p_quarter TEXT)
+RETURNS TABLE(state TEXT, miles_in_state NUMERIC, net_tax_due NUMERIC) LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_total_miles NUMERIC;
+  v_total_fuel  NUMERIC;
+BEGIN
+  IF p_carrier_org_id != my_org_id() OR NOT has_feature('ifta_tax_hub') THEN
+    RETURN;
+  END IF;
+
+  SELECT SUM(c.odometer_est) INTO v_total_miles
+  FROM ifta_state_crossings c WHERE c.carrier_org_id = p_carrier_org_id;
+
+  SELECT SUM(f.gallons) INTO v_total_fuel
+  FROM fuel_stops f WHERE f.carrier_org_id = p_carrier_org_id;
+
+  RETURN QUERY
+  SELECT
+    c.state,
+    SUM(c.odometer_est)::NUMERIC AS miles_in_state,
+    (
+      (SUM(c.odometer_est) / NULLIF(v_total_miles, 0)) * COALESCE(v_total_fuel, 0) *
+        COALESCE((SELECT rate_per_gallon FROM ifta_tax_rates WHERE ifta_tax_rates.state = c.state AND quarter = p_quarter), 0)
+      -
+      COALESCE((SELECT SUM(f2.gallons) FROM fuel_stops f2 WHERE f2.carrier_org_id = p_carrier_org_id AND f2.state = c.state), 0)
+        * COALESCE((SELECT rate_per_gallon FROM ifta_tax_rates WHERE ifta_tax_rates.state = c.state AND quarter = p_quarter), 0)
+    )::NUMERIC AS net_tax_due
+  FROM ifta_state_crossings c
+  WHERE c.carrier_org_id = p_carrier_org_id
+  GROUP BY c.state;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION get_customer_health_score(customer_org_id BIGINT)
+RETURNS NUMERIC
+LANGUAGE plpgsql SECURITY DEFINER STABLE SET search_path = public AS $$
+DECLARE
+  v_paid_total   INT;
+  v_paid_on_time INT;
+  v_payment_pct  NUMERIC;
+  v_exception_ct INT;
+  v_exception_pct NUMERIC;
+BEGIN
+  IF NOT has_feature('customer_health_score') THEN
+    RETURN NULL;
+  END IF;
+
+  SELECT
+    COUNT(*) FILTER (WHERE due_date IS NOT NULL),
+    COUNT(*) FILTER (WHERE due_date IS NOT NULL AND paid_at IS NOT NULL AND paid_at::DATE <= due_date)
+  INTO v_paid_total, v_paid_on_time
+  FROM invoices
+  WHERE invoices.customer_org_id = get_customer_health_score.customer_org_id
+    AND carrier_org_id = my_org_id()
+    AND status = 'paid';
+
+  v_payment_pct := CASE WHEN v_paid_total > 0
+    THEN (v_paid_on_time::NUMERIC / v_paid_total) * 100
+    ELSE 100
+  END;
+
+  SELECT COUNT(*)
+  INTO v_exception_ct
+  FROM exception_events
+  WHERE exception_events.entity_type = 'customer'
+    AND exception_events.entity_id = get_customer_health_score.customer_org_id
+    AND carrier_org_id = my_org_id()
+    AND occurred_at >= now() - INTERVAL '90 days';
+
+  v_exception_pct := GREATEST(0, 100 - (LEAST(v_exception_ct, 10) * 10));
+
+  RETURN ROUND((v_payment_pct * 0.7) + (v_exception_pct * 0.3));
+END;
+$$;
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 22: ROLE-SCOPED READS (migration 0022)
+-- The policy rewrites (is_active-aware helpers, role-scoped reads) are edited IN PLACE next to their tables above;
+-- this section holds the trigger and function changes. get_exceptions() supersedes the earlier definition.
+-- ────────────────────────────────────────────────────────────
+-- 3. Finance: status to invoiced/paid only. Same technique as 0018 (RLS cannot say which columns).
+CREATE OR REPLACE FUNCTION enforce_finance_load_columns() RETURNS trigger
+LANGUAGE plpgsql SET search_path = public AS $$
+DECLARE
+  v_ignored TEXT[] := ARRAY['status', 'updated_at'];
+BEGIN
+  IF my_role() = 'finance' THEN
+    IF (to_jsonb(NEW) - v_ignored) IS DISTINCT FROM (to_jsonb(OLD) - v_ignored) THEN
+      RAISE EXCEPTION 'finance may only change a load''s billing status' USING ERRCODE = '42501';
+    END IF;
+    IF NEW.status IS DISTINCT FROM OLD.status AND NEW.status NOT IN ('invoiced', 'paid') THEN
+      RAISE EXCEPTION 'finance may only move a load to invoiced or paid' USING ERRCODE = '42501';
+    END IF;
+  END IF;
+  RETURN NEW;
+END $$;
+
+CREATE TRIGGER loads_finance_columns BEFORE UPDATE ON loads
+  FOR EACH ROW EXECUTE FUNCTION enforce_finance_load_columns();
+
+-- 4. Office roles only.
+CREATE OR REPLACE FUNCTION mark_overdue_invoices()
+RETURNS INTEGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_count INTEGER;
+BEGIN
+  IF my_role() IS NULL OR my_role() NOT IN ('owner', 'solo', 'dispatcher', 'finance') THEN
+    RETURN 0;
+  END IF;
+  UPDATE invoices SET status = 'overdue'
+  WHERE status = 'sent' AND due_date < CURRENT_DATE
+    AND carrier_org_id = my_org_id();
+  GET DIAGNOSTICS v_count = ROW_COUNT;
+  RETURN v_count;
+END;
+$$;
+
+-- get_exceptions(): the existing body moves to an internal function that no client role can call; the public name
+-- becomes a role-checked wrapper with the same signature.
+CREATE OR REPLACE FUNCTION public.get_exceptions_unchecked()
+ RETURNS TABLE(entity_type text, entity_id bigint, exception_type text, tier text, title text, detail text, due_at timestamp with time zone)
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+
+  -- 1) INVOICES: overdue, or about to become overdue. No "upcoming" tier --
+  -- an invoice not yet due within a week isn't an exception yet.
+  SELECT
+    'invoice'::TEXT,
+    i.id,
+    'invoice_overdue'::TEXT,
+    CASE WHEN i.due_date < CURRENT_DATE THEN 'today' ELSE 'this_week' END,
+    'Invoice overdue'::TEXT,
+    'Invoice ' || i.invoice_number || ' for $' || i.amount || ' due ' || to_char(i.due_date, 'Mon DD, YYYY'),
+    i.due_date::TIMESTAMPTZ
+  FROM invoices i
+  WHERE i.carrier_org_id = my_org_id()
+    AND i.status IN ('sent', 'overdue')
+    AND i.due_date IS NOT NULL
+    AND i.due_date <= CURRENT_DATE + INTERVAL '7 days'
+
+  UNION ALL
+
+  -- 2) ORG DOCUMENTS: carrier's own compliance docs (COI, MC authority, UCR,
+  -- etc.) -- these are typically annual filings, so the "upcoming" horizon
+  -- is the widest of the doc branches (180 days, per the UCR-style hint).
+  -- entity_type is 'organization', NOT 'customer' -- this branch is scoped
+  -- to `od.org_id = my_org_id()`, i.e. the CARRIER's own org, never an
+  -- actual customer org. Bug found 2026-07-21: it was originally mislabeled
+  -- 'customer', which meant these exceptions silently could never match any
+  -- customer-entity filter anywhere in the app (there's no page that lists
+  -- exceptions for the carrier's own org itself, only the aggregate inbox/
+  -- banner, which don't filter by entity_type -- so this only ever broke a
+  -- hypothetical future per-entity view, not anything currently built).
+  SELECT
+    'organization'::TEXT,
+    od.org_id,
+    CASE WHEN od.expiry_date < CURRENT_DATE THEN 'doc_expired' ELSE 'doc_expiring' END,
+    CASE
+      WHEN od.expiry_date < CURRENT_DATE THEN 'today'
+      WHEN od.expiry_date <= CURRENT_DATE + INTERVAL '7 days' THEN 'this_week'
+      ELSE 'upcoming'
+    END,
+    CASE WHEN od.expiry_date < CURRENT_DATE THEN 'Compliance document expired' ELSE 'Compliance document expiring' END,
+    COALESCE(od.label, od.doc_type) || ' expires ' || to_char(od.expiry_date, 'Mon DD, YYYY'),
+    od.expiry_date::TIMESTAMPTZ
+  FROM org_documents od
+  WHERE od.org_id = my_org_id()
+    AND od.expiry_date IS NOT NULL
+    AND od.expiry_date <= CURRENT_DATE + INTERVAL '180 days'
+
+  UNION ALL
+
+  -- 3) VEHICLE DOCUMENTS: registration/insurance/DOT authority/annual
+  -- inspection -- a middle horizon (60 days) between CDL (30) and the
+  -- UCR-style org docs (180); these are typically renewed annually but
+  -- carriers plan for them further ahead than a driver's own CDL.
+  SELECT
+    'vehicle'::TEXT,
+    vd.vehicle_id,
+    CASE WHEN vd.expiry_date < CURRENT_DATE THEN 'doc_expired' ELSE 'doc_expiring' END,
+    CASE
+      WHEN vd.expiry_date < CURRENT_DATE THEN 'today'
+      WHEN vd.expiry_date <= CURRENT_DATE + INTERVAL '7 days' THEN 'this_week'
+      ELSE 'upcoming'
+    END,
+    CASE WHEN vd.expiry_date < CURRENT_DATE THEN 'Vehicle document expired' ELSE 'Vehicle document expiring' END,
+    v.nickname || ': ' || COALESCE(vd.label, vd.doc_type) || ' expires ' || to_char(vd.expiry_date, 'Mon DD, YYYY'),
+    vd.expiry_date::TIMESTAMPTZ
+  FROM vehicle_documents vd
+  JOIN vehicles v ON v.id = vd.vehicle_id
+  WHERE vd.carrier_org_id = my_org_id()
+    AND vd.expiry_date IS NOT NULL
+    AND vd.expiry_date <= CURRENT_DATE + INTERVAL '60 days'
+
+  UNION ALL
+
+  -- 4) DRIVER CDL EXPIRY: authoritative structured field (drivers.cdl_expiry),
+  -- not driver_documents -- see function-level note above. 30-day horizon
+  -- per the CDL-specific hint.
+  SELECT
+    'driver'::TEXT,
+    d.id,
+    'cdl_expiring'::TEXT,
+    CASE
+      WHEN d.cdl_expiry < CURRENT_DATE THEN 'today'
+      WHEN d.cdl_expiry <= CURRENT_DATE + INTERVAL '7 days' THEN 'this_week'
+      ELSE 'upcoming'
+    END,
+    'CDL expiring'::TEXT,
+    trim(COALESCE(p.first_name, '') || ' ' || COALESCE(p.last_name, '')) || '''s CDL expires ' || to_char(d.cdl_expiry, 'Mon DD, YYYY'),
+    d.cdl_expiry::TIMESTAMPTZ
+  FROM drivers d
+  JOIN profiles p ON p.id = d.profile_id
+  WHERE d.carrier_org_id = my_org_id()
+    AND d.cdl_expiry IS NOT NULL
+    AND d.cdl_expiry <= CURRENT_DATE + INTERVAL '30 days'
+
+  UNION ALL
+
+  -- 5) DRIVER MEDICAL CERT EXPIRY: same authoritative-field reasoning as CDL
+  -- above, same 30-day horizon (DOT physicals are typically flagged on a
+  -- similarly short runway).
+  SELECT
+    'driver'::TEXT,
+    d.id,
+    'med_cert_expiring'::TEXT,
+    CASE
+      WHEN d.med_cert_expiry < CURRENT_DATE THEN 'today'
+      WHEN d.med_cert_expiry <= CURRENT_DATE + INTERVAL '7 days' THEN 'this_week'
+      ELSE 'upcoming'
+    END,
+    'Medical certificate expiring'::TEXT,
+    trim(COALESCE(p.first_name, '') || ' ' || COALESCE(p.last_name, '')) || '''s medical certificate expires ' || to_char(d.med_cert_expiry, 'Mon DD, YYYY'),
+    d.med_cert_expiry::TIMESTAMPTZ
+  FROM drivers d
+  JOIN profiles p ON p.id = d.profile_id
+  WHERE d.carrier_org_id = my_org_id()
+    AND d.med_cert_expiry IS NOT NULL
+    AND d.med_cert_expiry <= CURRENT_DATE + INTERVAL '30 days'
+
+  UNION ALL
+
+  -- 6) POD MISSING: a load marked delivered with no matching 'pod'-type
+  -- document row. No natural due date to look forward to (delivery already
+  -- happened), so tiering instead reflects how overdue the paperwork is: a
+  -- 2-day grace period after delivery before this escalates from
+  -- 'this_week' to 'today'. due_at is the delivery date (when the POD
+  -- should have been captured), falling back to updated_at if delivery_date
+  -- was never recorded.
+  SELECT
+    'load'::TEXT,
+    l.id,
+    'pod_missing'::TEXT,
+    CASE
+      WHEN l.delivery_date IS NULL OR l.delivery_date <= CURRENT_DATE - INTERVAL '2 days' THEN 'today'
+      ELSE 'this_week'
+    END,
+    'POD missing'::TEXT,
+    'Load ' || l.load_number || ' delivered without a proof of delivery',
+    COALESCE(l.delivery_date::TIMESTAMPTZ, l.updated_at)
+  FROM loads l
+  WHERE l.carrier_org_id = my_org_id()
+    AND l.status = 'delivered'
+    AND NOT EXISTS (
+      SELECT 1 FROM documents doc WHERE doc.load_id = l.id AND doc.type = 'pod'
+    )
+
+  UNION ALL
+
+  -- 7) MAINTENANCE DUE: date-based reminders only -- see function-level note
+  -- on next_due_miles above. entity_type is 'vehicle' (the reminder is about
+  -- the vehicle, not a standalone entity of its own). 30-day horizon, same
+  -- reasoning as CDL: maintenance intervals are usually planned on a
+  -- similarly short runway, not an annual one.
+  SELECT
+    'vehicle'::TEXT,
+    mr.vehicle_id,
+    'maintenance_due'::TEXT,
+    CASE
+      WHEN mr.next_due_date < CURRENT_DATE THEN 'today'
+      WHEN mr.next_due_date <= CURRENT_DATE + INTERVAL '7 days' THEN 'this_week'
+      ELSE 'upcoming'
+    END,
+    'Maintenance due'::TEXT,
+    v.nickname || ': ' || mr.reminder_type || ' due ' || to_char(mr.next_due_date, 'Mon DD, YYYY'),
+    mr.next_due_date::TIMESTAMPTZ
+  FROM maintenance_reminders mr
+  JOIN vehicles v ON v.id = mr.vehicle_id
+  WHERE mr.carrier_org_id = my_org_id()
+    AND mr.is_active = true
+    AND mr.next_due_date IS NOT NULL
+    AND mr.next_due_date <= CURRENT_DATE + INTERVAL '30 days'
+
+$function$;
+REVOKE EXECUTE ON FUNCTION get_exceptions_unchecked() FROM PUBLIC, anon, authenticated;
+
+CREATE OR REPLACE FUNCTION get_exceptions()
+RETURNS TABLE(entity_type TEXT, entity_id BIGINT, exception_type TEXT, tier TEXT, title TEXT, detail TEXT, due_at TIMESTAMPTZ)
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT * FROM get_exceptions_unchecked() WHERE my_role() IN ('owner', 'solo', 'dispatcher', 'finance');
+$$;
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 23: PUBLIC DEVELOPER API (migration 0025)
+--
+-- Phase 9: external callers authenticate as an ORGANIZATION via an OAuth 2.0 client-credentials grant
+-- (client_id/client_secret), never as a logged-in human with a Supabase session. Nothing here is reachable
+-- by `authenticated`/`anon`: the app talks to these tables only via the service-role admin client (same
+-- posture as change_events/idempotency_keys), because there is no Supabase user session for RLS to key off
+-- for this caller. Tier gate (`public_api`, min_tier growth) is seeded next to `features` above.
+-- ────────────────────────────────────────────────────────────
+
+-- One org can hold several named clients (rotate/revoke independently without losing all API access).
+-- client_secret_hash is bcrypt -- the raw secret is shown to the user exactly once, at creation, and never
+-- stored or logged anywhere after that.
+CREATE TABLE oauth_clients (
+  id                 BIGSERIAL PRIMARY KEY,
+  org_id             BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  client_id          TEXT NOT NULL UNIQUE,
+  client_secret_hash TEXT NOT NULL,
+  name               TEXT NOT NULL,
+  created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
+  last_used_at       TIMESTAMPTZ,
+  -- NULL = active. A revoked client's credentials must never mint a new token again (checked at token-issue
+  -- time); a token already issued before revocation still expires naturally within its 1h lifetime -- the
+  -- same "good until it expires" posture as the tier-downgrade case, not a gap specific to revocation.
+  revoked_at         TIMESTAMPTZ
+);
+CREATE INDEX idx_oauth_clients_org ON oauth_clients(org_id);
+ALTER TABLE oauth_clients ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON oauth_clients FROM anon, authenticated;
+GRANT SELECT, INSERT, UPDATE ON oauth_clients TO service_role;
+GRANT USAGE, SELECT ON SEQUENCE oauth_clients_id_seq TO service_role;
+
+COMMENT ON TABLE oauth_clients IS
+  'Public developer API (Phase 9) OAuth 2.0 client-credentials clients, one org : many clients. Server-only -- no client role can read or write it, same posture as change_events/idempotency_keys.';
+
+-- Fixed-window rate-limit counter per client_id, enforced in Postgres (no Redis -- this app already leans on
+-- Postgres for shared counters, e.g. next_entity_val()/org_sequences). One row per (client, window); the
+-- window is truncated to p_window_seconds so concurrent requests across multiple app instances (ECS
+-- autoscaling) increment the SAME row and race safely through the atomic INSERT .. ON CONFLICT below --
+-- no in-process counter, which would be wrong the moment there is more than one instance.
+--
+-- client_id is deliberately NOT a foreign key to oauth_clients: the token endpoint rate-limits by the
+-- CLAIMED client_id before it has verified that client exists (so repeated guesses against a bogus or
+-- not-yet-created id are throttled too, not just guesses against a real one) -- an FK here would turn every
+-- such request into a 500 instead of the intended 401/429.
+--
+-- v1 scope cut: no scheduled cleanup of old window rows (same posture as send-reminders' cron not being
+-- wired to a scheduler yet -- see app/api/cron/send-reminders/route.ts). At 100 req/min per client this is a
+-- few hundred KB per client per day; revisit if/when a real cron runner exists.
+CREATE TABLE oauth_client_rate_limits (
+  client_id     TEXT NOT NULL,
+  window_start  TIMESTAMPTZ NOT NULL,
+  request_count INT NOT NULL DEFAULT 0,
+  PRIMARY KEY (client_id, window_start)
+);
+ALTER TABLE oauth_client_rate_limits ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON oauth_client_rate_limits FROM anon, authenticated;
+GRANT SELECT, INSERT, UPDATE ON oauth_client_rate_limits TO service_role;
+
+COMMENT ON TABLE oauth_client_rate_limits IS
+  'Fixed-window request counters backing the public API''s 100 req/min per-client rate limit. Server-only.';
+
+-- Atomic check-and-increment: one statement, so concurrent requests for the same client (whether same
+-- process or a different ECS task) serialize through Postgres row locking on the ON CONFLICT target rather
+-- than racing a read-then-write in application code.
+CREATE OR REPLACE FUNCTION check_public_api_rate_limit(p_client_id TEXT, p_window_seconds INT, p_limit INT)
+RETURNS TABLE(allowed BOOLEAN, current_count INT, retry_after_seconds INT)
+LANGUAGE plpgsql AS $$
+DECLARE
+  v_window_start TIMESTAMPTZ;
+  v_count        INT;
+BEGIN
+  v_window_start := to_timestamp(floor(extract(epoch FROM now()) / p_window_seconds) * p_window_seconds);
+
+  INSERT INTO oauth_client_rate_limits (client_id, window_start, request_count)
+  VALUES (p_client_id, v_window_start, 1)
+  ON CONFLICT (client_id, window_start)
+  DO UPDATE SET request_count = oauth_client_rate_limits.request_count + 1
+  RETURNING oauth_client_rate_limits.request_count INTO v_count;
+
+  RETURN QUERY SELECT
+    v_count <= p_limit,
+    v_count,
+    CASE WHEN v_count <= p_limit THEN 0
+         ELSE GREATEST(1, CEIL(p_window_seconds - extract(epoch FROM (now() - v_window_start)))::INT)
+    END;
+END;
+$$;
+REVOKE ALL ON FUNCTION check_public_api_rate_limit(TEXT, INT, INT) FROM PUBLIC, anon, authenticated;
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 24: SUPPORT TICKETING (migration 0027)
+--
+-- In-app support ticketing with AI triage routing (decisions.md T16). Resolves PR1's "dedicated
+-- support" half of Enterprise's originally-undefined "white-label + dedicated support" line (the
+-- other half, branding, was migration 0026/SECTION 1b's branding_customization feature row).
+--
+-- Three-queue model: carrieros_support (CarrierOS's own platform-staff queue, sx_owner/sx_support,
+-- every tier) / org_support (the submitting org's own staff, Enterprise-gated via
+-- has_feature('support_desk')) / ai_resolved (auto-answered above a confidence threshold, with
+-- fallback_queue recording where a "still need help?" escalation reopens to). See
+-- lib/support-triage.ts for the classification call this table's rows are written from.
+--
+-- Placed here (appended, not merged into SECTION 2/3's table blocks) because it must come after
+-- SECTION 8c's blanket base-table GRANT and after my_org_id()/my_role()/has_feature() -- same
+-- placement reasoning SECTION 23 (public developer API) already established for a new table added
+-- post-SECTION-8c; this table needs its OWN explicit GRANT below since the blanket statement earlier
+-- in the file only covers tables that existed at that point in a top-to-bottom replay.
+-- ────────────────────────────────────────────────────────────
+
+CREATE TABLE support_tickets (
+  id                   BIGSERIAL PRIMARY KEY,
+  submitted_by         UUID NOT NULL REFERENCES profiles(id),
+  carrier_org_id       BIGINT NOT NULL REFERENCES organizations(id),
+  -- Identity/context captured automatically at submission time (never asked of the user directly,
+  -- per T16's explicit "record details about them... ask the right question" framing) — snapshotted
+  -- rather than joined live so a later role change or tier change doesn't rewrite ticket history.
+  submitter_role       TEXT NOT NULL,
+  submitter_tier       TEXT,   -- carrier_details.tier at submission time; NULL for non-carrier (platform-org) submitters
+  category             TEXT NOT NULL CHECK (category IN (
+    'technical_issue','load_dispatch','account_billing','compliance_safety','driver_pay_hr','feature_request','other'
+  )),
+  related_load_number  TEXT,   -- conditional field, shown client-side only for category = 'load_dispatch'
+  body                 TEXT NOT NULL,
+  queue                TEXT NOT NULL CHECK (queue IN ('carrieros_support','org_support','ai_resolved')),
+  -- Only set when queue = 'ai_resolved' — the human queue the classifier would have routed to had it
+  -- not auto-resolved. escalate_support_ticket() reopens into exactly this queue (T16: "reopens it
+  -- into whichever queue the original classification pointed at").
+  fallback_queue       TEXT CHECK (fallback_queue IN ('carrieros_support','org_support')),
+  status               TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','resolved','closed')),
+  ai_confidence        NUMERIC CHECK (ai_confidence IS NULL OR (ai_confidence >= 0 AND ai_confidence <= 1)),
+  ai_answer            TEXT,   -- populated when queue = 'ai_resolved'; also mirrored into the first thread message
+  created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
+  resolved_at          TIMESTAMPTZ,
+  updated_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT fallback_queue_only_when_ai_resolved CHECK (
+    (queue = 'ai_resolved' AND fallback_queue IS NOT NULL) OR
+    (queue <> 'ai_resolved' AND fallback_queue IS NULL)
+  )
+);
+
+COMMENT ON TABLE support_tickets IS
+  'In-app support ticketing (decisions.md T16). AI-triaged into carrieros_support/org_support/ai_resolved on creation — see lib/support-triage.ts. RLS: submitter sees own; org_support staff (owner/solo, Enterprise-gated) see their own org''s org_support-queue tickets only; sx_owner/sx_support see carrieros_support-queue tickets regardless of org (mirrors admin_notes'' "gated on my_role() alone" precedent, SECTION 3c).';
+
+CREATE INDEX idx_support_tickets_org           ON support_tickets(carrier_org_id);
+CREATE INDEX idx_support_tickets_submitter     ON support_tickets(submitted_by);
+CREATE INDEX idx_support_tickets_queue_status  ON support_tickets(queue, status);
+
+CREATE TABLE support_ticket_messages (
+  id              BIGSERIAL PRIMARY KEY,
+  ticket_id       BIGINT NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+  carrier_org_id  BIGINT NOT NULL REFERENCES organizations(id),
+  sender_id       UUID REFERENCES profiles(id),   -- NULL = AI-generated or system message
+  is_ai_generated BOOLEAN NOT NULL DEFAULT false,
+  body            TEXT NOT NULL,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+COMMENT ON TABLE support_ticket_messages IS
+  'Reply thread for support_tickets (decisions.md T16). sender_id NULL + is_ai_generated true = the auto-answer message inserted alongside an ai_resolved ticket.';
+
+CREATE INDEX idx_support_ticket_messages_ticket ON support_ticket_messages(ticket_id);
+CREATE INDEX idx_support_ticket_messages_org    ON support_ticket_messages(carrier_org_id);
+
+CREATE TRIGGER support_tickets_updated_at
+  BEFORE UPDATE ON support_tickets FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+ALTER TABLE support_tickets ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "submitter_creates_own_ticket" ON support_tickets FOR INSERT TO authenticated
+  WITH CHECK (submitted_by = auth.uid() AND carrier_org_id = my_org_id());
+
+CREATE POLICY "submitter_own_tickets_select" ON support_tickets FOR SELECT TO authenticated
+  USING (submitted_by = auth.uid());
+
+CREATE POLICY "org_support_staff_select" ON support_tickets FOR SELECT TO authenticated
+  USING (
+    queue = 'org_support'
+    AND carrier_org_id = my_org_id()
+    AND my_role() IN ('owner','solo')
+    AND has_feature('support_desk')
+  );
+CREATE POLICY "org_support_staff_update" ON support_tickets FOR UPDATE TO authenticated
+  USING (
+    queue = 'org_support'
+    AND carrier_org_id = my_org_id()
+    AND my_role() IN ('owner','solo')
+    AND has_feature('support_desk')
+  )
+  WITH CHECK (
+    queue = 'org_support'
+    AND carrier_org_id = my_org_id()
+    AND my_role() IN ('owner','solo')
+    AND has_feature('support_desk')
+  );
+
+-- carrieros_support tickets are NOT scoped to ShipmentX's own org_id -- they're submitted by carrier-
+-- org users and routed to ShipmentX's queue, the same "gated on my_role() alone, no org-membership
+-- check" shape admin_notes already uses (SECTION 3c) and for the identical reason: only a trusted
+-- action ever assigns an sx_* role. app/api/admin/support-tickets/** routes use the service-role
+-- admin client per lib/admin-auth.ts convention regardless; this is defense in depth / consistency
+-- with that existing precedent, not the only enforcement point.
+CREATE POLICY "sx_carrieros_support_select" ON support_tickets FOR SELECT TO authenticated
+  USING (queue = 'carrieros_support' AND my_role() IN ('sx_owner','sx_support'));
+CREATE POLICY "sx_carrieros_support_update" ON support_tickets FOR UPDATE TO authenticated
+  USING (queue = 'carrieros_support' AND my_role() IN ('sx_owner','sx_support'))
+  WITH CHECK (queue = 'carrieros_support' AND my_role() IN ('sx_owner','sx_support'));
+
+ALTER TABLE support_ticket_messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "ticket_owner_messages_select" ON support_ticket_messages FOR SELECT TO authenticated
+  USING (ticket_id IN (SELECT id FROM support_tickets WHERE submitted_by = auth.uid()));
+
+CREATE POLICY "ticket_owner_messages_insert" ON support_ticket_messages FOR INSERT TO authenticated
+  WITH CHECK (
+    sender_id = auth.uid()
+    AND carrier_org_id = my_org_id()
+    AND ticket_id IN (SELECT id FROM support_tickets WHERE submitted_by = auth.uid())
+  );
+
+CREATE POLICY "org_support_staff_messages_select" ON support_ticket_messages FOR SELECT TO authenticated
+  USING (
+    carrier_org_id = my_org_id()
+    AND my_role() IN ('owner','solo')
+    AND has_feature('support_desk')
+    AND ticket_id IN (SELECT id FROM support_tickets WHERE queue = 'org_support')
+  );
+CREATE POLICY "org_support_staff_messages_insert" ON support_ticket_messages FOR INSERT TO authenticated
+  WITH CHECK (
+    sender_id = auth.uid()
+    AND carrier_org_id = my_org_id()
+    AND my_role() IN ('owner','solo')
+    AND has_feature('support_desk')
+    AND ticket_id IN (SELECT id FROM support_tickets WHERE queue = 'org_support')
+  );
+
+CREATE POLICY "sx_carrieros_support_messages_select" ON support_ticket_messages FOR SELECT TO authenticated
+  USING (
+    my_role() IN ('sx_owner','sx_support')
+    AND ticket_id IN (SELECT id FROM support_tickets WHERE queue = 'carrieros_support')
+  );
+CREATE POLICY "sx_carrieros_support_messages_insert" ON support_ticket_messages FOR INSERT TO authenticated
+  WITH CHECK (
+    sender_id = auth.uid()
+    AND my_role() IN ('sx_owner','sx_support')
+    AND ticket_id IN (SELECT id FROM support_tickets WHERE queue = 'carrieros_support')
+  );
+
+-- New tables added after SECTION 8c's blanket GRANT already ran (in a top-to-bottom replay of THIS
+-- file) need their own explicit grant, same requirement migration 0009 hit for role_capabilities and
+-- migration 0025/SECTION 23 hit for oauth_clients. RLS above is what actually restricts access.
+GRANT SELECT, INSERT, UPDATE, DELETE ON support_tickets, support_ticket_messages TO authenticated, service_role;
+GRANT USAGE, SELECT ON SEQUENCE support_tickets_id_seq, support_ticket_messages_id_seq TO authenticated, service_role;
+
+-- Escalation RPC -- "still need help?" on an ai_resolved ticket (T16: never a dead end). A plain RLS
+-- UPDATE policy could let a submitter set queue/status to anything reachable from their own row; this
+-- is a real state transition (queue AND status change together, only from a specific prior state) so
+-- it's a SECURITY DEFINER RPC instead, same idiom as submit_dvir_inspection()/log_vehicle_service()
+-- (SECTION 17/15) for real business-logic transitions rather than a raw table write.
+CREATE OR REPLACE FUNCTION escalate_support_ticket(p_ticket_id BIGINT)
+RETURNS support_tickets
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_ticket support_tickets;
+BEGIN
+  SELECT * INTO v_ticket FROM support_tickets WHERE id = p_ticket_id AND submitted_by = auth.uid();
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Ticket not found' USING ERRCODE = 'P0002';
+  END IF;
+  IF v_ticket.queue <> 'ai_resolved' OR v_ticket.fallback_queue IS NULL THEN
+    RAISE EXCEPTION 'Ticket is not eligible for escalation' USING ERRCODE = '22023';
+  END IF;
+
+  UPDATE support_tickets
+  SET queue = v_ticket.fallback_queue,
+      fallback_queue = NULL,  -- the fallback_queue_only_when_ai_resolved CHECK requires this once queue is no longer ai_resolved
+      status = 'open',
+      resolved_at = NULL
+  WHERE id = p_ticket_id
+  RETURNING * INTO v_ticket;
+
+  INSERT INTO support_ticket_messages (ticket_id, carrier_org_id, sender_id, is_ai_generated, body)
+  VALUES (p_ticket_id, v_ticket.carrier_org_id, auth.uid(), false, '[Escalated to a human — still need help with this.]');
+
+  RETURN v_ticket;
+END;
+$$;
+GRANT EXECUTE ON FUNCTION escalate_support_ticket(BIGINT) TO authenticated;
+GRANT EXECUTE ON FUNCTION check_public_api_rate_limit(TEXT, INT, INT) TO service_role;
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 25: AI PROVIDER CONFIG (migrations 0031, 0032)
+--
+-- Platform-wide LLM provider abstraction (decisions.md T17). Both real LLM integrations (T6 load
+-- extraction, T16 support-ticket triage) move off a hardcoded `@anthropic-ai/sdk` call onto the new
+-- lib/ai/ provider abstraction -- this table is the config side: a single, platform-wide (NOT
+-- per-org) row picking which provider is active. See lib/ai/index.ts (getActiveLLMProvider()).
+--
+-- Singleton-row pattern (id BIGINT PRIMARY KEY DEFAULT 1 CHECK (id = 1)) -- exactly one row, ever,
+-- enforced by the CHECK rather than just convention.
+--
+-- Where credentials live (migration 0031, amended by 0032 per T17's 2026-09-22 amendment): a
+-- provider's key can now be set from the SuperAdmin console, stored ENCRYPTED (AES-256-GCM, app-layer
+-- via lib/crypto/secrets.ts, never Postgres pgcrypto -- the plaintext never crosses into a SQL
+-- statement) in the `*_api_key_encrypted` columns below. An environment variable
+-- (ANTHROPIC_API_KEY / OPENAI_API_KEY / OPENAI_COMPATIBLE_API_KEY, the last one optional) remains a
+-- valid FALLBACK, checked only when no encrypted DB value is set -- additive, not a replacement. The
+-- `*_api_key_preview` columns hold only the plaintext key's last 4 characters, so GET
+-- /api/admin/ai-config can render a masked preview without ever decrypting -- decryption happens only
+-- in lib/ai/*-provider.ts at actual LLM-call time, never in the admin route (T17 amendment: no
+-- "reveal" affordance anywhere). This table still holds no full credential in readable form anywhere.
+--
+-- Default provider 'openai' (T17's new default), default model 'gpt-5-mini' (the fast/cheap tier,
+-- same reasoning T6 originally picked claude-haiku-4-5 over a larger Claude model for).
+--
+-- Server-only, same posture as change_events/idempotency_keys/oauth_clients (SECTION 23) -- no
+-- authenticated/anon grant at all; read via lib/ai/index.ts's service-role admin client, written via
+-- app/api/admin/ai-config/route.ts (requireAdminRole(request, 'admin_ai_config'), sx_owner only).
+-- ────────────────────────────────────────────────────────────
+
+CREATE TABLE ai_provider_config (
+  id                                    BIGINT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  provider                              TEXT NOT NULL DEFAULT 'openai' CHECK (provider IN ('anthropic', 'openai', 'openai_compatible')),
+  model                                 TEXT NOT NULL DEFAULT 'gpt-5-mini',
+  compatible_base_url                   TEXT,
+  -- Encrypted-at-rest provider API keys (migration 0032) -- see SECTION header above for the full
+  -- scheme. *_api_key_encrypted is AES-256-GCM ciphertext (base64(IV||authTag||ciphertext));
+  -- *_api_key_preview is the plaintext last 4 characters only, for masked display. Each pair is
+  -- always both NULL or both set together (CHECK below).
+  anthropic_api_key_encrypted           TEXT,
+  anthropic_api_key_preview             TEXT,
+  openai_api_key_encrypted              TEXT,
+  openai_api_key_preview                TEXT,
+  openai_compatible_api_key_encrypted   TEXT,
+  openai_compatible_api_key_preview     TEXT,
+  updated_at                            TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_by                            UUID REFERENCES profiles(id),
+  CONSTRAINT compatible_base_url_required_for_openai_compatible CHECK (
+    (provider = 'openai_compatible' AND compatible_base_url IS NOT NULL AND compatible_base_url <> '')
+    OR (provider <> 'openai_compatible')
+  ),
+  CONSTRAINT anthropic_api_key_preview_matches_encrypted CHECK (
+    (anthropic_api_key_encrypted IS NULL) = (anthropic_api_key_preview IS NULL)
+  ),
+  CONSTRAINT openai_api_key_preview_matches_encrypted CHECK (
+    (openai_api_key_encrypted IS NULL) = (openai_api_key_preview IS NULL)
+  ),
+  CONSTRAINT openai_compatible_api_key_preview_matches_encrypted CHECK (
+    (openai_compatible_api_key_encrypted IS NULL) = (openai_compatible_api_key_preview IS NULL)
+  )
+);
+
+COMMENT ON TABLE ai_provider_config IS
+  'Singleton row (id always 1) selecting the platform-wide active LLM provider (decisions.md T17). Provider API keys may be set encrypted-at-rest from the admin console (migration 0032, AES-256-GCM via lib/crypto/secrets.ts) or fall back to an environment variable when unset -- never a plaintext credential in this table. Changed only via PUT /api/admin/ai-config, sx_owner only (admin_ai_config capability).';
+COMMENT ON COLUMN ai_provider_config.anthropic_api_key_encrypted IS
+  'AES-256-GCM ciphertext (lib/crypto/secrets.ts), base64(IV||authTag||ciphertext). NULL means "no DB-stored key -- fall back to ANTHROPIC_API_KEY env var". Decrypted only by lib/ai/anthropic-provider.ts at LLM-call time, never in the admin route.';
+COMMENT ON COLUMN ai_provider_config.anthropic_api_key_preview IS
+  'Plaintext last 4 characters of the currently-stored key, for GET /api/admin/ai-config''s masked preview ("••••••••" + this). Never the full key. NULL iff anthropic_api_key_encrypted is NULL.';
+COMMENT ON COLUMN ai_provider_config.openai_api_key_encrypted IS
+  'Same scheme as anthropic_api_key_encrypted. NULL falls back to OPENAI_API_KEY env var.';
+COMMENT ON COLUMN ai_provider_config.openai_api_key_preview IS
+  'Same scheme as anthropic_api_key_preview, for the openai provider.';
+COMMENT ON COLUMN ai_provider_config.openai_compatible_api_key_encrypted IS
+  'Same scheme as anthropic_api_key_encrypted. NULL falls back to the optional OPENAI_COMPATIBLE_API_KEY env var (self-hosted endpoints often need no key at all, unchanged from migration 0031).';
+COMMENT ON COLUMN ai_provider_config.openai_compatible_api_key_preview IS
+  'Same scheme as anthropic_api_key_preview, for the openai_compatible provider.';
+
+INSERT INTO ai_provider_config (id) VALUES (1);
+
+CREATE TRIGGER ai_provider_config_updated_at
+  BEFORE UPDATE ON ai_provider_config FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+ALTER TABLE ai_provider_config ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON ai_provider_config FROM anon, authenticated;
+GRANT SELECT, UPDATE ON ai_provider_config TO service_role;
+
+-- ────────────────────────────────────────────────────────────
+-- SECTION 26: FINANCIAL EVENTS OUTBOX (migration 0033) -- decisions.md T19,
+-- accounting-integration readiness layer. mark_invoice_paid's extension
+-- lives in SECTION 14 above (it predates this migration); the rest of
+-- 0033's atomic-write-plus-outbox functions are here.
+-- ────────────────────────────────────────────────────────────
+
+-- Atomic invoice creation: insert + (optional) load status advance + outbox,
+-- in one transaction. All pre-checks that decide WHETHER to create (load
+-- delivered?, one-invoice-per-load?, invoice number already burned?) stay in
+-- app/(app)/invoices/actions.ts exactly as today -- this function only makes
+-- the write indivisible and emits the fact.
+CREATE OR REPLACE FUNCTION create_invoice_command(
+  p_load_id             BIGINT,
+  p_customer_org_id     BIGINT,
+  p_invoice_number      TEXT,
+  p_amount              NUMERIC,
+  p_due_date            DATE,
+  p_payment_method      TEXT,
+  p_factoring_company   TEXT,
+  p_advance_load_status BOOLEAN,
+  p_correlation_id      TEXT,
+  p_idempotency_key     TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_org_id   BIGINT;
+  v_actor    UUID;
+  v_invoice  RECORD;
+  v_existing BIGINT;
+BEGIN
+  v_actor  := auth.uid();
+  v_org_id := my_org_id();
+
+  IF v_actor IS NULL OR v_org_id IS NULL THEN
+    RAISE EXCEPTION 'AUTH_REQUIRED' USING ERRCODE = '28000';
+  END IF;
+  IF my_role() NOT IN ('owner','solo','finance') THEN
+    RAISE EXCEPTION 'FORBIDDEN' USING ERRCODE = '42501';
+  END IF;
+
+  SELECT id INTO v_existing FROM outbox_events WHERE idempotency_key = p_idempotency_key;
+  IF v_existing IS NOT NULL THEN
+    SELECT id, invoice_number INTO v_invoice
+      FROM invoices WHERE load_id = p_load_id AND carrier_org_id = v_org_id;
+    RETURN jsonb_build_object('outcome', 'REPLAYED', 'invoice_id', v_invoice.id, 'invoice_number', v_invoice.invoice_number);
+  END IF;
+
+  BEGIN
+    INSERT INTO invoices (
+      carrier_org_id, customer_org_id, load_id, invoice_number, amount, status,
+      due_date, payment_method, factoring_company
+    ) VALUES (
+      v_org_id, p_customer_org_id, p_load_id, p_invoice_number, p_amount, 'draft',
+      p_due_date, p_payment_method, p_factoring_company
+    )
+    RETURNING id, invoice_number INTO v_invoice;
+  EXCEPTION WHEN unique_violation THEN
+    RAISE EXCEPTION 'INVOICE_EXISTS' USING ERRCODE = '23505';
+  END;
+
+  IF p_advance_load_status THEN
+    UPDATE loads SET status = 'invoiced'
+     WHERE id = p_load_id AND carrier_org_id = v_org_id AND status = 'delivered';
+  END IF;
+
+  -- No currency key here: the org's currency is resolved once at export
+  -- read time from organizations.currency (financial-event-query-
+  -- repository.ts), not stamped per-event -- a per-event value would just
+  -- be one more place for it to drift from the source of truth.
+  INSERT INTO outbox_events (event_type, aggregate_type, aggregate_id, org_id, payload, correlation_id, idempotency_key)
+  VALUES (
+    'InvoiceCreated', 'Invoice', v_invoice.id::TEXT, v_org_id,
+    jsonb_build_object(
+      'invoiceId', v_invoice.id, 'invoiceNumber', v_invoice.invoice_number,
+      'loadId', p_load_id, 'amount', p_amount
+    ),
+    p_correlation_id, p_idempotency_key
+  );
+
+  RETURN jsonb_build_object('outcome', 'APPLIED', 'invoice_id', v_invoice.id, 'invoice_number', v_invoice.invoice_number);
+END $$;
+
+REVOKE EXECUTE ON FUNCTION create_invoice_command(
+  BIGINT, BIGINT, TEXT, NUMERIC, DATE, TEXT, TEXT, BOOLEAN, TEXT, TEXT
+) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION create_invoice_command(
+  BIGINT, BIGINT, TEXT, NUMERIC, DATE, TEXT, TEXT, BOOLEAN, TEXT, TEXT
+) TO authenticated;
+
+-- Invoice sent: replaces the plain UPDATE at the end of lib/invoice-actions.ts's
+-- sendInvoiceAndMarkSent (the email send itself, which cannot be transactional
+-- with a DB write, stays exactly where it is and still runs first -- this
+-- function is only called once the send has already succeeded).
+CREATE OR REPLACE FUNCTION mark_invoice_sent_command(
+  p_invoice_id      BIGINT,
+  p_sent_at         TIMESTAMPTZ,
+  p_correlation_id  TEXT,
+  p_idempotency_key TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_org_id   BIGINT;
+  v_actor    UUID;
+  v_invoice  RECORD;
+  v_existing BIGINT;
+BEGIN
+  v_actor  := auth.uid();
+  v_org_id := my_org_id();
+
+  IF v_actor IS NULL OR v_org_id IS NULL THEN
+    RAISE EXCEPTION 'AUTH_REQUIRED' USING ERRCODE = '28000';
+  END IF;
+  IF my_role() NOT IN ('owner','solo','finance') THEN
+    RAISE EXCEPTION 'FORBIDDEN' USING ERRCODE = '42501';
+  END IF;
+
+  SELECT id INTO v_existing FROM outbox_events WHERE idempotency_key = p_idempotency_key;
+  IF v_existing IS NOT NULL THEN
+    SELECT id, invoice_number, status INTO v_invoice FROM invoices WHERE id = p_invoice_id AND carrier_org_id = v_org_id;
+    RETURN jsonb_build_object('outcome', 'REPLAYED', 'invoice_id', p_invoice_id, 'status', v_invoice.status);
+  END IF;
+
+  UPDATE invoices SET status = 'sent', sent_at = p_sent_at
+   WHERE id = p_invoice_id AND carrier_org_id = v_org_id
+  RETURNING id, invoice_number, amount INTO v_invoice;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404';
+  END IF;
+
+  -- `amount` is included here (not just invoiceId/sentAt) so the
+  -- financial-events export's amountFor() has a real figure for this event
+  -- type -- an accounting sync reading "InvoiceSent, $0" would be actively
+  -- wrong, not just incomplete.
+  INSERT INTO outbox_events (event_type, aggregate_type, aggregate_id, org_id, payload, correlation_id, idempotency_key)
+  VALUES (
+    'InvoiceSent', 'Invoice', v_invoice.id::TEXT, v_org_id,
+    jsonb_build_object('invoiceId', v_invoice.id, 'invoiceNumber', v_invoice.invoice_number, 'amount', v_invoice.amount, 'sentAt', p_sent_at),
+    p_correlation_id, p_idempotency_key
+  );
+
+  RETURN jsonb_build_object('outcome', 'APPLIED', 'invoice_id', v_invoice.id, 'invoice_number', v_invoice.invoice_number);
+END $$;
+
+REVOKE EXECUTE ON FUNCTION mark_invoice_sent_command(BIGINT, TIMESTAMPTZ, TEXT, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION mark_invoice_sent_command(BIGINT, TIMESTAMPTZ, TEXT, TEXT) TO authenticated;
+
+-- ────────────────────────────────────────────────────────────
+-- DRIVER SETTLEMENTS (migration 0033)
+-- ────────────────────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION create_driver_settlement_command(
+  p_driver_id        BIGINT,
+  p_pay_method       TEXT,
+  p_rate_value       NUMERIC,
+  p_gross_revenue    NUMERIC,
+  p_net_pay          NUMERIC,
+  p_loads_count      INT,
+  p_period_start     DATE,
+  p_period_end       DATE,
+  p_correlation_id   TEXT,
+  p_idempotency_key  TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_org_id    BIGINT;
+  v_actor     UUID;
+  v_settlement RECORD;
+  v_existing  BIGINT;
+BEGIN
+  v_actor  := auth.uid();
+  v_org_id := my_org_id();
+
+  IF v_actor IS NULL OR v_org_id IS NULL THEN
+    RAISE EXCEPTION 'AUTH_REQUIRED' USING ERRCODE = '28000';
+  END IF;
+  IF my_role() NOT IN ('owner','solo','finance') THEN
+    RAISE EXCEPTION 'FORBIDDEN' USING ERRCODE = '42501';
+  END IF;
+  IF NOT has_feature('driver_settlements') THEN
+    RAISE EXCEPTION 'TIER_UPGRADE_REQUIRED' USING ERRCODE = 'PT402';
+  END IF;
+
+  SELECT id INTO v_existing FROM outbox_events WHERE idempotency_key = p_idempotency_key;
+  IF v_existing IS NOT NULL THEN
+    SELECT id, payment_status INTO v_settlement
+      FROM driver_settlements
+     WHERE carrier_org_id = v_org_id AND driver_id = p_driver_id
+       AND period_start = p_period_start AND period_end = p_period_end
+     ORDER BY id DESC LIMIT 1;
+    RETURN jsonb_build_object('outcome', 'REPLAYED', 'id', v_settlement.id, 'payment_status', v_settlement.payment_status);
+  END IF;
+
+  INSERT INTO driver_settlements (
+    carrier_org_id, driver_id, pay_method, rate_value, gross_revenue, net_pay,
+    loads_count, payment_status, period_start, period_end, pdf_statement_path, created_by
+  ) VALUES (
+    v_org_id, p_driver_id, p_pay_method, p_rate_value, p_gross_revenue, p_net_pay,
+    p_loads_count, 'pending', p_period_start, p_period_end, NULL, v_actor
+  )
+  RETURNING id, payment_status INTO v_settlement;
+
+  INSERT INTO outbox_events (event_type, aggregate_type, aggregate_id, org_id, payload, correlation_id, idempotency_key)
+  VALUES (
+    'DriverSettlementCreated', 'DriverSettlement', v_settlement.id::TEXT, v_org_id,
+    jsonb_build_object(
+      'settlementId', v_settlement.id, 'driverId', p_driver_id, 'grossRevenue', p_gross_revenue,
+      'netPay', p_net_pay, 'periodStart', p_period_start, 'periodEnd', p_period_end
+    ),
+    p_correlation_id, p_idempotency_key
+  );
+
+  RETURN jsonb_build_object('outcome', 'APPLIED', 'id', v_settlement.id, 'payment_status', v_settlement.payment_status);
+END $$;
+
+REVOKE EXECUTE ON FUNCTION create_driver_settlement_command(
+  BIGINT, TEXT, NUMERIC, NUMERIC, NUMERIC, INT, DATE, DATE, TEXT, TEXT
+) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION create_driver_settlement_command(
+  BIGINT, TEXT, NUMERIC, NUMERIC, NUMERIC, INT, DATE, DATE, TEXT, TEXT
+) TO authenticated;
+
+-- Settlement payment_status change (today only pending -> sent, from the
+-- send-ach route's ACH-stub; cleared is future work). Compare-and-swap on
+-- p_expected_status, same reasoning as submit_shipment_milestone: the
+-- current payment_status IS the version.
+CREATE OR REPLACE FUNCTION update_settlement_payment_status_command(
+  p_settlement_id    BIGINT,
+  p_expected_status  TEXT,
+  p_new_status       TEXT,
+  p_correlation_id   TEXT,
+  p_idempotency_key  TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_org_id     BIGINT;
+  v_actor      UUID;
+  v_updated    INTEGER;
+  v_settlement RECORD;
+  v_existing   BIGINT;
+BEGIN
+  v_actor  := auth.uid();
+  v_org_id := my_org_id();
+
+  IF v_actor IS NULL OR v_org_id IS NULL THEN
+    RAISE EXCEPTION 'AUTH_REQUIRED' USING ERRCODE = '28000';
+  END IF;
+  IF my_role() NOT IN ('owner','solo','finance') THEN
+    RAISE EXCEPTION 'FORBIDDEN' USING ERRCODE = '42501';
+  END IF;
+
+  SELECT id INTO v_existing FROM outbox_events WHERE idempotency_key = p_idempotency_key;
+  IF v_existing IS NOT NULL THEN
+    SELECT id, payment_status INTO v_settlement FROM driver_settlements WHERE id = p_settlement_id;
+    RETURN jsonb_build_object('outcome', 'REPLAYED', 'id', p_settlement_id, 'payment_status', v_settlement.payment_status);
+  END IF;
+
+  UPDATE driver_settlements
+     SET payment_status = p_new_status
+   WHERE id = p_settlement_id AND carrier_org_id = v_org_id AND payment_status = p_expected_status;
+
+  GET DIAGNOSTICS v_updated = ROW_COUNT;
+
+  IF v_updated = 0 THEN
+    SELECT id, payment_status, carrier_org_id INTO v_settlement FROM driver_settlements WHERE id = p_settlement_id;
+    IF NOT FOUND OR v_settlement.carrier_org_id <> v_org_id THEN
+      RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'P0002';
+    END IF;
+    RAISE EXCEPTION 'VERSION_CONFLICT:%', v_settlement.payment_status USING ERRCODE = '40001';
+  END IF;
+
+  SELECT id, payment_status, driver_id, net_pay INTO v_settlement FROM driver_settlements WHERE id = p_settlement_id;
+
+  INSERT INTO outbox_events (event_type, aggregate_type, aggregate_id, org_id, payload, correlation_id, idempotency_key)
+  VALUES (
+    'DriverSettlementPaymentStatusChanged', 'DriverSettlement', p_settlement_id::TEXT, v_org_id,
+    jsonb_build_object(
+      'settlementId', p_settlement_id, 'driverId', v_settlement.driver_id, 'netPay', v_settlement.net_pay,
+      'priorStatus', p_expected_status, 'newStatus', p_new_status
+    ),
+    p_correlation_id, p_idempotency_key
+  );
+
+  RETURN jsonb_build_object('outcome', 'APPLIED', 'id', v_settlement.id, 'payment_status', v_settlement.payment_status);
+END $$;
+
+REVOKE EXECUTE ON FUNCTION update_settlement_payment_status_command(BIGINT, TEXT, TEXT, TEXT, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION update_settlement_payment_status_command(BIGINT, TEXT, TEXT, TEXT, TEXT) TO authenticated;
+
+-- ────────────────────────────────────────────────────────────
+-- LOAD EXPENSES (migration 0033)
+-- ────────────────────────────────────────────────────────────
+-- Genuinely new: no write path exists for load_expenses anywhere in the app
+-- before this migration (query-only via test fixtures). Built fresh as a v1
+-- command, so it gets the atomic write + outbox in its very first version
+-- rather than as a later retrofit.
+CREATE OR REPLACE FUNCTION record_load_expense_command(
+  p_load_id          BIGINT,
+  p_expense_type     TEXT,
+  p_amount           NUMERIC,
+  p_note             TEXT,
+  p_correlation_id   TEXT,
+  p_idempotency_key  TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_org_id   BIGINT;
+  v_actor    UUID;
+  v_expense  RECORD;
+  v_existing BIGINT;
+  v_load     RECORD;
+BEGIN
+  v_actor  := auth.uid();
+  v_org_id := my_org_id();
+
+  IF v_actor IS NULL OR v_org_id IS NULL THEN
+    RAISE EXCEPTION 'AUTH_REQUIRED' USING ERRCODE = '28000';
+  END IF;
+  IF my_role() NOT IN ('owner','solo','dispatcher') THEN
+    RAISE EXCEPTION 'FORBIDDEN' USING ERRCODE = '42501';
+  END IF;
+  IF NOT has_feature('load_expenses') THEN
+    RAISE EXCEPTION 'TIER_UPGRADE_REQUIRED' USING ERRCODE = 'PT402';
+  END IF;
+
+  SELECT id INTO v_existing FROM outbox_events WHERE idempotency_key = p_idempotency_key;
+  IF v_existing IS NOT NULL THEN
+    SELECT id, expense_type, amount INTO v_expense
+      FROM load_expenses WHERE load_id = p_load_id AND carrier_org_id = v_org_id
+     ORDER BY id DESC LIMIT 1;
+    RETURN jsonb_build_object('outcome', 'REPLAYED', 'id', v_expense.id, 'amount', v_expense.amount);
+  END IF;
+
+  SELECT id, carrier_org_id INTO v_load FROM loads WHERE id = p_load_id;
+  IF NOT FOUND OR v_load.carrier_org_id <> v_org_id THEN
+    RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'P0002';
+  END IF;
+
+  INSERT INTO load_expenses (carrier_org_id, load_id, expense_type, amount, note, logged_by)
+  VALUES (v_org_id, p_load_id, p_expense_type, p_amount, p_note, v_actor)
+  RETURNING id, expense_type, amount INTO v_expense;
+
+  INSERT INTO outbox_events (event_type, aggregate_type, aggregate_id, org_id, payload, correlation_id, idempotency_key)
+  VALUES (
+    'LoadExpenseRecorded', 'LoadExpense', v_expense.id::TEXT, v_org_id,
+    jsonb_build_object(
+      'expenseId', v_expense.id, 'loadId', p_load_id, 'expenseType', v_expense.expense_type, 'amount', v_expense.amount
+    ),
+    p_correlation_id, p_idempotency_key
+  );
+
+  RETURN jsonb_build_object('outcome', 'APPLIED', 'id', v_expense.id, 'amount', v_expense.amount);
+END $$;
+
+REVOKE EXECUTE ON FUNCTION record_load_expense_command(BIGINT, TEXT, NUMERIC, TEXT, TEXT, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION record_load_expense_command(BIGINT, TEXT, NUMERIC, TEXT, TEXT, TEXT) TO authenticated;
+
+COMMENT ON FUNCTION create_invoice_command IS 'Atomic invoice create + optional load status advance + outbox (T19 readiness layer, migration 0033).';
+COMMENT ON FUNCTION mark_invoice_sent_command IS 'Atomic invoice sent status change + outbox (T19 readiness layer, migration 0033). Email send happens before this is called and is not part of the transaction.';
+COMMENT ON FUNCTION create_driver_settlement_command IS 'Atomic driver settlement create + outbox (T19 readiness layer, migration 0033).';
+COMMENT ON FUNCTION update_settlement_payment_status_command IS 'Atomic CAS settlement payment_status change + outbox (T19 readiness layer, migration 0033).';
+COMMENT ON FUNCTION record_load_expense_command IS 'Atomic load expense create + outbox (T19 readiness layer, migration 0033). First write path for load_expenses.';

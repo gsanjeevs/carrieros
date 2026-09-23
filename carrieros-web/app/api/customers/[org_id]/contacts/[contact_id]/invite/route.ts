@@ -14,6 +14,7 @@ import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '
 import { getProfileForUser, insertProfile } from '@/lib/queries/profiles'
 import { createAuthAdminProvider } from '@/lib/auth-admin'
 import { logError } from '@/lib/observability'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 const INVITABLE_PORTAL_ROLES = ['customer_admin', 'customer_viewer'] as const
 
@@ -29,7 +30,7 @@ export async function POST(
   const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) return apiError('NOT_ONBOARDED', 'No company', 400)
-  if (!['owner', 'solo', 'dispatcher'].includes(profile.role))
+  if (!roleHasCapability(profile.role, 'customers_manage'))
     return apiError('FORBIDDEN', 'Insufficient permissions', 403)
 
   const { data: contact } = await supabase

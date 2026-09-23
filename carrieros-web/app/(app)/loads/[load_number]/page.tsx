@@ -16,6 +16,7 @@ import CreateInvoiceButton from './CreateInvoiceButton'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import { Card, CardHeader, CardBody, StatusBadge } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 const STATUS_FLOW_KEYS = [
   { key: 'draft',      icon: 'draft' },
@@ -128,9 +129,10 @@ export default async function LoadDetailPage({
     })
   )
 
-  // Billing — owner/solo/finance only (same roles as the `billing_invoices_all`
-  // RLS policy; for anyone else this query returns nothing anyway).
-  const canBill = ['owner', 'solo', 'finance'].includes(profile.role)
+  // Billing — `invoice_actions` (owner/solo/finance), the same capability the
+  // invoice routes gate on and the same roles as the `billing_invoices_all`
+  // RLS policy; for anyone else this query returns nothing anyway.
+  const canBill = roleHasCapability(profile.role, 'invoice_actions')
   let existingInvoiceNumber: string | null = null
   if (canBill) {
     const { data: existingInvoice } = await supabase
@@ -148,19 +150,24 @@ export default async function LoadDetailPage({
     .eq('id', profile.org_id)
     .maybeSingle()
 
-  const showRate    = ['owner', 'solo', 'finance'].includes(profile.role)
-  const canDispatch = ['owner', 'solo', 'dispatcher'].includes(profile.role)
+  // Rate visibility is money-visibility, not a named capability: no
+  // role_capabilities row means "may see the rate", so this stays explicit.
+  const showRate    = roleHasCapability(profile.role, 'rate_visibility')
+  const canDispatch = roleHasCapability(profile.role, 'loads_manage')
+  // Upload/delete stay explicit: `documents_upload` also includes the driver
+  // (who uploads from the truck), and no capability covers deleting a
+  // document — converting either would widen access.
   const canUploadDoc = ['owner', 'solo', 'dispatcher'].includes(profile.role)
-  const canDeleteDoc = ['owner', 'solo'].includes(profile.role)
+  const canDeleteDoc = roleHasCapability(profile.role, 'documents_delete')
   // Driver chat (audit gap #13): finance gets none of it, by design (BR-2/
-  // FR-119) — matches the same role set the API routes' own explicit
-  // access checks use.
-  const canChat = ['owner', 'solo', 'dispatcher', 'driver'].includes(profile.role)
+  // FR-119) — `chat_participate` is the same role set the API routes' own
+  // explicit access checks use.
+  const canChat = roleHasCapability(profile.role, 'chat_participate')
   const chatEntitled = canChat && (await hasFeature(supabase, 'driver_chat'))
 
-  // IFTA mileage log (audit gap #13 cluster): same role set as fuel stops
-  // (owner/solo/dispatcher manage; driver logs their own via RLS).
-  const canIfta = ['owner', 'solo', 'dispatcher', 'driver'].includes(profile.role)
+  // IFTA mileage log (audit gap #13 cluster): `ifta_record` — owner/solo/
+  // dispatcher manage; driver logs their own via RLS.
+  const canIfta = roleHasCapability(profile.role, 'ifta_record')
   const iftaEntitled = canIfta && (await hasFeature(supabase, 'ifta_mileage_log'))
   let iftaCrossings: IftaCrossingRow[] = []
   if (iftaEntitled) {
@@ -359,7 +366,7 @@ export default async function LoadDetailPage({
               loadId={load.id}
               orgId={profile.org_id}
               crossings={iftaCrossings}
-              canManage={['owner', 'solo', 'dispatcher', 'driver'].includes(profile.role)}
+              canManage={canIfta}
               locale={locale}
             />
           )}

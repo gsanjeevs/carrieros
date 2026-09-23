@@ -13,9 +13,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '@/lib/api-auth'
 import { hasFeature } from '@/lib/entitlements'
-import { logError } from '@/lib/observability'
+import { logError, logEvent } from '@/lib/observability'
 import { getProfileForUser, insertProfile } from '@/lib/queries/profiles'
 import { createAuthAdminProvider } from '@/lib/auth-admin'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 // Deliberately excludes 'driver' (has its own flow on /drivers, which also
 // creates the drivers row) and 'solo' (owner+driver combined — only ever set
@@ -30,10 +31,7 @@ export const INVITABLE_ROLES = ['dispatcher', 'finance', 'owner'] as const
 // phone, no password) is real and complete, and a real provider can drop in
 // behind this function without changing anything else in the route.
 function sendPhoneInviteSms(params: { phone: string; role: string }): void {
-  console.log(
-    '[team-invite:sms-stub] no SMS provider is configured — no text was sent.',
-    JSON.stringify(params)
-  )
+  logEvent({ route: 'team/invite:sms-stub' }, { message: 'no SMS provider configured — no text was sent', params })
 }
 
 export async function POST(request: NextRequest) {
@@ -44,7 +42,7 @@ export async function POST(request: NextRequest) {
   const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) return apiError('NOT_ONBOARDED', 'No organization found for this user', 400)
-  if (!['owner', 'solo'].includes(profile.role))
+  if (!roleHasCapability(profile.role, 'team_manage'))
     return apiError('FORBIDDEN', 'Only owner/solo can invite team members', 403)
 
   const body = await request.json()

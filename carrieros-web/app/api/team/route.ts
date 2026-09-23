@@ -9,6 +9,7 @@ import { getAuthedContext, isErrorResponse, apiError, createAdminClient } from '
 import { createAuthAdminProvider } from '@/lib/auth-admin'
 import { getProfileForUser, listProfilesForOrg } from '@/lib/queries/profiles'
 import type { NextRequest } from 'next/server'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 export async function GET(request: NextRequest) {
   const ctx = await getAuthedContext(request)
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
 
   if (!profile?.org_id)
     return apiError('NOT_ONBOARDED', 'No organization found for this user', 400)
-  if (!['owner', 'solo'].includes(profile.role))
+  if (!roleHasCapability(profile.role, 'team_manage'))
     return apiError('FORBIDDEN', 'Only owner/solo can view the team roster', 403)
 
   const { data: members } = await listProfilesForOrg(supabase, profile.org_id)

@@ -3,6 +3,7 @@ import { generateVehicleNumber } from '@/lib/generate-number'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 export async function GET(request: NextRequest) {
   const ctx = await getAuthedContext(request)
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
   if (!profile?.org_id)
     return apiError('NOT_ONBOARDED', 'No company', 400)
 
-  if (!['owner', 'solo'].includes(profile.role))
+  if (!roleHasCapability(profile.role, 'vehicles_manage'))
     return apiError('FORBIDDEN', 'Insufficient permissions', 403)
 
   const body = await request.json()

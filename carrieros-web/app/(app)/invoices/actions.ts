@@ -15,7 +15,7 @@ import { sendInvoiceAndMarkSent } from '@/lib/invoice-actions'
 import { revalidatePath } from 'next/cache'
 import { INVOICE_ROLES } from '@/lib/roles-policy'
 import { getProfileForUser } from '@/lib/queries/profiles'
-import { getLoadForOrg, updateLoadStatus } from '@/lib/queries/loads'
+import { getLoadForOrg } from '@/lib/queries/loads'
 
 export type ActionResult =
   | { ok: true; invoice_number?: string; warning_code?: string }
@@ -99,34 +99,33 @@ export async function createInvoiceForLoad(loadId: number): Promise<ActionResult
 
   const paymentMethod = carrier?.default_payment_method ?? 'other'
 
-  const { data: invoice, error } = await supabase
-    .from('invoices')
-    .insert({
-      carrier_org_id:  orgId,
-      customer_org_id: load.customer_org_id,
-      load_id:         load.id,
-      invoice_number:  invoiceNumber,
-      amount:          Number(load.rate ?? 0),
-      status:          'draft',
-      due_date:        dueDate.toISOString().slice(0, 10),
-      payment_method:  paymentMethod,
-      factoring_company:
-        paymentMethod === 'factoring' ? carrier?.factoring_company ?? null : null,
-    })
-    .select('invoice_number')
-    .single()
+  // Atomic insert + (conditional) load status advance + outbox event (T19
+  // readiness layer, migration 0033), replacing the old two-statement
+  // insert-then-updateLoadStatus sequence — a failure between those two used
+  // to leave an invoice created with its load still 'delivered'. Idempotency
+  // key is deterministic per load: invoices_load_unique already enforces
+  // "one invoice per load" at the DB level, so a retried create targets the
+  // same business fact.
+  const { data: cmdData, error } = await supabase.rpc('create_invoice_command', {
+    p_load_id: load.id,
+    p_customer_org_id: load.customer_org_id as number,
+    p_invoice_number: invoiceNumber,
+    p_amount: Number(load.rate ?? 0),
+    p_due_date: dueDate.toISOString().slice(0, 10),
+    p_payment_method: paymentMethod,
+    p_factoring_company: (paymentMethod === 'factoring' ? carrier?.factoring_company ?? null : null) as string,
+    p_advance_load_status: load.status === 'delivered',
+    p_correlation_id: crypto.randomUUID(),
+    p_idempotency_key: `invoice:create:${load.id}`,
+  })
 
   if (error) {
     // 23505 = unique violation — someone else invoiced this load in the gap
     // between the check above and this insert.
-    if (error.code === '23505') return { ok: false, error_code: 'INVOICE_EXISTS' }
+    if (error.code === '23505' || error.message?.includes('INVOICE_EXISTS')) return { ok: false, error_code: 'INVOICE_EXISTS' }
     return { ok: false, error_code: 'SERVER_ERROR' }
   }
-
-  // Advance the load's own status so the two views agree.
-  if (load.status === 'delivered') {
-    await updateLoadStatus(supabase, load.id, 'invoiced')
-  }
+  const invoice = cmdData as unknown as { invoice_number: string }
 
   revalidatePath('/invoices')
   revalidatePath(`/loads/${load.load_number}`)
@@ -162,24 +161,32 @@ export async function markInvoicePaid(invoiceId: number): Promise<ActionResult> 
   if ('error_code' in ctx) return { ok: false, error_code: ctx.error_code }
   const { supabase, orgId } = ctx
 
-  const { data, error } = await supabase
-    .from('invoices')
-    .update({ status: 'paid', paid_at: new Date().toISOString() })
-    .eq('id', invoiceId)
-    .eq('carrier_org_id', orgId)
-    .select('invoice_number, load_id')
-    .maybeSingle()
-
-  if (error) return { ok: false, error_code: 'SERVER_ERROR' }
-  if (!data) return { ok: false, error_code: 'NOT_FOUND' }
-
-  if (data.load_id) {
-    await updateLoadStatus(supabase, data.load_id, 'paid')
+  // Delegates to the same atomic mark_invoice_paid RPC (migration 0014, extended
+  // by 0033 with outbox emission) the /api/v1 path uses, instead of the old
+  // plain UPDATE + separate updateLoadStatus call — one implementation for
+  // "invoice paid" instead of two that could drift.
+  const { data: cmdData, error } = await supabase.rpc('mark_invoice_paid', {
+    p_invoice_id: invoiceId,
+    p_paid_at: new Date().toISOString(),
+    p_correlation_id: crypto.randomUUID(),
+    p_idempotency_key: `invoice:${invoiceId}:paid`,
+  })
+  if (error) {
+    if (error.code === 'PT404') return { ok: false, error_code: 'NOT_FOUND' }
+    return { ok: false, error_code: 'SERVER_ERROR' }
   }
 
+  const { data: invoiceRow } = await supabase
+    .from('invoices')
+    .select('invoice_number')
+    .eq('id', invoiceId)
+    .eq('carrier_org_id', orgId)
+    .maybeSingle()
+  if (!invoiceRow) return { ok: false, error_code: 'NOT_FOUND' }
+
   revalidatePath('/invoices')
-  revalidatePath(`/invoices/${data.invoice_number}`)
-  return { ok: true, invoice_number: data.invoice_number }
+  revalidatePath(`/invoices/${invoiceRow.invoice_number}`)
+  return { ok: true, invoice_number: invoiceRow.invoice_number }
 }
 
 /**

@@ -1,9 +1,10 @@
 // src/lib/exceptions.ts
-// Shared helper around the get_exceptions() RPC (org-scoped internally via
-// my_org_id() — see supabase/schema/schema.sql), so the tier-priority sort
-// used to pick a single "top" exception per entity lives in one place,
-// shared by the Alerts tab and the inline per-row chips on Fleet/Customers.
-import { supabase } from '@/lib/supabase';
+// Shared helper around GET /api/v1/exceptions (get_exceptions(), org-scoped
+// and role-filtered server-side — see server/application/exception-query-
+// service.ts), so the tier-priority sort used to pick a single "top"
+// exception per entity lives in one place, shared by the Alerts tab and the
+// inline per-row chips on Fleet/Customers.
+import { apiClient } from '@/lib/api-client';
 
 export type ExceptionTier = 'today' | 'this_week' | 'upcoming';
 
@@ -36,8 +37,8 @@ export function sortExceptions(rows: ExceptionRow[]): ExceptionRow[] {
 }
 
 export async function fetchExceptions(): Promise<ExceptionRow[]> {
-  const { data } = await supabase.rpc('get_exceptions');
-  return sortExceptions((data as ExceptionRow[] | null) ?? []);
+  const { data } = await apiClient.http.GET('/api/v1/exceptions');
+  return sortExceptions((data?.exceptions as ExceptionRow[] | undefined) ?? []);
 }
 
 // Builds entity_type -> (entity_id -> top exception) so callers can look up

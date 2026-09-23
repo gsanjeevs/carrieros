@@ -15,6 +15,7 @@ import { captureRef } from 'react-native-view-shot';
 
 import { ThemedText } from '@/components/themed-text';
 import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
+import { haptics } from '@/lib/haptics';
 
 const ORANGE = BrandColors.orange;
 
@@ -37,6 +38,11 @@ export const SignaturePad = forwardRef<SignaturePadHandle, Props>(function Signa
   const [paths, setPaths] = useState<string[]>([]);
   const currentPath = useRef('');
   const [, forceRender] = useState(0);
+  // Plain ref, not state: PanResponder.create() below runs once (inside a
+  // useRef initializer), so its callbacks close over stale state forever --
+  // a ref is the only way for onPanResponderGrant to see up-to-date "has
+  // this pad been touched yet" without recreating the responder every stroke.
+  const touchedRef = useRef(false);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -44,6 +50,13 @@ export const SignaturePad = forwardRef<SignaturePadHandle, Props>(function Signa
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: (e) => {
         const { locationX, locationY } = e.nativeEvent;
+        // Haptic on the first touch-down of a signature stroke only (spec
+        // §1.4) -- confirms the pad registered the touch, useful in bright
+        // sunlight where the ink trail can be hard to see.
+        if (!touchedRef.current) {
+          touchedRef.current = true;
+          haptics.light();
+        }
         currentPath.current = `M${locationX.toFixed(1)},${locationY.toFixed(1)}`;
         forceRender((n) => n + 1);
       },
@@ -87,6 +100,7 @@ export const SignaturePad = forwardRef<SignaturePadHandle, Props>(function Signa
   function clear() {
     setPaths([]);
     currentPath.current = '';
+    touchedRef.current = false;
   }
 
   return (

@@ -31,6 +31,8 @@ interface Org {
   last_active: string | null
   loads_this_month: number
   health_score: number
+  open_ticket_count: number
+  earliest_open_ticket_id: number | null
 }
 
 type Urgency = 'critical' | 'high' | 'medium' | 'low'
@@ -40,12 +42,16 @@ function daysUntil(dateStr: string | null): number | null {
   return Math.ceil((new Date(dateStr).getTime() - Date.now()) / 86_400_000)
 }
 
+// SA5's severity spec named "open support ticket" as a Medium signal before support_tickets existed
+// (decisions.md T16) — an org with an open carrieros_support ticket is now floored at 'medium' so it
+// always surfaces here, even when nothing else about it looks urgent (health_score/billing untouched).
 function urgencyOf(org: Org): Urgency {
   if (org.billing_status === 'past_due') return 'critical'
   const trialDays = daysUntil(org.trial_ends_at)
   if (org.billing_status === 'trialing' && trialDays !== null && trialDays <= 7) return 'high'
   if (org.health_score < 40) return 'high'
   if (org.health_score < 70) return 'medium'
+  if (org.open_ticket_count > 0) return 'medium'
   return 'low'
 }
 
@@ -142,12 +148,25 @@ export default function TriageQueuePage() {
                     {o.tier ?? '—'} · health {o.health_score} · {o.billing_status ?? '—'}
                     {o.billing_status === 'trialing' && trialDays !== null && t('trialEndsIn', { days: trialDays })}
                   </p>
+                  {o.open_ticket_count > 0 && (
+                    <p className="text-warning text-xs mt-0.5">
+                      ⚠️ {t('openTicket')}{o.open_ticket_count > 1 ? ` (${o.open_ticket_count})` : ''} · {t('unresponded')}
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {o.billing_status === 'trialing' && (
                     <Button variant="secondary" size="sm" onClick={() => extendTrial(o.org_id)} loading={extending === o.org_id}>
                       {t('extendTrial')}
                     </Button>
+                  )}
+                  {o.earliest_open_ticket_id !== null && (
+                    <Link
+                      href={`/admin/support/${o.earliest_open_ticket_id}`}
+                      className="inline-flex items-center justify-center rounded-md font-semibold transition-colors px-2 py-1 text-[11px] bg-white/10 text-text-pri hover:bg-white/15"
+                    >
+                      {t('replyNow')}
+                    </Link>
                   )}
                   <Link
                     href={`/admin/orgs/${o.org_id}`}

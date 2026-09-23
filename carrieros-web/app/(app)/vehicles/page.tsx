@@ -19,6 +19,7 @@ import { VEHICLE_TYPE_ICONS } from '@/components/icons/vehicle-types'
 import ExceptionChip from '@/components/ExceptionChip'
 import { getExceptions } from '@/lib/exceptions'
 import { getProfileForUser } from '@/lib/queries/profiles'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 import { vehicleStatusVariant, type VehicleStatus } from '@/lib/domain/vehicle-status'
 import { Card, EmptyState, StatusBadge } from '@/components/ui'
 
@@ -66,7 +67,7 @@ export default async function VehiclesPage({
 
   const params = await searchParams
   const justCreated = params.created
-  const canManage = ['owner', 'solo'].includes(profile?.role ?? '')
+  const canManage = roleHasCapability(profile?.role, 'vehicles_manage')
 
   const t = await getTranslations('vehicles')
 

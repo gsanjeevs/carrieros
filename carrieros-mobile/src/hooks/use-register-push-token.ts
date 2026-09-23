@@ -16,7 +16,7 @@ import { useEffect } from 'react';
 import * as Notifications from 'expo-notifications';
 
 import { useSession } from '@/hooks/use-session';
-import { supabase } from '@/lib/supabase';
+import { registerPushToken } from '@/lib/profile-api';
 
 export function useRegisterPushToken() {
   const { session } = useSession();
@@ -38,10 +38,7 @@ export function useRegisterPushToken() {
         const { data: token } = await Notifications.getExpoPushTokenAsync();
         if (cancelled || !token) return;
 
-        await supabase
-          .from('profiles')
-          .update({ push_token: token })
-          .eq('id', session!.user.id);
+        await registerPushToken(token);
       } catch (err) {
         // No EAS project configured (or simulator/no-push-capable device) —
         // expected in this project today, see file header. Never crash the

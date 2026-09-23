@@ -1,7 +1,7 @@
 // src/app/(tabs)/alerts.tsx
-// "Alerts" tab (Owner/Solo/Dispatcher) — live exception data from the
-// existing get_exceptions() SECURITY DEFINER RPC (org-scoped internally via
-// my_org_id()), grouped by tier. Not a placeholder — this is the same
+// "Alerts" tab (Owner/Solo/Dispatcher/Finance) — live exception data from
+// GET /api/v1/exceptions (get_exceptions(), org-scoped and role-filtered
+// server-side), grouped by tier. Not a placeholder — this is the same
 // exception feed the web dashboard's parity work is built on.
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet } from 'react-native';
@@ -12,7 +12,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 
 type ExceptionRow = {
   entity_type: string;
@@ -34,8 +34,8 @@ export default function AlertsScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
-    const { data } = await supabase.rpc('get_exceptions');
-    setRows((data as ExceptionRow[] | null) ?? []);
+    const { data } = await apiClient.http.GET('/api/v1/exceptions');
+    setRows((data?.exceptions as ExceptionRow[] | undefined) ?? []);
   }, []);
 
   useEffect(() => {

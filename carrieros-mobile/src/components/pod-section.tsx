@@ -2,17 +2,21 @@
 // Proof-of-delivery photo capture for a load. Rendered from
 // src/app/load/[id].tsx for driver + solo roles.
 //
-// Storage contract (must be matched exactly or the upload 403s):
-//   bucket `documents` (PRIVATE) — path `{carrier_org_id}/loads/{load_id}/{file}`
-// RLS on storage.objects keys INSERT/SELECT off the FIRST path segment
-// equalling the caller's org id. DELETE is owner/solo-only via
-// `owner_solo_docs_delete`, but the additional `member_deletes_orphan_docs`
-// policy lets ANY org member delete an object as long as no `documents` row
-// references it — which is exactly the rollback case below, so drivers can
-// now clean up their own failed uploads.
+// Data path (ADR 0003): everything goes through the shared API, none of it through
+// supabase.from()/storage. Uploading is three steps (lib/pod-upload.ts) so the photo
+// bytes never pass through the API (serverless hosts cap request bodies at a few MB):
+//   1. POST /loads/{id}/document-uploads  -> server-chosen path + signed upload URL
+//   2. PUT the JPEG bytes to that URL (straight to storage)
+//   3. POST /loads/{id}/documents         -> server verifies the object exists at the
+//                                            issued path and records it
+// The server decides who may upload to which load and what path is used; this
+// component never builds a storage path.
 //
-// The bucket is private, so listing thumbnails uses createSignedUrl() —
-// getPublicUrl() returns a URL that always 400s here.
+// Offline: known-offline, or a live attempt that can't reach the server at all, saves
+// the photo to local storage and queues a pod.upload command (lib/offline-queue.ts)
+// instead of losing it -- proof of delivery on rural cellular can't depend on signal at
+// the loading dock. The queue replays the exact same three steps once online, requesting
+// a fresh signed URL at that time (see lib/pod-upload.ts / offline-queue.ts).
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -22,18 +26,19 @@ import { ThemedView } from '@/components/themed-view';
 import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
+import { useOfflineSync } from '@/hooks/use-offline-sync';
 import { base64ToArrayBuffer } from '@/lib/base64';
 import { formatDate } from '@/lib/format-date';
-import { supabase } from '@/lib/supabase';
-import { resolveSubmitter } from '@/lib/submitter';
+import { apiClient } from '@/lib/api-client';
+import { newIdempotencyKey } from '@/lib/idempotency';
+import { savePhotoLocally } from '@/lib/local-photo-store';
+import { enqueuePodUpload } from '@/lib/offline-queue';
+import { uploadPodPhoto } from '@/lib/pod-upload';
 
 const ORANGE = BrandColors.orange;
-const BUCKET = 'documents';
-const SIGNED_URL_TTL_SECONDS = 60 * 60; // 1h — plenty for a screen session
 
 type PodDoc = {
   id: number;
-  storage_path: string;
   created_at: string | null;
   signedUrl: string | null;
 };
@@ -41,37 +46,24 @@ type PodDoc = {
 export function PodSection({ loadId }: { loadId: number }) {
   const { t, locale } = useLocale();
   const theme = useTheme();
+  const { isOnline, refreshQueueLength } = useOfflineSync();
 
   const [docs, setDocs] = useState<PodDoc[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const [queuedNotice, setQueuedNotice] = useState(false);
 
   const loadDocs = useCallback(async () => {
-    const { data, error: fetchErr } = await supabase
-      .from('documents')
-      .select('id, storage_path, created_at')
-      .eq('load_id', loadId)
-      .eq('type', 'pod')
-      .order('created_at', { ascending: false });
-
-    if (fetchErr || !data) {
+    // The API returns each document with a short-lived signed download URL.
+    try {
+      const { data } = await apiClient.http.GET('/api/v1/loads/{id}/documents', {
+        params: { path: { id: loadId }, query: { type: 'pod' } },
+      });
+      setDocs((data?.documents ?? []).map((d) => ({ id: d.id, created_at: d.created_at, signedUrl: d.url })));
+    } catch {
       setDocs([]);
-      return;
     }
-
-    // One signed URL per object. createSignedUrls() (plural) exists but
-    // returns per-path errors inline; the loop keeps the mapping obvious and
-    // a POD list is small by nature.
-    const withUrls = await Promise.all(
-      data.map(async (d) => {
-        const { data: signed } = await supabase.storage
-          .from(BUCKET)
-          .createSignedUrl(d.storage_path, SIGNED_URL_TTL_SECONDS);
-        return { ...d, signedUrl: signed?.signedUrl ?? null };
-      })
-    );
-    setDocs(withUrls);
   }, [loadId]);
 
   useEffect(() => {
@@ -117,53 +109,35 @@ export function PodSection({ loadId }: { loadId: number }) {
     await upload(asset.base64);
   }
 
+  // Photo bytes go to local storage and a command is queued instead of uploaded, exactly
+  // the same "known offline OR the live attempt couldn't reach the server" split as
+  // src/app/load/[id].tsx's advanceStatus.
+  async function queueForLater(base64: string) {
+    const localUri = await savePhotoLocally(base64, 'jpg');
+    await enqueuePodUpload({ loadId, idempotencyKey: newIdempotencyKey(), localUri, contentType: 'image/jpeg' }, new Date().toISOString());
+    await refreshQueueLength();
+    setQueuedNotice(true);
+  }
+
   async function upload(base64: string) {
     setUploading(true);
     setError('');
+    setQueuedNotice(false);
 
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const userId = sessionData.session?.user.id;
-      if (!userId) {
-        setError(t('pod.errorNotSignedIn'));
+      if (!isOnline) {
+        await queueForLater(base64);
         return;
       }
 
-      const submitter = await resolveSubmitter(userId);
-      if (!submitter) {
-        setError(t('pod.errorResolveAccount'));
-        return;
-      }
-
-      const storagePath = `${submitter.carrierOrgId}/loads/${loadId}/pod-${Date.now()}.jpg`;
-      const body = base64ToArrayBuffer(base64);
-
-      const { error: uploadErr } = await supabase.storage
-        .from(BUCKET)
-        .upload(storagePath, body, { contentType: 'image/jpeg', upsert: false });
-
-      if (uploadErr) {
-        setError(t('pod.errorUploadFailed'));
-        return;
-      }
-
-      const { error: insertErr } = await supabase.from('documents').insert({
-        load_id: loadId,
-        carrier_org_id: submitter.carrierOrgId,
-        type: 'pod',
-        storage_path: storagePath,
-        uploaded_by: userId,
-      });
-
-      if (insertErr) {
-        // Don't leave a silent orphan in the bucket. The insert failed, so no
-        // `documents` row points at this object and `member_deletes_orphan_docs`
-        // permits the delete for every role — the rollback is expected to
-        // succeed. It's still best-effort (a network drop could strand the
-        // file), so a failed cleanup is logged rather than claimed as clean.
-        const { error: removeErr } = await supabase.storage.from(BUCKET).remove([storagePath]);
-        if (removeErr) console.warn('POD rollback failed to remove', storagePath, removeErr);
-        setError(t('pod.errorSaveFailed'));
+      const bytes = base64ToArrayBuffer(base64);
+      const result = await uploadPodPhoto(loadId, 'image/jpeg', bytes);
+      if (!result.ok) {
+        if (result.step === 'exception') {
+          await queueForLater(base64); // couldn't reach the server despite looking online
+          return;
+        }
+        setError(result.step === 'finalize' ? t('pod.errorSaveFailed') : t('pod.errorUploadFailed'));
         return;
       }
 
@@ -204,6 +178,7 @@ export function PodSection({ loadId }: { loadId: number }) {
       )}
 
       {error ? <ThemedText type="small" style={styles.error}>{error}</ThemedText> : null}
+      {queuedNotice ? <ThemedText type="small" style={styles.queued}>{t('pod.queuedOffline')}</ThemedText> : null}
 
       {loading ? (
         <ActivityIndicator />
@@ -244,6 +219,7 @@ const styles = StyleSheet.create({
   buttonDisabled: { opacity: 0.5 },
   uploadingRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   error: { color: StatusColors.danger },
+  queued: { color: '#d97706' },
   thumbRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   thumbWrap: { width: 88 },
   thumb: { width: 88, height: 88, borderRadius: 8 },

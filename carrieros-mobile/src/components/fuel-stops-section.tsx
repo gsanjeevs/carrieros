@@ -2,12 +2,11 @@
 // Fuel stop logging (mockup-18) -- Critical gap: fuel_stops has a mature web
 // UI (components/FuelStopsSection.tsx, per-vehicle) but was completely
 // absent from carrieros-mobile, where the mockup's whole flow actually
-// lives (a driver logging a stop mid-trip). RLS already has
-// driver_fuel_stops_insert (schema.sql) scoped to the driver's own
-// drivers.id -- no schema change needed, this is a pure UI addition.
-// Direct table insert/select (R3b category 2 -- plain RLS-protected CRUD),
-// same as the web component, not a Next.js route.
-import { useCallback, useEffect, useState } from 'react';
+// lives (a driver logging a stop mid-trip). Reads go through
+// GET /api/v1/loads/{id}/fuel-stops (gated by the fuel_log capability, same
+// as logging one); the write already went through the API in an earlier
+// batch.
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -18,7 +17,8 @@ import { useLocale } from '@/hooks/use-locale';
 import { useSession } from '@/hooks/use-session';
 import { formatMoney } from '@/lib/format-money';
 import { formatNumber } from '@/lib/format-number';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
+import { keyForSubmission } from '@/lib/idempotency';
 
 const ORANGE = BrandColors.orange;
 
@@ -32,12 +32,8 @@ type FuelStop = {
 
 export function FuelStopsSection({
   loadId,
-  vehicleId,
-  carrierOrgId,
 }: {
   loadId: number;
-  vehicleId: number | null;
-  carrierOrgId: number;
 }) {
   const theme = useTheme();
   const { t, locale } = useLocale();
@@ -48,6 +44,7 @@ export function FuelStopsSection({
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const submissionKey = useRef<{ key: string; body: string } | null>(null);
 
   const [state, setState] = useState('');
   const [station, setStation] = useState('');
@@ -55,12 +52,8 @@ export function FuelStopsSection({
   const [pricePerGallon, setPricePerGallon] = useState('');
 
   const fetchStops = useCallback(async () => {
-    const { data } = await supabase
-      .from('fuel_stops')
-      .select('id, state, station, gallons, total_cost')
-      .eq('load_id', loadId)
-      .order('stop_date', { ascending: true });
-    setStops(data ?? []);
+    const { data } = await apiClient.http.GET('/api/v1/loads/{id}/fuel-stops', { params: { path: { id: loadId } } });
+    setStops((data?.fuel_stops as FuelStop[] | undefined) ?? []);
     setLoading(false);
   }, [loadId]);
 
@@ -92,34 +85,33 @@ export function FuelStopsSection({
     setSaving(true);
     setError('');
 
-    const { data: driver } = await supabase
-      .from('drivers')
-      .select('id')
-      .eq('carrier_org_id', carrierOrgId)
-      .eq('profile_id', session.user.id)
-      .maybeSingle();
-
-    const totalCost = computedTotal ?? gallonsNum * (Number.isFinite(priceNum) ? priceNum : 0);
-
-    const { error: insertErr } = await supabase.from('fuel_stops').insert({
-      carrier_org_id: carrierOrgId,
-      vehicle_id: vehicleId,
-      load_id: loadId,
-      driver_id: driver?.id ?? null,
+    // The server derives org, driver, vehicle, logger and (when no receipt total is
+    // given) the cost; the client only sends what the driver entered.
+    const body = {
       state: state.trim().toUpperCase(),
       station: station.trim() || null,
-      stop_date: new Date().toISOString().slice(0, 10),
       gallons: gallonsNum,
       price_per_gallon: pricePerGallon ? priceNum : null,
-      total_cost: totalCost,
-      logged_by: session.user.id,
-    });
+    };
+
+    let ok = false;
+    try {
+      const { response } = await apiClient.http.POST('/api/v1/loads/{id}/fuel-stops', {
+        params: { path: { id: loadId }, header: { 'Idempotency-Key': keyForSubmission(submissionKey, body) } },
+        body,
+      });
+      ok = response.ok;
+    } catch {
+      ok = false; // couldn't reach the server; the same key is reused if the driver taps again
+    }
+    const insertErr = ok ? null : true;
 
     setSaving(false);
     if (insertErr) {
       setError(t('loadDetail.fuelSaveFailed'));
       return;
     }
+    submissionKey.current = null;
     setOpen(false);
     resetForm();
     await fetchStops();

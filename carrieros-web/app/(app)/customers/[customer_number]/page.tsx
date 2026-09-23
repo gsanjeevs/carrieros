@@ -26,8 +26,10 @@ import { SCORE_CRITICAL, SCORE_WARNING, SUCCESS } from '@/lib/design-tokens'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { listLoadsForCustomer } from '@/lib/queries/loads'
 import { logError } from '@/lib/observability'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
-const VIEW_ROLES = ['owner', 'solo', 'dispatcher', 'finance']
+// Matches customers/page.tsx's list gate — wider than `customers_manage`
+// (finance reads the directory), so no capability's role set covers it.
 
 const SEVERITY_COLOR: Record<string, string> = {
   info:    'bg-blue-500/20 text-blue-400',
@@ -101,7 +103,7 @@ export default async function CustomerDetailPage({
   const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) redirect('/onboarding')
-  if (!VIEW_ROLES.includes(profile.role)) redirect('/dashboard')
+  if (!roleHasCapability(profile.role, 'customers_view')) redirect('/dashboard')
 
   const t = await getTranslations('customers')
   const tLoads = await getTranslations('loads')
@@ -125,7 +127,7 @@ export default async function CustomerDetailPage({
     .maybeSingle()
   const currency = carrierOrg?.currency ?? 'USD'
 
-  const canSeeRevenue = ['owner', 'solo', 'finance'].includes(profile.role)
+  const canSeeRevenue = roleHasCapability(profile.role, 'rate_visibility')
   const canBill = INVOICE_ROLES.includes(profile.role)
 
   // Loads for this customer.
@@ -173,7 +175,7 @@ export default async function CustomerDetailPage({
   }
 
   // Contacts (Phase 3H) — one org, many contacts, some with portal login.
-  const canManageContacts = ['owner', 'solo', 'dispatcher'].includes(profile.role)
+  const canManageContacts = roleHasCapability(profile.role, 'customers_manage')
   const { data: contactsData } = await supabase
     .from('customer_contacts')
     .select('id, name, email, phone, title, is_primary, portal_profile_id')

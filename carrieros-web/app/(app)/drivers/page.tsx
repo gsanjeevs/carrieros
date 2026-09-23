@@ -11,6 +11,7 @@ import { cdlGlowStatus } from '@/lib/domain/driver-compliance'
 import { Card, EmptyState, StatusBadge, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { listActiveDriversForOrg } from '@/lib/queries/drivers'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 type Driver = {
   id: number
@@ -46,7 +47,7 @@ export default async function DriversPage({
 
   const params = await searchParams
   const justInvited = params.invited
-  const canManage = ['owner', 'solo'].includes(profile?.role ?? '')
+  const canManage = roleHasCapability(profile?.role, 'drivers_manage')
 
   const t = await getTranslations('drivers')
   const locale = await getLocale()

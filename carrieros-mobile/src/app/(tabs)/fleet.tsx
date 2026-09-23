@@ -13,7 +13,7 @@ import { ExceptionChip } from '@/components/exception-chip';
 import { BrandColors, Spacing, VEHICLE_STATUS_PILL } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 import { fetchExceptions, topExceptionByEntity, type ExceptionRow } from '@/lib/exceptions';
 
 type VehicleRow = {
@@ -21,7 +21,6 @@ type VehicleRow = {
   vehicle_number: string | null;
   nickname: string;
   status: string;
-  photo_path: string | null;
 };
 
 export default function FleetScreen() {
@@ -35,33 +34,14 @@ export default function FleetScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
-    const [{ data }, exceptionRows] = await Promise.all([
-      supabase
-        .from('vehicles')
-        .select('id, vehicle_number, nickname, status, photo_path')
-        .eq('is_active', true)
-        .order('vehicle_number', { ascending: true }),
-      fetchExceptions(),
-    ]);
-    const rows = (data as VehicleRow[] | null) ?? [];
-    setVehicles(rows);
+    // Photo-driven cards (mockup-22) — the server signs each vehicle's photo URL
+    // itself now (still private-bucket, still short-lived); this screen no
+    // longer talks to storage directly.
+    const [{ data }, exceptionRows] = await Promise.all([apiClient.http.GET('/api/v1/vehicles'), fetchExceptions()]);
+    const rows = data?.vehicles ?? [];
+    setVehicles(rows as VehicleRow[]);
     setExceptions(exceptionRows);
-
-    // Photo-driven cards (mockup-22) — resolve a signed URL per vehicle
-    // that actually has one; vehicles with no photo keep the plain card
-    // (no fabricated placeholder image).
-    const withPhoto = rows.filter((v) => v.photo_path);
-    if (withPhoto.length > 0) {
-      const entries = await Promise.all(
-        withPhoto.map(async (v) => {
-          const { data: signed } = await supabase.storage.from('documents').createSignedUrl(v.photo_path!, 3600);
-          return [v.id, signed?.signedUrl] as const;
-        })
-      );
-      setPhotoUrls(new Map(entries.filter((e): e is [number, string] => !!e[1])));
-    } else {
-      setPhotoUrls(new Map());
-    }
+    setPhotoUrls(new Map(rows.filter((v) => v.photo_url).map((v) => [v.id, v.photo_url as string])));
   }, []);
 
   const topExceptionByVehicle = topExceptionByEntity(exceptions, 'vehicle');

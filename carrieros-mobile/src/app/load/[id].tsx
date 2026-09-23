@@ -20,10 +20,12 @@ import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
 import { useOfflineSync } from '@/hooks/use-offline-sync';
-import { enqueueUpdate } from '@/lib/offline-queue';
+import { enqueueMilestone } from '@/lib/offline-queue';
+import { newIdempotencyKey } from '@/lib/idempotency';
+import { apiClient } from '@/lib/api-client';
+import { roleHasCapability } from '@/lib/generated/role-capabilities';
 import { formatDateTime } from '@/lib/format-date';
 import { formatNumber } from '@/lib/format-number';
-import { supabase } from '@/lib/supabase';
 import { apiFetch } from '@/lib/api';
 
 const ORANGE = BrandColors.orange;
@@ -126,44 +128,35 @@ export default function LoadDetailScreen() {
   const fetchAll = useCallback(async () => {
     if (!session?.user.id || !id) return;
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role, org_id')
-      .eq('id', session.user.id)
-      .single();
-
-    const currentRole = (profile?.role ?? 'solo') as Role;
+    const { data: me } = await apiClient.http.GET('/api/v1/me');
+    const currentRole = (me?.role ?? 'solo') as Role;
     setRole(currentRole);
-    setOrgId(profile?.org_id ?? null);
+    setOrgId(me?.org_id ?? null);
 
-    const { data: entitled } = await supabase.rpc('has_feature', { feature_key: 'driver_chat' });
-    setChatEntitled(entitled === true);
+    const { data: entitlements } = await apiClient.http.GET('/api/v1/me/entitlements');
+    setChatEntitled((entitlements?.keys ?? []).includes('driver_chat'));
 
-    const { data: loadData, error: loadErr } =
-      currentRole === 'driver'
-        ? await supabase.from('loads_driver_view').select(DETAIL_COLS).eq('id', Number(id)).single()
-        : await supabase.from('loads').select(DETAIL_COLS).eq('id', Number(id)).single();
+    // The server picks loads vs. loads_driver_view (and derives rate visibility) by role; this
+    // screen no longer has to know which table/view backs a given actor.
+    const { data: loadData, error: loadErr } = await apiClient.http.GET('/api/v1/loads/{id}', {
+      params: { path: { id: Number(id) } },
+    });
 
     if (loadErr) {
       setError(t('loadDetail.loadAccessError'));
-    } else {
-      const detail = loadData as unknown as LoadDetail;
+    } else if (loadData) {
+      const detail = loadData.load as unknown as LoadDetail;
       setLoad(detail);
       setAssignDriverId(detail.driver_id);
       setAssignVehicleId(detail.vehicle_id);
+      setEvents(loadData.events);
     }
 
-    const { data: eventData } = await supabase
-      .from('load_events')
-      .select('id, event_type, created_at')
-      .eq('load_id', Number(id))
-      .order('created_at', { ascending: true });
-
-    setEvents(eventData ?? []);
-
     // Assignment pickers are office-side only — skip the extra fetches for
-    // drivers, who can never see this section.
-    if (['owner', 'solo', 'dispatcher'].includes(currentRole)) {
+    // anyone without `loads_manage` (owner/solo/dispatcher today, per the
+    // generated role_capabilities source of truth), who can never see the
+    // section below.
+    if (roleHasCapability(currentRole, 'loads_manage')) {
       const [driversRes, vehiclesRes] = await Promise.all([
         apiFetch('/api/drivers'),
         apiFetch('/api/vehicles'),
@@ -205,43 +198,57 @@ export default function LoadDetailScreen() {
     setAdvancing(true);
     setError('');
 
-    // Offline mode (audit gap #13 cluster, last item): a driver marking a
-    // load delivered with no signal must not lose the action. When we
-    // already know we're offline, skip the network call entirely (it would
-    // just hang/fail) — queue it, apply the status change optimistically
-    // in local state, and let use-offline-sync.ts's flush replay it once
-    // connectivity returns.
-    if (!isOnline) {
-      await enqueueUpdate(
-        { table: 'loads', match: { id: load.id }, patch: { status: step.next } },
-        new Date().toISOString()
+    // One user action = one idempotency key, reused by the offline queue's
+    // replay, so a retry can never apply the status change twice.
+    const idempotencyKey = newIdempotencyKey();
+    const occurredAt = new Date().toISOString();
+
+    // Queue the action and show it optimistically. Used when we already know
+    // we're offline, and when the request itself fails to reach the server: a
+    // driver marking a load delivered with no signal must not lose the action
+    // (use-offline-sync.ts replays the queue through the API on reconnect).
+    const queueForLater = async () => {
+      await enqueueMilestone(
+        { loadId: load.id, expectedStatus: load.status, newStatus: step.next, idempotencyKey, occurredAt },
+        occurredAt
       );
       await refreshQueueLength();
       setLoad({ ...load, status: step.next });
       setAdvancing(false);
+    };
+
+    if (!isOnline) {
+      await queueForLater();
       return;
     }
 
-    // Update the base `loads` table directly (not the view) — the RLS
-    // policy that permits this is defined on `loads`. No .select() chained,
-    // so no risk of the response including the rate column even for
-    // owner/solo/dispatcher callers.
-    const { error: updateErr } = await supabase
-      .from('loads')
-      .update({ status: step.next })
-      .eq('id', load.id);
+    // Status change + timeline entry + audit + outbox are ONE atomic call on the
+    // server (previously two separate writes, so a failure between them left a
+    // status change with no timeline entry). The server also enforces who may
+    // do this and that the transition is legal.
+    let response: Response;
+    try {
+      ({ response } = await apiClient.http.POST('/api/v1/loads/{id}/milestones', {
+        params: { path: { id: load.id }, header: { 'Idempotency-Key': idempotencyKey } },
+        body: { expected_status: load.status, new_status: step.next, occurred_at: occurredAt },
+      }));
+    } catch {
+      await queueForLater(); // couldn't reach the server despite looking online
+      return;
+    }
 
-    if (updateErr) {
+    if (response.status === 409) {
+      // Someone else (dispatcher, another device) moved this load first.
+      setError(t('loadDetail.statusConflict'));
+      await fetchAll();
+      setAdvancing(false);
+      return;
+    }
+    if (!response.ok) {
       setError(t('loadDetail.statusUpdateError'));
       setAdvancing(false);
       return;
     }
-
-    await supabase.from('load_events').insert({
-      load_id: load.id,
-      event_type: `status_${step.next}`,
-      created_by: session.user.id,
-    });
 
     setLoad({ ...load, status: step.next });
     await fetchAll();
@@ -341,7 +348,7 @@ export default function LoadDetailScreen() {
             />
           </ThemedView>
 
-          {(role === 'owner' || role === 'solo' || role === 'dispatcher') && (
+          {roleHasCapability(role, 'loads_manage') && (
             <ThemedView type="backgroundElement" style={styles.section}>
               <SectionLabel text={t('loadDetail.sectionAssignment')} />
               <ThemedText type="small" themeColor="textSecondary" style={{ marginBottom: 4 }}>
@@ -448,13 +455,13 @@ export default function LoadDetailScreen() {
           )}
 
           {(role === 'driver' || role === 'solo') && ACTIVE_LOAD_STATUSES.includes(load.status) && orgId && (
-            <ReportProblemSection loadId={load.id} carrierOrgId={orgId} />
+            <ReportProblemSection loadId={load.id} />
           )}
 
           {(role === 'driver' || role === 'solo') && <PodSection loadId={load.id} />}
 
           {(role === 'driver' || role === 'solo') && orgId && (
-            <FuelStopsSection loadId={load.id} vehicleId={load.vehicle_id} carrierOrgId={orgId} />
+            <FuelStopsSection loadId={load.id} />
           )}
 
           {(role === 'driver' || role === 'solo') && orgId && (

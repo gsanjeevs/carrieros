@@ -1,16 +1,14 @@
-# Deploy pipeline: main -> staging (automatic) -> production (manual approval).
-#
-# Order matters and is the point of doing this in one workflow rather than a
-# host's git integration: the DATABASE is migrated first, then the app that
-# needs the new schema is deployed. Migrations are expand/contract-safe by
-# policy (architecture/database-migrations.md), so the previous app version keeps
-# working against the new schema during the window between the two steps.
+# Migration-only pipeline for staging. Runs automatically after CI passes on
+# main. Does NOT deploy carrieros-web -- the app runs on AWS ECS Express Mode
+# (see architecture/deployment.md), and deploying it from here would need
+# GitHub OIDC trust roles the account owner deliberately chose not to
+# hand-wire; the app is built/pushed/deployed manually for now (exact
+# commands in architecture/deployment.md). A CodeBuild + GitHub-connection
+# auto-deploy path is planned but not built -- see the same doc.
 #
 # One-time setup (GitHub -> Settings -> Environments) is in architecture/deployment.md.
-# Each environment needs these secrets:
-#   DATABASE_URL       direct Postgres connection string of that environment's Supabase project
-#   VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
-# Add required reviewers to the `production` environment: that is the approval gate.
+# The `staging` environment needs one secret: DATABASE_URL (direct Postgres
+# connection string for the staging Supabase project).
 name: Deploy
 
 on:
@@ -28,15 +26,13 @@ permissions:
   contents: read
 
 jobs:
-  staging:
-    name: Staging
+  migrate-staging:
+    name: Migrate staging database
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     environment: staging
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -48,54 +44,3 @@ jobs:
         run: node scripts/db/migrate.mjs --status
       - name: Apply migrations
         run: node scripts/db/migrate.mjs
-      - name: Deploy web (preview target = staging)
-        working-directory: carrieros-web
-        run: |
-          npx --yes vercel@latest pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-          npx --yes vercel@latest build --token=${{ secrets.VERCEL_TOKEN }}
-          npx --yes vercel@latest deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} | tee /tmp/url.txt
-      - name: Smoke test
-        run: |
-          url=$(tail -n1 /tmp/url.txt)
-          for i in $(seq 1 15); do
-            code=$(curl -s -o /dev/null -w '%{http_code}' "$url/login" || true)
-            [ "$code" = "200" ] && echo "smoke OK: $url" && exit 0
-            sleep 4
-          done
-          echo "smoke test failed for $url (last status $code)"; exit 1
-
-  production:
-    name: Production
-    needs: staging
-    runs-on: ubuntu-latest
-    environment: production   # configure required reviewers on this environment
-    env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Pending migrations
-        run: node scripts/db/migrate.mjs --status
-      - name: Apply migrations
-        run: node scripts/db/migrate.mjs
-      - name: Deploy web to production
-        working-directory: carrieros-web
-        run: |
-          npx --yes vercel@latest pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-          npx --yes vercel@latest build --prod --token=${{ secrets.VERCEL_TOKEN }}
-          npx --yes vercel@latest deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} | tee /tmp/url.txt
-      - name: Smoke test
-        run: |
-          url=$(tail -n1 /tmp/url.txt)
-          for i in $(seq 1 15); do
-            code=$(curl -s -o /dev/null -w '%{http_code}' "$url/login" || true)
-            [ "$code" = "200" ] && echo "smoke OK: $url" && exit 0
-            sleep 4
-          done
-          echo "smoke test failed for $url (last status $code)"; exit 1

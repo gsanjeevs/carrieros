@@ -24,3 +24,230 @@ export function createChangeFeedService(): ChangeFeedService {
     clock: { now: () => new Date() },
   })
 }
+
+import { ShipmentMilestoneService } from './application/shipment-milestone-service'
+import { SupabaseShipmentCommandRepository } from './infrastructure/supabase/shipment-command-repository'
+
+export function createShipmentMilestoneService(supabase: SupabaseClient<Database>): ShipmentMilestoneService {
+  return new ShipmentMilestoneService({
+    shipments: new SupabaseShipmentCommandRepository(supabase),
+    clock: { now: () => new Date() },
+  })
+}
+
+import { ProfilePreferencesService } from './application/profile-preferences-service'
+import { SupabaseProfileWriteRepository } from './infrastructure/supabase/profile-write-repository'
+
+export function createProfilePreferencesService(supabase: SupabaseClient<Database>): ProfilePreferencesService {
+  return new ProfilePreferencesService({ profiles: new SupabaseProfileWriteRepository(supabase) })
+}
+
+import { DriverActionService } from './application/driver-action-service'
+import { SupabaseDriverActionRepository } from './infrastructure/supabase/driver-action-repository'
+import { SupabaseIdempotencyRepository } from './infrastructure/supabase/idempotency-repository'
+
+export function createDriverActionService(supabase: SupabaseClient<Database>): DriverActionService {
+  return new DriverActionService({
+    shipments: new SupabaseShipmentCommandRepository(supabase),
+    actions: new SupabaseDriverActionRepository(supabase),
+    // Idempotency runs as service_role, scoped by the verified actor in every statement.
+    idempotency: new SupabaseIdempotencyRepository(createAdminClient()),
+    clock: { now: () => new Date() },
+  })
+}
+
+import { DocumentService } from './application/document-service'
+import { SupabaseDocumentRepository } from './infrastructure/supabase/document-repository'
+import { SupabaseObjectStorage } from './infrastructure/supabase/object-storage'
+import { createStorageProvider } from '@/lib/storage'
+
+export function createDocumentService(supabase: SupabaseClient<Database>): DocumentService {
+  return new DocumentService({
+    shipments: new SupabaseShipmentCommandRepository(supabase),
+    documents: new SupabaseDocumentRepository(supabase),
+    storage: new SupabaseObjectStorage(createStorageProvider(supabase)),
+    ids: { uuid: () => crypto.randomUUID() },
+    idempotency: new SupabaseIdempotencyRepository(createAdminClient()),
+  })
+}
+
+import { InvoiceService } from './application/invoice-service'
+import { SupabaseInvoiceWriteRepository } from './infrastructure/supabase/invoice-write-repository'
+
+export function createInvoiceService(supabase: SupabaseClient<Database>): InvoiceService {
+  return new InvoiceService({ invoices: new SupabaseInvoiceWriteRepository(supabase), clock: { now: () => new Date() } })
+}
+
+import { FieldActionsService } from './application/field-actions-service'
+import {
+  SupabaseDriverSelfRepository,
+  SupabaseFleetRepository,
+  SupabaseLoadLocationRepository,
+  SupabaseMessageRepository,
+} from './infrastructure/supabase/field-actions-repository'
+
+export function createFieldActionsService(supabase: SupabaseClient<Database>): FieldActionsService {
+  return new FieldActionsService({
+    shipments: new SupabaseShipmentCommandRepository(supabase),
+    messages: new SupabaseMessageRepository(supabase),
+    locations: new SupabaseLoadLocationRepository(supabase),
+    driverSelf: new SupabaseDriverSelfRepository(supabase),
+    fleet: new SupabaseFleetRepository(supabase),
+    idempotency: new SupabaseIdempotencyRepository(createAdminClient()),
+    clock: { now: () => new Date() },
+  })
+}
+
+import { IftaService } from './application/ifta-service'
+import { SupabaseFeatureGate, SupabaseIftaRepository } from './infrastructure/supabase/ifta-repository'
+
+export function createIftaService(supabase: SupabaseClient<Database>): IftaService {
+  return new IftaService({
+    shipments: new SupabaseShipmentCommandRepository(supabase),
+    ifta: new SupabaseIftaRepository(supabase),
+    features: new SupabaseFeatureGate(supabase),
+    idempotency: new SupabaseIdempotencyRepository(createAdminClient()),
+    clock: { now: () => new Date() },
+  })
+}
+
+export function createFeatureGate(supabase: SupabaseClient<Database>): SupabaseFeatureGate {
+  return new SupabaseFeatureGate(supabase)
+}
+
+import { DvirService } from './application/dvir-service'
+import { SupabaseDvirRepository } from './infrastructure/supabase/dvir-repository'
+
+export function createDvirService(supabase: SupabaseClient<Database>): DvirService {
+  return new DvirService({
+    shipments: new SupabaseShipmentCommandRepository(supabase),
+    dvir: new SupabaseDvirRepository(supabase),
+    storage: new SupabaseObjectStorage(createStorageProvider(supabase)),
+    ids: { uuid: () => crypto.randomUUID() },
+    idempotency: new SupabaseIdempotencyRepository(createAdminClient()),
+  })
+}
+
+import { DvirQueryService } from './application/dvir-query-service'
+import { SupabaseDvirQueryRepository } from './infrastructure/supabase/dvir-query-repository'
+
+export function createDvirQueryService(supabase: SupabaseClient<Database>): DvirQueryService {
+  return new DvirQueryService({
+    dvir: new SupabaseDvirQueryRepository(supabase),
+    shipments: new SupabaseShipmentCommandRepository(supabase),
+  })
+}
+
+import { FleetQueryService } from './application/fleet-query-service'
+import { SupabaseFleetQueryRepository } from './infrastructure/supabase/fleet-query-repository'
+
+export function createFleetQueryService(supabase: SupabaseClient<Database>): FleetQueryService {
+  const fleet = new SupabaseFleetQueryRepository(supabase)
+  return new FleetQueryService({ fleet, signPhoto: (path) => fleet.photoUrl(path) })
+}
+
+import { InvoiceQueryService } from './application/invoice-query-service'
+import { SupabaseInvoiceQueryRepository } from './infrastructure/supabase/invoice-query-repository'
+
+export function createInvoiceQueryService(supabase: SupabaseClient<Database>): InvoiceQueryService {
+  return new InvoiceQueryService({ invoices: new SupabaseInvoiceQueryRepository(supabase) })
+}
+
+import { ExceptionQueryService } from './application/exception-query-service'
+import { SupabaseExceptionQueryRepository } from './infrastructure/supabase/exception-query-repository'
+
+export function createExceptionQueryService(supabase: SupabaseClient<Database>): ExceptionQueryService {
+  return new ExceptionQueryService({ exceptions: new SupabaseExceptionQueryRepository(supabase) })
+}
+
+import { CustomerQueryService } from './application/customer-query-service'
+import { SupabaseCustomerQueryRepository } from './infrastructure/supabase/customer-query-repository'
+
+export function createCustomerQueryService(supabase: SupabaseClient<Database>): CustomerQueryService {
+  return new CustomerQueryService({ customers: new SupabaseCustomerQueryRepository(supabase) })
+}
+
+import { BillingQueryService } from './application/billing-query-service'
+import { SupabaseBillingQueryRepository } from './infrastructure/supabase/billing-query-repository'
+
+export function createBillingQueryService(supabase: SupabaseClient<Database>): BillingQueryService {
+  return new BillingQueryService({ billing: new SupabaseBillingQueryRepository(supabase) })
+}
+
+import { SettlementQueryService } from './application/settlement-query-service'
+import { SupabaseSettlementQueryRepository } from './infrastructure/supabase/settlement-query-repository'
+
+export function createSettlementQueryService(supabase: SupabaseClient<Database>): SettlementQueryService {
+  return new SettlementQueryService({
+    settlements: new SupabaseSettlementQueryRepository(supabase),
+    shipments: new SupabaseShipmentCommandRepository(supabase),
+    features: new SupabaseFeatureGate(supabase),
+  })
+}
+
+import { DashboardQueryService } from './application/dashboard-query-service'
+import { SupabaseDashboardQueryRepository } from './infrastructure/supabase/dashboard-query-repository'
+
+export function createDashboardQueryService(supabase: SupabaseClient<Database>): DashboardQueryService {
+  return new DashboardQueryService({ dashboard: new SupabaseDashboardQueryRepository(supabase) })
+}
+
+// Public developer API (Phase 9). oauth_clients/oauth_client_rate_limits have zero authenticated/anon
+// grants (migration 0025) — there is no Supabase session for either the Settings-page management flow or
+// the external caller's token exchange to key RLS off, so both always run as service_role, same posture as
+// createChangeFeedService above.
+import { OAuthClientService } from './application/oauth-client-service'
+import { PublicApiTokenService } from './application/public-api-token-service'
+import {
+  SupabaseOAuthClientRepository,
+  SupabasePublicApiEntitlementGate,
+  SupabasePublicApiRateLimiter,
+} from './infrastructure/supabase/oauth-client-repository'
+import { NodeOAuthCredentialProvider } from './infrastructure/crypto/oauth-credentials'
+
+export function createOAuthClientService(): OAuthClientService {
+  const admin = createAdminClient()
+  return new OAuthClientService({
+    clients: new SupabaseOAuthClientRepository(admin),
+    credentials: new NodeOAuthCredentialProvider(),
+  })
+}
+
+export function createPublicApiTokenService(): PublicApiTokenService {
+  const admin = createAdminClient()
+  return new PublicApiTokenService({
+    clients: new SupabaseOAuthClientRepository(admin),
+    credentials: new NodeOAuthCredentialProvider(),
+    entitlements: new SupabasePublicApiEntitlementGate(admin),
+    rateLimiter: new SupabasePublicApiRateLimiter(admin),
+  })
+}
+
+// Shared by every /api/public/v1/** data route (not just the token exchange) — a valid JWT still gets
+// rate-limited per request, keyed by the client_id embedded in it at issuance.
+export function createPublicApiRateLimiter(): SupabasePublicApiRateLimiter {
+  return new SupabasePublicApiRateLimiter(createAdminClient())
+}
+
+import { LoadExpenseService } from './application/load-expense-service'
+import { SupabaseLoadExpenseRepository } from './infrastructure/supabase/load-expense-repository'
+
+export function createLoadExpenseService(supabase: SupabaseClient<Database>): LoadExpenseService {
+  return new LoadExpenseService({
+    shipments: new SupabaseShipmentCommandRepository(supabase),
+    expenses: new SupabaseLoadExpenseRepository(supabase),
+    idempotency: new SupabaseIdempotencyRepository(createAdminClient()),
+  })
+}
+
+import { FinancialEventQueryService } from './application/financial-event-query-service'
+import { SupabaseFinancialEventQueryRepository } from './infrastructure/supabase/financial-event-query-repository'
+
+export function createFinancialEventQueryService(): FinancialEventQueryService {
+  // Reads outbox_events, which is deny-all to `authenticated` (0005) — same
+  // reasoning as createChangeFeedService: the service role is the only
+  // legitimate reader, scoped explicitly by the verified actor's org id.
+  return new FinancialEventQueryService({
+    events: new SupabaseFinancialEventQueryRepository(createAdminClient()),
+  })
+}

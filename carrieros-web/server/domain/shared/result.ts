@@ -47,6 +47,8 @@ export type DomainErrorCode =
   | 'NOT_FOUND'
   // Same Idempotency-Key replayed with a different request body
   | 'IDEMPOTENCY_KEY_REUSED'
+  // The same Idempotency-Key is still being processed by another request
+  | 'REQUEST_IN_PROGRESS'
   // A precondition about related data failed (e.g. load not delivered yet)
   | 'PRECONDITION_FAILED'
   // The actor may not perform this step on this record (segregation of duties)

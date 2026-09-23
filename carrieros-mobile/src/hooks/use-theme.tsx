@@ -34,7 +34,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { Colors } from '@/constants/theme';
 import { useSession } from '@/hooks/use-session';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
+import { savePreferences } from '@/lib/profile-api';
 
 export type ThemePreference = 'light' | 'dark' | 'system';
 export type ResolvedTheme = 'light' | 'dark';
@@ -85,20 +86,15 @@ export function AppThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!userId) return;
     let cancelled = false;
-    supabase
-      .from('profiles')
-      .select('theme_preference')
-      .eq('id', userId)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (cancelled) return;
-        const stored = data?.theme_preference;
-        if (isThemePreference(stored)) {
-          setPreferenceState(stored);
-          // Re-seed the fast path so the NEXT cold start already knows.
-          AsyncStorage.setItem(STORAGE_KEY, stored).catch(() => {});
-        }
-      });
+    apiClient.http.GET('/api/v1/me/preferences').then(({ data }) => {
+      if (cancelled) return;
+      const stored = data?.theme_preference;
+      if (isThemePreference(stored)) {
+        setPreferenceState(stored);
+        // Re-seed the fast path so the NEXT cold start already knows.
+        AsyncStorage.setItem(STORAGE_KEY, stored).catch(() => {});
+      }
+    });
     return () => {
       cancelled = true;
     };
@@ -111,7 +107,7 @@ export function AppThemeProvider({ children }: { children: ReactNode }) {
       setPreferenceState(next);
       await AsyncStorage.setItem(STORAGE_KEY, next).catch(() => {});
       if (userId) {
-        await supabase.from('profiles').update({ theme_preference: next }).eq('id', userId);
+        await savePreferences({ theme_preference: next });
       }
     },
     [userId]

@@ -19,7 +19,8 @@ import { useLocale } from '@/hooks/use-locale';
 import { useSession } from '@/hooks/use-session';
 import { hasFeature } from '@/lib/entitlements';
 import { startIftaTracking, stopIftaTracking, type StartResult } from '@/lib/ifta-tracking';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase'; // entitlements.ts still takes it as a parameter; no direct table/RPC calls here
+import { apiClient } from '@/lib/api-client';
 
 const AMBER = '#d97706';
 const GREEN = '#16a34a';
@@ -57,12 +58,8 @@ export function IftaSection({
   const isActive = ['dispatched', 'picked_up', 'in_transit'].includes(loadStatus);
 
   const fetchCrossings = useCallback(async () => {
-    const { data } = await supabase
-      .from('ifta_state_crossings')
-      .select('id, state, odometer_est, source')
-      .eq('load_id', loadId)
-      .order('crossed_at', { ascending: true });
-    setCrossings(data ?? []);
+    const { data } = await apiClient.http.GET('/api/v1/loads/{id}/ifta-crossings', { params: { path: { id: loadId } } });
+    setCrossings((data?.crossings as Crossing[] | undefined) ?? []);
   }, [loadId]);
 
   useEffect(() => {
@@ -81,12 +78,7 @@ export function IftaSection({
     if (isActive && !startedRef.current) {
       startedRef.current = true;
       (async () => {
-        const { data: driver } = await supabase
-          .from('drivers')
-          .select('id')
-          .eq('carrier_org_id', carrierOrgId)
-          .eq('profile_id', session.user.id)
-          .maybeSingle();
+        const { data: driver } = await apiClient.http.GET('/api/v1/me/driver-profile');
         if (!driver) return;
         const result = await startIftaTracking({ loadId, vehicleId, driverId: driver.id, carrierOrgId });
         setTrackingResult(result);
@@ -104,8 +96,8 @@ export function IftaSection({
     if (!entitled || loadStatus !== 'delivered' || checkedCompletenessRef.current) return;
     checkedCompletenessRef.current = true;
     (async () => {
-      const { data: complete } = await supabase.rpc('check_ifta_completeness', { p_load_id: loadId });
-      if (complete === false) {
+      const { data } = await apiClient.http.GET('/api/v1/loads/{id}/ifta-completeness', { params: { path: { id: loadId } } });
+      if (data?.complete === false) {
         setFallbackNeeded(true);
         setFallbackRows(
           crossings.length > 0
@@ -128,25 +120,29 @@ export function IftaSection({
     setSavingFallback(true);
     const rows = fallbackRows
       .filter((r) => r.state.trim() && r.miles && !Number.isNaN(Number(r.miles)))
-      .map((r) => ({
-        carrier_org_id: carrierOrgId,
-        vehicle_id: vehicleId,
-        load_id: loadId,
-        state: r.state.trim().toUpperCase(),
-        odometer_est: Number(r.miles),
-        crossed_at: new Date().toISOString(),
-        source: 'manual' as const,
-      }));
+      .map((r) => ({ state: r.state.trim().toUpperCase(), miles: Math.round(Number(r.miles)) }));
 
     if (rows.length === 0) {
       setSavingFallback(false);
       return;
     }
 
-    // Manual entry overrides GPS entirely for this load -- no mixing
-    // sources, per mockup-20's dev notes.
-    await supabase.from('ifta_state_crossings').delete().eq('load_id', loadId).eq('source', 'gps');
-    await supabase.from('ifta_state_crossings').insert(rows);
+    // Manual entry overrides GPS entirely for this load -- no mixing sources, per mockup-20's dev
+    // notes. Delete-GPS-and-insert-manual is ONE atomic server call. (The old client-side delete was
+    // silently blocked by RLS for drivers, so the override never actually happened for them.)
+    try {
+      const { response } = await apiClient.http.PUT('/api/v1/loads/{id}/ifta-crossings/manual', {
+        params: { path: { id: loadId } },
+        body: { rows },
+      });
+      if (!response.ok) {
+        setSavingFallback(false);
+        return; // refused (plan, validation): keep the rows on screen rather than pretending it saved
+      }
+    } catch {
+      setSavingFallback(false);
+      return; // offline: rows stay on screen for another try
+    }
 
     setSavingFallback(false);
     setFallbackNeeded(false);

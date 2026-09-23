@@ -3,7 +3,10 @@ import createNextIntlPlugin from "next-intl/plugin";
 import { withSentryConfig } from "@sentry/nextjs/config";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Self-contained build for container deployment (ECS Express Mode) —
+  // bundles only the production node_modules a request actually needs into
+  // .next/standalone instead of shipping the full node_modules tree.
+  output: "standalone",
 };
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");

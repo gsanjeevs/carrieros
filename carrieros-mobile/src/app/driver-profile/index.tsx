@@ -27,25 +27,12 @@ import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 const ORANGE = BrandColors.orange;
 const CDL_CLASSES = ['A', 'B', 'C'] as const;
 const ENDORSEMENT_CODES = ['hazmat', 'tanker', 'doubles', 'airbrakes', 'passenger'] as const;
 
 type Vehicle = { id: number; vehicle_number: string | null; nickname: string };
-
-type DriverRow = {
-  cdl_number: string | null;
-  cdl_class: 'A' | 'B' | 'C' | null;
-  cdl_state: string | null;
-  cdl_expiry: string | null;
-  med_cert_expiry: string | null;
-  endorsements: string[] | null;
-  emergency_contact_name: string | null;
-  emergency_contact_phone: string | null;
-  emergency_contact_relation: string | null;
-  default_vehicle_id: number | null;
-};
 
 export default function DriverProfileScreen() {
   const theme = useTheme();
@@ -74,33 +61,22 @@ export default function DriverProfileScreen() {
 
   const load = useCallback(async () => {
     if (!session?.user.id) return;
-    const { data: driver } = await supabase
-      .from('drivers')
-      .select(
-        'cdl_number, cdl_class, cdl_state, cdl_expiry, med_cert_expiry, endorsements, emergency_contact_name, emergency_contact_phone, emergency_contact_relation, default_vehicle_id'
-      )
-      .eq('profile_id', session.user.id)
-      .single();
+    const { data: driver } = await apiClient.http.GET('/api/v1/me/driver-profile');
 
-    if (driver as DriverRow | null) {
-      const d = driver as DriverRow;
-      setCdlNumber(d.cdl_number ?? '');
-      setCdlClass(d.cdl_class);
-      setCdlState(d.cdl_state ?? '');
-      setEndorsements(d.endorsements ?? []);
-      setEmergencyName(d.emergency_contact_name ?? '');
-      setEmergencyPhone(d.emergency_contact_phone ?? '');
-      setEmergencyRelation(d.emergency_contact_relation ?? '');
-      setDefaultVehicleId(d.default_vehicle_id);
-      setReadOnly({ cdlExpiry: d.cdl_expiry, medCertExpiry: d.med_cert_expiry });
+    if (driver) {
+      setCdlNumber(driver.cdl_number ?? '');
+      setCdlClass(driver.cdl_class);
+      setCdlState(driver.cdl_state ?? '');
+      setEndorsements(driver.endorsements ?? []);
+      setEmergencyName(driver.emergency_contact_name ?? '');
+      setEmergencyPhone(driver.emergency_contact_phone ?? '');
+      setEmergencyRelation(driver.emergency_contact_relation ?? '');
+      setDefaultVehicleId(driver.default_vehicle_id);
+      setReadOnly({ cdlExpiry: driver.cdl_expiry, medCertExpiry: driver.med_cert_expiry });
     }
 
-    const { data: vehicleRows } = await supabase
-      .from('vehicles')
-      .select('id, vehicle_number, nickname')
-      .eq('is_active', true)
-      .order('vehicle_number', { ascending: true });
-    setVehicles(vehicleRows ?? []);
+    const { data: vehiclesData } = await apiClient.http.GET('/api/v1/vehicles');
+    setVehicles(vehiclesData?.vehicles.map((v) => ({ id: v.id, vehicle_number: v.vehicle_number, nickname: v.nickname })) ?? []);
   }, [session?.user.id]);
 
   useEffect(() => {
@@ -120,20 +96,26 @@ export default function DriverProfileScreen() {
     // Deliberately omits cdl_expiry/med_cert_expiry/is_active/driver_number —
     // driver_self_update_allowed() requires those stay unchanged, which an
     // UPDATE naturally satisfies as long as this payload never sets them.
-    const { error: updateErr } = await supabase
-      .from('drivers')
-      .update({
-        cdl_number: cdlNumber.trim() || null,
-        cdl_class: cdlClass,
-        cdl_state: cdlState.trim() || null,
-        endorsements,
-        emergency_contact_name: emergencyName.trim() || null,
-        emergency_contact_phone: emergencyPhone.trim() || null,
-        emergency_contact_relation: emergencyRelation.trim() || null,
-        default_vehicle_id: defaultVehicleId,
-        invite_status: 'accepted',
-      })
-      .eq('profile_id', session.user.id);
+    // The server updates only the caller's own record and only these fields; protected ones
+    // (CDL/medical expiry, active flag, driver number) are not accepted at all.
+    let updateErr: boolean;
+    try {
+      const { response } = await apiClient.http.PATCH('/api/v1/me/driver-profile', {
+        body: {
+          cdl_number: cdlNumber.trim() || null,
+          cdl_class: cdlClass,
+          cdl_state: cdlState.trim() || null,
+          endorsements: endorsements as ('hazmat' | 'tanker' | 'doubles' | 'airbrakes' | 'passenger')[],
+          emergency_contact_name: emergencyName.trim() || null,
+          emergency_contact_phone: emergencyPhone.trim() || null,
+          emergency_contact_relation: emergencyRelation.trim() || null,
+          default_vehicle_id: defaultVehicleId,
+        },
+      });
+      updateErr = !response.ok;
+    } catch {
+      updateErr = true;
+    }
 
     setSaving(false);
     if (updateErr) {

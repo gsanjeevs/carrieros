@@ -131,7 +131,11 @@ export async function cleanupTestUser(admin: SupabaseClient<Database>, userId: s
 // cleared first, in this order: org/driver/load-scoped rows that block
 // `drivers`/`loads` themselves, then `drivers`/`loads`, then any remaining
 // profiles(id) references, then `profiles`, then `organizations`.
-const ORG_SCOPED_BLOCKERS = ['dvir_inspections', 'ifta_state_crossings', 'driver_settlements', 'fuel_stops'] as const
+// support_tickets (migration 0027) added here too: its submitted_by/carrier_org_id FKs are both "no
+// action" from profiles/organizations. Deleting it by carrier_org_id here, before the profile-cleanup
+// step below, also CASCADEs support_ticket_messages (ticket_id ON DELETE CASCADE) — no separate entry
+// needed for that table.
+const ORG_SCOPED_BLOCKERS = ['dvir_inspections', 'ifta_state_crossings', 'driver_settlements', 'fuel_stops', 'maintenance_reminders', 'support_tickets'] as const
 
 // Every profiles(id) FK below is "no action" — none cascade. A live row in
 // any of them blocks deleting the profile, which in turn blocks deleting
@@ -211,12 +215,19 @@ export async function cleanupTestOrg(admin: SupabaseClient<Database>, orgId: num
 const BASE_URL = process.env.TEST_APP_URL ?? 'http://localhost:3000'
 
 export async function apiFetch(path: string, accessToken: string, init: RequestInit = {}) {
+  // A FormData body (app/api/settings/branding/route.ts's multipart upload)
+  // must NOT get a hardcoded 'application/json' Content-Type — fetch sets
+  // its own `multipart/form-data; boundary=...` header from the FormData
+  // instance, and overriding it here would break the route's
+  // request.formData() parsing. Every existing JSON-body test is unaffected
+  // (init.body is never a FormData instance for those).
+  const isFormData = typeof FormData !== 'undefined' && init.body instanceof FormData
   return fetch(`${BASE_URL}${path}`, {
     ...init,
     headers: {
       ...(init.headers ?? {}),
       Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     },
   })
 }

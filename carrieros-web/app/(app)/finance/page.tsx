@@ -21,8 +21,7 @@ import { invoiceStatusVariant, type InvoiceStatus } from '@/lib/domain/invoice-s
 import { Card, CardHeader, CardBody, KpiTile, StatusBadge, Table, TableHeaderCell, TableRow, TableCell, EmptyState, ProgressBar } from '@/components/ui'
 import { BRAND_ORANGE, DANGER, SUCCESS, WARNING } from '@/lib/design-tokens'
 import { getProfileForUser } from '@/lib/queries/profiles'
-
-const STAFF_ROLES = ['owner', 'solo', 'finance']
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
@@ -49,7 +48,7 @@ export default async function FinancePage() {
   const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) redirect('/onboarding')
-  if (!STAFF_ROLES.includes(profile.role)) redirect('/dashboard')
+  if (!roleHasCapability(profile.role, 'finance')) redirect('/dashboard')
 
   const t = await getTranslations('finance')
   const tInvoices = await getTranslations('invoices')

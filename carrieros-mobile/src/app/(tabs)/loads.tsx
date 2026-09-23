@@ -12,6 +12,7 @@ import { useLocale } from '@/hooks/use-locale';
 import { apiClient } from '@/lib/api-client';
 import { supabase } from '@/lib/supabase'; // auth only (sign-out); data goes through apiClient
 import { useLiveRefresh } from '@/lib/generated/live-refresh';
+import { roleHasCapability } from '@/lib/generated/role-capabilities';
 
 type Role = 'owner' | 'solo' | 'driver' | 'dispatcher' | 'finance';
 
@@ -106,7 +107,10 @@ export default function MyLoadsScreen() {
           <ThemedText type="title" style={styles.heading}>
             {role === 'driver' ? t('loads.titleDriver') : t('loads.titleOffice')}
           </ThemedText>
-          {(role === 'owner' || role === 'solo' || role === 'dispatcher') && (
+          {/* Creating a load is the `loads_manage` capability (generated from
+              the role_capabilities table) — owner/solo/dispatcher today, and
+              whatever that table says tomorrow, without a second edit here. */}
+          {roleHasCapability(role, 'loads_manage') && (
             <ThemedView style={styles.newLoadButtonGroup} type="transparent">
               <Pressable onPress={() => router.push('/load/new-from-photo')} style={styles.scanButton}>
                 <ThemedText type="smallBold" themeColor="text">{t('loadNew.scanAction')}</ThemedText>

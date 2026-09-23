@@ -7,6 +7,7 @@ import { getProfileForUser } from '@/lib/queries/profiles'
 import { getLoadById } from '@/lib/queries/loads'
 import { sendPushNotification } from '@/lib/send-push'
 import { logError } from '@/lib/observability'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 const VALID_STATUSES = ['draft','scheduled','dispatched','picked_up','in_transit','delivered','invoiced','paid','cancelled','declined']
 
@@ -24,7 +25,7 @@ export async function PATCH(
   if (!profile?.org_id)
     return apiError('NOT_ONBOARDED', 'No organization', 400)
 
-  if (!['owner', 'solo', 'dispatcher'].includes(profile.role))
+  if (!roleHasCapability(profile.role, 'loads_manage'))
     return apiError('FORBIDDEN', 'Insufficient permissions', 403)
 
   const body = await request.json()
@@ -50,13 +51,18 @@ export async function PATCH(
   if (Object.keys(update).length === 0)
     return apiError('VALIDATION_ERROR', 'Nothing to update', 400)
 
-  const { error } = await supabase
+  const { data: changed, error } = await supabase
     .from('loads')
     .update(update)
     .eq('id', Number(id))
     .eq('carrier_org_id', profile.org_id)
+    .select('id')
 
+  // 23514: the tenancy trigger (migration 0019) refused an id that isn't this carrier's.
+  if (error?.code === '23514') return apiError('VALIDATION_ERROR', 'That driver or vehicle is not part of your fleet', 400)
   if (error) return apiError('SERVER_ERROR', error.message, 500)
+  // Zero rows: missing or another tenant's. Say so instead of a silent success.
+  if (!changed || changed.length === 0) return apiError('NOT_FOUND', 'Load not found', 404)
 
   // Push notification on dispatch (PRD P0: "driver receives push
   // notification on assignment"). Fire-and-forget — a failed/missing push

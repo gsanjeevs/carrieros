@@ -18,6 +18,7 @@ import { getProfileForUser, insertProfile } from '@/lib/queries/profiles'
 import { createDriver } from '@/lib/queries/drivers'
 import { createAuthAdminProvider } from '@/lib/auth-admin'
 import { logError } from '@/lib/observability'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 export async function POST(request: NextRequest) {
   const ctx = await getAuthedContext(request)
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
   const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) return apiError('NOT_ONBOARDED', 'No organization found for this user', 400)
-  if (!['owner', 'solo'].includes(profile.role))
+  if (!roleHasCapability(profile.role, 'drivers_manage'))
     return apiError('FORBIDDEN', 'Only owner/solo can invite drivers', 403)
 
   const body = await request.json()

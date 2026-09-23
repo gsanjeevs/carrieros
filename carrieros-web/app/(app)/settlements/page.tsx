@@ -18,9 +18,10 @@ import RunSettlementButton from './RunSettlementButton'
 import SendAchButton from './SendAchButton'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { listActiveDriversForOrg } from '@/lib/queries/drivers'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
-const STAFF_ROLES = ['owner', 'solo', 'finance']
-const VIEW_ROLES = ['owner', 'solo', 'finance', 'driver']
+// Viewing includes the driver reading their own settlements, which matches
+// no capability's role set — staff actions go through `settlements_manage`.
 
 export default async function SettlementsPage() {
   const supabase = await createClient()
@@ -30,9 +31,9 @@ export default async function SettlementsPage() {
   const { data: profile } = await getProfileForUser(supabase, user.id)
 
   if (!profile?.org_id) redirect('/onboarding')
-  if (!VIEW_ROLES.includes(profile.role)) redirect('/dashboard')
+  if (!roleHasCapability(profile.role, 'settlements_view')) redirect('/dashboard')
 
-  const isStaff = STAFF_ROLES.includes(profile.role)
+  const isStaff = roleHasCapability(profile.role, 'settlements_manage')
   const t = await getTranslations('settlements')
   const locale = await getLocale()
 

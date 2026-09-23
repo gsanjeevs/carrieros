@@ -17,6 +17,7 @@ import { Card, CardHeader, CardBody, KpiTile, StatusBadge, type StatusBadgeVaria
 import { createStorageProvider } from '@/lib/storage'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { listLoadsForVehicle } from '@/lib/queries/loads'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 type MaintStatus = 'overdue' | 'dueSoon' | 'ok' | 'noDate'
 
@@ -121,7 +122,7 @@ export default async function VehicleDetailPage({
   const vt = Array.isArray(vehicle.vehicle_types) ? vehicle.vehicle_types[0] : vehicle.vehicle_types
   const TypeIcon = vt ? VEHICLE_TYPE_ICONS[vt.code] : undefined
 
-  const canManage = ['owner', 'solo'].includes(profile.role)
+  const canManage = roleHasCapability(profile.role, 'vehicles_manage')
 
   const storage = createStorageProvider(supabase)
 
@@ -129,7 +130,9 @@ export default async function VehicleDetailPage({
   if (vehicle.photo_path) {
     photoUrl = await storage.getSignedUrl(vehicle.photo_path, 60 * 60).catch(() => null)
   }
-  const showRate = ['owner', 'solo', 'finance'].includes(profile.role)
+  // Purchase/financial figures — money-visibility, which has no
+  // role_capabilities row of its own, so this stays explicit.
+  const showRate = roleHasCapability(profile.role, 'rate_visibility')
 
   // ─── Documents ───
   const { data: docRows } = await supabase
@@ -228,6 +231,8 @@ export default async function VehicleDetailPage({
       : null,
   }))
 
+  // Narrower than `fuel_log` on purpose: that capability also includes the
+  // driver (who logs stops from the truck), so converting would widen this.
   const canLogFuel = ['owner', 'solo', 'dispatcher'].includes(profile.role)
 
   // ─── DVIRs ───

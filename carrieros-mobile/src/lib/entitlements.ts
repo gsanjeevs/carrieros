@@ -1,21 +1,23 @@
 // src/lib/entitlements.ts
-// Mirrors carrieros-web/lib/entitlements.ts — same has_feature()/
-// get_my_entitlements() RPCs, same caller-session-client requirement (never
-// pass the admin/service-role client; my_org_id() needs auth.uid()). No
-// shared package exists between the two apps' TS setups (see
-// docs/architecture-principles.md Rule A), so this is a deliberate, small
-// duplication of a thin wrapper rather than a service-role dependency —
-// same "mirror with a cross-reference comment" precedent already used for
-// i18n (decisions.md T10).
+// ADR 0003: no direct .rpc() calls from UI code. Backed now by
+// GET /api/v1/me/entitlements, which the server answers from the same
+// get_my_entitlements() RPC this file used to call directly (see that
+// route's header comment) — same result, same "the caller's own tier"
+// scoping, just reached over the shared API instead of the Supabase SDK.
+//
+// The `supabase` parameter is kept (unused) so the existing call sites in
+// customers/[id].tsx, settlements/index.tsx, ifta-section.tsx and
+// ifta-summary.tsx — owned by other in-flight work — do not need to change.
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database';
+import { apiClient } from '@/lib/api-client';
 
-export async function hasFeature(supabase: SupabaseClient<Database>, featureKey: string): Promise<boolean> {
-  const { data } = await supabase.rpc('has_feature', { feature_key: featureKey });
-  return data === true;
+export async function hasFeature(_supabase: SupabaseClient<Database>, featureKey: string): Promise<boolean> {
+  const { data } = await apiClient.http.GET('/api/v1/me/entitlements');
+  return (data?.keys ?? []).includes(featureKey);
 }
 
-export async function getEntitlements(supabase: SupabaseClient<Database>): Promise<Set<string>> {
-  const { data } = await supabase.rpc('get_my_entitlements');
-  return new Set((data ?? []).map((row: { key: string }) => row.key));
+export async function getEntitlements(_supabase: SupabaseClient<Database>): Promise<Set<string>> {
+  const { data } = await apiClient.http.GET('/api/v1/me/entitlements');
+  return new Set(data?.keys ?? []);
 }

@@ -14,6 +14,7 @@ import { cdlGlowStatus } from '@/lib/domain/driver-compliance'
 import { Card, CardHeader, CardBody, KpiTile, StatusBadge, Table, TableHeaderCell, TableRow, TableCell, EmptyState } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { listLoadsForDriver } from '@/lib/queries/loads'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 function InfoRow({ label, value }: { label: string; value: string | number | null | undefined }) {
   return (
@@ -57,8 +58,10 @@ export default async function DriverDetailPage({
   if (!driverRow) notFound()
   const driver = driverRow
 
-  const canManage = ['owner', 'solo'].includes(profile.role)
-  const showRate = ['owner', 'solo', 'finance'].includes(profile.role)
+  const canManage = roleHasCapability(profile.role, 'drivers_manage')
+  // Pay-rate visibility is money-visibility, not a named capability — no
+  // role_capabilities row means "may see rates", so this stays explicit.
+  const showRate = roleHasCapability(profile.role, 'rate_visibility')
 
   const driverName = [driver.profiles?.first_name, driver.profiles?.last_name].filter(Boolean).join(' ') || driver.driver_number || '—'
   const initials = driverName

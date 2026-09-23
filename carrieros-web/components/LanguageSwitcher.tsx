@@ -17,7 +17,8 @@
 // script regardless of the current UI locale.
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/client' // reads the language list only; the write goes through the API
+import { apiClient } from '@/lib/api-client'
 
 interface Language {
   code: string
@@ -68,8 +69,13 @@ export default function LanguageSwitcher({
     document.cookie = `locale=${code};path=/;max-age=${60 * 60 * 24 * 365}`
 
     if (userId) {
-      const supabase = createClient()
-      await supabase.from('profiles').update({ preferred_language: code }).eq('id', userId)
+      // Same endpoint the mobile app uses (ADR 0003): writes only the caller's own profile, from the
+      // session. The cookie above already switched the UI; a failed sync is retried on the next change.
+      try {
+        await apiClient.http.PATCH('/api/v1/me/preferences', { body: { preferred_language: code as 'en' | 'es' | 'pa' | 'ur' } })
+      } catch {
+        /* offline: the cookie still applies */
+      }
     }
 
     window.location.reload()

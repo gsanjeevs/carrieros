@@ -7,7 +7,7 @@
 // server secret needed, so no Next.js route) via the
 // driver_exception_events_insert policy, which locks a driver to only their
 // own assigned load and this exact event_type — see supabase/schema/schema.sql.
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -16,7 +16,8 @@ import { Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useSession } from '@/hooks/use-session';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
+import { keyForSubmission } from '@/lib/idempotency';
 
 const RED = StatusColors.danger;
 
@@ -27,7 +28,7 @@ const RED = StatusColors.danger;
 const REASON_CODES = ['breakdown', 'traffic', 'weather', 'accident', 'customer_issue', 'other'] as const;
 type ReasonCode = (typeof REASON_CODES)[number];
 
-export function ReportProblemSection({ loadId, carrierOrgId }: { loadId: number; carrierOrgId: number }) {
+export function ReportProblemSection({ loadId }: { loadId: number }) {
   const theme = useTheme();
   const { t } = useLocale();
   const { session } = useSession();
@@ -38,21 +39,27 @@ export function ReportProblemSection({ loadId, carrierOrgId }: { loadId: number;
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const submissionKey = useRef<{ key: string; body: string } | null>(null);
 
   async function submit() {
     if (!reason || !session?.user.id) return;
     setSubmitting(true);
     setError('');
 
-    const { error: insertErr } = await supabase.from('exception_events').insert({
-      carrier_org_id: carrierOrgId,
-      entity_type: 'load',
-      entity_id: loadId,
-      event_type: 'driver_reported_problem',
-      severity: 'urgent',
-      title: `reason:${reason}`,
-      detail: note.trim() || null,
-    });
+    // Org, reporter and severity are decided server-side; the reason is a code the
+    // Exceptions inbox renders in the reader's own language.
+    const body = { reason, note: note.trim() || null };
+    let ok = false;
+    try {
+      const { response } = await apiClient.http.POST('/api/v1/loads/{id}/problem-reports', {
+        params: { path: { id: loadId }, header: { 'Idempotency-Key': keyForSubmission(submissionKey, body) } },
+        body,
+      });
+      ok = response.ok;
+    } catch {
+      ok = false;
+    }
+    const insertErr = ok ? null : true;
 
     if (insertErr) {
       setError(t('loadDetail.reportProblemError'));
@@ -60,6 +67,7 @@ export function ReportProblemSection({ loadId, carrierOrgId }: { loadId: number;
       return;
     }
 
+    submissionKey.current = null;
     setSubmitting(false);
     setSubmitted(true);
   }

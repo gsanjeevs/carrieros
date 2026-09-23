@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const ctx = await requireAdminRole(request, ['sx_owner'])
+  const ctx = await requireAdminRole(request, 'admin_flags')
   if (isErrorResponse(ctx)) return ctx
   const { admin } = ctx
 

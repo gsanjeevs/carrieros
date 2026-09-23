@@ -29,10 +29,11 @@
 // already talks to its local Supabase (see CLAUDE.md). Override with
 // PG_CONTAINER, or set DATABASE_URL to use a direct psql connection instead.
 
-import { readFileSync, readdirSync } from 'node:fs'
+import { readFileSync, readdirSync, writeFileSync, unlinkSync, mkdtempSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import path from 'node:path'
+import os from 'node:os'
 import { fileURLToPath } from 'node:url'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
@@ -54,17 +55,45 @@ function psql(sql, { file = null } = {}) {
   // -v ON_ERROR_STOP=1 is what turns "psql printed some errors but exited 0"
   // into a real failure. Without it a broken migration reports success.
   const psqlArgs = ['-v', 'ON_ERROR_STOP=1', '--no-psqlrc', '-q']
-  if (file) psqlArgs.push('-f', '/dev/stdin')
-  else psqlArgs.push('-t', '-A', '-c', sql)
 
   try {
     if (DIRECT_URL) {
-      return execFileSync('psql', [DIRECT_URL, ...psqlArgs], {
-        input: file ?? undefined,
-        encoding: 'utf8',
-        maxBuffer: 64 * 1024 * 1024,
-      })
+      // A real host-filesystem temp file, not `-f /dev/stdin`: piping the SQL
+      // as execFileSync's `input` and having psql open `/dev/stdin` as a path
+      // works fine on macOS, but fails on GitHub Actions' Linux runners with
+      // `psql: error: /dev/stdin: No such device or address` -- re-opening an
+      // anonymous pipe via its /proc/self/fd path is a genuine Linux-specific
+      // restriction, not something wrong with the SQL or the connection.
+      // Confirmed live 2026-09-21: this exact migration applied fine locally
+      // (macOS), then failed only on the GitHub runner with this error. Only
+      // affects this DIRECT_URL branch -- psql runs as a direct child process
+      // here, sharing the host filesystem, so a real path just works.
+      let tmpFile = null
+      try {
+        if (file) {
+          const tmpDir = mkdtempSync(path.join(os.tmpdir(), 'carrieros-migrate-'))
+          tmpFile = path.join(tmpDir, 'migration.sql')
+          writeFileSync(tmpFile, file, 'utf8')
+          psqlArgs.push('-f', tmpFile)
+        } else {
+          psqlArgs.push('-t', '-A', '-c', sql)
+        }
+        return execFileSync('psql', [DIRECT_URL, ...psqlArgs], {
+          encoding: 'utf8',
+          maxBuffer: 64 * 1024 * 1024,
+        })
+      } finally {
+        if (tmpFile) unlinkSync(tmpFile)
+      }
     }
+
+    // Docker path (local dev): the temp-file trick above doesn't apply --
+    // `docker exec` runs psql *inside* the container, which can't see a file
+    // written to the host's tmpdir, so this keeps using `-f /dev/stdin` with
+    // the SQL piped in via `-i`. Never observed to hit the Linux
+    // /proc/self/fd restriction above in any local run.
+    if (file) psqlArgs.push('-f', '/dev/stdin')
+    else psqlArgs.push('-t', '-A', '-c', sql)
     return execFileSync(
       'docker',
       ['exec', '-i', CONTAINER, 'psql', '-U', 'postgres', '-d', DATABASE, ...psqlArgs],
@@ -73,6 +102,38 @@ function psql(sql, { file = null } = {}) {
   } catch (err) {
     const detail = [err.stdout, err.stderr].filter(Boolean).join('\n').trim()
     throw new Error(detail || err.message)
+  }
+}
+
+// Rule E (docs/architecture-principles.md) — a schema change needs an
+// impact-analysis step, not just a passing typecheck. Every migration in this
+// repo already carries a header comment explaining what changed and why (the
+// shortest today, 0003, is 5 lines) — this requires the SAME already-common
+// practice going forward instead of leaving it to habit. Not a new format:
+// no migration in the repo needs editing to satisfy this.
+const MIN_HEADER_LINES = 3
+
+function validateMigrationHeader(file, body) {
+  const lines = body.split('\n')
+  const expectedFirstLine = `-- ${file}`
+  if (lines[0] !== expectedFirstLine) {
+    throw new Error(
+      `${file} must start with the header comment "${expectedFirstLine}" (Rule E, docs/architecture-principles.md). ` +
+        `Every migration names itself on its first line — see any existing file under supabase/migrations/.`
+    )
+  }
+  let headerLines = 0
+  for (const line of lines) {
+    if (line.startsWith('--')) headerLines++
+    else break
+  }
+  if (headerLines < MIN_HEADER_LINES) {
+    throw new Error(
+      `${file}'s header comment is only ${headerLines} line(s) before the first SQL statement. Rule E ` +
+        `(docs/architecture-principles.md) requires a short header describing the change's impact — what changed ` +
+        `and why — the same way every existing migration does (shortest today: ` +
+        `0003_revoke_anon_truncate_and_definer_execute.sql, 5 lines). Add a couple of lines of context above the SQL.`
+    )
   }
 }
 
@@ -88,6 +149,7 @@ function discoverMigrations() {
       )
     }
     const body = readFileSync(path.join(MIGRATIONS_DIR, file), 'utf8')
+    validateMigrationHeader(file, body)
     return {
       file,
       ordinal: Number(m[1]),

@@ -25,7 +25,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 
 export const IFTA_TASK_NAME = 'ifta-location-tracking';
 const CONTEXT_KEY = 'ifta_tracking_context';
@@ -66,18 +66,19 @@ async function recordCrossingIfStateChanged(lat: number, lng: number, timestampM
   const stateCode = address?.region ? (US_STATE_NAME_TO_CODE[address.region] ?? address.region) : null;
   if (!stateCode || stateCode === ctx.lastState) return;
 
-  const { error } = await supabase.from('ifta_state_crossings').insert({
-    carrier_org_id: ctx.carrierOrgId,
-    vehicle_id: ctx.vehicleId,
-    driver_id: ctx.driverId,
-    load_id: ctx.loadId,
-    state: stateCode,
-    crossed_at: new Date(timestampMs).toISOString(),
-    lat,
-    lng,
-    source: 'gps',
-  });
-  if (error) return; // best-effort; next fix will retry the comparison
+  // Through the shared API: it derives org/driver/vehicle, checks the ifta_mileage_log entitlement
+  // and that this driver owns the load. The idempotency key is DETERMINISTIC (load + state + fix
+  // time), so a retry after a dropped connection can never record the same crossing twice.
+  // This runs as a headless background task: any failure just means the next fix retries the comparison.
+  try {
+    const { response } = await apiClient.http.POST('/api/v1/loads/{id}/ifta-crossings', {
+      params: { path: { id: ctx.loadId }, header: { 'Idempotency-Key': `ifta-${ctx.loadId}-${stateCode}-${timestampMs}` } },
+      body: { state: stateCode, crossed_at: new Date(timestampMs).toISOString(), latitude: lat, longitude: lng },
+    });
+    if (!response.ok) return;
+  } catch {
+    return;
+  }
 
   await AsyncStorage.setItem(CONTEXT_KEY, JSON.stringify({ ...ctx, lastState: stateCode }));
 }

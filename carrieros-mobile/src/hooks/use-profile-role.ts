@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react';
 
 import { useSession } from '@/hooks/use-session';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 
 export type Role = 'owner' | 'solo' | 'driver' | 'dispatcher' | 'finance';
 
@@ -25,11 +25,7 @@ export function useProfileRole() {
         if (!cancelled) setLoading(false);
         return;
       }
-      const { data } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', session.user.id)
-        .single();
+      const { data } = await apiClient.http.GET('/api/v1/me');
       if (cancelled) return;
       // 'solo' fallback matches the pre-existing default in (tabs)/index.tsx.
       setRole((data?.role as Role) ?? 'solo');

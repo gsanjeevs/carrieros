@@ -2,9 +2,10 @@
 // Customer detail screen — High gap: mobile had a customers LIST but no
 // detail screen at all (audit finding, mockup-07 screen 2). Read-only,
 // same posture as settlements/index.tsx's mobile view-only screens; editing
-// notes/tags stays web-only. Health score reuses the same
-// get_customer_health_score() RPC + customer_health_score entitlement the
-// web detail page already gates on.
+// notes/tags stays web-only. Health score comes back from the same
+// get_customer_health_score() RPC via GET /api/v1/customers/{id} — the RPC
+// itself already returns null when the org lacks the customer_health_score
+// entitlement, so no separate client-side gate is needed.
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,9 +16,8 @@ import { ThemedView } from '@/components/themed-view';
 import { BrandColors, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
-import { hasFeature } from '@/lib/entitlements';
 import { formatMoney } from '@/lib/format-money';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 
 type CustomerDetail = {
   org_id: number;
@@ -25,7 +25,7 @@ type CustomerDetail = {
   contact_name: string | null;
   tags: string[] | null;
   notes: string | null;
-  organizations: { name: string; phone: string | null; email: string | null; city: string | null; state: string | null } | null;
+  organization: { name: string; phone: string | null; email: string | null; city: string | null; state: string | null } | null;
 };
 
 type LoadRow = {
@@ -57,31 +57,11 @@ export default function CustomerDetailScreen() {
     if (!id) return;
     const orgId = Number(id);
 
-    const [{ data: customerData }, { data: loadsData }, entitled] = await Promise.all([
-      supabase
-        .from('customer_details')
-        // See customers/index.tsx's comment — customer_details has two FKs
-        // to organizations, so this embed needs the explicit fkey hint or
-        // PostgREST returns an ambiguous-relationship error.
-        .select('org_id, customer_number, contact_name, tags, notes, organizations!customer_details_org_id_fkey(name, phone, email, city, state)')
-        .eq('org_id', orgId)
-        .single(),
-      supabase
-        .from('loads')
-        .select('id, load_number, status, rate, delivery_date')
-        .eq('customer_org_id', orgId)
-        .order('created_at', { ascending: false })
-        .limit(10),
-      hasFeature(supabase, 'customer_health_score'),
-    ]);
+    const { data } = await apiClient.http.GET('/api/v1/customers/{id}', { params: { path: { id: orgId } } });
 
-    setCustomer(customerData as unknown as CustomerDetail);
-    setLoads(loadsData ?? []);
-
-    if (entitled) {
-      const { data: scoreData } = await supabase.rpc('get_customer_health_score', { customer_org_id: orgId });
-      setHealthScore(scoreData != null ? Number(scoreData) : null);
-    }
+    setCustomer((data?.customer as unknown as CustomerDetail) ?? null);
+    setLoads((data?.recent_loads as LoadRow[] | undefined) ?? []);
+    setHealthScore(data?.health_score ?? null);
   }, [id]);
 
   useEffect(() => {
@@ -104,7 +84,7 @@ export default function CustomerDetailScreen() {
     );
   }
 
-  const org = customer.organizations;
+  const org = customer.organization;
   const totalRevenue = loads.reduce((sum, l) => sum + Number(l.rate ?? 0), 0);
 
   return (

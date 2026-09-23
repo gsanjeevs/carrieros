@@ -17,6 +17,7 @@
     "expo-file-system": "~57.0.1",
     "expo-font": "~57.0.1",
     "expo-glass-effect": "~57.0.3",
+    "expo-haptics": "~57.0.3",
     "expo-image": "~57.0.5",
     "expo-image-picker": "~57.0.19",
     "expo-linking": "~57.0.10",
@@ -46,6 +47,11 @@
     "react-native-view-shot": "5.1.0",
     "react-native-web": "~0.21.0",
     "react-native-worklets": "0.10.1"
+  },
+  "overrides": {
+    "metro": "0.84.5",
+    "metro-config": "0.84.5",
+    "metro-transform-worker": "0.84.5"
   },
   "devDependencies": {
     "@react-native/jest-preset": "^0.86.3",

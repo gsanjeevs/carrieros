@@ -12,7 +12,7 @@ import { logError } from '@/lib/observability'
 const MAX_DAYS = 30
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ org_id: string }> }) {
-  const ctx = await requireAdminRole(request, ['sx_owner', 'sx_finance'])
+  const ctx = await requireAdminRole(request, 'admin_billing')
   if (isErrorResponse(ctx)) return ctx
   const { admin, userId } = ctx
 

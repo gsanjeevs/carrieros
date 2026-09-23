@@ -2,13 +2,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { extractLoadFromText, ExtractionFailedError } from '@/lib/extract-load'
+import { getProfileForUser } from '@/lib/queries/profiles'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 export async function POST(request: NextRequest) {
-  // Any authenticated carrier user (web or mobile) may extract a load —
-  // this just needs *a* valid session, not org/role checks, since the
-  // caller hasn't created a load yet at this point.
+  // Extraction is a paid LLM call made on behalf of load intake, so only the roles that create loads may spend it
+  // (a driver or finance login used to be able to burn it freely).
   const ctx = await getAuthedContext(request)
   if (isErrorResponse(ctx)) return ctx
+  const { data: profile } = await getProfileForUser(ctx.supabase, ctx.user.id)
+  if (!profile?.org_id || !roleHasCapability(profile.role, 'load_intake_extract'))
+    return apiError('FORBIDDEN', 'Insufficient permissions', 403)
 
   let text: string
   try {

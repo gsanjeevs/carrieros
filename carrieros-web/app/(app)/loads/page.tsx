@@ -46,7 +46,7 @@ export default async function LoadsPage({
   // Same service the /api/v1/loads endpoint uses (mobile, web client code):
   // tenant scoping, driver restriction and rate visibility are decided there.
   const result = await createLoadQueryService(supabase).list(actor.value, {
-    statusGroup: activeGroup?.key,
+    statusGroups: activeGroup?.key ? [activeGroup.key] : undefined,
   })
   const loads = result.ok ? result.value.loads : []
   const showRate = result.ok && result.value.canSeeRate

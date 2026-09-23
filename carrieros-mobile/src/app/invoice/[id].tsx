@@ -4,7 +4,10 @@
 // carrieros-web/app/(app)/invoices/actions.ts's three mutations, gated to
 // the same roles as invoices' own RLS (`billing_invoices_all`:
 // owner/solo/finance — dispatcher has no invoice access at all, matching
-// web).
+// web). That gate is the generated `invoice_actions` capability
+// (src/lib/generated/role-capabilities.ts, from the role_capabilities
+// table) rather than a hand-written role array, so mobile, web and the API
+// cannot drift apart.
 //
 // markInvoicePaid/updateInvoiceDraft have no side effect beyond DB writes,
 // so this screen does them directly against Supabase (RLS-protected) —
@@ -27,12 +30,13 @@ import { BrandColors, INVOICE_STATUS_PILL, Spacing, StatusColors } from '@/const
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
-import { supabase } from '@/lib/supabase';
 import { apiFetch } from '@/lib/api';
+import { apiClient } from '@/lib/api-client';
+import { roleHasCapability } from '@/lib/generated/role-capabilities';
 import { formatDateTime } from '@/lib/format-date';
 import { formatMoney } from '@/lib/format-money';
 
-const ORANGE = BrandColors.orange;const WRITE_ROLES = ['owner', 'solo', 'finance'];
+const ORANGE = BrandColors.orange;
 
 type InvoiceDetail = {
   id: number;
@@ -63,17 +67,13 @@ export default function InvoiceDetailScreen() {
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
 
-  const canWrite = role != null && WRITE_ROLES.includes(role);
+  const canWrite = roleHasCapability(role, 'invoice_actions');
 
   const load = useCallback(async () => {
     if (!id) return;
-    const { data } = await supabase
-      .from('invoices')
-      .select('id, invoice_number, amount, status, due_date, notes, sent_at, paid_at, opened_at, load_id')
-      .eq('id', Number(id))
-      .maybeSingle();
+    const { data } = await apiClient.http.GET('/api/v1/invoices/{id}', { params: { path: { id: Number(id) } } });
 
-    const inv = data as InvoiceDetail | null;
+    const inv = (data as InvoiceDetail | undefined) ?? null;
     setInvoice(inv);
     if (inv) {
       setAmount(String(inv.amount));
@@ -99,11 +99,17 @@ export default function InvoiceDetailScreen() {
       return;
     }
 
-    const { error: updateErr } = await supabase
-      .from('invoices')
-      .update({ amount: numericAmount, due_date: dueDate || null, notes: notes || null })
-      .eq('id', invoice.id)
-      .eq('status', 'draft');
+    // Draft-only editing, and who may edit, are decided server-side.
+    let updateErr: boolean;
+    try {
+      const { response } = await apiClient.http.PATCH('/api/v1/invoices/{id}', {
+        params: { path: { id: invoice.id } },
+        body: { amount: numericAmount, due_date: dueDate || null, notes: notes || null },
+      });
+      updateErr = !response.ok;
+    } catch {
+      updateErr = true; // offline etc.
+    }
 
     setBusy(false);
     if (updateErr) {
@@ -133,13 +139,16 @@ export default function InvoiceDetailScreen() {
     setBusy(true);
     setError('');
 
-    const { error: updateErr } = await supabase
-      .from('invoices')
-      .update({ status: 'paid', paid_at: new Date().toISOString() })
-      .eq('id', invoice.id);
-
-    if (!updateErr && invoice.load_id) {
-      await supabase.from('loads').update({ status: 'paid' }).eq('id', invoice.load_id);
+    // Invoice paid AND its load paid, in ONE atomic call (was two separate writes, so a failure
+    // between them left an invoice paid with its load still 'invoiced'). Safe to repeat.
+    let updateErr: boolean;
+    try {
+      const { response } = await apiClient.http.POST('/api/v1/invoices/{id}/mark-paid', {
+        params: { path: { id: invoice.id } },
+      });
+      updateErr = !response.ok;
+    } catch {
+      updateErr = true;
     }
 
     setBusy(false);

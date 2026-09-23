@@ -14,8 +14,7 @@ import { BrandColors, LOAD_STATUS_PILL, Spacing, StatusColors } from '@/constant
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
-import { supabase } from '@/lib/supabase';
-const ACTIVE_LOAD_STATUSES = ['dispatched', 'picked_up', 'in_transit'];
+import { apiClient } from '@/lib/api-client';
 // Compliance chip thresholds — 30 days mirrors get_exceptions()'s own CDL
 // "expiring soon" horizon (see supabase/schema/schema.sql), reused here for
 // the same visual convention.
@@ -85,49 +84,38 @@ export default function MyLoadScreen() {
   const load = useCallback(async () => {
     if (!session?.user.id) return;
 
-    const { data: driver } = await supabase
-      .from('drivers')
-      .select('id, cdl_expiry, med_cert_expiry')
-      .eq('profile_id', session.user.id)
-      .single();
-
+    // /api/v1/me/driver-profile is the caller's own drivers row; a solo owner (no drivers row)
+    // gets a 404 here, same as before this screen resolved a driver id at all.
+    const { data: driver } = await apiClient.http.GET('/api/v1/me/driver-profile');
     if (!driver) return;
     setCdlExpiry(driver.cdl_expiry);
     setMedCertExpiry(driver.med_cert_expiry);
 
-    const cols = 'id, load_number, status, customer_name_raw, pickup_city, pickup_state, delivery_city, delivery_state, pickup_date';
-
-    const [{ data: active }, { data: next }] = await Promise.all([
-      supabase
-        .from('loads_driver_view')
-        .select(cols)
-        .eq('driver_id', driver.id)
-        .in('status', ACTIVE_LOAD_STATUSES)
-        .order('created_at', { ascending: false })
-        .maybeSingle(),
-      supabase
-        .from('loads_driver_view')
-        .select(cols)
-        .eq('driver_id', driver.id)
-        .eq('status', 'scheduled')
-        .order('pickup_date', { ascending: true })
-        .maybeSingle(),
+    // /api/v1/loads already restricts a driver to their own loads.
+    const [{ data: activeData }, { data: nextData }] = await Promise.all([
+      apiClient.http.GET('/api/v1/loads', { params: { query: { status_group: 'in_progress' } } }),
+      apiClient.http.GET('/api/v1/loads', { params: { query: { status_group: 'needs_dispatch' } } }),
     ]);
 
-    setActiveLoad((active as LoadRow | null) ?? null);
-    setNextLoad((next as LoadRow | null) ?? null);
+    const active = (activeData?.loads as LoadRow[] | undefined)?.[0] ?? null;
+    // needs_dispatch is draft+scheduled; a driver only ever has 'scheduled' loads assigned to
+    // them, and this screen wants the soonest by pickup_date, not the server's created_at order.
+    const scheduled = ((nextData?.loads as LoadRow[] | undefined) ?? []).filter((l) => l.status === 'scheduled');
+    const next = scheduled.length
+      ? scheduled.reduce((soonest, l) => (!soonest.pickup_date || (l.pickup_date && l.pickup_date < soonest.pickup_date) ? l : soonest))
+      : null;
+
+    setActiveLoad(active);
+    setNextLoad(next);
 
     // Pre-trip DVIR nudge (audit gap) — only for a load that hasn't left yet
     // (dispatched, not already picked_up/in_transit) and only if no pre_trip
     // inspection has been filed for it yet.
     if (active && active.status === 'dispatched' && active.id != null) {
-      const { data: existingDvir } = await supabase
-        .from('dvir_inspections')
-        .select('id')
-        .eq('load_id', active.id)
-        .eq('type', 'pre_trip')
-        .maybeSingle();
-      setNeedsPreTripDvir(!existingDvir);
+      const { data: dvirData } = await apiClient.http.GET('/api/v1/loads/{id}/dvir-inspections', {
+        params: { path: { id: active.id }, query: { type: 'pre_trip' } },
+      });
+      setNeedsPreTripDvir((dvirData?.inspections.length ?? 0) === 0);
     } else {
       setNeedsPreTripDvir(false);
     }

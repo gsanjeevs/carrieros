@@ -16,7 +16,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 import { useLocale } from '@/hooks/use-locale';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 
 const ORANGE = BrandColors.orange;
 // Balanced accuracy + a distance filter (not a time interval) — a parked/
@@ -47,14 +47,20 @@ export function ShareLocationSection({ loadId }: { loadId: number }) {
     subscriptionRef.current = await Location.watchPositionAsync(
       { accuracy: Location.Accuracy.Balanced, distanceInterval: DISTANCE_FILTER_METERS },
       async (position) => {
-        await supabase
-          .from('loads')
-          .update({
-            last_location_lat: position.coords.latitude,
-            last_location_lng: position.coords.longitude,
-            last_location_at: new Date(position.timestamp).toISOString(),
-          })
-          .eq('id', loadId);
+        // Only the three location columns are written, forward in time, for an active load: all decided
+        // server-side. A dropped sample (no signal) is fine; the next one replaces it.
+        try {
+          await apiClient.http.PUT('/api/v1/loads/{id}/location', {
+            params: { path: { id: loadId } },
+            body: {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+              recorded_at: new Date(position.timestamp).toISOString(),
+            },
+          });
+        } catch {
+          /* offline: next sample */
+        }
       }
     );
     setSharing(true);

@@ -85,6 +85,11 @@ jobs:
       - name: Verify migrations (clean build, upgrade path, snapshot parity, grants)
         run: node scripts/db/verify-migrations.mjs
 
+      # The ERD is generated from the live schema; a schema change that forgets to
+      # regenerate it (node scripts/db/gen-erd.mjs) fails here.
+      - name: ERD is up to date
+        run: node scripts/db/gen-erd.mjs --check
+
       - name: Write test env from the running stack
         working-directory: carrieros-web
         run: |
@@ -98,6 +103,12 @@ jobs:
             echo "ANTHROPIC_API_KEY=ci-placeholder"
             echo "CRON_SECRET=ci-cron-secret"
             echo "INTAKE_WEBHOOK_SECRET=ci-intake-secret"
+            echo "PUBLIC_API_JWT_SECRET=ci-public-api-jwt-secret-not-for-real-use"
+            # Must be a real 32-byte hex string (lib/crypto/secrets.ts validates the length) --
+            # tests/secrets-crypto.test.ts exercises real AES-256-GCM round trips, so this needs
+            # to actually decode correctly, not just be present. Fixed, not secret: CI never
+            # stores anything meaningful behind it (decisions.md T17's 2026-09-22 amendment).
+            echo "SECRETS_ENCRYPTION_KEY=$(node -e 'console.log(require("crypto").randomBytes(32).toString("hex"))')"
           } > .env.local
 
       - name: Install web dependencies

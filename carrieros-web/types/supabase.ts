@@ -115,6 +115,59 @@ export type Database = {
           },
         ]
       }
+      ai_provider_config: {
+        Row: {
+          anthropic_api_key_encrypted: string | null
+          anthropic_api_key_preview: string | null
+          compatible_base_url: string | null
+          id: number
+          model: string
+          openai_api_key_encrypted: string | null
+          openai_api_key_preview: string | null
+          openai_compatible_api_key_encrypted: string | null
+          openai_compatible_api_key_preview: string | null
+          provider: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          anthropic_api_key_encrypted?: string | null
+          anthropic_api_key_preview?: string | null
+          compatible_base_url?: string | null
+          id?: number
+          model?: string
+          openai_api_key_encrypted?: string | null
+          openai_api_key_preview?: string | null
+          openai_compatible_api_key_encrypted?: string | null
+          openai_compatible_api_key_preview?: string | null
+          provider?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          anthropic_api_key_encrypted?: string | null
+          anthropic_api_key_preview?: string | null
+          compatible_base_url?: string | null
+          id?: number
+          model?: string
+          openai_api_key_encrypted?: string | null
+          openai_api_key_preview?: string | null
+          openai_compatible_api_key_encrypted?: string | null
+          openai_compatible_api_key_preview?: string | null
+          provider?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_provider_config_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_events: {
         Row: {
           action: string
@@ -218,6 +271,8 @@ export type Database = {
       carrier_details: {
         Row: {
           billing_status: string
+          brand_accent_color: string | null
+          brand_primary_color: string | null
           card_brand: string | null
           card_last4: string | null
           default_language: string
@@ -237,6 +292,8 @@ export type Database = {
         }
         Insert: {
           billing_status?: string
+          brand_accent_color?: string | null
+          brand_primary_color?: string | null
           card_brand?: string | null
           card_last4?: string | null
           default_language?: string
@@ -256,6 +313,8 @@ export type Database = {
         }
         Update: {
           billing_status?: string
+          brand_accent_color?: string | null
+          brand_primary_color?: string | null
           card_brand?: string | null
           card_last4?: string | null
           default_language?: string
@@ -790,7 +849,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "drivers_default_truck_id_fkey"
+            foreignKeyName: "drivers_default_vehicle_id_fkey"
             columns: ["default_vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
@@ -913,7 +972,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "dvir_inspections_truck_id_fkey"
+            foreignKeyName: "dvir_inspections_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
@@ -974,18 +1033,21 @@ export type Database = {
           key: string
           label: string
           min_tier: string
+          retained_when_delinquent: boolean
         }
         Insert: {
           display_order: number
           key: string
           label: string
           min_tier: string
+          retained_when_delinquent?: boolean
         }
         Update: {
           display_order?: number
           key?: string
           label?: string
           min_tier?: string
+          retained_when_delinquent?: boolean
         }
         Relationships: [
           {
@@ -1617,7 +1679,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "loads_truck_id_fkey"
+            foreignKeyName: "loads_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
@@ -1677,10 +1739,69 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "maintenance_reminders_truck_id_fkey"
+            foreignKeyName: "maintenance_reminders_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      oauth_client_rate_limits: {
+        Row: {
+          client_id: string
+          request_count: number
+          window_start: string
+        }
+        Insert: {
+          client_id: string
+          request_count?: number
+          window_start: string
+        }
+        Update: {
+          client_id?: string
+          request_count?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
+      oauth_clients: {
+        Row: {
+          client_id: string
+          client_secret_hash: string
+          created_at: string
+          id: number
+          last_used_at: string | null
+          name: string
+          org_id: number
+          revoked_at: string | null
+        }
+        Insert: {
+          client_id: string
+          client_secret_hash: string
+          created_at?: string
+          id?: number
+          last_used_at?: string | null
+          name: string
+          org_id: number
+          revoked_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          client_secret_hash?: string
+          created_at?: string
+          id?: number
+          last_used_at?: string | null
+          name?: string
+          org_id?: number
+          revoked_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oauth_clients_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -1730,6 +1851,58 @@ export type Database = {
           {
             foreignKeyName: "org_documents_uploaded_by_fkey"
             columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_feature_overrides: {
+        Row: {
+          effect: string
+          expires_at: string | null
+          feature_key: string
+          org_id: number
+          reason: string
+          set_at: string
+          set_by: string | null
+        }
+        Insert: {
+          effect: string
+          expires_at?: string | null
+          feature_key: string
+          org_id: number
+          reason: string
+          set_at?: string
+          set_by?: string | null
+        }
+        Update: {
+          effect?: string
+          expires_at?: string | null
+          feature_key?: string
+          org_id?: number
+          reason?: string
+          set_at?: string
+          set_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_feature_overrides_feature_key_fkey"
+            columns: ["feature_key"]
+            isOneToOne: false
+            referencedRelation: "features"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "org_feature_overrides_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_feature_overrides_set_by_fkey"
+            columns: ["set_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -2156,7 +2329,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "service_logs_truck_id_fkey"
+            foreignKeyName: "service_logs_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
@@ -2192,6 +2365,130 @@ export type Database = {
             columns: ["settlement_id"]
             isOneToOne: false
             referencedRelation: "driver_settlements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_ticket_messages: {
+        Row: {
+          body: string
+          carrier_org_id: number
+          created_at: string
+          id: number
+          is_ai_generated: boolean
+          sender_id: string | null
+          ticket_id: number
+        }
+        Insert: {
+          body: string
+          carrier_org_id: number
+          created_at?: string
+          id?: number
+          is_ai_generated?: boolean
+          sender_id?: string | null
+          ticket_id: number
+        }
+        Update: {
+          body?: string
+          carrier_org_id?: number
+          created_at?: string
+          id?: number
+          is_ai_generated?: boolean
+          sender_id?: string | null
+          ticket_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_ticket_messages_carrier_org_id_fkey"
+            columns: ["carrier_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_ticket_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          ai_answer: string | null
+          ai_confidence: number | null
+          body: string
+          carrier_org_id: number
+          category: string
+          created_at: string
+          fallback_queue: string | null
+          id: number
+          queue: string
+          related_load_number: string | null
+          resolved_at: string | null
+          status: string
+          submitted_by: string
+          submitter_role: string
+          submitter_tier: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_answer?: string | null
+          ai_confidence?: number | null
+          body: string
+          carrier_org_id: number
+          category: string
+          created_at?: string
+          fallback_queue?: string | null
+          id?: number
+          queue: string
+          related_load_number?: string | null
+          resolved_at?: string | null
+          status?: string
+          submitted_by: string
+          submitter_role: string
+          submitter_tier?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_answer?: string | null
+          ai_confidence?: number | null
+          body?: string
+          carrier_org_id?: number
+          category?: string
+          created_at?: string
+          fallback_queue?: string | null
+          id?: number
+          queue?: string
+          related_load_number?: string | null
+          resolved_at?: string | null
+          status?: string
+          submitted_by?: string
+          submitter_role?: string
+          submitter_tier?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_carrier_org_id_fkey"
+            columns: ["carrier_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2298,24 +2595,24 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "truck_documents_carrier_org_id_fkey"
+            foreignKeyName: "vehicle_documents_carrier_org_id_fkey"
             columns: ["carrier_org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "truck_documents_truck_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "truck_documents_uploaded_by_fkey"
+            foreignKeyName: "vehicle_documents_uploaded_by_fkey"
             columns: ["uploaded_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_documents_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
         ]
@@ -2452,7 +2749,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "trucks_carrier_org_id_fkey"
+            foreignKeyName: "vehicles_carrier_org_id_fkey"
             columns: ["carrier_org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -2601,7 +2898,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "loads_truck_id_fkey"
+            foreignKeyName: "loads_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
@@ -2620,7 +2917,16 @@ export type Database = {
           row_name: string
         }[]
       }
+      caller_may_act_on_load: { Args: { p_load_id: number }; Returns: boolean }
       check_ifta_completeness: { Args: { p_load_id: number }; Returns: boolean }
+      check_public_api_rate_limit: {
+        Args: { p_client_id: string; p_limit: number; p_window_seconds: number }
+        Returns: {
+          allowed: boolean
+          current_count: number
+          retry_after_seconds: number
+        }[]
+      }
       create_customer_org: {
         Args: {
           p_address?: string
@@ -2640,6 +2946,36 @@ export type Database = {
           org_id: number
         }[]
       }
+      create_driver_settlement_command: {
+        Args: {
+          p_correlation_id: string
+          p_driver_id: number
+          p_gross_revenue: number
+          p_idempotency_key: string
+          p_loads_count: number
+          p_net_pay: number
+          p_pay_method: string
+          p_period_end: string
+          p_period_start: string
+          p_rate_value: number
+        }
+        Returns: Json
+      }
+      create_invoice_command: {
+        Args: {
+          p_advance_load_status: boolean
+          p_amount: number
+          p_correlation_id: string
+          p_customer_org_id: number
+          p_due_date: string
+          p_factoring_company: string
+          p_idempotency_key: string
+          p_invoice_number: string
+          p_load_id: number
+          p_payment_method: string
+        }
+        Returns: Json
+      }
       driver_self_update_allowed: {
         Args: {
           p_active: boolean
@@ -2650,11 +2986,57 @@ export type Database = {
         }
         Returns: boolean
       }
+      entitlement_decision: {
+        Args: { p_key: string; p_org_id: number }
+        Returns: {
+          allowed: boolean
+          reason: string
+        }[]
+      }
+      escalate_support_ticket: {
+        Args: { p_ticket_id: number }
+        Returns: {
+          ai_answer: string | null
+          ai_confidence: number | null
+          body: string
+          carrier_org_id: number
+          category: string
+          created_at: string
+          fallback_queue: string | null
+          id: number
+          queue: string
+          related_load_number: string | null
+          resolved_at: string | null
+          status: string
+          submitted_by: string
+          submitter_role: string
+          submitter_tier: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "support_tickets"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_customer_health_score: {
         Args: { customer_org_id: number }
         Returns: number
       }
       get_exceptions: {
+        Args: never
+        Returns: {
+          detail: string
+          due_at: string
+          entity_id: number
+          entity_type: string
+          exception_type: string
+          tier: string
+          title: string
+        }[]
+      }
+      get_exceptions_unchecked: {
         Args: never
         Returns: {
           detail: string
@@ -2681,15 +3063,34 @@ export type Database = {
           state: string
         }[]
       }
+      get_my_entitlement: {
+        Args: { p_key: string }
+        Returns: {
+          allowed: boolean
+          reason: string
+        }[]
+      }
       get_my_entitlements: {
         Args: never
         Returns: {
           key: string
         }[]
       }
+      get_org_branding: {
+        Args: never
+        Returns: {
+          accent_color: string
+          enabled: boolean
+          logo_path: string
+          primary_color: string
+        }[]
+      }
       get_public_tracking: {
         Args: { p_token: string }
         Returns: {
+          brand_accent_color: string
+          brand_logo_path: string
+          brand_primary_color: string
           carrier_email: string
           carrier_name: string
           carrier_phone: string
@@ -2714,14 +3115,75 @@ export type Database = {
         }[]
       }
       has_feature: { Args: { feature_key: string }; Returns: boolean }
+      log_vehicle_service: {
+        Args: {
+          p_cost: number
+          p_next_due_date: string
+          p_next_due_miles: number
+          p_notes: string
+          p_odometer: number
+          p_reminder_id: number
+          p_service_date: string
+          p_service_type: string
+          p_shop_name: string
+          p_vehicle_id: number
+        }
+        Returns: number
+      }
+      mark_invoice_paid: {
+        Args: {
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_invoice_id: number
+          p_paid_at: string
+        }
+        Returns: Json
+      }
+      mark_invoice_sent_command: {
+        Args: {
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_invoice_id: number
+          p_sent_at: string
+        }
+        Returns: Json
+      }
       mark_overdue_invoices: { Args: never; Returns: number }
+      my_driver_id: { Args: never; Returns: number }
       my_org_id: { Args: never; Returns: number }
       my_role: { Args: never; Returns: string }
       next_entity_val: {
         Args: { carrier_org_bigint: number; entity_name: string }
         Returns: number
       }
+      record_load_expense_command: {
+        Args: {
+          p_amount: number
+          p_correlation_id: string
+          p_expense_type: string
+          p_idempotency_key: string
+          p_load_id: number
+          p_note: string
+        }
+        Returns: Json
+      }
+      replace_ifta_crossings_with_manual: {
+        Args: { p_load_id: number; p_rows: Json }
+        Returns: number
+      }
       send_expiry_reminders: { Args: never; Returns: number }
+      submit_dvir_inspection: {
+        Args: {
+          p_condition: string
+          p_defects: Json
+          p_driver_id: number
+          p_load_id: number
+          p_odometer: number
+          p_type: string
+          p_vehicle_id: number
+        }
+        Returns: Json
+      }
       submit_shipment_milestone: {
         Args: {
           p_correlation_id: string
@@ -2732,6 +3194,16 @@ export type Database = {
           p_new_status: string
           p_occurred_at: string
           p_reason: string
+        }
+        Returns: Json
+      }
+      update_settlement_payment_status_command: {
+        Args: {
+          p_correlation_id: string
+          p_expected_status: string
+          p_idempotency_key: string
+          p_new_status: string
+          p_settlement_id: number
         }
         Returns: Json
       }
