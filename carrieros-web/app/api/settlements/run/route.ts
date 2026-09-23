@@ -123,29 +123,30 @@ export async function POST(request: NextRequest) {
     netPay = loadsCount * rateValue
   }
 
-  const { data: settlement, error: insertError } = await supabase
-    .from('driver_settlements')
-    .insert({
-      carrier_org_id: profile.org_id,
-      driver_id: driver.id,
-      pay_method: driver.settlement_type,
-      rate_value: rateValue,
-      gross_revenue: grossRevenue,
-      net_pay: netPay,
-      loads_count: loadsCount,
-      payment_status: 'pending',
-      period_start: periodStart,
-      period_end: periodEnd,
-      // Real PDF generation is deferred infrastructure — no statement
-      // renderer/storage upload exists in this project yet. Left null
-      // rather than faked.
-      pdf_statement_path: null,
-      created_by: user.id,
-    })
-    .select('id, payment_status')
-    .single()
+  // Atomic insert + outbox event (T19 readiness layer, migration 0033),
+  // replacing the old plain INSERT. Idempotency key is deterministic per
+  // driver+period: re-running settlements/run for the same driver and pay
+  // period is the retried-command case this key exists to make safe.
+  const { data: cmdData, error: cmdError } = await supabase.rpc('create_driver_settlement_command', {
+    p_driver_id: driver.id,
+    p_pay_method: driver.settlement_type,
+    p_rate_value: rateValue,
+    p_gross_revenue: grossRevenue,
+    p_net_pay: netPay,
+    p_loads_count: loadsCount,
+    p_period_start: periodStart,
+    p_period_end: periodEnd,
+    p_correlation_id: crypto.randomUUID(),
+    p_idempotency_key: `settlement:create:${driver.id}:${periodStart}:${periodEnd}`,
+  })
 
-  if (insertError) return apiError('SERVER_ERROR', insertError.message, 500)
+  if (cmdError) {
+    if (cmdError.message?.includes('TIER_UPGRADE_REQUIRED')) {
+      return apiError('TIER_UPGRADE_REQUIRED', 'Driver settlements require the Growth plan or above', 403)
+    }
+    return apiError('SERVER_ERROR', cmdError.message, 500)
+  }
+  const settlement = cmdData as unknown as { id: number; payment_status: string }
 
   return NextResponse.json({ id: settlement.id, payment_status: settlement.payment_status })
 }

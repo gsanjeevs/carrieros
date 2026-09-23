@@ -424,7 +424,20 @@ describe('P8 SECURITY DEFINER RPCs called directly (bypassing the app-layer auth
     expect(r2.error).not.toBeNull()
   })
   it('driver cannot mark_invoice_paid', async () => {
-    const r = await f.a.driver1.client.rpc('mark_invoice_paid', { p_invoice_id: f.ids.invoiceA } as never)
+    // mark_invoice_paid gained two trailing params (0033: correlation_id,
+    // idempotency_key) and became SECURITY DEFINER with an explicit
+    // my_role() IN ('owner','solo','finance') check, since a DEFINER
+    // function bypasses RLS. Call the CURRENT 4-arg signature and assert on
+    // the actual FORBIDDEN error (42501) it now raises -- calling the old
+    // 2-arg shape would fail to resolve to any overload (42883) and pass
+    // this test for the wrong reason, leaving the new role check unverified.
+    const r = await f.a.driver1.client.rpc('mark_invoice_paid' as never, {
+      p_invoice_id: f.ids.invoiceA,
+      p_paid_at: new Date().toISOString(),
+      p_correlation_id: 'roles-rls-test',
+      p_idempotency_key: `roles-rls-driver-mark-paid-${f.ids.invoiceA}`,
+    } as never)
+    expect(r.error?.code, r.error?.message).toBe('42501')
     const { data } = await f.admin.from('invoices').select('status').eq('id', f.ids.invoiceA).single()
     expect(data!.status, `err=${r.error?.message}`).toBe('sent')
   })

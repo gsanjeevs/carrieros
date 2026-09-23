@@ -10,6 +10,8 @@ import {
   GetLoadResponseSchema,
   InvoiceDetailResponseSchema,
   InvoiceIdParamsSchema,
+  ListFinancialEventsQuerySchema,
+  ListFinancialEventsResponseSchema,
   ListInvoicesResponseSchema,
   ListLoadsResponseSchema,
   LoadIdParamsSchema,
@@ -84,6 +86,18 @@ export const publicEndpoints: readonly PublicEndpoint[] = [
     params: InvoiceIdParamsSchema,
     response: InvoiceDetailResponseSchema,
     errorStatuses: [401, 403, 404, 429],
+    security: 'bearer',
+  },
+  {
+    operationId: 'listFinancialEvents',
+    method: 'get',
+    path: '/api/public/v1/financial-events',
+    summary:
+      'Cursor-paginated, ledger-shaped export of invoice/settlement/expense events, for an accounting sync to consume exactly once and resume from where it left off (T19 readiness layer)',
+    tag: 'financial-events',
+    query: ListFinancialEventsQuerySchema,
+    response: ListFinancialEventsResponseSchema,
+    errorStatuses: [401, 403, 429],
     security: 'bearer',
   },
 ]

@@ -14,6 +14,7 @@ import { DOCUMENT_TYPES, UPLOAD_CONTENT_TYPES, MAX_UPLOAD_BYTES } from '../domai
 import { CDL_CLASSES, ENDORSEMENT_CODES } from '../domain/driver/self-profile'
 import { DEFECT_SEVERITIES, DVIR_AREAS, DVIR_TYPES } from '../domain/compliance/dvir'
 import { PROBLEM_REASONS } from '../domain/driver-actions/problem-report'
+import { LOAD_EXPENSE_TYPES } from '../domain/load-expense/record'
 import { DATE_FORMATS, LANGUAGES, THEMES, TIME_FORMATS, UOM_SYSTEMS } from '../domain/profile/preferences'
 
 export const ChangeEntitySchema = z.enum(CHANGE_ENTITIES)
@@ -185,6 +186,14 @@ export const ReportProblemBodySchema = z.object({
   note: z.string().max(1000).nullable().optional(),
 })
 export const ReportProblemResponseSchema = z.object({ id: z.number().int() })
+
+// T19 readiness layer: the first write path load_expenses has ever had.
+export const RecordLoadExpenseBodySchema = z.object({
+  expense_type: z.enum(LOAD_EXPENSE_TYPES),
+  amount: z.number().positive().max(1_000_000),
+  note: z.string().max(1000).nullable().optional(),
+})
+export const RecordLoadExpenseResponseSchema = z.object({ id: z.number().int(), amount: z.number() })
 
 export const DocumentTypeSchema = z.enum(DOCUMENT_TYPES)
 
@@ -579,6 +588,49 @@ export const CreateOAuthClientResponseSchema = z.object({
 })
 export const OAuthClientIdParamsSchema = z.object({ client_id: z.string().min(1) })
 export const RevokeOAuthClientResponseSchema = z.object({ ok: z.boolean() })
+
+// ── Financial events (T19: accounting-integration readiness layer) ──────────
+// Ledger-shaped export of the outbox events emitted by the five financial
+// mutations migration 0033 instruments: invoice created/sent/paid, driver
+// settlement created/payment_status changed, load expense recorded. Served
+// under /api/public/v1 (T14's OAuth2 client-credentials API), extending it
+// rather than inventing a second integration surface (decisions.md T19).
+export const FINANCIAL_EVENT_CATEGORIES = [
+  'revenue:freight',
+  'expense:driver_pay',
+  'expense:toll',
+  'expense:lumper',
+  'expense:scale',
+  'expense:other',
+] as const
+
+export const FinancialEventSchema = z.object({
+  // The outbox event's own bigserial id, stringified — stable, monotonic, and
+  // the natural key for an accounting system to dedupe on and to resume a
+  // sync from (also usable as the pagination cursor, see `next_cursor` below).
+  id: z.string().describe('Stable external id for this event. Also the pagination cursor value.'),
+  event_type: z.string().describe('Business fact, past tense (InvoiceCreated, DriverSettlementPaymentStatusChanged, ...).'),
+  category: z.enum(FINANCIAL_EVENT_CATEGORIES).describe('Chart-of-accounts-style category for mapping into an external ledger.'),
+  amount: z.number(),
+  currency: z.string().length(3).describe('ISO 4217, resolved from the organization\'s own currency (Rule I) — never a literal fallback.'),
+  occurred_at: z.string().describe('When the outbox event was recorded (its occurred_at timestamp).'),
+  reference: z.object({
+    invoice_number: z.string().nullable(),
+    load_id: z.number().int().nullable(),
+    driver_id: z.number().int().nullable(),
+    settlement_id: z.number().int().nullable(),
+  }),
+})
+
+export const ListFinancialEventsQuerySchema = z.object({
+  cursor: z.coerce.number().int().min(0).optional().describe('Resume after this event id (exclusive). Omit to start from the beginning.'),
+  limit: z.coerce.number().int().min(1).max(500).optional(),
+})
+
+export const ListFinancialEventsResponseSchema = z.object({
+  events: z.array(FinancialEventSchema),
+  next_cursor: z.string().nullable().describe('Pass as `cursor` on the next call to resume. null = no more events currently available.'),
+})
 
 export type ListLoadsQuery = z.infer<typeof ListLoadsQuerySchema>
 export type ListLoadsResponse = z.infer<typeof ListLoadsResponseSchema>

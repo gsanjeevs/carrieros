@@ -80,16 +80,29 @@ export async function sendInvoiceAndMarkSent(
     warningCode = 'NO_RECIPIENT_EMAIL'
   }
 
-  const { data, error } = await supabase
-    .from('invoices')
-    .update({ status: 'sent', sent_at: new Date().toISOString() })
-    .eq('id', invoiceId)
-    .eq('carrier_org_id', orgId)
-    .select('invoice_number')
-    .maybeSingle()
+  // Atomic status change + outbox event (T19 readiness layer, migration 0033) —
+  // replaces the old plain UPDATE. The email above already went out and is not
+  // part of this transaction (it cannot be — it's an external side effect); this
+  // call only makes the DB write and its outbox fact indivisible. Idempotency key
+  // is deterministic per invoice: an invoice only ever transitions to 'sent' once
+  // from this path (a second call would target the same status row, which the RPC
+  // reports back as NOT_FOUND once status has moved on — the outbox key existing
+  // is what actually prevents a duplicate InvoiceSent event on any true retry).
+  const sentAt = new Date().toISOString()
+  const idempotencyKey = `invoice:${invoiceId}:sent`
+  const { data: cmdData, error: cmdError } = await supabase.rpc('mark_invoice_sent_command', {
+    p_invoice_id: invoiceId,
+    p_sent_at: sentAt,
+    p_correlation_id: crypto.randomUUID(),
+    p_idempotency_key: idempotencyKey,
+  })
 
-  if (error) return { ok: false, error_code: 'SERVER_ERROR' }
-  if (!data) return { ok: false, error_code: 'NOT_FOUND' }
+  if (cmdError) {
+    if (cmdError.code === 'PT404') return { ok: false, error_code: 'NOT_FOUND' }
+    return { ok: false, error_code: 'SERVER_ERROR' }
+  }
+  const row = cmdData as unknown as { invoice_number: string } | null
+  if (!row) return { ok: false, error_code: 'NOT_FOUND' }
 
-  return { ok: true, invoice_number: data.invoice_number, warning_code: warningCode }
+  return { ok: true, invoice_number: row.invoice_number, warning_code: warningCode }
 }

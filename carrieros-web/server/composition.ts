@@ -228,3 +228,26 @@ export function createPublicApiTokenService(): PublicApiTokenService {
 export function createPublicApiRateLimiter(): SupabasePublicApiRateLimiter {
   return new SupabasePublicApiRateLimiter(createAdminClient())
 }
+
+import { LoadExpenseService } from './application/load-expense-service'
+import { SupabaseLoadExpenseRepository } from './infrastructure/supabase/load-expense-repository'
+
+export function createLoadExpenseService(supabase: SupabaseClient<Database>): LoadExpenseService {
+  return new LoadExpenseService({
+    shipments: new SupabaseShipmentCommandRepository(supabase),
+    expenses: new SupabaseLoadExpenseRepository(supabase),
+    idempotency: new SupabaseIdempotencyRepository(createAdminClient()),
+  })
+}
+
+import { FinancialEventQueryService } from './application/financial-event-query-service'
+import { SupabaseFinancialEventQueryRepository } from './infrastructure/supabase/financial-event-query-repository'
+
+export function createFinancialEventQueryService(): FinancialEventQueryService {
+  // Reads outbox_events, which is deny-all to `authenticated` (0005) — same
+  // reasoning as createChangeFeedService: the service role is the only
+  // legitimate reader, scoped explicitly by the verified actor's org id.
+  return new FinancialEventQueryService({
+    events: new SupabaseFinancialEventQueryRepository(createAdminClient()),
+  })
+}

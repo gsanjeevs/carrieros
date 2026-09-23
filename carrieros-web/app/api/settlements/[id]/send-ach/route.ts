@@ -74,15 +74,25 @@ export async function POST(
   if (readError) return apiError('SERVER_ERROR', readError.message, 500)
   if (!settlement) return apiError('NOT_FOUND', 'Settlement not found', 404)
 
-  const { data: updated, error: updateError } = await supabase
-    .from('driver_settlements')
-    .update({ payment_status: 'sent' })
-    .eq('id', settlementId)
-    .eq('carrier_org_id', profile.org_id)
-    .select('id, payment_status')
-    .single()
+  // Atomic CAS status change + outbox event (T19 readiness layer, migration
+  // 0033), replacing the old plain UPDATE. Idempotency key is deterministic
+  // per settlement+transition: a retried send-ach call for the same
+  // settlement targets the same pending->sent business fact.
+  const { data: cmdData, error: updateError } = await supabase.rpc('update_settlement_payment_status_command', {
+    p_settlement_id: settlementId,
+    p_expected_status: settlement.payment_status,
+    p_new_status: 'sent',
+    p_correlation_id: crypto.randomUUID(),
+    p_idempotency_key: `settlement:${settlementId}:sent`,
+  })
 
-  if (updateError) return apiError('SERVER_ERROR', updateError.message, 500)
+  if (updateError) {
+    if (updateError.message?.includes('VERSION_CONFLICT') || updateError.message?.includes('NOT_FOUND')) {
+      return apiError('VERSION_CONFLICT', 'Settlement is no longer pending', 409)
+    }
+    return apiError('SERVER_ERROR', updateError.message, 500)
+  }
+  const updated = cmdData as unknown as { id: number; payment_status: string }
 
   // Fire-and-forget demo side effect — see the stub's own comment. Never
   // moves real money.

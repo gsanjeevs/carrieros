@@ -349,6 +349,24 @@ export interface InvoiceWriteRepository {
   markPaid(actor: ActorContext, invoiceId: number, paidAt: Date): Promise<Result<{ outcome: 'APPLIED' | 'ALREADY_PAID'; invoiceId: number }>>
 }
 
+// ── Load expenses (T19 readiness layer) ──────────────────────────────────────
+
+export interface LoadExpenseRecord {
+  readonly expenseType: string
+  readonly amount: number
+  readonly note: string | null
+}
+
+export interface LoadExpenseCommandRepository {
+  /** Atomic: load_expenses insert + outbox event. Idempotent on idempotencyKey. */
+  record(
+    actor: ActorContext,
+    loadId: number,
+    record: LoadExpenseRecord,
+    idempotencyKey: string
+  ): Promise<Result<{ id: number; amount: number; outcome: 'APPLIED' | 'REPLAYED' }>>
+}
+
 // ── Messages, location, driver profile, fleet service ───────────────────────
 
 export interface DriverMessageRecord {
@@ -773,4 +791,27 @@ export interface PublicApiEntitlementGate {
 export interface PublicApiRateLimiter {
   /** Atomic check-and-increment against the fixed window. retryAfterSeconds is 0 when allowed. */
   checkAndIncrement(clientId: string): Promise<Result<{ allowed: boolean; retryAfterSeconds: number }>>
+}
+
+// ── Financial events (T19 readiness layer) ───────────────────────────────────
+
+/** Raw outbox row for a financial event, before categorization (categorize() is pure domain logic, not a query). */
+export interface FinancialOutboxRecord {
+  readonly id: number
+  readonly eventType: string
+  readonly payload: Record<string, unknown>
+  readonly occurredAt: string
+}
+
+export interface FinancialEventQueryRepository {
+  /**
+   * Financial outbox events for this org, ordered by id ascending, starting
+   * strictly after `cursor` (0/undefined = from the beginning). The org's own
+   * currency, resolved once per call (Rule I: no literal fallback).
+   */
+  listSince(
+    actor: ActorContext,
+    cursor: number,
+    limit: number
+  ): Promise<Result<{ events: readonly FinancialOutboxRecord[]; currency: string }>>
 }
