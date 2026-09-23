@@ -15,6 +15,7 @@ import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Figure } from '@/components/figure-text';
 import { Spacing } from '@/constants/theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
@@ -102,7 +103,7 @@ export default function BillingScreen() {
             </ThemedText>
             <ThemedView type="transparent" style={styles.rowBetween}>
               <ThemedText type="default" style={{ textTransform: 'capitalize' }}>{t(`billing.tier_${tier}`)}</ThemedText>
-              <ThemedText type="small" themeColor="textSecondary">{TIER_PRICE[tier] ?? ''}</ThemedText>
+              <Figure type="small" themeColor="textSecondary">{TIER_PRICE[tier] ?? ''}</Figure>
             </ThemedView>
           </ThemedView>
 
@@ -123,24 +124,24 @@ export default function BillingScreen() {
             <ThemedText type="small" themeColor="textSecondary" style={styles.sectionLabel}>
               {t('billing.paymentMethod').toUpperCase()}
             </ThemedText>
-            <ThemedText type="default">
+            <Figure type="default">
               {hasPaymentMethod
                 ? t('billing.cardOnFile', { brand: (details?.card_brand ?? 'card').toUpperCase(), last4: details?.card_last4 ?? '••••' })
                 : t('billing.noPaymentMethod')}
-            </ThemedText>
+            </Figure>
           </ThemedView>
 
           <ThemedView type="backgroundElement" style={styles.section}>
             <ThemedText type="small" themeColor="textSecondary" style={styles.sectionLabel}>
               {t('billing.fleetUsage').toUpperCase()}
             </ThemedText>
-            <ThemedText type="default">
+            <Figure type="default">
               {t('billing.trucksUsed', { count: vehicleCount, included: includedTrucks })}
-            </ThemedText>
+            </Figure>
             {overageCount > 0 && (
-              <ThemedText type="small" style={{ color: '#d97706', marginTop: 4 }}>
+              <Figure type="small" style={{ color: '#d97706', marginTop: 4 }}>
                 {t('billing.overageFee', { count: overageCount, fee: overageFee.toFixed(2) })}
-              </ThemedText>
+              </Figure>
             )}
           </ThemedView>
         </ScrollView>

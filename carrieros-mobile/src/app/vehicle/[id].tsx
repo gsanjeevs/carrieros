@@ -18,6 +18,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Figure } from '@/components/figure-text';
 import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
@@ -26,6 +27,7 @@ import { useProfileRole } from '@/hooks/use-profile-role';
 import { apiClient } from '@/lib/api-client';
 import { roleHasCapability } from '@/lib/generated/role-capabilities';
 import { keyForSubmission } from '@/lib/idempotency';
+import { formatMoney } from '@/lib/format-money';
 
 const ORANGE = BrandColors.orange;
 
@@ -51,9 +53,9 @@ const NO_REMINDER = '';
 export default function VehicleDetailScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, logService: logServiceParam } = useLocalSearchParams<{ id: string; logService?: string }>();
   const { session } = useSession();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { role } = useProfileRole();
 
   const [vehicle, setVehicle] = useState<VehicleDetail | null>(null);
@@ -61,7 +63,10 @@ export default function VehicleDetailScreen() {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [formOpen, setFormOpen] = useState(false);
+  // Maintenance overview's swipe-left-to-"Log Service" action (spec §2.1)
+  // deep-links here with ?logService=1 so the form opens immediately instead
+  // of landing on the vehicle detail screen and requiring a second tap.
+  const [formOpen, setFormOpen] = useState(logServiceParam === '1');
   const [reminderId, setReminderId] = useState(NO_REMINDER);
   const [serviceType, setServiceType] = useState('');
   const [serviceDate, setServiceDate] = useState(todayISO());
@@ -182,7 +187,11 @@ export default function VehicleDetailScreen() {
           ) : null}
 
           {canLogService && !formOpen && (
-            <Pressable onPress={() => setFormOpen(true)} style={styles.logServiceButton}>
+            <Pressable
+              onPress={() => setFormOpen(true)}
+              style={({ pressed }) => [styles.logServiceButton, pressed && styles.logServiceButtonPressed]}
+              android_ripple={{ color: 'rgba(255,255,255,0.15)' }}
+            >
               <ThemedText type="smallBold" style={{ color: '#ffffff' }}>{t('vehicleDetail.logService')}</ThemedText>
             </Pressable>
           )}
@@ -246,7 +255,7 @@ export default function VehicleDetailScreen() {
                   style={[styles.input, { color: theme.text, borderColor: theme.border }]}
                   value={odometer}
                   onChangeText={setOdometer}
-                  keyboardType="numeric"
+                  keyboardType="number-pad"
                   placeholderTextColor={theme.textSecondary}
                 />
               </ThemedView>
@@ -259,7 +268,7 @@ export default function VehicleDetailScreen() {
                   style={[styles.input, { color: theme.text, borderColor: theme.border }]}
                   value={cost}
                   onChangeText={setCost}
-                  keyboardType="numeric"
+                  keyboardType="decimal-pad"
                   placeholderTextColor={theme.textSecondary}
                 />
               </ThemedView>
@@ -323,7 +332,7 @@ export default function VehicleDetailScreen() {
                     <ThemedText type="small">{l.service_type}</ThemedText>
                     <ThemedText type="small" themeColor="textSecondary">{l.service_date}</ThemedText>
                   </ThemedView>
-                  {l.cost ? <ThemedText type="small" themeColor="textSecondary">${l.cost.toFixed(2)}</ThemedText> : null}
+                  {l.cost ? <Figure type="small" themeColor="textSecondary">{formatMoney(l.cost, locale)}</Figure> : null}
                 </ThemedView>
               ))
             )}
@@ -360,6 +369,7 @@ const styles = StyleSheet.create({
   cancelButton: { flex: 1, borderRadius: 8, paddingVertical: 12, alignItems: 'center', borderWidth: 1 },
   submitButton: { flex: 1, backgroundColor: ORANGE, borderRadius: 8, paddingVertical: 12, alignItems: 'center' },
   submitButtonDisabled: { opacity: 0.5 },
+  logServiceButtonPressed: { opacity: 0.85 },
   error: { color: StatusColors.danger },
   logRow: {
     flexDirection: 'row',

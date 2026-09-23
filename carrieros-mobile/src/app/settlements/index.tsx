@@ -17,16 +17,19 @@ import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import * as Clipboard from 'expo-clipboard';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { Figure } from '@/components/figure-text';
+import { BrandColors, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
 import { apiClient } from '@/lib/api-client';
 import { formatMoney } from '@/lib/format-money';
 import { roleHasCapability } from '@/lib/generated/role-capabilities';
+import { haptics } from '@/lib/haptics';
 
 type SettlementRow = {
   id: number;
@@ -49,6 +52,11 @@ export default function SettlementsScreen() {
   const [entitled, setEntitled] = useState(true);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  // Long-press-a-dollar-amount-to-copy (spec §3.1) -- a driver relaying net
+  // pay over a phone call is a real use case worth the one-line addition.
+  // copiedId briefly labels which row was just copied instead of a global
+  // Toast component (none exists in this app yet).
+  const [copiedId, setCopiedId] = useState<number | null>(null);
 
   const isStaff = roleHasCapability(role, 'settlements_manage');
 
@@ -67,6 +75,13 @@ export default function SettlementsScreen() {
     setRefreshing(true);
     await load();
     setRefreshing(false);
+  }
+
+  async function copyAmount(id: number, amount: number) {
+    await Clipboard.setStringAsync(formatMoney(amount, locale));
+    await haptics.light();
+    setCopiedId(id);
+    setTimeout(() => setCopiedId((current) => (current === id ? null : current)), 1500);
   }
 
   if (roleLoading || loading) {
@@ -93,7 +108,14 @@ export default function SettlementsScreen() {
           <FlatList
             data={settlements}
             keyExtractor={(item) => String(item.id)}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={BrandColors.orange}
+                colors={[BrandColors.orange]}
+              />
+            }
             contentContainerStyle={styles.listContent}
             ListEmptyComponent={
               <ThemedText type="small" themeColor="textSecondary" style={styles.empty}>
@@ -113,9 +135,16 @@ export default function SettlementsScreen() {
                   <ThemedText type="small" themeColor="textSecondary">
                     {item.period_start} – {item.period_end}
                   </ThemedText>
-                  <ThemedText type="default">
-                    {item.net_pay != null ? formatMoney(item.net_pay, locale) : '—'}
-                  </ThemedText>
+                  {item.net_pay != null ? (
+                    <Pressable onLongPress={() => copyAmount(item.id, item.net_pay!)} delayLongPress={400}>
+                      <Figure type="default">{formatMoney(item.net_pay, locale)}</Figure>
+                      {copiedId === item.id && (
+                        <ThemedText type="small" themeColor="textSecondary">{t('settlements.copied')}</ThemedText>
+                      )}
+                    </Pressable>
+                  ) : (
+                    <ThemedText type="default">—</ThemedText>
+                  )}
                 </ThemedView>
               );
             }}
