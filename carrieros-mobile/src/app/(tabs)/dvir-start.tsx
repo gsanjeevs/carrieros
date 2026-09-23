@@ -5,7 +5,7 @@
 // explains why it can't yet. Named "dvir-start" (not "dvir") to avoid any
 // ambiguity with the app/dvir/[loadId] route segment outside this group.
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
@@ -51,14 +51,21 @@ export default function DvirStartScreen() {
 
         {activeLoadId ? (
           <ThemedView type="transparent" style={styles.buttonGroup}>
+            {/* iOS/Android deliberately diverge here (spec §1.1): Android
+                gets a visible ripple over the orange fill on press, iOS
+                relies on Pressable's platform-default opacity dim -- making
+                iOS ripple-less isn't a bug to "fix" by disabling Android's,
+                it's the correct per-platform default. */}
             <Pressable
-              style={styles.actionButton}
+              style={({ pressed }) => [styles.actionButton, pressed && Platform.OS === 'ios' && styles.actionButtonPressed]}
+              android_ripple={{ color: 'rgba(255,255,255,0.15)' }}
               onPress={() => router.push({ pathname: '/dvir/[loadId]', params: { loadId: String(activeLoadId), type: 'pre_trip' } })}
             >
               <ThemedText type="smallBold" style={styles.actionButtonText}>{t('dvirTab.startPreTrip')}</ThemedText>
             </Pressable>
             <Pressable
-              style={[styles.actionButton, styles.actionButtonSecondary]}
+              style={({ pressed }) => [styles.actionButton, styles.actionButtonSecondary, pressed && Platform.OS === 'ios' && styles.actionButtonPressed]}
+              android_ripple={{ color: `${ORANGE}22` }}
               onPress={() => router.push({ pathname: '/dvir/[loadId]', params: { loadId: String(activeLoadId), type: 'post_trip' } })}
             >
               <ThemedText type="smallBold" style={styles.actionButtonSecondaryText}>{t('dvirTab.startPostTrip')}</ThemedText>
@@ -94,6 +101,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   actionButtonText: { color: '#ffffff' },
+  actionButtonPressed: { opacity: 0.85 },
   actionButtonSecondary: { backgroundColor: 'transparent', borderWidth: 1, borderColor: ORANGE },
   actionButtonSecondaryText: { color: ORANGE },
   empty: { alignItems: 'center', marginTop: Spacing.six, gap: Spacing.two, paddingHorizontal: Spacing.three },

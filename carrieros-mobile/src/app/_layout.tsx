@@ -1,6 +1,7 @@
 import { DarkTheme, DefaultTheme, Slot, ThemeProvider, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { AppThemeProvider, useThemePreference } from '@/hooks/use-theme';
@@ -180,24 +181,32 @@ function NavigationThemeBridge({ children }: { children: React.ReactNode }) {
 
 export default function RootLayout() {
   return (
-    // AppThemeProvider is outermost: everything below it, including the splash
-    // overlay and the auth gate's own screens, should already be themed. It
-    // reads its own useSession() rather than taking one as a prop, same
-    // independent-concerns pattern as LocaleProvider below.
-    <AppThemeProvider>
-      <NavigationThemeBridge>
-        <AnimatedSplashOverlay />
-        {/* LocaleProvider sits alongside AuthGate (not instead of it): it reads
-            its own useSession() so locale resolution and auth redirects are
-            independent concerns, same as the rest of this file. */}
-        <LocaleProvider>
-          <OnboardingStatusProvider>
-            <AuthGate>
-              <Slot />
-            </AuthGate>
-          </OnboardingStatusProvider>
-        </LocaleProvider>
-      </NavigationThemeBridge>
-    </AppThemeProvider>
+    // GestureHandlerRootView must wrap the app above anything that uses
+    // react-native-gesture-handler (src/components/swipeable-row.tsx's
+    // Swipeable, used by DVIR/Maintenance/Settlements) -- without it, pan
+    // gestures fail to respond reliably, especially on Android. Outermost,
+    // since it's a plain View and has no interaction with the providers below.
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      {/* AppThemeProvider is outermost among the providers: everything below it,
+          including the splash overlay and the auth gate's own screens, should
+          already be themed. It reads its own useSession() rather than taking
+          one as a prop, same independent-concerns pattern as LocaleProvider
+          below. */}
+      <AppThemeProvider>
+        <NavigationThemeBridge>
+          <AnimatedSplashOverlay />
+          {/* LocaleProvider sits alongside AuthGate (not instead of it): it reads
+              its own useSession() so locale resolution and auth redirects are
+              independent concerns, same as the rest of this file. */}
+          <LocaleProvider>
+            <OnboardingStatusProvider>
+              <AuthGate>
+                <Slot />
+              </AuthGate>
+            </OnboardingStatusProvider>
+          </LocaleProvider>
+        </NavigationThemeBridge>
+      </AppThemeProvider>
+    </GestureHandlerRootView>
   );
 }
