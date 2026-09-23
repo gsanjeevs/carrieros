@@ -3,15 +3,21 @@
 // src/app/load/[id].tsx for driver + solo roles.
 //
 // Data path (ADR 0003): everything goes through the shared API, none of it through
-// supabase.from()/storage. Uploading is three steps so the photo bytes never pass
-// through the API (serverless hosts cap request bodies at a few MB):
+// supabase.from()/storage. Uploading is three steps (lib/pod-upload.ts) so the photo
+// bytes never pass through the API (serverless hosts cap request bodies at a few MB):
 //   1. POST /loads/{id}/document-uploads  -> server-chosen path + signed upload URL
 //   2. PUT the JPEG bytes to that URL (straight to storage)
 //   3. POST /loads/{id}/documents         -> server verifies the object exists at the
 //                                            issued path and records it
 // The server decides who may upload to which load and what path is used; this
 // component never builds a storage path.
-import { useCallback, useEffect, useRef, useState } from 'react';
+//
+// Offline: known-offline, or a live attempt that can't reach the server at all, saves
+// the photo to local storage and queues a pod.upload command (lib/offline-queue.ts)
+// instead of losing it -- proof of delivery on rural cellular can't depend on signal at
+// the loading dock. The queue replays the exact same three steps once online, requesting
+// a fresh signed URL at that time (see lib/pod-upload.ts / offline-queue.ts).
+import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -20,11 +26,14 @@ import { ThemedView } from '@/components/themed-view';
 import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
+import { useOfflineSync } from '@/hooks/use-offline-sync';
 import { base64ToArrayBuffer } from '@/lib/base64';
 import { formatDate } from '@/lib/format-date';
 import { apiClient } from '@/lib/api-client';
-import { keyForSubmission } from '@/lib/idempotency';
-import { logError } from '@/lib/observability';
+import { newIdempotencyKey } from '@/lib/idempotency';
+import { savePhotoLocally } from '@/lib/local-photo-store';
+import { enqueuePodUpload } from '@/lib/offline-queue';
+import { uploadPodPhoto } from '@/lib/pod-upload';
 
 const ORANGE = BrandColors.orange;
 
@@ -37,12 +46,13 @@ type PodDoc = {
 export function PodSection({ loadId }: { loadId: number }) {
   const { t, locale } = useLocale();
   const theme = useTheme();
+  const { isOnline, refreshQueueLength } = useOfflineSync();
 
   const [docs, setDocs] = useState<PodDoc[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
-  const submissionKey = useRef<{ key: string; body: string } | null>(null);
+  const [queuedNotice, setQueuedNotice] = useState(false);
 
   const loadDocs = useCallback(async () => {
     // The API returns each document with a short-lived signed download URL.
@@ -99,53 +109,39 @@ export function PodSection({ loadId }: { loadId: number }) {
     await upload(asset.base64);
   }
 
+  // Photo bytes go to local storage and a command is queued instead of uploaded, exactly
+  // the same "known offline OR the live attempt couldn't reach the server" split as
+  // src/app/load/[id].tsx's advanceStatus.
+  async function queueForLater(base64: string) {
+    const localUri = await savePhotoLocally(base64, 'jpg');
+    await enqueuePodUpload({ loadId, idempotencyKey: newIdempotencyKey(), localUri, contentType: 'image/jpeg' }, new Date().toISOString());
+    await refreshQueueLength();
+    setQueuedNotice(true);
+  }
+
   async function upload(base64: string) {
     setUploading(true);
     setError('');
+    setQueuedNotice(false);
 
     try {
+      if (!isOnline) {
+        await queueForLater(base64);
+        return;
+      }
+
       const bytes = base64ToArrayBuffer(base64);
-
-      // 1. Ask for an upload slot. The server authorizes this actor for THIS load and chooses the path.
-      const slot = await apiClient.http.POST('/api/v1/loads/{id}/document-uploads', {
-        params: { path: { id: loadId } },
-        body: { type: 'pod', content_type: 'image/jpeg', size_bytes: bytes.byteLength },
-      });
-      if (!slot.data) {
-        logError({ where: 'pod-upload', step: 'request-slot', status: slot.response.status, bytes: bytes.byteLength }, slot.error);
-        setError(t('pod.errorUploadFailed'));
+      const result = await uploadPodPhoto(loadId, 'image/jpeg', bytes);
+      if (!result.ok) {
+        if (result.step === 'exception') {
+          await queueForLater(base64); // couldn't reach the server despite looking online
+          return;
+        }
+        setError(result.step === 'finalize' ? t('pod.errorSaveFailed') : t('pod.errorUploadFailed'));
         return;
       }
 
-      // 2. Bytes go straight to storage. An ArrayBuffer (not a Blob) is required on RN, see lib/base64.ts.
-      const put = await fetch(slot.data.upload_url, {
-        method: 'PUT',
-        headers: { 'Content-Type': slot.data.content_type },
-        body: bytes,
-      });
-      if (!put.ok) {
-        logError({ where: 'pod-upload', step: 'put-bytes', status: put.status, bytes: bytes.byteLength }, await put.text().catch(() => ''));
-        setError(t('pod.errorUploadFailed'));
-        return;
-      }
-
-      // 3. Record it. The server verifies the object is really there; a retry with the same key applies once.
-      const body = { type: 'pod' as const, storage_path: slot.data.storage_path };
-      const { response } = await apiClient.http.POST('/api/v1/loads/{id}/documents', {
-        params: { path: { id: loadId }, header: { 'Idempotency-Key': keyForSubmission(submissionKey, body) } },
-        body,
-      });
-      if (!response.ok) {
-        logError({ where: 'pod-upload', step: 'finalize', status: response.status }, await response.text().catch(() => ''));
-        setError(t('pod.errorSaveFailed'));
-        return;
-      }
-
-      submissionKey.current = null;
       await loadDocs();
-    } catch (e) {
-      logError({ where: 'pod-upload', step: 'exception' }, e); // no signal, etc.
-      setError(t('pod.errorUploadFailed'));
     } finally {
       setUploading(false);
     }
@@ -182,6 +178,7 @@ export function PodSection({ loadId }: { loadId: number }) {
       )}
 
       {error ? <ThemedText type="small" style={styles.error}>{error}</ThemedText> : null}
+      {queuedNotice ? <ThemedText type="small" style={styles.queued}>{t('pod.queuedOffline')}</ThemedText> : null}
 
       {loading ? (
         <ActivityIndicator />
@@ -222,6 +219,7 @@ const styles = StyleSheet.create({
   buttonDisabled: { opacity: 0.5 },
   uploadingRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   error: { color: StatusColors.danger },
+  queued: { color: '#d97706' },
   thumbRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   thumbWrap: { width: 88 },
   thumb: { width: 88, height: 88, borderRadius: 8 },

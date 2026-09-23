@@ -4,6 +4,11 @@
 // dev client) and flushes the offline queue the instant the app comes back
 // online. Exposes isOnline + queueLength so screens/banners can reflect
 // current state without each re-implementing the listener.
+//
+// queueLength counts every queued command regardless of kind (load status
+// advances, DVIR submissions, POD uploads) -- lib/offline-queue.ts is one
+// shared queue, so this hook and offline-banner.tsx automatically cover all
+// three without knowing which kinds exist.
 import { useEffect, useRef, useState } from 'react'
 import { useNetworkState } from 'expo-network'
 import { flushQueue, getQueueLength } from '@/lib/offline-queue'

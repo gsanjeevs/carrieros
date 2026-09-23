@@ -10,7 +10,9 @@ import { apiClient } from '@/lib/api-client';
 import { keyForSubmission } from '@/lib/idempotency';
 import { logError } from '@/lib/observability';
 
-type DvirArea = 'brakes' | 'lights' | 'tires' | 'steering' | 'horn' | 'mirrors' | 'coupling_devices' | 'emergency_equipment';
+// Exported so lib/offline-queue.ts (queued dvir.submit commands) and src/app/dvir/[loadId].tsx
+// share one definition instead of re-declaring the area union.
+export type DvirArea = 'brakes' | 'lights' | 'tires' | 'steering' | 'horn' | 'mirrors' | 'coupling_devices' | 'emergency_equipment';
 
 export async function uploadDvirAttachment(
   inspectionId: number,

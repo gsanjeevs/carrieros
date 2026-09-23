@@ -303,7 +303,8 @@
     "signHere": "Sign here",
     "clearSignature": "Clear",
     "errorMustSign": "You must sign this inspection before submitting.",
-    "signatureUploadFailedWarning": "The inspection was saved, but the signature could not be uploaded. Contact your dispatcher if a signed copy is required."
+    "signatureUploadFailedWarning": "The inspection was saved, but the signature could not be uploaded. Contact your dispatcher if a signed copy is required.",
+    "queuedOffline": "Inspection saved on this device. It will submit automatically when you're back online."
   },
   "settings": {
     "title": "Settings",
@@ -527,7 +528,8 @@
     "errorNotSignedIn": "You are signed out. Sign in again to upload.",
     "errorResolveAccount": "Could not resolve your carrier account.",
     "errorUploadFailed": "Upload failed. Check your connection and try again.",
-    "errorSaveFailed": "The photo could not be saved to this load. The upload was removed — please try again."
+    "errorSaveFailed": "The photo could not be saved to this load. The upload was removed — please try again.",
+    "queuedOffline": "Photo saved on this device. It will upload automatically when you're back online."
   },
   "dvirHistory": {
     "title": "DVIR History",
