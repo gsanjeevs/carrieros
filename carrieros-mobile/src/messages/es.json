@@ -303,7 +303,8 @@
     "signHere": "Firme aquí",
     "clearSignature": "Borrar",
     "errorMustSign": "Debes firmar esta inspección antes de enviarla.",
-    "signatureUploadFailedWarning": "La inspección se guardó, pero la firma no se pudo subir. Contacta a tu despachador si se requiere una copia firmada."
+    "signatureUploadFailedWarning": "La inspección se guardó, pero la firma no se pudo subir. Contacta a tu despachador si se requiere una copia firmada.",
+    "queuedOffline": "Inspección guardada en este dispositivo. Se enviará automáticamente cuando vuelvas a estar en línea."
   },
   "settings": {
     "title": "Configuración",
@@ -527,7 +528,8 @@
     "errorNotSignedIn": "Su sesión se cerró. Inicie sesión de nuevo para subir archivos.",
     "errorResolveAccount": "No se pudo determinar su cuenta de transportista.",
     "errorUploadFailed": "Error al subir. Verifique su conexión e inténtelo de nuevo.",
-    "errorSaveFailed": "La foto no se pudo guardar en esta carga. La subida se eliminó; inténtelo de nuevo."
+    "errorSaveFailed": "La foto no se pudo guardar en esta carga. La subida se eliminó; inténtelo de nuevo.",
+    "queuedOffline": "Foto guardada en este dispositivo. Se subirá automáticamente cuando vuelvas a estar en línea."
   },
   "dvirHistory": {
     "title": "Historial de DVIR",

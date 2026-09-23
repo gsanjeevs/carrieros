@@ -1,6 +1,9 @@
 // src/components/offline-banner.tsx
 // Global "you're offline" / "N changes queued" strip. Mounted once in
-// _layout.tsx so it's visible everywhere, not per-screen.
+// _layout.tsx so it's visible everywhere, not per-screen. The count is the
+// shared offline queue's length (lib/offline-queue.ts), so it already covers
+// queued load-status changes, DVIR submissions, and POD uploads together --
+// this component doesn't need to know which kinds exist.
 import { StyleSheet } from 'react-native'
 import { ThemedText } from '@/components/themed-text'
 import { ThemedView } from '@/components/themed-view'

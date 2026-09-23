@@ -22,6 +22,12 @@
 //
 // Blob is deliberately avoided — see src/lib/base64.ts (RN Blob uploads
 // 0 bytes). Same pick/upload approach as src/components/pod-section.tsx.
+//
+// Offline: known-offline, or a live submit that can't reach the server at all, writes
+// the signature/defect photos to local storage and queues a dvir.submit command
+// (lib/offline-queue.ts) instead of losing the inspection -- an FMCSA-mandated safety
+// record filed at the end of a route with no signal must not disappear. The queue
+// replays the atomic inspection+defects call, then the attachments, once online.
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -35,10 +41,13 @@ import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
+import { useOfflineSync } from '@/hooks/use-offline-sync';
 import { base64ToArrayBuffer } from '@/lib/base64';
 import { apiClient } from '@/lib/api-client';
 import { keyForSubmission } from '@/lib/idempotency';
 import { uploadDvirAttachment } from '@/lib/dvir-attachments';
+import { savePhotoLocally } from '@/lib/local-photo-store';
+import { enqueueDvirSubmit, type DvirAttachmentPayload } from '@/lib/offline-queue';
 import { resolveSubmitter } from '@/lib/submitter';
 
 const ORANGE = BrandColors.orange;
@@ -76,6 +85,7 @@ export default function DVIRScreen() {
   const { loadId, type } = useLocalSearchParams<{ loadId: string; type: 'pre_trip' | 'post_trip' }>();
   const { session } = useSession();
   const { t } = useLocale();
+  const { isOnline, refreshQueueLength } = useOfflineSync();
 
   const [areas, setAreas] = useState<Record<AreaKey, AreaState>>(() =>
     Object.fromEntries(
@@ -89,6 +99,7 @@ export default function DVIRScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
+  const [queued, setQueued] = useState(false);
   const submissionKey = useRef<{ key: string; body: string } | null>(null);
   // Non-fatal: photos that failed to upload after the inspection was already
   // saved. Shown on the confirmation screen, not treated as a submit failure.
@@ -193,23 +204,69 @@ export default function DVIRScreen() {
       odometer: odometer ? Number(odometer) : null,
       defects: defectAreas.map((a) => ({ area: a.key, description: areas[a.key].description.trim(), severity: areas[a.key].severity })),
     };
+    const idempotencyKey = keyForSubmission(submissionKey, submissionBody);
+
+    // Captured now regardless of connectivity: SignaturePad's view must still be
+    // mounted, so this can't be deferred to replay time the way the upload itself can.
+    const signatureBase64 = await signaturePadRef.current?.capture();
+
+    // Offline (or a live attempt that can't reach the server at all): the inspection
+    // and its attachments are queued whole, exactly the same "known offline OR the
+    // request itself failed to reach the server" split as src/app/load/[id].tsx's
+    // advanceStatus. Photo bytes move to local storage (AsyncStorage isn't for blobs);
+    // the actual upload happens at replay time via lib/offline-queue.ts.
+    const queueForLater = async () => {
+      const attachments: DvirAttachmentPayload[] = [];
+      if (signatureBase64) {
+        const localUri = await savePhotoLocally(signatureBase64, 'png');
+        attachments.push({ kind: 'signature', localUri, contentType: 'image/png' });
+      }
+      for (const a of defectAreas) {
+        const photo = areas[a.key].photo;
+        if (!photo) continue;
+        const localUri = await savePhotoLocally(photo.base64, 'jpg');
+        attachments.push({ kind: 'defect_photo', area: a.key, localUri, contentType: 'image/jpeg' });
+      }
+
+      await enqueueDvirSubmit(
+        { loadId: Number(loadId), idempotencyKey, ...submissionBody, attachments },
+        new Date().toISOString()
+      );
+      await refreshQueueLength();
+      submissionKey.current = null;
+      setQueued(true);
+      setSubmitting(false);
+      setDone(true);
+    };
+
+    if (!isOnline) {
+      await queueForLater();
+      return;
+    }
 
     // The inspection AND its defects are ONE atomic call. The server files it as the caller, picks the
     // vehicle (the load's, else the driver's default), and DERIVES the condition from the defects, so an
     // inspection can never claim 'satisfactory' while listing defects. (Previously: inspection insert,
     // then a separate defects insert, so a failure between them left a 'defects_noted' report with no
     // defects: a safety record that lies.)
-    let filed: { id: number; defects: { id: number; area: string }[] } | null = null;
+    let response: Response;
+    let data: { id: number; defects: { id: number; area: string }[] } | undefined;
     try {
-      const { data } = await apiClient.http.POST('/api/v1/loads/{id}/dvir-inspections', {
-        params: { path: { id: Number(loadId) }, header: { 'Idempotency-Key': keyForSubmission(submissionKey, submissionBody) } },
+      ({ data, response } = await apiClient.http.POST('/api/v1/loads/{id}/dvir-inspections', {
+        params: { path: { id: Number(loadId) }, header: { 'Idempotency-Key': idempotencyKey } },
         body: submissionBody,
-      });
-      filed = data ?? null;
+      }));
     } catch {
-      filed = null;
+      await queueForLater(); // couldn't reach the server despite looking online
+      return;
     }
 
+    if (!response.ok) {
+      setError(t('dvir.errorSubmitFailed'));
+      setSubmitting(false);
+      return;
+    }
+    const filed = data ?? null;
     if (!filed) {
       setError(t('dvir.errorSubmitFailed'));
       setSubmitting(false);
@@ -220,7 +277,6 @@ export default function DVIRScreen() {
     // Attachments are best-effort: the report is already saved, so a failed signature/photo is a
     // warning on the confirmation screen, never a lost inspection.
     let signatureFailed = false;
-    const signatureBase64 = await signaturePadRef.current?.capture();
     if (signatureBase64) {
       signatureFailed = !(await uploadDvirAttachment(filed.id, { kind: 'signature' }, 'image/png', base64ToArrayBuffer(signatureBase64)));
     }
@@ -242,13 +298,15 @@ export default function DVIRScreen() {
   if (done) {
     return (
       <ThemedView style={styles.centered}>
-        <ThemedText type="title" style={{ color: GREEN, fontSize: 22 }}>{t('dvir.submitted')}</ThemedText>
-        {photoWarningCount > 0 && (
+        <ThemedText type="title" style={{ color: GREEN, fontSize: 22 }}>
+          {queued ? t('dvir.queuedOffline') : t('dvir.submitted')}
+        </ThemedText>
+        {!queued && photoWarningCount > 0 && (
           <ThemedText type="small" style={[styles.warning, styles.doneWarning]}>
             {t('dvir.photoUploadFailedWarning', { count: photoWarningCount })}
           </ThemedText>
         )}
-        {signatureWarning && (
+        {!queued && signatureWarning && (
           <ThemedText type="small" style={[styles.warning, styles.doneWarning]}>
             {t('dvir.signatureUploadFailedWarning')}
           </ThemedText>
