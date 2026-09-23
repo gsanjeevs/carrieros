@@ -632,5 +632,192 @@ export const ListFinancialEventsResponseSchema = z.object({
   next_cursor: z.string().nullable().describe('Pass as `cursor` on the next call to resume. null = no more events currently available.'),
 })
 
+// ── Loads writes (API migration) ─────────────────────────────────────────────
+// Contract-only for now (decisions.md mobile-migration gap #1/#2): mirrors
+// app/api/loads/route.ts POST and app/api/loads/[id]/route.ts PATCH exactly.
+// No /api/v1 route exists yet.
+
+export const CreateLoadBodySchema = z.object({
+  customer_name_raw: z.string().nullable().optional(),
+  pickup_address: z.string().nullable().optional(),
+  pickup_city: z.string().nullable().optional(),
+  pickup_state: z.string().nullable().optional(),
+  pickup_zip: z.string().nullable().optional(),
+  pickup_date: z.string().nullable().optional(),
+  pickup_time: z.string().nullable().optional(),
+  delivery_address: z.string().nullable().optional(),
+  delivery_city: z.string().nullable().optional(),
+  delivery_state: z.string().nullable().optional(),
+  delivery_zip: z.string().nullable().optional(),
+  delivery_date: z.string().nullable().optional(),
+  delivery_time: z.string().nullable().optional(),
+  commodity: z.string().nullable().optional(),
+  weight_lbs: z.number().nullable().optional(),
+  rate: z.number().nullable().optional(),
+  total_miles: z.number().nullable().optional(),
+  intake_method: z.string().nullable().optional().describe('Defaults to "manual" when omitted.'),
+  raw_intake_text: z.string().nullable().optional(),
+})
+export const CreateLoadResponseSchema = z.object({ load_number: z.string() })
+
+export const AssignLoadBodySchema = z
+  .object({
+    driver_id: z.number().int().positive().nullable().optional().describe('Null clears the assignment.'),
+    vehicle_id: z.number().int().positive().nullable().optional().describe('Null clears the assignment.'),
+    status: z
+      .string()
+      .optional()
+      .describe('One of: draft, scheduled, dispatched, picked_up, in_transit, delivered, invoiced, paid, cancelled, declined.'),
+  })
+  .refine((v) => Object.keys(v).length > 0, { message: 'Provide at least one of driver_id, vehicle_id, status' })
+
+export const AssignLoadResponseSchema = z.object({
+  outcome: z.enum(['APPLIED', 'REPLAYED']),
+  load_id: z.number().int(),
+  ifta_mileage_complete: z
+    .boolean()
+    .nullable()
+    .optional()
+    .describe('Present only when status transitions to delivered and the org has the ifta_mileage_log feature.'),
+})
+
+// ── Invoices writes (API migration) ──────────────────────────────────────────
+// Mirrors app/api/invoices/[id]/send/route.ts POST. Body is empty — the
+// route reads no request body, only the {id} path param (InvoiceIdParamsSchema).
+
+export const SendInvoiceResponseSchema = z.object({
+  invoice_number: z.string(),
+  warning_code: z
+    .string()
+    .optional()
+    .describe('e.g. NO_RECIPIENT_EMAIL — set when the invoice was marked sent despite the email failing to send.'),
+})
+
+// ── Onboarding writes (API migration) ────────────────────────────────────────
+// Mirrors app/api/onboarding/route.ts POST (single atomic call: creates the
+// organization, carrier_details, and profile together) plus the
+// add-payment-method step the onboarding wizard calls separately. The
+// "first vehicle" and "first customer" wizard steps reuse
+// CreateVehicleBodySchema/CreateVehicleResponseSchema and
+// CreateCustomerBodySchema/CreateCustomerResponseSchema below — the legacy
+// onboarding route itself does not create a vehicle or customer.
+
+export const OnboardingBodySchema = z.object({
+  company_name: z.string().min(1),
+  mc_number: z.string().nullable().optional(),
+  dot_number: z.string().nullable().optional(),
+  ein: z.string().nullable().optional(),
+  address: z.string().nullable().optional(),
+  country: z.string().nullable().optional().describe('Defaults to "US".'),
+  state: z.string().min(1),
+  city: z.string().nullable().optional(),
+  zip: z.string().nullable().optional(),
+  default_net_terms_days: z
+    .number()
+    .int()
+    .optional()
+    .describe('One of 7, 15, 30, 45, 60; falls back to 30 if omitted or not one of those.'),
+  first_name: z.string().min(1),
+  last_name: z.string().min(1),
+  role: z
+    .enum(['owner', 'solo'])
+    .optional()
+    .describe('Defaults to "owner". Self-serve onboarding only ever creates the org\'s owner or solo operator.'),
+  tier: z
+    .enum(['starter', 'growth', 'pro', 'enterprise'])
+    .optional()
+    .describe('Plan chosen during signup; falls back to "starter" if omitted or not one of those.'),
+})
+export const OnboardingResponseSchema = z.object({
+  org_id: z.number().int(),
+  load_email: z
+    .string()
+    .nullable()
+    .describe('The carrier\'s generated inbound load-forwarding address; null if a free slug could not be found.'),
+})
+
+export const AddPaymentMethodResponseSchema = z.object({
+  stripe_customer_id: z.string().nullable(),
+  card_brand: z.string().nullable(),
+  card_last4: z.string().nullable(),
+  billing_status: z.string().nullable(),
+  trial_ends_at: z.string().nullable(),
+})
+
+// ── Customers writes (API migration) ─────────────────────────────────────────
+// Mirrors app/api/customers/route.ts POST (delegates to the create_customer_org()
+// RPC). No PATCH /api/customers/[id] route exists today, so there is no update
+// body schema to add.
+
+export const CreateCustomerBodySchema = z.object({
+  name: z.string().min(1),
+  phone: z.string().nullable().optional(),
+  email: z.string().nullable().optional(),
+  address: z.string().nullable().optional(),
+  city: z.string().nullable().optional(),
+  state: z.string().nullable().optional(),
+  zip: z.string().nullable().optional(),
+  country: z.string().nullable().optional().describe('Defaults to "US".'),
+  contact_name: z.string().nullable().optional(),
+  notes: z.string().nullable().optional(),
+})
+export const CreateCustomerResponseSchema = z.object({
+  org_id: z.number().int(),
+  name: z.string(),
+  customer_number: z.string().nullable(),
+})
+
+// ── Vehicles writes (API migration) ──────────────────────────────────────────
+// Mirrors app/api/vehicles/route.ts POST. No PATCH /api/vehicles/[id] route
+// exists today, so there is no update body schema to add.
+
+export const CreateVehicleBodySchema = z.object({
+  vehicle_type_id: z.number().int().positive(),
+  nickname: z.string().min(1),
+  year: z.number().int().nullable().optional(),
+  make: z.string().nullable().optional(),
+  model: z.string().nullable().optional(),
+  vin: z.string().nullable().optional(),
+  license_plate: z.string().nullable().optional(),
+  license_state: z.string().nullable().optional(),
+  cab_type: z.string().nullable().optional(),
+  color: z.string().nullable().optional(),
+  dimensions: z.string().nullable().optional(),
+})
+export const CreateVehicleResponseSchema = z.object({
+  vehicle_number: z.string().nullable(),
+  nickname: z.string(),
+})
+
+// ── Drivers (API migration) ──────────────────────────────────────────────────
+// Mirrors app/api/drivers/route.ts GET.
+
+export const DriverSummarySchema = z.object({
+  id: z.number().int(),
+  driver_number: z.string().nullable(),
+  invite_status: z.string().nullable(),
+  default_vehicle_id: z.number().int().nullable(),
+  cdl_expiry: z.string().nullable(),
+  med_cert_expiry: z.string().nullable(),
+  is_active: z.boolean().nullable(),
+  first_name: z.string().nullable(),
+  last_name: z.string().nullable(),
+  phone: z.string().nullable(),
+})
+export const ListDriversResponseSchema = z.object({ drivers: z.array(DriverSummarySchema) })
+
+// ── Driver messages writes (API migration) ───────────────────────────────────
+// Mirrors app/api/driver-messages/route.ts POST. Translation is out of scope
+// here (deferred) — no translate-related field is modeled.
+
+export const SendDriverMessageBodySchema = z.object({
+  load_id: z.number().int().positive(),
+  body: z.string().min(1),
+})
+export const SendDriverMessageResponseSchema = z.object({
+  id: z.number().int(),
+  sent_at: z.string(),
+})
+
 export type ListLoadsQuery = z.infer<typeof ListLoadsQuerySchema>
 export type ListLoadsResponse = z.infer<typeof ListLoadsResponseSchema>
