@@ -169,6 +169,10 @@ describe('mark_invoice_sent_command', () => {
 
     const outbox = await outboxRow(idempotencyKey)
     expect(outbox?.event_type).toBe('InvoiceSent')
+    // Caught in review: this payload originally carried no `amount` at all,
+    // which made the financial-events export silently report every
+    // InvoiceSent event as $0.
+    expect((outbox?.payload as { amount: number }).amount).toBe(500)
   })
 })
 
@@ -194,6 +198,9 @@ describe('mark_invoice_paid (extended by 0033 with outbox emission)', () => {
 
     const outbox = await outboxRow(idempotencyKey)
     expect(outbox?.event_type).toBe('InvoicePaid')
+    // Same gap as InvoiceSent above: this payload originally carried no
+    // `amount`, so the export reported every InvoicePaid event as $0.
+    expect((outbox?.payload as { amount: number }).amount).toBe(700)
 
     const second = await ownerAClient.rpc('mark_invoice_paid' as never, {
       p_invoice_id: invoiceId,

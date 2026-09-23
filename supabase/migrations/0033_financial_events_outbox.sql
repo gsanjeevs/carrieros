@@ -91,9 +91,13 @@ BEGIN
   INSERT INTO outbox_events (event_type, aggregate_type, aggregate_id, org_id, payload, correlation_id, idempotency_key)
   VALUES (
     'InvoiceCreated', 'Invoice', v_invoice.id::TEXT, v_org_id,
+    -- No currency key here: the org's currency is resolved once at export
+    -- read time from organizations.currency (financial-event-query-
+    -- repository.ts), not stamped per-event -- a per-event value would just
+    -- be one more place for it to drift from the source of truth.
     jsonb_build_object(
       'invoiceId', v_invoice.id, 'invoiceNumber', v_invoice.invoice_number,
-      'loadId', p_load_id, 'amount', p_amount, 'currency', NULL
+      'loadId', p_load_id, 'amount', p_amount
     ),
     p_correlation_id, p_idempotency_key
   );
@@ -147,16 +151,20 @@ BEGIN
 
   UPDATE invoices SET status = 'sent', sent_at = p_sent_at
    WHERE id = p_invoice_id AND carrier_org_id = v_org_id
-  RETURNING id, invoice_number INTO v_invoice;
+  RETURNING id, invoice_number, amount INTO v_invoice;
 
   IF NOT FOUND THEN
     RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404';
   END IF;
 
+  -- `amount` is included here (not just invoiceId/sentAt) so the
+  -- financial-events export's amountFor() has a real figure for this event
+  -- type -- an accounting sync reading "InvoiceSent, $0" would be actively
+  -- wrong, not just incomplete.
   INSERT INTO outbox_events (event_type, aggregate_type, aggregate_id, org_id, payload, correlation_id, idempotency_key)
   VALUES (
     'InvoiceSent', 'Invoice', v_invoice.id::TEXT, v_org_id,
-    jsonb_build_object('invoiceId', v_invoice.id, 'invoiceNumber', v_invoice.invoice_number, 'sentAt', p_sent_at),
+    jsonb_build_object('invoiceId', v_invoice.id, 'invoiceNumber', v_invoice.invoice_number, 'amount', v_invoice.amount, 'sentAt', p_sent_at),
     p_correlation_id, p_idempotency_key
   );
 
@@ -199,6 +207,7 @@ DECLARE
   v_org_id   BIGINT;
   v_actor    UUID;
   v_load_id  BIGINT;
+  v_amount   NUMERIC;
   v_exists   BOOLEAN;
   v_existing BIGINT;
 BEGIN
@@ -220,7 +229,7 @@ BEGIN
   UPDATE invoices
      SET status = 'paid', paid_at = p_paid_at
    WHERE id = p_invoice_id AND carrier_org_id = v_org_id AND status <> 'paid'
-  RETURNING load_id INTO v_load_id;
+  RETURNING load_id, amount INTO v_load_id, v_amount;
 
   IF NOT FOUND THEN
     SELECT EXISTS (SELECT 1 FROM invoices WHERE id = p_invoice_id AND carrier_org_id = v_org_id) INTO v_exists;
@@ -234,10 +243,13 @@ BEGIN
     UPDATE loads SET status = 'paid' WHERE id = v_load_id AND carrier_org_id = v_org_id;
   END IF;
 
+  -- `amount` is included here (not just invoiceId/loadId/paidAt) for the same
+  -- reason as InvoiceSent above -- amountFor() in the financial-events export
+  -- would otherwise report this event as $0.
   INSERT INTO outbox_events (event_type, aggregate_type, aggregate_id, org_id, payload, correlation_id, idempotency_key)
   VALUES (
     'InvoicePaid', 'Invoice', p_invoice_id::TEXT, v_org_id,
-    jsonb_build_object('invoiceId', p_invoice_id, 'loadId', v_load_id, 'paidAt', p_paid_at),
+    jsonb_build_object('invoiceId', p_invoice_id, 'loadId', v_load_id, 'amount', v_amount, 'paidAt', p_paid_at),
     p_correlation_id, p_idempotency_key
   );
 

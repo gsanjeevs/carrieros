@@ -72,6 +72,26 @@ describe('GET /api/public/v1/financial-events', () => {
       p_idempotency_key: `test:pub:invoice:${loadId}`,
     } as never)
 
+    const { data: invoiceRow } = await admin.from('invoices').select('id').eq('load_id', loadId).single()
+    const invoiceId = Number(invoiceRow!.id)
+
+    // Also exercise InvoiceSent/InvoicePaid -- these two event types didn't
+    // carry `amount` in their outbox payload before a fix caught in review,
+    // which made the export silently report them as $0. Assert the real
+    // amount survives (see 'reports the real invoice amount...' below).
+    await ownerClient.rpc('mark_invoice_sent_command' as never, {
+      p_invoice_id: invoiceId,
+      p_sent_at: new Date().toISOString(),
+      p_correlation_id: 'test-corr',
+      p_idempotency_key: `test:pub:invoice-sent:${loadId}`,
+    } as never)
+    await ownerClient.rpc('mark_invoice_paid' as never, {
+      p_invoice_id: invoiceId,
+      p_paid_at: new Date().toISOString(),
+      p_correlation_id: 'test-corr',
+      p_idempotency_key: `test:pub:invoice-paid:${loadId}`,
+    } as never)
+
     const driverUser = await createTestUser(admin, org.orgId, 'driver')
     const { data: driverRow } = await admin
       .from('drivers')
@@ -138,6 +158,15 @@ describe('GET /api/public/v1/financial-events', () => {
 
     expect(byType.LoadExpenseRecorded.category).toBe('expense:lumper')
     expect(byType.LoadExpenseRecorded.amount).toBe(55)
+
+    // Regression coverage for the amount bug caught in review: InvoiceSent
+    // and InvoicePaid must report the invoice's real amount, not $0 (their
+    // outbox payloads didn't originally carry it at all).
+    expect(byType.InvoiceCreated.amount).toBe(1234)
+    expect(byType.InvoiceSent.category).toBe('revenue:freight')
+    expect(byType.InvoiceSent.amount).toBe(1234)
+    expect(byType.InvoicePaid.category).toBe('revenue:freight')
+    expect(byType.InvoicePaid.amount).toBe(1234)
 
     // Stable external id present on every event, usable as a dedupe key.
     for (const e of body.events as { id: string }[]) {
