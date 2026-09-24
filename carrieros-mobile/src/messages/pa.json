@@ -512,7 +512,13 @@
     "noPaymentMethod": "ਕੋਈ ਭੁਗਤਾਨ ਤਰੀਕਾ ਦਰਜ ਨਹੀਂ",
     "fleetUsage": "ਫਲੀਟ ਵਰਤੋਂ",
     "trucksUsed": "%{included} ਵਿੱਚੋਂ %{count} ਟਰੱਕ ਸ਼ਾਮਲ",
-    "overageFee": "%{count} ਵਾਧੂ — $%{fee}/ਮਹੀਨਾ ਵਾਧੂ ਖਰਚਾ"
+    "overageFee": "%{count} ਵਾਧੂ — $%{fee}/ਮਹੀਨਾ ਵਾਧੂ ਖਰਚਾ",
+    "manageSubscription": "ਸਬਸਕ੍ਰਿਪਸ਼ਨ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ",
+    "manageSubscriptionHandoffTitle": "ਵੈੱਬ 'ਤੇ ਜਾਰੀ ਰੱਖੋ",
+    "manageSubscriptionHandoffMessage": "ਆਪਣੀ ਯੋਜਨਾ ਜਾਂ ਭੁਗਤਾਨ ਦਾ ਤਰੀਕਾ ਬਦਲਣ ਨਾਲ ਤੁਹਾਡੇ ਬ੍ਰਾਊਜ਼ਰ ਵਿੱਚ carrieros.com ਖੁੱਲ੍ਹਦਾ ਹੈ — ਉਹੀ ਸੁਰੱਖਿਅਤ ਚੈਕਆਊਟ ਜੋ ਡੈਸਕਟਾਪ 'ਤੇ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ।",
+    "manageSubscriptionHandoffCancel": "ਰੱਦ ਕਰੋ",
+    "manageSubscriptionHandoffConfirm": "carrieros.com ਖੋਲ੍ਹੋ",
+    "manageSubscriptionOpenError": "ਬ੍ਰਾਊਜ਼ਰ ਨਹੀਂ ਖੁੱਲ੍ਹ ਸਕਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
   },
   "settlements": {
     "title": "ਸੈਟਲਮੈਂਟ",

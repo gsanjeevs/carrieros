@@ -512,7 +512,13 @@
     "noPaymentMethod": "No hay ningún método de pago registrado",
     "fleetUsage": "Uso de la Flota",
     "trucksUsed": "%{count} de %{included} camiones incluidos",
-    "overageFee": "%{count} de más — $%{fee}/mes de excedente"
+    "overageFee": "%{count} de más — $%{fee}/mes de excedente",
+    "manageSubscription": "Administrar Suscripción",
+    "manageSubscriptionHandoffTitle": "Continuar en la Web",
+    "manageSubscriptionHandoffMessage": "Cambiar tu plan o método de pago abre carrieros.com en tu navegador — el mismo proceso de pago seguro que en la versión de escritorio.",
+    "manageSubscriptionHandoffCancel": "Cancelar",
+    "manageSubscriptionHandoffConfirm": "Abrir carrieros.com",
+    "manageSubscriptionOpenError": "No se pudo abrir el navegador. Inténtalo de nuevo."
   },
   "settlements": {
     "title": "Liquidaciones",
