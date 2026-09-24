@@ -91,7 +91,10 @@ export class SupabaseSetupRepository implements BillingWriteRepository, Customer
 
     const { data, error } = await this.admin.from('carrier_details').update({ tier }).eq('org_id', actor.orgId).select('tier').single()
     if (error || !data) return fail('tier change', error?.message ?? 'No row returned')
-    return ok(data.tier)
+    // `tier` (the just-validated, just-written input) rather than `data.tier`:
+    // the column is nullable in the generated type even though this update
+    // just set it to a real value, so `data.tier` is `string | null` here.
+    return ok(tier)
   }
 
   async create(actor: ActorContext, input: CreateCustomerInput): Promise<Result<{ org_id: number; name: string; customer_number: string | null }>>
@@ -161,7 +164,7 @@ export class SupabaseSetupRepository implements BillingWriteRepository, Customer
   // direct tenant-scoped UPDATE, so no RPC is needed here, unlike customers
   // (which cross a tenant boundary).
   private async updateVehicle(actor: ActorContext, vehicleId: number, input: UpdateVehicleInput) {
-    const patch: Record<string, unknown> = {}
+    const patch: Database['public']['Tables']['vehicles']['Update'] = {}
     for (const [key, dbKey] of [
       ['nickname', 'nickname'], ['year', 'year'], ['make', 'make'], ['model', 'model'], ['vin', 'vin'],
       ['licensePlate', 'license_plate'], ['licenseState', 'license_state'], ['cabType', 'cab_type'],
