@@ -23,7 +23,12 @@ function operationFor(e: Endpoint) {
   const errorSchema = toSchema(ErrorResponseSchema)
   const responses: Record<string, unknown> = e.stream
     ? { '200': { description: 'Server-sent events stream', content: { 'text/event-stream': { schema: { type: 'string' } } } } }
-    : { '200': { description: 'OK', content: { 'application/json': { schema: toSchema(e.response) } } } }
+    : {
+        [String(e.successStatus ?? 200)]: {
+          description: e.successStatus === 201 ? 'Created' : 'OK',
+          content: { 'application/json': { schema: toSchema(e.response) } },
+        },
+      }
   for (const status of e.errorStatuses) {
     responses[String(status)] = { description: 'Error', content: { 'application/json': { schema: errorSchema } } }
   }

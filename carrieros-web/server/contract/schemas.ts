@@ -672,8 +672,7 @@ export const AssignLoadBodySchema = z
   .refine((v) => Object.keys(v).length > 0, { message: 'Provide at least one of driver_id, vehicle_id, status' })
 
 export const AssignLoadResponseSchema = z.object({
-  outcome: z.enum(['APPLIED', 'REPLAYED']),
-  load_id: z.number().int(),
+  ok: z.literal(true),
   ifta_mileage_complete: z
     .boolean()
     .nullable()
@@ -804,7 +803,7 @@ export const DriverSummarySchema = z.object({
   last_name: z.string().nullable(),
   phone: z.string().nullable(),
 })
-export const ListDriversResponseSchema = z.object({ drivers: z.array(DriverSummarySchema) })
+export const ListDriversResponseSchema = z.array(DriverSummarySchema)
 
 // ── Driver messages writes (API migration) ───────────────────────────────────
 // Mirrors app/api/driver-messages/route.ts POST. Translation is out of scope

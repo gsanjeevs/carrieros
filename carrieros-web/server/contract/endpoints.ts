@@ -75,6 +75,21 @@ import {
   CreateOAuthClientResponseSchema,
   OAuthClientIdParamsSchema,
   RevokeOAuthClientResponseSchema,
+  CreateLoadBodySchema,
+  CreateLoadResponseSchema,
+  AssignLoadBodySchema,
+  AssignLoadResponseSchema,
+  SendInvoiceResponseSchema,
+  OnboardingBodySchema,
+  OnboardingResponseSchema,
+  AddPaymentMethodResponseSchema,
+  CreateCustomerBodySchema,
+  CreateCustomerResponseSchema,
+  CreateVehicleBodySchema,
+  CreateVehicleResponseSchema,
+  ListDriversResponseSchema,
+  SendDriverMessageBodySchema,
+  SendDriverMessageResponseSchema,
 } from './schemas'
 
 export interface Endpoint {
@@ -88,6 +103,8 @@ export interface Endpoint {
   headers?: ZodType
   body?: ZodType
   response: ZodType
+  /** Successful JSON response status. Defaults to 200. */
+  successStatus?: number
   /** Extra status codes, all shaped as ErrorResponse. */
   errorStatuses: readonly number[]
   /** text/event-stream: documented here, consumed via the client's subscribe(), not openapi-fetch. */
@@ -112,6 +129,17 @@ export const endpoints: readonly Endpoint[] = [
     tag: 'loads',
     query: ListLoadsQuerySchema,
     response: ListLoadsResponseSchema,
+    errorStatuses: [400, 401, 403, 500],
+  },
+  {
+    operationId: 'createLoad',
+    method: 'post',
+    path: '/api/v1/loads',
+    summary: 'Create a draft load for the caller\'s organization',
+    tag: 'loads',
+    body: CreateLoadBodySchema,
+    response: CreateLoadResponseSchema,
+    successStatus: 201,
     errorStatuses: [400, 401, 403, 500],
   },
   {
@@ -359,6 +387,17 @@ export const endpoints: readonly Endpoint[] = [
     errorStatuses: [401, 403, 404, 500],
   },
   {
+    operationId: 'assignLoad',
+    method: 'patch',
+    path: '/api/v1/loads/{id}',
+    summary: 'Assign or unassign a driver and vehicle, and optionally update load status',
+    tag: 'loads',
+    params: LoadIdParamsSchema,
+    body: AssignLoadBodySchema,
+    response: AssignLoadResponseSchema,
+    errorStatuses: [400, 401, 403, 404, 500],
+  },
+  {
     operationId: 'getMyEntitlements',
     method: 'get',
     path: '/api/v1/me/entitlements',
@@ -384,6 +423,17 @@ export const endpoints: readonly Endpoint[] = [
     tag: 'fleet',
     response: ListVehiclesResponseSchema,
     errorStatuses: [401, 403, 500],
+  },
+  {
+    operationId: 'createVehicle',
+    method: 'post',
+    path: '/api/v1/vehicles',
+    summary: 'Add a vehicle to the caller\'s fleet',
+    tag: 'fleet',
+    body: CreateVehicleBodySchema,
+    response: CreateVehicleResponseSchema,
+    successStatus: 201,
+    errorStatuses: [400, 401, 403, 500],
   },
   {
     operationId: 'getVehicle',
@@ -413,6 +463,16 @@ export const endpoints: readonly Endpoint[] = [
     params: InvoiceIdParamsSchema,
     response: InvoiceDetailResponseSchema,
     errorStatuses: [401, 403, 404, 500],
+  },
+  {
+    operationId: 'sendInvoice',
+    method: 'post',
+    path: '/api/v1/invoices/{id}/send',
+    summary: 'Email an invoice to its recipient and mark it sent',
+    tag: 'invoices',
+    params: InvoiceIdParamsSchema,
+    response: SendInvoiceResponseSchema,
+    errorStatuses: [400, 401, 403, 404, 500],
   },
   {
     operationId: 'listLoadDvirInspections',
@@ -453,6 +513,17 @@ export const endpoints: readonly Endpoint[] = [
     errorStatuses: [401, 403, 500],
   },
   {
+    operationId: 'createCustomer',
+    method: 'post',
+    path: '/api/v1/customers',
+    summary: 'Create a customer organization for the caller\'s carrier',
+    tag: 'customers',
+    body: CreateCustomerBodySchema,
+    response: CreateCustomerResponseSchema,
+    successStatus: 201,
+    errorStatuses: [400, 401, 403, 500],
+  },
+  {
     operationId: 'getCustomer',
     method: 'get',
     path: '/api/v1/customers/{id}',
@@ -470,6 +541,15 @@ export const endpoints: readonly Endpoint[] = [
     tag: 'billing',
     response: GetBillingResponseSchema,
     errorStatuses: [401, 403, 404, 500],
+  },
+  {
+    operationId: 'addPaymentMethod',
+    method: 'post',
+    path: '/api/v1/billing/payment-method',
+    summary: 'Add or replace the organization\'s payment method',
+    tag: 'billing',
+    response: AddPaymentMethodResponseSchema,
+    errorStatuses: [400, 401, 403, 500],
   },
   {
     operationId: 'listMaintenanceReminders',
@@ -538,6 +618,37 @@ export const endpoints: readonly Endpoint[] = [
     params: LoadIdParamsSchema,
     response: ListMessagesResponseSchema,
     errorStatuses: [401, 403, 404, 500],
+  },
+  {
+    operationId: 'sendDriverMessage',
+    method: 'post',
+    path: '/api/v1/driver-messages',
+    summary: 'Send a message on a load\'s driver and back-office thread',
+    tag: 'messages',
+    body: SendDriverMessageBodySchema,
+    response: SendDriverMessageResponseSchema,
+    successStatus: 201,
+    errorStatuses: [400, 401, 403, 404, 500],
+  },
+  {
+    operationId: 'listDrivers',
+    method: 'get',
+    path: '/api/v1/drivers',
+    summary: 'List the organization\'s active drivers',
+    tag: 'fleet',
+    response: ListDriversResponseSchema,
+    errorStatuses: [401, 403, 500],
+  },
+  {
+    operationId: 'completeOnboarding',
+    method: 'post',
+    path: '/api/v1/onboarding',
+    summary: 'Create the caller\'s carrier organization and owner or solo profile',
+    tag: 'onboarding',
+    body: OnboardingBodySchema,
+    response: OnboardingResponseSchema,
+    successStatus: 201,
+    errorStatuses: [400, 401, 409, 500],
   },
   {
     operationId: 'getDashboard',

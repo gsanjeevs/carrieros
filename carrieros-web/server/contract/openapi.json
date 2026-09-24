@@ -468,6 +468,315 @@
             }
           }
         }
+      },
+      "post": {
+        "operationId": "createLoad",
+        "summary": "Create a draft load for the caller's organization",
+        "tags": [
+          "loads"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "customer_name_raw": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "pickup_address": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "pickup_city": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "pickup_state": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "pickup_zip": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "pickup_date": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "pickup_time": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "delivery_address": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "delivery_city": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "delivery_state": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "delivery_zip": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "delivery_date": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "delivery_time": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "commodity": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "weight_lbs": {
+                    "nullable": true,
+                    "type": "number"
+                  },
+                  "rate": {
+                    "nullable": true,
+                    "type": "number"
+                  },
+                  "total_miles": {
+                    "nullable": true,
+                    "type": "number"
+                  },
+                  "intake_method": {
+                    "description": "Defaults to \"manual\" when omitted.",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "raw_intake_text": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "load_number": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "load_number"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/me/preferences": {
@@ -9907,6 +10216,327 @@
             }
           }
         }
+      },
+      "patch": {
+        "operationId": "assignLoad",
+        "summary": "Assign or unassign a driver and vehicle, and optionally update load status",
+        "tags": [
+          "loads"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "exclusiveMinimum": true,
+              "maximum": 9007199254740991
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "driver_id": {
+                    "description": "Null clears the assignment.",
+                    "nullable": true,
+                    "type": "integer",
+                    "minimum": 0,
+                    "exclusiveMinimum": true,
+                    "maximum": 9007199254740991
+                  },
+                  "vehicle_id": {
+                    "description": "Null clears the assignment.",
+                    "nullable": true,
+                    "type": "integer",
+                    "minimum": 0,
+                    "exclusiveMinimum": true,
+                    "maximum": 9007199254740991
+                  },
+                  "status": {
+                    "description": "One of: draft, scheduled, dispatched, picked_up, in_transit, delivered, invoiced, paid, cancelled, declined.",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "ifta_mileage_complete": {
+                      "description": "Present only when status transitions to delivered and the org has the ifta_mileage_log feature.",
+                      "nullable": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "ok"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/me/entitlements": {
@@ -10141,6 +10771,295 @@
                   },
                   "required": [
                     "vehicles"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createVehicle",
+        "summary": "Add a vehicle to the caller's fleet",
+        "tags": [
+          "fleet"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "vehicle_type_id": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "exclusiveMinimum": true,
+                    "maximum": 9007199254740991
+                  },
+                  "nickname": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "year": {
+                    "nullable": true,
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "make": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "model": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "vin": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "license_plate": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "license_state": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "cab_type": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "color": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "dimensions": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "vehicle_type_id",
+                  "nickname"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "vehicle_number": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "nickname": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "vehicle_number",
+                    "nickname"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
                   ],
                   "additionalProperties": false
                 }
@@ -10735,6 +11654,293 @@
             }
           },
           "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/invoices/{id}/send": {
+      "post": {
+        "operationId": "sendInvoice",
+        "summary": "Email an invoice to its recipient and mark it sent",
+        "tags": [
+          "invoices"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "exclusiveMinimum": true,
+              "maximum": 9007199254740991
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "invoice_number": {
+                      "type": "string"
+                    },
+                    "warning_code": {
+                      "description": "e.g. NO_RECIPIENT_EMAIL — set when the invoice was marked sent despite the email failing to send.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "invoice_number"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
             "description": "Error",
             "content": {
               "application/json": {
@@ -11538,6 +12744,293 @@
             }
           }
         }
+      },
+      "post": {
+        "operationId": "createCustomer",
+        "summary": "Create a customer organization for the caller's carrier",
+        "tags": [
+          "customers"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phone": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "email": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "address": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "city": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "state": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "zip": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "country": {
+                    "description": "Defaults to \"US\".",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "contact_name": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "notes": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "org_id": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "customer_number": {
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "org_id",
+                    "name",
+                    "customer_number"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/customers/{id}": {
@@ -12051,6 +13544,249 @@
             }
           },
           "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/billing/payment-method": {
+      "post": {
+        "operationId": "addPaymentMethod",
+        "summary": "Add or replace the organization's payment method",
+        "tags": [
+          "billing"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "stripe_customer_id": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "card_brand": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "card_last4": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "billing_status": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "trial_ends_at": {
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "stripe_customer_id",
+                    "card_brand",
+                    "card_last4",
+                    "billing_status",
+                    "trial_ends_at"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
             "description": "Error",
             "content": {
               "application/json": {
@@ -13287,6 +15023,851 @@
             }
           },
           "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/driver-messages": {
+      "post": {
+        "operationId": "sendDriverMessage",
+        "summary": "Send a message on a load's driver and back-office thread",
+        "tags": [
+          "messages"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "load_id": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "exclusiveMinimum": true,
+                    "maximum": 9007199254740991
+                  },
+                  "body": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "load_id",
+                  "body"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "sent_at": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "sent_at"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drivers": {
+      "get": {
+        "operationId": "listDrivers",
+        "summary": "List the organization's active drivers",
+        "tags": [
+          "fleet"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "driver_number": {
+                        "nullable": true,
+                        "type": "string"
+                      },
+                      "invite_status": {
+                        "nullable": true,
+                        "type": "string"
+                      },
+                      "default_vehicle_id": {
+                        "nullable": true,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "cdl_expiry": {
+                        "nullable": true,
+                        "type": "string"
+                      },
+                      "med_cert_expiry": {
+                        "nullable": true,
+                        "type": "string"
+                      },
+                      "is_active": {
+                        "nullable": true,
+                        "type": "boolean"
+                      },
+                      "first_name": {
+                        "nullable": true,
+                        "type": "string"
+                      },
+                      "last_name": {
+                        "nullable": true,
+                        "type": "string"
+                      },
+                      "phone": {
+                        "nullable": true,
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "driver_number",
+                      "invite_status",
+                      "default_vehicle_id",
+                      "cdl_expiry",
+                      "med_cert_expiry",
+                      "is_active",
+                      "first_name",
+                      "last_name",
+                      "phone"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/onboarding": {
+      "post": {
+        "operationId": "completeOnboarding",
+        "summary": "Create the caller's carrier organization and owner or solo profile",
+        "tags": [
+          "onboarding"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "company_name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "mc_number": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "dot_number": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "ein": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "address": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "country": {
+                    "description": "Defaults to \"US\".",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "city": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "zip": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "default_net_terms_days": {
+                    "description": "One of 7, 15, 30, 45, 60; falls back to 30 if omitted or not one of those.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "first_name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "last_name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "role": {
+                    "description": "Defaults to \"owner\". Self-serve onboarding only ever creates the org's owner or solo operator.",
+                    "type": "string",
+                    "enum": [
+                      "owner",
+                      "solo"
+                    ]
+                  },
+                  "tier": {
+                    "description": "Plan chosen during signup; falls back to \"starter\" if omitted or not one of those.",
+                    "type": "string",
+                    "enum": [
+                      "starter",
+                      "growth",
+                      "pro",
+                      "enterprise"
+                    ]
+                  }
+                },
+                "required": [
+                  "company_name",
+                  "state",
+                  "first_name",
+                  "last_name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "org_id": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "load_email": {
+                      "nullable": true,
+                      "description": "The carrier's generated inbound load-forwarding address; null if a free slug could not be found.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "org_id",
+                    "load_email"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
             "description": "Error",
             "content": {
               "application/json": {

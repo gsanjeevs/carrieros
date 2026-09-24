@@ -12,6 +12,7 @@
     "verify:compliance": "eslint && tsc --noEmit && node scripts/check-architecture.mjs && node scripts/check-tokens.mjs && npm run check:api",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:contract": "vitest run --config vitest.contract.config.ts",
     "test:extraction": "vitest run --config vitest.extraction.config.ts",
     "test:support-triage": "vitest run --config vitest.support-triage.config.ts",
     "gen:api": "tsx scripts/gen-api-client.ts",
