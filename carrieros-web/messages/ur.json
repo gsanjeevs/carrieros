@@ -419,6 +419,7 @@
     "title": "گاڑیاں",
     "truckCount": "{count} گاڑیاں",
     "addTruck": "گاڑی شامل کریں",
+    "editTruck": "گاڑی میں ترمیم کریں",
     "truckNumber": "گاڑی #",
     "nickname": "عرفیت",
     "year": "سال",
@@ -432,6 +433,7 @@
     "plate": "پلیٹ",
     "addFirstTruck": "پہلی گاڑی شامل کریں",
     "adding": "شامل کیا جا رہا ہے…",
+    "saving": "محفوظ ہو رہا ہے…",
     "chooseType": "گاڑی کی قسم",
     "chooseTypeRequired": "جاری رکھنے کے لیے گاڑی کی قسم منتخب کریں۔",
     "type_semi": "سیمی (ٹریکٹر ٹریلر)",
@@ -537,7 +539,8 @@
     "uploadPhoto": "تصویر اپ لوڈ کریں",
     "replacePhoto": "تصویر تبدیل کریں",
     "photoUploadFailed": "تصویر اپ لوڈ نہیں ہو سکی۔ دوبارہ کوشش کریں۔",
-    "dvirNotSigned": "دستخط نہیں"
+    "dvirNotSigned": "دستخط نہیں",
+    "saving": "محفوظ ہو رہا ہے…"
   },
   "companyDocuments": {
     "title": "کمپنی کے دستاویزات",

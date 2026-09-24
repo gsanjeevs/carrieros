@@ -4,6 +4,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getTranslations, getLocale } from 'next-intl/server'
 import VehicleTabs from './VehicleTabs'
+import EditVehicleButton from './EditVehicleButton'
 import FuelStopsSection, { type FuelStopRow } from '@/components/FuelStopsSection'
 import VehicleDocuments, { type VehicleDocType, type VehicleDocument } from '@/components/VehicleDocuments'
 import VehiclePhotoUpload from './VehiclePhotoUpload'
@@ -548,6 +549,25 @@ export default async function VehicleDetailPage({
           <StatusBadge variant={vehicleStatusVariant((vehicle.status ?? 'active') as VehicleStatus)}>
             {t(`vstatus_${vehicle.status ?? 'active'}` as never)}
           </StatusBadge>
+          {canManage && (
+            <div className="ml-auto">
+              <EditVehicleButton
+                vehicle={{
+                  id: vehicle.id,
+                  nickname: vehicle.nickname,
+                  year: vehicle.year,
+                  make: vehicle.make,
+                  model: vehicle.model,
+                  vin: vehicle.vin,
+                  license_plate: vehicle.license_plate,
+                  license_state: vehicle.license_state,
+                  cab_type: vehicle.cab_type,
+                  color: vehicle.color,
+                  dimensions: vehicle.dimensions,
+                }}
+              />
+            </div>
+          )}
         </div>
         <p className="text-text-sec text-sm ml-9">{ymm || vt ? [ymm, vt ? t(`type_${vt.code}` as never) : null].filter(Boolean).join(' · ') : ''}</p>
         <div className="ml-9 mt-2">
