@@ -548,6 +548,10 @@
     "signed": "Signed",
     "notSigned": "Not signed"
   },
+  "messages": {
+    "title": "Message Inbox",
+    "empty": "No conversations yet."
+  },
   "driverProfile": {
     "linkLabel": "Driver Info",
     "title": "Driver Info",

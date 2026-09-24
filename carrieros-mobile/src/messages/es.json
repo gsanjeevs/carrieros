@@ -548,6 +548,10 @@
     "signed": "Firmado",
     "notSigned": "Sin firmar"
   },
+  "messages": {
+    "title": "Bandeja de mensajes",
+    "empty": "Aún no hay conversaciones."
+  },
   "driverProfile": {
     "linkLabel": "Información del Conductor",
     "title": "Información del Conductor",
