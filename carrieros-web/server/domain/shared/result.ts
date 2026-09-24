@@ -51,6 +51,8 @@ export type DomainErrorCode =
   | 'REQUEST_IN_PROGRESS'
   // A precondition about related data failed (e.g. load not delivered yet)
   | 'PRECONDITION_FAILED'
+  // An external invoice email failed before the database status changed.
+  | 'EMAIL_SEND_FAILED'
   // The actor may not perform this step on this record (segregation of duties)
   | 'SEGREGATION_OF_DUTIES'
   // Authenticated bootstrap caller already has an organization membership.

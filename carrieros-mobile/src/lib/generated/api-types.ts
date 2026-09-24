@@ -30,7 +30,7 @@ export interface paths {
         /** List loads visible to the caller */
         get: operations["listLoads"];
         put?: never;
-        /** Create a draft load for the caller's organization */
+        /** Create a draft load for the caller's organization (retry-safe) */
         post: operations["createLoad"];
         delete?: never;
         options?: never;
@@ -382,7 +382,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Assign or unassign a driver and vehicle, and optionally update load status */
+        /** Assign or unassign a driver and vehicle, and optionally update load status (retry-safe) */
         patch: operations["assignLoad"];
         trace?: never;
     };
@@ -964,7 +964,9 @@ export interface operations {
     createLoad: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -4516,7 +4518,9 @@ export interface operations {
     assignLoad: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
             path: {
                 id: number;
             };

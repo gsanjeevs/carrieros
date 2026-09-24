@@ -282,3 +282,28 @@ export function createDriverMessageService(supabase: SupabaseClient<Database>): 
     idempotency: new SupabaseIdempotencyRepository(createAdminClient()),
   })
 }
+
+import { LoadWriteService } from './application/load-write-service'
+import { SupabaseLoadWriteRepository } from './infrastructure/supabase/load-write-repository'
+import { ExpoPushGateway } from './infrastructure/push/expo-push-gateway'
+
+export function createLoadWriteService(supabase: SupabaseClient<Database>): LoadWriteService {
+  return new LoadWriteService({
+    loads: new SupabaseLoadWriteRepository(supabase),
+    features: new SupabaseFeatureGate(supabase),
+    notifications: new ExpoPushGateway(),
+    idempotency: new SupabaseIdempotencyRepository(createAdminClient()),
+  })
+}
+
+import { InvoiceSendService } from './application/invoice-send-service'
+import { SmtpEmailGateway } from './infrastructure/email/smtp-email-gateway'
+
+export function createInvoiceSendService(supabase: SupabaseClient<Database>): InvoiceSendService {
+  return new InvoiceSendService({
+    invoices: new SupabaseInvoiceWriteRepository(supabase),
+    email: new SmtpEmailGateway(),
+    clock: { now: () => new Date() },
+    appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  })
+}

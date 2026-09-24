@@ -471,9 +471,22 @@
       },
       "post": {
         "operationId": "createLoad",
-        "summary": "Create a draft load for the caller's organization",
+        "summary": "Create a draft load for the caller's organization (retry-safe)",
         "tags": [
           "loads"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128,
+              "description": "Client-generated key, unique per user action. Replaying it returns the original outcome instead of applying twice (safe offline retry)."
+            }
+          }
         ],
         "requestBody": {
           "required": true,
@@ -10219,7 +10232,7 @@
       },
       "patch": {
         "operationId": "assignLoad",
-        "summary": "Assign or unassign a driver and vehicle, and optionally update load status",
+        "summary": "Assign or unassign a driver and vehicle, and optionally update load status (retry-safe)",
         "tags": [
           "loads"
         ],
@@ -10233,6 +10246,17 @@
               "minimum": 0,
               "exclusiveMinimum": true,
               "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128,
+              "description": "Client-generated key, unique per user action. Replaying it returns the original outcome instead of applying twice (safe offline retry)."
             }
           }
         ],

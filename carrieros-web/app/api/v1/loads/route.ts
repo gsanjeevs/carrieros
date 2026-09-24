@@ -6,10 +6,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { apiError, getAuthedContext, isErrorResponse } from '@/lib/api-auth'
 import { logError } from '@/lib/observability'
-import { createLoadQueryService } from '@/server/composition'
+import { createLoadQueryService, createLoadWriteService } from '@/server/composition'
 import { buildActorContext } from '@/server/infrastructure/supabase/actor-context'
 import { domainErrorResponse } from '@/server/http-errors'
-import { ListLoadsQuerySchema, ListLoadsResponseSchema } from '@/server/contract/schemas'
+import { CreateLoadBodySchema, CreateLoadResponseSchema, IdempotencyKeyHeaderSchema, ListLoadsQuerySchema, ListLoadsResponseSchema } from '@/server/contract/schemas'
 import type { LoadStatusGroup } from '@/server/domain/load/status-groups'
 
 export async function GET(request: NextRequest) {
@@ -43,4 +43,26 @@ export async function GET(request: NextRequest) {
     can_see_rate: result.value.canSeeRate,
   })
   return NextResponse.json(body)
+}
+
+export async function POST(request: NextRequest) {
+  const authed = await getAuthedContext(request)
+  if (isErrorResponse(authed)) return authed
+
+  const header = IdempotencyKeyHeaderSchema.safeParse({ 'Idempotency-Key': request.headers.get('idempotency-key') ?? '' })
+  if (!header.success) return apiError('VALIDATION_ERROR', 'Idempotency-Key header is required (8-128 characters)', 400)
+
+  let json: unknown
+  try { json = await request.json() }
+  catch { return apiError('VALIDATION_ERROR', 'Body must be JSON', 400) }
+  const body = CreateLoadBodySchema.safeParse(json)
+  if (!body.success) return apiError('VALIDATION_ERROR', body.error.issues[0]?.message ?? 'Invalid body', 400)
+
+  const requestId = request.headers.get('x-request-id')
+  const actor = await buildActorContext(authed.supabase, authed.user, requestId ?? crypto.randomUUID())
+  if (!actor.ok) return domainErrorResponse(actor.error)
+
+  const result = await createLoadWriteService(authed.supabase).create(actor.value, body.data, header.data['Idempotency-Key'])
+  if (!result.ok) return domainErrorResponse(result.error)
+  return NextResponse.json(CreateLoadResponseSchema.parse({ load_number: result.value.loadNumber }), { status: 201 })
 }
