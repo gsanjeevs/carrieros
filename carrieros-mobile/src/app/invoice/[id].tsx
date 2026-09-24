@@ -15,10 +15,10 @@
 // (decisions.md R3b) already used by DVIR/fuel-stops elsewhere in mobile.
 // Marking an invoice SENT is different: it really emails the customer via
 // server-side SMTP (lib/send-email.ts), which a mobile client has no
-// credentials for, so that one action calls the new
-// POST /api/invoices/[id]/send route (lib/invoice-actions.ts's
-// sendInvoiceAndMarkSent — the exact same function the web server action
-// calls) via apiFetch instead of writing to the table directly.
+// credentials for, so that one action calls POST /api/v1/invoices/{id}/send
+// (server/application/invoice-send-service.ts — the same shared
+// implementation the web server action and the legacy mobile route both
+// call) via the typed apiClient instead of writing to the table directly.
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -30,7 +30,6 @@ import { BrandColors, INVOICE_STATUS_PILL, Spacing, StatusColors } from '@/const
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
-import { apiFetch } from '@/lib/api';
 import { apiClient } from '@/lib/api-client';
 import { roleHasCapability } from '@/lib/generated/role-capabilities';
 import { formatDateTime } from '@/lib/format-date';
@@ -125,9 +124,9 @@ export default function InvoiceDetailScreen() {
     setBusy(true);
     setError('');
 
-    const res = await apiFetch(`/api/invoices/${invoice.id}/send`, { method: 'POST' });
+    const { response } = await apiClient.http.POST('/api/v1/invoices/{id}/send', { params: { path: { id: invoice.id } } });
     setBusy(false);
-    if (!res.ok) {
+    if (!response.ok) {
       setError(t('invoices.errorSendFailed'));
       return;
     }

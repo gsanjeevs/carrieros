@@ -7,9 +7,9 @@
 // than the API, since ADR 0003's SSE stream is signal-only and this thread
 // needs the message body itself the instant it lands, not a "something
 // changed, go refetch" nudge. Sending goes through POST /api/v1/driver-messages
-// (the typed apiClient, retry-safe via an idempotency key); translating still
-// uses the legacy bearer-token fetch since that route's role/tier gating and
-// language-inheritance logic aren't part of this migration's scope.
+// and translating through POST /api/v1/driver-messages/{id}/translate, both
+// via the typed apiClient (sending is retry-safe via an idempotency key;
+// translating is naturally idempotent, cached per message/language).
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 
@@ -22,7 +22,6 @@ import { useSession } from '@/hooks/use-session';
 import { supabase } from '@/lib/supabase';
 import { apiClient } from '@/lib/api-client';
 import { keyForSubmission } from '@/lib/idempotency';
-import { apiFetch } from '@/lib/api';
 
 const ORANGE = BrandColors.orange;
 
@@ -119,13 +118,12 @@ export function DriverChatSection({ loadId }: { loadId: number }) {
 
   async function translate(messageId: number) {
     try {
-      const res = await apiFetch(`/api/driver-messages/${messageId}/translate`, {
-        method: 'POST',
-        body: JSON.stringify({ target_language: locale }),
+      const { data, response } = await apiClient.http.POST('/api/v1/driver-messages/{id}/translate', {
+        params: { path: { id: messageId } },
+        body: { target_language: locale as 'en' | 'es' | 'pa' | 'ur' },
       });
-      if (res.ok) {
-        const j = await res.json();
-        setTranslated((prev) => ({ ...prev, [messageId]: j.translated_body }));
+      if (response.ok && data) {
+        setTranslated((prev) => ({ ...prev, [messageId]: data.translated_body }));
       }
     } catch {
       // Translation is a nice-to-have on top of an already-delivered
