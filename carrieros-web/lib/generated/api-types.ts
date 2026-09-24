@@ -868,6 +868,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/loads/extract-image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** AI photo-to-load extraction: parse a rate confirmation/BOL photo into load fields (pre-creation, no load id yet) */
+        post: operations["extractLoadImage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -7986,6 +8003,132 @@ export interface operations {
             };
             /** @description Error */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+        };
+    };
+    extractLoadImage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Base64-encoded photo, ~6MB decoded max. */
+                    image_base64: string;
+                    /** @enum {string} */
+                    media_type: "image/jpeg" | "image/png" | "image/webp";
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        customer_name_raw: string | null;
+                        load_number_raw: string | null;
+                        pickup_address: string | null;
+                        pickup_city: string | null;
+                        pickup_state: string | null;
+                        pickup_zip: string | null;
+                        pickup_date: string | null;
+                        pickup_time: string | null;
+                        delivery_address: string | null;
+                        delivery_city: string | null;
+                        delivery_state: string | null;
+                        delivery_zip: string | null;
+                        delivery_date: string | null;
+                        delivery_time: string | null;
+                        commodity: string | null;
+                        weight_lbs: number | null;
+                        rate: number | null;
+                        total_miles: number | null;
+                        confidence: {
+                            /** @enum {string} */
+                            pickup: "high" | "medium" | "low";
+                            /** @enum {string} */
+                            delivery: "high" | "medium" | "low";
+                            /** @enum {string} */
+                            rate: "high" | "medium" | "low";
+                            /** @enum {string} */
+                            dates: "high" | "medium" | "low";
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            502: {
                 headers: {
                     [name: string]: unknown;
                 };

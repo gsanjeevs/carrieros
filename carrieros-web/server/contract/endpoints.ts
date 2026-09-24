@@ -104,6 +104,8 @@ import {
   FinalizeOrgDocumentBodySchema,
   OrgDocumentResponseSchema,
   ListOrgDocumentsResponseSchema,
+  ExtractLoadImageBodySchema,
+  ExtractLoadImageResponseSchema,
 } from './schemas'
 
 export interface Endpoint {
@@ -800,5 +802,15 @@ export const endpoints: readonly Endpoint[] = [
     tag: 'documents',
     response: ListOrgDocumentsResponseSchema,
     errorStatuses: [401, 403, 500],
+  },
+  {
+    operationId: 'extractLoadImage',
+    method: 'post',
+    path: '/api/v1/loads/extract-image',
+    summary: 'AI photo-to-load extraction: parse a rate confirmation/BOL photo into load fields (pre-creation, no load id yet)',
+    tag: 'loads',
+    body: ExtractLoadImageBodySchema,
+    response: ExtractLoadImageResponseSchema,
+    errorStatuses: [400, 401, 500, 502],
   },
 ]

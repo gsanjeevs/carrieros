@@ -667,6 +667,43 @@ export const CreateLoadBodySchema = z.object({
 })
 export const CreateLoadResponseSchema = z.object({ load_number: z.string() })
 
+// Mirrors app/api/extract-load-image/route.ts (AI photo-to-load extraction) —
+// the one remaining API gap flagged in the 2026-09-23 completeness audit.
+// Stateless LLM passthrough (no DB read/write, same as the legacy route), so
+// no domain/application/infra layer — the route calls lib/extract-load.ts's
+// extractLoadFromImage() directly, same as the legacy route already does.
+export const ExtractLoadImageBodySchema = z.object({
+  image_base64: z.string().min(1).max(8 * 1024 * 1024).describe('Base64-encoded photo, ~6MB decoded max.'),
+  media_type: z.enum(['image/jpeg', 'image/png', 'image/webp']),
+})
+export const ExtractedLoadConfidenceSchema = z.object({
+  pickup: z.enum(['high', 'medium', 'low']),
+  delivery: z.enum(['high', 'medium', 'low']),
+  rate: z.enum(['high', 'medium', 'low']),
+  dates: z.enum(['high', 'medium', 'low']),
+})
+export const ExtractLoadImageResponseSchema = z.object({
+  customer_name_raw: z.string().nullable(),
+  load_number_raw: z.string().nullable(),
+  pickup_address: z.string().nullable(),
+  pickup_city: z.string().nullable(),
+  pickup_state: z.string().nullable(),
+  pickup_zip: z.string().nullable(),
+  pickup_date: z.string().nullable(),
+  pickup_time: z.string().nullable(),
+  delivery_address: z.string().nullable(),
+  delivery_city: z.string().nullable(),
+  delivery_state: z.string().nullable(),
+  delivery_zip: z.string().nullable(),
+  delivery_date: z.string().nullable(),
+  delivery_time: z.string().nullable(),
+  commodity: z.string().nullable(),
+  weight_lbs: z.number().nullable(),
+  rate: z.number().nullable(),
+  total_miles: z.number().nullable(),
+  confidence: ExtractedLoadConfidenceSchema,
+})
+
 export const AssignLoadBodySchema = z
   .object({
     driver_id: z.number().int().positive().nullable().optional().describe('Null clears the assignment.'),
