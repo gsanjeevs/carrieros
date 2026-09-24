@@ -16,6 +16,7 @@ import { formatDate } from '@/lib/format-datetime'
 import { formatMoney } from '@/lib/format-money'
 import { hasFeature } from '@/lib/entitlements'
 import CustomerTabs from './CustomerTabs'
+import EditCustomerButton from './EditCustomerButton'
 import CustomerContacts from '@/components/CustomerContacts'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import { invoiceStatusVariant, type InvoiceStatus } from '@/lib/domain/invoice-status'
@@ -112,7 +113,7 @@ export default async function CustomerDetailPage({
 
   const { data: customer } = await supabase
     .from('customer_details')
-    .select('org_id, customer_number, contact_name, tags, notes, organizations!customer_details_org_id_fkey(id, name, email, phone, address, city, state, zip)')
+    .select('org_id, customer_number, contact_name, tags, notes, organizations!customer_details_org_id_fkey(id, name, email, phone, address, city, state, zip, country)')
     .eq('customer_number', customer_number)
     .eq('carrier_org_id', profile.org_id)
     .maybeSingle()
@@ -129,6 +130,7 @@ export default async function CustomerDetailPage({
 
   const canSeeRevenue = roleHasCapability(profile.role, 'rate_visibility')
   const canBill = INVOICE_ROLES.includes(profile.role)
+  const canManageCustomer = roleHasCapability(profile.role, 'customers_manage')
 
   // Loads for this customer.
   const { data: loadsData } = await listLoadsForCustomer(supabase, org?.id ?? -1, profile.org_id)
@@ -175,7 +177,7 @@ export default async function CustomerDetailPage({
   }
 
   // Contacts (Phase 3H) — one org, many contacts, some with portal login.
-  const canManageContacts = roleHasCapability(profile.role, 'customers_manage')
+  const canManageContacts = canManageCustomer
   const { data: contactsData } = await supabase
     .from('customer_contacts')
     .select('id, name, email, phone, title, is_primary, portal_profile_id')
@@ -192,7 +194,26 @@ export default async function CustomerDetailPage({
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 space-y-6">
         <Card>
-          <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('detailInfo')}</h2></CardHeader>
+          <CardHeader className="flex items-center justify-between">
+            <h2 className="text-text-pri font-medium text-sm">{t('detailInfo')}</h2>
+            {canManageCustomer && (
+              <EditCustomerButton
+                customer={{
+                  id: org?.id ?? -1,
+                  name: org?.name ?? '',
+                  contact_name: customer.contact_name,
+                  phone: org?.phone ?? null,
+                  email: org?.email ?? null,
+                  address: org?.address ?? null,
+                  city: org?.city ?? null,
+                  state: org?.state ?? null,
+                  zip: org?.zip ?? null,
+                  country: org?.country ?? null,
+                  notes: customer.notes,
+                }}
+              />
+            )}
+          </CardHeader>
           <CardBody>
             <InfoRow label={t('contact')} value={customer.contact_name} />
             <InfoRow label={t('phoneEmail')} value={[org?.phone, org?.email].filter(Boolean).join(' · ') || null} />
