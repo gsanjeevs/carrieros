@@ -5,10 +5,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { apiError, getAuthedContext, isErrorResponse } from '@/lib/api-auth'
 import { logError } from '@/lib/observability'
-import { createLoadQueryService } from '@/server/composition'
+import { createLoadQueryService, createLoadWriteService } from '@/server/composition'
 import { buildActorContext } from '@/server/infrastructure/supabase/actor-context'
 import { domainErrorResponse } from '@/server/http-errors'
-import { GetLoadResponseSchema, LoadIdParamsSchema } from '@/server/contract/schemas'
+import { parseCommand } from '@/server/http-command'
+import { AssignLoadBodySchema, AssignLoadResponseSchema, GetLoadResponseSchema, LoadIdParamsSchema } from '@/server/contract/schemas'
 
 export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const authed = await getAuthedContext(request)
@@ -31,4 +32,17 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
 
   const body = GetLoadResponseSchema.parse({ load: result.value.load, events: result.value.events })
   return NextResponse.json(body)
+}
+
+export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const cmd = await parseCommand(request, context, AssignLoadBodySchema)
+  if (cmd instanceof NextResponse) return cmd
+
+  const result = await createLoadWriteService(cmd.supabase).assign(cmd.actor, cmd.id, cmd.body, cmd.idempotencyKey)
+  if (!result.ok) return domainErrorResponse(result.error)
+  return NextResponse.json(AssignLoadResponseSchema.parse({
+    outcome: result.value.outcome,
+    load_id: result.value.loadId,
+    ...(result.value.iftaMileageComplete !== undefined ? { ifta_mileage_complete: result.value.iftaMileageComplete } : {}),
+  }))
 }

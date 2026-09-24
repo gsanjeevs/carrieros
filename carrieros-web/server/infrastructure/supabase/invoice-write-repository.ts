@@ -5,7 +5,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase'
 import { domainError, err, ok, type Result } from '../../domain/shared/result'
 import type { ActorContext } from '../../domain/shared/identity'
-import type { InvoiceDraftPatch, InvoiceWriteRepository } from '../../ports'
+import type { InvoiceDraftPatch, InvoiceSendRecord, InvoiceWriteRepository } from '../../ports'
 
 export class SupabaseInvoiceWriteRepository implements InvoiceWriteRepository {
   constructor(private readonly supabase: SupabaseClient<Database>) {}
@@ -47,5 +47,53 @@ export class SupabaseInvoiceWriteRepository implements InvoiceWriteRepository {
     const row = data as unknown as { outcome: 'APPLIED' | 'ALREADY_PAID' | 'REPLAYED'; invoice_id: number }
     const outcome = row.outcome === 'REPLAYED' ? 'ALREADY_PAID' : row.outcome
     return ok({ outcome, invoiceId: Number(row.invoice_id) })
+  }
+
+  // Mirrors lib/invoice-actions.ts's sendInvoiceAndMarkSent() select exactly
+  // (same columns/joins) so the /api/v1 route behaves identically to the
+  // legacy mobile route it replaces.
+  async findForSend(actor: ActorContext, invoiceId: number): Promise<Result<InvoiceSendRecord | null>> {
+    const { data, error } = await this.supabase
+      .from('invoices')
+      .select(`
+        invoice_number, amount, due_date,
+        loads ( load_number, tracking_token ),
+        organizations!invoices_customer_org_id_fkey ( name, email )
+      `)
+      .eq('id', invoiceId)
+      .eq('carrier_org_id', actor.orgId)
+      .maybeSingle()
+    if (error) return err(domainError('PRECONDITION_FAILED', `invoice lookup failed: ${error.message}`))
+    if (!data) return ok(null)
+
+    const customerOrg = Array.isArray(data.organizations) ? data.organizations[0] : data.organizations
+    const load = Array.isArray(data.loads) ? data.loads[0] : data.loads
+    return ok({
+      invoiceNumber: data.invoice_number,
+      amount: data.amount,
+      dueDate: data.due_date,
+      recipient: customerOrg?.email ?? null,
+      customerName: customerOrg?.name ?? null,
+      loadTrackingToken: load?.tracking_token ?? null,
+    })
+  }
+
+  // Same mark_invoice_sent_command RPC (atomic status flip + outbox event,
+  // T19 readiness layer / migration 0033) as the legacy route, with the same
+  // deterministic per-invoice idempotency key — an invoice only ever
+  // transitions to 'sent' once from this path.
+  async markSent(actor: ActorContext, invoiceId: number): Promise<Result<void>> {
+    const idempotencyKey = `invoice:${invoiceId}:sent`
+    const { error } = await this.supabase.rpc('mark_invoice_sent_command', {
+      p_invoice_id: invoiceId,
+      p_sent_at: new Date().toISOString(),
+      p_correlation_id: actor.correlationId,
+      p_idempotency_key: idempotencyKey,
+    })
+    if (error) {
+      if (error.code === 'PT404') return err(domainError('NOT_FOUND', 'Invoice not found'))
+      return err(domainError('PRECONDITION_FAILED', `mark sent failed: ${error.message}`))
+    }
+    return ok(undefined)
   }
 }

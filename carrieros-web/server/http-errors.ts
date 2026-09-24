@@ -15,6 +15,7 @@ const STATUS: Record<string, number> = {
   IDEMPOTENCY_KEY_REUSED: 422,
   REQUEST_IN_PROGRESS: 409,
   PRECONDITION_FAILED: 500,
+  EMAIL_SEND_FAILED: 500,
 }
 
 const CODE: Record<string, ErrorCode> = {
@@ -26,6 +27,7 @@ const CODE: Record<string, ErrorCode> = {
   ILLEGAL_TRANSITION: 'ILLEGAL_TRANSITION',
   IDEMPOTENCY_KEY_REUSED: 'IDEMPOTENCY_KEY_REUSED',
   REQUEST_IN_PROGRESS: 'REQUEST_IN_PROGRESS',
+  EMAIL_SEND_FAILED: 'EMAIL_SEND_FAILED',
 }
 
 export function domainErrorResponse(error: DomainError) {

@@ -12,14 +12,15 @@ export async function withIdempotency<T>(
   endpoint: string,
   key: string,
   requestBody: unknown,
-  work: () => Promise<Result<T>>
+  work: () => Promise<Result<T>>,
+  options: { readonly mapReplay?: (stored: T) => T } = {}
 ): Promise<Result<T>> {
   const begun = await repo.begin(actor, endpoint, key, requestBody)
   if (!begun.ok) return begun
 
   switch (begun.value.kind) {
     case 'replay':
-      return ok(begun.value.responseBody as T)
+      return ok(options.mapReplay ? options.mapReplay(begun.value.responseBody as T) : begun.value.responseBody as T)
     case 'in_progress':
       return err(domainError('REQUEST_IN_PROGRESS', 'The same request is still being processed'))
     case 'key_reused':
