@@ -362,6 +362,23 @@ export interface DocumentRepository {
   listForLoad(actor: ActorContext, loadId: number, type: string): Promise<Result<readonly DocumentRecord[]>>
 }
 
+export interface OrgDocumentRecord {
+  readonly id: number
+  readonly docType: string
+  readonly storagePath: string
+  readonly expiryDate: string | null
+  readonly createdAt: string | null
+}
+
+/** Company-level compliance documents (COI, MC authority, DOT cert, UCR, W-9,
+ * business license) — org_documents table + storage convention already exist
+ * (built for the web app); this is the /api/v1 path mobile needs. */
+export interface OrgDocumentRepository {
+  findByPath(actor: ActorContext, storagePath: string): Promise<Result<OrgDocumentRecord | null>>
+  insert(actor: ActorContext, input: { docType: string; storagePath: string; expiryDate: string | null }): Promise<Result<OrgDocumentRecord>>
+  list(actor: ActorContext): Promise<Result<readonly OrgDocumentRecord[]>>
+}
+
 /** Object bytes never pass through the application; it only mints and checks access. */
 export interface ObjectStorage {
   createUploadUrl(path: string): Promise<Result<string>>
@@ -436,6 +453,33 @@ export interface MessageRepository {
   listForLoad(actor: ActorContext, loadId: number): Promise<Result<readonly DriverMessageRecord[]>>
   resolveOriginalLanguage(actor: ActorContext): Promise<Result<string>>
   send(actor: ActorContext, loadId: number, body: string, originalLanguage: string): Promise<Result<{ id: number; sent_at: string }>>
+  findById(actor: ActorContext, messageId: number): Promise<Result<{ id: number; body: string; loadId: number } | null>>
+}
+
+export interface ConversationSummary {
+  readonly loadId: number
+  readonly loadNumber: string
+  readonly lastMessageBody: string
+  readonly lastMessageAt: string
+  readonly unreadCount: number
+}
+
+/** Dispatcher-facing aggregate inbox — never built before (legacy or v1); every
+ * prior messages capability is scoped to one load's thread. */
+export interface ConversationRepository {
+  listForOrg(actor: ActorContext): Promise<Result<readonly ConversationSummary[]>>
+}
+
+export interface MessageTranslationRepository {
+  findCached(messageId: number, targetLanguage: string): Promise<Result<string | null>>
+  insert(messageId: number, targetLanguage: string, translatedBody: string): Promise<Result<string>>
+}
+
+/** Wraps the platform-wide LLM provider (lib/ai/) for translation. Never used
+ * directly by application services — always through MessageTranslationRepository's
+ * cache-then-translate flow, so a translation is never re-billed. */
+export interface TranslationProvider {
+  translate(text: string, targetLanguageName: string): Promise<Result<string>>
 }
 
 // ── Onboarding and mobile write-gap resources ──────────────────────────────
@@ -456,6 +500,8 @@ export interface PaymentMethodRecord {
 export interface BillingWriteRepository {
   organizationName(actor: ActorContext): Promise<Result<string | null>>
   savePaymentMethod(actor: ActorContext, value: { stripeCustomerId: string; cardBrand: string; cardLast4: string }): Promise<Result<PaymentMethodRecord>>
+  /** Validates against the real `tiers` table, not a hardcoded list — mirrors app/api/billing/change-tier/route.ts. */
+  changeTier(actor: ActorContext, tier: string): Promise<Result<string>>
 }
 
 export interface CreateCustomerInput {
@@ -471,8 +517,26 @@ export interface CreateCustomerInput {
   readonly notes?: string | null
 }
 
+export interface UpdateCustomerInput {
+  readonly name?: string
+  readonly phone?: string | null
+  readonly email?: string | null
+  readonly address?: string | null
+  readonly city?: string | null
+  readonly state?: string | null
+  readonly zip?: string | null
+  readonly country?: string | null
+  readonly contactName?: string | null
+  readonly notes?: string | null
+  /** True when the caller's request body included this field at all, so an
+   * explicit `null` (clear it) can be told apart from "not provided". */
+  readonly contactNameProvided: boolean
+  readonly notesProvided: boolean
+}
+
 export interface CustomerWriteRepository {
   create(actor: ActorContext, input: CreateCustomerInput): Promise<Result<{ org_id: number; name: string; customer_number: string | null }>>
+  update(actor: ActorContext, customerOrgId: number, input: UpdateCustomerInput): Promise<Result<{ org_id: number; name: string; customer_number: string | null }>>
 }
 
 export interface CreateVehicleInput {
@@ -489,8 +553,11 @@ export interface CreateVehicleInput {
   readonly dimensions?: string | null
 }
 
+export type UpdateVehicleInput = Partial<CreateVehicleInput>
+
 export interface VehicleWriteRepository {
   create(actor: ActorContext, input: CreateVehicleInput): Promise<Result<{ vehicle_number: string | null; nickname: string }>>
+  update(actor: ActorContext, vehicleId: number, input: UpdateVehicleInput): Promise<Result<{ vehicle_number: string | null; nickname: string } | null>>
 }
 
 export interface DriverSummaryRecord {

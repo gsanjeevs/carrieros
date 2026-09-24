@@ -56,6 +56,17 @@ export class SupabaseMessageRepository implements MessageRepository {
     if (error || !data) return fail('message send', error?.message ?? 'No row returned')
     return ok({ id: Number(data.id), sent_at: data.sent_at })
   }
+
+  async findById(actor: ActorContext, messageId: number): Promise<Result<{ id: number; body: string; loadId: number } | null>> {
+    const { data, error } = await this.supabase
+      .from('driver_messages')
+      .select('id, body, load_id')
+      .eq('id', messageId)
+      .eq('carrier_org_id', actor.orgId)
+      .maybeSingle()
+    if (error) return fail('message lookup', error.message)
+    return ok(data ? { id: Number(data.id), body: data.body, loadId: Number(data.load_id) } : null)
+  }
 }
 
 export class SupabaseLoadLocationRepository implements LoadLocationRepository {

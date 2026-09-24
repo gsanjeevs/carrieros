@@ -1,5 +1,6 @@
 import { roleHasCapability } from '@/lib/generated/role-capabilities'
 import type { ActorContext } from '../domain/shared/identity'
+import { buildCustomerUpdate, type UpdateCustomerRawInput } from '../domain/customer/write'
 import { err, forbidden, type Result } from '../domain/shared/result'
 import type {
   BillingWriteRepository,
@@ -10,6 +11,7 @@ import type {
   DriverSummaryRecord,
   IdempotencyRepository,
   PaymentMethodRecord,
+  UpdateVehicleInput,
   VehicleWriteRepository,
 } from '../ports'
 import { withIdempotency } from './idempotency'
@@ -53,5 +55,22 @@ export class SetupWriteService {
   listDrivers(actor: ActorContext): Promise<Result<readonly DriverSummaryRecord[]>> {
     if (!roleHasCapability(actor.role, 'drivers')) return Promise.resolve(err(forbidden('This role cannot view drivers', { role: actor.role })))
     return this.deps.drivers.listActive(actor)
+  }
+
+  updateCustomer(actor: ActorContext, customerOrgId: number, raw: UpdateCustomerRawInput) {
+    if (!roleHasCapability(actor.role, 'customers_manage')) return Promise.resolve(err(forbidden('This role cannot edit customers', { role: actor.role })))
+    const patch = buildCustomerUpdate(raw)
+    if (!patch.ok) return Promise.resolve(patch)
+    return this.deps.customers.update(actor, customerOrgId, patch.value)
+  }
+
+  updateVehicle(actor: ActorContext, vehicleId: number, input: UpdateVehicleInput) {
+    if (!roleHasCapability(actor.role, 'vehicles_manage')) return Promise.resolve(err(forbidden('This role cannot edit vehicles', { role: actor.role })))
+    return this.deps.vehicles.update(actor, vehicleId, input)
+  }
+
+  changeTier(actor: ActorContext, tier: string) {
+    if (!roleHasCapability(actor.role, 'subscription_management')) return Promise.resolve(err(forbidden('This role cannot manage billing', { role: actor.role })))
+    return this.deps.billing.changeTier(actor, tier)
   }
 }

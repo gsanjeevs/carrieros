@@ -57,6 +57,8 @@ export type DomainErrorCode =
   | 'SEGREGATION_OF_DUTIES'
   // Authenticated bootstrap caller already has an organization membership.
   | 'ALREADY_ONBOARDED'
+  // The LLM translation provider is unconfigured or its call failed.
+  | 'TRANSLATION_FAILED'
 
 export interface DomainError {
   readonly code: DomainErrorCode

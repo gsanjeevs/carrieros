@@ -12,6 +12,8 @@ import type {
   DriverSummaryRecord,
   OnboardingRepository,
   PaymentMethodRecord,
+  UpdateCustomerInput,
+  UpdateVehicleInput,
   VehicleWriteRepository,
 } from '../../ports'
 import type { OnboardingDraft } from '../../domain/onboarding/draft'
@@ -77,6 +79,21 @@ export class SupabaseSetupRepository implements BillingWriteRepository, Customer
     return ok(data)
   }
 
+  // Mirrors app/api/billing/change-tier/route.ts: validates against the real
+  // `tiers` table (not a hardcoded list) via the request-scoped client (read
+  // access is fine under RLS), then writes carrier_details.tier with the
+  // admin client the same way the legacy route does (carrier_details is
+  // server-write-only, migration 0019).
+  async changeTier(actor: ActorContext, tier: string): Promise<Result<string>> {
+    const { data: tierRow, error: tierError } = await this.session.from('tiers').select('code').eq('code', tier).maybeSingle()
+    if (tierError) return fail('tier lookup', tierError.message)
+    if (!tierRow) return err(validationFailed('Unknown tier', { tier: 'INVALID' }))
+
+    const { data, error } = await this.admin.from('carrier_details').update({ tier }).eq('org_id', actor.orgId).select('tier').single()
+    if (error || !data) return fail('tier change', error?.message ?? 'No row returned')
+    return ok(data.tier)
+  }
+
   async create(actor: ActorContext, input: CreateCustomerInput): Promise<Result<{ org_id: number; name: string; customer_number: string | null }>>
   async create(actor: ActorContext, input: CreateVehicleInput): Promise<Result<{ vehicle_number: string | null; nickname: string }>>
   async create(
@@ -101,6 +118,62 @@ export class SupabaseSetupRepository implements BillingWriteRepository, Customer
     const row = Array.isArray(data) ? data[0] : data
     if (!row) return fail('customer create', 'No row returned')
     return ok({ org_id: Number(row.org_id), name: row.name, customer_number: row.customer_number })
+  }
+
+  // Neither edit capability was ever built before (legacy or v1). Overloaded
+  // the same way `create` above is, since this one class implements both
+  // CustomerWriteRepository.update and VehicleWriteRepository.update.
+  async update(actor: ActorContext, id: number, input: UpdateCustomerInput): Promise<Result<{ org_id: number; name: string; customer_number: string | null }>>
+  async update(actor: ActorContext, id: number, input: UpdateVehicleInput): Promise<Result<{ vehicle_number: string | null; nickname: string } | null>>
+  async update(
+    actor: ActorContext,
+    id: number,
+    input: UpdateCustomerInput | UpdateVehicleInput,
+  ): Promise<Result<{ org_id: number; name: string; customer_number: string | null } | { vehicle_number: string | null; nickname: string } | null>> {
+    if ('contactNameProvided' in input) return this.updateCustomer(actor, id, input)
+    return this.updateVehicle(actor, id, input)
+  }
+
+  // A carrier has no direct RLS write access to a customer org's own
+  // `organizations` row, so this goes through update_customer_org()
+  // (migration 0034), same SECURITY DEFINER shape as create_customer_org.
+  private async updateCustomer(actor: ActorContext, customerOrgId: number, input: UpdateCustomerInput) {
+    const { data, error } = await this.session.rpc('update_customer_org', {
+      p_customer_org_id: customerOrgId,
+      p_name: input.name ?? undefined, p_phone: input.phone ?? undefined, p_email: input.email ?? undefined,
+      p_address: input.address ?? undefined, p_city: input.city ?? undefined, p_state: input.state ?? undefined,
+      p_zip: input.zip ?? undefined, p_country: input.country ?? undefined,
+      p_contact_name: input.contactName ?? undefined, p_notes: input.notes ?? undefined,
+      p_set_contact_name: input.contactNameProvided, p_set_notes: input.notesProvided,
+    })
+    if (error) {
+      if (error.message.includes('NOT_FOUND')) return err(domainError('NOT_FOUND', 'Customer not found'))
+      if (error.message.includes('FORBIDDEN')) return err(domainError('FORBIDDEN', error.message))
+      if (error.message.includes('VALIDATION_ERROR')) return err(validationFailed(error.message))
+      return fail('customer update', error.message)
+    }
+    const row = Array.isArray(data) ? data[0] : data
+    if (!row) return fail('customer update', 'No row returned')
+    return ok({ org_id: Number(row.org_id), name: row.name, customer_number: row.customer_number })
+  }
+
+  // `vehicles` RLS (owner_solo_vehicles_all) already grants owner/solo a
+  // direct tenant-scoped UPDATE, so no RPC is needed here, unlike customers
+  // (which cross a tenant boundary).
+  private async updateVehicle(actor: ActorContext, vehicleId: number, input: UpdateVehicleInput) {
+    const patch: Record<string, unknown> = {}
+    for (const [key, dbKey] of [
+      ['nickname', 'nickname'], ['year', 'year'], ['make', 'make'], ['model', 'model'], ['vin', 'vin'],
+      ['licensePlate', 'license_plate'], ['licenseState', 'license_state'], ['cabType', 'cab_type'],
+      ['color', 'color'], ['dimensions', 'dimensions'],
+    ] as const) {
+      if (key in input) patch[dbKey] = input[key]
+    }
+    const { data, error } = await this.session.from('vehicles').update(patch)
+      .eq('id', vehicleId).eq('carrier_org_id', actor.orgId)
+      .select('vehicle_number, nickname').maybeSingle()
+    if (error) return fail('vehicle update', error.message)
+    return ok(data ? { vehicle_number: data.vehicle_number, nickname: data.nickname } : null)
   }
 
   private async createVehicle(actor: ActorContext, input: CreateVehicleInput) {

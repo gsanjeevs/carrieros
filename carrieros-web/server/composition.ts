@@ -274,12 +274,35 @@ export function createSetupWriteService(supabase: SupabaseClient<Database>): Set
   })
 }
 
+import { SupabaseMessageTranslationRepository } from './infrastructure/supabase/message-translation-repository'
+import { LlmTranslationProvider } from './infrastructure/ai/llm-translation-provider'
+
 export function createDriverMessageService(supabase: SupabaseClient<Database>): DriverMessageService {
   return new DriverMessageService({
     shipments: new SupabaseShipmentCommandRepository(supabase),
     messages: new SupabaseMessageRepository(supabase),
     features: new SupabaseFeatureGate(supabase),
     idempotency: new SupabaseIdempotencyRepository(createAdminClient()),
+    translations: new SupabaseMessageTranslationRepository(supabase),
+    translator: new LlmTranslationProvider(),
+  })
+}
+
+import { ConversationService } from './application/conversation-service'
+import { SupabaseConversationRepository } from './infrastructure/supabase/conversation-repository'
+
+export function createConversationService(supabase: SupabaseClient<Database>): ConversationService {
+  return new ConversationService({ conversations: new SupabaseConversationRepository(supabase) })
+}
+
+import { OrgDocumentService } from './application/org-document-service'
+import { SupabaseOrgDocumentRepository } from './infrastructure/supabase/org-document-repository'
+
+export function createOrgDocumentService(supabase: SupabaseClient<Database>): OrgDocumentService {
+  return new OrgDocumentService({
+    documents: new SupabaseOrgDocumentRepository(supabase),
+    storage: new SupabaseObjectStorage(createStorageProvider(supabase)),
+    ids: { uuid: () => crypto.randomUUID() },
   })
 }
 

@@ -464,6 +464,13 @@ export const GetBillingResponseSchema = z.object({
   price_per_additional_truck: z.number(),
 })
 
+// Mirrors app/api/billing/change-tier/route.ts POST — demo mode (decisions.md):
+// writes carrier_details.tier directly, validated against the real `tiers`
+// table rather than a hardcoded list. A real Stripe integration replaces this
+// route's body, not this contract.
+export const ChangeTierBodySchema = z.object({ tier: z.string().min(1) })
+export const ChangeTierResponseSchema = z.object({ tier: z.string() })
+
 // ── Maintenance reminders (fleet-wide) ──────────────────────────────────────
 
 export const FleetReminderSchema = z.object({
@@ -672,7 +679,8 @@ export const AssignLoadBodySchema = z
   .refine((v) => Object.keys(v).length > 0, { message: 'Provide at least one of driver_id, vehicle_id, status' })
 
 export const AssignLoadResponseSchema = z.object({
-  ok: z.literal(true),
+  outcome: z.enum(['APPLIED', 'REPLAYED']),
+  load_id: z.number().int(),
   ifta_mileage_complete: z
     .boolean()
     .nullable()
@@ -766,9 +774,34 @@ export const CreateCustomerResponseSchema = z.object({
   customer_number: z.string().nullable(),
 })
 
+// No PATCH /api/customers/[id] route exists in the legacy app either — this is
+// new, not a migration. Same editable fields as create, all optional (at
+// least one required, enforced in the domain layer); updates both
+// organizations (identity/contact fields) and customer_details
+// (contact_name/notes) atomically via update_customer_org() (migration 0034),
+// since a carrier has no direct RLS write access to a customer org's own row.
+export const UpdateCustomerBodySchema = z
+  .object({
+    name: z.string().min(1).optional(),
+    phone: z.string().nullable().optional(),
+    email: z.string().nullable().optional(),
+    address: z.string().nullable().optional(),
+    city: z.string().nullable().optional(),
+    state: z.string().nullable().optional(),
+    zip: z.string().nullable().optional(),
+    country: z.string().nullable().optional(),
+    contact_name: z.string().nullable().optional(),
+    notes: z.string().nullable().optional(),
+  })
+  .refine((v) => Object.keys(v).length > 0, { message: 'Provide at least one field to update' })
+export const UpdateCustomerResponseSchema = z.object({
+  org_id: z.number().int(),
+  name: z.string(),
+  customer_number: z.string().nullable(),
+})
+
 // ── Vehicles writes (API migration) ──────────────────────────────────────────
-// Mirrors app/api/vehicles/route.ts POST. No PATCH /api/vehicles/[id] route
-// exists today, so there is no update body schema to add.
+// Mirrors app/api/vehicles/route.ts POST.
 
 export const CreateVehicleBodySchema = z.object({
   vehicle_type_id: z.number().int().positive(),
@@ -788,6 +821,29 @@ export const CreateVehicleResponseSchema = z.object({
   nickname: z.string(),
 })
 
+// No PATCH /api/vehicles/[id] route exists in the legacy app either — this is
+// new. `vehicles` RLS (owner_solo_vehicles_all) already grants owner/solo a
+// direct tenant-scoped UPDATE, so this is a plain table update, no RPC needed
+// (unlike customers, which cross a tenant boundary).
+export const UpdateVehicleBodySchema = z
+  .object({
+    nickname: z.string().min(1).optional(),
+    year: z.number().int().nullable().optional(),
+    make: z.string().nullable().optional(),
+    model: z.string().nullable().optional(),
+    vin: z.string().nullable().optional(),
+    license_plate: z.string().nullable().optional(),
+    license_state: z.string().nullable().optional(),
+    cab_type: z.string().nullable().optional(),
+    color: z.string().nullable().optional(),
+    dimensions: z.string().nullable().optional(),
+  })
+  .refine((v) => Object.keys(v).length > 0, { message: 'Provide at least one field to update' })
+export const UpdateVehicleResponseSchema = z.object({
+  vehicle_number: z.string().nullable(),
+  nickname: z.string(),
+})
+
 // ── Drivers (API migration) ──────────────────────────────────────────────────
 // Mirrors app/api/drivers/route.ts GET.
 
@@ -803,7 +859,7 @@ export const DriverSummarySchema = z.object({
   last_name: z.string().nullable(),
   phone: z.string().nullable(),
 })
-export const ListDriversResponseSchema = z.array(DriverSummarySchema)
+export const ListDriversResponseSchema = z.object({ drivers: z.array(DriverSummarySchema) })
 
 // ── Driver messages writes (API migration) ───────────────────────────────────
 // Mirrors app/api/driver-messages/route.ts POST. Translation is out of scope
@@ -816,6 +872,68 @@ export const SendDriverMessageBodySchema = z.object({
 export const SendDriverMessageResponseSchema = z.object({
   id: z.number().int(),
   sent_at: z.string(),
+})
+
+// Real translation (LLM-backed, replaces the pre-existing stub at
+// app/api/driver-messages/[id]/translate/route.ts). Kept as a literal list
+// rather than importing i18n/request.ts's SUPPORTED_LOCALES, since this file
+// is the dependency-free contract root generated into both apps — must stay
+// in sync with SUPPORTED_LOCALES by hand.
+export const TranslateMessageBodySchema = z.object({ target_language: z.enum(['en', 'es', 'pa', 'ur']) })
+export const TranslateMessageResponseSchema = z.object({ translated_body: z.string() })
+
+// Dispatcher-facing aggregate inbox: never built before (legacy or v1) — every
+// prior messages endpoint is scoped to one load's thread. Groups by load,
+// newest activity first, with each load's unread count for the caller.
+export const ConversationSummarySchema = z.object({
+  load_id: z.number().int(),
+  load_number: z.string(),
+  last_message_body: z.string(),
+  last_message_at: z.string(),
+  unread_count: z.number().int(),
+})
+export const ListConversationsResponseSchema = z.object({ conversations: z.array(ConversationSummarySchema) })
+
+// ── Company-level documents (never built before - legacy or v1; the web app's
+// org_documents table/RLS/storage convention already exists, this just adds
+// the /api/v1 upload path mobile needs) ───────────────────────────────────────
+
+export const OrgDocTypeSchema = z.enum([
+  'coi', 'general_liability', 'workers_comp', 'mc_authority',
+  'dot_certificate', 'ucr', 'w9', 'business_license',
+])
+export const RequestOrgUploadBodySchema = z.object({
+  doc_type: OrgDocTypeSchema,
+  content_type: z.enum(['image/jpeg', 'image/png', 'image/heic', 'image/webp', 'application/pdf']),
+  size_bytes: z.number().int().positive().max(10 * 1024 * 1024),
+  expiry_date: z.string().nullable().optional(),
+})
+export const RequestOrgUploadResponseSchema = z.object({
+  upload_url: z.string().describe('PUT the raw file bytes here with the Content-Type header below. Valid for this path only.'),
+  storage_path: z.string().describe('Chosen by the server. Pass it back to finalize the upload.'),
+  content_type: z.string(),
+})
+export const FinalizeOrgDocumentBodySchema = z.object({
+  doc_type: OrgDocTypeSchema,
+  storage_path: z.string().min(1).max(300),
+  expiry_date: z.string().nullable().optional(),
+})
+export const OrgDocumentResponseSchema = z.object({
+  id: z.number().int(),
+  doc_type: z.string(),
+  storage_path: z.string(),
+  expiry_date: z.string().nullable(),
+})
+export const ListOrgDocumentsResponseSchema = z.object({
+  documents: z.array(
+    z.object({
+      id: z.number().int(),
+      doc_type: z.string(),
+      expiry_date: z.string().nullable(),
+      created_at: z.string().nullable(),
+      url: z.string().nullable().describe('Short-lived signed download URL.'),
+    })
+  ),
 })
 
 export type ListLoadsQuery = z.infer<typeof ListLoadsQuerySchema>

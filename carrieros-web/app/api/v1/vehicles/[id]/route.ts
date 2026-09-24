@@ -3,10 +3,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { apiError, getAuthedContext, isErrorResponse } from '@/lib/api-auth'
 import { logError } from '@/lib/observability'
-import { createFleetQueryService } from '@/server/composition'
+import { createFleetQueryService, createSetupWriteService } from '@/server/composition'
 import { buildActorContext } from '@/server/infrastructure/supabase/actor-context'
 import { domainErrorResponse } from '@/server/http-errors'
-import { LoadIdParamsSchema, VehicleDetailResponseSchema } from '@/server/contract/schemas'
+import { LoadIdParamsSchema, UpdateVehicleBodySchema, UpdateVehicleResponseSchema, VehicleDetailResponseSchema } from '@/server/contract/schemas'
 
 export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const authed = await getAuthedContext(request)
@@ -42,4 +42,27 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     })),
   })
   return NextResponse.json(body)
+}
+
+export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const authed = await getAuthedContext(request)
+  if (isErrorResponse(authed)) return authed
+
+  const params = LoadIdParamsSchema.safeParse({ id: Number((await context.params).id) })
+  if (!params.success) return apiError('VALIDATION_ERROR', 'Invalid id', 400)
+
+  let json: unknown
+  try { json = await request.json() }
+  catch { return apiError('VALIDATION_ERROR', 'Body must be JSON', 400) }
+  const body = UpdateVehicleBodySchema.safeParse(json)
+  if (!body.success) return apiError('VALIDATION_ERROR', body.error.issues[0]?.message ?? 'Invalid body', 400)
+
+  const requestId = request.headers.get('x-request-id')
+  const actor = await buildActorContext(authed.supabase, authed.user, requestId ?? crypto.randomUUID())
+  if (!actor.ok) return domainErrorResponse(actor.error)
+
+  const result = await createSetupWriteService(authed.supabase).updateVehicle(actor.value, params.data.id, body.data)
+  if (!result.ok) return domainErrorResponse(result.error)
+  if (!result.value) return apiError('NOT_FOUND', 'Vehicle not found', 404)
+  return NextResponse.json(UpdateVehicleResponseSchema.parse(result.value))
 }
