@@ -4702,6 +4702,49 @@ ALTER TABLE ai_provider_config ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON ai_provider_config FROM anon, authenticated;
 GRANT SELECT, UPDATE ON ai_provider_config TO service_role;
 
+-- Per-feature LLM override on top of ai_provider_config's default (migration
+-- 0036). No row for a feature = use the global default. A row's presence is a
+-- full override, never a partial merge -- same self-contained-row philosophy
+-- as ai_provider_config. feature is CHECK-constrained so a typo can't create
+-- a dead override no code reads.
+CREATE TABLE ai_feature_overrides (
+  feature                              TEXT PRIMARY KEY CHECK (feature IN ('translation')),
+  provider                             TEXT NOT NULL CHECK (provider IN ('anthropic', 'openai', 'openai_compatible')),
+  model                                TEXT NOT NULL,
+  compatible_base_url                  TEXT,
+  anthropic_api_key_encrypted          TEXT,
+  anthropic_api_key_preview            TEXT,
+  openai_api_key_encrypted             TEXT,
+  openai_api_key_preview               TEXT,
+  openai_compatible_api_key_encrypted  TEXT,
+  openai_compatible_api_key_preview    TEXT,
+  updated_at                           TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_by                           UUID REFERENCES profiles(id),
+  CONSTRAINT compatible_base_url_required_for_openai_compatible CHECK (
+    (provider = 'openai_compatible' AND compatible_base_url IS NOT NULL AND compatible_base_url <> '')
+    OR (provider <> 'openai_compatible')
+  ),
+  CONSTRAINT anthropic_api_key_preview_matches_encrypted CHECK (
+    (anthropic_api_key_encrypted IS NULL) = (anthropic_api_key_preview IS NULL)
+  ),
+  CONSTRAINT openai_api_key_preview_matches_encrypted CHECK (
+    (openai_api_key_encrypted IS NULL) = (openai_api_key_preview IS NULL)
+  ),
+  CONSTRAINT openai_compatible_api_key_preview_matches_encrypted CHECK (
+    (openai_compatible_api_key_encrypted IS NULL) = (openai_compatible_api_key_preview IS NULL)
+  )
+);
+
+COMMENT ON TABLE ai_feature_overrides IS
+  'Per-feature LLM override on top of ai_provider_config''s platform-wide default. No row for a feature = use the global config. Never holds a credential in the clear -- same encrypted-key/preview-pair scheme as ai_provider_config (migration 0032). Changed only via /api/admin/ai-config/features/{feature}, sx_owner only (admin_ai_config capability).';
+
+CREATE TRIGGER ai_feature_overrides_updated_at
+  BEFORE UPDATE ON ai_feature_overrides FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+ALTER TABLE ai_feature_overrides ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON ai_feature_overrides FROM anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ai_feature_overrides TO service_role;
+
 -- ────────────────────────────────────────────────────────────
 -- SECTION 26: FINANCIAL EVENTS OUTBOX (migration 0033) -- decisions.md T19,
 -- accounting-integration readiness layer. mark_invoice_paid's extension

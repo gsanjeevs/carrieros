@@ -115,6 +115,59 @@ export type Database = {
           },
         ]
       }
+      ai_feature_overrides: {
+        Row: {
+          anthropic_api_key_encrypted: string | null
+          anthropic_api_key_preview: string | null
+          compatible_base_url: string | null
+          feature: string
+          model: string
+          openai_api_key_encrypted: string | null
+          openai_api_key_preview: string | null
+          openai_compatible_api_key_encrypted: string | null
+          openai_compatible_api_key_preview: string | null
+          provider: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          anthropic_api_key_encrypted?: string | null
+          anthropic_api_key_preview?: string | null
+          compatible_base_url?: string | null
+          feature: string
+          model: string
+          openai_api_key_encrypted?: string | null
+          openai_api_key_preview?: string | null
+          openai_compatible_api_key_encrypted?: string | null
+          openai_compatible_api_key_preview?: string | null
+          provider: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          anthropic_api_key_encrypted?: string | null
+          anthropic_api_key_preview?: string | null
+          compatible_base_url?: string | null
+          feature?: string
+          model?: string
+          openai_api_key_encrypted?: string | null
+          openai_api_key_preview?: string | null
+          openai_compatible_api_key_encrypted?: string | null
+          openai_compatible_api_key_preview?: string | null
+          provider?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_feature_overrides_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_provider_config: {
         Row: {
           anthropic_api_key_encrypted: string | null
@@ -2946,6 +2999,36 @@ export type Database = {
           org_id: number
         }[]
       }
+      create_driver_settlement_command: {
+        Args: {
+          p_correlation_id: string
+          p_driver_id: number
+          p_gross_revenue: number
+          p_idempotency_key: string
+          p_loads_count: number
+          p_net_pay: number
+          p_pay_method: string
+          p_period_end: string
+          p_period_start: string
+          p_rate_value: number
+        }
+        Returns: Json
+      }
+      create_invoice_command: {
+        Args: {
+          p_advance_load_status: boolean
+          p_amount: number
+          p_correlation_id: string
+          p_customer_org_id: number
+          p_due_date: string
+          p_factoring_company: string
+          p_idempotency_key: string
+          p_invoice_number: string
+          p_load_id: number
+          p_payment_method: string
+        }
+        Returns: Json
+      }
       driver_self_update_allowed: {
         Args: {
           p_active: boolean
@@ -3085,6 +3168,16 @@ export type Database = {
         }[]
       }
       has_feature: { Args: { feature_key: string }; Returns: boolean }
+      list_message_conversations: {
+        Args: never
+        Returns: {
+          last_message_at: string
+          last_message_body: string
+          load_id: number
+          load_number: string
+          unread_count: number
+        }[]
+      }
       log_vehicle_service: {
         Args: {
           p_cost: number
@@ -3101,7 +3194,21 @@ export type Database = {
         Returns: number
       }
       mark_invoice_paid: {
-        Args: { p_invoice_id: number; p_paid_at: string }
+        Args: {
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_invoice_id: number
+          p_paid_at: string
+        }
+        Returns: Json
+      }
+      mark_invoice_sent_command: {
+        Args: {
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_invoice_id: number
+          p_sent_at: string
+        }
         Returns: Json
       }
       mark_overdue_invoices: { Args: never; Returns: number }
@@ -3111,6 +3218,17 @@ export type Database = {
       next_entity_val: {
         Args: { carrier_org_bigint: number; entity_name: string }
         Returns: number
+      }
+      record_load_expense_command: {
+        Args: {
+          p_amount: number
+          p_correlation_id: string
+          p_expense_type: string
+          p_idempotency_key: string
+          p_load_id: number
+          p_note: string
+        }
+        Returns: Json
       }
       replace_ifta_crossings_with_manual: {
         Args: { p_load_id: number; p_rows: Json }
@@ -3139,6 +3257,38 @@ export type Database = {
           p_new_status: string
           p_occurred_at: string
           p_reason: string
+        }
+        Returns: Json
+      }
+      update_customer_org: {
+        Args: {
+          p_address?: string
+          p_city?: string
+          p_contact_name?: string
+          p_country?: string
+          p_customer_org_id: number
+          p_email?: string
+          p_name?: string
+          p_notes?: string
+          p_phone?: string
+          p_set_contact_name?: boolean
+          p_set_notes?: boolean
+          p_state?: string
+          p_zip?: string
+        }
+        Returns: {
+          customer_number: string
+          name: string
+          org_id: number
+        }[]
+      }
+      update_settlement_payment_status_command: {
+        Args: {
+          p_correlation_id: string
+          p_expected_status: string
+          p_idempotency_key: string
+          p_new_status: string
+          p_settlement_id: number
         }
         Returns: Json
       }

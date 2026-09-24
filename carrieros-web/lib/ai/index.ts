@@ -1,15 +1,14 @@
 // lib/ai/index.ts
-// getActiveLLMProvider() — resolves the platform-wide active provider (decisions.md T17, amended
-// 2026-09-22) from ai_provider_config (migrations 0031, 0032) and returns the matching LLMProvider
-// instance, plus the resolved default model string so callers don't need to know provider-specific
-// model names.
+// getActiveLLMProvider() — resolves the active provider (decisions.md T17, amended 2026-09-22, and
+// the 2026-09-24 per-feature override) and returns the matching LLMProvider instance, plus the
+// resolved model string so callers don't need to know provider-specific model names.
 //
-// Server-only: reads ai_provider_config via the service-role admin client (that table has no
-// authenticated/anon grant at all — see migration 0031's comments). Each provider class resolves its
-// own API key with a DB-encrypted-key-first, env-var-fallback order (T17's 2026-09-22 amendment) —
-// this module's job is only to fetch the row (including the `*_api_key_encrypted` columns) and pass
-// the relevant one through; decryption itself happens inside the provider constructors
-// (lib/ai/*-provider.ts), never here. Never call this from a browser client.
+// Server-only: reads ai_provider_config / ai_feature_overrides via the service-role admin client
+// (neither table has an authenticated/anon grant at all). Each provider class resolves its own API
+// key with a DB-encrypted-key-first, env-var-fallback order (T17's 2026-09-22 amendment) — this
+// module's job is only to fetch the row and pass the relevant key through; decryption itself happens
+// inside the provider constructors (lib/ai/*-provider.ts), never here. Never call this from a
+// browser client.
 import { createAdminClient } from '@/lib/supabase/server'
 import type { LLMProvider } from './types'
 import { LLMProviderNotConfiguredError } from './types'
@@ -20,21 +19,43 @@ import { OpenAICompatibleProvider } from './openai-compatible-provider'
 export type { LLMProvider, LLMCallOptions, LLMCallResult, LLMContentBlock, LLMFailureMode } from './types'
 export { LLMCallError, LLMProviderNotConfiguredError } from './types'
 
+// The only per-feature override the DB CHECK on ai_feature_overrides.feature allows today. Extend
+// both together (a migration adding the value to the CHECK, and this union) when another feature
+// opts in — mismatched, and either the DB rejects the row or no code path ever selects it.
+export const AI_FEATURES = ['translation'] as const
+export type AiFeature = (typeof AI_FEATURES)[number]
+
 export interface ActiveLLMProvider {
   provider: LLMProvider
-  /** ai_provider_config.model — the model string to pass as LLMCallOptions.model unless a caller
-   * has a specific reason to pin a different one. */
+  /** The resolved model string to pass as LLMCallOptions.model unless a caller has a specific reason
+   * to pin a different one. */
   model: string
 }
 
-export async function getActiveLLMProvider(): Promise<ActiveLLMProvider> {
+const CONFIG_COLUMNS = 'provider, model, compatible_base_url, anthropic_api_key_encrypted, openai_api_key_encrypted, openai_compatible_api_key_encrypted'
+
+/**
+ * Resolves the LLM provider a caller should use. With no `feature`, or when the named feature has
+ * no override row, this is the platform-wide default (ai_provider_config, unchanged behavior). When
+ * `feature` has a row in ai_feature_overrides, that row is used INSTEAD of the global default —
+ * never merged with it — same self-contained-row philosophy ai_provider_config already uses.
+ */
+export async function getActiveLLMProvider(feature?: AiFeature): Promise<ActiveLLMProvider> {
   const admin = createAdminClient()
-  // A single string literal (not built via concatenation) -- supabase-js's `.select()` typing needs
-  // the literal type to infer the returned row shape; see app/api/admin/ai-config/route.ts's
-  // CONFIG_SELECT comment for the same gotcha.
+
+  if (feature) {
+    const { data: override, error: overrideError } = await admin
+      .from('ai_feature_overrides')
+      .select(CONFIG_COLUMNS)
+      .eq('feature', feature)
+      .maybeSingle()
+    if (overrideError) throw new LLMProviderNotConfiguredError(`ai_feature_overrides lookup for "${feature}" failed: ${overrideError.message}`)
+    if (override) return { provider: buildProvider(override), model: override.model }
+  }
+
   const { data, error } = await admin
     .from('ai_provider_config')
-    .select('provider, model, compatible_base_url, anthropic_api_key_encrypted, openai_api_key_encrypted, openai_compatible_api_key_encrypted')
+    .select(CONFIG_COLUMNS)
     .eq('id', 1)
     .single()
 

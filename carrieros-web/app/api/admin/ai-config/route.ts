@@ -21,17 +21,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { isErrorResponse, apiError } from '@/lib/api-auth'
 import { requireAdminRole } from '@/lib/admin-auth'
 import { logError } from '@/lib/observability'
-import { encryptSecret, previewLastFour, SecretsEncryptionKeyError } from '@/lib/crypto/secrets'
+import { applyKeyFields, isValidProvider, maskedPreview, VALID_PROVIDERS } from '@/lib/ai/admin-config-shared'
 import type { Database } from '@/types/supabase'
 
 type ConfigUpdate = Database['public']['Tables']['ai_provider_config']['Update']
-
-const VALID_PROVIDERS = ['anthropic', 'openai', 'openai_compatible'] as const
-type Provider = (typeof VALID_PROVIDERS)[number]
-
-function isValidProvider(value: unknown): value is Provider {
-  return typeof value === 'string' && (VALID_PROVIDERS as readonly string[]).includes(value)
-}
 
 // A single string literal (not built via concatenation) -- supabase-js's `.select()` typing parses
 // the literal type of this string to infer the returned row shape; a concatenated `string` loses
@@ -48,13 +41,6 @@ interface ConfigRow {
   anthropic_api_key_preview: string | null
   openai_api_key_preview: string | null
   openai_compatible_api_key_preview: string | null
-}
-
-// Last-4-characters preview -> the masked string the UI renders, e.g. "••••••••ab12". `null` ("not
-// set") passes through unchanged. Never fed a full key or ciphertext -- only the *_api_key_preview
-// columns, which are already just 4 characters, computed at write time (see PUT below).
-function maskedPreview(lastFour: string | null): string | null {
-  return lastFour ? `${'•'.repeat(8)}${lastFour}` : null
 }
 
 // Shapes a raw ai_provider_config row into the response contract -- the only thing that ever leaves
@@ -96,17 +82,13 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ config: toResponseConfig(data) })
 }
 
-// Each of these body fields is optional and independently controls one provider's stored key:
+// Each provider key field is optional and independently controls one provider's stored key:
 //   - absent (key not in body at all, or `undefined`) -> leave the existing stored key untouched.
 //     This is what lets a provider/model-only save (the common case) skip re-entering a key.
 //   - non-empty string -> encrypt and store it (rotates/sets the key), refreshing the preview.
 //   - empty string `""` -> the explicit "clear" signal: removes the stored encrypted key/preview so
 //     the provider falls back to its environment variable again.
-const KEY_FIELDS = [
-  { body: 'anthropic_api_key', encryptedCol: 'anthropic_api_key_encrypted', previewCol: 'anthropic_api_key_preview' },
-  { body: 'openai_api_key', encryptedCol: 'openai_api_key_encrypted', previewCol: 'openai_api_key_preview' },
-  { body: 'openai_compatible_api_key', encryptedCol: 'openai_compatible_api_key_encrypted', previewCol: 'openai_compatible_api_key_preview' },
-] as const
+// (See lib/ai/admin-config-shared.ts's applyKeyFields — shared with the per-feature override route.)
 
 export async function PUT(request: NextRequest) {
   const ctx = await requireAdminRole(request, 'admin_ai_config')
@@ -134,31 +116,8 @@ export async function PUT(request: NextRequest) {
     updated_by: userId,
   }
 
-  for (const field of KEY_FIELDS) {
-    const raw = body?.[field.body]
-    if (raw === undefined) continue // untouched -- existing stored key (if any) survives this update
-    if (typeof raw !== 'string')
-      return apiError('VALIDATION_ERROR', `${field.body} must be a string`, 400)
-    if (raw === '') {
-      // Explicit clear -- fall back to the environment variable.
-      update[field.encryptedCol] = null
-      update[field.previewCol] = null
-      continue
-    }
-    try {
-      update[field.encryptedCol] = encryptSecret(raw)
-      update[field.previewCol] = previewLastFour(raw)
-    } catch (err) {
-      if (err instanceof SecretsEncryptionKeyError) {
-        // Not a validation error about the *key* itself -- this is a deployment configuration gap
-        // (SECRETS_ENCRYPTION_KEY unset). err.message names the missing env var, never the submitted
-        // secret, so it's safe to surface directly.
-        logError({ route: 'admin/ai-config PUT', requestId: request.headers.get('x-request-id'), userId }, err)
-        return apiError('SERVER_ERROR', err.message, 500)
-      }
-      throw err
-    }
-  }
+  const keyError = applyKeyFields(update, body, { route: 'admin/ai-config PUT', requestId: request.headers.get('x-request-id'), userId })
+  if (keyError) return keyError
 
   const { data, error } = await admin
     .from('ai_provider_config')

@@ -115,6 +115,59 @@ export type Database = {
           },
         ]
       }
+      ai_feature_overrides: {
+        Row: {
+          anthropic_api_key_encrypted: string | null
+          anthropic_api_key_preview: string | null
+          compatible_base_url: string | null
+          feature: string
+          model: string
+          openai_api_key_encrypted: string | null
+          openai_api_key_preview: string | null
+          openai_compatible_api_key_encrypted: string | null
+          openai_compatible_api_key_preview: string | null
+          provider: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          anthropic_api_key_encrypted?: string | null
+          anthropic_api_key_preview?: string | null
+          compatible_base_url?: string | null
+          feature: string
+          model: string
+          openai_api_key_encrypted?: string | null
+          openai_api_key_preview?: string | null
+          openai_compatible_api_key_encrypted?: string | null
+          openai_compatible_api_key_preview?: string | null
+          provider: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          anthropic_api_key_encrypted?: string | null
+          anthropic_api_key_preview?: string | null
+          compatible_base_url?: string | null
+          feature?: string
+          model?: string
+          openai_api_key_encrypted?: string | null
+          openai_api_key_preview?: string | null
+          openai_compatible_api_key_encrypted?: string | null
+          openai_compatible_api_key_preview?: string | null
+          provider?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_feature_overrides_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_provider_config: {
         Row: {
           anthropic_api_key_encrypted: string | null
@@ -3115,6 +3168,16 @@ export type Database = {
         }[]
       }
       has_feature: { Args: { feature_key: string }; Returns: boolean }
+      list_message_conversations: {
+        Args: never
+        Returns: {
+          last_message_at: string
+          last_message_body: string
+          load_id: number
+          load_number: string
+          unread_count: number
+        }[]
+      }
       log_vehicle_service: {
         Args: {
           p_cost: number
@@ -3196,6 +3259,28 @@ export type Database = {
           p_reason: string
         }
         Returns: Json
+      }
+      update_customer_org: {
+        Args: {
+          p_address?: string
+          p_city?: string
+          p_contact_name?: string
+          p_country?: string
+          p_customer_org_id: number
+          p_email?: string
+          p_name?: string
+          p_notes?: string
+          p_phone?: string
+          p_set_contact_name?: boolean
+          p_set_notes?: boolean
+          p_state?: string
+          p_zip?: string
+        }
+        Returns: {
+          customer_number: string
+          name: string
+          org_id: number
+        }[]
       }
       update_settlement_payment_status_command: {
         Args: {
