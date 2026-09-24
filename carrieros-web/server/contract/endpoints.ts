@@ -106,6 +106,7 @@ import {
   ListOrgDocumentsResponseSchema,
   ExtractLoadImageBodySchema,
   ExtractLoadImageResponseSchema,
+  ExtractLoadTextBodySchema,
 } from './schemas'
 
 export interface Endpoint {
@@ -822,5 +823,15 @@ export const endpoints: readonly Endpoint[] = [
     body: ExtractLoadImageBodySchema,
     response: ExtractLoadImageResponseSchema,
     errorStatuses: [400, 401, 500, 502],
+  },
+  {
+    operationId: 'extractLoadText',
+    method: 'post',
+    path: '/api/v1/loads/extract-text',
+    summary: 'AI paste-text load extraction: parse pasted rate confirmation/broker email text into load fields (pre-creation, no load id yet, requires load_intake_extract)',
+    tag: 'loads',
+    body: ExtractLoadTextBodySchema,
+    response: ExtractLoadImageResponseSchema,
+    errorStatuses: [400, 401, 403, 500, 502],
   },
 ]

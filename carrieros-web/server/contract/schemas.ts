@@ -704,6 +704,14 @@ export const ExtractLoadImageResponseSchema = z.object({
   confidence: ExtractedLoadConfidenceSchema,
 })
 
+// Mirrors app/api/extract-load/route.ts (paste-text load extraction) — same
+// SCHEMA/prompt/failure-classification as the image variant above
+// (lib/extract-load.ts's extractLoadFromText vs extractLoadFromImage), so the
+// response shape is identical; reuses ExtractLoadImageResponseSchema.
+export const ExtractLoadTextBodySchema = z.object({
+  text: z.string().min(10).describe('The pasted rate confirmation / broker email text.'),
+})
+
 export const AssignLoadBodySchema = z
   .object({
     driver_id: z.number().int().positive().nullable().optional().describe('Null clears the assignment.'),
