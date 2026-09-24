@@ -65,6 +65,9 @@ export function SettingsContent() {
   // who sees what, so they stay role literals until that's a deliberate call.
   const isOwnerSolo = role === 'owner' || role === 'solo';
   const canSeeSettlements = role != null && role !== 'dispatcher';
+  // Message Inbox (GET /api/v1/messages) is gated server-side to the
+  // `loads_manage` capability — owner/solo/dispatcher; drivers get a 403.
+  const canSeeMessageInbox = roleHasCapability(role, 'loads_manage');
 
   async function withSaving(key: OptionKey, run: () => Promise<void>) {
     if (saving) return;
@@ -234,12 +237,15 @@ export function SettingsContent() {
           </>
         )}
 
-        {(isOwnerSolo || canManageTeam || canManageSubscription || canSeeSettlements) && (
+        {(isOwnerSolo || canManageTeam || canManageSubscription || canSeeSettlements || canSeeMessageInbox) && (
           <>
             <ThemedText type="default" style={[styles.sectionHeading, styles.sectionHeadingText]}>{t('settings.businessSection')}</ThemedText>
             <ThemedView style={styles.options}>
               {isOwnerSolo && (
                 <LinkRow label={t('tabs.customers')} onPress={() => router.push('/customers')} />
+              )}
+              {canSeeMessageInbox && (
+                <LinkRow label={t('messages.title')} onPress={() => router.push('/messages')} />
               )}
               {canManageTeam && (
                 <LinkRow label={t('team.title')} onPress={() => router.push('/team')} />
