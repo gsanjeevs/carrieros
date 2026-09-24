@@ -598,5 +598,32 @@
     "status_dueSoon": "Due Soon",
     "status_ok": "OK",
     "status_noDate": "No Date"
+  },
+  "companyDocuments": {
+    "title": "Company Documents",
+    "uploadTitle": "Upload a document",
+    "expiryLabel": "Expiry date (optional)",
+    "chooseFile": "Choose File",
+    "empty": "No documents uploaded yet.",
+    "noAccess": "You don't have access to this page.",
+    "view": "View",
+    "expiresOn": "Expires %{date}",
+    "expired": "Expired",
+    "expiringSoon": "Expiring soon",
+    "errorInvalidExpiry": "Enter the expiry date as YYYY-MM-DD.",
+    "errorUnsupportedType": "That file type isn't supported. Use a JPG, PNG, HEIC, WEBP, or PDF.",
+    "errorTooLarge": "That file is too large. The limit is 10 MB.",
+    "errorUploadFailed": "Upload failed. Please try again.",
+    "errorSaveFailed": "The file uploaded but saving the record failed. Please try again.",
+    "type": {
+      "coi": "Certificate of Insurance",
+      "general_liability": "General Liability",
+      "workers_comp": "Workers Comp",
+      "mc_authority": "MC Authority",
+      "dot_certificate": "DOT Certificate",
+      "ucr": "UCR",
+      "w9": "W-9",
+      "business_license": "Business License"
+    }
   }
 }

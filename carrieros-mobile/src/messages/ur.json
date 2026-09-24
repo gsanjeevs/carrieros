@@ -598,5 +598,32 @@
     "status_dueSoon": "جلد واجب",
     "status_ok": "ٹھیک",
     "status_noDate": "کوئی تاریخ نہیں"
+  },
+  "companyDocuments": {
+    "title": "کمپنی کے دستاویزات",
+    "uploadTitle": "دستاویز اپ لوڈ کریں",
+    "expiryLabel": "میعاد ختم ہونے کی تاریخ (اختیاری)",
+    "chooseFile": "فائل منتخب کریں",
+    "empty": "ابھی تک کوئی دستاویز اپ لوڈ نہیں کی گئی۔",
+    "noAccess": "آپ کو اس صفحے تک رسائی حاصل نہیں ہے۔",
+    "view": "دیکھیں",
+    "expiresOn": "%{date} کو میعاد ختم ہو رہی ہے",
+    "expired": "میعاد ختم",
+    "expiringSoon": "جلد میعاد ختم ہو رہی ہے",
+    "errorInvalidExpiry": "میعاد ختم ہونے کی تاریخ YYYY-MM-DD کی صورت میں درج کریں۔",
+    "errorUnsupportedType": "یہ فائل کی قسم معاون نہیں ہے۔ JPG, PNG, HEIC, WEBP، یا PDF استعمال کریں۔",
+    "errorTooLarge": "یہ فائل بہت بڑی ہے۔ حد 10 MB ہے۔",
+    "errorUploadFailed": "اپ لوڈ ناکام ہو گیا۔ براہ کرم دوبارہ کوشش کریں۔",
+    "errorSaveFailed": "فائل اپ لوڈ ہو گئی لیکن ریکارڈ محفوظ کرنا ناکام ہو گیا۔ براہ کرم دوبارہ کوشش کریں۔",
+    "type": {
+      "coi": "بیمہ کا سرٹیفکیٹ",
+      "general_liability": "جنرل لائبلٹی",
+      "workers_comp": "ورکرز کمپ",
+      "mc_authority": "MC اتھارٹی",
+      "dot_certificate": "DOT سرٹیفکیٹ",
+      "ucr": "UCR",
+      "w9": "W-9",
+      "business_license": "کاروباری لائسنس"
+    }
   }
 }

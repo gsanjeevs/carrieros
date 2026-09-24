@@ -598,5 +598,32 @@
     "status_dueSoon": "Próximo a Vencer",
     "status_ok": "Al Día",
     "status_noDate": "Sin Fecha"
+  },
+  "companyDocuments": {
+    "title": "Documentos de la empresa",
+    "uploadTitle": "Subir un documento",
+    "expiryLabel": "Fecha de vencimiento (opcional)",
+    "chooseFile": "Elegir archivo",
+    "empty": "Aún no se han subido documentos.",
+    "noAccess": "No tienes acceso a esta página.",
+    "view": "Ver",
+    "expiresOn": "Vence el %{date}",
+    "expired": "Vencido",
+    "expiringSoon": "Vence pronto",
+    "errorInvalidExpiry": "Ingresa la fecha de vencimiento como AAAA-MM-DD.",
+    "errorUnsupportedType": "Ese tipo de archivo no es compatible. Usa JPG, PNG, HEIC, WEBP o PDF.",
+    "errorTooLarge": "El archivo es demasiado grande. El límite es 10 MB.",
+    "errorUploadFailed": "Error al subir el archivo. Inténtalo de nuevo.",
+    "errorSaveFailed": "El archivo se subió, pero no se pudo guardar el registro. Inténtalo de nuevo.",
+    "type": {
+      "coi": "Certificado de seguro",
+      "general_liability": "Responsabilidad civil general",
+      "workers_comp": "Compensación laboral",
+      "mc_authority": "Autorización MC",
+      "dot_certificate": "Certificado DOT",
+      "ucr": "UCR",
+      "w9": "W-9",
+      "business_license": "Licencia comercial"
+    }
   }
 }

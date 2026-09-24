@@ -57,6 +57,7 @@ export function SettingsContent() {
   // Capability-backed gates (generated from the role_capabilities table).
   const canManageTeam = roleHasCapability(role, 'team_manage');
   const canManageSubscription = roleHasCapability(role, 'subscription_management');
+  const canViewOrgDocuments = roleHasCapability(role, 'org_documents_view');
   // Still hand-gated: the Customers / IFTA report / DVIR history links are
   // owner-solo-only here, which is NARROWER than the matching capabilities
   // (`customers_manage` and `ifta_record` are also held by dispatcher/driver),
@@ -237,7 +238,7 @@ export function SettingsContent() {
           </>
         )}
 
-        {(isOwnerSolo || canManageTeam || canManageSubscription || canSeeSettlements || canSeeMessageInbox) && (
+        {(isOwnerSolo || canManageTeam || canManageSubscription || canSeeSettlements || canSeeMessageInbox || canViewOrgDocuments) && (
           <>
             <ThemedText type="default" style={[styles.sectionHeading, styles.sectionHeadingText]}>{t('settings.businessSection')}</ThemedText>
             <ThemedView style={styles.options}>
@@ -255,6 +256,9 @@ export function SettingsContent() {
               )}
               {canSeeSettlements && (
                 <LinkRow label={t('settlements.title')} onPress={() => router.push('/settlements')} />
+              )}
+              {canViewOrgDocuments && (
+                <LinkRow label={t('companyDocuments.title')} onPress={() => router.push('/company-documents')} />
               )}
               {/* IFTA mileage summary (mockup-20) is Finance's own "Reports"
                   tab already -- Owner/Solo reach the same content via this

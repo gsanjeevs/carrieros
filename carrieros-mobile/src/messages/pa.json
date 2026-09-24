@@ -598,5 +598,32 @@
     "status_dueSoon": "ਜਲਦੀ ਬਕਾਇਆ",
     "status_ok": "ਠੀਕ",
     "status_noDate": "ਕੋਈ ਤਾਰੀਖ ਨਹੀਂ"
+  },
+  "companyDocuments": {
+    "title": "ਕੰਪਨੀ ਦਸਤਾਵੇਜ਼",
+    "uploadTitle": "ਦਸਤਾਵੇਜ਼ ਅੱਪਲੋਡ ਕਰੋ",
+    "expiryLabel": "ਮਿਆਦ ਪੁੱਗਣ ਦੀ ਤਾਰੀਖ (ਵਿਕਲਪਿਕ)",
+    "chooseFile": "ਫ਼ਾਈਲ ਚੁਣੋ",
+    "empty": "ਅਜੇ ਤੱਕ ਕੋਈ ਦਸਤਾਵੇਜ਼ ਅੱਪਲੋਡ ਨਹੀਂ ਕੀਤਾ ਗਿਆ।",
+    "noAccess": "ਤੁਹਾਡੇ ਕੋਲ ਇਸ ਪੰਨੇ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਹੈ।",
+    "view": "ਦੇਖੋ",
+    "expiresOn": "%{date} ਨੂੰ ਮਿਆਦ ਪੁੱਗਦੀ ਹੈ",
+    "expired": "ਮਿਆਦ ਪੁੱਗ ਗਈ",
+    "expiringSoon": "ਜਲਦੀ ਮਿਆਦ ਪੁੱਗ ਰਹੀ ਹੈ",
+    "errorInvalidExpiry": "ਮਿਆਦ ਪੁੱਗਣ ਦੀ ਤਾਰੀਖ YYYY-MM-DD ਵਜੋਂ ਦਰਜ ਕਰੋ।",
+    "errorUnsupportedType": "ਉਹ ਫ਼ਾਈਲ ਕਿਸਮ ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ। JPG, PNG, HEIC, WEBP, ਜਾਂ PDF ਵਰਤੋ।",
+    "errorTooLarge": "ਉਹ ਫ਼ਾਈਲ ਬਹੁਤ ਵੱਡੀ ਹੈ। ਸੀਮਾ 10 MB ਹੈ।",
+    "errorUploadFailed": "ਅੱਪਲੋਡ ਅਸਫਲ ਰਿਹਾ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "errorSaveFailed": "ਫ਼ਾਈਲ ਅੱਪਲੋਡ ਹੋ ਗਈ ਪਰ ਰਿਕਾਰਡ ਸੰਭਾਲਣਾ ਅਸਫਲ ਰਿਹਾ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "type": {
+      "coi": "ਬੀਮਾ ਸਰਟੀਫਿਕੇਟ",
+      "general_liability": "ਜਨਰਲ ਲਾਇਬਿਲਿਟੀ",
+      "workers_comp": "ਵਰਕਰਜ਼ ਕੰਪ",
+      "mc_authority": "MC ਅਥਾਰਟੀ",
+      "dot_certificate": "DOT ਸਰਟੀਫਿਕੇਟ",
+      "ucr": "UCR",
+      "w9": "W-9",
+      "business_license": "ਵਪਾਰ ਲਾਇਸੈਂਸ"
+    }
   }
 }
