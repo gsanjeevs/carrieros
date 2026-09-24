@@ -66,7 +66,8 @@
     "developerApi": "ڈولپر API",
     "brandingCustomization": "برانڈنگ",
     "support": "معاونت",
-    "supportDesk": "معاونتی ڈیسک"
+    "supportDesk": "معاونتی ڈیسک",
+    "messages": "پیغامات"
   },
   "login": {
     "title": "اپنے اکاؤنٹ میں سائن ان کریں",
@@ -1405,5 +1406,16 @@
     "markClosed": "ٹکٹ بند کریں",
     "loading": "لوڈ ہو رہا ہے…",
     "error": "ٹکٹیں لوڈ نہیں ہو سکیں۔"
+  },
+  "messages": {
+    "title": "پیغامات",
+    "pageDescription": "ہر لوڈ کا پیغام تھریڈ ایک جگہ، تازہ ترین سرگرمی پہلے۔",
+    "noAccess": "آپ کو پیغام ان باکس تک رسائی حاصل نہیں ہے۔",
+    "emptyTitle": "ابھی تک کوئی گفتگو نہیں",
+    "emptyDescription": "آپ کے لوڈز پر بھیجے گئے پیغامات یہاں ظاہر ہوں گے۔",
+    "columnLoad": "لوڈ",
+    "columnLastMessage": "آخری پیغام",
+    "columnUpdated": "اپ ڈیٹ",
+    "columnUnread": "غیر پڑھا"
   }
 }

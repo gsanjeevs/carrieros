@@ -170,7 +170,7 @@ export class SupabaseSetupRepository implements BillingWriteRepository, Customer
       ['licensePlate', 'license_plate'], ['licenseState', 'license_state'], ['cabType', 'cab_type'],
       ['color', 'color'], ['dimensions', 'dimensions'],
     ] as const) {
-      if (key in input) patch[dbKey] = input[key]
+      if (key in input) patch[dbKey] = input[key] as never
     }
     const { data, error } = await this.session.from('vehicles').update(patch)
       .eq('id', vehicleId).eq('carrier_org_id', actor.orgId)
