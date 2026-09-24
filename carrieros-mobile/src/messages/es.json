@@ -615,6 +615,11 @@
     "errorTooLarge": "El archivo es demasiado grande. El límite es 10 MB.",
     "errorUploadFailed": "Error al subir el archivo. Inténtalo de nuevo.",
     "errorSaveFailed": "El archivo se subió, pero no se pudo guardar el registro. Inténtalo de nuevo.",
+    "delete": "Eliminar",
+    "deleteConfirmTitle": "¿Eliminar documento?",
+    "deleteConfirmMessage": "Esta acción no se puede deshacer.",
+    "deleteCancel": "Cancelar",
+    "errorDeleteFailed": "No se pudo eliminar. Inténtalo de nuevo.",
     "type": {
       "coi": "Certificado de seguro",
       "general_liability": "Responsabilidad civil general",

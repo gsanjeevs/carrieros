@@ -615,6 +615,11 @@
     "errorTooLarge": "That file is too large. The limit is 10 MB.",
     "errorUploadFailed": "Upload failed. Please try again.",
     "errorSaveFailed": "The file uploaded but saving the record failed. Please try again.",
+    "delete": "Delete",
+    "deleteConfirmTitle": "Delete document?",
+    "deleteConfirmMessage": "This can't be undone.",
+    "deleteCancel": "Cancel",
+    "errorDeleteFailed": "Delete failed. Please try again.",
     "type": {
       "coi": "Certificate of Insurance",
       "general_liability": "General Liability",

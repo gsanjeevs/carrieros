@@ -615,6 +615,11 @@
     "errorTooLarge": "ਉਹ ਫ਼ਾਈਲ ਬਹੁਤ ਵੱਡੀ ਹੈ। ਸੀਮਾ 10 MB ਹੈ।",
     "errorUploadFailed": "ਅੱਪਲੋਡ ਅਸਫਲ ਰਿਹਾ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
     "errorSaveFailed": "ਫ਼ਾਈਲ ਅੱਪਲੋਡ ਹੋ ਗਈ ਪਰ ਰਿਕਾਰਡ ਸੰਭਾਲਣਾ ਅਸਫਲ ਰਿਹਾ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "delete": "ਮਿਟਾਓ",
+    "deleteConfirmTitle": "ਦਸਤਾਵੇਜ਼ ਮਿਟਾਓ?",
+    "deleteConfirmMessage": "ਇਸਨੂੰ ਵਾਪਸ ਨਹੀਂ ਲਿਆ ਜਾ ਸਕਦਾ।",
+    "deleteCancel": "ਰੱਦ ਕਰੋ",
+    "errorDeleteFailed": "ਮਿਟਾਉਣਾ ਅਸਫਲ ਰਿਹਾ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
     "type": {
       "coi": "ਬੀਮਾ ਸਰਟੀਫਿਕੇਟ",
       "general_liability": "ਜਨਰਲ ਲਾਇਬਿਲਿਟੀ",

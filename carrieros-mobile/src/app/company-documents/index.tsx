@@ -15,14 +15,11 @@
 //   1. POST /api/v1/org-documents/uploads  -> server-chosen path + signed PUT url
 //   2. PUT the raw bytes to that url
 //   3. POST /api/v1/org-documents          -> server verifies the object and records it
-// There is no delete endpoint in the mobile API surface (generated
-// lib/generated/api-types.ts only declares GET/POST for /api/v1/org-documents and
-// POST for /api/v1/org-documents/uploads) — web deletes via a direct Supabase
-// RLS-backed call (components/CompanyDocuments.tsx), which mobile deliberately never
-// does (ADR 0003). So this screen is list + upload only; delete is a backend gap to
-// close before mobile can offer it.
+// Delete: DELETE /api/v1/org-documents/{id}, org_documents_manage only (same
+// gate as upload) — removes the storage object then the row, same order as
+// web's components/CompanyDocuments.tsx.
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
@@ -103,6 +100,7 @@ export default function CompanyDocumentsScreen() {
   const [selectedType, setSelectedType] = useState<DocType>('coi');
   const [expiryInput, setExpiryInput] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [error, setError] = useState('');
 
   const load = useCallback(async () => {
@@ -196,6 +194,34 @@ export default function CompanyDocumentsScreen() {
     } finally {
       setUploading(false);
     }
+  }
+
+  async function handleDelete(doc: OrgDocument) {
+    setError('');
+    setDeletingId(doc.id);
+    try {
+      const { response } = await apiClient.http.DELETE('/api/v1/org-documents/{id}', { params: { path: { id: doc.id } } });
+      if (!response.ok) {
+        setError(t('companyDocuments.errorDeleteFailed'));
+        return;
+      }
+      await load();
+    } catch {
+      setError(t('companyDocuments.errorDeleteFailed'));
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
+  function confirmDelete(doc: OrgDocument) {
+    Alert.alert(
+      t('companyDocuments.deleteConfirmTitle'),
+      t('companyDocuments.deleteConfirmMessage'),
+      [
+        { text: t('companyDocuments.deleteCancel'), style: 'cancel' },
+        { text: t('companyDocuments.delete'), style: 'destructive', onPress: () => void handleDelete(doc) },
+      ]
+    );
   }
 
   if (roleLoading) {
@@ -311,11 +337,22 @@ export default function CompanyDocumentsScreen() {
                         {formatDate(doc.created_at, locale)}
                       </ThemedText>
                     )}
-                    {doc.url && (
-                      <Pressable onPress={() => Linking.openURL(doc.url as string)}>
-                        <ThemedText type="link" themeColor="textSecondary">{t('companyDocuments.view')}</ThemedText>
-                      </Pressable>
-                    )}
+                    <ThemedView type="transparent" style={styles.rowBetween}>
+                      {doc.url && (
+                        <Pressable onPress={() => Linking.openURL(doc.url as string)}>
+                          <ThemedText type="link" themeColor="textSecondary">{t('companyDocuments.view')}</ThemedText>
+                        </Pressable>
+                      )}
+                      {canManage && (
+                        <Pressable onPress={() => confirmDelete(doc)} disabled={deletingId === doc.id}>
+                          {deletingId === doc.id ? (
+                            <ActivityIndicator size="small" color={StatusColors.dangerDark} />
+                          ) : (
+                            <ThemedText type="link" style={styles.error}>{t('companyDocuments.delete')}</ThemedText>
+                          )}
+                        </Pressable>
+                      )}
+                    </ThemedView>
                   </ThemedView>
                 );
               })
