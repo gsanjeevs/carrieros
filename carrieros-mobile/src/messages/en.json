@@ -512,7 +512,13 @@
     "noPaymentMethod": "No payment method on file",
     "fleetUsage": "Fleet Usage",
     "trucksUsed": "%{count} of %{included} trucks included",
-    "overageFee": "%{count} over — $%{fee}/mo overage"
+    "overageFee": "%{count} over — $%{fee}/mo overage",
+    "manageSubscription": "Manage Subscription",
+    "manageSubscriptionHandoffTitle": "Continue on Web",
+    "manageSubscriptionHandoffMessage": "Changing your plan or payment method opens carrieros.com in your browser — the same secure checkout used on desktop.",
+    "manageSubscriptionHandoffCancel": "Cancel",
+    "manageSubscriptionHandoffConfirm": "Open carrieros.com",
+    "manageSubscriptionOpenError": "Couldn't open the browser. Please try again."
   },
   "settlements": {
     "title": "Settlements",

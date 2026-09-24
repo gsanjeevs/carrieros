@@ -512,7 +512,13 @@
     "noPaymentMethod": "کوئی ادائیگی کا طریقہ درج نہیں",
     "fleetUsage": "فلیٹ کا استعمال",
     "trucksUsed": "%{included} میں سے %{count} ٹرک شامل",
-    "overageFee": "%{count} اضافی — $%{fee}/ماہ اضافی چارج"
+    "overageFee": "%{count} اضافی — $%{fee}/ماہ اضافی چارج",
+    "manageSubscription": "سبسکرپشن کا انتظام کریں",
+    "manageSubscriptionHandoffTitle": "ویب پر جاری رکھیں",
+    "manageSubscriptionHandoffMessage": "اپنا پلان یا ادائیگی کا طریقہ تبدیل کرنے سے آپ کے براؤزر میں carrieros.com کھل جائے گا — وہی محفوظ چیک آؤٹ جو ڈیسک ٹاپ پر استعمال ہوتا ہے۔",
+    "manageSubscriptionHandoffCancel": "منسوخ کریں",
+    "manageSubscriptionHandoffConfirm": "carrieros.com کھولیں",
+    "manageSubscriptionOpenError": "براؤزر نہیں کھل سکا۔ براہ کرم دوبارہ کوشش کریں۔"
   },
   "settlements": {
     "title": "سیٹلمنٹس",
