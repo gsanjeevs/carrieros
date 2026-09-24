@@ -15,15 +15,14 @@
 //   1. POST /api/v1/org-documents/uploads  -> server-chosen path + signed PUT url
 //   2. PUT the raw bytes to that url
 //   3. POST /api/v1/org-documents          -> server verifies the object and records it
-// Delete calls DELETE /api/v1/org-documents/{id} via lib/api.ts's apiFetch (the same
-// bearer-token raw-fetch helper src/app/team/index.tsx uses), rather than
-// apiClient.http, because the generated client (lib/generated/api-types.ts) has no
-// delete operation for this path yet — the web app instead deletes via a direct
-// Supabase RLS-backed call (components/CompanyDocuments.tsx), which mobile
-// deliberately never does (ADR 0003). This id-based DELETE route does not exist in the
-// backend yet; adding it is a required follow-up before this button will work.
+// There is no delete endpoint in the mobile API surface (generated
+// lib/generated/api-types.ts only declares GET/POST for /api/v1/org-documents and
+// POST for /api/v1/org-documents/uploads) — web deletes via a direct Supabase
+// RLS-backed call (components/CompanyDocuments.tsx), which mobile deliberately never
+// does (ADR 0003). So this screen is list + upload only; delete is a backend gap to
+// close before mobile can offer it.
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
@@ -36,7 +35,6 @@ import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useProfileRole } from '@/hooks/use-profile-role';
 import { apiClient } from '@/lib/api-client';
-import { apiFetch } from '@/lib/api';
 import { base64ToArrayBuffer } from '@/lib/base64';
 import { formatDate } from '@/lib/format-date';
 import { roleHasCapability } from '@/lib/generated/role-capabilities';
@@ -106,7 +104,6 @@ export default function CompanyDocumentsScreen() {
   const [expiryInput, setExpiryInput] = useState('');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
-  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     const { data } = await apiClient.http.GET('/api/v1/org-documents');
@@ -198,35 +195,6 @@ export default function CompanyDocumentsScreen() {
       setError(t('companyDocuments.errorUploadFailed'));
     } finally {
       setUploading(false);
-    }
-  }
-
-  function confirmDelete(doc: OrgDocument) {
-    if (deletingId !== null) return;
-    Alert.alert(
-      t('companyDocuments.deleteConfirmTitle'),
-      t('companyDocuments.deleteConfirmMessage', { type: t(`companyDocuments.type.${doc.doc_type}`, { defaultValue: doc.doc_type }) }),
-      [
-        { text: t('companyDocuments.deleteCancel'), style: 'cancel' },
-        { text: t('companyDocuments.delete'), style: 'destructive', onPress: () => handleDelete(doc.id) },
-      ]
-    );
-  }
-
-  async function handleDelete(id: number) {
-    setError('');
-    setDeletingId(id);
-    try {
-      const response = await apiFetch(`/api/v1/org-documents/${id}`, { method: 'DELETE' });
-      if (!response.ok) {
-        setError(t('companyDocuments.errorDeleteFailed'));
-        return;
-      }
-      setDocuments((prev) => prev.filter((d) => d.id !== id));
-    } catch {
-      setError(t('companyDocuments.errorDeleteFailed'));
-    } finally {
-      setDeletingId(null);
     }
   }
 
@@ -343,24 +311,11 @@ export default function CompanyDocumentsScreen() {
                         {formatDate(doc.created_at, locale)}
                       </ThemedText>
                     )}
-                    <ThemedView type="transparent" style={styles.rowBetween}>
-                      {doc.url && (
-                        <Pressable onPress={() => Linking.openURL(doc.url as string)}>
-                          <ThemedText type="link" themeColor="textSecondary">{t('companyDocuments.view')}</ThemedText>
-                        </Pressable>
-                      )}
-                      {canManage && (
-                        <Pressable onPress={() => confirmDelete(doc)} disabled={deletingId === doc.id}>
-                          {deletingId === doc.id ? (
-                            <ActivityIndicator size="small" color={StatusColors.dangerDark} />
-                          ) : (
-                            <ThemedText type="link" style={{ color: StatusColors.dangerDark }}>
-                              {t('companyDocuments.delete')}
-                            </ThemedText>
-                          )}
-                        </Pressable>
-                      )}
-                    </ThemedView>
+                    {doc.url && (
+                      <Pressable onPress={() => Linking.openURL(doc.url as string)}>
+                        <ThemedText type="link" themeColor="textSecondary">{t('companyDocuments.view')}</ThemedText>
+                      </Pressable>
+                    )}
                   </ThemedView>
                 );
               })
