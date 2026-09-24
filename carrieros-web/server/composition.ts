@@ -251,3 +251,34 @@ export function createFinancialEventQueryService(): FinancialEventQueryService {
     events: new SupabaseFinancialEventQueryRepository(createAdminClient()),
   })
 }
+
+import { OnboardingService } from './application/onboarding-service'
+import { SetupWriteService } from './application/setup-write-service'
+import { DriverMessageService } from './application/driver-message-service'
+import { SupabaseOnboardingRepository, SupabaseSetupRepository } from './infrastructure/supabase/setup-repository'
+import { createStripeCustomer } from '@/lib/stripe'
+
+export function createOnboardingService(supabase: SupabaseClient<Database>): OnboardingService {
+  return new OnboardingService({ onboarding: new SupabaseOnboardingRepository(supabase, createAdminClient()) })
+}
+
+export function createSetupWriteService(supabase: SupabaseClient<Database>): SetupWriteService {
+  const setup = new SupabaseSetupRepository(supabase, createAdminClient())
+  return new SetupWriteService({
+    billing: setup,
+    customers: setup,
+    vehicles: setup,
+    drivers: setup,
+    idempotency: new SupabaseIdempotencyRepository(createAdminClient()),
+    createStripeCustomer,
+  })
+}
+
+export function createDriverMessageService(supabase: SupabaseClient<Database>): DriverMessageService {
+  return new DriverMessageService({
+    shipments: new SupabaseShipmentCommandRepository(supabase),
+    messages: new SupabaseMessageRepository(supabase),
+    features: new SupabaseFeatureGate(supabase),
+    idempotency: new SupabaseIdempotencyRepository(createAdminClient()),
+  })
+}

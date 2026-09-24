@@ -15,6 +15,7 @@ const STATUS: Record<string, number> = {
   IDEMPOTENCY_KEY_REUSED: 422,
   REQUEST_IN_PROGRESS: 409,
   PRECONDITION_FAILED: 500,
+  ALREADY_ONBOARDED: 409,
 }
 
 const CODE: Record<string, ErrorCode> = {
@@ -26,6 +27,7 @@ const CODE: Record<string, ErrorCode> = {
   ILLEGAL_TRANSITION: 'ILLEGAL_TRANSITION',
   IDEMPOTENCY_KEY_REUSED: 'IDEMPOTENCY_KEY_REUSED',
   REQUEST_IN_PROGRESS: 'REQUEST_IN_PROGRESS',
+  ALREADY_ONBOARDED: 'ALREADY_ONBOARDED',
 }
 
 export function domainErrorResponse(error: DomainError) {

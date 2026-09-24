@@ -53,6 +53,8 @@ export type DomainErrorCode =
   | 'PRECONDITION_FAILED'
   // The actor may not perform this step on this record (segregation of duties)
   | 'SEGREGATION_OF_DUTIES'
+  // Authenticated bootstrap caller already has an organization membership.
+  | 'ALREADY_ONBOARDED'
 
 export interface DomainError {
   readonly code: DomainErrorCode

@@ -17,6 +17,7 @@ import type { ChangeEntity } from '../domain/events/entities'
 import type { PreferencesPatch } from '../domain/profile/preferences'
 import type { DriverProfilePatch } from '../domain/driver/self-profile'
 import type { OAuthClientSummary } from '../domain/oauth/model'
+import type { OnboardingDraft } from '../domain/onboarding/draft'
 
 // ── Cross-cutting ───────────────────────────────────────────────────────────
 
@@ -383,6 +384,80 @@ export interface MessageRepository {
   markRead(actor: ActorContext, loadId: number, messageIds: readonly number[], readAt: Date): Promise<Result<number>>
   /** A load's message thread, oldest first. */
   listForLoad(actor: ActorContext, loadId: number): Promise<Result<readonly DriverMessageRecord[]>>
+  resolveOriginalLanguage(actor: ActorContext): Promise<Result<string>>
+  send(actor: ActorContext, loadId: number, body: string, originalLanguage: string): Promise<Result<{ id: number; sent_at: string }>>
+}
+
+// ── Onboarding and mobile write-gap resources ──────────────────────────────
+
+export interface OnboardingRepository {
+  hasOrganization(userId: UserId): Promise<Result<boolean>>
+  create(userId: UserId, draft: OnboardingDraft): Promise<Result<{ orgId: number; loadEmail: string | null }>>
+}
+
+export interface PaymentMethodRecord {
+  readonly stripe_customer_id: string | null
+  readonly card_brand: string | null
+  readonly card_last4: string | null
+  readonly billing_status: string | null
+  readonly trial_ends_at: string | null
+}
+
+export interface BillingWriteRepository {
+  organizationName(actor: ActorContext): Promise<Result<string | null>>
+  savePaymentMethod(actor: ActorContext, value: { stripeCustomerId: string; cardBrand: string; cardLast4: string }): Promise<Result<PaymentMethodRecord>>
+}
+
+export interface CreateCustomerInput {
+  readonly name: string
+  readonly phone?: string | null
+  readonly email?: string | null
+  readonly address?: string | null
+  readonly city?: string | null
+  readonly state?: string | null
+  readonly zip?: string | null
+  readonly country?: string | null
+  readonly contactName?: string | null
+  readonly notes?: string | null
+}
+
+export interface CustomerWriteRepository {
+  create(actor: ActorContext, input: CreateCustomerInput): Promise<Result<{ org_id: number; name: string; customer_number: string | null }>>
+}
+
+export interface CreateVehicleInput {
+  readonly vehicleTypeId: number
+  readonly nickname: string
+  readonly year?: number | null
+  readonly make?: string | null
+  readonly model?: string | null
+  readonly vin?: string | null
+  readonly licensePlate?: string | null
+  readonly licenseState?: string | null
+  readonly cabType?: string | null
+  readonly color?: string | null
+  readonly dimensions?: string | null
+}
+
+export interface VehicleWriteRepository {
+  create(actor: ActorContext, input: CreateVehicleInput): Promise<Result<{ vehicle_number: string | null; nickname: string }>>
+}
+
+export interface DriverSummaryRecord {
+  readonly id: number
+  readonly driver_number: string | null
+  readonly invite_status: string | null
+  readonly default_vehicle_id: number | null
+  readonly cdl_expiry: string | null
+  readonly med_cert_expiry: string | null
+  readonly is_active: boolean | null
+  readonly first_name: string | null
+  readonly last_name: string | null
+  readonly phone: string | null
+}
+
+export interface DriverDirectoryRepository {
+  listActive(actor: ActorContext): Promise<Result<readonly DriverSummaryRecord[]>>
 }
 
 export interface LoadLocationRepository {

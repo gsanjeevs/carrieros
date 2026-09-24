@@ -36,6 +36,26 @@ export class SupabaseMessageRepository implements MessageRepository {
     if (error) return fail('message list', error.message)
     return ok((data ?? []) as unknown as DriverMessageRecord[])
   }
+
+  async resolveOriginalLanguage(actor: ActorContext): Promise<Result<string>> {
+    const [{ data: profile, error: profileError }, { data: carrier, error: carrierError }] = await Promise.all([
+      this.supabase.from('profiles').select('preferred_language').eq('id', actor.userId).maybeSingle(),
+      this.supabase.from('carrier_details').select('default_language').eq('org_id', actor.orgId).maybeSingle(),
+    ])
+    if (profileError) return fail('profile language lookup', profileError.message)
+    if (carrierError) return fail('carrier language lookup', carrierError.message)
+    return ok(profile?.preferred_language ?? carrier?.default_language ?? 'en')
+  }
+
+  async send(actor: ActorContext, loadId: number, body: string, originalLanguage: string): Promise<Result<{ id: number; sent_at: string }>> {
+    const { data, error } = await this.supabase
+      .from('driver_messages')
+      .insert({ carrier_org_id: actor.orgId, load_id: loadId, sender_id: actor.userId, body, original_language: originalLanguage })
+      .select('id, sent_at')
+      .single()
+    if (error || !data) return fail('message send', error?.message ?? 'No row returned')
+    return ok({ id: Number(data.id), sent_at: data.sent_at })
+  }
 }
 
 export class SupabaseLoadLocationRepository implements LoadLocationRepository {

@@ -1,0 +1,57 @@
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
+import type { ActorContext } from '../domain/shared/identity'
+import { err, forbidden, type Result } from '../domain/shared/result'
+import type {
+  BillingWriteRepository,
+  CreateCustomerInput,
+  CreateVehicleInput,
+  CustomerWriteRepository,
+  DriverDirectoryRepository,
+  DriverSummaryRecord,
+  IdempotencyRepository,
+  PaymentMethodRecord,
+  VehicleWriteRepository,
+} from '../ports'
+import { withIdempotency } from './idempotency'
+
+type StripeCreator = (org: { id: number; name?: string | null }) => Promise<{ stripe_customer_id: string; card_brand: string; card_last4: string }>
+
+export class SetupWriteService {
+  constructor(private readonly deps: {
+    readonly billing: BillingWriteRepository
+    readonly customers: CustomerWriteRepository
+    readonly vehicles: VehicleWriteRepository
+    readonly drivers: DriverDirectoryRepository
+    readonly idempotency: IdempotencyRepository
+    readonly createStripeCustomer: StripeCreator
+  }) {}
+
+  addPaymentMethod(actor: ActorContext, key: string): Promise<Result<PaymentMethodRecord>> {
+    if (!roleHasCapability(actor.role, 'subscription_management')) return Promise.resolve(err(forbidden('This role cannot manage billing', { role: actor.role })))
+    return withIdempotency(this.deps.idempotency, actor, 'POST /billing/add-payment-method', key, {}, async () => {
+      const name = await this.deps.billing.organizationName(actor)
+      if (!name.ok) return name
+      const stripe = await this.deps.createStripeCustomer({ id: actor.orgId, name: name.value })
+      return this.deps.billing.savePaymentMethod(actor, {
+        stripeCustomerId: stripe.stripe_customer_id,
+        cardBrand: stripe.card_brand,
+        cardLast4: stripe.card_last4,
+      })
+    })
+  }
+
+  createCustomer(actor: ActorContext, input: CreateCustomerInput, key: string) {
+    if (!roleHasCapability(actor.role, 'customers_manage')) return Promise.resolve(err(forbidden('This role cannot create customers', { role: actor.role })))
+    return withIdempotency(this.deps.idempotency, actor, 'POST /customers', key, input, () => this.deps.customers.create(actor, input))
+  }
+
+  createVehicle(actor: ActorContext, input: CreateVehicleInput, key: string) {
+    if (!roleHasCapability(actor.role, 'vehicles_manage')) return Promise.resolve(err(forbidden('This role cannot create vehicles', { role: actor.role })))
+    return withIdempotency(this.deps.idempotency, actor, 'POST /vehicles', key, input, () => this.deps.vehicles.create(actor, input))
+  }
+
+  listDrivers(actor: ActorContext): Promise<Result<readonly DriverSummaryRecord[]>> {
+    if (!roleHasCapability(actor.role, 'drivers')) return Promise.resolve(err(forbidden('This role cannot view drivers', { role: actor.role })))
+    return this.deps.drivers.listActive(actor)
+  }
+}
