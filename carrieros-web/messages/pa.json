@@ -66,7 +66,8 @@
     "developerApi": "ਡੈਵਲਪਰ API",
     "brandingCustomization": "ਬ੍ਰਾਂਡਿੰਗ",
     "support": "ਸਹਾਇਤਾ",
-    "supportDesk": "ਸਹਾਇਤਾ ਡੈਸਕ"
+    "supportDesk": "ਸਹਾਇਤਾ ਡੈਸਕ",
+    "messages": "ਸੁਨੇਹੇ"
   },
   "login": {
     "title": "ਆਪਣੇ ਖਾਤੇ ਵਿੱਚ ਸਾਈਨ ਇਨ ਕਰੋ",
@@ -1410,5 +1411,16 @@
     "markClosed": "ਟਿਕਟ ਬੰਦ ਕਰੋ",
     "loading": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ…",
     "error": "ਟਿਕਟਾਂ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀਆਂ।"
+  },
+  "messages": {
+    "title": "ਸੁਨੇਹੇ",
+    "pageDescription": "ਹਰ ਲੋਡ ਦੀ ਸੁਨੇਹਾ ਥਰਿੱਡ ਇੱਕ ਥਾਂ 'ਤੇ, ਨਵੀਨਤਮ ਗਤੀਵਿਧੀ ਪਹਿਲਾਂ।",
+    "noAccess": "ਤੁਹਾਡੇ ਕੋਲ ਸੁਨੇਹਾ ਇਨਬਾਕਸ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਹੈ।",
+    "emptyTitle": "ਅਜੇ ਕੋਈ ਗੱਲਬਾਤ ਨਹੀਂ",
+    "emptyDescription": "ਤੁਹਾਡੇ ਲੋਡਾਂ 'ਤੇ ਭੇਜੇ ਗਏ ਸੁਨੇਹੇ ਇੱਥੇ ਦਿਖਾਈ ਦੇਣਗੇ।",
+    "columnLoad": "ਲੋਡ",
+    "columnLastMessage": "ਆਖਰੀ ਸੁਨੇਹਾ",
+    "columnUpdated": "ਅੱਪਡੇਟ ਕੀਤਾ",
+    "columnUnread": "ਨਾ ਪੜ੍ਹੇ"
   }
 }

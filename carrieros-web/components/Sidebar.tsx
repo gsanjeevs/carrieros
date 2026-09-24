@@ -42,6 +42,9 @@ const NAV_SECTIONS: NavSection[] = [
       { labelKey: 'dispatch',  href: '/dispatch',   icon: 'swap_driving_apps',capability: 'dispatch' },
       { labelKey: 'customers', href: '/customers',  icon: 'business',         capability: 'customers_view' },
       { labelKey: 'documents', href: '/documents',  icon: 'folder',           capability: 'org_documents_view' },
+      // Dispatcher-facing aggregate message inbox (never built before) — gated the same as
+      // /dispatch and other dispatcher-only tools, via loads_manage.
+      { labelKey: 'messages',  href: '/messages',   icon: 'forum',            capability: 'loads_manage' },
     ],
   },
   {
