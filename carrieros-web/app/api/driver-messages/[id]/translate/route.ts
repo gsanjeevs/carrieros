@@ -1,142 +1,48 @@
 // app/api/driver-messages/[id]/translate/route.ts
-// POST — translate a driver_messages row into `target_language`, caching the
-// result in driver_message_translations (unique on message_id, target_language)
-// so a thread re-opened in the same language never re-translates. Same
-// driver_chat gate as app/api/driver-messages/route.ts — translation is part
-// of that one gated feature, not a separate entitlement.
+// POST — translate a driver_messages row into `target_language`. Legacy
+// mobile-facing counterpart to app/api/v1/driver-messages/[id]/translate;
+// both now share the exact same real (LLM-backed) implementation via
+// DriverMessageService.translate() rather than each having its own logic —
+// same reasoning as lib/invoice-actions.ts's sendInvoiceAndMarkSent(), one
+// shared implementation instead of two. This used to be a stub (no
+// translation backend was configured); it now delegates to the real one
+// built this session, so the existing "Translate" buttons in
+// components/DriverMessageThread.tsx (web) and
+// src/components/driver-chat-section.tsx (mobile) — both of which already
+// call this exact route — start returning real translations with no UI
+// change needed.
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
-import { hasFeature } from '@/lib/entitlements'
 import { SUPPORTED_LOCALES } from '@/i18n/request'
-import { getProfileForUser } from '@/lib/queries/profiles'
-import { getLoadById } from '@/lib/queries/loads'
-import { getDriverIdForProfile } from '@/lib/queries/drivers'
-import { logError, logEvent } from '@/lib/observability'
-import { roleHasCapability } from '@/lib/generated/role-capabilities'
+import { createDriverMessageService } from '@/server/composition'
+import { buildActorContext } from '@/server/infrastructure/supabase/actor-context'
+import { domainErrorResponse } from '@/server/http-errors'
+import { TranslateMessageResponseSchema } from '@/server/contract/schemas'
 
 type Ctx = { params: Promise<{ id: string }> }
-
-/**
- * TODO(translate): the real backend is genuinely undecided (an LLM call vs.
- * a dedicated service like DeepL/Google Translate — see decisions.md), so
- * there is nothing to wire up yet. Mirrors lib/stripe.ts's
- * createStripeCustomer() in spirit: no network call is made, and the
- * "translated" output is obviously fake — prefixed so nobody testing this
- * mistakes it for a working translation.
- */
-async function translateText(body: string, targetLanguage: string): Promise<string> {
-  logEvent({ route: 'driver-messages/translate:stub' }, { message: 'no translation backend configured — returning the original text', targetLanguage })
-  return `[STUB TRANSLATION → ${targetLanguage}] ${body}`
-}
 
 export async function POST(request: NextRequest, { params }: Ctx) {
   const { id } = await params
   const messageId = Number(id)
-  if (!Number.isFinite(messageId)) {
-    return apiError('VALIDATION_ERROR', 'Invalid message id', 400)
-  }
+  if (!Number.isFinite(messageId)) return apiError('VALIDATION_ERROR', 'Invalid message id', 400)
 
-  const ctx = await getAuthedContext(request)
-  if (isErrorResponse(ctx)) return ctx
-  const { supabase, user } = ctx
-
-  const { data: profile } = await getProfileForUser(supabase, user.id)
-
-  if (!profile?.org_id) {
-    return apiError('NOT_ONBOARDED', 'No organization found for this user', 400)
-  }
-
-  const entitled = await hasFeature(supabase, 'driver_chat')
-  if (!entitled) {
-    return apiError(
-      'TIER_UPGRADE_REQUIRED',
-      'Driver messaging requires the Growth plan or above',
-      403
-    )
-  }
+  const authed = await getAuthedContext(request)
+  if (isErrorResponse(authed)) return authed
 
   let body: Record<string, unknown>
-  try {
-    body = await request.json()
-  } catch {
-    return apiError('VALIDATION_ERROR', 'Invalid request body', 400)
-  }
+  try { body = await request.json() }
+  catch { return apiError('VALIDATION_ERROR', 'Invalid request body', 400) }
 
   const targetLanguage = body.target_language
-  if (
-    typeof targetLanguage !== 'string' ||
-    !(SUPPORTED_LOCALES as readonly string[]).includes(targetLanguage)
-  ) {
-    return apiError(
-      'VALIDATION_ERROR',
-      `target_language must be one of ${SUPPORTED_LOCALES.join(', ')}`,
-      400
-    )
+  if (typeof targetLanguage !== 'string' || !(SUPPORTED_LOCALES as readonly string[]).includes(targetLanguage)) {
+    return apiError('VALIDATION_ERROR', `target_language must be one of ${SUPPORTED_LOCALES.join(', ')}`, 400)
   }
 
-  const { data: message } = await supabase
-    .from('driver_messages')
-    .select('id, body, load_id, carrier_org_id')
-    .eq('id', messageId)
-    .maybeSingle()
+  const requestId = request.headers.get('x-request-id')
+  const actor = await buildActorContext(authed.supabase, authed.user, requestId ?? crypto.randomUUID())
+  if (!actor.ok) return domainErrorResponse(actor.error)
 
-  if (!message) {
-    return apiError('NOT_FOUND', 'No such message', 404)
-  }
-
-  // Same access shape as the send route: owner/solo/dispatcher of the
-  // message's org, or the driver assigned to its load. Checked explicitly
-  // here rather than relying solely on RLS, matching this codebase's
-  // convention (app/api/team/[id]/route.ts).
-  // Office staff, i.e. may act on ANY load in the org — deliberately NOT 'chat_participate', which also
-  // covers the driver, whose access is the separate assigned-load check below.
-  let allowed =
-    // Office staff, i.e. may act on ANY load in the org — deliberately NOT 'chat_participate', which also
-    // covers the driver, whose access is the separate assigned-load check below.
-    message.carrier_org_id === profile.org_id && roleHasCapability(profile.role, 'loads_manage')
-
-  if (!allowed) {
-    const { data: driverRow } = await getDriverIdForProfile(supabase, user.id)
-    if (driverRow) {
-      const { data: load } = await getLoadById(supabase, message.load_id)
-      allowed = !!load && load.driver_id === driverRow.id
-    }
-  }
-
-  if (!allowed) {
-    return apiError('FORBIDDEN', 'You do not have access to this message', 403)
-  }
-
-  // Cache check first — the plan calls for never re-translating a message
-  // that already has a cached row for this (message_id, target_language)
-  // pair (enforced at the DB level too, via a unique constraint).
-  const { data: cached } = await supabase
-    .from('driver_message_translations')
-    .select('translated_body')
-    .eq('message_id', messageId)
-    .eq('target_language', targetLanguage)
-    .maybeSingle()
-
-  if (cached) {
-    return NextResponse.json({ translated_body: cached.translated_body })
-  }
-
-  const translatedBody = await translateText(message.body, targetLanguage)
-
-  const { data: inserted, error } = await supabase
-    .from('driver_message_translations')
-    .insert({
-      message_id: messageId,
-      target_language: targetLanguage,
-      translated_body: translatedBody,
-    })
-    .select('translated_body')
-    .single()
-
-  if (error || !inserted) {
-    logError({ route: 'api/driver-messages/:id/translate POST', requestId: request.headers.get('x-request-id') }, error)
-    return apiError('SERVER_ERROR', error?.message ?? 'Failed to translate message', 500)
-  }
-
-  return NextResponse.json({ translated_body: inserted.translated_body })
+  const result = await createDriverMessageService(authed.supabase).translate(actor.value, messageId, targetLanguage)
+  if (!result.ok) return domainErrorResponse(result.error)
+  return NextResponse.json(TranslateMessageResponseSchema.parse({ translated_body: result.value }))
 }

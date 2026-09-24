@@ -176,7 +176,13 @@ describe('POST /api/driver-messages/:id/translate', () => {
     })
     expect(first.status).toBe(200)
     const firstBody = await first.json()
-    expect(firstBody.translated_body).toContain('es')
+    // Real LLM-backed translation as of 2026-09-24 (was a literal
+    // "[STUB TRANSLATION -> es] ..." string before) -- can't assert on exact
+    // wording, only that a real, non-empty, different-from-the-original
+    // translation came back.
+    expect(typeof firstBody.translated_body).toBe('string')
+    expect(firstBody.translated_body.length).toBeGreaterThan(0)
+    expect(firstBody.translated_body).not.toBe('need an update')
 
     const second = await apiFetch(`/api/driver-messages/${messageId}/translate`, dispatcherSession.accessToken, {
       method: 'POST',
