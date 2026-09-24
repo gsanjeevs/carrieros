@@ -46,4 +46,16 @@ export class SupabaseOrgDocumentRepository implements OrgDocumentRepository {
     if (error) return err(domainError('PRECONDITION_FAILED', `org document list failed: ${error.message}`))
     return ok((data ?? []).map(toRecord))
   }
+
+  async findById(actor: ActorContext, id: number): Promise<Result<OrgDocumentRecord | null>> {
+    const { data, error } = await this.supabase.from('org_documents').select(COLUMNS).eq('org_id', actor.orgId).eq('id', id).maybeSingle()
+    if (error) return err(domainError('PRECONDITION_FAILED', `org document lookup failed: ${error.message}`))
+    return ok(data ? toRecord(data) : null)
+  }
+
+  async delete(actor: ActorContext, id: number): Promise<Result<void>> {
+    const { error } = await this.supabase.from('org_documents').delete().eq('org_id', actor.orgId).eq('id', id)
+    if (error) return err(domainError('PRECONDITION_FAILED', `org document delete failed: ${error.message}`))
+    return ok(undefined)
+  }
 }

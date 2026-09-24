@@ -7,7 +7,7 @@
 // scoped to the org instead of a load.
 import { roleHasCapability } from '@/lib/generated/role-capabilities'
 import { buildOrgStoragePath, isIssuedOrgPath, ORG_DOC_TYPES, type OrgDocType, type OrgUploadContentType } from '../domain/documents/org-upload'
-import { err, forbidden, ok, validationFailed, type Result } from '../domain/shared/result'
+import { err, forbidden, notFound, ok, validationFailed, type Result } from '../domain/shared/result'
 import type { ActorContext } from '../domain/shared/identity'
 import type { IdGenerator, ObjectStorage, OrgDocumentRecord, OrgDocumentRepository } from '../ports'
 
@@ -74,6 +74,22 @@ export class OrgDocumentService {
       })
     )
     return ok(withUrls)
+  }
+
+  async delete(actor: ActorContext, id: number): Promise<Result<void>> {
+    if (!roleHasCapability(actor.role, 'org_documents_manage')) return err(forbidden('This role cannot delete company documents', { role: actor.role }))
+
+    const existing = await this.deps.documents.findById(actor, id)
+    if (!existing.ok) return existing
+    if (!existing.value) return err(notFound('Document'))
+
+    // Remove the storage object first, same order CompanyDocuments.tsx uses -
+    // an orphaned object with no row is recoverable manually; a row pointing
+    // at a deleted object is a broken download link with no fix path.
+    const removed = await this.deps.storage.remove([existing.value.storagePath])
+    if (!removed.ok) return removed
+
+    return this.deps.documents.delete(actor, id)
   }
 }
 

@@ -804,6 +804,16 @@ export const endpoints: readonly Endpoint[] = [
     errorStatuses: [401, 403, 500],
   },
   {
+    operationId: 'deleteOrgDocument',
+    method: 'delete',
+    path: '/api/v1/org-documents/{id}',
+    summary: 'Delete a company compliance document (removes the storage object first, then the row)',
+    tag: 'documents',
+    params: LoadIdParamsSchema,
+    response: OkResponseSchema,
+    errorStatuses: [401, 403, 404, 500],
+  },
+  {
     operationId: 'extractLoadImage',
     method: 'post',
     path: '/api/v1/loads/extract-image',

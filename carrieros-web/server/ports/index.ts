@@ -377,6 +377,8 @@ export interface OrgDocumentRepository {
   findByPath(actor: ActorContext, storagePath: string): Promise<Result<OrgDocumentRecord | null>>
   insert(actor: ActorContext, input: { docType: string; storagePath: string; expiryDate: string | null }): Promise<Result<OrgDocumentRecord>>
   list(actor: ActorContext): Promise<Result<readonly OrgDocumentRecord[]>>
+  findById(actor: ActorContext, id: number): Promise<Result<OrgDocumentRecord | null>>
+  delete(actor: ActorContext, id: number): Promise<Result<void>>
 }
 
 /** Object bytes never pass through the application; it only mints and checks access. */
