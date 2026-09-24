@@ -6,10 +6,10 @@
 // arrive over a direct Postgres Changes subscription (RLS-scoped) rather
 // than the API, since ADR 0003's SSE stream is signal-only and this thread
 // needs the message body itself the instant it lands, not a "something
-// changed, go refetch" nudge. Sending and translating go through
-// carrieros-web's API routes via src/lib/api.ts's bearer-token fetch, since
-// that's where the role/tier gating and language-inheritance logic already
-// lives (see that route's own header comment) — not duplicated here.
+// changed, go refetch" nudge. Sending goes through POST /api/v1/driver-messages
+// (the typed apiClient, retry-safe via an idempotency key); translating still
+// uses the legacy bearer-token fetch since that route's role/tier gating and
+// language-inheritance logic aren't part of this migration's scope.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 
@@ -21,6 +21,7 @@ import { useLocale } from '@/hooks/use-locale';
 import { useSession } from '@/hooks/use-session';
 import { supabase } from '@/lib/supabase';
 import { apiClient } from '@/lib/api-client';
+import { keyForSubmission } from '@/lib/idempotency';
 import { apiFetch } from '@/lib/api';
 
 const ORANGE = BrandColors.orange;
@@ -44,6 +45,7 @@ export function DriverChatSection({ loadId }: { loadId: number }) {
   const [error, setError] = useState('');
   const [translated, setTranslated] = useState<Record<number, string>>({});
   const scrollRef = useRef<ScrollView>(null);
+  const sendSubmissionKey = useRef<{ key: string; body: string } | null>(null);
 
   const load = useCallback(async () => {
     const { data } = await apiClient.http.GET('/api/v1/loads/{id}/messages', { params: { path: { id: loadId } } });
@@ -95,15 +97,17 @@ export function DriverChatSection({ loadId }: { loadId: number }) {
     setSending(true);
     setError('');
     try {
-      const res = await apiFetch('/api/driver-messages', {
-        method: 'POST',
-        body: JSON.stringify({ load_id: loadId, body: draft.trim() }),
+      const body = { load_id: loadId, body: draft.trim() };
+      const { data, error: err } = await apiClient.http.POST('/api/v1/driver-messages', {
+        params: { header: { 'Idempotency-Key': keyForSubmission(sendSubmissionKey, body) } },
+        body,
       });
-      if (!res.ok) {
-        const j = await res.json();
-        setError(j.error_code === 'TIER_UPGRADE_REQUIRED' ? t('chat.upgradeRequired') : t('chat.sendFailed'));
+      if (err || !data) {
+        const errorCode = (err as { error_code?: string } | undefined)?.error_code;
+        setError(errorCode === 'TIER_UPGRADE_REQUIRED' ? t('chat.upgradeRequired') : t('chat.sendFailed'));
         return;
       }
+      sendSubmissionKey.current = null;
       setDraft('');
       await load();
     } catch {

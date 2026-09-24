@@ -2,10 +2,9 @@
 // mockup-06's onboarding wizard, built natively for mobile — previously
 // mobile had NO onboarding UI at all; this flow (plus welcome.tsx and
 // signup.tsx) was the missing piece that made mobile signup a dead end.
-// Reuses the exact same API routes carrieros-web's app/onboarding/page.tsx
-// already calls (POST /api/onboarding, /api/vehicles, /api/customers,
-// /api/billing/add-payment-method via apiFetch's Bearer-token auth), so
-// there is no new backend work here — this is a client only.
+// Calls the same operations carrieros-web's app/onboarding/page.tsx already
+// calls, via the typed /api/v1 apiClient (ADR 0003): POST /api/v1/onboarding,
+// /api/v1/vehicles, /api/v1/customers, /api/v1/billing/payment-method.
 //
 // Rebuilt against mockup-06 on 2026-07-26 after a direct screen-by-screen
 // comparison. The first pass matched the mockup's FIELDS but almost none of
@@ -28,7 +27,7 @@
 //   it needs storage-bucket plumbing (organizations.logo_path has no writer
 //   anywhere yet), which is a bigger change than a re-skin and would have
 //   held up everything else. Tracked separately rather than half-built.
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -50,7 +49,8 @@ import { BrandColors, Fonts, Radius, Spacing, StatusColors } from '@/constants/t
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useOnboardingStatus } from '@/hooks/use-onboarding-status';
-import { apiFetch } from '@/lib/api';
+import { apiClient } from '@/lib/api-client';
+import { keyForSubmission } from '@/lib/idempotency';
 import { supabase } from '@/lib/supabase';
 
 const ORANGE = BrandColors.orange;
@@ -148,6 +148,10 @@ export default function OnboardingScreen({ onFinish }: { onFinish?: () => void }
   const [addedPaymentMethod, setAddedPaymentMethod] = useState(false);
   const [card, setCard] = useState<{ brand: string; last4: string } | null>(null);
 
+  const vehicleSubmissionKey = useRef<{ key: string; body: string } | null>(null);
+  const customerSubmissionKey = useRef<{ key: string; body: string } | null>(null);
+  const paymentSubmissionKey = useRef<{ key: string; body: string } | null>(null);
+
   const stepIndex = STEPS.indexOf(step);
 
   // Back is available on the optional middle steps only. Not on 'company'
@@ -195,9 +199,8 @@ export default function OnboardingScreen({ onFinish }: { onFinish?: () => void }
     setLoading(true);
     setError('');
     try {
-      const res = await apiFetch('/api/onboarding', {
-        method: 'POST',
-        body: JSON.stringify({
+      const { data, error: err } = await apiClient.http.POST('/api/v1/onboarding', {
+        body: {
           company_name: companyForm.company_name.trim(),
           dot_number: companyForm.dot_number.trim() || undefined,
           ein: companyForm.ein.trim() || undefined,
@@ -209,14 +212,14 @@ export default function OnboardingScreen({ onFinish }: { onFinish?: () => void }
           first_name: companyForm.first_name.trim(),
           last_name: companyForm.last_name.trim(),
           role: companyForm.role,
-        }),
+        },
       });
-      const json = await res.json();
-      if (!res.ok) {
-        setError(json.error_code === 'ALREADY_ONBOARDED' ? t('onboarding.alreadyOnboarded') : t('onboarding.setupFailed'));
+      if (err || !data) {
+        const errorCode = (err as { error_code?: string } | undefined)?.error_code;
+        setError(errorCode === 'ALREADY_ONBOARDED' ? t('onboarding.alreadyOnboarded') : t('onboarding.setupFailed'));
         return;
       }
-      setLoadEmail(json.load_email ?? null);
+      setLoadEmail(data.load_email ?? null);
       setSavedCompanyName(companyForm.company_name.trim());
       // The org now exists — refresh the SHARED onboarding-status the
       // moment it's true, not later at the completion screen. AuthGate
@@ -237,19 +240,28 @@ export default function OnboardingScreen({ onFinish }: { onFinish?: () => void }
     setLoading(true);
     setError('');
     try {
-      const res = await apiFetch('/api/vehicles', {
-        method: 'POST',
-        body: JSON.stringify({
-          nickname: vehicleForm.nickname.trim(),
-          year: vehicleForm.year ? Number(vehicleForm.year) : undefined,
-          make: vehicleForm.make.trim() || undefined,
-          model: vehicleForm.model.trim() || undefined,
-        }),
+      const body = {
+        // TODO(pre-existing gap): onboarding's vehicle step never collected a
+        // vehicle_type_id, so even the legacy /api/vehicles route (which also
+        // required it) already rejected this call with VALIDATION_ERROR. No
+        // v1 endpoint exists yet to list vehicle types for a picker here, so
+        // this migration preserves that existing (broken) behavior rather
+        // than inventing a fake type id — see the migration report for detail.
+        vehicle_type_id: undefined as unknown as number,
+        nickname: vehicleForm.nickname.trim(),
+        year: vehicleForm.year ? Number(vehicleForm.year) : undefined,
+        make: vehicleForm.make.trim() || undefined,
+        model: vehicleForm.model.trim() || undefined,
+      };
+      const { response } = await apiClient.http.POST('/api/v1/vehicles', {
+        params: { header: { 'Idempotency-Key': keyForSubmission(vehicleSubmissionKey, body) } },
+        body,
       });
-      if (!res.ok) {
+      if (!response.ok) {
         setError(t('onboarding.setupFailed'));
         return;
       }
+      vehicleSubmissionKey.current = null;
       setAddedVehicle(true);
       setSavedVehicleLabel(
         [vehicleForm.year, vehicleForm.make, vehicleForm.model].map((s) => s.trim()).filter(Boolean).join(' ') ||
@@ -268,19 +280,21 @@ export default function OnboardingScreen({ onFinish }: { onFinish?: () => void }
     setLoading(true);
     setError('');
     try {
-      const res = await apiFetch('/api/customers', {
-        method: 'POST',
-        body: JSON.stringify({
-          name: customerForm.name.trim(),
-          contact_name: customerForm.contact_name.trim() || undefined,
-          phone: customerForm.phone.trim() || undefined,
-          email: customerForm.email.trim() || undefined,
-        }),
+      const body = {
+        name: customerForm.name.trim(),
+        contact_name: customerForm.contact_name.trim() || undefined,
+        phone: customerForm.phone.trim() || undefined,
+        email: customerForm.email.trim() || undefined,
+      };
+      const { response } = await apiClient.http.POST('/api/v1/customers', {
+        params: { header: { 'Idempotency-Key': keyForSubmission(customerSubmissionKey, body) } },
+        body,
       });
-      if (!res.ok) {
+      if (!response.ok) {
         setError(t('onboarding.setupFailed'));
         return;
       }
+      customerSubmissionKey.current = null;
       setAddedCustomer(true);
       setSavedCustomerName(customerForm.name.trim());
       setStep('billing');
@@ -296,13 +310,15 @@ export default function OnboardingScreen({ onFinish }: { onFinish?: () => void }
     setLoading(true);
     setError('');
     try {
-      const res = await apiFetch('/api/billing/add-payment-method', { method: 'POST' });
-      const json = await res.json();
-      if (!res.ok) {
+      const { data, error: err } = await apiClient.http.POST('/api/v1/billing/payment-method', {
+        params: { header: { 'Idempotency-Key': keyForSubmission(paymentSubmissionKey, null) } },
+      });
+      if (err || !data) {
         setError(t('onboarding.setupFailed'));
         return;
       }
-      setCard({ brand: json.card_brand, last4: json.card_last4 });
+      paymentSubmissionKey.current = null;
+      setCard({ brand: data.card_brand ?? '', last4: data.card_last4 ?? '' });
       setAddedPaymentMethod(true);
     } catch (err) {
       console.warn('[onboarding] request failed:', err);
