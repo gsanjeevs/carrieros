@@ -1,12 +1,12 @@
 // src/app/load/new.tsx
 // Create a new load from mobile — owner/solo/dispatcher only. Mirrors
 // carrieros-web/components/ManualLoadForm.tsx's field set. Submits through
-// the existing POST /api/loads route (via apiFetch, src/lib/api.ts) rather
-// than inserting directly against `loads` — that route owns load_number
-// generation (next_entity_val(), atomic) and the role check; duplicating
-// either client-side would risk a race on the sequence or a stale copy of
-// the permission rule.
-import { useState } from 'react';
+// POST /api/v1/loads (the typed apiClient, ADR 0003) rather than inserting
+// directly against `loads` — that route owns load_number generation
+// (next_entity_val(), atomic) and the role check; duplicating either
+// client-side would risk a race on the sequence or a stale copy of the
+// permission rule.
+import { useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -16,7 +16,8 @@ import { ThemedView } from '@/components/themed-view';
 import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
-import { apiFetch } from '@/lib/api';
+import { apiClient } from '@/lib/api-client';
+import { keyForSubmission } from '@/lib/idempotency';
 
 const ORANGE = BrandColors.orange;
 
@@ -56,6 +57,7 @@ export default function NewLoadScreen() {
   const [form, setForm] = useState<FormState>(EMPTY);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const submissionKey = useRef<{ key: string; body: string } | null>(null);
 
   function field(key: keyof FormState, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -65,28 +67,37 @@ export default function NewLoadScreen() {
     setSubmitting(true);
     setError('');
 
-    const res = await apiFetch('/api/loads', {
-      method: 'POST',
-      body: JSON.stringify({
-        customer_name_raw: form.customer_name_raw || null,
-        pickup_city: form.pickup_city || null,
-        pickup_state: form.pickup_state || null,
-        pickup_date: form.pickup_date || null,
-        delivery_city: form.delivery_city || null,
-        delivery_state: form.delivery_state || null,
-        delivery_date: form.delivery_date || null,
-        commodity: form.commodity || null,
-        weight_lbs: form.weight_lbs || null,
-        rate: form.rate || null,
-        total_miles: form.total_miles || null,
-      }),
-    });
+    const body = {
+      customer_name_raw: form.customer_name_raw || null,
+      pickup_city: form.pickup_city || null,
+      pickup_state: form.pickup_state || null,
+      pickup_date: form.pickup_date || null,
+      delivery_city: form.delivery_city || null,
+      delivery_state: form.delivery_state || null,
+      delivery_date: form.delivery_date || null,
+      commodity: form.commodity || null,
+      weight_lbs: form.weight_lbs ? Number(form.weight_lbs) : null,
+      rate: form.rate ? Number(form.rate) : null,
+      total_miles: form.total_miles ? Number(form.total_miles) : null,
+    };
 
-    if (!res.ok) {
+    let failed: boolean;
+    try {
+      const { response } = await apiClient.http.POST('/api/v1/loads', {
+        params: { header: { 'Idempotency-Key': keyForSubmission(submissionKey, body) } },
+        body,
+      });
+      failed = !response.ok;
+    } catch {
+      failed = true;
+    }
+
+    if (failed) {
       setError(t('loadNew.errorCreateFailed'));
       setSubmitting(false);
       return;
     }
+    submissionKey.current = null;
 
     setSubmitting(false);
     router.back();

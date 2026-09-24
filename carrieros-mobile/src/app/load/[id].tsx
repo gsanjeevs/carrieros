@@ -2,7 +2,7 @@
 // Load detail + status advancement. Lives outside the (tabs) group — a
 // standalone pushed screen, not a tab, per the auth-guard/tab-bar
 // architecture set up in _layout.tsx.
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -21,12 +21,11 @@ import { useSession } from '@/hooks/use-session';
 import { useLocale } from '@/hooks/use-locale';
 import { useOfflineSync } from '@/hooks/use-offline-sync';
 import { enqueueMilestone } from '@/lib/offline-queue';
-import { newIdempotencyKey } from '@/lib/idempotency';
+import { newIdempotencyKey, keyForSubmission } from '@/lib/idempotency';
 import { apiClient } from '@/lib/api-client';
 import { roleHasCapability } from '@/lib/generated/role-capabilities';
 import { formatDateTime } from '@/lib/format-date';
 import { formatNumber } from '@/lib/format-number';
-import { apiFetch } from '@/lib/api';
 
 const ORANGE = BrandColors.orange;
 
@@ -54,8 +53,8 @@ type LoadDetail = {
   vehicle_id: number | null;
 };
 
-type DriverOption = { id: number; driver_number: string; first_name: string | null; last_name: string | null };
-type VehicleOption = { id: number; vehicle_number: string; nickname: string };
+type DriverOption = { id: number; driver_number: string | null; first_name: string | null; last_name: string | null };
+type VehicleOption = { id: number; vehicle_number: string | null; nickname: string };
 
 type LoadEvent = {
   id: number;
@@ -124,6 +123,7 @@ export default function LoadDetailScreen() {
   const [assignVehicleId, setAssignVehicleId] = useState<number | null>(null);
   const [assigning, setAssigning] = useState(false);
   const [assignError, setAssignError] = useState('');
+  const assignSubmissionKey = useRef<{ key: string; body: string } | null>(null);
 
   const fetchAll = useCallback(async () => {
     if (!session?.user.id || !id) return;
@@ -157,12 +157,12 @@ export default function LoadDetailScreen() {
     // generated role_capabilities source of truth), who can never see the
     // section below.
     if (roleHasCapability(currentRole, 'loads_manage')) {
-      const [driversRes, vehiclesRes] = await Promise.all([
-        apiFetch('/api/drivers'),
-        apiFetch('/api/vehicles'),
+      const [{ data: driversData }, { data: vehiclesData }] = await Promise.all([
+        apiClient.http.GET('/api/v1/drivers', {}),
+        apiClient.http.GET('/api/v1/vehicles', {}),
       ]);
-      if (driversRes.ok) setDrivers(await driversRes.json());
-      if (vehiclesRes.ok) setVehicles(await vehiclesRes.json());
+      setDrivers(driversData?.drivers ?? []);
+      setVehicles(vehiclesData?.vehicles ?? []);
     }
   }, [session?.user.id, id]);
 
@@ -171,16 +171,27 @@ export default function LoadDetailScreen() {
     setAssigning(true);
     setAssignError('');
 
-    const res = await apiFetch(`/api/loads/${load.id}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ driver_id: assignDriverId, vehicle_id: assignVehicleId }),
-    });
+    const body = { driver_id: assignDriverId, vehicle_id: assignVehicleId };
+    let failed: boolean;
+    try {
+      const { response } = await apiClient.http.PATCH('/api/v1/loads/{id}', {
+        params: {
+          path: { id: load.id },
+          header: { 'Idempotency-Key': keyForSubmission(assignSubmissionKey, body) },
+        },
+        body,
+      });
+      failed = !response.ok;
+    } catch {
+      failed = true;
+    }
 
-    if (!res.ok) {
+    if (failed) {
       setAssignError(t('loadDetail.assignError'));
       setAssigning(false);
       return;
     }
+    assignSubmissionKey.current = null;
 
     setAssigning(false);
     await fetchAll();

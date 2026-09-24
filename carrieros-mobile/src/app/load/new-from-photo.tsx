@@ -6,14 +6,13 @@
 // photo instead of pasted text, via the same picker/base64 pattern already
 // used in dvir/[loadId].tsx and pod-section.tsx.
 //
-// Calls POST /api/extract-load-image (lib/extract-load.ts's
-// extractLoadFromImage — a real vision-model call, distinct from the
-// text-only extractLoadFromText the paste/email paths use) with the raw
+// Calls POST /api/v1/loads/extract-image (a real vision-model call, distinct
+// from the text-only extraction the paste/email paths use) with the raw
 // base64 photo, then lets the driver/dispatcher correct the result before
-// POSTing to /api/loads with intake_method: 'pdf' — same endpoint load/new.tsx
-// already uses, so load_number generation and the role check stay
-// server-side and aren't duplicated here.
-import { useState } from 'react';
+// POSTing to /api/v1/loads with intake_method: 'pdf' — same endpoint
+// load/new.tsx already uses, so load_number generation and the role check
+// stay server-side and aren't duplicated here.
+import { useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -24,7 +23,8 @@ import { ThemedView } from '@/components/themed-view';
 import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
-import { apiFetch } from '@/lib/api';
+import { apiClient } from '@/lib/api-client';
+import { keyForSubmission } from '@/lib/idempotency';
 
 const ORANGE = BrandColors.orange;
 
@@ -92,6 +92,7 @@ export default function NewLoadFromPhotoScreen() {
   const [form, setForm] = useState<FormState | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const submissionKey = useRef<{ key: string; body: string } | null>(null);
 
   function field(key: keyof FormState, value: string) {
     setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
@@ -131,19 +132,19 @@ export default function NewLoadFromPhotoScreen() {
 
     setExtracting(true);
     try {
-      const res = await apiFetch('/api/extract-load-image', {
-        method: 'POST',
-        body: JSON.stringify({
+      const mediaType =
+        asset.mimeType === 'image/png' || asset.mimeType === 'image/webp' ? asset.mimeType : 'image/jpeg';
+      const { data, response } = await apiClient.http.POST('/api/v1/loads/extract-image', {
+        body: {
           image_base64: asset.base64,
-          media_type: asset.mimeType ?? 'image/jpeg',
-        }),
+          media_type: mediaType,
+        },
       });
-      if (!res.ok) {
+      if (!response.ok || !data) {
         setError(t('loadNew.scanErrorExtractFailed'));
         return;
       }
-      const extracted = await res.json();
-      setForm(toFormState(extracted));
+      setForm(toFormState(data));
     } catch {
       setError(t('loadNew.scanErrorExtractFailed'));
     } finally {
@@ -156,36 +157,45 @@ export default function NewLoadFromPhotoScreen() {
     setSubmitting(true);
     setError('');
 
-    const res = await apiFetch('/api/loads', {
-      method: 'POST',
-      body: JSON.stringify({
-        customer_name_raw: form.customer_name_raw || null,
-        load_number_raw: form.load_number_raw || null,
-        pickup_address: form.pickup_address || null,
-        pickup_city: form.pickup_city || null,
-        pickup_state: form.pickup_state || null,
-        pickup_zip: form.pickup_zip || null,
-        pickup_date: form.pickup_date || null,
-        pickup_time: form.pickup_time || null,
-        delivery_address: form.delivery_address || null,
-        delivery_city: form.delivery_city || null,
-        delivery_state: form.delivery_state || null,
-        delivery_zip: form.delivery_zip || null,
-        delivery_date: form.delivery_date || null,
-        delivery_time: form.delivery_time || null,
-        commodity: form.commodity || null,
-        weight_lbs: form.weight_lbs || null,
-        rate: form.rate || null,
-        total_miles: form.total_miles || null,
-        intake_method: 'pdf',
-      }),
-    });
+    const body = {
+      customer_name_raw: form.customer_name_raw || null,
+      load_number_raw: form.load_number_raw || null,
+      pickup_address: form.pickup_address || null,
+      pickup_city: form.pickup_city || null,
+      pickup_state: form.pickup_state || null,
+      pickup_zip: form.pickup_zip || null,
+      pickup_date: form.pickup_date || null,
+      pickup_time: form.pickup_time || null,
+      delivery_address: form.delivery_address || null,
+      delivery_city: form.delivery_city || null,
+      delivery_state: form.delivery_state || null,
+      delivery_zip: form.delivery_zip || null,
+      delivery_date: form.delivery_date || null,
+      delivery_time: form.delivery_time || null,
+      commodity: form.commodity || null,
+      weight_lbs: form.weight_lbs ? Number(form.weight_lbs) : null,
+      rate: form.rate ? Number(form.rate) : null,
+      total_miles: form.total_miles ? Number(form.total_miles) : null,
+      intake_method: 'pdf',
+    };
 
-    if (!res.ok) {
+    let failed: boolean;
+    try {
+      const { response } = await apiClient.http.POST('/api/v1/loads', {
+        params: { header: { 'Idempotency-Key': keyForSubmission(submissionKey, body) } },
+        body,
+      });
+      failed = !response.ok;
+    } catch {
+      failed = true;
+    }
+
+    if (failed) {
       setError(t('loadNew.errorCreateFailed'));
       setSubmitting(false);
       return;
     }
+    submissionKey.current = null;
 
     setSubmitting(false);
     router.back();
