@@ -221,6 +221,57 @@ export type Database = {
           },
         ]
       }
+      app_error_log: {
+        Row: {
+          context: Json | null
+          created_at: string
+          id: number
+          level: string
+          message: string
+          org_id: number | null
+          request_id: string | null
+          route: string
+          user_id: string | null
+        }
+        Insert: {
+          context?: Json | null
+          created_at?: string
+          id?: number
+          level?: string
+          message: string
+          org_id?: number | null
+          request_id?: string | null
+          route: string
+          user_id?: string | null
+        }
+        Update: {
+          context?: Json | null
+          created_at?: string
+          id?: number
+          level?: string
+          message?: string
+          org_id?: number | null
+          request_id?: string | null
+          route?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_error_log_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "app_error_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_events: {
         Row: {
           action: string

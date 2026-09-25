@@ -378,6 +378,7 @@ try {
       'oauth_client_rate_limits', // public API rate-limit counters, server-only (0025)
       'ai_provider_config', // platform-wide LLM provider config, server-only via admin client (0031)
       'ai_feature_overrides', // per-feature LLM override, server-only via admin client (0036)
+      'app_error_log', // best-effort logError() mirror, server-only via admin client (0038)
     ])
 
     const orphans = sh(

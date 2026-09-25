@@ -28,6 +28,11 @@ const NAV_ITEMS: NavItem[] = [
   { labelKey: 'billing', href: '/admin/billing',  icon: 'payments',      capability: 'admin_billing' },
   { labelKey: 'pipeline', href: '/admin/pipeline', icon: 'trending_up',  capability: 'admin_billing' },
   { labelKey: 'audit',   href: '/admin/audit',    icon: 'history',       capability: 'admin' },
+  // Debug/Error Log viewer (app_error_log, migration 0038) -- best-effort
+  // mirror of lib/observability.ts logError() calls. Gated on the same bare
+  // 'admin' capability as triage/health/audit: it's a read-only diagnostic
+  // view, not a commercial or destructive action.
+  { labelKey: 'errorLog', href: '/admin/logs',    icon: 'bug_report',    capability: 'admin' },
   { labelKey: 'flags',   href: '/admin/flags',    icon: 'flag',          capability: 'admin_flags' },
   // LLM provider abstraction (decisions.md T17) — which of Anthropic/OpenAI/OpenAI-compatible
   // every LLM call in the app uses. sx_owner only (admin_ai_config, migration 0031), same narrow-
@@ -81,7 +86,7 @@ export default function AdminSidebar({ role, userName }: { role: string; userNam
               }`}
             >
               <span className="material-symbols-outlined text-[18px] leading-none">{item.icon}</span>
-              {t(item.labelKey as 'triage' | 'health' | 'billing' | 'pipeline' | 'audit' | 'flags' | 'aiConfig' | 'security')}
+              {t(item.labelKey as 'triage' | 'health' | 'billing' | 'pipeline' | 'audit' | 'errorLog' | 'flags' | 'aiConfig' | 'security')}
             </Link>
           )
         })}
