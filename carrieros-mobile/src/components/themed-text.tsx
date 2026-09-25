@@ -2,7 +2,7 @@ import { Platform, StyleSheet, Text, type TextProps } from 'react-native';
 
 import { Fonts, ThemeColor } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { useLocale } from '@/hooks/use-locale';
+import { useLocaleFontFamily } from '@/hooks/use-locale';
 
 export type ThemedTextProps = TextProps & {
   type?: 'default' | 'title' | 'small' | 'smallBold' | 'subtitle' | 'link' | 'linkPrimary' | 'code';
@@ -17,8 +17,10 @@ export function ThemedText({ style, type = 'default', themeColor, ...rest }: The
   // Gurmukhi/Nastaliq well) — English/Spanish keep the system font, see
   // src/constants/theme.ts Fonts. fontFamily is null until the matching
   // font finishes loading (see src/hooks/use-locale.tsx), so text renders
-  // with the system font briefly rather than not at all.
-  const { fontFamily } = useLocale();
+  // with the system font briefly rather than not at all. Uses the
+  // non-throwing accessor (not useLocale()) since ThemedText also renders
+  // inside app-error-screen.tsx, which sits above LocaleProvider.
+  const fontFamily = useLocaleFontFamily();
   const localeFontStyle = fontFamily
     ? { fontFamily: BOLD_TYPES.includes(type) ? fontFamily.bold : fontFamily.regular }
     : null;

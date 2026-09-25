@@ -252,6 +252,16 @@ export function useLocale() {
   return ctx;
 }
 
+// Non-throwing escape hatch for ThemedText: the root error boundary
+// (app-error-screen.tsx) deliberately renders ABOVE LocaleProvider so it can
+// catch errors thrown by the provider itself, but still uses ThemedText —
+// which must not crash-cascade into "useLocale must be used within a
+// LocaleProvider" and hide the real error. Falls back to the system font,
+// same as before any Gurmukhi/Nastaliq font has loaded.
+export function useLocaleFontFamily(): LocaleFontFamily {
+  return useContext(LocaleContext)?.fontFamily ?? null;
+}
+
 // Escape hatch for the rare non-component call site (none currently) that
 // needs a translation without hooks — prefer useLocale().t in screens so
 // they re-render on locale change.
