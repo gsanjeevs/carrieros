@@ -21,6 +21,7 @@ import { Suspense, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useSearchParams } from 'next/navigation'
 import { Button, Callout, Field, Input, StepProgress } from '@/components/ui'
+import { apiClient } from '@/lib/api-client'
 import AddLogoStep from './steps/AddLogoStep'
 import AddVehicleStep from './steps/AddVehicleStep'
 import AddCustomerStep from './steps/AddCustomerStep'
@@ -90,14 +91,16 @@ function OnboardingFlow() {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch('/api/onboarding', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(tierParam ? { ...form, tier: tierParam } : form),
+      const tier = tierParam as 'starter' | 'growth' | 'pro' | 'enterprise' | null
+      const { data, error: err } = await apiClient.http.POST('/api/v1/onboarding', {
+        body: {
+          ...form,
+          default_net_terms_days: Number(form.default_net_terms_days),
+          ...(tier ? { tier } : {}),
+        },
       })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? t('setupFailed'))
-      setOrgId(Number(json.org_id))
+      if (err || !data) throw new Error((err as { error?: string } | undefined)?.error ?? t('setupFailed'))
+      setOrgId(data.org_id)
       setStep('logo')
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : tCommon('somethingWentWrong'))

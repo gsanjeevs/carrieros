@@ -7,6 +7,7 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Button, Callout, Field, Input } from '@/components/ui'
+import { apiClient } from '@/lib/api-client'
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
@@ -41,10 +42,9 @@ export default function AddCustomerStep({ onNext }: { onNext: (added: boolean) =
     setLoading(true)
     setError('')
     try {
-      const res = await fetch('/api/customers', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const { data, error: err } = await apiClient.http.POST('/api/v1/customers', {
+        params: { header: { 'Idempotency-Key': crypto.randomUUID() } },
+        body: {
           name: form.name.trim(),
           contact_name: form.contact_name.trim() || undefined,
           phone: form.phone.trim() || undefined,
@@ -53,10 +53,9 @@ export default function AddCustomerStep({ onNext }: { onNext: (added: boolean) =
           city: form.city.trim() || undefined,
           state: form.state || undefined,
           zip: form.zip.trim() || undefined,
-        }),
+        },
       })
-      const json = await res.json()
-      if (!res.ok) throw new Error(friendly(json.error_code))
+      if (err || !data) throw new Error(friendly((err as { error_code?: string } | undefined)?.error_code))
       onNext(true)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : tCommon('somethingWentWrong'))

@@ -19,6 +19,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { Card, CardBody, Field, Input } from '@/components/ui'
+import { apiClient } from '@/lib/api-client'
 
 function FormField({
   label,
@@ -91,24 +92,21 @@ export default function ManualLoadForm() {
     }
     setSaving(true)
     try {
-      const res = await fetch('/api/loads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const { data, error: err } = await apiClient.http.POST('/api/v1/loads', {
+        params: { header: { 'Idempotency-Key': crypto.randomUUID() } },
+        body: {
           ...fields,
           weight_lbs: fields.weight_lbs ? Number(fields.weight_lbs) : null,
           rate: fields.rate ? Number(fields.rate) : null,
           total_miles: fields.total_miles ? Number(fields.total_miles) : null,
           intake_method: 'manual',
-        }),
+        },
       })
-      if (!res.ok) {
-        const d = await res.json()
-        setError(d.error ?? t('failedToSave'))
+      if (err || !data) {
+        setError((err as { error?: string } | undefined)?.error ?? t('failedToSave'))
         return
       }
-      const { load_number } = await res.json()
-      router.push(`/loads?created=${load_number}`)
+      router.push(`/loads?created=${data.load_number}`)
     } catch {
       setError(t('networkError'))
     } finally {

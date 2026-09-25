@@ -11,6 +11,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { apiClient } from '@/lib/api-client'
 
 export default function UpgradeTierButton({
   tierCode,
@@ -39,13 +40,10 @@ export default function UpgradeTierButton({
     setLoading(true)
     setError('')
     try {
-      const res = await fetch('/api/billing/change-tier', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tier: tierCode }),
+      const { data, error: err } = await apiClient.http.POST('/api/v1/billing/change-tier', {
+        body: { tier: tierCode },
       })
-      const json = await res.json()
-      if (!res.ok) throw new Error(friendly(json.error_code))
+      if (err || !data) throw new Error(friendly((err as { error_code?: string } | undefined)?.error_code))
       router.refresh()
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : t('changeTierFailed'))

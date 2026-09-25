@@ -9,6 +9,7 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Button, Callout, Card } from '@/components/ui'
+import { apiClient } from '@/lib/api-client'
 
 export default function BillingStep({ onNext }: { onNext: (added: boolean) => void }) {
   const t = useTranslations('onboarding')
@@ -31,10 +32,11 @@ export default function BillingStep({ onNext }: { onNext: (added: boolean) => vo
     setLoading(true)
     setError('')
     try {
-      const res = await fetch('/api/billing/add-payment-method', { method: 'POST' })
-      const json = await res.json()
-      if (!res.ok) throw new Error(friendly(json.error_code))
-      setCard({ brand: json.card_brand, last4: json.card_last4 })
+      const { data, error: err } = await apiClient.http.POST('/api/v1/billing/payment-method', {
+        params: { header: { 'Idempotency-Key': crypto.randomUUID() } },
+      })
+      if (err || !data) throw new Error(friendly((err as { error_code?: string } | undefined)?.error_code))
+      setCard({ brand: data.card_brand ?? '', last4: data.card_last4 ?? '' })
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : tBilling('addFailed'))
     } finally {

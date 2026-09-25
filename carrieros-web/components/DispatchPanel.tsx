@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Card, Button } from '@/components/ui'
+import { apiClient } from '@/lib/api-client'
 
 interface Driver { id: number; driver_number: string; default_vehicle_id: number | null; first_name: string | null; last_name: string | null }
 interface Vehicle { id: number; vehicle_number: string; nickname: string }
@@ -64,8 +65,8 @@ export default function DispatchPanel({
   const [error,    setError]    = useState('')
 
   useEffect(() => {
-    fetch('/api/drivers').then(r => r.json()).then(setDrivers).catch(() => {})
-    fetch('/api/vehicles').then(r => r.json()).then(setVehicles).catch(() => {})
+    apiClient.http.GET('/api/v1/drivers').then(({ data }) => setDrivers(data?.drivers ?? [])).catch(() => {})
+    apiClient.http.GET('/api/v1/vehicles').then(({ data }) => setVehicles(data?.vehicles ?? [])).catch(() => {})
   }, [])
 
   async function save(newStatus?: string) {

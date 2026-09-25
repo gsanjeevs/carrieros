@@ -12,6 +12,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { apiClient } from '@/lib/api-client'
 
 export default function AddPaymentMethodButton({ hasPaymentMethod }: { hasPaymentMethod: boolean }) {
   const router = useRouter()
@@ -32,9 +33,10 @@ export default function AddPaymentMethodButton({ hasPaymentMethod }: { hasPaymen
     setLoading(true)
     setError('')
     try {
-      const res = await fetch('/api/billing/add-payment-method', { method: 'POST' })
-      const json = await res.json()
-      if (!res.ok) throw new Error(friendly(json.error_code))
+      const { data, error: err } = await apiClient.http.POST('/api/v1/billing/payment-method', {
+        params: { header: { 'Idempotency-Key': crypto.randomUUID() } },
+      })
+      if (err || !data) throw new Error(friendly((err as { error_code?: string } | undefined)?.error_code))
       router.refresh()
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : t('addFailed'))

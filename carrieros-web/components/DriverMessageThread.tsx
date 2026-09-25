@@ -138,14 +138,13 @@ export default function DriverMessageThread({
     setSending(true)
     setError('')
     try {
-      const res = await fetch('/api/driver-messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ load_id: loadId, body: draft.trim() }),
+      const { data, error: err } = await apiClient.http.POST('/api/v1/driver-messages', {
+        params: { header: { 'Idempotency-Key': crypto.randomUUID() } },
+        body: { load_id: loadId, body: draft.trim() },
       })
-      if (!res.ok) {
-        const j = await res.json()
-        throw new Error(j.error_code === 'TIER_UPGRADE_REQUIRED' ? t('chatUpgradeRequired') : t('chatSendFailed'))
+      if (err || !data) {
+        const errorCode = (err as { error_code?: string } | undefined)?.error_code
+        throw new Error(errorCode === 'TIER_UPGRADE_REQUIRED' ? t('chatUpgradeRequired') : t('chatSendFailed'))
       }
       setDraft('')
       await load()
@@ -159,14 +158,12 @@ export default function DriverMessageThread({
   async function translate(messageId: number) {
     setTranslating(messageId)
     try {
-      const res = await fetch(`/api/driver-messages/${messageId}/translate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ target_language: locale }),
+      const { data, response } = await apiClient.http.POST('/api/v1/driver-messages/{id}/translate', {
+        params: { path: { id: messageId } },
+        body: { target_language: locale as 'en' | 'es' | 'pa' | 'ur' },
       })
-      if (res.ok) {
-        const j = await res.json()
-        setTranslated((prev) => ({ ...prev, [messageId]: j.translated_body }))
+      if (response.ok && data) {
+        setTranslated((prev) => ({ ...prev, [messageId]: data.translated_body }))
       }
     } finally {
       setTranslating(null)
