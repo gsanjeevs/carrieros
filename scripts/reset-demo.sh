@@ -1,4 +1,13 @@
 #!/usr/bin/env bash
+#
+# Still the right tool for just this: resetting the 2 carrier demo accounts'
+# language/unit/date prefs and Sierra Freight Co's trial clock. It does NOT
+# touch the extra ShipmentX-admin-console demo orgs (Trailhead Transport,
+# Redline Logistics, Bluepeak Carriers, Cascade Freightways) -- those are
+# seeded/reset by carrieros-web/scripts/load-demo-data.mjs (--reset), a
+# distinct, broader scenario added 2026-09-24. Run that one too if those
+# orgs' state has drifted.
+#
 # Resets the persistent demo accounts' mutable preferences back to known
 # defaults after manual/browser-automation testing changes them (language,
 # units, date/time format). These accounts are NOT deleted between sessions

@@ -1,5 +1,13 @@
 #!/usr/bin/env node
 // carrieros-web/scripts/seed-staging-demo.mjs
+//
+// Superseded by scripts/load-demo-data.mjs for local/staging use (2026-09-24)
+// -- that script does everything this one does (idempotently, so it's safe
+// to rerun) PLUS seeds the extra carrier orgs the ShipmentX admin console
+// screens need. Kept only in case an existing staging environment already
+// depends on this exact one-shot behavior; prefer load-demo-data.mjs for
+// anything new.
+//
 // One-off seed for a fresh (migrated, empty) staging environment: creates
 // demo@carrieros.dev (owner), mike.driver@carrieros.dev (driver), and
 // info@shipmentx.com (sx_owner), matching the persistent local demo accounts

@@ -45,6 +45,53 @@ After browser-testing changes their language/units/date/time prefs, run
 `./scripts/reset-demo.sh` to put them back to defaults rather than resetting
 by hand.
 
+## Demo data for the ShipmentX admin console (2026-09-24)
+The 3 persistent accounts above are enough for the carrier-side app, but the
+`/admin` triage queue, `/admin/health`, `/admin/pipeline` and `/admin/billing`
+screens need multiple orgs in different states to show anything meaningful.
+`carrieros-web/scripts/load-demo-data.mjs` is the rerunnable loader for that:
+
+    cd carrieros-web && node scripts/load-demo-data.mjs [--reset]
+
+Requires `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` env vars, or falls back to
+reading `carrieros-web/.env.local`. It first ensures the 3 persistent
+accounts above exist (creating them if a DB is totally fresh, reusing them
+otherwise), then adds 4 more carrier orgs, each seeded once and left alone on
+later runs:
+- **Trailhead Transport** — `trialing`, trial ends in ~4 days (pipeline
+  "trials ending soon" / triage high-urgency).
+- **Redline Logistics** — `past_due` + an active grace period + one open
+  `carrieros_support` ticket (triage "critical" + billing "at risk" +
+  ticket-reply UI).
+- **Bluepeak Carriers** — `starter` tier with 9 loads and 2 active drivers
+  (pipeline "upgrade candidates"), plus one invoice in each of
+  draft/sent/paid/overdue for the invoices/billing UI.
+- **Cascade Freightways** — `growth` tier, healthy and unremarkable, so the
+  admin screens aren't uniformly on fire.
+
+It also adds one webhook + one successful delivery, and one driver-chat
+message, onto Sierra Freight Co (`/settings/integrations` and the load chat
+UI). Owner logins for the 4 extra orgs are `<org-slug>-owner@demo.carrieros.dev`
+/ `Demo123!` (e.g. `bluepeak-carriers-owner@demo.carrieros.dev`).
+
+Idempotency contract: fixed entities (org by name, user by email) are looked
+up before insert and reused. Per-org bulk fixtures (vehicles/drivers/
+customers/loads/invoices/the support ticket/the webhook/the driver message)
+are only created the first time an org has zero rows in that table — reruns
+are a no-op for orgs that already have data rather than topping anything up
+or duplicating it. `--reset` deletes the 4 extra orgs (and their dependent
+rows) and Sierra Freight Co's webhooks, then reseeds everything — it never
+touches the 3 persistent accounts' identity (email/org/role), matching
+`reset-demo.sh`'s "reset drift, don't delete" philosophy for those 3.
+
+This script supersedes `scripts/seed-staging-demo.mjs` (a fresh-DB-only,
+non-rerunnable seed for the same 3 accounts) for local/staging use — prefer
+`load-demo-data.mjs` going forward; `seed-staging-demo.mjs` is kept only
+because a staging environment may already depend on its one-shot behavior.
+`./scripts/reset-demo.sh` is still the right tool for just resetting the 2
+carrier accounts' language/unit/date prefs and Sierra Freight Co's trial
+clock without touching the 4 extra admin-demo orgs.
+
 ## Conventions added with the foundations work (2026-09-20)
 - Errors: API routes return `apiError(code, msg, status)` (`lib/api-auth.ts`,
   typed `ErrorCode`); log failures with `logError` (`lib/observability.ts`),
