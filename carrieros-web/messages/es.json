@@ -1087,7 +1087,8 @@
       "audit": "Auditoría y actividad",
       "flags": "Funciones experimentales",
       "aiConfig": "Proveedor de LLM",
-      "security": "Seguridad"
+      "security": "Seguridad",
+      "roles": "Capacidades por rol"
     },
     "roleLabels": {
       "sx_owner": "Propietario SX",
@@ -1273,6 +1274,23 @@
       "error": "No se pudo cargar este ticket.",
       "notFound": "Ticket no encontrado.",
       "aiAnswerLabel": "Respuesta automática de IA"
+    },
+    "roles": {
+      "title": "Capacidades por rol",
+      "subtitle": "Qué roles de la plataforma pueden usar qué capacidades — la tabla de referencia detrás del control de rutas y pestañas.",
+      "loading": "Cargando…",
+      "error": "No se pudieron cargar las capacidades por rol.",
+      "notLiveNotice": "Editar esta tabla no tiene efecto inmediato. El control de acceso se aplica desde un archivo generado (scripts/gen-role-capabilities.mjs), no desde esta tabla — los cambios aquí solo tienen efecto después de ejecutar Regenerar y de confirmar y desplegar los archivos resultantes.",
+      "savedRegenerateToApply": "Guardado. Regenere para aplicar.",
+      "regenerateButton": "Regenerar",
+      "regenerateError": "No se pudo regenerar.",
+      "regenerateChanged": "Regenerado — archivos modificados: {files}.",
+      "regenerateNoChanges": "Regenerado — sin cambios (los archivos generados ya coincidían con la tabla).",
+      "regenerateDeployReminder": "Revise y confirme los archivos modificados, y luego despliegue, para que esto tenga efecto.",
+      "matrixTitle": "Matriz de rol × capacidad",
+      "noCapabilities": "Aún no hay capacidades definidas.",
+      "capabilityColumn": "Capacidad",
+      "toggleAriaLabel": "Alternar {capability} para {role}"
     }
   },
   "loadIntake": {

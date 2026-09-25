@@ -540,8 +540,7 @@
     "uploadPhoto": "تصویر اپ لوڈ کریں",
     "replacePhoto": "تصویر تبدیل کریں",
     "photoUploadFailed": "تصویر اپ لوڈ نہیں ہو سکی۔ دوبارہ کوشش کریں۔",
-    "dvirNotSigned": "دستخط نہیں",
-    "saving": "محفوظ ہو رہا ہے…"
+    "dvirNotSigned": "دستخط نہیں"
   },
   "companyDocuments": {
     "title": "کمپنی کے دستاویزات",
@@ -1088,7 +1087,8 @@
       "audit": "آڈٹ اور سرگرمی",
       "flags": "فیچر فلیگز",
       "aiConfig": "LLM فراہم کنندہ",
-      "security": "سیکیورٹی"
+      "security": "سیکیورٹی",
+      "roles": "کردار کی صلاحیتیں"
     },
     "roleLabels": {
       "sx_owner": "SX مالک",
@@ -1274,6 +1274,23 @@
       "error": "یہ ٹکٹ لوڈ نہیں ہو سکا۔",
       "notFound": "ٹکٹ نہیں ملا۔",
       "aiAnswerLabel": "اے آئی خودکار جواب"
+    },
+    "roles": {
+      "title": "کردار کی صلاحیتیں",
+      "subtitle": "کون سے پلیٹ فارم کردار کون سی صلاحیتیں استعمال کر سکتے ہیں — روٹ اور ٹیب گیٹنگ کے پیچھے ماخذِ حقیقت جدول۔",
+      "loading": "لوڈ ہو رہا ہے…",
+      "error": "کردار کی صلاحیتیں لوڈ نہیں ہو سکیں۔",
+      "notLiveNotice": "اس جدول میں ترمیم فوری اثر انداز نہیں ہوتی۔ گیٹنگ ایک تیار کردہ فائل (scripts/gen-role-capabilities.mjs) سے لاگو ہوتی ہے، اس جدول سے نہیں — یہاں کی تبدیلیاں صرف Regenerate چلانے اور نتیجے میں آنے والی فائلوں کو کمٹ اور ڈیپلائے کرنے کے بعد ہی مؤثر ہوں گی۔",
+      "savedRegenerateToApply": "محفوظ ہو گیا۔ لاگو کرنے کے لیے Regenerate کریں۔",
+      "regenerateButton": "Regenerate",
+      "regenerateError": "Regenerate ناکام ہو گیا۔",
+      "regenerateChanged": "Regenerate ہو گیا — تبدیل شدہ فائلیں: {files}۔",
+      "regenerateNoChanges": "Regenerate ہو گیا — کوئی تبدیلی نہیں (تیار کردہ فائلیں پہلے ہی جدول سے مماثل تھیں)۔",
+      "regenerateDeployReminder": "اس کے مؤثر ہونے کے لیے تبدیل شدہ فائلوں کا جائزہ لے کر کمٹ کریں، پھر ڈیپلائے کریں۔",
+      "matrixTitle": "کردار × صلاحیت میٹرکس",
+      "noCapabilities": "ابھی تک کوئی صلاحیت متعین نہیں کی گئی۔",
+      "capabilityColumn": "صلاحیت",
+      "toggleAriaLabel": "{role} کے لیے {capability} ٹوگل کریں"
     }
   },
   "loadIntake": {

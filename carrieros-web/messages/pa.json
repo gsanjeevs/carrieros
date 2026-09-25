@@ -1087,7 +1087,8 @@
       "audit": "ਆਡਿਟ ਅਤੇ ਗਤੀਵਿਧੀ",
       "flags": "ਫੀਚਰ ਫਲੈਗ",
       "aiConfig": "LLM ਪ੍ਰਦਾਤਾ",
-      "security": "ਸੁਰੱਖਿਆ"
+      "security": "ਸੁਰੱਖਿਆ",
+      "roles": "ਭੂਮਿਕਾ ਸਮਰੱਥਾਵਾਂ"
     },
     "roleLabels": {
       "sx_owner": "SX ਮਾਲਕ",
@@ -1273,6 +1274,23 @@
       "error": "ਇਹ ਟਿਕਟ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀ।",
       "notFound": "ਟਿਕਟ ਨਹੀਂ ਮਿਲੀ।",
       "aiAnswerLabel": "AI ਆਟੋ-ਜਵਾਬ"
+    },
+    "roles": {
+      "title": "ਭੂਮਿਕਾ ਸਮਰੱਥਾਵਾਂ",
+      "subtitle": "ਕਿਹੜੀਆਂ ਪਲੇਟਫਾਰਮ ਭੂਮਿਕਾਵਾਂ ਕਿਹੜੀਆਂ ਸਮਰੱਥਾਵਾਂ ਵਰਤ ਸਕਦੀਆਂ ਹਨ — ਰੂਟ ਅਤੇ ਟੈਬ ਗੇਟਿੰਗ ਪਿੱਛੇ ਦੀ ਮੂਲ-ਸੱਚ ਸਾਰਣੀ।",
+      "loading": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ…",
+      "error": "ਭੂਮਿਕਾ ਸਮਰੱਥਾਵਾਂ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀਆਂ।",
+      "notLiveNotice": "ਇਸ ਸਾਰਣੀ ਨੂੰ ਸੋਧਣਾ ਤੁਰੰਤ ਲਾਗੂ ਨਹੀਂ ਹੁੰਦਾ। ਗੇਟਿੰਗ ਇੱਕ ਜਨਰੇਟ ਕੀਤੀ ਫਾਈਲ (scripts/gen-role-capabilities.mjs) ਤੋਂ ਲਾਗੂ ਹੁੰਦੀ ਹੈ, ਇਸ ਸਾਰਣੀ ਤੋਂ ਨਹੀਂ — ਇੱਥੇ ਤਬਦੀਲੀਆਂ ਸਿਰਫ਼ Regenerate ਚਲਾਉਣ ਅਤੇ ਨਤੀਜੇ ਵਾਲੀਆਂ ਫਾਈਲਾਂ ਨੂੰ ਕਮਿੱਟ ਅਤੇ ਡਿਪਲਾਏ ਕਰਨ ਤੋਂ ਬਾਅਦ ਹੀ ਲਾਗੂ ਹੁੰਦੀਆਂ ਹਨ।",
+      "savedRegenerateToApply": "ਸੰਭਾਲਿਆ ਗਿਆ। ਲਾਗੂ ਕਰਨ ਲਈ Regenerate ਕਰੋ।",
+      "regenerateButton": "Regenerate",
+      "regenerateError": "Regenerate ਅਸਫਲ ਰਿਹਾ।",
+      "regenerateChanged": "Regenerate ਹੋ ਗਿਆ — ਬਦਲੀਆਂ ਫਾਈਲਾਂ: {files}।",
+      "regenerateNoChanges": "Regenerate ਹੋ ਗਿਆ — ਕੋਈ ਤਬਦੀਲੀ ਨਹੀਂ (ਜਨਰੇਟ ਕੀਤੀਆਂ ਫਾਈਲਾਂ ਪਹਿਲਾਂ ਹੀ ਸਾਰਣੀ ਨਾਲ ਮੇਲ ਖਾਂਦੀਆਂ ਸਨ)।",
+      "regenerateDeployReminder": "ਇਸਦੇ ਲਾਗੂ ਹੋਣ ਲਈ ਬਦਲੀਆਂ ਫਾਈਲਾਂ ਦੀ ਸਮੀਖਿਆ ਕਰੋ ਅਤੇ ਕਮਿੱਟ ਕਰੋ, ਫਿਰ ਡਿਪਲਾਏ ਕਰੋ।",
+      "matrixTitle": "ਭੂਮਿਕਾ × ਸਮਰੱਥਾ ਮੈਟ੍ਰਿਕਸ",
+      "noCapabilities": "ਹਾਲੇ ਤੱਕ ਕੋਈ ਸਮਰੱਥਾਵਾਂ ਪਰਿਭਾਸ਼ਿਤ ਨਹੀਂ ਹਨ।",
+      "capabilityColumn": "ਸਮਰੱਥਾ",
+      "toggleAriaLabel": "{role} ਲਈ {capability} ਟੌਗਲ ਕਰੋ"
     }
   },
   "loadIntake": {

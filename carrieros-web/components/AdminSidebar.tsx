@@ -29,6 +29,7 @@ const NAV_ITEMS: NavItem[] = [
   { labelKey: 'pipeline', href: '/admin/pipeline', icon: 'trending_up',  capability: 'admin_billing' },
   { labelKey: 'audit',   href: '/admin/audit',    icon: 'history',       capability: 'admin' },
   { labelKey: 'flags',   href: '/admin/flags',    icon: 'flag',          capability: 'admin_flags' },
+  { labelKey: 'roles',   href: '/admin/roles',    icon: 'admin_panel_settings', capability: 'admin_flags' },
   // LLM provider abstraction (decisions.md T17) — which of Anthropic/OpenAI/OpenAI-compatible
   // every LLM call in the app uses. sx_owner only (admin_ai_config, migration 0031), same narrow-
   // capability shape as admin_flags/admin_billing above, not the bare 'admin' every sx_* role holds.
@@ -81,7 +82,7 @@ export default function AdminSidebar({ role, userName }: { role: string; userNam
               }`}
             >
               <span className="material-symbols-outlined text-[18px] leading-none">{item.icon}</span>
-              {t(item.labelKey as 'triage' | 'health' | 'billing' | 'pipeline' | 'audit' | 'flags' | 'aiConfig' | 'security')}
+              {t(item.labelKey as 'triage' | 'health' | 'billing' | 'pipeline' | 'audit' | 'flags' | 'roles' | 'aiConfig' | 'security')}
             </Link>
           )
         })}
