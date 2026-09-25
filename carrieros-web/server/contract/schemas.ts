@@ -596,6 +596,56 @@ export const CreateOAuthClientResponseSchema = z.object({
 export const OAuthClientIdParamsSchema = z.object({ client_id: z.string().min(1) })
 export const RevokeOAuthClientResponseSchema = z.object({ ok: z.boolean() })
 
+// ── Webhooks (Settings > Integrations) ───────────────────────────────────────
+// Org-level outbound webhooks — administered by a logged-in owner/solo human,
+// so ordinary /api/v1 (session auth). See server/application/webhook-service.ts.
+export const WEBHOOK_EVENT_TYPE_VALUES = ['load.delivered', 'load.status_changed', 'invoice.paid'] as const
+
+export const WebhookSummarySchema = z.object({
+  id: z.number().int(),
+  url: z.string(),
+  subscribed_events: z.array(z.string()),
+  enabled: z.boolean(),
+  created_at: z.string(),
+  secret_preview: z.string().describe('Last 4 characters of the secret only.'),
+})
+export const ListWebhooksResponseSchema = z.object({ webhooks: z.array(WebhookSummarySchema) })
+
+export const CreateWebhookBodySchema = z.object({
+  url: z.string().min(1),
+  subscribed_events: z.array(z.enum(WEBHOOK_EVENT_TYPE_VALUES)).min(1),
+})
+export const CreateWebhookResponseSchema = z.object({
+  webhook: WebhookSummarySchema,
+  secret: z.string().describe('Shown once, at creation. Never returned by any other call.'),
+})
+
+export const WebhookIdParamsSchema = z.object({ webhook_id: z.coerce.number().int() })
+
+export const UpdateWebhookBodySchema = z.object({
+  url: z.string().min(1).optional(),
+  subscribed_events: z.array(z.enum(WEBHOOK_EVENT_TYPE_VALUES)).min(1).optional(),
+  enabled: z.boolean().optional(),
+})
+export const UpdateWebhookResponseSchema = z.object({ webhook: WebhookSummarySchema })
+export const DeleteWebhookResponseSchema = z.object({ ok: z.boolean() })
+export const RotateWebhookSecretResponseSchema = z.object({
+  webhook: WebhookSummarySchema,
+  secret: z.string().describe('Shown once, at rotation. Never returned by any other call.'),
+})
+
+export const WebhookDeliverySchema = z.object({
+  id: z.number().int(),
+  webhook_id: z.number().int(),
+  event_type: z.string(),
+  status: z.enum(['pending', 'success', 'failed']),
+  attempt_count: z.number().int(),
+  last_attempted_at: z.string().nullable(),
+  last_response_status: z.number().int().nullable(),
+  created_at: z.string(),
+})
+export const ListWebhookDeliveriesResponseSchema = z.object({ deliveries: z.array(WebhookDeliverySchema) })
+
 // ── Financial events (T19: accounting-integration readiness layer) ──────────
 // Ledger-shaped export of the outbox events emitted by the five financial
 // mutations migration 0033 instruments: invoice created/sent/paid, driver

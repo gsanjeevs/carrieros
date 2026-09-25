@@ -67,7 +67,8 @@
     "section_team": "Team",
     "support": "Support",
     "supportDesk": "Support Desk",
-    "messages": "Messages"
+    "messages": "Messages",
+    "integrations": "Integrations"
   },
   "login": {
     "title": "Sign in to your account",
@@ -1459,5 +1460,36 @@
     "columnLastMessage": "Last message",
     "columnUpdated": "Updated",
     "columnUnread": "Unread"
+  },
+  "integrations": {
+    "title": "Integrations",
+    "subtitle": "Register a URL to receive event notifications from CarrierOS.",
+    "signatureNote": "Every request is signed with an HMAC-SHA256 signature in the X-CarrierOS-Signature header so you can verify it came from us.",
+    "createWebhook": "New Webhook",
+    "create": "Create",
+    "webhookUrl": "Endpoint URL",
+    "webhookUrlHelp": "The URL CarrierOS will POST event notifications to.",
+    "subscribedEvents": "Subscribed events",
+    "url": "URL",
+    "events": "Events",
+    "created": "Created",
+    "status": "Status",
+    "statusEnabled": "Enabled",
+    "statusDisabled": "Disabled",
+    "enable": "Enable",
+    "disable": "Disable",
+    "delete": "Delete",
+    "deleteTitle": "Delete webhook",
+    "deleteConfirm": "Delete \"{url}\"? CarrierOS will stop sending event notifications to this URL immediately. This cannot be undone.",
+    "rotateSecret": "Rotate secret",
+    "secretRevealTitle": "Webhook secret",
+    "secretRevealWarning": "This is the only time the signing secret is shown. Copy it now and store it securely — CarrierOS does not keep a copy.",
+    "secretRevealDone": "I've saved this secret",
+    "webhookSecret": "Signing secret",
+    "viewDeliveries": "Recent deliveries",
+    "deliveriesTitle": "Recent deliveries",
+    "noDeliveries": "No deliveries yet",
+    "emptyTitle": "No webhooks yet",
+    "emptyDescription": "Register a webhook to have CarrierOS notify another application when a load's status changes or an invoice is paid."
   }
 }

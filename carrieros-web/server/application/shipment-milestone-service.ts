@@ -18,6 +18,7 @@ import { err, validationFailed, type Result } from '../domain/shared/result'
 import type { ActorContext } from '../domain/shared/identity'
 import type { Clock, MilestoneOutcome, ShipmentCommandRepository } from '../ports'
 import { authorizeLoadAction } from './load-access'
+import type { WebhookDispatchService } from './webhook-dispatch-service'
 
 // Deliberately narrower than today's RLS, which also lets `finance` UPDATE loads:
 // advancing a shipment is a dispatch/driving action, not a billing one.
@@ -33,7 +34,14 @@ export interface SubmitMilestoneInput {
 }
 
 export class ShipmentMilestoneService {
-  constructor(private readonly deps: { readonly shipments: ShipmentCommandRepository; readonly clock: Clock }) {}
+  constructor(
+    private readonly deps: {
+      readonly shipments: ShipmentCommandRepository
+      readonly clock: Clock
+      /** Optional: not every caller (e.g. tests) needs webhook fan-out wired up. */
+      readonly webhooks?: WebhookDispatchService
+    }
+  ) {}
 
   async submit(actor: ActorContext, input: SubmitMilestoneInput): Promise<Result<MilestoneOutcome>> {
     const target = fromLegacyStatus(input.newStatus)
@@ -55,7 +63,7 @@ export class ShipmentMilestoneService {
     const decision = transition(from, target, { reason: input.reason, effectiveAt: input.occurredAt ?? now, expectedVersion: 0 })
     if (!decision.ok) return decision
 
-    return this.deps.shipments.submitMilestone(actor, {
+    const result = await this.deps.shipments.submitMilestone(actor, {
       loadId: input.loadId,
       expectedStatus: expectedLegacy,
       newStatus: input.newStatus,
@@ -64,5 +72,19 @@ export class ShipmentMilestoneService {
       idempotencyKey: input.idempotencyKey,
       occurredAt: input.occurredAt ?? now,
     })
+
+    // Webhook fan-out only for a genuine (non-replayed) transition — never block or fail the
+    // triggering request on a third party's endpoint responding.
+    if (result.ok && result.value.outcome === 'APPLIED') {
+      this.deps.webhooks?.dispatchInBackground(actor.orgId, 'load.status_changed', {
+        loadId: input.loadId,
+        newStatus: input.newStatus,
+      })
+      if (input.newStatus === 'delivered') {
+        this.deps.webhooks?.dispatchInBackground(actor.orgId, 'load.delivered', { loadId: input.loadId })
+      }
+    }
+
+    return result
   }
 }

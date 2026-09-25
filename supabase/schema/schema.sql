@@ -5226,3 +5226,52 @@ GRANT SELECT, INSERT ON app_error_log TO service_role;
 -- outbox_events_id_seq/change_events_id_seq (migrations 0005/0012).
 REVOKE ALL ON SEQUENCE app_error_log_id_seq FROM anon, authenticated;
 GRANT USAGE, SELECT ON SEQUENCE app_error_log_id_seq TO service_role;
+-- ────────────────────────────────────────────────────────────────────────────
+-- WEBHOOKS (migration 0037) — org-level outbound webhooks, Settings > Integrations.
+-- ────────────────────────────────────────────────────────────────────────────
+CREATE TABLE webhooks (
+  id                 BIGSERIAL PRIMARY KEY,
+  org_id             BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  url                TEXT NOT NULL,
+  secret             TEXT NOT NULL,
+  subscribed_events  TEXT[] NOT NULL DEFAULT '{}',
+  enabled            BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
+  created_by         UUID REFERENCES profiles(id) ON DELETE SET NULL
+);
+
+CREATE INDEX webhooks_org_id_idx ON webhooks(org_id);
+
+ALTER TABLE webhooks ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "owner_solo_webhooks_all" ON webhooks FOR ALL USING (
+  org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
+) WITH CHECK (
+  org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
+);
+
+CREATE TABLE webhook_deliveries (
+  id                  BIGSERIAL PRIMARY KEY,
+  webhook_id          BIGINT NOT NULL REFERENCES webhooks(id) ON DELETE CASCADE,
+  org_id              BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  event_type          TEXT NOT NULL,
+  payload             JSONB NOT NULL,
+  status              TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','success','failed')),
+  attempt_count       INTEGER NOT NULL DEFAULT 0,
+  last_attempted_at   TIMESTAMPTZ,
+  last_response_status INTEGER,
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX webhook_deliveries_webhook_id_idx ON webhook_deliveries(webhook_id, created_at DESC);
+CREATE INDEX webhook_deliveries_org_id_idx ON webhook_deliveries(org_id);
+
+ALTER TABLE webhook_deliveries ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "owner_solo_webhook_deliveries_select" ON webhook_deliveries FOR SELECT USING (
+  org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
+);
+
+COMMENT ON TABLE webhooks IS 'Org-registered outbound webhook endpoints (Settings > Integrations). First real webhook infra in this codebase.';
+COMMENT ON TABLE webhook_deliveries IS 'Delivery attempt log for webhooks — observability + bounded inline retry, no external job queue.';

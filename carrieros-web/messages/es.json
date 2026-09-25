@@ -67,7 +67,8 @@
     "brandingCustomization": "Marca",
     "support": "Soporte",
     "supportDesk": "Mesa de Soporte",
-    "messages": "Mensajes"
+    "messages": "Mensajes",
+    "integrations": "Integraciones"
   },
   "login": {
     "title": "Inicia sesión en tu cuenta",
@@ -1459,5 +1460,36 @@
     "columnLastMessage": "Último mensaje",
     "columnUpdated": "Actualizado",
     "columnUnread": "Sin leer"
+  },
+  "integrations": {
+    "title": "Integraciones",
+    "subtitle": "Registra una URL para recibir notificaciones de eventos de CarrierOS.",
+    "signatureNote": "Cada solicitud se firma con una firma HMAC-SHA256 en el encabezado X-CarrierOS-Signature para que puedas verificar que proviene de nosotros.",
+    "createWebhook": "Nuevo webhook",
+    "create": "Crear",
+    "webhookUrl": "URL del endpoint",
+    "webhookUrlHelp": "La URL a la que CarrierOS enviará las notificaciones de eventos.",
+    "subscribedEvents": "Eventos suscritos",
+    "url": "URL",
+    "events": "Eventos",
+    "created": "Creado",
+    "status": "Estado",
+    "statusEnabled": "Habilitado",
+    "statusDisabled": "Deshabilitado",
+    "enable": "Habilitar",
+    "disable": "Deshabilitar",
+    "delete": "Eliminar",
+    "deleteTitle": "Eliminar webhook",
+    "deleteConfirm": "¿Eliminar \"{url}\"? CarrierOS dejará de enviar notificaciones a esta URL de inmediato. Esta acción no se puede deshacer.",
+    "rotateSecret": "Rotar secreto",
+    "secretRevealTitle": "Secreto del webhook",
+    "secretRevealWarning": "Esta es la única vez que se muestra el secreto de firma. Cópialo ahora y guárdalo de forma segura — CarrierOS no conserva una copia.",
+    "secretRevealDone": "Ya guardé este secreto",
+    "webhookSecret": "Secreto de firma",
+    "viewDeliveries": "Entregas recientes",
+    "deliveriesTitle": "Entregas recientes",
+    "noDeliveries": "Aún no hay entregas",
+    "emptyTitle": "Aún no hay webhooks",
+    "emptyDescription": "Registra un webhook para que CarrierOS notifique a otra aplicación cuando cambie el estado de una carga o se pague una factura."
   }
 }

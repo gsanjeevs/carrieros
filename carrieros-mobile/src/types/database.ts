@@ -2868,6 +2868,108 @@ export type Database = {
           },
         ]
       }
+      webhook_deliveries: {
+        Row: {
+          attempt_count: number
+          created_at: string
+          event_type: string
+          id: number
+          last_attempted_at: string | null
+          last_response_status: number | null
+          org_id: number
+          payload: Json
+          status: string
+          webhook_id: number
+        }
+        Insert: {
+          attempt_count?: number
+          created_at?: string
+          event_type: string
+          id?: number
+          last_attempted_at?: string | null
+          last_response_status?: number | null
+          org_id: number
+          payload: Json
+          status?: string
+          webhook_id: number
+        }
+        Update: {
+          attempt_count?: number
+          created_at?: string
+          event_type?: string
+          id?: number
+          last_attempted_at?: string | null
+          last_response_status?: number | null
+          org_id?: number
+          payload?: Json
+          status?: string
+          webhook_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_deliveries_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webhook_deliveries_webhook_id_fkey"
+            columns: ["webhook_id"]
+            isOneToOne: false
+            referencedRelation: "webhooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webhooks: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          enabled: boolean
+          id: number
+          org_id: number
+          secret: string
+          subscribed_events: string[]
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          id?: number
+          org_id: number
+          secret: string
+          subscribed_events?: string[]
+          url: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          id?: number
+          org_id?: number
+          secret?: string
+          subscribed_events?: string[]
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhooks_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webhooks_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       loads_driver_view: {
