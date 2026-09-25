@@ -7,9 +7,17 @@ import { domainError, err, forbidden, ok, type Result } from '../domain/shared/r
 import type { ActorContext } from '../domain/shared/identity'
 import type { Clock, InvoiceWriteRepository } from '../ports'
 import { roleHasCapability } from '@/lib/generated/role-capabilities'
+import type { WebhookDispatchService } from './webhook-dispatch-service'
 
 export class InvoiceService {
-  constructor(private readonly deps: { readonly invoices: InvoiceWriteRepository; readonly clock: Clock }) {}
+  constructor(
+    private readonly deps: {
+      readonly invoices: InvoiceWriteRepository
+      readonly clock: Clock
+      /** Optional: not every caller (e.g. tests) needs webhook fan-out wired up. */
+      readonly webhooks?: WebhookDispatchService
+    }
+  ) {}
 
   async updateDraft(actor: ActorContext, invoiceId: number, input: DraftInput): Promise<Result<{ id: number }>> {
     if (!roleHasCapability(actor.role, 'invoice_actions')) return err(forbidden('This role cannot edit invoices', { role: actor.role }))
@@ -27,6 +35,12 @@ export class InvoiceService {
 
   async markPaid(actor: ActorContext, invoiceId: number): Promise<Result<{ outcome: 'APPLIED' | 'ALREADY_PAID'; invoiceId: number }>> {
     if (!roleHasCapability(actor.role, 'invoice_actions')) return err(forbidden('This role cannot mark invoices paid', { role: actor.role }))
-    return this.deps.invoices.markPaid(actor, invoiceId, this.deps.clock.now())
+    const result = await this.deps.invoices.markPaid(actor, invoiceId, this.deps.clock.now())
+    // Webhook fan-out only for a genuine (non-replayed) transition to paid — never block or fail
+    // the request on a third party's endpoint responding.
+    if (result.ok && result.value.outcome === 'APPLIED') {
+      this.deps.webhooks?.dispatchInBackground(actor.orgId, 'invoice.paid', { invoiceId: result.value.invoiceId })
+    }
+    return result
   }
 }

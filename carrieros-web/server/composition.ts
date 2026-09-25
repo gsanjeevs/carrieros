@@ -32,6 +32,7 @@ export function createShipmentMilestoneService(supabase: SupabaseClient<Database
   return new ShipmentMilestoneService({
     shipments: new SupabaseShipmentCommandRepository(supabase),
     clock: { now: () => new Date() },
+    webhooks: createWebhookDispatchService(),
   })
 }
 
@@ -75,7 +76,11 @@ import { InvoiceService } from './application/invoice-service'
 import { SupabaseInvoiceWriteRepository } from './infrastructure/supabase/invoice-write-repository'
 
 export function createInvoiceService(supabase: SupabaseClient<Database>): InvoiceService {
-  return new InvoiceService({ invoices: new SupabaseInvoiceWriteRepository(supabase), clock: { now: () => new Date() } })
+  return new InvoiceService({
+    invoices: new SupabaseInvoiceWriteRepository(supabase),
+    clock: { now: () => new Date() },
+    webhooks: createWebhookDispatchService(),
+  })
 }
 
 import { FieldActionsService } from './application/field-actions-service'
@@ -328,5 +333,28 @@ export function createInvoiceSendService(supabase: SupabaseClient<Database>): In
     email: new SmtpEmailGateway(),
     clock: { now: () => new Date() },
     appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  })
+}
+
+// Webhooks (Settings > Integrations, migration 0037). WebhookService is the
+// Settings-surface CRUD, RLS-scoped by the caller's own client, same posture
+// as vehicles/customers. WebhookDispatchService fires from inside another
+// domain service's success path (see createInvoiceService/
+// createShipmentMilestoneService above) with no session of its own, so its
+// lookup + delivery recording run as service_role, same posture as
+// createChangeFeedService.
+import { WebhookService } from './application/webhook-service'
+import { WebhookDispatchService } from './application/webhook-dispatch-service'
+import { SupabaseWebhookRepository, SupabaseWebhookDeliveryWriter } from './infrastructure/supabase/webhook-repository'
+
+export function createWebhookService(supabase: SupabaseClient<Database>): WebhookService {
+  return new WebhookService({ webhooks: new SupabaseWebhookRepository(supabase, createAdminClient()) })
+}
+
+export function createWebhookDispatchService(): WebhookDispatchService {
+  const admin = createAdminClient()
+  return new WebhookDispatchService({
+    webhooks: new SupabaseWebhookRepository(admin, admin),
+    deliveries: new SupabaseWebhookDeliveryWriter(admin),
   })
 }

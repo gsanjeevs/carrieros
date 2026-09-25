@@ -19,6 +19,7 @@ import type { DriverProfilePatch } from '../domain/driver/self-profile'
 import type { OAuthClientSummary } from '../domain/oauth/model'
 import type { OnboardingDraft } from '../domain/onboarding/draft'
 import type { LoadAssignmentPatch } from '../domain/load/write'
+import type { WebhookDeliveryRecord, WebhookSummary } from '../domain/webhooks/model'
 
 // ── Cross-cutting ───────────────────────────────────────────────────────────
 
@@ -1008,4 +1009,58 @@ export interface FinancialEventQueryRepository {
     cursor: number,
     limit: number
   ): Promise<Result<{ events: readonly FinancialOutboxRecord[]; currency: string }>>
+}
+
+// ── Webhooks (Settings > Integrations) ───────────────────────────────────────
+// Org-scoped, RLS-backed CRUD — unlike OAuthClientRepository above, callers
+// here always carry a normal session-authenticated ActorContext, so the
+// caller's own Supabase client (RLS-scoped) is the right adapter, not
+// service_role. See migration 0037.
+
+export interface WebhookRecord {
+  readonly id: number
+  readonly orgId: OrgId
+  readonly url: string
+  /** Raw secret, used only for HMAC signing at dispatch time. */
+  readonly secret: string
+  readonly subscribedEvents: readonly string[]
+  readonly enabled: boolean
+}
+
+export interface WebhookRepository {
+  listForOrg(actor: ActorContext): Promise<Result<readonly WebhookSummary[]>>
+  create(
+    actor: ActorContext,
+    input: { url: string; secret: string; subscribedEvents: readonly string[] }
+  ): Promise<Result<WebhookSummary>>
+  update(
+    actor: ActorContext,
+    webhookId: number,
+    patch: { url?: string; subscribedEvents?: readonly string[]; enabled?: boolean }
+  ): Promise<Result<WebhookSummary | null>>
+  /** Ok(false) = no webhook with this id belongs to this org. */
+  delete(actor: ActorContext, webhookId: number): Promise<Result<boolean>>
+  rotateSecret(actor: ActorContext, webhookId: number, newSecret: string): Promise<Result<WebhookSummary | null>>
+  listDeliveries(actor: ActorContext, webhookId: number, limit: number): Promise<Result<readonly WebhookDeliveryRecord[]>>
+  /**
+   * Cross-caller lookup for dispatch: every enabled webhook in `orgId`
+   * subscribed to `eventType`, WITH its raw secret. Runs as service_role
+   * (WebhookDispatchService has no human session — it fires from inside
+   * another request's success path) so org scoping is enforced in the query
+   * itself, same posture as OAuthClientRepository.findActiveByClientId.
+   */
+  findEnabledForDispatch(orgId: OrgId, eventType: string): Promise<Result<readonly WebhookRecord[]>>
+}
+
+export interface WebhookDeliveryWriter {
+  /** Records one delivery attempt (service_role — dispatch has no session). Returns the delivery id. */
+  recordAttempt(input: {
+    webhookId: number
+    orgId: OrgId
+    eventType: string
+    payload: Record<string, unknown>
+    status: 'success' | 'failed'
+    attemptCount: number
+    responseStatus: number | null
+  }): Promise<Result<number>>
 }

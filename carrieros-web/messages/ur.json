@@ -67,7 +67,8 @@
     "brandingCustomization": "برانڈنگ",
     "support": "معاونت",
     "supportDesk": "معاونتی ڈیسک",
-    "messages": "پیغامات"
+    "messages": "پیغامات",
+    "integrations": "انضمامات"
   },
   "login": {
     "title": "اپنے اکاؤنٹ میں سائن ان کریں",
@@ -540,8 +541,7 @@
     "uploadPhoto": "تصویر اپ لوڈ کریں",
     "replacePhoto": "تصویر تبدیل کریں",
     "photoUploadFailed": "تصویر اپ لوڈ نہیں ہو سکی۔ دوبارہ کوشش کریں۔",
-    "dvirNotSigned": "دستخط نہیں",
-    "saving": "محفوظ ہو رہا ہے…"
+    "dvirNotSigned": "دستخط نہیں"
   },
   "companyDocuments": {
     "title": "کمپنی کے دستاویزات",
@@ -1423,5 +1423,36 @@
     "columnLastMessage": "آخری پیغام",
     "columnUpdated": "اپ ڈیٹ",
     "columnUnread": "غیر پڑھا"
+  },
+  "integrations": {
+    "title": "انضمامات",
+    "subtitle": "CarrierOS سے ایونٹ نوٹیفیکیشنز وصول کرنے کے لیے ایک URL رجسٹر کریں۔",
+    "signatureNote": "ہر درخواست کو X-CarrierOS-Signature ہیڈر میں HMAC-SHA256 دستخط کے ساتھ سائن کیا جاتا ہے تاکہ آپ تصدیق کر سکیں کہ یہ ہماری طرف سے ہے۔",
+    "createWebhook": "نیا ویب ہک",
+    "create": "بنائیں",
+    "webhookUrl": "اینڈ پوائنٹ URL",
+    "webhookUrlHelp": "وہ URL جہاں CarrierOS ایونٹ نوٹیفیکیشنز بھیجے گا۔",
+    "subscribedEvents": "سبسکرائب کردہ ایونٹس",
+    "url": "URL",
+    "events": "ایونٹس",
+    "created": "تخلیق شدہ",
+    "status": "حیثیت",
+    "statusEnabled": "فعال",
+    "statusDisabled": "غیر فعال",
+    "enable": "فعال کریں",
+    "disable": "غیر فعال کریں",
+    "delete": "حذف کریں",
+    "deleteTitle": "ویب ہک حذف کریں",
+    "deleteConfirm": "\"{url}\" حذف کریں؟ CarrierOS فوری طور پر اس URL پر نوٹیفیکیشنز بھیجنا بند کر دے گا۔ یہ واپس نہیں ہو سکتا۔",
+    "rotateSecret": "سیکرٹ تبدیل کریں",
+    "secretRevealTitle": "ویب ہک سیکرٹ",
+    "secretRevealWarning": "یہ واحد موقع ہے جب دستخطی سیکرٹ دکھایا جاتا ہے۔ اسے ابھی کاپی کریں اور محفوظ طریقے سے رکھیں — CarrierOS اس کی کاپی نہیں رکھتا۔",
+    "secretRevealDone": "میں نے یہ سیکرٹ محفوظ کر لیا ہے",
+    "webhookSecret": "دستخطی سیکرٹ",
+    "viewDeliveries": "حالیہ ترسیل",
+    "deliveriesTitle": "حالیہ ترسیل",
+    "noDeliveries": "ابھی تک کوئی ترسیل نہیں",
+    "emptyTitle": "ابھی تک کوئی ویب ہک نہیں",
+    "emptyDescription": "ایک ویب ہک رجسٹر کریں تاکہ CarrierOS دوسری ایپلیکیشن کو مطلع کرے جب لوڈ کی حیثیت تبدیل ہو یا انوائس ادا ہو جائے۔"
   }
 }

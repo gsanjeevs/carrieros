@@ -80,6 +80,9 @@ const NAV_SECTIONS: NavSection[] = [
       { labelKey: 'security', href: '/settings/security', icon: 'passkey', capability: 'settings_view' },
       // Public developer API (Phase 9) client management — same gate as billing (subscription_management).
       { labelKey: 'developerApi', href: '/settings/developer-api', icon: 'api', capability: 'subscription_management' },
+      // Org-level outbound webhooks (Settings > Integrations) — same gate as Developer API: registering a
+      // URL that receives every subscribed event for the org is an administration action.
+      { labelKey: 'integrations', href: '/settings/integrations', icon: 'webhook', capability: 'subscription_management' },
       // Enterprise branding customization (decisions.md PR1 amendment, migration 0026) — owner/solo only,
       // same shape as the other org-administration nav items above. The Enterprise tier gate itself is
       // enforced on the page (a locked upsell state, not hidden nav) — same pattern developerApi uses.
