@@ -107,6 +107,8 @@ import {
   ExtractLoadImageBodySchema,
   ExtractLoadImageResponseSchema,
   ExtractLoadTextBodySchema,
+  ListErrorLogQuerySchema,
+  ListErrorLogResponseSchema,
 } from './schemas'
 
 export interface Endpoint {
@@ -833,5 +835,15 @@ export const endpoints: readonly Endpoint[] = [
     body: ExtractLoadTextBodySchema,
     response: ExtractLoadImageResponseSchema,
     errorStatuses: [400, 401, 403, 500, 502],
+  },
+  {
+    operationId: 'listAdminErrorLog',
+    method: 'get',
+    path: '/api/v1/admin/error-log',
+    summary: 'Platform-admin Debug/Error Log — paginated, filterable mirror of lib/observability.ts logError() calls (ShipmentX staff only)',
+    tag: 'admin',
+    query: ListErrorLogQuerySchema,
+    response: ListErrorLogResponseSchema,
+    errorStatuses: [400, 401, 403, 500],
   },
 ]

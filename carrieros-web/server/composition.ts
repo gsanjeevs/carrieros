@@ -330,3 +330,10 @@ export function createInvoiceSendService(supabase: SupabaseClient<Database>): In
     appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   })
 }
+
+import { ErrorLogQueryService } from './application/error-log-query-service'
+import { SupabaseErrorLogQueryRepository } from './infrastructure/supabase/error-log-query-repository'
+
+export function createErrorLogQueryService(supabase: SupabaseClient<Database>): ErrorLogQueryService {
+  return new ErrorLogQueryService({ errorLog: new SupabaseErrorLogQueryRepository(supabase) })
+}

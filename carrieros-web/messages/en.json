@@ -1088,7 +1088,8 @@
       "flags": "Feature Flags",
       "aiConfig": "LLM Provider",
       "security": "Security",
-      "roles": "Role Capabilities"
+      "roles": "Role Capabilities",
+      "errorLog": "Debug / Error Log"
     },
     "roleLabels": {
       "sx_owner": "SX Owner",
@@ -1291,6 +1292,24 @@
       "noCapabilities": "No capabilities defined yet.",
       "capabilityColumn": "Capability",
       "toggleAriaLabel": "Toggle {capability} for {role}"
+    },
+    "errorLog": {
+      "title": "Debug / Error Log",
+      "subtitle": "Best-effort mirror of application errors reported via logError() — route, message, org, user, and time.",
+      "sentryNote": "Full stack traces are available in Sentry. This view shows short messages only.",
+      "loading": "Loading…",
+      "error": "Could not load error log.",
+      "noEntries": "No errors logged yet.",
+      "filterRoute": "Filter by route",
+      "filterOrgId": "Filter by org ID",
+      "colRoute": "Route",
+      "colMessage": "Message",
+      "colOrg": "Org",
+      "colUser": "User",
+      "colWhen": "When",
+      "pageInfo": "Page {page} of {totalPages} ({total} total)",
+      "prev": "Previous",
+      "next": "Next"
     }
   },
   "loadIntake": {

@@ -981,5 +981,39 @@ export const ListOrgDocumentsResponseSchema = z.object({
   ),
 })
 
+// ── Platform-admin Debug/Error Log viewer (migration 0038) ──────────────────
+// Best-effort mirror of lib/observability.ts logError() calls. Full stack
+// traces live in Sentry only -- this contract never carries one.
+export const ListErrorLogQuerySchema = z.object({
+  route_contains: z.string().min(1).max(200).optional(),
+  org_id: z.coerce.number().int().optional(),
+  from: z.string().datetime({ offset: true }).optional(),
+  to: z.string().datetime({ offset: true }).optional(),
+  limit: z.coerce.number().int().min(1).max(200).optional(),
+  offset: z.coerce.number().int().min(0).optional(),
+})
+
+export const ErrorLogEntrySchema = z.object({
+  id: z.number().int(),
+  route: z.string(),
+  message: z.string(),
+  level: z.string(),
+  org_id: z.number().int().nullable(),
+  org_name: z.string().nullable(),
+  user_id: z.string().nullable(),
+  request_id: z.string().nullable(),
+  context: z.record(z.string(), z.unknown()).nullable(),
+  created_at: z.string(),
+})
+
+export const ListErrorLogResponseSchema = z.object({
+  entries: z.array(ErrorLogEntrySchema),
+  total: z.number().int(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+})
+
 export type ListLoadsQuery = z.infer<typeof ListLoadsQuerySchema>
 export type ListLoadsResponse = z.infer<typeof ListLoadsResponseSchema>
+export type ListErrorLogQuery = z.infer<typeof ListErrorLogQuerySchema>
+export type ListErrorLogResponse = z.infer<typeof ListErrorLogResponseSchema>

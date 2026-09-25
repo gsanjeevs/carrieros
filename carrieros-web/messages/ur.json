@@ -1089,6 +1089,8 @@
       "aiConfig": "LLM فراہم کنندہ",
       "security": "سیکیورٹی",
       "roles": "کردار کی صلاحیتیں"
+,
+      "errorLog": "ایرر لاگ"
     },
     "roleLabels": {
       "sx_owner": "SX مالک",
@@ -1291,6 +1293,24 @@
       "noCapabilities": "ابھی تک کوئی صلاحیت متعین نہیں کی گئی۔",
       "capabilityColumn": "صلاحیت",
       "toggleAriaLabel": "{role} کے لیے {capability} ٹوگل کریں"
+    },
+    "errorLog": {
+      "title": "ڈیبگ / ایرر لاگ",
+      "subtitle": "ایپ کے مسائل جو logError() کے ذریعے رپورٹ ہوئے ہیں ان کی بہترین کوشش کاپی — روٹ، پیغام، تنظیم، صارف اور وقت۔",
+      "sentryNote": "مکمل اسٹیک ٹریس Sentry میں دستیاب ہیں۔ یہ ویو صرف مختصر پیغامات دکھاتا ہے۔",
+      "loading": "لوڈ ہو رہا ہے…",
+      "error": "ایرر لاگ لوڈ نہیں ہو سکا۔",
+      "noEntries": "ابھی تک کوئی خرابی درج نہیں ہوئی۔",
+      "filterRoute": "روٹ کے ذریعے فلٹر کریں",
+      "filterOrgId": "تنظیم ID کے ذریعے فلٹر کریں",
+      "colRoute": "روٹ",
+      "colMessage": "پیغام",
+      "colOrg": "تنظیم",
+      "colUser": "صارف",
+      "colWhen": "کب",
+      "pageInfo": "صفحہ {page} از {totalPages} ({total} کل)",
+      "prev": "پچھلا",
+      "next": "اگلا"
     }
   },
   "loadIntake": {

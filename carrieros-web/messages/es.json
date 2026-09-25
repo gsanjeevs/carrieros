@@ -1088,7 +1088,8 @@
       "flags": "Funciones experimentales",
       "aiConfig": "Proveedor de LLM",
       "security": "Seguridad",
-      "roles": "Capacidades por rol"
+      "roles": "Capacidades por rol",
+      "errorLog": "Registro de errores"
     },
     "roleLabels": {
       "sx_owner": "Propietario SX",
@@ -1291,6 +1292,24 @@
       "noCapabilities": "Aún no hay capacidades definidas.",
       "capabilityColumn": "Capacidad",
       "toggleAriaLabel": "Alternar {capability} para {role}"
+    },
+    "errorLog": {
+      "title": "Depuración / Registro de errores",
+      "subtitle": "Copia de mejor esfuerzo de los errores de la aplicación reportados vía logError() — ruta, mensaje, organización, usuario y fecha.",
+      "sentryNote": "Las trazas de pila completas están disponibles en Sentry. Esta vista solo muestra mensajes breves.",
+      "loading": "Cargando…",
+      "error": "No se pudo cargar el registro de errores.",
+      "noEntries": "Aún no se han registrado errores.",
+      "filterRoute": "Filtrar por ruta",
+      "filterOrgId": "Filtrar por ID de organización",
+      "colRoute": "Ruta",
+      "colMessage": "Mensaje",
+      "colOrg": "Org",
+      "colUser": "Usuario",
+      "colWhen": "Cuándo",
+      "pageInfo": "Página {page} de {totalPages} ({total} en total)",
+      "prev": "Anterior",
+      "next": "Siguiente"
     }
   },
   "loadIntake": {

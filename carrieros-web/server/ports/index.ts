@@ -1009,3 +1009,35 @@ export interface FinancialEventQueryRepository {
     limit: number
   ): Promise<Result<{ events: readonly FinancialOutboxRecord[]; currency: string }>>
 }
+
+// ── Platform-admin Debug/Error Log viewer (migration 0038) ──────────────────
+
+export interface ErrorLogRow {
+  readonly id: number
+  readonly route: string
+  readonly message: string
+  readonly level: string
+  readonly orgId: number | null
+  readonly orgName: string | null
+  readonly userId: string | null
+  readonly requestId: string | null
+  readonly context: Record<string, unknown> | null
+  readonly createdAt: string
+}
+
+export interface ErrorLogFilters {
+  readonly routeContains?: string
+  readonly orgId?: number
+  readonly from?: string
+  readonly to?: string
+  readonly limit: number
+  readonly offset: number
+}
+
+// No ActorContext here (unlike every other query repository in this file) --
+// this is a cross-tenant platform-admin read, gated by requireAdminRole()'s
+// service-role client, the same posture app/api/admin/audit's route already
+// uses for admin_events. There is no per-org actor to scope by.
+export interface ErrorLogQueryRepository {
+  list(filters: ErrorLogFilters): Promise<Result<{ readonly rows: readonly ErrorLogRow[]; readonly total: number }>>
+}

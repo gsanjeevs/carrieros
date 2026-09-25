@@ -1088,7 +1088,8 @@
       "flags": "ਫੀਚਰ ਫਲੈਗ",
       "aiConfig": "LLM ਪ੍ਰਦਾਤਾ",
       "security": "ਸੁਰੱਖਿਆ",
-      "roles": "ਭੂਮਿਕਾ ਸਮਰੱਥਾਵਾਂ"
+      "roles": "ਭੂਮਿਕਾ ਸਮਰੱਥਾਵਾਂ",
+      "errorLog": "ਐਰਰ ਲਾਗ"
     },
     "roleLabels": {
       "sx_owner": "SX ਮਾਲਕ",
@@ -1291,6 +1292,24 @@
       "noCapabilities": "ਹਾਲੇ ਤੱਕ ਕੋਈ ਸਮਰੱਥਾਵਾਂ ਪਰਿਭਾਸ਼ਿਤ ਨਹੀਂ ਹਨ।",
       "capabilityColumn": "ਸਮਰੱਥਾ",
       "toggleAriaLabel": "{role} ਲਈ {capability} ਟੌਗਲ ਕਰੋ"
+    },
+    "errorLog": {
+      "title": "ਡੀਬੱਗ / ਐਰਰ ਲਾਗ",
+      "subtitle": "logError() ਰਾਹੀਂ ਰਿਪੋਰਟ ਕੀਤੀਆਂ ਐਪ ਗਲਤੀਆਂ ਦੀ ਬੈਸਟ-ਇਫਰਟ ਕਾਪੀ — ਰੂਟ, ਸੁਨੇਹਾ, ਓਰਗ, ਯੂਜ਼ਰ ਅਤੇ ਸਮਾਂ।",
+      "sentryNote": "ਪੂਰੇ ਸਟੈਕ ਟਰੇਸ Sentry ਵਿੱਚ ਉਪਲਬੱਧ ਹਨ। ਇਹ ਵਿ੊ ਸਿਰਫ਼ ਜ਼ੋਟੇ ਸੁਨੇਹੇ ਦਿਖਾਂਦਾ ਹੈ।",
+      "loading": "ਲੋਡ ਹੋ ਰਿਹਿਆ ਹੈ…",
+      "error": "ਐਰਰ ਲਾਗ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕਿਆ।",
+      "noEntries": "ਹਾਲੇ ਤੱਕ ਕੋਈ ਐਰਰ ਲਾਗ ਨਹੀਂ ਹੋਈ।",
+      "filterRoute": "ਰੂਟ ਦੁਆਰਾ ਫ਼ਿਲਟਰ ਕਰੋ",
+      "filterOrgId": "ਓਰਗ ID ਦੁਆਰਾ ਫ਼ਿਲਟਰ ਕਰੋ",
+      "colRoute": "ਰੂਟ",
+      "colMessage": "ਸੁਨੇਹਾ",
+      "colOrg": "ਓਰਗ",
+      "colUser": "ਯੂਜ਼ਰ",
+      "colWhen": "ਕਦੋਂ",
+      "pageInfo": "ਸਫ਼ਾ {page} ਵਿਚੋਂ {totalPages} ({total} ਕੁੱਲ)",
+      "prev": "ਪਿਛਲਾ",
+      "next": "ਅਗਲਾ"
     }
   },
   "loadIntake": {
