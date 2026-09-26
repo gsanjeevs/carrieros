@@ -219,9 +219,9 @@ export default async function LoadDetailPage({
               {[load.pickup_city, load.pickup_state].filter(Boolean).join(', ') || '—'}
             </span>
           </div>
-          <div className="flex-1 h-px bg-white/10 min-w-[24px] max-w-[80px]" />
+          <div className="flex-1 h-px bg-divider-ui min-w-[24px] max-w-[80px]" />
           <span className="material-symbols-outlined text-text-mut text-[16px] -mx-1 shrink-0">arrow_forward</span>
-          <div className="flex-1 h-px bg-white/10 min-w-[24px] max-w-[80px]" />
+          <div className="flex-1 h-px bg-divider-ui min-w-[24px] max-w-[80px]" />
           <div className="flex items-center gap-2 min-w-0">
             <span className="w-2 h-2 rounded-full bg-teal shrink-0" />
             <span className="text-text-pri text-sm font-medium truncate">
@@ -271,7 +271,7 @@ export default async function LoadDetailPage({
                   }`}>{s.label}</span>
                 </div>
                 {i < STATUS_FLOW.length - 1 && (
-                  <div className={`flex-1 h-px mx-1 ${done ? 'bg-brand-orange/40' : 'bg-white/8'}`} />
+                  <div className={`flex-1 h-px mx-1 ${done ? 'bg-brand-orange/40' : 'bg-divider-ui'}`} />
                 )}
               </div>
             )

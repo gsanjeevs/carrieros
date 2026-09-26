@@ -18,7 +18,7 @@ import {
 } from './actions'
 import { Card, CardHeader, CardBody, Button, Input } from '@/components/ui'
 
-const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
+const labelCls = 'block text-xs font-medium text-text-sec mb-1.5'
 
 interface Props {
   invoiceId: number

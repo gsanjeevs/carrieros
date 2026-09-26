@@ -38,10 +38,10 @@ export default async function DashboardPage() {
   return (
     <div>
       <div className="px-8 pt-8">
-        <h1 className="text-2xl font-semibold text-white">
+        <h1 className="text-2xl font-semibold text-text-pri">
           {role === 'owner' || role === 'solo' ? t('title') : tNav('dashboard')}
         </h1>
-        <p className="text-slate-400 text-sm mt-1">
+        <p className="text-text-sec text-sm mt-1">
           {new Date().toLocaleDateString(locale, { weekday: 'long', month: 'long', day: 'numeric' })}
         </p>
       </div>
@@ -53,7 +53,7 @@ export default async function DashboardPage() {
       {role === 'finance' && <FinanceView orgId={orgId} />}
       {!hasKnownView && (
         <div className="px-8 py-6">
-          <p className="text-slate-400 text-sm">{t('noViewForRole')}</p>
+          <p className="text-text-sec text-sm">{t('noViewForRole')}</p>
         </div>
       )}
     </div>

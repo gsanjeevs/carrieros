@@ -29,8 +29,8 @@ export default function VehicleTabs({
             onClick={() => setActive(tab.key)}
             className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 rounded-t ${
               active === tab.key
-                ? 'border-brand-orange text-white'
-                : 'border-transparent text-slate-500 hover:text-slate-300'
+                ? 'border-brand-orange text-text-pri'
+                : 'border-transparent text-text-sec hover:text-text-pri'
             }`}
           >
             {t(`tab_${tab.key}`)}

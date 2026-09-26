@@ -76,8 +76,8 @@ export default async function InvoicesPage({
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">{t('title')}</h1>
-          <p className="text-slate-400 text-sm mt-1">
+          <h1 className="text-2xl font-semibold text-text-pri">{t('title')}</h1>
+          <p className="text-text-sec text-sm mt-1">
             {t('invoiceCount', { count: invoices?.length ?? 0 })}
             {invoices && invoices.length > 0 && (
               <> · {t('totalValue', { amount: formatMoney(total, currency, locale) })}</>

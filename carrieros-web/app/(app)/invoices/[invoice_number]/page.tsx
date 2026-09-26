@@ -17,8 +17,8 @@ import { logError } from '@/lib/observability'
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex justify-between items-start py-2.5 border-b border-divider-ui last:border-0">
-      <span className="text-slate-500 text-sm">{label}</span>
-      <span className="text-white text-sm text-right ml-4">{value ?? '—'}</span>
+      <span className="text-text-sec text-sm">{label}</span>
+      <span className="text-text-pri text-sm text-right ml-4">{value ?? '—'}</span>
     </div>
   )
 }
@@ -88,22 +88,22 @@ export default async function InvoiceDetailPage({
       <div className="flex items-start justify-between mb-8">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <Link href="/invoices" className="text-slate-500 hover:text-white transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
+            <Link href="/invoices" className="text-text-sec hover:text-text-pri transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
               <span className="material-symbols-outlined text-[20px]">arrow_back</span>
             </Link>
-            <h1 className="text-2xl font-semibold text-white">{invoice.invoice_number}</h1>
+            <h1 className="text-2xl font-semibold text-text-pri">{invoice.invoice_number}</h1>
             <StatusBadge variant={invoiceStatusVariant((invoice.status ?? 'draft') as InvoiceStatus)}>
               {t(`status_${invoice.status ?? 'draft'}`)}
             </StatusBadge>
           </div>
-          <p className="text-slate-400 text-sm ml-9">
+          <p className="text-text-sec text-sm ml-9">
             {t('billedTo', { customer: customerName ?? '—' })}
           </p>
         </div>
         <div className="flex items-start gap-4">
           <div className="text-right">
-            <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">{t('amountDue')}</p>
-            <p className="text-2xl font-semibold text-white">{formatMoney(invoice.amount, currency, locale)}</p>
+            <p className="text-[10px] uppercase tracking-wider text-text-sec font-semibold">{t('amountDue')}</p>
+            <p className="text-2xl font-semibold text-text-pri">{formatMoney(invoice.amount, currency, locale)}</p>
           </div>
           <a
             href={`/invoices/${invoice.invoice_number}/print`}
@@ -122,7 +122,7 @@ export default async function InvoiceDetailPage({
 
           <Card>
             <CardHeader>
-              <h2 className="text-white font-medium text-sm">{t('summary')}</h2>
+              <h2 className="text-text-pri font-medium text-sm">{t('summary')}</h2>
             </CardHeader>
             <CardBody>
               <InfoRow label={t('from')} value={org?.name ?? '—'} />
@@ -158,7 +158,7 @@ export default async function InvoiceDetailPage({
           {/* Line items */}
           <Card>
             <CardHeader>
-              <h2 className="text-white font-medium text-sm">{t('lineItems')}</h2>
+              <h2 className="text-text-pri font-medium text-sm">{t('lineItems')}</h2>
             </CardHeader>
             <Table>
               <thead>
@@ -177,7 +177,7 @@ export default async function InvoiceDetailPage({
                         })
                       : t('lineItemGeneric')}
                     {invoice.loads?.commodity && (
-                      <span className="block text-slate-500 text-xs mt-0.5">{invoice.loads.commodity}</span>
+                      <span className="block text-text-sec text-xs mt-0.5">{invoice.loads.commodity}</span>
                     )}
                   </TableCell>
                   <TableCell numeric>
@@ -197,10 +197,10 @@ export default async function InvoiceDetailPage({
           {invoice.notes && (
             <Card>
               <CardHeader>
-                <h2 className="text-white font-medium text-sm">{t('notes')}</h2>
+                <h2 className="text-text-pri font-medium text-sm">{t('notes')}</h2>
               </CardHeader>
               <CardBody>
-                <p className="text-slate-400 text-sm whitespace-pre-wrap">{invoice.notes}</p>
+                <p className="text-text-sec text-sm whitespace-pre-wrap">{invoice.notes}</p>
               </CardBody>
             </Card>
           )}

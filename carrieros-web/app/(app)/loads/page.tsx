@@ -56,8 +56,8 @@ export default async function LoadsPage({
       <LiveRefresh entities={['loads']} />
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">{t('title')}</h1>
-          <p className="text-slate-400 text-sm mt-1">{t('loadCount', { count: loads?.length ?? 0 })}</p>
+          <h1 className="text-2xl font-semibold text-text-pri">{t('title')}</h1>
+          <p className="text-text-sec text-sm mt-1">{t('loadCount', { count: loads?.length ?? 0 })}</p>
         </div>
         <div className="flex items-center gap-3">
           {showRate && (

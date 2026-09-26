@@ -167,7 +167,7 @@ export default async function DriversPage({
                             }}
                           />
                         </div>
-                        <div className="text-slate-400 text-xs">
+                        <div className="text-text-sec text-xs">
                           {driver.cdl_expiry
                             ? new Date(driver.cdl_expiry).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })
                             : '—'}

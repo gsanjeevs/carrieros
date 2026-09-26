@@ -16,7 +16,7 @@ export default function CopyIntakeEmailButton({ email }: { email: string }) {
   return (
     <button
       onClick={copy}
-      className="flex items-center gap-1 text-slate-400 hover:text-white text-xs font-medium transition shrink-0"
+      className="flex items-center gap-1 text-text-sec hover:text-text-pri text-xs font-medium transition shrink-0"
     >
       <span className="material-symbols-outlined text-[14px]">{copied ? 'check' : 'content_copy'}</span>
       {copied ? t('copied') : t('copy')}

@@ -47,7 +47,7 @@ export default async function AppLayout({
 
   return (
     <div
-      className="flex h-screen bg-navy overflow-hidden"
+      className="flex h-screen bg-surface-page overflow-hidden"
       style={brandingStyle as React.CSSProperties}
     >
       <Sidebar

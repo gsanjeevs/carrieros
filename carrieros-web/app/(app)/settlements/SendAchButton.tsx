@@ -15,7 +15,7 @@ export default function SendAchButton({ settlementId, entitled }: { settlementId
   const [loading, setLoading] = useState(false)
 
   if (!entitled) {
-    return <span className="text-slate-500 text-xs">{t('sendAchRequiresPro')}</span>
+    return <span className="text-text-sec text-xs">{t('sendAchRequiresPro')}</span>
   }
 
   async function send() {

@@ -12,7 +12,7 @@ import { useTranslations } from 'next-intl'
 import { updateInvoiceDraft, type ActionResult } from './actions'
 import { Card, CardHeader, CardBody, Button, Input } from '@/components/ui'
 
-const labelCls = 'block text-xs font-medium text-slate-400 mb-1.5'
+const labelCls = 'block text-xs font-medium text-text-sec mb-1.5'
 
 export default function EditInvoiceCard({
   invoiceId,
@@ -85,7 +85,7 @@ export default function EditInvoiceCard({
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-white font-medium text-sm">{t('editInvoice')}</h2>
+        <h2 className="text-text-pri font-medium text-sm">{t('editInvoice')}</h2>
       </CardHeader>
       <CardBody>
         <div className="space-y-3">

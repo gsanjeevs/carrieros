@@ -311,7 +311,7 @@ export default function AddVehicleButton({ variant }: { variant?: 'empty' }) {
                     title={c.name}
                     onClick={() => set('color', selected ? '' : c.name)}
                     className={`w-8 h-8 rounded-full border-2 transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
-                      selected ? 'border-brand-orange scale-110' : 'border-white/20'
+                      selected ? 'border-brand-orange scale-110' : 'border-border-ui'
                     }`}
                     style={{ backgroundColor: c.hex }}
                   />

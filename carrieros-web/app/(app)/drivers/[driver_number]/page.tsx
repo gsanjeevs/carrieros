@@ -196,7 +196,7 @@ export default async function DriverDetailPage({
               // eslint-disable-next-line @next/next/no-img-element
               <img src={avatarUrl} alt={driverName} className="w-16 h-16 rounded-full object-cover mb-3" />
             ) : (
-              <div className="w-16 h-16 rounded-full bg-navy-light flex items-center justify-center mb-3">
+              <div className="w-16 h-16 rounded-full bg-surface-subtle flex items-center justify-center mb-3">
                 <span className="text-avatar-text text-lg font-semibold">{initials}</span>
               </div>
             )}
@@ -227,7 +227,7 @@ export default async function DriverDetailPage({
                 }}
               />
             </div>
-            <div className="text-slate-400 text-xs">
+            <div className="text-text-sec text-xs">
               {driver.cdl_number ? `${driver.cdl_number} · ` : ''}
               {driver.cdl_state ? `${driver.cdl_state} · ` : ''}
               {driver.cdl_expiry ? formatDate(driver.cdl_expiry, profile) : '—'}
@@ -386,15 +386,15 @@ export default async function DriverDetailPage({
     <div className="p-8 max-w-5xl mx-auto">
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-1">
-          <Link href="/drivers" className="text-slate-500 hover:text-white transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
+          <Link href="/drivers" className="text-text-sec hover:text-text-pri transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
             <span className="material-symbols-outlined text-[20px]">arrow_back</span>
           </Link>
-          <h1 className="text-2xl font-semibold text-white">{driverName}</h1>
+          <h1 className="text-2xl font-semibold text-text-pri">{driverName}</h1>
           <StatusBadge variant={inviteStatusVariant(inviteStatus)}>
             {t(`inviteStatus_${driver.invite_status}` as never)}
           </StatusBadge>
         </div>
-        <p className="text-slate-400 text-sm ml-9">{driver.driver_number}</p>
+        <p className="text-text-sec text-sm ml-9">{driver.driver_number}</p>
       </div>
 
       <DriverTabs

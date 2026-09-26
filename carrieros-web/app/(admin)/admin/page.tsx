@@ -163,7 +163,7 @@ export default function TriageQueuePage() {
                   {o.earliest_open_ticket_id !== null && (
                     <Link
                       href={`/admin/support/${o.earliest_open_ticket_id}`}
-                      className="inline-flex items-center justify-center rounded-md font-semibold transition-colors px-2 py-1 text-[11px] bg-white/10 text-text-pri hover:bg-white/15"
+                      className="inline-flex items-center justify-center rounded-md font-semibold transition-colors px-2 py-1 text-[11px] bg-surface-subtle text-text-pri hover:bg-surface-subtle/70"
                     >
                       {t('replyNow')}
                     </Link>

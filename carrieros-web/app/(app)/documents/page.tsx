@@ -25,8 +25,8 @@ export default async function DocumentsPage() {
   if (!roleHasCapability(profile.role, 'org_documents_view')) {
     return (
       <div className="p-8">
-        <h1 className="text-2xl font-semibold text-white">{t('title')}</h1>
-        <p className="text-slate-400 mt-2 text-sm">{t('noAccess')}</p>
+        <h1 className="text-2xl font-semibold text-text-pri">{t('title')}</h1>
+        <p className="text-text-sec mt-2 text-sm">{t('noAccess')}</p>
       </div>
     )
   }
@@ -66,8 +66,8 @@ export default async function DocumentsPage() {
   return (
     <div className="p-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-white">{t('title')}</h1>
-        <p className="text-slate-400 text-sm mt-1">{t('pageDescription')}</p>
+        <h1 className="text-2xl font-semibold text-text-pri">{t('title')}</h1>
+        <p className="text-text-sec text-sm mt-1">{t('pageDescription')}</p>
       </div>
 
       <CompanyDocuments
