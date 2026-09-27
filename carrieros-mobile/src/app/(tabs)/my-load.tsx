@@ -80,6 +80,11 @@ export default function MyLoadScreen() {
   const [cdlExpiry, setCdlExpiry] = useState<string | null>(null);
   const [medCertExpiry, setMedCertExpiry] = useState<string | null>(null);
   const [needsPreTripDvir, setNeedsPreTripDvir] = useState(false);
+  // mockup-19 screen 3's driver-side unread badge (audit gap) -- the aggregate
+  // /api/v1/messages inbox is dispatcher-only (loads_manage), so this reads the
+  // active load's own thread directly, same as driver-chat-section.tsx does,
+  // and counts messages from someone else that are still unread.
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
 
   const load = useCallback(async () => {
     if (!session?.user.id) return;
@@ -119,6 +124,14 @@ export default function MyLoadScreen() {
     } else {
       setNeedsPreTripDvir(false);
     }
+
+    if (active?.id != null) {
+      const { data: messagesData } = await apiClient.http.GET('/api/v1/loads/{id}/messages', { params: { path: { id: active.id } } });
+      const rows = (messagesData?.messages as { sender_id: string | null; read_at: string | null }[] | undefined) ?? [];
+      setUnreadMessageCount(rows.filter((m) => m.sender_id !== session.user.id && !m.read_at).length);
+    } else {
+      setUnreadMessageCount(0);
+    }
   }, [session?.user.id]);
 
   useEffect(() => {
@@ -154,7 +167,14 @@ export default function MyLoadScreen() {
               onPress={() => router.push({ pathname: '/load/[id]', params: { id: String(activeLoad.id) } })}
             >
               <ThemedView style={styles.cardHeader} type="transparent">
-                <ThemedText type="subtitle">{activeLoad.load_number}</ThemedText>
+                <ThemedView style={styles.cardHeaderLeft} type="transparent">
+                  <ThemedText type="subtitle">{activeLoad.load_number}</ThemedText>
+                  {unreadMessageCount > 0 && (
+                    <ThemedView style={styles.unreadBadge}>
+                      <ThemedText type="small" style={styles.unreadBadgeText}>{unreadMessageCount}</ThemedText>
+                    </ThemedView>
+                  )}
+                </ThemedView>
                 <ThemedView
                   style={[styles.statusPill, { backgroundColor: (LOAD_STATUS_PILL[activeLoad.status] ?? LOAD_STATUS_PILL.draft).bg }]}
                 >
@@ -249,6 +269,9 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  cardHeaderLeft: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  unreadBadge: { backgroundColor: StatusColors.danger, borderRadius: 999, minWidth: 20, height: 20, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 5 },
+  unreadBadgeText: { color: '#ffffff', fontWeight: '700', fontSize: 11, lineHeight: 14 },
   statusPill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
   statusPillText: { fontWeight: '700' },
   routeRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' },

@@ -2391,6 +2391,10 @@
                           },
                           "total_cost": {
                             "type": "number"
+                          },
+                          "has_receipt": {
+                            "type": "boolean",
+                            "description": "Whether a receipt photo has been attached -- never the raw internal storage path."
                           }
                         },
                         "required": [
@@ -2398,7 +2402,8 @@
                           "state",
                           "station",
                           "gallons",
-                          "total_cost"
+                          "total_cost",
+                          "has_receipt"
                         ],
                         "additionalProperties": false
                       }
@@ -2509,6 +2514,377 @@
             }
           },
           "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/loads/{id}/fuel-stops/{fuel_stop_id}/receipt": {
+      "post": {
+        "operationId": "attachFuelStopReceipt",
+        "summary": "Step 3 of a fuel-receipt upload: verify the object exists at the issued path and attach it to an already-created fuel stop",
+        "tags": [
+          "loads"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "exclusiveMinimum": true,
+              "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "fuel_stop_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "exclusiveMinimum": true,
+              "maximum": 9007199254740991
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "storage_path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "storage_path"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "receipt_attached": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "receipt_attached"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_code": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Developer-facing fallback text; never render to end users."
+                    },
+                    "meta": {
+                      "description": "Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "nullable": true,
+                            "enum": [
+                              null
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "error_code",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "422": {
             "description": "Error",
             "content": {
               "application/json": {
@@ -3540,7 +3916,8 @@
                   "type": {
                     "type": "string",
                     "enum": [
-                      "pod"
+                      "pod",
+                      "fuel_receipt"
                     ]
                   },
                   "content_type": {
@@ -3883,7 +4260,8 @@
                   "type": {
                     "type": "string",
                     "enum": [
-                      "pod"
+                      "pod",
+                      "fuel_receipt"
                     ]
                   },
                   "storage_path": {
@@ -4293,7 +4671,8 @@
             "schema": {
               "type": "string",
               "enum": [
-                "pod"
+                "pod",
+                "fuel_receipt"
               ]
             }
           }

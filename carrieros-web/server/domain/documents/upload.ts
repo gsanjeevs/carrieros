@@ -3,7 +3,11 @@
 // it is built here, on the server, from verified ids -- never taken from the client --
 // and finalize re-checks that a claimed path matches the pattern for THIS org and
 // load, so a client cannot attach someone else's object to its own load.
-export const DOCUMENT_TYPES = ['pod'] as const // extend as further types move onto this path
+// 'fuel_receipt' shares this path-building/signed-URL infra but is finalized by
+// DriverActionService.attachFuelStopReceipt() into fuel_stops.receipt_path, not
+// DocumentService's generic `documents` table -- a fuel receipt is 1:1 with an
+// already-created fuel_stops row, not one of a load's many listed documents.
+export const DOCUMENT_TYPES = ['pod', 'fuel_receipt'] as const // extend as further types move onto this path
 export type DocumentType = (typeof DOCUMENT_TYPES)[number]
 
 // Mirrors the bucket's own allowlist (storage.buckets.allowed_mime_types); storage remains the enforcement point.

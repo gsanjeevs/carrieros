@@ -57,11 +57,33 @@ export class SupabaseDriverActionRepository implements DriverActionRepository {
   async listFuelStopsForLoad(actor: ActorContext, loadId: number): Promise<Result<readonly FuelStopReadRecord[]>> {
     const { data, error } = await this.supabase
       .from('fuel_stops')
-      .select('id, state, station, gallons, total_cost')
+      .select('id, state, station, gallons, total_cost, receipt_path')
       .eq('load_id', loadId)
       .eq('carrier_org_id', actor.orgId)
       .order('stop_date', { ascending: true })
     if (error) return err(domainError('PRECONDITION_FAILED', `fuel stop list failed: ${error.message}`))
-    return ok((data ?? []) as unknown as FuelStopReadRecord[])
+    return ok(
+      (data ?? []).map((row) => ({
+        id: Number(row.id),
+        state: row.state,
+        station: row.station,
+        gallons: Number(row.gallons),
+        total_cost: Number(row.total_cost),
+        receipt_path: row.receipt_path,
+      }))
+    )
+  }
+
+  async attachFuelStopReceipt(actor: ActorContext, loadId: number, fuelStopId: number, storagePath: string): Promise<Result<boolean>> {
+    const { data, error } = await this.supabase
+      .from('fuel_stops')
+      .update({ receipt_path: storagePath })
+      .eq('id', fuelStopId)
+      .eq('load_id', loadId)
+      .eq('carrier_org_id', actor.orgId)
+      .select('id')
+      .maybeSingle()
+    if (error) return err(domainError('PRECONDITION_FAILED', `fuel stop receipt attach failed: ${error.message}`))
+    return ok(data !== null)
   }
 }

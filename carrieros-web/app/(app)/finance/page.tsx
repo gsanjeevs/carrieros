@@ -271,7 +271,19 @@ export default async function FinancePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card className="lg:col-span-1">
-          <SectionHeader title={t('iftaBreakdownTitle')} subtitle={t('iftaBreakdownSub', { quarter: quarter.label })} />
+          <CardHeader>
+            <div>
+              <h2 className="text-text-pri font-medium text-sm">{t('iftaBreakdownTitle')}</h2>
+              <p className="text-text-sec text-xs mt-0.5">{t('iftaBreakdownSub', { quarter: quarter.label })}</p>
+            </div>
+            <a
+              href={`/api/v1/reports/ifta-quarterly/export?quarter=${quarterKey}`}
+              className="inline-flex items-center gap-1.5 text-brand-orange text-xs font-medium hover:text-brand-orange-hover focus:outline-none focus:ring-2 focus:ring-brand-orange/50 rounded"
+            >
+              <span className="material-symbols-outlined text-[14px]">download</span>
+              {t('exportIftaReport')}
+            </a>
+          </CardHeader>
           <CardBody>
             {ifta.length === 0 ? (
               <EmptyState icon="route" title={t('iftaNoData')} />

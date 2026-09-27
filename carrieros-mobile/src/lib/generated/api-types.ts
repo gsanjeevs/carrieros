@@ -108,6 +108,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/loads/{id}/fuel-stops/{fuel_stop_id}/receipt": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Step 3 of a fuel-receipt upload: verify the object exists at the issued path and attach it to an already-created fuel stop */
+        post: operations["attachFuelStopReceipt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/loads/{id}/problem-reports": {
         parameters: {
             query?: never;
@@ -1752,6 +1769,8 @@ export interface operations {
                             station: string | null;
                             gallons: number;
                             total_cost: number;
+                            /** @description Whether a receipt photo has been attached -- never the raw internal storage path. */
+                            has_receipt: boolean;
                         }[];
                     };
                 };
@@ -1936,6 +1955,141 @@ export interface operations {
             };
             /** @description Error */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+        };
+    };
+    attachFuelStopReceipt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                fuel_stop_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    storage_path: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: number;
+                        /** @enum {boolean} */
+                        receipt_attached: true;
+                    };
+                };
+            };
+            /** @description Error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2325,7 +2479,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /** @enum {string} */
-                    type: "pod";
+                    type: "pod" | "fuel_receipt";
                     /** @enum {string} */
                     content_type: "image/jpeg" | "image/png" | "image/heic" | "image/webp" | "application/pdf";
                     size_bytes: number;
@@ -2438,7 +2592,7 @@ export interface operations {
     listLoadDocuments: {
         parameters: {
             query: {
-                type: "pod";
+                type: "pod" | "fuel_receipt";
             };
             header?: never;
             path: {
@@ -2567,7 +2721,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /** @enum {string} */
-                    type: "pod";
+                    type: "pod" | "fuel_receipt";
                     storage_path: string;
                 };
             };

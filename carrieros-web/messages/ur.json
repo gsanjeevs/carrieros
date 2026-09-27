@@ -1052,6 +1052,7 @@
     "iftaBreakdownTitle": "IFTA — ریاستی تفصیل",
     "iftaBreakdownSub": "{quarter}",
     "iftaNoData": "اس سہ ماہی میں ابھی تک کوئی IFTA مائلیج درج نہیں ہوئی۔",
+    "exportIftaReport": "IFTA رپورٹ ایکسپورٹ کریں",
     "colState": "ریاست",
     "colMiles": "میل",
     "colNetDue": "خالص واجب الادا",

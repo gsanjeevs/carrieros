@@ -1052,6 +1052,7 @@
     "iftaBreakdownTitle": "IFTA — Desglose por Estado",
     "iftaBreakdownSub": "{quarter}",
     "iftaNoData": "Aún no se ha registrado millaje IFTA este trimestre.",
+    "exportIftaReport": "Exportar Informe IFTA",
     "colState": "Estado",
     "colMiles": "Millas",
     "colNetDue": "Neto Adeudado",

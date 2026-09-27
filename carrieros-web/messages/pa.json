@@ -1052,6 +1052,7 @@
     "iftaBreakdownTitle": "IFTA — ਰਾਜ ਵੇਰਵਾ",
     "iftaBreakdownSub": "{quarter}",
     "iftaNoData": "ਇਸ ਤਿਮਾਹੀ ਵਿੱਚ ਅਜੇ ਤੱਕ ਕੋਈ IFTA ਮਾਈਲੇਜ ਦਰਜ ਨਹੀਂ ਕੀਤੀ ਗਈ।",
+    "exportIftaReport": "IFTA ਰਿਪੋਰਟ ਐਕਸਪੋਰਟ ਕਰੋ",
     "colState": "ਰਾਜ",
     "colMiles": "ਮੀਲ",
     "colNetDue": "ਨੈੱਟ ਬਕਾਇਆ",

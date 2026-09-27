@@ -27,7 +27,9 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     }
     return domainErrorResponse(result.error)
   }
-  return NextResponse.json(ListFuelStopsResponseSchema.parse({ fuel_stops: result.value }))
+  // Never expose the raw internal receipt_path to the client -- just whether one exists.
+  const fuelStops = result.value.map(({ receipt_path, ...rest }) => ({ ...rest, has_receipt: receipt_path != null }))
+  return NextResponse.json(ListFuelStopsResponseSchema.parse({ fuel_stops: fuelStops }))
 }
 
 export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {

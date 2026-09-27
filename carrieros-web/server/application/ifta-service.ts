@@ -5,7 +5,7 @@
 import { IFTA_FEATURE_KEY, validateGpsCrossing, validateManualRows, type GpsCrossingInput } from '../domain/compliance/ifta'
 import { domainError, err, ok, type Result } from '../domain/shared/result'
 import type { ActorContext } from '../domain/shared/identity'
-import type { Clock, FeatureGate, IdempotencyRepository, IftaCrossingRecord, IftaRepository, IftaStateMiles, ShipmentAccessRepository } from '../ports'
+import type { Clock, FeatureGate, IdempotencyRepository, IftaCrossingRecord, IftaRepository, IftaStateMiles, IftaStateTax, ShipmentAccessRepository } from '../ports'
 import { withIdempotency } from './idempotency'
 import { authorizeLoadAction } from './load-access'
 import { roleHasCapability } from '@/lib/generated/role-capabilities'
@@ -83,5 +83,17 @@ export class IftaService {
     const rows = await this.deps.ifta.quarterlySummary(actor, quarter)
     if (!rows.ok) return rows
     return ok({ entitled: true, rows: rows.value })
+  }
+
+  /** Pro-tier per-state tax breakdown for the mockup-17 Finance & IFTA Hub's CSV export
+   * (app/(app)/finance/page.tsx already shows the same rows on screen via the same RPC). Gated on
+   * 'finance' like quarterlySummary above, plus the Pro-only 'ifta_tax_hub' feature -- a Growth
+   * carrier has no tax-computed view to export in the first place. */
+  async taxSummaryForExport(actor: ActorContext, quarter: string): Promise<Result<readonly IftaStateTax[]>> {
+    if (!roleHasCapability(actor.role, 'finance')) return err(domainError('FORBIDDEN', 'This role cannot view IFTA reports', { meta: { role: actor.role } }))
+    const entitled = await this.deps.features.hasFeature(actor, 'ifta_tax_hub')
+    if (!entitled.ok) return entitled
+    if (!entitled.value) return err(domainError('ENTITLEMENT_REQUIRED', 'The IFTA tax hub is not part of this plan', { meta: { feature: 'ifta_tax_hub' } }))
+    return this.deps.ifta.taxSummary(actor, quarter)
   }
 }

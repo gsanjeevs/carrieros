@@ -7,18 +7,22 @@
 // as logging one); the write already went through the API in an earlier
 // batch.
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, TextInput } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, TextInput } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { PhotoSourceSheet } from '@/components/photo-source-sheet';
 import { BrandColors, Spacing, StatusColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useLocale } from '@/hooks/use-locale';
 import { useSession } from '@/hooks/use-session';
+import { usePhotoPicker, type PickedPhoto } from '@/hooks/use-photo-picker';
 import { formatMoney } from '@/lib/format-money';
 import { formatNumber } from '@/lib/format-number';
 import { apiClient } from '@/lib/api-client';
 import { keyForSubmission } from '@/lib/idempotency';
+import { base64ToArrayBuffer } from '@/lib/base64';
+import { uploadFuelStopReceipt } from '@/lib/fuel-receipt-upload';
 
 const ORANGE = BrandColors.orange;
 
@@ -28,6 +32,7 @@ type FuelStop = {
   station: string | null;
   gallons: number;
   total_cost: number;
+  has_receipt: boolean;
 };
 
 export function FuelStopsSection({
@@ -44,12 +49,26 @@ export function FuelStopsSection({
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  // Separate from `error`: that one only renders while the form is open, but a
+  // receipt-upload failure is discovered right as the form is closing on success.
+  const [receiptWarning, setReceiptWarning] = useState('');
   const submissionKey = useRef<{ key: string; body: string } | null>(null);
 
   const [state, setState] = useState('');
   const [station, setStation] = useState('');
   const [gallons, setGallons] = useState('');
   const [pricePerGallon, setPricePerGallon] = useState('');
+  const [receiptPhoto, setReceiptPhoto] = useState<PickedPhoto | null>(null);
+
+  const photoPicker = usePhotoPicker({
+    cameraDeniedMessage: t('loadDetail.fuelErrorCameraDenied'),
+    libraryDeniedMessage: t('loadDetail.fuelErrorLibraryDenied'),
+    noImageDataMessage: t('loadDetail.fuelErrorNoImageData'),
+    takePhotoLabel: t('loadDetail.fuelTakePhoto'),
+    chooseFromLibraryLabel: t('loadDetail.fuelChooseFromLibrary'),
+    cancelLabel: t('common.cancel'),
+    sheetTitle: t('loadDetail.fuelReceiptSheetTitle'),
+  });
 
   const fetchStops = useCallback(async () => {
     const { data } = await apiClient.http.GET('/api/v1/loads/{id}/fuel-stops', { params: { path: { id: loadId } } });
@@ -73,6 +92,7 @@ export function FuelStopsSection({
     setStation('');
     setGallons('');
     setPricePerGallon('');
+    setReceiptPhoto(null);
     setError('');
   }
 
@@ -94,24 +114,33 @@ export function FuelStopsSection({
       price_per_gallon: pricePerGallon ? priceNum : null,
     };
 
-    let ok = false;
+    let fuelStopId: number | null = null;
     try {
-      const { response } = await apiClient.http.POST('/api/v1/loads/{id}/fuel-stops', {
+      const { data, response } = await apiClient.http.POST('/api/v1/loads/{id}/fuel-stops', {
         params: { path: { id: loadId }, header: { 'Idempotency-Key': keyForSubmission(submissionKey, body) } },
         body,
       });
-      ok = response.ok;
+      fuelStopId = response.ok && data ? data.id : null;
     } catch {
-      ok = false; // couldn't reach the server; the same key is reused if the driver taps again
+      fuelStopId = null; // couldn't reach the server; the same key is reused if the driver taps again
     }
-    const insertErr = ok ? null : true;
 
     setSaving(false);
-    if (insertErr) {
+    if (fuelStopId == null) {
       setError(t('loadDetail.fuelSaveFailed'));
       return;
     }
     submissionKey.current = null;
+    setReceiptWarning('');
+
+    // The receipt photo is a nice-to-have on top of an already-saved fuel stop -- a failed
+    // upload must never look like the fuel stop itself failed to save (same posture as
+    // DVIR/POD photo uploads elsewhere in this app).
+    if (receiptPhoto) {
+      const uploadResult = await uploadFuelStopReceipt(loadId, fuelStopId, 'image/jpeg', base64ToArrayBuffer(receiptPhoto.base64));
+      if (!uploadResult.ok) setReceiptWarning(t('loadDetail.fuelReceiptUploadFailed'));
+    }
+
     setOpen(false);
     resetForm();
     await fetchStops();
@@ -145,9 +174,18 @@ export function FuelStopsSection({
         <ThemedText type="small" themeColor="textSecondary">{t('loadDetail.noFuelStopsYet')}</ThemedText>
       )}
 
+      {receiptWarning ? <ThemedText type="small" style={styles.error}>{receiptWarning}</ThemedText> : null}
+
       {stops.map((s) => (
         <ThemedView type="transparent" key={s.id} style={styles.stopRow}>
-          <ThemedText type="small">{s.state} — {s.station || '—'}</ThemedText>
+          <ThemedView type="transparent" style={styles.stopRowLeft}>
+            <ThemedText type="small">{s.state} — {s.station || '—'}</ThemedText>
+            {s.has_receipt && (
+              <ThemedText type="small" themeColor="textSecondary" accessibilityLabel={t('loadDetail.fuelReceiptAttached')}>
+                📎
+              </ThemedText>
+            )}
+          </ThemedView>
           <ThemedText type="small">{formatMoney(Number(s.total_cost), locale)} · {Number(s.gallons)} gal</ThemedText>
         </ThemedView>
       ))}
@@ -197,6 +235,16 @@ export function FuelStopsSection({
             </ThemedText>
           )}
 
+          <ThemedView type="transparent" style={styles.receiptRow}>
+            {receiptPhoto && <Image source={{ uri: receiptPhoto.uri }} style={styles.receiptThumbnail} />}
+            <Pressable onPress={() => photoPicker.open(setReceiptPhoto)}>
+              <ThemedText type="small" style={{ color: ORANGE }}>
+                {receiptPhoto ? t('loadDetail.fuelRetakeReceiptPhoto') : t('loadDetail.fuelAddReceiptPhoto')}
+              </ThemedText>
+            </Pressable>
+          </ThemedView>
+          {photoPicker.error ? <ThemedText type="small" style={styles.error}>{photoPicker.error}</ThemedText> : null}
+
           {error ? <ThemedText type="small" style={styles.error}>{error}</ThemedText> : null}
 
           <ThemedView type="transparent" style={styles.buttonRow}>
@@ -213,6 +261,20 @@ export function FuelStopsSection({
           </ThemedView>
         </ThemedView>
       )}
+
+      {/* Android bottom-sheet half of the camera/library chooser -- iOS uses
+          ActionSheetIOS imperatively (see photoPicker.open/use-photo-picker.ts)
+          and never opens this. */}
+      <PhotoSourceSheet
+        visible={photoPicker.androidSheetOpen}
+        title={t('loadDetail.fuelReceiptSheetTitle')}
+        takePhotoLabel={t('loadDetail.fuelTakePhoto')}
+        chooseFromLibraryLabel={t('loadDetail.fuelChooseFromLibrary')}
+        cancelLabel={t('common.cancel')}
+        onClose={photoPicker.closeAndroidSheet}
+        onTakePhoto={() => photoPicker.pickFromAndroidSheet('camera', setReceiptPhoto)}
+        onChooseFromLibrary={() => photoPicker.pickFromAndroidSheet('library', setReceiptPhoto)}
+      />
     </ThemedView>
   );
 }
@@ -233,11 +295,14 @@ const styles = StyleSheet.create({
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: 'transparent' },
   summaryCell: { alignItems: 'center', gap: 2, backgroundColor: 'transparent' },
   stopRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 3 },
+  stopRowLeft: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'transparent' },
   form: { gap: Spacing.two, marginTop: Spacing.two, backgroundColor: 'transparent' },
   formRow: { flexDirection: 'row', gap: Spacing.two, backgroundColor: 'transparent' },
   input: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8 },
   inputSmall: { width: 64 },
   inputFlex: { flex: 1 },
+  receiptRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: 'transparent' },
+  receiptThumbnail: { width: 40, height: 40, borderRadius: 6 },
   buttonRow: { flexDirection: 'row', gap: Spacing.two, backgroundColor: 'transparent' },
   cancelButton: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 12 },
   submitButton: { flex: 2, backgroundColor: ORANGE, borderRadius: 8, paddingVertical: 12, alignItems: 'center' },

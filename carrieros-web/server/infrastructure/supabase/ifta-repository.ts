@@ -4,7 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase'
 import { domainError, err, ok, validationFailed, type Result } from '../../domain/shared/result'
 import type { ActorContext } from '../../domain/shared/identity'
-import type { FeatureGate, IftaCrossingRecord, IftaRepository, IftaStateMiles, ShipmentAccess } from '../../ports'
+import type { FeatureGate, IftaCrossingRecord, IftaRepository, IftaStateMiles, IftaStateTax, ShipmentAccess } from '../../ports'
 
 export class SupabaseFeatureGate implements FeatureGate {
   constructor(private readonly supabase: SupabaseClient<Database>) {}
@@ -78,5 +78,20 @@ export class SupabaseIftaRepository implements IftaRepository {
     })
     if (error) return err(domainError('PRECONDITION_FAILED', `quarterly summary failed: ${error.message}`))
     return ok(((data ?? []) as { state: string; total_miles: number }[]).map((r) => ({ state: r.state, total_miles: Number(r.total_miles) })))
+  }
+
+  async taxSummary(actor: ActorContext, quarter: string): Promise<Result<readonly IftaStateTax[]>> {
+    const { data, error } = await this.supabase.rpc('get_ifta_tax_summary', {
+      p_carrier_org_id: actor.orgId,
+      p_quarter: quarter,
+    })
+    if (error) return err(domainError('PRECONDITION_FAILED', `tax summary failed: ${error.message}`))
+    return ok(
+      ((data ?? []) as { state: string; miles_in_state: number; net_tax_due: number }[]).map((r) => ({
+        state: r.state,
+        miles_in_state: Number(r.miles_in_state),
+        net_tax_due: Number(r.net_tax_due),
+      }))
+    )
   }
 }

@@ -339,6 +339,7 @@ export interface FuelStopReadRecord {
   readonly station: string | null
   readonly gallons: number
   readonly total_cost: number
+  readonly receipt_path: string | null
 }
 
 export interface DriverActionRepository {
@@ -346,6 +347,8 @@ export interface DriverActionRepository {
   createProblemReport(actor: ActorContext, load: ShipmentAccess, record: ProblemReportRecord): Promise<Result<{ id: number }>>
   /** A load's fuel stops, oldest first. */
   listFuelStopsForLoad(actor: ActorContext, loadId: number): Promise<Result<readonly FuelStopReadRecord[]>>
+  /** Ok(false) = no fuel stop with this id belongs to this org/load. */
+  attachFuelStopReceipt(actor: ActorContext, loadId: number, fuelStopId: number, storagePath: string): Promise<Result<boolean>>
 }
 
 // ── Documents ───────────────────────────────────────────────────────────────
@@ -749,6 +752,12 @@ export interface IftaStateMiles {
   readonly total_miles: number
 }
 
+export interface IftaStateTax {
+  readonly state: string
+  readonly miles_in_state: number
+  readonly net_tax_due: number
+}
+
 export interface IftaRepository {
   insertGpsCrossing(
     actor: ActorContext,
@@ -763,6 +772,10 @@ export interface IftaRepository {
   checkCompleteness(actor: ActorContext, loadId: number): Promise<Result<boolean>>
   /** get_ifta_quarterly_summary(): state mileage totals for the org's whole fleet in one quarter (e.g. "2026-Q3"). */
   quarterlySummary(actor: ActorContext, quarter: string): Promise<Result<readonly IftaStateMiles[]>>
+  /** get_ifta_tax_summary(): Pro-tier per-state net tax due, same RPC app/(app)/finance/page.tsx
+   * already calls for its on-screen breakdown table -- used here for the CSV export so the two can
+   * never disagree. */
+  taxSummary(actor: ActorContext, quarter: string): Promise<Result<readonly IftaStateTax[]>>
 }
 
 // ── DVIR ────────────────────────────────────────────────────────────────────

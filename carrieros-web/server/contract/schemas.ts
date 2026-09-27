@@ -181,6 +181,14 @@ export const LogFuelStopBodySchema = z.object({
 })
 export const LogFuelStopResponseSchema = z.object({ id: z.number().int(), total_cost: z.number() })
 
+// Step 1 (signed upload slot) reuses RequestUploadBodySchema/RequestUploadResponseSchema below with
+// type 'fuel_receipt' -- 'documents_upload' and 'fuel_log' are held by the same role set, so a
+// second signing endpoint would just duplicate that one. This is step 3: attach an already-uploaded
+// receipt photo to an already-created fuel stop (mockup-18's missing piece).
+export const FuelStopReceiptParamsSchema = z.object({ id: z.number().int().positive(), fuel_stop_id: z.coerce.number().int().positive() })
+export const AttachFuelStopReceiptBodySchema = z.object({ storage_path: z.string().min(1).max(300) })
+export const AttachFuelStopReceiptResponseSchema = z.object({ id: z.number().int(), receipt_attached: z.literal(true) })
+
 export const ReportProblemBodySchema = z.object({
   reason: z.enum(PROBLEM_REASONS),
   note: z.string().max(1000).nullable().optional(),
@@ -522,6 +530,7 @@ export const FuelStopSchema = z.object({
   station: z.string().nullable(),
   gallons: z.number(),
   total_cost: z.number(),
+  has_receipt: z.boolean().describe('Whether a receipt photo has been attached -- never the raw internal storage path.'),
 })
 export const ListFuelStopsResponseSchema = z.object({ fuel_stops: z.array(FuelStopSchema) })
 

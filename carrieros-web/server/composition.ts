@@ -46,6 +46,9 @@ export function createProfilePreferencesService(supabase: SupabaseClient<Databas
 import { DriverActionService } from './application/driver-action-service'
 import { SupabaseDriverActionRepository } from './infrastructure/supabase/driver-action-repository'
 import { SupabaseIdempotencyRepository } from './infrastructure/supabase/idempotency-repository'
+// SupabaseObjectStorage/createStorageProvider are imported once, below, by
+// createDocumentService -- ESM import bindings are hoisted, so this earlier
+// factory can still use them without a second (duplicate, build-error) import.
 
 export function createDriverActionService(supabase: SupabaseClient<Database>): DriverActionService {
   return new DriverActionService({
@@ -54,6 +57,7 @@ export function createDriverActionService(supabase: SupabaseClient<Database>): D
     // Idempotency runs as service_role, scoped by the verified actor in every statement.
     idempotency: new SupabaseIdempotencyRepository(createAdminClient()),
     clock: { now: () => new Date() },
+    storage: new SupabaseObjectStorage(createStorageProvider(supabase)),
   })
 }
 

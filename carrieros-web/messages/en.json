@@ -1052,6 +1052,7 @@
     "iftaBreakdownTitle": "IFTA — State Breakdown",
     "iftaBreakdownSub": "{quarter}",
     "iftaNoData": "No IFTA mileage logged yet this quarter.",
+    "exportIftaReport": "Export IFTA Report",
     "colState": "State",
     "colMiles": "Miles",
     "colNetDue": "Net Due",
