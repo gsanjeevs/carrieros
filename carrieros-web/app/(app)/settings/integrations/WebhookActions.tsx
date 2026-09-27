@@ -113,19 +113,19 @@ export default function WebhookActions({ webhook }: { webhook: Webhook }) {
     <div className="flex items-center justify-end gap-3">
       <button
         onClick={openDeliveries}
-        className="text-text-sec hover:text-text-pri transition text-xs"
+        className="text-text-sec hover:text-text-pri disabled:opacity-40 transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50 text-xs"
       >
         {t('viewDeliveries')}
       </button>
-      <button onClick={toggleEnabled} disabled={busy} className="text-text-sec hover:text-text-pri transition text-xs">
+      <button onClick={toggleEnabled} disabled={busy} className="text-text-sec hover:text-text-pri disabled:opacity-40 transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50 text-xs">
         {webhook.enabled ? t('disable') : t('enable')}
       </button>
-      <button onClick={rotateSecret} disabled={busy} className="text-text-sec hover:text-text-pri transition text-xs">
+      <button onClick={rotateSecret} disabled={busy} className="text-text-sec hover:text-text-pri disabled:opacity-40 transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50 text-xs">
         {t('rotateSecret')}
       </button>
       <button
         onClick={() => { setError(''); setConfirmingDelete(true) }}
-        className="text-text-sec hover:text-danger transition text-xs"
+        className="text-text-sec hover:text-danger disabled:opacity-40 transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50 text-xs"
       >
         {t('delete')}
       </button>

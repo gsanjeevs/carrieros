@@ -100,7 +100,7 @@ export default function RoleCapabilitiesPage() {
   return (
     <div className="p-8 max-w-6xl">
       <h1 className="text-2xl font-semibold text-text-pri mb-1">{t('title')}</h1>
-      <p className="text-text-sec text-sm mb-4">{t('subtitle')}</p>
+      <p className="text-text-sec text-sm mb-6">{t('subtitle')}</p>
 
       <Callout tone="warning" icon="info" className="mb-6 max-w-3xl">
         {t('notLiveNotice')}
