@@ -229,6 +229,23 @@ this — it's a session-driven workflow, so the habit has to be explicit):
   `docs/design/carrieros-design-system.md` §11's changelog after each wave —
   makes stalled progress or backsliding visible instead of silent.
 
+## Multiple LLM sessions working on this repo at once
+
+More than one coding session (different tools/models, e.g. a Claude session and a GPT-Luna session)
+may have full write access to this repo at the same time, both reading this exact CLAUDE.md. **Read
+and update `CURRENT_WORK.md` (repo root) before starting a task and when you finish one** — it's a
+one-line-per-session status board specifically to prevent the collisions this convention was created
+to stop (see that file's own log for what those looked like in practice on 2026-09-27: a git ref race,
+repeated `git add -p` surgery to avoid committing another session's in-progress hunk out of
+`supabase/schema/schema.sql`, and two sessions independently fixing the exact same bug without
+knowing the other was already on it).
+
+For anything beyond a quick fix, prefer a git worktree per session/task
+(`git worktree add ../carrieros-<name> -b <branch> main`) over both sessions editing the same checkout
+of `main` directly — see `CURRENT_WORK.md` for the full rationale and the list of shared "hub" files
+(schema.sql, migration numbering, generated role-capabilities, i18n JSON) worth extra caution around
+even across worktrees, since they can still conflict at merge time.
+
 ## Speeding up multi-surface work
 When a task spans independent surfaces (e.g. i18n on web + i18n on mobile,
 or a fix needed in both apps), dispatch one background `Agent` per surface

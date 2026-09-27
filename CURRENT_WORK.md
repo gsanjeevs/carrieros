@@ -1,0 +1,75 @@
+# Current work (multi-session coordination)
+
+This repo is actively worked on by more than one LLM coding session at the same time (as of
+2026-09-27: a Claude session and a GPT-Luna session, both with full write access, both reading this
+exact file — not per-tool copies). This file is the shared "who's doing what right now" board. It
+costs one read + one small edit per task; the alternative (discovering a collision via `git status`,
+a broken build, or two sessions independently fixing the same bug) has already cost real time today —
+see the log below for what that actually looked like before this file existed.
+
+## How to use this file
+
+**Before starting a new task:**
+1. Read the table below. If another entry touches the same files/area you're about to start on,
+   coordinate before proceeding (wait, pick a different task, or explicitly split the work) rather
+   than assuming it'll sort itself out at merge time.
+2. Add a row for yourself: which session, what you're doing, which files/areas you expect to touch,
+   and when you started. Keep it to one line — this is a status board, not a changelog.
+
+**While working:** if the scope changes meaningfully (you touch a file you didn't expect to), update
+your row rather than leaving it stale — a wrong entry is worse than no entry.
+
+**When done:** remove your row (or move it to "recently finished" for a day if it's useful context for
+the other session), and mention the commit(s) so the other session can `git log` them if curious.
+
+## Active
+
+| Session | Task | Files/areas | Started |
+|---|---|---|---|
+| _(none active)_ | | | |
+
+## Recently finished (for context, not a permanent log — prune entries older than a day or two)
+
+| Session | Task | Commits | Finished |
+|---|---|---|---|
+| Claude | UX/navigation review + 3 fixes (customer-role login loop, Settings nav consolidation, theme flash) | `edadaca`, `da0e791`, `374c235` | 2026-09-27 |
+| Claude | Found + fixed 4 missing table-grant bugs (0037, 0042) surfaced by running the real demo seed against staging | `2358438` | 2026-09-27 |
+| Claude | `/api/version` + staging drift-check tooling | `fdf5e10` | 2026-09-27 |
+
+## Why this exists — real collisions from before this file (2026-09-27)
+
+Worth keeping as a reminder of what "no coordination" actually costs, not just an abstract risk:
+
+- **A literal git ref race**: two sessions committing within seconds of each other hit
+  `cannot lock ref 'HEAD'` — recoverable (just retry), but a close call.
+- **`supabase/schema/schema.sql` hunk conflicts**: this file is hand-maintained and both sessions
+  append to it in the same region for unrelated migrations — repeatedly had to `git add -p` to stage
+  only one session's hunk without touching the other's in-progress addition.
+- **Migration numbering races**: sequential, must-be-unique migration files (`0043`, `0044`, ...) —
+  two sessions picking "the next number" from memory rather than re-checking right before writing is
+  a collision waiting to happen. **Always re-run `ls supabase/migrations | sort -V | tail -3` (or
+  `git fetch && git log origin/main -- supabase/migrations`) immediately before creating a new
+  migration file** — never reuse a number you determined earlier in your own session.
+- **Duplicate work**: both sessions independently found and fixed the exact same
+  `dedupeByVehicle`/RSC-boundary bug in `components/DispatchMap.tsx` around the same time — neither
+  could see the other was already on it. This is the specific failure mode this file exists to prevent.
+
+## Worktrees for real parallel feature work
+
+For anything beyond a quick fix, prefer a separate git worktree per session/task over both sessions
+editing the same checkout of `main` directly:
+
+```bash
+git worktree add ../carrieros-<short-task-name> -b <task-branch> main
+```
+
+Each worktree has its own working directory and branch off the same repo/history — no shared
+uncommitted state, no ref races, no accidental hunk-picking in shared files. Merge (or open a PR) when
+the task is done. `git worktree list` to see what's active; `git worktree remove <path>` to clean up
+after merging.
+
+Shared "hub" files that are worth extra caution even across worktrees (they can still conflict at
+merge time even though they won't race during editing): `supabase/schema/schema.sql`,
+`supabase/migrations/*` (numbering), `lib/generated/role-capabilities.ts` and its mobile counterpart
+(regenerated, not hand-edited — regenerate after merging, don't hand-merge the generated file itself),
+`messages/{en,es,pa,ur}.json`.
