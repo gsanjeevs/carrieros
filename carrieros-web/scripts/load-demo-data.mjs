@@ -163,9 +163,12 @@ function vehiclePng(seed) {
 
 async function ensureDemoCompliance(orgId, driverId, profileId, vehicles) {
   const { data: profile } = await admin.from('profiles').select('avatar_path').eq('id', profileId).single()
-  if (profile && !profile.avatar_path) {
-    const path = `${profileId}/demo-profile.png`
-    const uploaded = await admin.storage.from('avatars').upload(path, avatarPng(driverId), { contentType: 'image/png', upsert: true })
+  // Migrate the pre-release temporary avatars bucket fixture once; preserve
+  // any real/user-edited avatar path after it has moved to documents.
+  if (profile && (!profile.avatar_path || /\/demo-profile\.png$/.test(profile.avatar_path))) {
+    const demoUuid = `00000000-0000-0000-0000-${String(driverId).padStart(12, '0')}`
+    const path = `${orgId}/profiles/${profileId}/avatar-${demoUuid}.png`
+    const uploaded = await admin.storage.from('documents').upload(path, avatarPng(driverId), { contentType: 'image/png', upsert: true })
     if (!uploaded.error) await must(admin.from('profiles').update({ avatar_path: path }).eq('id', profileId), 'demo avatar path')
   }
 

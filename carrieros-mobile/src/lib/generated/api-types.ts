@@ -73,6 +73,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/avatar/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request a signed upload URL for the caller's profile photo */
+        post: operations["requestMyAvatarUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/avatar": {
         parameters: {
             query?: never;
@@ -82,8 +99,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Replace the caller's own profile photo */
-        post: operations["uploadMyAvatar"];
+        /** Finalize the caller's own profile photo upload */
+        post: operations["finalizeMyAvatar"];
         /** Delete the caller's own profile photo */
         delete: operations["deleteMyAvatar"];
         options?: never;
@@ -1615,7 +1632,7 @@ export interface operations {
             };
         };
     };
-    uploadMyAvatar: {
+    requestMyAvatarUpload: {
         parameters: {
             query?: never;
             header?: never;
@@ -1627,7 +1644,7 @@ export interface operations {
                 "application/json": {
                     /** @enum {string} */
                     content_type: "image/jpeg" | "image/png" | "image/webp" | "image/heic";
-                    base64: string;
+                    size_bytes: number;
                 };
             };
         };
@@ -1639,8 +1656,10 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        /** @enum {boolean} */
-                        ok: true;
+                        /** @description PUT the raw image bytes here with the Content-Type header below. */
+                        upload_url: string;
+                        storage_path: string;
+                        content_type: string;
                     };
                 };
             };
@@ -1696,7 +1715,87 @@ export interface operations {
                 };
             };
             /** @description Error */
-            413: {
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+        };
+    };
+    finalizeMyAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    storage_path: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {boolean} */
+                        ok: true;
+                    };
+                };
+            };
+            /** @description Error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error_code: string;
+                        /** @description Developer-facing fallback text; never render to end users. */
+                        error: string;
+                        /** @description Machine-readable context, e.g. { current_status } on a 409 VERSION_CONFLICT. */
+                        meta?: {
+                            [key: string]: string | number | boolean | (null);
+                        };
+                    };
+                };
+            };
+            /** @description Error */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

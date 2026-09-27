@@ -37,10 +37,19 @@ export function createShipmentMilestoneService(supabase: SupabaseClient<Database
 }
 
 import { ProfilePreferencesService } from './application/profile-preferences-service'
+import { ProfileAvatarService } from './application/profile-avatar-service'
 import { SupabaseProfileWriteRepository } from './infrastructure/supabase/profile-write-repository'
 
 export function createProfilePreferencesService(supabase: SupabaseClient<Database>): ProfilePreferencesService {
   return new ProfilePreferencesService({ profiles: new SupabaseProfileWriteRepository(supabase) })
+}
+
+export function createProfileAvatarService(supabase: SupabaseClient<Database>): ProfileAvatarService {
+  return new ProfileAvatarService({
+    profiles: new SupabaseProfileWriteRepository(supabase),
+    storage: new SupabaseObjectStorage(createStorageProvider(supabase)),
+    ids: { uuid: () => crypto.randomUUID() },
+  })
 }
 
 import { DriverActionService } from './application/driver-action-service'

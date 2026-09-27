@@ -166,11 +166,16 @@ export const UpdatePreferencesBodySchema = z
   })
   .refine((v) => Object.keys(v).length > 0, { message: 'Provide at least one preference to update' })
 
-export const UploadAvatarBodySchema = z.object({
+export const RequestAvatarUploadBodySchema = z.object({
   content_type: z.enum(['image/jpeg', 'image/png', 'image/webp', 'image/heic']),
-  /** Base64 image bytes; clients compress/crop before sending. */
-  base64: z.string().min(1).max(7_000_000),
+  size_bytes: z.number().int().positive().max(5 * 1024 * 1024),
 })
+export const RequestAvatarUploadResponseSchema = z.object({
+  upload_url: z.string().describe('PUT the raw image bytes here with the Content-Type header below.'),
+  storage_path: z.string(),
+  content_type: z.string(),
+})
+export const FinalizeAvatarBodySchema = z.object({ storage_path: z.string().min(1).max(300) })
 
 export const SetPushTokenBodySchema = z.object({ token: z.string().min(1).max(512) })
 

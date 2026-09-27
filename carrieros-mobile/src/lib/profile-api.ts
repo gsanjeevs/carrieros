@@ -4,6 +4,7 @@
 // round trip), so a failed sync must not throw into the UI: it is logged and the
 // value is simply re-sent the next time the user changes it or the profile loads.
 import { apiClient } from '@/lib/api-client';
+import { base64ToArrayBuffer } from '@/lib/base64';
 import type { operations } from '@/lib/generated/api-types';
 import { logError } from '@/lib/observability';
 
@@ -26,6 +27,13 @@ export async function registerPushToken(token: string): Promise<void> {
 }
 
 export async function uploadAvatar(base64: string, contentType: 'image/jpeg' | 'image/png' | 'image/webp' | 'image/heic'): Promise<void> {
-  const { error } = await apiClient.http.POST('/api/v1/me/avatar', { body: { base64, content_type: contentType } });
-  if (error) throw new Error(`avatar upload rejected: ${JSON.stringify(error)}`);
+  const bytes = base64ToArrayBuffer(base64);
+  const slot = await apiClient.http.POST('/api/v1/me/avatar/uploads', {
+    body: { content_type: contentType, size_bytes: bytes.byteLength },
+  });
+  if (!slot.data) throw new Error(`avatar upload slot rejected: ${JSON.stringify(slot.error)}`);
+  const put = await fetch(slot.data.upload_url, { method: 'PUT', headers: { 'Content-Type': slot.data.content_type }, body: bytes });
+  if (!put.ok) throw new Error(`avatar bytes rejected: ${put.status}`);
+  const { error } = await apiClient.http.POST('/api/v1/me/avatar', { body: { storage_path: slot.data.storage_path } });
+  if (error) throw new Error(`avatar finalize rejected: ${JSON.stringify(error)}`);
 }

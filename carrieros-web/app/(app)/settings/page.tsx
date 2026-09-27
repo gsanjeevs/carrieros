@@ -10,9 +10,10 @@ import ProfileSettingsForm from './ProfileSettingsForm'
 import ThemeSwitcher from '@/components/ThemeSwitcher'
 import { Card, CardBody } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
-import { createStorageProvider } from '@/lib/storage'
 import { isThemePreference } from '@/lib/theme'
 import ProfilePhotoForm from './ProfilePhotoForm'
+import { createProfileAvatarService } from '@/server/composition'
+import { buildActorContext } from '@/server/infrastructure/supabase/actor-context'
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -34,8 +35,10 @@ export default async function SettingsPage() {
   const t = await getTranslations('settings')
   const themePreference = isThemePreference(profile?.theme_preference) ? profile.theme_preference : 'system'
   let avatarUrl: string | null = null
-  if (profile?.avatar_path) {
-    avatarUrl = await createStorageProvider(supabase, 'avatars').getSignedUrl(profile.avatar_path, 3600).catch(() => null)
+  const actor = await buildActorContext(supabase, user, crypto.randomUUID())
+  if (actor.ok) {
+    const result = await createProfileAvatarService(supabase).signedUrl(actor.value, profile?.avatar_path ?? null)
+    avatarUrl = result.ok ? result.value : null
   }
 
   return (

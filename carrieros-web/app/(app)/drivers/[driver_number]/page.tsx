@@ -15,6 +15,7 @@ import { Card, CardHeader, CardBody, KpiTile, StatusBadge, Table, TableHeaderCel
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { listLoadsForDriver } from '@/lib/queries/loads'
 import { roleHasCapability } from '@/lib/generated/role-capabilities'
+import { createStorageProvider } from '@/lib/storage'
 
 function InfoRow({ label, value }: { label: string; value: string | number | null | undefined }) {
   return (
@@ -71,15 +72,11 @@ export default async function DriverDetailPage({
     .toUpperCase()
     .slice(0, 2)
 
-  // Avatar — mobile-captured only, nullable, no web upload UI. Signed URL
-  // from the (not-yet-guaranteed-to-exist) 'avatars' bucket; fall back to
-  // initials silently if the bucket/object isn't there.
+  // Avatar — private profile media in the canonical documents bucket. Fall
+  // back to initials silently if the nullable object is absent.
   let avatarUrl: string | null = null
   if (driver.profiles?.avatar_path) {
-    const { data: signedAvatar } = await supabase.storage
-      .from('avatars')
-      .createSignedUrl(driver.profiles.avatar_path, 60 * 60)
-    avatarUrl = signedAvatar?.signedUrl ?? null
+    avatarUrl = await createStorageProvider(supabase).getSignedUrl(driver.profiles.avatar_path, 60 * 60).catch(() => null)
   }
 
   // ─── Documents ───

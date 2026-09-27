@@ -10,23 +10,10 @@ const MAX_BYTES = 5 * 1024 * 1024
 const ACCEPT = 'image/jpeg,image/png,image/webp,image/heic'
 type AvatarContentType = 'image/jpeg' | 'image/png' | 'image/webp' | 'image/heic'
 
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      // reader.result is "data:<mime>;base64,<data>" for readAsDataURL -- strip the prefix.
-      const result = reader.result as string
-      resolve(result.slice(result.indexOf(',') + 1))
-    }
-    reader.onerror = () => reject(reader.error)
-    reader.readAsDataURL(file)
-  })
-}
-
 // ADR 0003: this form never touches Supabase storage/tables directly -- both
-// actions go through POST/DELETE /api/v1/me/avatar (server/contract/schemas.ts's
-// UploadAvatarBodySchema), same as every other client-component data write in
-// this app. router.refresh() re-runs settings/page.tsx's Server Component to
+// actions go through the signed-upload/finalize API contract, same as every
+// other client-component data write in this app. router.refresh() re-runs the
+// settings Server Component to
 // get a fresh signed URL rather than this component trying to sign one itself.
 export default function ProfilePhotoForm({ currentUrl }: { currentUrl: string | null }) {
   const t = useTranslations('settings')
@@ -41,10 +28,13 @@ export default function ProfilePhotoForm({ currentUrl }: { currentUrl: string | 
     if (file.size > MAX_BYTES) { setError(t('photoSizeError')); return }
     if (!['image/jpeg', 'image/png', 'image/webp', 'image/heic'].includes(file.type)) { setError(t('photoTypeError')); return }
     setBusy(true)
-    const base64 = await fileToBase64(file)
-    const { response } = await apiClient.http.POST('/api/v1/me/avatar', {
-      body: { content_type: file.type as AvatarContentType, base64 },
+    const slot = await apiClient.http.POST('/api/v1/me/avatar/uploads', {
+      body: { content_type: file.type as AvatarContentType, size_bytes: file.size },
     })
+    if (!slot.data) { setBusy(false); setError(t('photoUploadError')); return }
+    const put = await fetch(slot.data.upload_url, { method: 'PUT', headers: { 'Content-Type': slot.data.content_type }, body: file })
+    if (!put.ok) { setBusy(false); setError(t('photoUploadError')); return }
+    const { response } = await apiClient.http.POST('/api/v1/me/avatar', { body: { storage_path: slot.data.storage_path } })
     setBusy(false)
     if (!response.ok) { setError(t('photoUploadError')); return }
     router.refresh()

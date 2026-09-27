@@ -310,6 +310,8 @@ export interface ProfileWriteRepository {
   getPreferences(actor: ActorContext): Promise<Result<ProfilePreferencesRecord>>
   updatePreferences(actor: ActorContext, patch: PreferencesPatch): Promise<Result<void>>
   setPushToken(actor: ActorContext, token: string): Promise<Result<void>>
+  getAvatarPath(actor: ActorContext): Promise<Result<string | null>>
+  updateAvatarPath(actor: ActorContext, avatarPath: string | null): Promise<Result<void>>
 }
 
 // ── Driver actions ──────────────────────────────────────────────────────────

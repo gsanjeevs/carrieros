@@ -52,4 +52,23 @@ export class SupabaseProfileWriteRepository implements ProfileWriteRepository {
     if (error) return err(domainError('PRECONDITION_FAILED', `push token update failed: ${error.message}`))
     return ok(undefined)
   }
+
+  async getAvatarPath(actor: ActorContext): Promise<Result<string | null>> {
+    const { data, error } = await this.supabase
+      .from('profiles')
+      .select('avatar_path')
+      .eq('id', actor.userId)
+      .single()
+    if (error) return err(domainError('PRECONDITION_FAILED', `avatar lookup failed: ${error.message}`))
+    return ok(data.avatar_path)
+  }
+
+  async updateAvatarPath(actor: ActorContext, avatarPath: string | null): Promise<Result<void>> {
+    const { error } = await this.supabase
+      .from('profiles')
+      .update({ avatar_path: avatarPath })
+      .eq('id', actor.userId)
+    if (error) return err(domainError('PRECONDITION_FAILED', `avatar update failed: ${error.message}`))
+    return ok(undefined)
+  }
 }
