@@ -21,6 +21,7 @@ import type { OnboardingDraft } from '../domain/onboarding/draft'
 import type { LoadAssignmentPatch } from '../domain/load/write'
 import type { WebhookDeliveryRecord, WebhookSummary } from '../domain/webhooks/model'
 import type { TelematicsIntegrationSummary, TelematicsProvider } from '../domain/telematics/model'
+import type { LoadboardIntegrationSummary, LoadboardPostingSummary, LoadboardProvider, LoadPostingResult } from '../domain/loadboard/model'
 
 // ── Cross-cutting ───────────────────────────────────────────────────────────
 
@@ -1144,4 +1145,81 @@ export interface TelematicsIntegrationRepository {
     provider: TelematicsProvider,
     patch: { apiKeyEncrypted?: string | null; webhookSecretEncrypted?: string | null; enabled?: boolean }
   ): Promise<Result<TelematicsIntegrationSummary>>
+}
+
+// ── Loadboard (migration 0052) ───────────────────────────────────────────────
+// DAT load-board integration, Phase 1 (posting only). Settings > Integrations
+// > Load Board: one row per (org, provider) vendor credential -- same
+// RLS-scoped-by-caller posture as TelematicsIntegrationRepository above (the
+// caller's own session has direct tenant-scoped access; owner/solo/dispatcher
+// per migration 0052's carrier_loadboard_integrations_all policy).
+
+export interface LoadboardIntegrationRepository {
+  listForOrg(actor: ActorContext): Promise<Result<readonly LoadboardIntegrationSummary[]>>
+  /**
+   * Upserts the org's row for `provider`. `apiKey` is ALREADY app-layer encrypted
+   * (lib/crypto/secrets.ts) by the caller (LoadboardIntegrationService) before this repository ever
+   * sees it -- undefined leaves the stored credential untouched, null clears it, a string
+   * (re)sets it.
+   */
+  upsert(
+    actor: ActorContext,
+    provider: LoadboardProvider,
+    patch: { apiKeyEncrypted?: string | null; enabled?: boolean }
+  ): Promise<Result<LoadboardIntegrationSummary>>
+  /** The decrypted-at-rest ciphertext for the org's active credential, or null if none/disabled. Only
+   * ever called by LoadboardPostingService right before an outbound DatClient call -- never returned
+   * to any API response. */
+  getCredential(actor: ActorContext, provider: LoadboardProvider): Promise<Result<{ apiKeyEncrypted: string | null; enabled: boolean } | null>>
+}
+
+/**
+ * Outbound gateway to a load-board vendor's posting API. Phase 1's only implementation
+ * (MockDatClient, server/infrastructure/loadboard/dat-client.ts) is a deterministic fake -- no real
+ * DAT API credentials exist yet, a separate business/partnership step. Kept here as a port (not a
+ * concrete import in server/application) so swapping in a real HTTP-backed client later needs no
+ * change to LoadboardPostingService.
+ */
+export interface LoadPostPayload {
+  readonly loadId: number
+  readonly originCity: string | null
+  readonly originState: string | null
+  readonly destinationCity: string | null
+  readonly destinationState: string | null
+  readonly pickupDate: string | null
+  readonly equipmentType: string | null
+  readonly weightLbs: number | null
+  readonly rate: number | null
+}
+
+export interface DatClient {
+  postLoad(payload: LoadPostPayload): Promise<LoadPostingResult>
+}
+
+/** Just the load fields a load-board posting payload needs -- see the LoadPostPayload port above. */
+export interface LoadboardPostingLoadFields {
+  readonly id: number
+  readonly pickupCity: string | null
+  readonly pickupState: string | null
+  readonly deliveryCity: string | null
+  readonly deliveryState: string | null
+  readonly pickupDate: string | null
+  readonly weightLbs: number | null
+  readonly rate: number | null
+}
+
+// loadboard_postings -- append-only audit trail / "already posted" check for the load-detail "Post to
+// DAT" button (migration 0052).
+export interface LoadboardPostingRepository {
+  getForLoad(actor: ActorContext, loadId: number, provider: LoadboardProvider): Promise<Result<LoadboardPostingSummary | null>>
+  create(
+    actor: ActorContext,
+    loadId: number,
+    provider: LoadboardProvider,
+    result: LoadPostingResult
+  ): Promise<Result<LoadboardPostingSummary>>
+  /** Tenant-scoped load lookup (carrier_org_id = actor.orgId) -- returns null if the load doesn't
+   * exist or isn't this actor's org's, same NOT_FOUND-vs-cross-tenant posture as every other
+   * org-scoped read in this codebase. */
+  getLoadForPosting(actor: ActorContext, loadId: number): Promise<Result<LoadboardPostingLoadFields | null>>
 }

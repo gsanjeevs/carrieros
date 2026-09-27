@@ -391,3 +391,27 @@ import { SupabaseTelematicsIntegrationRepository } from './infrastructure/supaba
 export function createTelematicsIntegrationService(supabase: SupabaseClient<Database>): TelematicsIntegrationService {
   return new TelematicsIntegrationService({ integrations: new SupabaseTelematicsIntegrationRepository(supabase) })
 }
+
+// Settings > Integrations > Load Board (migration 0052) -- DAT integration, Phase 1 (posting only,
+// mocked client). Same RLS-scoped-by-caller posture as telematics above. MockDatClient stands in for
+// a real DAT HTTP client until real API credentials exist (see its own file's header comment) --
+// swapping it here is the only change a real integration needs.
+import { LoadboardIntegrationService, LoadboardPostingService } from './application/loadboard-service'
+import { SupabaseLoadboardIntegrationRepository, SupabaseLoadboardPostingRepository } from './infrastructure/supabase/loadboard-repository'
+import { MockDatClient } from './infrastructure/loadboard/dat-client'
+
+export function createLoadboardIntegrationService(supabase: SupabaseClient<Database>): LoadboardIntegrationService {
+  return new LoadboardIntegrationService({
+    integrations: new SupabaseLoadboardIntegrationRepository(supabase),
+    features: new SupabaseFeatureGate(supabase),
+  })
+}
+
+export function createLoadboardPostingService(supabase: SupabaseClient<Database>): LoadboardPostingService {
+  return new LoadboardPostingService({
+    integrations: new SupabaseLoadboardIntegrationRepository(supabase),
+    postings: new SupabaseLoadboardPostingRepository(supabase),
+    features: new SupabaseFeatureGate(supabase),
+    datClient: new MockDatClient(),
+  })
+}
