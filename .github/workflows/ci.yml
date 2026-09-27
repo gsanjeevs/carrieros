@@ -98,8 +98,12 @@ jobs:
             echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
             echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY"
             echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
-            # Non-secret placeholders: the default suite never calls Anthropic
-            # (golden extraction tests are excluded from `npm test`).
+            # Non-secret placeholders. Stale claim removed 2026-09-27: the default suite DOES now
+            # exercise a real LLM call (tests/driver-messages.test.ts's translate test, live since
+            # 2026-09-24) -- but ai_provider_config defaults to 'openai' (migration 0031), not
+            # anthropic, and no working key exists for either provider here anyway, so that one test
+            # is skipped in CI (see its own it.skipIf(process.env.CI) comment) rather than given a key
+            # that would just be a second placeholder no more real than this one.
             echo "ANTHROPIC_API_KEY=ci-placeholder"
             echo "CRON_SECRET=ci-cron-secret"
             echo "INTAKE_WEBHOOK_SECRET=ci-intake-secret"
