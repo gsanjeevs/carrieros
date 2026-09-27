@@ -26,7 +26,7 @@ import { useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
-import { dedupeByVehicle, type DispatchMapPin } from '@/components/DispatchMap'
+import { dedupeByVehicle, type DispatchMapPin } from '@/lib/dispatch-map-pins'
 
 const ACTIVE_STATUSES = new Set(['dispatched', 'picked_up', 'in_transit'])
 
@@ -107,7 +107,7 @@ export default function DispatchMapClient({ pins, locale, orgId }: { pins: Dispa
               lng: Number(row.last_location_lng),
               lastLocationAt: row.last_location_at as string,
               source: 'phone',
-              shipment: prev.find((p) => p.id === id)?.shipment,
+              shipment: (prev.find((p) => p.id === id) as (DispatchMapPin & { shipment?: unknown }) | undefined)?.shipment,
             }
             const exists = prev.some((p) => p.id === id)
             return exists ? prev.map((p) => (p.id === id ? updated : p)) : [...prev, updated]

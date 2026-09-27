@@ -2,16 +2,25 @@
 // Live dispatch map (audit gap #13 cluster / PRD "Desktop Command Center",
 // Growth+ desktop_command_center feature — "Dispatcher desktop: all
 // trucks on map + load queue + driver availability"). Plots two location
-// sources, normalized into DispatchMapPin (components/DispatchMap.tsx):
+// sources, normalized into DispatchMapPin (lib/dispatch-map-pins.ts):
 //   - loads.last_location_lat/lng (phone GPS, share-location-section.tsx),
 //     only while a load has an active status.
 //   - vehicle_locations (real telematics, migration 0042 — Motive webhook
 //     receiver / Samsara poller), independent of any load. This is what lets
 //     an IDLE truck with no active load still show up on the map.
 // A vehicle reporting through both sources shows one pin, whichever reading
-// is more recent (dedupeByVehicle() in components/DispatchMap.tsx) — not a
+// is more recent (dedupeByVehicle() in lib/dispatch-map-pins.ts) — not a
 // hardcoded "always prefer telematics", since a fresher phone ping should
 // win over a stale telematics fix and vice versa.
+//
+// dedupeByVehicle/DispatchMapPin import from lib/dispatch-map-pins.ts, NOT
+// components/DispatchMap.tsx (a 'use client' file — Leaflet touches `window`
+// at import time): every named export of a 'use client' module is
+// client-only for cross-boundary calls, even a plain non-React function, so
+// this server component calling dedupeByVehicle() through DispatchMap.tsx
+// threw "Attempted to call dedupeByVehicle() from the server but
+// dedupeByVehicle is on the client" at request time (only surfaces at
+// runtime, not at build/tsc).
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getTranslations, getLocale } from 'next-intl/server'
@@ -19,7 +28,7 @@ import DispatchMapClient from './DispatchMapClient'
 import DispatchQueueRow from './DispatchQueueRow'
 import { hasFeature } from '@/lib/entitlements'
 import { Card, CardHeader, EmptyState } from '@/components/ui'
-import { dedupeByVehicle, type DispatchMapPin } from '@/components/DispatchMap'
+import { dedupeByVehicle, type DispatchMapPin } from '@/lib/dispatch-map-pins'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
@@ -75,7 +84,7 @@ export default async function DispatchPage() {
       origin: [l.pickup_city, l.pickup_state].filter(Boolean).join(', ') || null,
       destination: [l.delivery_city, l.delivery_state].filter(Boolean).join(', ') || null,
     },
-  }))
+  }) as DispatchMapPin)
   const activeLoadByVehicle = new Map(
     (activeLoadsData ?? [])
       .filter((load) => load.vehicle_id != null)
@@ -131,7 +140,7 @@ export default async function DispatchPage() {
           origin: [shipment.pickup_city, shipment.pickup_state].filter(Boolean).join(', ') || null,
           destination: [shipment.delivery_city, shipment.delivery_state].filter(Boolean).join(', ') || null,
         } : undefined,
-      }
+      } as DispatchMapPin
     })
     .filter((p): p is DispatchMapPin => p !== null)
 

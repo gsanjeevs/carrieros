@@ -26,6 +26,17 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
 import { useTranslations } from 'next-intl'
 import 'leaflet/dist/leaflet.css'
+import { dedupeByVehicle, type DispatchMapPin, type DispatchMapPinSource, type DispatchMapLoad } from '@/lib/dispatch-map-pins'
+
+// Re-exported for any other client-side caller still importing these from here (this file used to
+// define them directly — moved to lib/dispatch-map-pins.ts so app/(app)/dispatch/page.tsx, a server
+// component, can use dedupeByVehicle() without importing it through this 'use client' file's
+// boundary: React Server Components treat every named export of a 'use client' module as client-only
+// for cross-boundary calls, even a plain function with zero React/browser dependencies — this surfaced
+// at request time as "Attempted to call dedupeByVehicle() from the server but dedupeByVehicle is on
+// the client" (only at runtime, not at build/tsc, which is why it went unnoticed until the page was
+// actually hit).
+export { dedupeByVehicle, type DispatchMapPin, type DispatchMapPinSource, type DispatchMapLoad }
 
 // No fixed GPS ping interval exists today (share-location-section.tsx samples
 // on 50m of movement, not a timer, and the Samsara poller's own cadence
@@ -46,53 +57,6 @@ const DEFAULT_ICON = L.icon({
   popupAnchor: [1, -34],
   shadowSize: [41, 41],
 })
-
-export type DispatchMapPinSource = 'phone' | 'samsara' | 'motive'
-
-export interface DispatchMapPin {
-  /** Stable React/Leaflet key, unique across BOTH kinds — `load-<load id>` or `vehicle-<vehicle id>`. */
-  id: string
-  kind: 'load' | 'vehicle'
-  /** Null only in the (currently never-hit) case a load has no vehicle assigned yet but somehow has a
-   * phone location — kept nullable rather than widened to 0, since dedupeByVehicle must never treat
-   * two genuinely-unrelated "no vehicle" pins as the same vehicle. */
-  vehicleId: number | null
-  /** Load number for a `load` pin, vehicle nickname/number for a `vehicle` pin. */
-  label: string
-  status: string
-  driverName: string | null
-  lat: number
-  lng: number
-  lastLocationAt: string
-  source: DispatchMapPinSource
-}
-
-/** @deprecated renamed to DispatchMapPin — kept as an alias so any straggling import doesn't need to
- * change in the same commit as its call site; remove once nothing references it. */
-export type DispatchMapLoad = DispatchMapPin
-
-// Precedence rule (task requirement — "don't just hardcode always prefer telematics"): when the same
-// vehicle has both a load-derived pin (phone GPS) and a vehicle-derived pin (telematics), keep
-// whichever has the MORE RECENT lastLocationAt, not a fixed source priority. Telematics is generally
-// the more reliable/higher-frequency source when present, but a phone ping from 30 seconds ago is
-// still more current than a telematics fix from 10 minutes ago, and showing the stale one as if it
-// were live would be a worse outcome than the two-pins-for-one-truck problem this function exists to
-// avoid. Pins with vehicleId === null (should not occur in practice) always pass through unmerged.
-export function dedupeByVehicle(pins: readonly DispatchMapPin[]): DispatchMapPin[] {
-  const byVehicle = new Map<number, DispatchMapPin>()
-  const unassigned: DispatchMapPin[] = []
-  for (const pin of pins) {
-    if (pin.vehicleId == null) {
-      unassigned.push(pin)
-      continue
-    }
-    const existing = byVehicle.get(pin.vehicleId)
-    if (!existing || new Date(pin.lastLocationAt).getTime() > new Date(existing.lastLocationAt).getTime()) {
-      byVehicle.set(pin.vehicleId, pin)
-    }
-  }
-  return [...byVehicle.values(), ...unassigned]
-}
 
 const US_CENTER: [number, number] = [39.8283, -98.5795]
 
