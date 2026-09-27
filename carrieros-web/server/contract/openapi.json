@@ -852,6 +852,11 @@
                         "system"
                       ]
                     },
+                    "timezone": {
+                      "nullable": true,
+                      "description": "null = inherit the organization's carrier_details.timezone default.",
+                      "type": "string"
+                    },
                     "org_default_uom_system": {
                       "type": "string",
                       "enum": [
@@ -866,6 +871,7 @@
                     "date_format",
                     "time_format",
                     "theme_preference",
+                    "timezone",
                     "org_default_uom_system"
                   ],
                   "additionalProperties": false
@@ -1024,6 +1030,11 @@
                       "dark",
                       "system"
                     ]
+                  },
+                  "timezone": {
+                    "description": "null = inherit the organization's setting.",
+                    "nullable": true,
+                    "type": "string"
                   }
                 }
               }

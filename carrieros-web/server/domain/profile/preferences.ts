@@ -16,4 +16,8 @@ export interface PreferencesPatch {
   readonly date_format?: (typeof DATE_FORMATS)[number]
   readonly time_format?: (typeof TIME_FORMATS)[number]
   readonly theme_preference?: (typeof THEMES)[number]
+  /** IANA zone name (e.g. 'America/Los_Angeles'), validated against
+   *  Intl.supportedValuesOf('timeZone') at the edge. null = inherit the
+   *  organization's carrier_details.timezone default. */
+  readonly timezone?: string | null
 }

@@ -1403,6 +1403,8 @@ export interface operations {
                         time_format: "12h" | "24h" | null;
                         /** @enum {string|null} */
                         theme_preference: "light" | "dark" | "system" | null;
+                        /** @description null = inherit the organization's carrier_details.timezone default. */
+                        timezone: string | null;
                         /** @enum {string} */
                         org_default_uom_system: "imperial" | "metric";
                     };
@@ -1467,6 +1469,8 @@ export interface operations {
                     time_format?: "12h" | "24h";
                     /** @enum {string} */
                     theme_preference?: "light" | "dark" | "system";
+                    /** @description null = inherit the organization's setting. */
+                    timezone?: string | null;
                 };
             };
         };
