@@ -24,14 +24,13 @@ the other session), and mention the commit(s) so the other session can `git log`
 
 ## Active
 
-| Session | Task | Files/areas | Started |
-|---|---|---|---|
-| Claude | DAT load-board integration Phase 1 (posting only, mocked client): schema, settings UI, load-detail action | new migration 0052+, `server/contract/`, `app/(app)/settings/integrations`, `app/(app)/loads/[load_number]`; worktree `../carrieros-loadboard` on `feature/dat-loadboard` | 2026-09-27 |
+(none from this session right now)
 
 ## Recently finished (for context, not a permanent log — prune entries older than a day or two)
 
 | Session | Task | Commits | Finished |
 |---|---|---|---|
+| Claude | DAT load-board integration Phase 1 (posting only, mocked client): migration 0052/0053, server layer, settings UI, load-detail "Post to DAT" action, tests. Branch `feature/dat-loadboard`, worktree `../carrieros-loadboard`. Migration numbered 0052 not 0049 -- the shared local Supabase instance already had 0047/0049-0051 applied from another session's uncommitted work not present in this branch's git history. Not merged to main, not pushed. | `95c0e24`, `f675cf2`, `88211c0`, `59995b1` | 2026-09-27 |
 | Claude | UX/navigation review + 3 fixes (customer-role login loop, Settings nav consolidation, theme flash) | `edadaca`, `da0e791`, `374c235` | 2026-09-27 |
 | Claude | Found + fixed 4 missing table-grant bugs (0037, 0042) surfaced by running the real demo seed against staging | `2358438` | 2026-09-27 |
 | Claude | `/api/version` + staging drift-check tooling | `fdf5e10` | 2026-09-27 |
