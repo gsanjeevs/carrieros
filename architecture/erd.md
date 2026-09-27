@@ -3,7 +3,7 @@
 > **Generated** by `node scripts/db/gen-erd.mjs` from the live schema. Do not edit by hand:
 > change the database via a migration, then re-run the generator. CI runs it with `--check`.
 
-52 tables, 95 foreign keys, split into 6 domain diagrams (one diagram of every table is unreadable).
+56 tables, 102 foreign keys, split into 7 domain diagrams (one diagram of every table is unreadable).
 A box drawn without columns belongs to another domain; find it in its own section.
 `||` = the FK is required (NOT NULL); `|o` = the FK is optional (nullable). `PK`/`FK` mark keys.
 
@@ -775,4 +775,68 @@ erDiagram
   support_tickets ||--o{ support_ticket_messages : "ticket_id"
   organizations ||--o{ support_tickets : "carrier_org_id"
   profiles ||--o{ support_tickets : "submitted_by"
+```
+
+## Unassigned
+
+Tables not yet placed in a domain: add them to DOMAINS in scripts/db/gen-erd.mjs.
+
+Tables: `ai_feature_overrides`, `app_error_log`, `webhook_deliveries`, `webhooks`
+
+```mermaid
+erDiagram
+  ai_feature_overrides {
+    text feature PK
+    text anthropic_api_key_encrypted
+    text anthropic_api_key_preview
+    text compatible_base_url
+    text model
+    text openai_api_key_encrypted
+    text openai_api_key_preview
+    text openai_compatible_api_key_encrypted
+    text openai_compatible_api_key_preview
+    text provider
+    timestamptz updated_at
+    uuid updated_by FK
+  }
+  app_error_log {
+    bigint id PK
+    jsonb context
+    timestamptz created_at
+    text level
+    text message
+    bigint org_id FK
+    text request_id
+    text route
+    uuid user_id FK
+  }
+  webhook_deliveries {
+    bigint id PK
+    integer attempt_count
+    timestamptz created_at
+    text event_type
+    timestamptz last_attempted_at
+    integer last_response_status
+    bigint org_id FK
+    jsonb payload
+    text status
+    bigint webhook_id FK
+  }
+  webhooks {
+    bigint id PK
+    timestamptz created_at
+    uuid created_by FK
+    boolean enabled
+    bigint org_id FK
+    text secret
+    ARRAY subscribed_events
+    text url
+  }
+  profiles |o--o{ ai_feature_overrides : "updated_by"
+  organizations |o--o{ app_error_log : "org_id"
+  profiles |o--o{ app_error_log : "user_id"
+  organizations ||--o{ webhook_deliveries : "org_id"
+  webhooks ||--o{ webhook_deliveries : "webhook_id"
+  profiles |o--o{ webhooks : "created_by"
+  organizations ||--o{ webhooks : "org_id"
 ```

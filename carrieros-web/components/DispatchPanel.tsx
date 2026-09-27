@@ -8,8 +8,8 @@ import { useTranslations } from 'next-intl'
 import { Card, Button } from '@/components/ui'
 import { apiClient } from '@/lib/api-client'
 
-interface Driver { id: number; driver_number: string; default_vehicle_id: number | null; first_name: string | null; last_name: string | null }
-interface Vehicle { id: number; vehicle_number: string; nickname: string }
+interface Driver { id: number; driver_number: string | null; default_vehicle_id: number | null; first_name: string | null; last_name: string | null }
+interface Vehicle { id: number; vehicle_number: string | null; nickname: string }
 
 const NEXT_STATUS: Record<string, string> = {
   draft:      'scheduled',
@@ -97,14 +97,14 @@ export default function DispatchPanel({
   function driverInitials(d: Driver): string {
     const name = (d.first_name || d.last_name)
       ? [d.first_name, d.last_name].filter(Boolean).join(' ')
-      : d.driver_number
+      : (d.driver_number ?? '')
     const initials = name
       .split(' ')
       .map(n => n[0])
       .join('')
       .toUpperCase()
       .slice(0, 2)
-    return initials || d.driver_number.slice(0, 2).toUpperCase()
+    return initials || (d.driver_number ?? '').slice(0, 2).toUpperCase()
   }
 
   function selectDriver(id: string) {
@@ -157,7 +157,7 @@ export default function DispatchPanel({
           {drivers.map(d => {
             const name = (d.first_name || d.last_name)
               ? [d.first_name, d.last_name].filter(Boolean).join(' ')
-              : d.driver_number
+              : (d.driver_number ?? '')
             const isSelected = driverId === d.id.toString()
             return (
               <Card

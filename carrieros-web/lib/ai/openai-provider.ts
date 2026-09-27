@@ -47,7 +47,12 @@ export class OpenAIProvider implements LLMProvider {
     try {
       completion = await this.client.chat.completions.create({
         model: opts.model,
-        max_tokens: opts.maxTokens,
+        // `max_tokens` is the deprecated name in OpenAI's Chat Completions API;
+        // newer models (gpt-5-mini and later, o-series) reject it outright with
+        // "Unsupported parameter" and there is no per-model way to know which
+        // name a configured model expects ahead of time — `max_completion_tokens`
+        // is the current field name and works across old and new chat models.
+        max_completion_tokens: opts.maxTokens,
         messages: [
           { role: 'system', content: opts.system },
           { role: 'user', content: toOpenAIContent(opts.userContent) },
