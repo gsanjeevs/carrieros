@@ -34,7 +34,13 @@ export async function POST(request: NextRequest) {
   const { readFileSync } = await import('node:fs')
   const before = GENERATED_FILES.map((f) => {
     try {
-      return readFileSync(f, 'utf8')
+      // GENERATED_FILES is a fixed, module-scoped constant, not user input -- but Next's build
+      // tracer can't prove that statically and otherwise traces (and bundles into the standalone
+      // output) the ENTIRE monorepo, including tests/, scripts/, and carrieros-mobile/, which is
+      // both a slow/bloated deploy artifact and the reason vitest picked up the intentionally-red
+      // tests/audit/** suite a second time (as .next/standalone/tests/audit/**, outside the
+      // exclude glob's reach) and failed CI on every commit since this route was added.
+      return readFileSync(/*turbopackIgnore: true*/ f, 'utf8')
     } catch {
       return null
     }
@@ -50,7 +56,7 @@ export async function POST(request: NextRequest) {
 
   const after = GENERATED_FILES.map((f) => {
     try {
-      return readFileSync(f, 'utf8')
+      return readFileSync(/*turbopackIgnore: true*/ f, 'utf8')
     } catch {
       return null
     }

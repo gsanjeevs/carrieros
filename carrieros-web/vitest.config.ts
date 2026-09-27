@@ -30,7 +30,15 @@ export default defineConfig({
     // e2e/**/*.spec.ts are Playwright specs (`npm run test:e2e`), not vitest tests — Playwright's
     // test() throws "did not expect test() to be called here" if vitest tries to collect them too,
     // since vitest's default include glob matches *.spec.ts anywhere in the project.
-    exclude: [...configDefaults.exclude, '**/*.golden.test.ts', 'tests/audit/**', 'e2e/**'],
+    //
+    // Leading '**/' (not a bare 'tests/audit/**') on purpose: a real Next.js build-tracing bug
+    // (app/api/admin/roles/regenerate/route.ts's dynamic readFileSync calls, fixed alongside this)
+    // used to copy the ENTIRE repo -- tests/ included -- into .next/standalone/, so `npm test` run
+    // against a built app picked up a second, un-excluded copy at .next/standalone/tests/audit/**
+    // (a bare prefix glob only anchors at the project root) and failed CI on every commit for over
+    // a week on these deliberately-red probes. The build-tracing fix removes the duplication at its
+    // source; this is defense in depth against the same class of anchoring mistake recurring.
+    exclude: [...configDefaults.exclude, '**/*.golden.test.ts', '**/tests/audit/**', 'e2e/**'],
   },
   resolve: {
     alias: {
