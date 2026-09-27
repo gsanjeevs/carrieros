@@ -188,7 +188,7 @@ git config core.hooksPath scripts/git-hooks
 ```
 
 - **`scripts/git-hooks/pre-commit`** — on any staged `carrieros-web/**/*.{ts,tsx}`:
-  `eslint` (includes the UI-component-pattern guard below), `tsc --noEmit`,
+  `eslint` (includes the UI-component-pattern guard below), `tsc --noEmit --incremental false`,
   and `carrieros-web/scripts/check-architecture.mjs` (static grep — no DB —
   enforcing Rule B/D "business/query logic must not import React/Next.js/
   components" and Rule G "call sites must go through `lib/storage`/
@@ -201,6 +201,10 @@ git config core.hooksPath scripts/git-hooks
 - **`scripts/git-hooks/pre-push`** — runs each app's full test suite
   (DB-backed, slower) if that app changed since `main`. Gated at push, not
   commit, since that's when code actually leaves the machine.
+- **Migration safety in `scripts/git-hooks/pre-commit`** — blocks edits,
+  deletions, and renames of already-committed migration files, and blocks
+  duplicate migration numbers. Fix schema changes forward in a new,
+  uniquely-numbered migration; do not edit an applied migration.
 - **`carrieros-web/eslint.config.mjs`'s `no-restricted-syntax` UI guard** —
   flags hand-rolled card/badge Tailwind (`bg-white/5`, `shadow-card-dark`,
   `border-white/8`, etc.) instead of `components/ui/*`. Ratcheted: `warn`
@@ -245,6 +249,39 @@ For anything beyond a quick fix, prefer a git worktree per session/task
 of `main` directly — see `CURRENT_WORK.md` for the full rationale and the list of shared "hub" files
 (schema.sql, migration numbering, generated role-capabilities, i18n JSON) worth extra caution around
 even across worktrees, since they can still conflict at merge time.
+
+## Test scope and when to push (2026-09-27, account owner's explicit policy)
+
+**Don't `git push` (and don't rely on GitHub Actions CI/Deploy as your verification) unless the
+account owner explicitly asks for it, in either session.** GitHub Actions costs nothing on this public
+repo, but pushing on every small fix is still real wall-clock time spent waiting on a redundant check
+when the same verification already runs locally first. All verification happens locally, always,
+before you'd otherwise push.
+
+**Don't run the full local test suite (DB-backed, ~2-4 min against a live dev server) for every
+change either.** Scope it:
+
+- **Every change, always** (seconds, not minutes): `tsc --noEmit` on the affected app, `eslint` on
+  just the changed files, `node scripts/check-architecture.mjs` (no DB).
+- **Targeted tests as the default**, not the full suite: run only the `tests/*.test.ts` file(s) that
+  actually exercise the changed area — found by directory/naming convention (a change under
+  `app/api/webhooks/` → run `tests/webhooks.test.ts`) or a quick grep for the changed
+  route/function/table name across `tests/`. Usually a handful of files, seconds not minutes.
+- **Run the full local suite** (`npm test` against a live dev server) at these checkpoints instead of
+  per-commit:
+  1. Before marking a task/feature genuinely done and reporting it back as complete.
+  2. Before any `git push` (once the account owner has actually asked for one).
+  3. Before a staging deploy.
+  4. The diff touches a **shared/hub file** with broad, hard-to-bound blast radius —
+     `proxy.ts`, `supabase/schema/schema.sql`, `lib/generated/role-capabilities.ts` (either app),
+     `server/composition.ts`, or a shared `components/ui/*` primitive.
+  5. **5+ files changed**, or several small fixes have accumulated, since the last full run — a batch
+     checkpoint, not a per-commit tax.
+
+Known tradeoff, stated plainly rather than hidden: targeted testing means a regression in an area a
+change touched only indirectly could occasionally slip through between full-suite checkpoints. Trigger
+4 (hub files) and trigger 5 (accumulation) exist specifically to bound that risk before it compounds —
+don't skip a full run once either condition is true just because the individual diff looked small.
 
 ## Speeding up multi-surface work
 When a task spans independent surfaces (e.g. i18n on web + i18n on mobile,
