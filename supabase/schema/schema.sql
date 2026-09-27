@@ -5474,6 +5474,23 @@ GRANT SELECT, INSERT ON loadboard_postings TO authenticated;
 GRANT SELECT, INSERT ON loadboard_postings TO service_role;
 GRANT USAGE, SELECT ON SEQUENCE loadboard_postings_id_seq TO authenticated, service_role;
 
+-- Tenant guard (migration 0053, fixing forward a real 0052 gap -- RLS validates the row being
+-- written, not what its FKs point at; see 0019's enforce_load_reference_tenancy() for the same
+-- pattern): carrier_org_id on a loadboard_postings row must actually match the referenced load's own
+-- carrier_org_id, not just the caller's session org.
+CREATE OR REPLACE FUNCTION enforce_loadboard_posting_tenancy() RETURNS trigger
+LANGUAGE plpgsql SET search_path = public AS $$
+BEGIN
+  IF (TG_OP = 'INSERT' OR NEW.load_id IS DISTINCT FROM OLD.load_id OR NEW.carrier_org_id IS DISTINCT FROM OLD.carrier_org_id)
+     AND NOT EXISTS (SELECT 1 FROM loads WHERE id = NEW.load_id AND carrier_org_id = NEW.carrier_org_id) THEN
+    RAISE EXCEPTION 'load does not belong to this carrier' USING ERRCODE = '23514';
+  END IF;
+  RETURN NEW;
+END $$;
+
+CREATE TRIGGER loadboard_postings_tenancy BEFORE INSERT OR UPDATE ON loadboard_postings
+  FOR EACH ROW EXECUTE FUNCTION enforce_loadboard_posting_tenancy();
+
 -- ── Realtime publication (migration 0041) ────────────────────────────────
 -- loads/driver_messages Postgres Changes subscriptions (dispatch map,
 -- driver chat) only actually deliver events once their table is in this

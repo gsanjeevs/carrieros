@@ -37,6 +37,8 @@ let driverAId: number
 let dvirAId: number
 let maintenanceReminderAId: number
 let telematicsIntegrationAId: number
+let loadboardIntegrationAId: number
+let loadboardPostingAId: number
 let vehicleLocationAId: number
 let vehicleDocAId: number
 let customerContactAId: number
@@ -105,6 +107,25 @@ beforeAll(async () => {
     .select('id')
     .single()
   telematicsIntegrationAId = Number(telematicsIntegration!.id)
+
+  // loadboard_integrations (0052 "carrier_loadboard_integrations_all": ALL requires carrier_org_id =
+  // my_org_id() AND my_role() IN ('owner','solo','dispatcher') -- broader role set than
+  // telematics_integrations, but the org check is the one this suite exercises).
+  const { data: loadboardIntegration } = await admin
+    .from('loadboard_integrations')
+    .insert({ carrier_org_id: orgA.orgId, provider: 'dat', api_key_encrypted: 'test-ciphertext' })
+    .select('id')
+    .single()
+  loadboardIntegrationAId = Number(loadboardIntegration!.id)
+
+  // loadboard_postings (0052 "carrier_loadboard_postings_select"/"_insert": SELECT/INSERT require
+  // carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher')).
+  const { data: loadboardPosting } = await admin
+    .from('loadboard_postings')
+    .insert({ carrier_org_id: orgA.orgId, load_id: loadAId, provider: 'dat', external_posting_id: 'dat-test-posting-1' })
+    .select('id')
+    .single()
+  loadboardPostingAId = Number(loadboardPosting!.id)
 
   // vehicle_locations (0042 "carrier_vehicle_locations_select": SELECT requires carrier_org_id =
   // my_org_id(), same shape as carrier_vehicles_select -- no role restriction beyond org match).
@@ -313,6 +334,48 @@ describe('cross-tenant isolation — org B cannot see org A data', () => {
     expect(data).toEqual([])
     const { data: stillIntact } = await admin.from('telematics_integrations').select('enabled').eq('id', telematicsIntegrationAId).single()
     expect(stillIntact?.enabled).toBe(true)
+  })
+
+  // loadboard_integrations: carrier_loadboard_integrations_all (ALL) gates on carrier_org_id =
+  // my_org_id() AND my_role() IN ('owner','solo','dispatcher'). userB is an owner of orgB, so this
+  // exercises the org check specifically, same reasoning as telematics_integrations above.
+  it('loadboard_integrations: org B session sees zero rows for org A integration', async () => {
+    const { data, error } = await sessionB.client.from('loadboard_integrations').select('id').eq('id', loadboardIntegrationAId)
+    expect(error).toBeNull()
+    expect(data).toEqual([])
+  })
+
+  it('loadboard_integrations: org B session cannot update org A integration', async () => {
+    const { data, error } = await sessionB.client
+      .from('loadboard_integrations')
+      .update({ enabled: false })
+      .eq('id', loadboardIntegrationAId)
+      .select()
+    expect(error).toBeNull()
+    expect(data).toEqual([])
+    const { data: stillIntact } = await admin.from('loadboard_integrations').select('enabled').eq('id', loadboardIntegrationAId).single()
+    expect(stillIntact?.enabled).toBe(true)
+  })
+
+  // loadboard_postings: carrier_loadboard_postings_select/_insert gate on carrier_org_id = my_org_id()
+  // AND my_role() IN ('owner','solo','dispatcher') -- same org-check exercise as above, plus confirms
+  // org B cannot post against org A's load either.
+  it('loadboard_postings: org B session sees zero rows for org A posting', async () => {
+    const { data, error } = await sessionB.client.from('loadboard_postings').select('id').eq('id', loadboardPostingAId)
+    expect(error).toBeNull()
+    expect(data).toEqual([])
+  })
+
+  it('loadboard_postings: org B session cannot insert a posting against org A\'s load', async () => {
+    const { data, error } = await sessionB.client
+      .from('loadboard_postings')
+      .insert({ carrier_org_id: orgB.orgId, load_id: loadAId, provider: 'dat', external_posting_id: 'dat-cross-org-attempt' })
+      .select()
+    // Blocked by the INSERT policy's WITH CHECK, not a foreign-key error -- carrier_org_id = orgB.orgId
+    // is a real row shape, but load_id belongs to org A, so RLS (not a constraint) is what must reject
+    // this, same "policy denies, not schema denies" assertion style as the rest of this suite.
+    expect(data).toBeNull()
+    expect(error).not.toBeNull()
   })
 
   // vehicle_locations: carrier_vehicle_locations_select (SELECT only -- all writes are service_role,
