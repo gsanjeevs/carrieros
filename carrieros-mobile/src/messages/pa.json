@@ -347,7 +347,8 @@
     "timeFormatSection": "ਸਮਾਂ ਫਾਰਮੈਟ",
     "time12h": "12-ਘੰਟੇ (2:30 PM)",
     "time24h": "24-ਘੰਟੇ (14:30)",
-    "businessSection": "ਕਾਰੋਬਾਰ"
+    "businessSection": "ਕਾਰੋਬਾਰ",
+    "photoSection": "ਪ੍ਰੋਫ਼ਾਈਲ ਫੋਟੋ", "photoTitle": "ਆਪਣੀ ਟੀਮ ਨੂੰ ਤੁਹਾਨੂੰ ਪਛਾਣਨ ਵਿੱਚ ਮਦਦ ਕਰੋ", "photoSubtitle": "ਕੈਮਰੇ ਜਾਂ ਲਾਇਬ੍ਰੇਰੀ ਤੋਂ ਫੋਟੋ ਸ਼ਾਮਲ ਕਰੋ।", "changePhoto": "ਫੋਟੋ ਚੁਣੋ", "photoSource": "ਪ੍ਰੋਫ਼ਾਈਲ ਫੋਟੋ", "takePhoto": "ਫੋਟੋ ਖਿੱਚੋ", "choosePhoto": "ਲਾਇਬ੍ਰੇਰੀ ਵਿੱਚੋਂ ਚੁਣੋ", "cameraDenied": "ਕੈਮਰਾ ਪਹੁੰਚ ਲੋੜੀਂਦੀ ਹੈ।", "libraryDenied": "ਫੋਟੋ ਪਹੁੰਚ ਲੋੜੀਂਦੀ ਹੈ।", "photoReadFailed": "ਫੋਟੋ ਪੜ੍ਹੀ ਨਹੀਂ ਜਾ ਸਕੀ।"
   },
   "tabs": {
     "home": "ਹੋਮ",

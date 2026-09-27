@@ -2748,6 +2748,22 @@ VALUES ('documents', 'documents', false, 10485760,
         ARRAY['image/jpeg','image/png','image/heic','image/webp','application/pdf'])
 ON CONFLICT (id) DO NOTHING;
 
+-- Private self-service profile photos. Path convention: {auth_user_id}/{filename}.
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('avatars', 'avatars', false, 5242880,
+        ARRAY['image/jpeg','image/png','image/webp','image/heic'])
+ON CONFLICT (id) DO NOTHING;
+
+CREATE POLICY "users_read_own_avatar" ON storage.objects FOR SELECT TO authenticated
+  USING (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text);
+CREATE POLICY "users_insert_own_avatar" ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text);
+CREATE POLICY "users_update_own_avatar" ON storage.objects FOR UPDATE TO authenticated
+  USING (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text)
+  WITH CHECK (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text);
+CREATE POLICY "users_delete_own_avatar" ON storage.objects FOR DELETE TO authenticated
+  USING (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text);
+
 CREATE POLICY "org_docs_read" ON storage.objects FOR SELECT TO authenticated
   USING (bucket_id = 'documents' AND (storage.foldername(name))[1] = my_org_id()::text);
 

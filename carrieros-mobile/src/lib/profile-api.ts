@@ -24,3 +24,8 @@ export async function registerPushToken(token: string): Promise<void> {
   const { error } = await apiClient.http.PUT('/api/v1/me/push-token', { body: { token } });
   if (error) throw new Error(`push token registration rejected: ${JSON.stringify(error)}`);
 }
+
+export async function uploadAvatar(base64: string, contentType: 'image/jpeg' | 'image/png' | 'image/webp' | 'image/heic'): Promise<void> {
+  const { error } = await apiClient.http.POST('/api/v1/me/avatar', { body: { base64, content_type: contentType } });
+  if (error) throw new Error(`avatar upload rejected: ${JSON.stringify(error)}`);
+}

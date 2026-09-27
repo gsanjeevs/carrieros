@@ -347,7 +347,8 @@
     "timeFormatSection": "Formato de hora",
     "time12h": "12 horas (2:30 PM)",
     "time24h": "24 horas (14:30)",
-    "businessSection": "Negocio"
+    "businessSection": "Negocio",
+    "photoSection": "Foto de perfil", "photoTitle": "Ayuda a tu equipo a reconocerte", "photoSubtitle": "Añade una foto desde tu cámara o biblioteca.", "changePhoto": "Elegir foto", "photoSource": "Foto de perfil", "takePhoto": "Tomar foto", "choosePhoto": "Elegir de la biblioteca", "cameraDenied": "Se necesita acceso a la cámara.", "libraryDenied": "Se necesita acceso a tus fotos.", "photoReadFailed": "No se pudo leer la foto."
   },
   "tabs": {
     "home": "Inicio",

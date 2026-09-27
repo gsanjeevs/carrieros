@@ -347,7 +347,17 @@
     "timeFormatSection": "Time format",
     "time12h": "12-hour (2:30 PM)",
     "time24h": "24-hour (14:30)",
-    "businessSection": "Business"
+    "businessSection": "Business",
+    "photoSection": "Profile photo",
+    "photoTitle": "Help your team recognize you",
+    "photoSubtitle": "Add a photo from your camera or library.",
+    "changePhoto": "Choose photo",
+    "photoSource": "Profile photo",
+    "takePhoto": "Take photo",
+    "choosePhoto": "Choose from library",
+    "cameraDenied": "Camera access is needed to take a profile photo.",
+    "libraryDenied": "Photo access is needed to choose a profile photo.",
+    "photoReadFailed": "Could not read that photo. Try another image."
   },
   "tabs": {
     "home": "Home",

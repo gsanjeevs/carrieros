@@ -11,6 +11,7 @@ import ThemeSwitcher from '@/components/ThemeSwitcher'
 import { Card, CardBody } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { isThemePreference } from '@/lib/theme'
+import ProfilePhotoForm from './ProfilePhotoForm'
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -31,6 +32,11 @@ export default async function SettingsPage() {
 
   const t = await getTranslations('settings')
   const themePreference = isThemePreference(profile?.theme_preference) ? profile.theme_preference : 'system'
+  let avatarUrl: string | null = null
+  if (profile?.avatar_path) {
+    const { data } = await supabase.storage.from('avatars').createSignedUrl(profile.avatar_path, 3600)
+    avatarUrl = data?.signedUrl ?? null
+  }
 
   return (
     // This page is the app's proof surface for decisions.md V3's "the main
@@ -54,6 +60,8 @@ export default async function SettingsPage() {
             <ThemeSwitcher current={themePreference} />
           </CardBody>
         </Card>
+
+        <ProfilePhotoForm currentUrl={avatarUrl} />
 
         <Card>
           <CardBody>

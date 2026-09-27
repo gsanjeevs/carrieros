@@ -6,7 +6,7 @@
 // need the same personal-preferences functionality plus a way to sign out,
 // since neither of those role groups has any other settings surface.
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
@@ -19,6 +19,9 @@ import { useProfileRole } from '@/hooks/use-profile-role';
 import { roleHasCapability } from '@/lib/generated/role-capabilities';
 import { SUPPORTED_LOCALES, type Locale } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
+import { usePhotoPicker, type PickedPhoto } from '@/hooks/use-photo-picker';
+import { PhotoSourceSheet } from '@/components/photo-source-sheet';
+import { uploadAvatar } from '@/lib/profile-api';
 
 const ORANGE = BrandColors.orange;
 
@@ -53,6 +56,24 @@ export function SettingsContent() {
   const { role } = useProfileRole();
   const { preference: themePreference, setPreference: setThemePreference } = useThemePreference();
   const [saving, setSaving] = useState<OptionKey | null>(null);
+  const [avatar, setAvatar] = useState<PickedPhoto | null>(null);
+  const [avatarSaving, setAvatarSaving] = useState(false);
+  const photoPicker = usePhotoPicker({
+    cameraDeniedMessage: t('settings.cameraDenied'),
+    libraryDeniedMessage: t('settings.libraryDenied'),
+    noImageDataMessage: t('settings.photoReadFailed'),
+    takePhotoLabel: t('settings.takePhoto'),
+    chooseFromLibraryLabel: t('settings.choosePhoto'),
+    cancelLabel: t('common.cancel'),
+    sheetTitle: t('settings.photoSource'),
+  });
+
+  async function saveAvatar(photo: PickedPhoto) {
+    setAvatar(photo);
+    setAvatarSaving(true);
+    try { await uploadAvatar(photo.base64, 'image/jpeg'); } catch { setAvatar(null); }
+    setAvatarSaving(false);
+  }
 
   // Capability-backed gates (generated from the role_capabilities table).
   const canManageTeam = roleHasCapability(role, 'team_manage');
@@ -137,6 +158,29 @@ export function SettingsContent() {
         <ThemedText type="small" themeColor="textSecondary" style={styles.subtitle}>
           {t('settings.subtitle')}
         </ThemedText>
+
+        <ThemedText type="default" style={[styles.sectionHeading, styles.sectionHeadingText]}>{t('settings.photoSection')}</ThemedText>
+        <ThemedView style={[styles.photoCard, { backgroundColor: theme.backgroundElement, borderColor: theme.backgroundSelected }]}>
+          {avatar ? <Image source={{ uri: avatar.uri }} style={styles.avatar} /> : <View style={[styles.avatar, styles.avatarFallback, { backgroundColor: ORANGE }]}><ThemedText style={styles.avatarInitial}>?</ThemedText></View>}
+          <View style={styles.photoCopy}>
+            <ThemedText type="default">{t('settings.photoTitle')}</ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">{t('settings.photoSubtitle')}</ThemedText>
+            <Pressable onPress={() => photoPicker.open(saveAvatar)} disabled={avatarSaving} style={styles.photoButton}>
+              {avatarSaving ? <ActivityIndicator color="#fff" /> : <ThemedText style={styles.photoButtonText}>{t('settings.changePhoto')}</ThemedText>}
+            </Pressable>
+            {photoPicker.error ? <ThemedText type="small" style={styles.photoError}>{photoPicker.error}</ThemedText> : null}
+          </View>
+        </ThemedView>
+        <PhotoSourceSheet
+          visible={photoPicker.androidSheetOpen}
+          title={t('settings.photoSource')}
+          takePhotoLabel={t('settings.takePhoto')}
+          chooseFromLibraryLabel={t('settings.choosePhoto')}
+          cancelLabel={t('common.cancel')}
+          onTakePhoto={() => photoPicker.pickFromAndroidSheet('camera', saveAvatar)}
+          onChooseFromLibrary={() => photoPicker.pickFromAndroidSheet('library', saveAvatar)}
+          onClose={photoPicker.closeAndroidSheet}
+        />
 
         {/* Language */}
         <ThemedText type="default" style={[styles.sectionHeading, styles.sectionHeadingText]}>{t('settings.languageSection')}</ThemedText>
@@ -292,6 +336,14 @@ const styles = StyleSheet.create({
   sectionHeadingText: { fontWeight: 700 },
   sectionSubtitle: { marginTop: -Spacing.one },
   options: { gap: Spacing.two, marginTop: Spacing.one },
+  photoCard: { borderWidth: 1, borderRadius: 14, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 14 },
+  avatar: { width: 64, height: 64, borderRadius: 32 },
+  avatarFallback: { alignItems: 'center', justifyContent: 'center' },
+  avatarInitial: { color: '#fff', fontSize: 24, fontWeight: '700' },
+  photoCopy: { flex: 1, gap: 4 },
+  photoButton: { alignSelf: 'flex-start', backgroundColor: ORANGE, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, marginTop: 6 },
+  photoButtonText: { color: '#fff', fontWeight: '700' },
+  photoError: { color: '#dc2626' },
   option: {
     flexDirection: 'row',
     justifyContent: 'space-between',

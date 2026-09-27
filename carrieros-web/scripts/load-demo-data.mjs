@@ -70,6 +70,7 @@
 // SUPABASE_SERVICE_ROLE_KEY) if the SUPABASE_URL env vars aren't set, same as
 // bootstrap-shipmentx.mjs.
 import { createClient } from '@supabase/supabase-js'
+import { deflateSync } from 'node:zlib'
 import { readFileSync, existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
@@ -111,6 +112,96 @@ async function must(promise, what) {
   const { data, error } = await promise
   if (error) throw new Error(`${what}: ${error.message}`)
   return data
+}
+
+// Small deterministic PNGs keep demo media synthetic, local, and rerunnable;
+// no real-person or scraped images are checked into the repository.
+function crc32(bytes) {
+  let crc = 0xffffffff
+  for (const byte of bytes) {
+    crc ^= byte
+    for (let i = 0; i < 8; i++) crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0)
+  }
+  return (crc ^ 0xffffffff) >>> 0
+}
+function png(width, height, paint) {
+  const raw = Buffer.alloc((width * 4 + 1) * height)
+  for (let y = 0; y < height; y++) {
+    raw[y * (width * 4 + 1)] = 0
+    for (let x = 0; x < width; x++) raw.set(paint(x, y), y * (width * 4 + 1) + 1 + x * 4)
+  }
+  const chunk = (type, data) => {
+    const t = Buffer.from(type)
+    const body = Buffer.concat([t, data])
+    const out = Buffer.alloc(12 + data.length)
+    out.writeUInt32BE(data.length, 0); body.copy(out, 4); out.writeUInt32BE(crc32(body), 8 + data.length)
+    return out
+  }
+  const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(width, 0); ihdr.writeUInt32BE(height, 4); ihdr[8] = 8; ihdr[9] = 6
+  return Buffer.concat([Buffer.from('\x89PNG\r\n\x1a\n', 'binary'), chunk('IHDR', ihdr), chunk('IDAT', deflateSync(raw)), chunk('IEND', Buffer.alloc(0))])
+}
+function avatarPng(seed) {
+  const bg = seed % 2 ? [219, 234, 254] : [254, 226, 226]
+  return png(128, 128, (x, y) => {
+    const dx = x - 64, dy = y - 64
+    const face = dx * dx + dy * dy < 30 * 30
+    const hair = dy < -10 && dx * dx + (dy + 8) * (dy + 8) < 34 * 34
+    const shirt = dy > 28 && Math.abs(dx) < 48
+    return face ? [244, 190, 150, 255] : hair ? [55, 45, 42, 255] : shirt ? [30, 91, 140, 255] : [...bg, 255]
+  })
+}
+function vehiclePng(seed) {
+  const accent = seed % 2 ? [234, 88, 57] : [36, 116, 170]
+  return png(320, 140, (x, y) => {
+    const cab = x > 28 && x < 110 && y > 50 && y < 108
+    const trailer = x >= 110 && x < 285 && y > 30 && y < 108
+    const window = cab && x > 48 && x < 92 && y > 60 && y < 78
+    const wheel = ((x - 80) ** 2 + (y - 111) ** 2 < 16 ** 2) || ((x - 235) ** 2 + (y - 111) ** 2 < 16 ** 2)
+    return wheel ? [35, 35, 40, 255] : window ? [180, 220, 235, 255] : (cab || trailer) ? [...accent, 255] : [235, 242, 248, 255]
+  })
+}
+
+async function ensureDemoCompliance(orgId, driverId, profileId, vehicles) {
+  const { data: profile } = await admin.from('profiles').select('avatar_path').eq('id', profileId).single()
+  if (profile && !profile.avatar_path) {
+    const path = `${profileId}/demo-profile.png`
+    const uploaded = await admin.storage.from('avatars').upload(path, avatarPng(driverId), { contentType: 'image/png', upsert: true })
+    if (!uploaded.error) await must(admin.from('profiles').update({ avatar_path: path }).eq('id', profileId), 'demo avatar path')
+  }
+
+  const { data: driver } = await admin.from('drivers').select('cdl_number, cdl_class, cdl_state, cdl_expiry, med_cert_expiry, endorsements').eq('id', driverId).single()
+  if (driver) {
+    const patch = {}
+    if (!driver.cdl_number) patch.cdl_number = `DEMO-${String(driverId).padStart(5, '0')}`
+    if (!driver.cdl_class) patch.cdl_class = 'A'
+    if (!driver.cdl_state) patch.cdl_state = 'TX'
+    if (!driver.cdl_expiry) patch.cdl_expiry = '2028-06-30'
+    if (!driver.med_cert_expiry) patch.med_cert_expiry = '2027-12-31'
+    if (!driver.endorsements?.length) patch.endorsements = ['T', 'N']
+    if (Object.keys(patch).length) await must(admin.from('drivers').update(patch).eq('id', driverId), 'demo driver compliance fields')
+  }
+
+  const { count: docCount } = await admin.from('driver_documents').select('id', { count: 'exact', head: true }).eq('driver_id', driverId)
+  if (!docCount) {
+    for (const [docType, expiry, suffix] of [['cdl_scan', '2028-06-30', 'cdl'], ['medical_cert', '2027-12-31', 'medical']]) {
+      const path = `${orgId}/drivers/${driverId}/demo-${suffix}.png`
+      const uploaded = await admin.storage.from('documents').upload(path, avatarPng(driverId + suffix.length), { contentType: 'image/png', upsert: true })
+      if (!uploaded.error) await must(admin.from('driver_documents').insert({ driver_id: driverId, carrier_org_id: orgId, doc_type: docType, label: `DEMO ${docType.replace('_', ' ')}`, storage_path: path, expiry_date: expiry, uploaded_by: profileId }), `demo ${docType}`)
+    }
+  }
+
+  for (const vehicle of vehicles) {
+    const { data: current } = await admin.from('vehicles').select('photo_path, license_plate, license_state').eq('id', vehicle.id).single()
+    const vehiclePatch = {}
+    if (!current?.license_plate) vehiclePatch.license_plate = `DEMO${String(vehicle.id).padStart(4, '0')}`
+    if (!current?.license_state) vehiclePatch.license_state = 'TX'
+    if (Object.keys(vehiclePatch).length) await must(admin.from('vehicles').update(vehiclePatch).eq('id', vehicle.id), 'demo vehicle license fields')
+    if (!current?.photo_path) {
+      const path = `${orgId}/vehicles/${vehicle.id}/demo-vehicle.png`
+      const uploaded = await admin.storage.from('documents').upload(path, vehiclePng(vehicle.id), { contentType: 'image/png', upsert: true })
+      if (!uploaded.error) await must(admin.from('vehicles').update({ photo_path: path }).eq('id', vehicle.id), 'demo vehicle photo path')
+    }
+  }
 }
 
 async function nextNumber(orgId, entity, prefix) {
@@ -438,9 +529,10 @@ async function seedPersistentAccounts() {
   await ensureUser('info@shipmentx.com', platformOrgId, 'sx_owner', 'ShipmentX', 'Admin')
 
   const vehicles = await ensureVehicles(sierra.id, [
-    { nickname: 'Freightliner Cascadia', year: 2022, make: 'Freightliner' },
-    { nickname: 'Peterbilt 579', year: 2021, make: 'Peterbilt' },
+    { nickname: 'Freightliner Cascadia', year: 2022, make: 'Freightliner', model: 'Cascadia 126', cab_type: 'sleeper', color: 'Blue' },
+    { nickname: 'Peterbilt 579', year: 2021, make: 'Peterbilt', model: '579', cab_type: 'day_cab', color: 'Red' },
   ])
+  await ensureDemoCompliance(sierra.id, driverId, driverProfileId, vehicles)
   const customerOrgId = await ensureCustomer(sierra.id, { name: 'Sierra Steel Fabricators', city: 'Dallas', state: 'TX' })
   const loads = await ensureLoads(sierra.id, customerOrgId, driverId, vehicles[0]?.id, [
     { status: 'invoiced', pickupDate: dateOnly(daysAgo(6)), deliveryDate: dateOnly(daysAgo(5)), createdAt: daysAgo(6) },
@@ -463,6 +555,7 @@ async function seedExtraOrg({ name, carrierDetails, loadStatuses, driverName }) 
   const driverProfileId = await ensureUser(`${slug}-driver@demo.carrieros.dev`, org.id, 'driver', driverName[0], driverName[1])
   const driverId = await ensureDriver(org.id, driverProfileId)
   const vehicles = await ensureVehicles(org.id, [{ nickname: `${name} Truck 1`, year: 2020, make: 'Kenworth' }])
+  await ensureDemoCompliance(org.id, driverId, driverProfileId, vehicles)
   const customerOrgId = await ensureCustomer(org.id, { name: `${name} Shipper Co`, city: 'Fort Worth', state: 'TX' })
   const loads = await ensureLoads(
     org.id,
@@ -508,7 +601,8 @@ async function main() {
   // Pipeline's "upgrade candidate" needs a SECOND active driver, not just
   // load volume, to also demonstrate that branch of the OR condition.
   const bluepeakSecondDriverProfileId = await ensureUser('bluepeak-carriers-driver2@demo.carrieros.dev', bluepeak.orgId, 'driver', 'Second', 'Driver')
-  await ensureDriver(bluepeak.orgId, bluepeakSecondDriverProfileId)
+  const bluepeakSecondDriverId = await ensureDriver(bluepeak.orgId, bluepeakSecondDriverProfileId)
+  await ensureDemoCompliance(bluepeak.orgId, bluepeakSecondDriverId, bluepeakSecondDriverProfileId, [])
   await ensureInvoices(bluepeak.orgId, bluepeak.loads)
 
   await seedExtraOrg({

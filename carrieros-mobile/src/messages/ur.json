@@ -347,7 +347,8 @@
     "timeFormatSection": "وقت کی شکل",
     "time12h": "12 گھنٹے (2:30 PM)",
     "time24h": "24 گھنٹے (14:30)",
-    "businessSection": "کاروبار"
+    "businessSection": "کاروبار",
+    "photoSection": "پروفائل تصویر", "photoTitle": "اپنی ٹیم کو آپ کو پہچاننے میں مدد دیں", "photoSubtitle": "کیمرے یا لائبریری سے تصویر شامل کریں۔", "changePhoto": "تصویر منتخب کریں", "photoSource": "پروفائل تصویر", "takePhoto": "تصویر لیں", "choosePhoto": "لائبریری سے منتخب کریں", "cameraDenied": "کیمرے کی اجازت درکار ہے۔", "libraryDenied": "تصاویر کی اجازت درکار ہے۔", "photoReadFailed": "تصویر پڑھی نہیں جا سکی۔"
   },
   "tabs": {
     "home": "ہوم",
