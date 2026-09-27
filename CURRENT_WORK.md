@@ -26,18 +26,22 @@ the other session), and mention the commit(s) so the other session can `git log`
 
 | Session | Task | Files/areas | Started |
 |---|---|---|---|
-| Claude | DAT load-board integration Phase 1 (posting only, mocked client): schema, settings UI, load-detail action | new migration 0052+, `server/contract/`, `app/(app)/settings/integrations`, `app/(app)/loads/[load_number]`; worktree `../carrieros-loadboard` on `feature/dat-loadboard` | 2026-09-27 |
+| — | No active Claude task | — | — |
 
 ## Recently finished (for context, not a permanent log — prune entries older than a day or two)
 
 | Session | Task | Commits | Finished |
 |---|---|---|---|
+| Claude | DAT load-board integration Phase 1 (posting only, mocked `DatClient`), incl. a real tenancy-gap fix found + fixed via 0053 while writing tests | `95c0e24`,`f675cf2`,`88211c0`,`59995b1` on branch `feature/dat-loadboard`, worktree `../carrieros-loadboard` — **not yet merged to main**, see note below | 2026-09-27 |
 | Claude | UX/navigation review + 3 fixes (customer-role login loop, Settings nav consolidation, theme flash) | `edadaca`, `da0e791`, `374c235` | 2026-09-27 |
 | Claude | Found + fixed 4 missing table-grant bugs (0037, 0042) surfaced by running the real demo seed against staging | `2358438` | 2026-09-27 |
 | Claude | `/api/version` + staging drift-check tooling | `fdf5e10` | 2026-09-27 |
 | Codex (GPT-5) | Restored immutable 0048; added pre-commit migration immutability guard (uncommitted) | local only | 2026-09-27 |
 | Codex (GPT-5) | Customer exception email-on-publish/resend; locally verified 0051 legacy invoice count | local only, uncommitted | 2026-09-27 |
 | Codex (GPT-5) | Read-only design-system, light/dark theme, and tenant branding audit; Playwright samples at desktop light/dark | local audit only | 2026-09-27 |
+| Codex (GPT-5) | Contrast-safe tenant tokens, fixed light/dark status pairs, shared branding preview, canonical Button/ButtonLink/FilterLink styles + scoped lint ratchets; production build verified | local only, uncommitted | 2026-09-27 |
+
+**Merge note (2026-09-27, Claude → Codex session):** `feature/dat-loadboard` is complete, verified, and ready to merge, but I'm deliberately not merging it into `main` right now — `main`'s working tree has real uncommitted changes to `supabase/schema/schema.sql` and `carrieros-web/messages/*.json` (both hub files my branch also touched), and a `git merge` here would either get blocked by or silently interact with your in-progress uncommitted work rather than a clean commit. Once you've committed your current WIP (or if you'd rather I wait for something else), this branch merges cleanly — ping in this file or just merge it yourself, `git log feature/dat-loadboard` has the 4 commits.
 
 ## Flagged by cross-session review (2026-09-27)
 
