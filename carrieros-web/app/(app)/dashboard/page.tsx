@@ -8,7 +8,6 @@ import DriverView from './DriverView'
 import DispatcherView from './DispatcherView'
 import FinanceView from './FinanceView'
 import { getProfileForUser } from '@/lib/queries/profiles'
-import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -30,10 +29,16 @@ export default async function DashboardPage() {
   // sx_support ShipmentX roles, and pre-existing: customer_admin/
   // customer_viewer) silently rendered a blank page body below the header,
   // no error anywhere. `hasKnownView` makes the missing case visible instead.
-  // `dashboard` is exactly "which roles have a dashboard" in the generated
-  // role_capabilities table — the same capability proxy.ts guards
-  // /dashboard with, so the two cannot disagree about this case.
-  const hasKnownView = roleHasCapability(role, 'dashboard')
+  //
+  // Deliberately NOT roleHasCapability(role, 'dashboard') (migration 0048's lesson): that capability
+  // only answers "may this role reach /dashboard at all" (proxy.ts's route guard -- customer_admin/
+  // customer_viewer now legitimately hold it so they don't infinite-redirect-loop on login) -- it says
+  // nothing about whether a View component below actually exists for the role. Conflating the two
+  // meant granting them the capability made hasKnownView true with no matching view, silently
+  // suppressing this exact fallback message again. This list is the one true source for "does a real
+  // view exist", independent of the route-guard capability.
+  const ROLES_WITH_VIEW = ['owner', 'solo', 'driver', 'dispatcher', 'finance']
+  const hasKnownView = ROLES_WITH_VIEW.includes(role)
 
   return (
     <div>

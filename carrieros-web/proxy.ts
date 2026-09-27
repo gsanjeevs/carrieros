@@ -15,6 +15,13 @@ const ROLE_HOME: Record<string, string> = {
   sx_owner:   '/admin',
   sx_finance: '/admin',
   sx_support: '/admin',
+  // Migration 0048: these two previously had no entry here AND held the
+  // `dashboard` capability required by '/dashboard' -- the fallback default
+  // (also '/dashboard') then failed its own capability check and bounced back
+  // to itself, an infinite loop. Explicit here so it's clearly intentional,
+  // not just relying on the default matching by coincidence.
+  customer_admin:  '/dashboard',
+  customer_viewer: '/dashboard',
 }
 
 // Routes that require a specific minimum role, expressed as the

@@ -415,7 +415,17 @@ INSERT INTO role_capabilities (role, capability) VALUES
   ('sx_support', 'admin_impersonate'),
   -- Migration 0028: fix-forward capability for staffing ShipmentX's own carrieros_support queue
   -- (decisions.md T16) -- sx_owner/sx_support only, matching 0027's RLS policies; NOT sx_finance.
-  ('sx_support', 'admin_support');
+  ('sx_support', 'admin_support'),
+  -- Migration 0048: these two intentionally got zero rows at 0009 ("today's code has no defined
+  -- behavior for them either... denied by default is the honest current state") -- but proxy.ts's
+  -- redirect logic assumes every authenticated role reaches SOME capability-gated page, so zero
+  -- capabilities meant an infinite redirect loop (ROLE_HOME default '/dashboard' -> denied, no
+  -- ROLE_HOME entry -> '/dashboard' again), not just "no view", confirmed live 2026-09-27. `dashboard`
+  -- only, so they land on the already-built noViewForRole fallback message
+  -- (app/(app)/dashboard/page.tsx) instead -- not a real customer-portal experience, which is
+  -- separate, larger feature work.
+  ('customer_admin',  'dashboard'),
+  ('customer_viewer', 'dashboard');
 
 -- Language reference/display data — NOT a foreign key, profiles.preferred_language
 -- and carrier_details.default_language keep their own CHECKs. native_name IS the
