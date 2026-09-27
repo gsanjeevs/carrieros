@@ -20,6 +20,7 @@ import type { OAuthClientSummary } from '../domain/oauth/model'
 import type { OnboardingDraft } from '../domain/onboarding/draft'
 import type { LoadAssignmentPatch } from '../domain/load/write'
 import type { WebhookDeliveryRecord, WebhookSummary } from '../domain/webhooks/model'
+import type { TelematicsIntegrationSummary, TelematicsProvider } from '../domain/telematics/model'
 
 // ── Cross-cutting ───────────────────────────────────────────────────────────
 
@@ -561,6 +562,15 @@ export interface CreateVehicleInput {
   readonly cabType?: string | null
   readonly color?: string | null
   readonly dimensions?: string | null
+  // NOTE: named snake_case (not camelCase like the rest of this interface) deliberately —
+  // app/api/v1/vehicles/[id]/route.ts passes UpdateVehicleBodySchema's parsed body straight through
+  // as this type without a camelCase mapping step (same passthrough the pre-existing licensePlate/
+  // licenseState/cabType fields above rely on, which only actually work today because a
+  // single-word field name is spelled identically in snake_case and camelCase — a latent bug for
+  // the multi-word fields, out of scope here). Matching the real snake_case shape here is what
+  // makes setup-repository.ts's `key in input` lookup for these two fields actually fire.
+  readonly telematics_provider?: 'samsara' | 'motive' | null
+  readonly telematics_device_id?: string | null
 }
 
 export type UpdateVehicleInput = Partial<CreateVehicleInput>
@@ -1113,4 +1123,25 @@ export interface WebhookDeliveryWriter {
     responseStatus: number | null
   }): Promise<Result<number>>
 
+}
+
+// ── Telematics (migration 0042) ──────────────────────────────────────────────
+// Settings > Integrations > Telematics: one row per (org, provider) vendor
+// credential. The RLS-scoped caller's own session (owner/solo) has direct
+// table access, same posture as WebhookRepository above -- no cross-tenant
+// boundary to cross, so no RPC/service-role indirection is needed here either.
+
+export interface TelematicsIntegrationRepository {
+  listForOrg(actor: ActorContext): Promise<Result<readonly TelematicsIntegrationSummary[]>>
+  /**
+   * Upserts the org's row for `provider`. `apiKey`/`webhookSecret` are ALREADY app-layer encrypted
+   * (lib/crypto/secrets.ts) by the caller (TelematicsIntegrationService) before this repository ever
+   * sees them -- undefined leaves the stored credential untouched, null clears it, a string
+   * (re)sets it. Only the field matching `provider` is ever meaningful; the service enforces that.
+   */
+  upsert(
+    actor: ActorContext,
+    provider: TelematicsProvider,
+    patch: { apiKeyEncrypted?: string | null; webhookSecretEncrypted?: string | null; enabled?: boolean }
+  ): Promise<Result<TelematicsIntegrationSummary>>
 }

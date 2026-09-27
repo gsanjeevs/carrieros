@@ -13,11 +13,12 @@ import { createClient } from '@/lib/supabase/server'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { roleHasCapability } from '@/lib/generated/role-capabilities'
 import { buildActorContext } from '@/server/infrastructure/supabase/actor-context'
-import { createWebhookService } from '@/server/composition'
+import { createWebhookService, createTelematicsIntegrationService } from '@/server/composition'
 import { formatDate } from '@/lib/format-datetime'
 import { Callout, Card, EmptyState, StatusBadge, Table, TableCell, TableHeaderCell, TableRow } from '@/components/ui'
 import CreateWebhookButton from './CreateWebhookButton'
 import WebhookActions from './WebhookActions'
+import TelematicsSection from './TelematicsSection'
 
 export default async function IntegrationsPage() {
   const supabase = await createClient()
@@ -35,6 +36,11 @@ export default async function IntegrationsPage() {
   // treated as "no webhooks" rather than a crash, since the redirect above already covers the real case.
   const webhooks = actor.ok ? await createWebhookService(supabase).list(actor.value) : null
   const rows = webhooks?.ok ? webhooks.value : []
+
+  const telematics = actor.ok ? await createTelematicsIntegrationService(supabase).list(actor.value) : null
+  const telematicsRows = telematics?.ok
+    ? telematics.value.map((i) => ({ provider: i.provider, enabled: i.enabled, credentialConfigured: i.credentialConfigured }))
+    : []
 
   return (
     <div className="p-8 max-w-4xl">
@@ -84,6 +90,8 @@ export default async function IntegrationsPage() {
           </Table>
         )}
       </Card>
+
+      <TelematicsSection integrations={telematicsRows} orgId={profile.org_id} />
     </div>
   )
 }

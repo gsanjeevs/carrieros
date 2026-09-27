@@ -33,6 +33,8 @@ const CAB_TYPES = ['sleeper', 'day_cab', 'other'] as const
 
 const labelCls = 'block text-xs font-medium text-text-sec mb-1.5'
 
+const TELEMATICS_PROVIDERS = ['samsara', 'motive'] as const
+
 export type EditVehicleInitial = {
   id: number
   nickname: string | null
@@ -45,6 +47,8 @@ export type EditVehicleInitial = {
   cab_type: string | null
   color: string | null
   dimensions: string | null
+  telematics_provider: string | null
+  telematics_device_id: string | null
 }
 
 function toForm(v: EditVehicleInitial) {
@@ -59,6 +63,8 @@ function toForm(v: EditVehicleInitial) {
     cab_type: v.cab_type ?? '',
     color: v.color ?? '',
     dimensions: v.dimensions ?? '',
+    telematics_provider: v.telematics_provider ?? '',
+    telematics_device_id: v.telematics_device_id ?? '',
   }
 }
 
@@ -114,6 +120,10 @@ export default function EditVehicleButton({ vehicle }: { vehicle: EditVehicleIni
           cab_type: form.cab_type || undefined,
           color: form.color || undefined,
           dimensions: form.dimensions.trim() || undefined,
+          // Explicit null clears registration (provider deselected); omitted (undefined) leaves it
+          // untouched when neither telematics field changed.
+          telematics_provider: form.telematics_provider ? form.telematics_provider : null,
+          telematics_device_id: form.telematics_provider ? (form.telematics_device_id.trim() || undefined) : null,
         }),
       })
       const json = await res.json()
@@ -146,7 +156,12 @@ export default function EditVehicleButton({ vehicle }: { vehicle: EditVehicleIni
             <Button variant="secondary" size="sm" onClick={close} disabled={loading}>
               {tCommon('cancel')}
             </Button>
-            <Button size="sm" onClick={submit} disabled={loading || !form.nickname} loading={loading}>
+            <Button
+              size="sm"
+              onClick={submit}
+              disabled={loading || !form.nickname || (!!form.telematics_provider && !form.telematics_device_id.trim())}
+              loading={loading}
+            >
               {loading ? t('saving') : tCommon('save')}
             </Button>
           </>
@@ -253,6 +268,34 @@ export default function EditVehicleButton({ vehicle }: { vehicle: EditVehicleIni
               })}
             </div>
           </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>{t('telematicsProvider')}</label>
+              <Input
+                as="select"
+                value={form.telematics_provider}
+                onChange={e => setForm(f => ({ ...f, telematics_provider: e.target.value, telematics_device_id: e.target.value ? f.telematics_device_id : '' }))}
+              >
+                <option value="">{t('telematicsProviderNone')}</option>
+                {TELEMATICS_PROVIDERS.map(p => (
+                  <option key={p} value={p}>{t(`telematicsProvider_${p}` as never)}</option>
+                ))}
+              </Input>
+            </div>
+            <div>
+              <label className={labelCls}>{t('telematicsDeviceId')}{form.telematics_provider ? ' *' : ''}</label>
+              <Input
+                placeholder={t('telematicsDeviceIdPlaceholder')}
+                value={form.telematics_device_id}
+                disabled={!form.telematics_provider}
+                onChange={e => set('telematics_device_id', e.target.value)}
+              />
+            </div>
+          </div>
+          {form.telematics_provider && (
+            <p className="text-xs text-text-mut -mt-2">{t('telematicsDeviceIdHint')}</p>
+          )}
 
           {error && (
             <div className="rounded-lg bg-danger/10 border border-danger/20 px-4 py-3 text-danger text-sm">

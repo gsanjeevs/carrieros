@@ -3,24 +3,30 @@
 // Leaflet touches `window` at import time — must load client-only, never
 // during the server render pass.
 //
-// Live updates (2026-09-26): subscribes to Postgres Changes UPDATE events on
-// `loads`, filtered to this org, so a pin's position moves the moment the
-// driver's phone (share-location-section.tsx) writes a new
-// last_location_lat/lng/last_location_at — no page reload needed. Requires
-// `loads` to be in the `supabase_realtime` publication (migration 0041; it
-// wasn't, before this feature — see that migration's header comment). RLS
-// still applies to the payload exactly as it does to a normal SELECT, same
-// posture DriverMessageThread.tsx already documents for driver_messages.
+// Live updates: subscribes to Postgres Changes on TWO tables, filtered to
+// this org, merging both into one DispatchMapPin list (components/DispatchMap.tsx):
+//   - `loads` UPDATE — a driver's phone GPS ping (migration 0041).
+//   - `vehicle_locations` INSERT/UPDATE — real telematics (migration 0042;
+//     Motive webhook receiver / Samsara poller). This is what makes an idle
+//     truck (no active load) start showing up live, not just at page load.
+// Both require their table in the `supabase_realtime` publication (0041 for
+// `loads`, 0042 for `vehicle_locations`). RLS still applies to the payload
+// exactly as it does to a normal SELECT, same posture already documented for
+// driver_messages/loads.
 //
-// A load leaving the active-status set (delivered, etc.) is removed from the
-// map; a load newly entering it (e.g. just got dispatched with a location
-// already on file) is added — both derived from the same UPDATE payload,
-// not a second query.
-import { useEffect, useState } from 'react'
+// Precedence when a vehicle has both a load pin and a vehicle pin: same rule
+// as the server's initial query, applied continuously via dedupeByVehicle()
+// on every render — whichever pin has the more recent lastLocationAt wins,
+// not a fixed source priority. Each realtime event only ever upserts its OWN
+// candidate pin (load-<id> or vehicle-<vehicleId>) into local state; the
+// final dedupe pass right before rendering is what resolves which one
+// actually gets drawn, so an out-of-order or slow-to-arrive event from one
+// source can never permanently clobber a fresher reading from the other.
+import { useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
-import type { DispatchMapLoad } from '@/components/DispatchMap'
+import { dedupeByVehicle, type DispatchMapPin } from '@/components/DispatchMap'
 
 const ACTIVE_STATUSES = new Set(['dispatched', 'picked_up', 'in_transit'])
 
@@ -42,13 +48,24 @@ type LoadLocationRow = {
   id: number
   load_number: string
   status: string
+  vehicle_id: number | null
   last_location_lat: number | string | null
   last_location_lng: number | string | null
   last_location_at: string | null
 }
 
-export default function DispatchMapClient({ loads, locale, orgId }: { loads: DispatchMapLoad[]; locale: string; orgId: number }) {
-  const [mapLoads, setMapLoads] = useState(loads)
+type VehicleLocationRow = {
+  id: number
+  vehicle_id: number
+  carrier_org_id: number
+  lat: number | string
+  lng: number | string
+  recorded_at: string
+  source: string
+}
+
+export default function DispatchMapClient({ pins, locale, orgId }: { pins: DispatchMapPin[]; locale: string; orgId: number }) {
+  const [rawPins, setRawPins] = useState(pins)
   // DispatchMap derives each pin's live/stale badge from `now`, not by calling
   // Date.now() itself during render (impure, react-hooks/purity flags it) --
   // with no state changing otherwise, nothing would ever re-render it as time
@@ -73,22 +90,56 @@ export default function DispatchMapClient({ loads, locale, orgId }: { loads: Dis
           const row = payload.new as LoadLocationRow
           const hasLocation = row.last_location_lat != null && row.last_location_lng != null && row.last_location_at != null
           const isActive = ACTIVE_STATUSES.has(row.status)
+          const id = `load-${row.id}`
 
-          setMapLoads((prev) => {
-            if (!hasLocation || !isActive) return prev.filter((l) => l.id !== row.id)
-            const updated: DispatchMapLoad = {
-              id: row.id,
-              loadNumber: row.load_number,
+          setRawPins((prev) => {
+            if (!hasLocation || !isActive) return prev.filter((p) => p.id !== id)
+            const updated: DispatchMapPin = {
+              id,
+              kind: 'load',
+              vehicleId: row.vehicle_id,
+              label: row.load_number,
               status: row.status,
               // driverName isn't in this payload (Realtime sends the raw row, no joins) — keep
               // whatever the last known name was rather than blanking it out on every location tick.
-              driverName: prev.find((l) => l.id === row.id)?.driverName ?? null,
+              driverName: prev.find((p) => p.id === id)?.driverName ?? null,
               lat: Number(row.last_location_lat),
               lng: Number(row.last_location_lng),
               lastLocationAt: row.last_location_at as string,
+              source: 'phone',
             }
-            const exists = prev.some((l) => l.id === row.id)
-            return exists ? prev.map((l) => (l.id === row.id ? updated : l)) : [...prev, updated]
+            const exists = prev.some((p) => p.id === id)
+            return exists ? prev.map((p) => (p.id === id ? updated : p)) : [...prev, updated]
+          })
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'vehicle_locations', filter: `carrier_org_id=eq.${orgId}` },
+        (payload) => {
+          const row = payload.new as VehicleLocationRow
+          const id = `vehicle-${row.vehicle_id}`
+          const source = row.source === 'samsara' || row.source === 'motive' ? row.source : 'phone'
+
+          setRawPins((prev) => {
+            const existing = prev.find((p) => p.id === id)
+            const updated: DispatchMapPin = {
+              id,
+              kind: 'vehicle',
+              vehicleId: row.vehicle_id,
+              // No vehicle nickname/number in this payload (raw row, no join) — keep whatever label
+              // was already known (from the initial server query, or a prior ping) rather than
+              // showing a blank one; a brand-new never-before-seen vehicle falls back to its id.
+              label: existing?.label ?? `#${row.vehicle_id}`,
+              status: existing?.status ?? 'active',
+              driverName: null,
+              lat: Number(row.lat),
+              lng: Number(row.lng),
+              lastLocationAt: row.recorded_at,
+              source,
+            }
+            const exists = prev.some((p) => p.id === id)
+            return exists ? prev.map((p) => (p.id === id ? updated : p)) : [...prev, updated]
           })
         }
       )
@@ -99,5 +150,7 @@ export default function DispatchMapClient({ loads, locale, orgId }: { loads: Dis
     }
   }, [orgId])
 
-  return <DispatchMap loads={mapLoads} locale={locale} now={now} />
+  const dedupedPins = useMemo(() => dedupeByVehicle(rawPins), [rawPins])
+
+  return <DispatchMap pins={dedupedPins} locale={locale} now={now} />
 }

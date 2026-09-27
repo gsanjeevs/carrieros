@@ -564,6 +564,8 @@ export default async function VehicleDetailPage({
                   cab_type: vehicle.cab_type,
                   color: vehicle.color,
                   dimensions: vehicle.dimensions,
+                  telematics_provider: vehicle.telematics_provider,
+                  telematics_device_id: vehicle.telematics_device_id,
                 }}
               />
             </div>

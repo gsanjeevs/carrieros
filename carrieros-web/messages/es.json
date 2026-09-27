@@ -453,6 +453,13 @@
     "color": "Color",
     "dimensions": "Dimensiones",
     "dimensionsPlaceholder": "p. ej. 53 pies x 8.5 pies",
+    "telematicsProvider": "Proveedor de telemática",
+    "telematicsProviderNone": "Ninguno (solo GPS del teléfono)",
+    "telematicsProvider_samsara": "Samsara",
+    "telematicsProvider_motive": "Motive",
+    "telematicsDeviceId": "ID del dispositivo de telemática",
+    "telematicsDeviceIdPlaceholder": "ID del vehículo del proveedor",
+    "telematicsDeviceIdHint": "El ID del vehículo tal como está registrado con el proveedor de telemática seleccionado.",
     "type": "Tipo",
     "details": "Detalles",
     "tab_details": "Detalles",
@@ -689,16 +696,17 @@
   },
   "dispatch": {
     "title": "Despacho",
-    "subtitle": "{count, plural, =0 {Sin cargas activas en el mapa} one {# carga activa en el mapa} other {# cargas activas en el mapa}}",
+    "subtitle": "{count, plural, =0 {Ningún camión en el mapa} one {# camión en el mapa} other {# camiones en el mapa}}",
     "upgradeRequired": "El mapa de despacho en vivo requiere el plan Growth o superior.",
-    "noActiveLocations": "Ninguna carga activa ha compartido su ubicación todavía.",
+    "noActiveLocations": "Ningún camión tiene una ubicación compartida o de telemática todavía.",
     "queueTitle": "Necesita Despacho",
     "noQueue": "No hay nada esperando ser despachado.",
     "dispatchAction": "Despachar →",
     "dispatchModalTitle": "Despachar {loadNumber}",
     "loadingMap": "Cargando mapa…",
     "locationStale": "⚠ Sin actualización en más de 15 min",
-    "locationLive": "● En vivo"
+    "locationLive": "● En vivo",
+    "idleVehicleBadge": "inactivo, sin carga activa"
   },
   "settings": {
     "title": "Configuración de perfil",
@@ -1504,5 +1512,27 @@
     "noDeliveries": "Aún no hay entregas",
     "emptyTitle": "Aún no hay webhooks",
     "emptyDescription": "Registra un webhook para que CarrierOS notifique a otra aplicación cuando cambie el estado de una carga o se pague una factura."
+  },
+  "telematics": {
+    "title": "Telemática",
+    "subtitle": "Conecta un proveedor de GPS/telemática para que la posición del vehículo provenga de hardware real, no solo del teléfono del conductor — y para que los camiones inactivos sin carga activa sigan apareciendo en el mapa de despacho.",
+    "samsaraTitle": "Samsara",
+    "samsaraDescription": "Se consulta periódicamente la última posición de cada vehículo (Samsara no envía GPS continuo por webhook).",
+    "motiveTitle": "Motive",
+    "motiveDescription": "Tiempo real — Motive envía la ubicación de cada vehículo a la URL de webhook a continuación en tiempo real.",
+    "enabled": "Habilitado",
+    "apiKeyLabel": "Clave API (token Bearer)",
+    "apiKeyPlaceholder": "Ingrese para establecer o rotar",
+    "apiKeyConfigured": "Hay una clave configurada. Déjelo en blanco para mantenerla, o ingrese una nueva para rotarla.",
+    "apiKeyNotConfigured": "Aún no hay ninguna clave configurada.",
+    "webhookSecretLabel": "Secreto de firma del webhook",
+    "webhookSecretPlaceholder": "Ingrese para establecer o rotar",
+    "webhookSecretConfigured": "Hay un secreto configurado. Déjelo en blanco para mantenerlo, o ingrese uno nuevo para rotarlo.",
+    "webhookSecretNotConfigured": "Aún no hay ningún secreto configurado.",
+    "webhookUrlLabel": "URL del webhook",
+    "webhookUrlHelp": "Pegue esto en la configuración de webhook del panel de Motive, usando el MISMO secreto ingresado abajo para firmar las solicitudes.",
+    "save": "Guardar",
+    "saved": "Guardado",
+    "credentialRequired": "Ingrese una credencial para configurar esto por primera vez."
   }
 }

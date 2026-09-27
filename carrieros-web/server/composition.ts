@@ -378,3 +378,16 @@ export function createWebhookDispatchService(): WebhookDispatchService {
     deliveries: new SupabaseWebhookDeliveryWriter(admin),
   })
 }
+
+// Settings > Integrations > Telematics -- same RLS-scoped-by-caller posture as
+// createWebhookService above (owner_solo_telematics_integrations_all grants
+// owner/solo direct tenant-scoped access, no service-role indirection needed
+// for this CRUD surface). The Motive webhook receiver and Samsara poller use
+// their own service-role admin-client queries directly (no caller session to
+// scope by), not this service.
+import { TelematicsIntegrationService } from './application/telematics-service'
+import { SupabaseTelematicsIntegrationRepository } from './infrastructure/supabase/telematics-repository'
+
+export function createTelematicsIntegrationService(supabase: SupabaseClient<Database>): TelematicsIntegrationService {
+  return new TelematicsIntegrationService({ integrations: new SupabaseTelematicsIntegrationRepository(supabase) })
+}

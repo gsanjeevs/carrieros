@@ -36,6 +36,8 @@ let vehicleAId: number
 let driverAId: number
 let dvirAId: number
 let maintenanceReminderAId: number
+let telematicsIntegrationAId: number
+let vehicleLocationAId: number
 let vehicleDocAId: number
 let customerContactAId: number
 
@@ -93,6 +95,25 @@ beforeAll(async () => {
     .select('id')
     .single()
   maintenanceReminderAId = Number(reminder!.id)
+
+  // telematics_integrations (0042 "owner_solo_telematics_integrations_all": ALL requires
+  // carrier_org_id = my_org_id() AND my_role() IN ('owner','solo') -- no separate broader-role
+  // SELECT policy, same posture as webhooks).
+  const { data: telematicsIntegration } = await admin
+    .from('telematics_integrations')
+    .insert({ carrier_org_id: orgA.orgId, provider: 'samsara', api_key_encrypted: 'test-ciphertext' })
+    .select('id')
+    .single()
+  telematicsIntegrationAId = Number(telematicsIntegration!.id)
+
+  // vehicle_locations (0042 "carrier_vehicle_locations_select": SELECT requires carrier_org_id =
+  // my_org_id(), same shape as carrier_vehicles_select -- no role restriction beyond org match).
+  const { data: vehicleLocation } = await admin
+    .from('vehicle_locations')
+    .insert({ carrier_org_id: orgA.orgId, vehicle_id: vehicleAId, lat: 39.1, lng: -94.6, recorded_at: new Date().toISOString(), source: 'samsara' })
+    .select('id')
+    .single()
+  vehicleLocationAId = Number(vehicleLocation!.id)
 
   // vehicle_documents (0001 L898 + 0022 L246 "carrier_vehicle_docs_select":
   // SELECT requires carrier_org_id = my_org_id()).
@@ -271,6 +292,35 @@ describe('cross-tenant isolation — org B cannot see org A data', () => {
     expect(data).toEqual([])
     const { data: stillIntact } = await admin.from('maintenance_reminders').select('reminder_type').eq('id', maintenanceReminderAId).single()
     expect(stillIntact?.reminder_type).toBe('oil_change')
+  })
+
+  // telematics_integrations: owner_solo_telematics_integrations_all (ALL) gates on carrier_org_id =
+  // my_org_id() AND my_role() IN ('owner','solo'). userB is an owner of orgB, so this specifically
+  // exercises that the org check (not just the role check) is what's blocking access.
+  it('telematics_integrations: org B session sees zero rows for org A integration', async () => {
+    const { data, error } = await sessionB.client.from('telematics_integrations').select('id').eq('id', telematicsIntegrationAId)
+    expect(error).toBeNull()
+    expect(data).toEqual([])
+  })
+
+  it('telematics_integrations: org B session cannot update org A integration', async () => {
+    const { data, error } = await sessionB.client
+      .from('telematics_integrations')
+      .update({ enabled: false })
+      .eq('id', telematicsIntegrationAId)
+      .select()
+    expect(error).toBeNull()
+    expect(data).toEqual([])
+    const { data: stillIntact } = await admin.from('telematics_integrations').select('enabled').eq('id', telematicsIntegrationAId).single()
+    expect(stillIntact?.enabled).toBe(true)
+  })
+
+  // vehicle_locations: carrier_vehicle_locations_select (SELECT only -- all writes are service_role,
+  // from the Motive webhook receiver / Samsara poller, neither of which has a caller session).
+  it('vehicle_locations: org B session sees zero rows for org A vehicle location', async () => {
+    const { data, error } = await sessionB.client.from('vehicle_locations').select('id').eq('id', vehicleLocationAId)
+    expect(error).toBeNull()
+    expect(data).toEqual([])
   })
 
   // vehicle_documents: carrier_vehicle_docs_select (SELECT) and

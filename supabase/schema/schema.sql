@@ -641,6 +641,10 @@ CREATE TABLE vehicles (
   -- Vehicle photo (2026-07-21, decisions.md S10) -- both mobile (DVIR-flow
   -- capture) and web (simple upload) surfaces write here.
   photo_path      TEXT,
+  -- Telematics device registration (migration 0042) -- which vendor (if any) reports this vehicle's
+  -- GPS position, and that vendor's own id for it. See migration 0042's header comment.
+  telematics_provider  TEXT CHECK (telematics_provider IN ('samsara','motive')),
+  telematics_device_id TEXT,
   created_at      TIMESTAMPTZ DEFAULT now()
 );
 
@@ -5283,6 +5287,68 @@ CREATE POLICY "owner_solo_webhook_deliveries_select" ON webhook_deliveries FOR S
 COMMENT ON TABLE webhooks IS 'Org-registered outbound webhook endpoints (Settings > Integrations). First real webhook infra in this codebase.';
 COMMENT ON TABLE webhook_deliveries IS 'Delivery attempt log for webhooks — observability + bounded inline retry, no external job queue.';
 
+-- ────────────────────────────────────────────────────────────────────────────
+-- TELEMATICS (migration 0042) — real Samsara + Motive integration. Settings >
+-- Integrations > Telematics stores per-org vendor credentials;
+-- vehicle_locations is the normalized location-ping table any vendor (or the
+-- existing loads.last_location_* phone-GPS path) can feed. See migration
+-- 0042's header comment for the full rationale.
+-- ────────────────────────────────────────────────────────────────────────────
+CREATE TABLE telematics_integrations (
+  id                        BIGSERIAL PRIMARY KEY,
+  carrier_org_id            BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  provider                  TEXT NOT NULL CHECK (provider IN ('samsara','motive')),
+  api_key_encrypted         TEXT,
+  webhook_secret_encrypted  TEXT,
+  enabled                   BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at                TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at                TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_by                UUID REFERENCES profiles(id) ON DELETE SET NULL,
+
+  CONSTRAINT telematics_integrations_org_provider_unique UNIQUE (carrier_org_id, provider),
+  CONSTRAINT telematics_integrations_credential_matches_provider CHECK (
+    (provider = 'samsara' AND api_key_encrypted IS NOT NULL AND webhook_secret_encrypted IS NULL)
+    OR (provider = 'motive' AND webhook_secret_encrypted IS NOT NULL AND api_key_encrypted IS NULL)
+  )
+);
+
+CREATE INDEX telematics_integrations_carrier_org_id_idx ON telematics_integrations(carrier_org_id);
+
+CREATE TRIGGER telematics_integrations_updated_at
+  BEFORE UPDATE ON telematics_integrations FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+COMMENT ON TABLE telematics_integrations IS 'One row per (carrier_org_id, provider) telematics vendor credential (Settings > Integrations > Telematics). Credentials are app-layer AES-256-GCM encrypted (lib/crypto/secrets.ts), same posture as ai_provider_config -- never plaintext at rest, never returned by any GET route.';
+
+ALTER TABLE telematics_integrations ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "owner_solo_telematics_integrations_all" ON telematics_integrations FOR ALL USING (
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
+) WITH CHECK (
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo')
+);
+
+CREATE TABLE vehicle_locations (
+  id              BIGSERIAL PRIMARY KEY,
+  vehicle_id      BIGINT NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
+  carrier_org_id  BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  lat             DOUBLE PRECISION NOT NULL,
+  lng             DOUBLE PRECISION NOT NULL,
+  recorded_at     TIMESTAMPTZ NOT NULL,
+  source          TEXT NOT NULL CHECK (source IN ('samsara','motive')),
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX vehicle_locations_vehicle_id_recorded_at_idx ON vehicle_locations(vehicle_id, recorded_at DESC);
+CREATE INDEX vehicle_locations_carrier_org_id_idx ON vehicle_locations(carrier_org_id);
+
+COMMENT ON TABLE vehicle_locations IS 'Normalized telematics location pings, vehicle-scoped (not load-scoped) -- lets an idle vehicle with no active load still show a live position on the dispatch map.';
+
+ALTER TABLE vehicle_locations ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "carrier_vehicle_locations_select" ON vehicle_locations FOR SELECT USING (
+  carrier_org_id = my_org_id()
+);
+
 -- ── Realtime publication (migration 0041) ────────────────────────────────
 -- loads/driver_messages Postgres Changes subscriptions (dispatch map,
 -- driver chat) only actually deliver events once their table is in this
@@ -5297,3 +5363,5 @@ END $$;
 
 ALTER PUBLICATION supabase_realtime ADD TABLE loads;
 ALTER PUBLICATION supabase_realtime ADD TABLE driver_messages;
+-- vehicle_locations (migration 0042) -- idle-truck telematics pins on the dispatch map.
+ALTER PUBLICATION supabase_realtime ADD TABLE vehicle_locations;

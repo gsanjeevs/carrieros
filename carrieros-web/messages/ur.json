@@ -453,6 +453,13 @@
     "color": "رنگ",
     "dimensions": "طول و عرض",
     "dimensionsPlaceholder": "مثلاً 53 فٹ x 8.5 فٹ",
+    "telematicsProvider": "ٹیلی میٹکس فراہم کنندہ",
+    "telematicsProviderNone": "کوئی نہیں (صرف فون GPS)",
+    "telematicsProvider_samsara": "Samsara",
+    "telematicsProvider_motive": "Motive",
+    "telematicsDeviceId": "ٹیلی میٹکس ڈیوائس ID",
+    "telematicsDeviceIdPlaceholder": "وینڈر گاڑی ID",
+    "telematicsDeviceIdHint": "منتخب کردہ ٹیلی میٹکس فراہم کنندہ کے ساتھ رجسٹرڈ گاڑی کی ID۔",
     "type": "قسم",
     "details": "تفصیلات",
     "tab_details": "تفصیلات",
@@ -689,16 +696,17 @@
   },
   "dispatch": {
     "title": "ڈسپیچ",
-    "subtitle": "{count, plural, =0 {نقشے پر کوئی فعال لوڈ نہیں} one {نقشے پر # فعال لوڈ} other {نقشے پر # فعال لوڈز}}",
+    "subtitle": "{count, plural, =0 {نقشے پر کوئی ٹرک نہیں} one {نقشے پر # ٹرک} other {نقشے پر # ٹرک}}",
     "upgradeRequired": "لائیو ڈسپیچ نقشے کے لیے Growth پلان یا اس سے اوپر درکار ہے۔",
-    "noActiveLocations": "ابھی تک کسی فعال لوڈ نے مقام شیئر نہیں کیا۔",
+    "noActiveLocations": "ابھی تک کسی ٹرک کا مشترکہ یا ٹیلی میٹکس مقام نہیں ہے۔",
     "queueTitle": "ڈسپیچ درکار ہے",
     "noQueue": "ڈسپیچ ہونے کے انتظار میں کچھ نہیں۔",
     "dispatchAction": "ڈسپیچ →",
     "dispatchModalTitle": "{loadNumber} ڈسپیچ کریں",
     "loadingMap": "نقشہ لوڈ ہو رہا ہے…",
     "locationStale": "⚠ 15 منٹ سے زیادہ سے کوئی اپ ڈیٹ نہیں",
-    "locationLive": "● لائیو"
+    "locationLive": "● لائیو",
+    "idleVehicleBadge": "خالی، کوئی فعال لوڈ نہیں"
   },
   "settings": {
     "title": "پروفائل کی ترتیبات",
@@ -1102,8 +1110,7 @@
       "flags": "فیچر فلیگز",
       "aiConfig": "LLM فراہم کنندہ",
       "security": "سیکیورٹی",
-      "roles": "کردار کی صلاحیتیں"
-,
+      "roles": "کردار کی صلاحیتیں",
       "errorLog": "ایرر لاگ"
     },
     "roleLabels": {
@@ -1505,5 +1512,27 @@
     "noDeliveries": "ابھی تک کوئی ترسیل نہیں",
     "emptyTitle": "ابھی تک کوئی ویب ہک نہیں",
     "emptyDescription": "ایک ویب ہک رجسٹر کریں تاکہ CarrierOS دوسری ایپلیکیشن کو مطلع کرے جب لوڈ کی حیثیت تبدیل ہو یا انوائس ادا ہو جائے۔"
+  },
+  "telematics": {
+    "title": "ٹیلی میٹکس",
+    "subtitle": "ایک GPS/ٹیلی میٹکس فراہم کنندہ کو مربوط کریں تاکہ گاڑی کی پوزیشن حقیقی ہارڈویئر سے آئے، صرف ڈرائیور کے فون سے نہیں — اور تاکہ بغیر فعال لوڈ کے خالی ٹرک بھی ڈسپیچ نقشے پر نظر آئیں۔",
+    "samsaraTitle": "Samsara",
+    "samsaraDescription": "ہر گاڑی کی تازہ ترین پوزیشن کے لیے وقتاً فوقتاً پول کیا جاتا ہے (Samsara ویب ہک کے ذریعے مسلسل GPS نہیں بھیجتا)۔",
+    "motiveTitle": "Motive",
+    "motiveDescription": "ریئل ٹائم — Motive ہر گاڑی کا مقام نیچے دیے گئے ویب ہک URL پر فوری طور پر بھیجتا ہے۔",
+    "enabled": "فعال",
+    "apiKeyLabel": "API کلید (Bearer ٹوکن)",
+    "apiKeyPlaceholder": "سیٹ یا تبدیل کرنے کے لیے درج کریں",
+    "apiKeyConfigured": "ایک کلید تشکیل شدہ ہے۔ رکھنے کے لیے خالی چھوڑیں، یا تبدیل کرنے کے لیے نئی درج کریں۔",
+    "apiKeyNotConfigured": "ابھی تک کوئی کلید تشکیل شدہ نہیں ہے۔",
+    "webhookSecretLabel": "ویب ہک سائننگ سیکرٹ",
+    "webhookSecretPlaceholder": "سیٹ یا تبدیل کرنے کے لیے درج کریں",
+    "webhookSecretConfigured": "ایک سیکرٹ تشکیل شدہ ہے۔ رکھنے کے لیے خالی چھوڑیں، یا تبدیل کرنے کے لیے نیا درج کریں۔",
+    "webhookSecretNotConfigured": "ابھی تک کوئی سیکرٹ تشکیل شدہ نہیں ہے۔",
+    "webhookUrlLabel": "ویب ہک URL",
+    "webhookUrlHelp": "اسے Motive کے ڈیش بورڈ ویب ہک کنفیگریشن میں پیسٹ کریں، درخواستوں پر دستخط کرنے کے لیے نیچے درج کردہ اسی سیکرٹ کا استعمال کرتے ہوئے۔",
+    "save": "محفوظ کریں",
+    "saved": "محفوظ ہو گیا",
+    "credentialRequired": "اسے پہلی بار سیٹ اپ کرنے کے لیے ایک کریڈینشل درج کریں۔"
   }
 }

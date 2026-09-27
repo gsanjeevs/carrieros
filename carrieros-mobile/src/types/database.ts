@@ -2597,6 +2597,57 @@ export type Database = {
           },
         ]
       }
+      telematics_integrations: {
+        Row: {
+          api_key_encrypted: string | null
+          carrier_org_id: number
+          created_at: string
+          enabled: boolean
+          id: number
+          provider: string
+          updated_at: string
+          updated_by: string | null
+          webhook_secret_encrypted: string | null
+        }
+        Insert: {
+          api_key_encrypted?: string | null
+          carrier_org_id: number
+          created_at?: string
+          enabled?: boolean
+          id?: number
+          provider: string
+          updated_at?: string
+          updated_by?: string | null
+          webhook_secret_encrypted?: string | null
+        }
+        Update: {
+          api_key_encrypted?: string | null
+          carrier_org_id?: number
+          created_at?: string
+          enabled?: boolean
+          id?: number
+          provider?: string
+          updated_at?: string
+          updated_by?: string | null
+          webhook_secret_encrypted?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telematics_integrations_carrier_org_id_fkey"
+            columns: ["carrier_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "telematics_integrations_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tiers: {
         Row: {
           code: string
@@ -2721,6 +2772,54 @@ export type Database = {
           },
         ]
       }
+      vehicle_locations: {
+        Row: {
+          carrier_org_id: number
+          created_at: string
+          id: number
+          lat: number
+          lng: number
+          recorded_at: string
+          source: string
+          vehicle_id: number
+        }
+        Insert: {
+          carrier_org_id: number
+          created_at?: string
+          id?: number
+          lat: number
+          lng: number
+          recorded_at: string
+          source: string
+          vehicle_id: number
+        }
+        Update: {
+          carrier_org_id?: number
+          created_at?: string
+          id?: number
+          lat?: number
+          lng?: number
+          recorded_at?: string
+          source?: string
+          vehicle_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_locations_carrier_org_id_fkey"
+            columns: ["carrier_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_locations_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicle_type_classifications: {
         Row: {
           classification_id: number
@@ -2806,6 +2905,8 @@ export type Database = {
           nickname: string
           photo_path: string | null
           status: string
+          telematics_device_id: string | null
+          telematics_provider: string | null
           vehicle_number: string | null
           vehicle_type_id: number
           vin: string | null
@@ -2826,6 +2927,8 @@ export type Database = {
           nickname: string
           photo_path?: string | null
           status?: string
+          telematics_device_id?: string | null
+          telematics_provider?: string | null
           vehicle_number?: string | null
           vehicle_type_id: number
           vin?: string | null
@@ -2846,6 +2949,8 @@ export type Database = {
           nickname?: string
           photo_path?: string | null
           status?: string
+          telematics_device_id?: string | null
+          telematics_provider?: string | null
           vehicle_number?: string | null
           vehicle_type_id?: number
           vin?: string | null

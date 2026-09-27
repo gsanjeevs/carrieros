@@ -169,6 +169,11 @@ export class SupabaseSetupRepository implements BillingWriteRepository, Customer
       ['nickname', 'nickname'], ['year', 'year'], ['make', 'make'], ['model', 'model'], ['vin', 'vin'],
       ['licensePlate', 'license_plate'], ['licenseState', 'license_state'], ['cabType', 'cab_type'],
       ['color', 'color'], ['dimensions', 'dimensions'],
+      // Spelled snake_case here (unlike the camelCase-vs-snake_case pairs above) because
+      // CreateVehicleInput/UpdateVehicleInput (server/ports/index.ts) deliberately name these two
+      // fields to match the real runtime shape passed through from the route — see that file's
+      // comment.
+      ['telematics_provider', 'telematics_provider'], ['telematics_device_id', 'telematics_device_id'],
     ] as const) {
       if (key in input) patch[dbKey] = input[key] as never
     }

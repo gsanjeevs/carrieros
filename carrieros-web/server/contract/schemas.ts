@@ -666,6 +666,37 @@ export const WebhookDeliverySchema = z.object({
 })
 export const ListWebhookDeliveriesResponseSchema = z.object({ deliveries: z.array(WebhookDeliverySchema) })
 
+// ── Telematics integrations (Settings > Integrations > Telematics, migration 0042) ──────────────
+// Org-level Samsara/Motive vendor credentials — administered by a logged-in owner/solo human, so
+// ordinary /api/v1 (session auth), same posture as webhooks above. See
+// server/application/telematics-service.ts. The credential itself (Samsara Bearer token / Motive
+// HMAC secret) is NEVER returned by GET — only whether one is configured (no preview at all, unlike
+// webhooks.secret_preview, since these are read back for outbound calls/signature verification, the
+// T17 "no reveal affordance" posture ai_provider_config already established for LLM keys).
+export const TelematicsIntegrationSummarySchema = z.object({
+  provider: z.enum(['samsara', 'motive']),
+  enabled: z.boolean(),
+  credential_configured: z.boolean(),
+  updated_at: z.string(),
+  updated_by: z.string().nullable(),
+})
+export const ListTelematicsIntegrationsResponseSchema = z.object({
+  integrations: z.array(TelematicsIntegrationSummarySchema),
+})
+
+// Exactly one of api_key (samsara)/webhook_secret (motive) applies to a given provider — enforced in
+// server/application/telematics-service.ts, not here, so the 400 response carries a specific field
+// name rather than a generic Zod union-discriminator error. Omitted = leave the stored credential
+// untouched (the common case: toggling `enabled` alone); empty string = explicit clear, matching
+// admin/ai-config's applyKeyFields convention.
+export const UpsertTelematicsIntegrationBodySchema = z.object({
+  provider: z.enum(['samsara', 'motive']),
+  enabled: z.boolean().optional(),
+  api_key: z.string().optional(),
+  webhook_secret: z.string().optional(),
+})
+export const UpsertTelematicsIntegrationResponseSchema = z.object({ integration: TelematicsIntegrationSummarySchema })
+
 // ── Financial events (T19: accounting-integration readiness layer) ──────────
 // Ledger-shaped export of the outbox events emitted by the five financial
 // mutations migration 0033 instruments: invoice created/sent/paid, driver
@@ -940,6 +971,11 @@ export const CreateVehicleResponseSchema = z.object({
 // new. `vehicles` RLS (owner_solo_vehicles_all) already grants owner/solo a
 // direct tenant-scoped UPDATE, so this is a plain table update, no RPC needed
 // (unlike customers, which cross a tenant boundary).
+// telematics_provider/telematics_device_id (migration 0042): registers a Samsara/Motive device on
+// this vehicle, so app/(app)/dispatch's map can show it even with no active load (see
+// components/DispatchMap.tsx). Both null together means "no telematics device" (the default);
+// setting a provider without a device id (or vice versa) is rejected below — a half-set pair can
+// never actually receive a vendor location.
 export const UpdateVehicleBodySchema = z
   .object({
     nickname: z.string().min(1).optional(),
@@ -952,8 +988,16 @@ export const UpdateVehicleBodySchema = z
     cab_type: z.string().nullable().optional(),
     color: z.string().nullable().optional(),
     dimensions: z.string().nullable().optional(),
+    telematics_provider: z.enum(['samsara', 'motive']).nullable().optional(),
+    telematics_device_id: z.string().nullable().optional(),
   })
   .refine((v) => Object.keys(v).length > 0, { message: 'Provide at least one field to update' })
+  .refine(
+    (v) => !('telematics_provider' in v && v.telematics_provider !== undefined) ||
+      v.telematics_provider === null ||
+      (typeof v.telematics_device_id === 'string' && v.telematics_device_id.trim().length > 0),
+    { message: 'telematics_device_id is required when telematics_provider is set' }
+  )
 export const UpdateVehicleResponseSchema = z.object({
   vehicle_number: z.string().nullable(),
   nickname: z.string(),
