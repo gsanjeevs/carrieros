@@ -1,0 +1,18 @@
+-- 0045_webhooks_service_role_write.sql
+--
+-- Follow-up to 0044: that migration granted service_role only SELECT on webhooks, reasoning that
+-- SupabaseWebhookDeliveryRepository (the only real production caller) only ever reads the endpoint
+-- URL/secret to sign an outbound delivery. That reasoning missed a second, equally legitimate
+-- service_role caller: scripts/load-demo-data.mjs writes straight through the service-role admin
+-- client for demo-org fixtures across orgs/users/vehicles/drivers/customers/loads/invoices/support
+-- tickets/webhooks (its own header comment says so explicitly) -- including a direct
+-- admin.from('webhooks').insert(...) and, for --reset, a .delete(). Confirmed live on staging
+-- (2026-09-27): re-running the seed script after 0044 still failed with "permission denied for table
+-- webhooks" on that INSERT.
+--
+-- Matches the same posture this codebase already gives service_role on tables with an equivalent
+-- admin-bypass write path (e.g. loads: GRANT ALL ... TO service_role) -- service_role is
+-- unrestricted-by-design everywhere in this app (server-only, never exposed to a browser), so giving
+-- it full CRUD here is not a new privilege boundary, just catching this one table up to the same
+-- convention every other admin-bypassable table already follows.
+GRANT INSERT, UPDATE, DELETE ON webhooks TO service_role;

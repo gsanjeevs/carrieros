@@ -5261,6 +5261,15 @@ CREATE POLICY "owner_solo_webhooks_all" ON webhooks FOR ALL USING (
   org_id = my_org_id()
   AND my_role() IN ('owner','solo')
 );
+-- Explicit grants (migration 0044/0045, fixing a real 0037 bug -- see 0002_tighten_base_grants.sql
+-- for why none is implicit here). service_role gets full CRUD, not just SELECT (0044's original
+-- guess): scripts/load-demo-data.mjs also writes straight through the service-role admin client for
+-- demo fixtures, same admin-bypass posture this codebase already gives service_role on every other
+-- such table (e.g. loads' GRANT ALL).
+REVOKE ALL ON webhooks FROM anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON webhooks TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON webhooks TO service_role;
+GRANT USAGE, SELECT ON SEQUENCE webhooks_id_seq TO authenticated, service_role;
 
 CREATE TABLE webhook_deliveries (
   id                  BIGSERIAL PRIMARY KEY,
@@ -5283,6 +5292,11 @@ CREATE POLICY "owner_solo_webhook_deliveries_select" ON webhook_deliveries FOR S
   org_id = my_org_id()
   AND my_role() IN ('owner','solo')
 );
+-- Explicit grants (migration 0044, fixing a real 0037 bug -- see webhooks above).
+REVOKE ALL ON webhook_deliveries FROM anon;
+GRANT SELECT ON webhook_deliveries TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON webhook_deliveries TO service_role;
+GRANT USAGE, SELECT ON SEQUENCE webhook_deliveries_id_seq TO service_role;
 
 COMMENT ON TABLE webhooks IS 'Org-registered outbound webhook endpoints (Settings > Integrations). First real webhook infra in this codebase.';
 COMMENT ON TABLE webhook_deliveries IS 'Delivery attempt log for webhooks — observability + bounded inline retry, no external job queue.';
@@ -5327,6 +5341,12 @@ CREATE POLICY "owner_solo_telematics_integrations_all" ON telematics_integration
   carrier_org_id = my_org_id()
   AND my_role() IN ('owner','solo')
 );
+-- Explicit grants (migration 0043, fixing a real 0042 bug -- RLS policies alone are not reachable
+-- without a base table grant; see 0002_tighten_base_grants.sql for why none is implicit here).
+REVOKE ALL ON telematics_integrations FROM anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON telematics_integrations TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON telematics_integrations TO service_role;
+GRANT USAGE, SELECT ON SEQUENCE telematics_integrations_id_seq TO authenticated, service_role;
 
 CREATE TABLE vehicle_locations (
   id              BIGSERIAL PRIMARY KEY,
@@ -5348,6 +5368,13 @@ ALTER TABLE vehicle_locations ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "carrier_vehicle_locations_select" ON vehicle_locations FOR SELECT USING (
   carrier_org_id = my_org_id()
 );
+-- Explicit grants (migration 0043, fixing a real 0042 bug -- see telematics_integrations above).
+-- authenticated only ever SELECTs (matches the SELECT-only policy above); all writes come from the
+-- service-role admin client (Motive webhook receiver, Samsara poller), never UPDATE/DELETE.
+REVOKE ALL ON vehicle_locations FROM anon;
+GRANT SELECT ON vehicle_locations TO authenticated;
+GRANT SELECT, INSERT ON vehicle_locations TO service_role;
+GRANT USAGE, SELECT ON SEQUENCE vehicle_locations_id_seq TO service_role;
 
 -- ── Realtime publication (migration 0041) ────────────────────────────────
 -- loads/driver_messages Postgres Changes subscriptions (dispatch map,
