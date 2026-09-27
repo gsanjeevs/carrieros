@@ -12,8 +12,10 @@ import { Card, CardBody } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { isThemePreference } from '@/lib/theme'
 import ProfilePhotoForm from './ProfilePhotoForm'
+import DriverProfileForm from './DriverProfileForm'
 import { createProfileAvatarService } from '@/server/composition'
 import { buildActorContext } from '@/server/infrastructure/supabase/actor-context'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -65,6 +67,14 @@ export default async function SettingsPage() {
         </Card>
 
         <ProfilePhotoForm currentUrl={avatarUrl} />
+
+        {profile && roleHasCapability(profile.role, 'driver_profile_edit_own') && (
+          <Card className="mb-6">
+            <CardBody>
+              <DriverProfileForm />
+            </CardBody>
+          </Card>
+        )}
 
         <Card>
           <CardBody>

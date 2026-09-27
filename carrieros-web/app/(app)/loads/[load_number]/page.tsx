@@ -13,6 +13,9 @@ import { hasFeature } from '@/lib/entitlements'
 import { formatDateTime, toDate } from '@/lib/format-datetime'
 import { formatMoney, resolveCurrency } from '@/lib/format-money'
 import CreateInvoiceButton from './CreateInvoiceButton'
+import DriverLoadActions from './DriverLoadActions'
+import DvirForm from './DvirForm'
+import LoadFuelStops from './LoadFuelStops'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import { Card, CardHeader, CardBody, StatusBadge } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
@@ -157,7 +160,7 @@ export default async function LoadDetailPage({
   // Upload/delete stay explicit: `documents_upload` also includes the driver
   // (who uploads from the truck), and no capability covers deleting a
   // document — converting either would widen access.
-  const canUploadDoc = ['owner', 'solo', 'dispatcher'].includes(profile.role)
+  const canUploadDoc = roleHasCapability(profile.role, 'documents_upload')
   const canDeleteDoc = roleHasCapability(profile.role, 'documents_delete')
   // Driver chat (audit gap #13): finance gets none of it, by design (BR-2/
   // FR-119) — `chat_participate` is the same role set the API routes' own
@@ -354,6 +357,16 @@ export default async function LoadDetailPage({
             </div>
           )}
           </div>
+
+          {(roleHasCapability(profile.role, 'location_share') || roleHasCapability(profile.role, 'problem_report')) && (
+            <DriverLoadActions
+              loadId={load.id}
+              active={['dispatched', 'picked_up', 'in_transit'].includes(load.status ?? '')}
+            />
+          )}
+
+          {roleHasCapability(profile.role, 'dvir_file') && <DvirForm loadId={load.id} />}
+          {roleHasCapability(profile.role, 'fuel_log') && <LoadFuelStops loadId={load.id} />}
 
           {/* Driver chat */}
           {chatEntitled && (
