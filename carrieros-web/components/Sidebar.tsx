@@ -73,24 +73,15 @@ const NAV_SECTIONS: NavSection[] = [
       // In-app support ticketing (decisions.md T16) — any authenticated user, any role, any tier can
       // submit a ticket, so this is gated the same as settings itself: everyone with a tenant role.
       { labelKey: 'support', href: '/support', icon: 'help', capability: 'settings_view' },
-      // Everyone with a tenant role has settings; no capability covers that.
+      // Single entry point for everything under /settings/* -- Security, Developer API,
+      // Integrations, Branding, and Support Desk used to each be their own flat item here (5 more
+      // rows in an already-crowded "TEAM" section, none of them team management -- a real IA problem
+      // found in this session's UX review). They're still real pages with the same capability gates
+      // as before; app/(app)/settings/layout.tsx now renders them as an in-page tab strip
+      // (capability-filtered the same way) instead of each needing its own Sidebar row. Everyone with
+      // a tenant role has at least the plain Settings page; no capability covers "has settings" more
+      // narrowly than settings_view.
       { labelKey: 'settings', href: '/settings', icon: 'settings', capability: 'settings_view' },
-      // Passkey/WebAuthn management (decisions.md T15) — same gate as
-      // settings itself; every tenant role manages its own credentials.
-      { labelKey: 'security', href: '/settings/security', icon: 'passkey', capability: 'settings_view' },
-      // Public developer API (Phase 9) client management — same gate as billing (subscription_management).
-      { labelKey: 'developerApi', href: '/settings/developer-api', icon: 'api', capability: 'subscription_management' },
-      // Org-level outbound webhooks (Settings > Integrations) — same gate as Developer API: registering a
-      // URL that receives every subscribed event for the org is an administration action.
-      { labelKey: 'integrations', href: '/settings/integrations', icon: 'webhook', capability: 'subscription_management' },
-      // Enterprise branding customization (decisions.md PR1 amendment, migration 0026) — owner/solo only,
-      // same shape as the other org-administration nav items above. The Enterprise tier gate itself is
-      // enforced on the page (a locked upsell state, not hidden nav) — same pattern developerApi uses.
-      { labelKey: 'brandingCustomization', href: '/settings/branding', icon: 'palette', capability: 'org_branding_manage' },
-      // Enterprise org_support ticket queue staff console (decisions.md T16, migration 0027) —
-      // owner/solo only, same shape as brandingCustomization above. Tier gate is enforced on the
-      // page itself (locked upsell state), not by hiding the nav item.
-      { labelKey: 'supportDesk', href: '/settings/support-desk', icon: 'support_agent', capability: 'org_support_manage' },
     ],
   },
 ]
