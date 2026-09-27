@@ -165,9 +165,7 @@ async function handle(request: NextRequest, requestId: string) {
     // reads this cookie; Server Components can't set cookies directly, so middleware
     // is where this has to happen. Only writes when it actually changed.
     const locale = profile.preferred_language ?? 'en'
-    if (request.cookies.get('locale')?.value !== locale) {
-      response.cookies.set('locale', locale, { path: '/', maxAge: 60 * 60 * 24 * 365 })
-    }
+    const localeChanged = request.cookies.get('locale')?.value !== locale
 
     // Same sync for `theme` (decisions.md V3/V6, profiles.theme_preference) —
     // app/layout.tsx reads this cookie the exact same way i18n/request.ts
@@ -177,8 +175,24 @@ async function handle(request: NextRequest, requestId: string) {
     // selection (same as LanguageSwitcher does for `locale`) so the change
     // is instant; this sync is the cross-device/cross-session backstop.
     const theme = profile.theme_preference ?? 'system'
-    if (request.cookies.get('theme')?.value !== theme) {
-      response.cookies.set('theme', theme, { path: '/', maxAge: 60 * 60 * 24 * 365 })
+    const themeChanged = request.cookies.get('theme')?.value !== theme
+
+    // Correcting the cookie on `response` while letting THIS SAME request's page render was the bug
+    // (found in this session's UX review, reproduced live): Server Components read cookies from the
+    // incoming request, not from a Set-Cookie header this middleware attaches to its own response, so
+    // the page that request was for always rendered with the stale value first -- most visibly, a
+    // fresh login rendering the wrong theme for exactly one page, self-correcting only on the next
+    // navigation. A genuine redirect-to-self forces the browser to make one more request, this time
+    // carrying the corrected cookie, so the page the user actually SEES already has it right. Only
+    // fires when a correction is genuinely needed (self-terminating: the immediately-following request
+    // has the now-matching cookie, so this branch is false and a normal response.next() proceeds) --
+    // every other request on every other page load takes the cheap `!localeChanged && !themeChanged`
+    // path with zero extra round trips, same as before this fix.
+    if (localeChanged || themeChanged) {
+      const redirectResponse = NextResponse.redirect(request.url)
+      if (localeChanged) redirectResponse.cookies.set('locale', locale, { path: '/', maxAge: 60 * 60 * 24 * 365 })
+      if (themeChanged) redirectResponse.cookies.set('theme', theme, { path: '/', maxAge: 60 * 60 * 24 * 365 })
+      return redirectResponse
     }
   }
 
@@ -188,7 +202,27 @@ async function handle(request: NextRequest, requestId: string) {
 
     const role = profile.data?.role ?? 'solo'
     const home = ROLE_HOME[role] ?? '/dashboard'
-    return NextResponse.redirect(new URL(home, request.url))
+    const redirectResponse = NextResponse.redirect(new URL(home, request.url))
+
+    // Same locale/theme sync as the "New user with no org" block above, duplicated here rather than
+    // shared: that block never runs for a /login request (PUBLIC_PREFIXES excludes it from `!isPublic`),
+    // so without this, the very first page a user sees after signing in always rendered with whatever
+    // stale/default cookie value existed before login -- a real, reproducible flash from the wrong
+    // theme (or locale) to the correct one on the user's next navigation, found in this session's UX
+    // review. Setting it on THIS redirect response means the browser stores the corrected cookie
+    // before it even requests `home`, so that very first render already has it right.
+    if (profile.data) {
+      const locale = profile.data.preferred_language ?? 'en'
+      if (request.cookies.get('locale')?.value !== locale) {
+        redirectResponse.cookies.set('locale', locale, { path: '/', maxAge: 60 * 60 * 24 * 365 })
+      }
+      const theme = profile.data.theme_preference ?? 'system'
+      if (request.cookies.get('theme')?.value !== theme) {
+        redirectResponse.cookies.set('theme', theme, { path: '/', maxAge: 60 * 60 * 24 * 365 })
+      }
+    }
+
+    return redirectResponse
   }
 
   // ── Role-based route guard ───────────────────────────────────
