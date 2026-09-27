@@ -1216,7 +1216,19 @@
       "keyClearButton": "صاف کریں",
       "keyClearing": "صاف ہو رہی ہے…",
       "lastUpdated": "آخری اپ ڈیٹ {date}",
-      "saveButton": "محفوظ کریں"
+      "saveButton": "محفوظ کریں",
+      "featureOverride": {
+        "sectionTitle": "فیچر کے مطابق اوور رائیڈ",
+        "sectionSubtitle": "کسی ایک فیچر کو اوپر دیے گئے پلیٹ فارم ڈیفالٹ سے مختلف پرووائیڈر یا ماڈل پر مقرر کریں — مثلاً ترجمے کے لیے سستا ماڈل۔",
+        "error": "اس فیچر کا اوور رائیڈ لوڈ نہیں ہو سکا۔",
+        "saveError": "اس فیچر کا اوور رائیڈ محفوظ نہیں ہو سکا۔",
+        "modeDefault": "پلیٹ فارم ڈیفالٹ استعمال کریں",
+        "modeCustom": "اس فیچر کے لیے مخصوص",
+        "usingDefaultNotice": "پلیٹ فارم ڈیفالٹ: {provider} / {model}",
+        "featureLabel": {
+          "translation": "ترجمہ"
+        }
+      }
     },
     "health": {
       "title": "کسٹمر ہیلتھ",

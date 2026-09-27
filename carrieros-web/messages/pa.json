@@ -1216,7 +1216,19 @@
       "keyClearButton": "ਸਾਫ਼ ਕਰੋ",
       "keyClearing": "ਸਾਫ਼ ਹੋ ਰਹੀ ਹੈ…",
       "lastUpdated": "ਆਖਰੀ ਵਾਰ ਅੱਪਡੇਟ {date}",
-      "saveButton": "ਸੰਭਾਲੋ"
+      "saveButton": "ਸੰਭਾਲੋ",
+      "featureOverride": {
+        "sectionTitle": "ਫ਼ੀਚਰ-ਵਾਰ ਓਵਰਰਾਈਡ",
+        "sectionSubtitle": "ਕਿਸੇ ਇੱਕ ਫ਼ੀਚਰ ਨੂੰ ਉੱਪਰ ਦਿੱਤੇ ਪਲੇਟਫਾਰਮ ਡਿਫਾਲਟ ਨਾਲੋਂ ਵੱਖਰੇ ਪ੍ਰੋਵਾਈਡਰ ਜਾਂ ਮਾਡਲ ਨਾਲ ਸੈੱਟ ਕਰੋ — ਜਿਵੇਂ ਕਿ ਅਨੁਵਾਦ ਲਈ ਸਸਤਾ ਮਾਡਲ।",
+        "error": "ਇਸ ਫ਼ੀਚਰ ਦਾ ਓਵਰਰਾਈਡ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕਿਆ।",
+        "saveError": "ਇਸ ਫ਼ੀਚਰ ਦਾ ਓਵਰਰਾਈਡ ਸੰਭਾਲਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ।",
+        "modeDefault": "ਪਲੇਟਫਾਰਮ ਡਿਫਾਲਟ ਵਰਤੋ",
+        "modeCustom": "ਇਸ ਫ਼ੀਚਰ ਲਈ ਕਸਟਮ",
+        "usingDefaultNotice": "ਪਲੇਟਫਾਰਮ ਡਿਫਾਲਟ: {provider} / {model}",
+        "featureLabel": {
+          "translation": "ਅਨੁਵਾਦ"
+        }
+      }
     },
     "health": {
       "title": "ਗਾਹਕ ਸਿਹਤ",

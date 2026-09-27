@@ -1216,7 +1216,19 @@
       "keyClearButton": "Borrar",
       "keyClearing": "Borrando…",
       "lastUpdated": "Última actualización {date}",
-      "saveButton": "Guardar"
+      "saveButton": "Guardar",
+      "featureOverride": {
+        "sectionTitle": "Anulaciones por función",
+        "sectionSubtitle": "Asigna a una función específica un proveedor o modelo distinto al predeterminado de la plataforma indicado arriba — por ejemplo, un modelo más económico para la traducción.",
+        "error": "No se pudo cargar la anulación de esta función.",
+        "saveError": "No se pudo guardar la anulación de esta función.",
+        "modeDefault": "Usar el predeterminado de la plataforma",
+        "modeCustom": "Personalizado para esta función",
+        "usingDefaultNotice": "Predeterminado de la plataforma: {provider} / {model}",
+        "featureLabel": {
+          "translation": "Traducción"
+        }
+      }
     },
     "health": {
       "title": "Salud del cliente",

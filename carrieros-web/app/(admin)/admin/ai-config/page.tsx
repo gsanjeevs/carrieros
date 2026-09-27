@@ -18,8 +18,9 @@
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Card, Button, Input, Field, Callout } from '@/components/ui'
-
-type Provider = 'anthropic' | 'openai' | 'openai_compatible'
+import { AI_FEATURES } from '@/lib/ai'
+import { REQUIRED_ENV_VAR, KEY_FIELDS, type Provider } from './shared'
+import FeatureOverrideCard from './FeatureOverrideCard'
 
 interface AiConfig {
   provider: Provider
@@ -34,20 +35,6 @@ interface AiConfig {
   openai_compatible_key_configured: boolean
   openai_compatible_key_preview: string | null
 }
-
-const REQUIRED_ENV_VAR: Record<Provider, string> = {
-  anthropic: 'ANTHROPIC_API_KEY',
-  openai: 'OPENAI_API_KEY',
-  openai_compatible: 'OPENAI_COMPATIBLE_API_KEY (optional — many self-hosted endpoints need none)',
-}
-
-// One entry per provider's key field — drives both the three key-input sections below and the body
-// this page sends to PUT /api/admin/ai-config.
-const KEY_FIELDS = [
-  { provider: 'anthropic' as const, bodyField: 'anthropic_api_key' as const, configuredKey: 'anthropic_key_configured' as const, previewKey: 'anthropic_key_preview' as const, envVar: 'ANTHROPIC_API_KEY' },
-  { provider: 'openai' as const, bodyField: 'openai_api_key' as const, configuredKey: 'openai_key_configured' as const, previewKey: 'openai_key_preview' as const, envVar: 'OPENAI_API_KEY' },
-  { provider: 'openai_compatible' as const, bodyField: 'openai_compatible_api_key' as const, configuredKey: 'openai_compatible_key_configured' as const, previewKey: 'openai_compatible_key_preview' as const, envVar: 'OPENAI_COMPATIBLE_API_KEY' },
-]
 
 export default function AiConfigPage() {
   const t = useTranslations('admin.aiConfig')
@@ -223,6 +210,16 @@ export default function AiConfigPage() {
           </Button>
         </div>
       </Card>
+
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold text-text-pri mb-1">{t('featureOverride.sectionTitle')}</h2>
+        <p className="text-text-sec text-sm mb-4">{t('featureOverride.sectionSubtitle')}</p>
+        <div className="flex flex-col gap-4">
+          {AI_FEATURES.map((feature) => (
+            <FeatureOverrideCard key={feature} feature={feature} platformDefault={{ provider: config.provider, model: config.model }} />
+          ))}
+        </div>
+      </div>
     </div>
   )
 }

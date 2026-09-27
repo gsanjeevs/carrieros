@@ -1216,7 +1216,19 @@
       "keyClearButton": "Clear",
       "keyClearing": "Clearing…",
       "lastUpdated": "Last updated {date}",
-      "saveButton": "Save"
+      "saveButton": "Save",
+      "featureOverride": {
+        "sectionTitle": "Per-Feature Overrides",
+        "sectionSubtitle": "Pin a single feature to a different provider or model than the platform-wide default above — for example, a cheaper model for translation.",
+        "error": "Could not load this feature's override.",
+        "saveError": "Could not save this feature's override.",
+        "modeDefault": "Use platform default",
+        "modeCustom": "Custom for this feature",
+        "usingDefaultNotice": "Platform default: {provider} / {model}",
+        "featureLabel": {
+          "translation": "Translation"
+        }
+      }
     },
     "health": {
       "title": "Customer Health",
