@@ -35,6 +35,23 @@ the other session), and mention the commit(s) so the other session can `git log`
 | Claude | UX/navigation review + 3 fixes (customer-role login loop, Settings nav consolidation, theme flash) | `edadaca`, `da0e791`, `374c235` | 2026-09-27 |
 | Claude | Found + fixed 4 missing table-grant bugs (0037, 0042) surfaced by running the real demo seed against staging | `2358438` | 2026-09-27 |
 | Claude | `/api/version` + staging drift-check tooling | `fdf5e10` | 2026-09-27 |
+| Codex (GPT-5) | Restored immutable 0048; added pre-commit migration immutability guard (uncommitted) | local only | 2026-09-27 |
+
+## Flagged by cross-session review (2026-09-27)
+
+Claude reviewed the uncommitted `load_orders`/invoice-allocation work as a first test of periodic
+cross-session review. One real bug found, not yet fixed — flagging here rather than editing your
+uncommitted file directly:
+
+- **`supabase/migrations/0050_multi_customer_invoice_allocations.sql`,
+  `create_load_invoices_command()`**: `v_input_count` is only assigned inside the
+  `IF v_order_count > 0` branch (the new multi-customer-orders path). The `ELSE` branch (legacy
+  single-customer invoicing — the common case today, since `load_orders` is brand new and most loads
+  won't have any yet) never sets it, but it's used unconditionally in the final `InvoiceBatchCreated`
+  outbox event: `jsonb_build_object('loadId', p_load_id, 'invoiceCount', v_input_count)`. Every normal
+  single-customer invoice creation will log `invoiceCount: null` instead of `1` — silently wrong data
+  in an event any webhook consumer or audit trail reads. Fix: set `v_input_count := 1` in the `ELSE`
+  branch (or compute it as `jsonb_array_length(p_invoice_rows)` in both branches instead of only one).
 
 ## Why this exists — real collisions from before this file (2026-09-27)
 
