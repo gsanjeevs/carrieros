@@ -27,6 +27,17 @@ RUN npm run build
 FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+# Server-only (no NEXT_PUBLIC_ prefix -- never baked into the client bundle, just read at request
+# time by app/api/version/route.ts) so /api/version can report exactly which commit a running
+# container is serving. Without this there was no way to tell "main has new commits" apart from
+# "staging is actually running them" short of manually reasoning through git log and deploy history --
+# the gap that let the 2026-09-27 session's fixes sit undeployed on staging without anyone noticing.
+# Pass at build time: docker buildx build --build-arg BUILD_SHA=$(git rev-parse HEAD)
+#   --build-arg BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) ...
+ARG BUILD_SHA
+ARG BUILD_TIME
+ENV BUILD_SHA=$BUILD_SHA
+ENV BUILD_TIME=$BUILD_TIME
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./

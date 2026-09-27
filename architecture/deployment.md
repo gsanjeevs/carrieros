@@ -29,12 +29,29 @@ docker buildx build --platform linux/amd64 \
   --build-arg NEXT_PUBLIC_SUPABASE_URL=https://ddwgnsheafuuzzepqxsf.supabase.co \
   --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=<publishable key, not secret> \
   --build-arg NEXT_PUBLIC_APP_URL=https://ca-aa167deb702e4a338c4370ff70576195.ecs.us-east-1.on.aws \
+  --build-arg BUILD_SHA=$(git rev-parse HEAD) \
+  --build-arg BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
   -t <account-id>.dkr.ecr.us-east-1.amazonaws.com/carrieros-web:latest --push .
 aws ecs update-express-gateway-service \
   --service-arn arn:aws:ecs:us-east-1:<account-id>:service/default/carrieros-web-staging \
   --primary-container '{"image":"<account-id>.dkr.ecr.us-east-1.amazonaws.com/carrieros-web:latest","containerPort":3000}' \
   --region us-east-1
+
+# Verify it actually took effect -- don't just trust the two commands above returning success.
+node carrieros-web/scripts/check-staging-drift.mjs
 ```
+
+**A real gotcha hit on 2026-09-27**: pushing a new image to the same `:latest` tag does NOT by
+itself replace the running ECS task -- the tag string in the service config is unchanged, so nothing
+tells ECS a new image exists. `update-express-gateway-service` must be re-run (even with the exact
+same `--primary-container` value as before) every time, which registers a new service deployment and
+actually rolls the task over. `aws ecs describe-service-deployments --service-deployment-arns
+<currentDeployment ARN from describe-express-gateway-service>` shows real rollout progress (old task
+draining, new task starting) -- the two commands above returning success only means they were
+*accepted*, not that staging is actually serving the new code yet. This is exactly why
+`check-staging-drift.mjs` (compares `origin/main` against the running container's own
+`/api/version`) exists -- it was built the same day this bit someone, after several hours' worth of
+fixes sat pushed to `main`, CI-green, and completely undeployed without anyone noticing.
 
 `--platform linux/amd64` is required on Apple Silicon — Fargate is x86_64 and a plain `docker build`
 here produces an arm64 image that fails to pull.
