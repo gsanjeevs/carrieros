@@ -39,4 +39,32 @@ if [ -n "$TOKEN_FILES" ]; then
   (cd carrieros-web && node scripts/check-tokens.mjs)
 fi
 
+# Migration-number collision check (cheap, no DB needed) — two coding sessions in this repo (see
+# CLAUDE.md "Multiple LLM sessions working on this repo at once") have already independently picked
+# the same "next" migration number once. Sequential/unique numbering across supabase/migrations/*.sql
+# is a hard requirement (scripts/db/migrate.mjs applies them in order), so this is a real block, not a
+# nudge — catches the collision here instead of at merge/push time or, worse, after both are applied.
+MIGRATION_FILES=$(echo "$STAGED" | grep -E '^supabase/migrations/.*\.sql$' || true)
+if [ -n "$MIGRATION_FILES" ]; then
+  echo "→ migration number collision check"
+  DUPES=$(ls supabase/migrations/*.sql | xargs -n1 basename | grep -oE '^[0-9]+' | sort | uniq -d)
+  if [ -n "$DUPES" ]; then
+    echo "✗ Duplicate migration number(s): $DUPES"
+    echo "  Another session likely picked the same number. Re-check the real latest number"
+    echo "  (\`ls supabase/migrations | sort -V | tail -3\` or \`git fetch\`) and renumber before committing."
+    exit 1
+  fi
+fi
+
+# Shared-hub-file nudge (non-blocking) — see CURRENT_WORK.md and CLAUDE.md "Multiple LLM sessions":
+# these specific files are the ones repeatedly edited by more than one coding session and are where
+# real merge friction has actually happened (hand-picking hunks out of schema.sql, etc.) — a plain
+# reminder here is cheap and catches the case where a session forgot to check CURRENT_WORK.md first.
+HUB_FILES=$(echo "$STAGED" | grep -E '^(supabase/schema/schema\.sql|supabase/migrations/.*\.sql|carrieros-web/lib/generated/role-capabilities\.ts|carrieros-mobile/src/lib/generated/role-capabilities\.ts|carrieros-web/messages/.*\.json)$' || true)
+if [ -n "$HUB_FILES" ]; then
+  echo "ℹ Committing a change to a file other coding sessions may also be editing:"
+  echo "$HUB_FILES" | sed 's/^/    /'
+  echo "  Checked/updated CURRENT_WORK.md (repo root)?"
+fi
+
 echo "✓ pre-commit checks passed"
