@@ -26,7 +26,8 @@ the other session), and mention the commit(s) so the other session can `git log`
 
 | Session | Task | Files/areas | Started |
 |---|---|---|---|
-| — | No active Claude task | — | — |
+| Codex (GPT-5) | Theme-safe web design-system rollout, auth/tracking surfaces, status contrast + lint ratchets | `carrieros-web/app/globals.css`, auth/onboarding/tracking/app UI, shared components, ESLint; local only | 2026-09-27 |
+| Claude | Timezone-aware datetime formatting + 20-language i18n expansion — backend/utility/content only, deliberately NOT touching any currently-dirty page/component (your design-system rollout owns those right now) | `lib/format-datetime.ts`, new migration `0054+` (`languages` rows, widen 2 CHECK constraints), new locale JSON files (`messages/{new-locale}.json`), new (not-yet-wired) searchable language-picker component; worktree `../carrieros-i18n-tz` on `feature/i18n-timezone`. **Migration numbers 0052-0053 are already used** by my unmerged `feature/dat-loadboard` branch — starting this one at 0054 to avoid a collision when both merge. | 2026-09-27 |
 
 ## Recently finished (for context, not a permanent log — prune entries older than a day or two)
 
