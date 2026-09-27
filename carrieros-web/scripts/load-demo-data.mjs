@@ -70,7 +70,6 @@
 // SUPABASE_SERVICE_ROLE_KEY) if the SUPABASE_URL env vars aren't set, same as
 // bootstrap-shipmentx.mjs.
 import { createClient } from '@supabase/supabase-js'
-import { deflateSync } from 'node:zlib'
 import { readFileSync, existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
@@ -114,61 +113,26 @@ async function must(promise, what) {
   return data
 }
 
-// Small deterministic PNGs keep demo media synthetic, local, and rerunnable;
-// no real-person or scraped images are checked into the repository.
-function crc32(bytes) {
-  let crc = 0xffffffff
-  for (const byte of bytes) {
-    crc ^= byte
-    for (let i = 0; i < 8; i++) crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0)
-  }
-  return (crc ^ 0xffffffff) >>> 0
+// Realistic, entirely synthetic demo media generated for this repository. No
+// real-person or scraped images are checked in. Keep the selection stable so
+// rerunning the loader does not reshuffle the demo.
+const DEMO_ASSET_DIR = join(__dirname, 'demo-assets')
+const DRIVER_ASSETS = ['driver-01.png', 'driver-02.png']
+const VEHICLE_ASSETS = ['vehicle-01.png', 'vehicle-02.png']
+function demoAsset(names, seed) {
+  return readFileSync(join(DEMO_ASSET_DIR, names[Math.abs(Number(seed)) % names.length]))
 }
-function png(width, height, paint) {
-  const raw = Buffer.alloc((width * 4 + 1) * height)
-  for (let y = 0; y < height; y++) {
-    raw[y * (width * 4 + 1)] = 0
-    for (let x = 0; x < width; x++) raw.set(paint(x, y), y * (width * 4 + 1) + 1 + x * 4)
-  }
-  const chunk = (type, data) => {
-    const t = Buffer.from(type)
-    const body = Buffer.concat([t, data])
-    const out = Buffer.alloc(12 + data.length)
-    out.writeUInt32BE(data.length, 0); body.copy(out, 4); out.writeUInt32BE(crc32(body), 8 + data.length)
-    return out
-  }
-  const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(width, 0); ihdr.writeUInt32BE(height, 4); ihdr[8] = 8; ihdr[9] = 6
-  return Buffer.concat([Buffer.from('\x89PNG\r\n\x1a\n', 'binary'), chunk('IHDR', ihdr), chunk('IDAT', deflateSync(raw)), chunk('IEND', Buffer.alloc(0))])
-}
-function avatarPng(seed) {
-  const bg = seed % 2 ? [219, 234, 254] : [254, 226, 226]
-  return png(128, 128, (x, y) => {
-    const dx = x - 64, dy = y - 64
-    const face = dx * dx + dy * dy < 30 * 30
-    const hair = dy < -10 && dx * dx + (dy + 8) * (dy + 8) < 34 * 34
-    const shirt = dy > 28 && Math.abs(dx) < 48
-    return face ? [244, 190, 150, 255] : hair ? [55, 45, 42, 255] : shirt ? [30, 91, 140, 255] : [...bg, 255]
-  })
-}
-function vehiclePng(seed) {
-  const accent = seed % 2 ? [234, 88, 57] : [36, 116, 170]
-  return png(320, 140, (x, y) => {
-    const cab = x > 28 && x < 110 && y > 50 && y < 108
-    const trailer = x >= 110 && x < 285 && y > 30 && y < 108
-    const window = cab && x > 48 && x < 92 && y > 60 && y < 78
-    const wheel = ((x - 80) ** 2 + (y - 111) ** 2 < 16 ** 2) || ((x - 235) ** 2 + (y - 111) ** 2 < 16 ** 2)
-    return wheel ? [35, 35, 40, 255] : window ? [180, 220, 235, 255] : (cab || trailer) ? [...accent, 255] : [235, 242, 248, 255]
-  })
-}
+function driverImage(seed) { return demoAsset(DRIVER_ASSETS, seed) }
+function vehicleImage(seed) { return demoAsset(VEHICLE_ASSETS, seed) }
 
 async function ensureDemoCompliance(orgId, driverId, profileId, vehicles) {
   const { data: profile } = await admin.from('profiles').select('avatar_path').eq('id', profileId).single()
   // Migrate the pre-release temporary avatars bucket fixture once; preserve
   // any real/user-edited avatar path after it has moved to documents.
-  if (profile && (!profile.avatar_path || /\/demo-profile\.png$/.test(profile.avatar_path))) {
-    const demoUuid = `00000000-0000-0000-0000-${String(driverId).padStart(12, '0')}`
-    const path = `${orgId}/profiles/${profileId}/avatar-${demoUuid}.png`
-    const uploaded = await admin.storage.from('documents').upload(path, avatarPng(driverId), { contentType: 'image/png', upsert: true })
+  const isLegacyDemoAvatar = profile?.avatar_path && /\/avatar-00000000-0000-0000-0000-\d+\.png$/.test(profile.avatar_path)
+  if (profile && (!profile.avatar_path || /\/demo-profile\.png$/.test(profile.avatar_path) || isLegacyDemoAvatar)) {
+    const path = `${orgId}/profiles/${profileId}/demo-driver-${String(driverId).padStart(5, '0')}.png`
+    const uploaded = await admin.storage.from('documents').upload(path, driverImage(driverId), { contentType: 'image/png', upsert: true })
     if (!uploaded.error) await must(admin.from('profiles').update({ avatar_path: path }).eq('id', profileId), 'demo avatar path')
   }
 
@@ -188,7 +152,7 @@ async function ensureDemoCompliance(orgId, driverId, profileId, vehicles) {
   if (!docCount) {
     for (const [docType, expiry, suffix] of [['cdl_scan', '2028-06-30', 'cdl'], ['medical_cert', '2027-12-31', 'medical']]) {
       const path = `${orgId}/drivers/${driverId}/demo-${suffix}.png`
-      const uploaded = await admin.storage.from('documents').upload(path, avatarPng(driverId + suffix.length), { contentType: 'image/png', upsert: true })
+      const uploaded = await admin.storage.from('documents').upload(path, driverImage(driverId + suffix.length), { contentType: 'image/png', upsert: true })
       if (!uploaded.error) await must(admin.from('driver_documents').insert({ driver_id: driverId, carrier_org_id: orgId, doc_type: docType, label: `DEMO ${docType.replace('_', ' ')}`, storage_path: path, expiry_date: expiry, uploaded_by: profileId }), `demo ${docType}`)
     }
   }
@@ -199,9 +163,10 @@ async function ensureDemoCompliance(orgId, driverId, profileId, vehicles) {
     if (!current?.license_plate) vehiclePatch.license_plate = `DEMO${String(vehicle.id).padStart(4, '0')}`
     if (!current?.license_state) vehiclePatch.license_state = 'TX'
     if (Object.keys(vehiclePatch).length) await must(admin.from('vehicles').update(vehiclePatch).eq('id', vehicle.id), 'demo vehicle license fields')
-    if (!current?.photo_path) {
-      const path = `${orgId}/vehicles/${vehicle.id}/demo-vehicle.png`
-      const uploaded = await admin.storage.from('documents').upload(path, vehiclePng(vehicle.id), { contentType: 'image/png', upsert: true })
+    const isLegacyDemoVehicle = current?.photo_path?.endsWith('/demo-vehicle.png')
+    if (!current?.photo_path || isLegacyDemoVehicle) {
+      const path = `${orgId}/vehicles/${vehicle.id}/demo-vehicle-${String(vehicle.id).padStart(5, '0')}.png`
+      const uploaded = await admin.storage.from('documents').upload(path, vehicleImage(vehicle.id), { contentType: 'image/png', upsert: true })
       if (!uploaded.error) await must(admin.from('vehicles').update({ photo_path: path }).eq('id', vehicle.id), 'demo vehicle photo path')
     }
   }
