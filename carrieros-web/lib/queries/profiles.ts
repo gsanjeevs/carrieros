@@ -109,6 +109,10 @@ export async function countOrgAdmins(supabase: AnySupabaseClient, orgId: number)
     .in('role', rolesWithCapability('team_manage'))
 }
 
+export async function updateProfileAvatarPath(supabase: AnySupabaseClient, userId: string, avatarPath: string | null) {
+  return supabase.from('profiles').update({ avatar_path: avatarPath }).eq('id', userId)
+}
+
 export async function updateProfileRole(supabase: AnySupabaseClient, profileId: string, role: string) {
   return supabase.from('profiles').update({ role }).eq('id', profileId)
 }
