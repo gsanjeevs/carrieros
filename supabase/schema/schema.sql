@@ -427,6 +427,16 @@ INSERT INTO role_capabilities (role, capability) VALUES
   ('customer_admin',  'dashboard'),
   ('customer_viewer', 'dashboard');
 
+-- Migration 0052: DAT load-board integration (Phase 1, posting only) -- gates BOTH managing the org's
+-- DAT credential (Settings > Integrations > Load Board) and posting a load, owner/solo/dispatcher
+-- only (the same three roles that hold dispatch/loads_manage above), NOT finance or driver. See
+-- Migration 0052's header comment for why this differs from telematics_integrations'
+-- subscription_management (owner/solo-only) gate.
+INSERT INTO role_capabilities (role, capability) VALUES
+  ('owner',      'loadboard_posting'),
+  ('solo',       'loadboard_posting'),
+  ('dispatcher', 'loadboard_posting');
+
 -- Language reference/display data — NOT a foreign key, profiles.preferred_language
 -- and carrier_details.default_language keep their own CHECKs. native_name IS the
 -- correct display value regardless of UI locale (a language's own name in its own
@@ -517,6 +527,11 @@ INSERT INTO features (key, label, min_tier, display_order) VALUES
 -- queue) is available on every tier and is NOT gated by this row -- see SECTION 24 below.
 INSERT INTO features (key, label, min_tier, display_order) VALUES
   ('support_desk', 'Dedicated Support Desk', 'enterprise', 17);
+
+-- Migration 0052 (2026-09-27): DAT load-board integration, Phase 1 (posting only, mocked client) --
+-- Growth+, same features/has_feature() model as everything above.
+INSERT INTO features (key, label, min_tier, display_order) VALUES
+  ('loadboard_posting', 'DAT Load Board Posting', 'growth', 18);
 
 -- ────────────────────────────────────────────────────────────
 -- SECTION 2: PROFILES — ALL users in the system
@@ -5385,6 +5400,79 @@ REVOKE ALL ON vehicle_locations FROM anon;
 GRANT SELECT ON vehicle_locations TO authenticated;
 GRANT SELECT, INSERT ON vehicle_locations TO service_role;
 GRANT USAGE, SELECT ON SEQUENCE vehicle_locations_id_seq TO service_role;
+
+-- ────────────────────────────────────────────────────────────────────────────
+-- LOADBOARD (Migration 0052) — DAT load-board integration, Phase 1 (posting
+-- only, mocked client). Settings > Integrations > Load Board stores the org's
+-- DAT API key; loadboard_postings is an append-only audit trail of loads
+-- posted, and the "already posted" check for the load-detail "Post to DAT"
+-- button. Capability (loadboard_posting) is owner/solo/dispatcher, unlike
+-- telematics_integrations' owner/solo-only subscription_management gate — see
+-- Migration 0052's header comment for why.
+-- ────────────────────────────────────────────────────────────────────────────
+CREATE TABLE loadboard_integrations (
+  id                  BIGSERIAL PRIMARY KEY,
+  carrier_org_id      BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  provider            TEXT NOT NULL CHECK (provider IN ('dat')),
+  api_key_encrypted   TEXT,
+  enabled             BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_by          UUID REFERENCES profiles(id) ON DELETE SET NULL,
+
+  CONSTRAINT loadboard_integrations_org_provider_unique UNIQUE (carrier_org_id, provider)
+);
+
+CREATE INDEX loadboard_integrations_carrier_org_id_idx ON loadboard_integrations(carrier_org_id);
+
+CREATE TRIGGER loadboard_integrations_updated_at
+  BEFORE UPDATE ON loadboard_integrations FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+COMMENT ON TABLE loadboard_integrations IS 'One row per (carrier_org_id, provider) load-board vendor credential (Settings > Integrations > Load Board). Credential is app-layer AES-256-GCM encrypted (lib/crypto/secrets.ts) -- never plaintext at rest, never returned by any GET route. Phase 1: DAT only, posting-only.';
+
+ALTER TABLE loadboard_integrations ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "carrier_loadboard_integrations_all" ON loadboard_integrations FOR ALL USING (
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo','dispatcher')
+) WITH CHECK (
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo','dispatcher')
+);
+REVOKE ALL ON loadboard_integrations FROM anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON loadboard_integrations TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON loadboard_integrations TO service_role;
+GRANT USAGE, SELECT ON SEQUENCE loadboard_integrations_id_seq TO authenticated, service_role;
+
+CREATE TABLE loadboard_postings (
+  id                    BIGSERIAL PRIMARY KEY,
+  load_id               BIGINT NOT NULL REFERENCES loads(id) ON DELETE CASCADE,
+  carrier_org_id        BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  provider              TEXT NOT NULL CHECK (provider IN ('dat')),
+  external_posting_id   TEXT NOT NULL,
+  posted_at             TIMESTAMPTZ NOT NULL DEFAULT now(),
+  posted_by             UUID REFERENCES profiles(id) ON DELETE SET NULL,
+
+  CONSTRAINT loadboard_postings_load_provider_unique UNIQUE (load_id, provider)
+);
+
+CREATE INDEX loadboard_postings_load_id_idx ON loadboard_postings(load_id);
+CREATE INDEX loadboard_postings_carrier_org_id_idx ON loadboard_postings(carrier_org_id);
+
+COMMENT ON TABLE loadboard_postings IS 'Append-only audit trail of loads posted to an external load board (DAT, Phase 1). One row per successful post -- external_posting_id is whatever id the vendor returned (mocked in Phase 1 by MockDatClient).';
+
+ALTER TABLE loadboard_postings ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "carrier_loadboard_postings_select" ON loadboard_postings FOR SELECT USING (
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo','dispatcher')
+);
+CREATE POLICY "carrier_loadboard_postings_insert" ON loadboard_postings FOR INSERT WITH CHECK (
+  carrier_org_id = my_org_id()
+  AND my_role() IN ('owner','solo','dispatcher')
+);
+REVOKE ALL ON loadboard_postings FROM anon;
+GRANT SELECT, INSERT ON loadboard_postings TO authenticated;
+GRANT SELECT, INSERT ON loadboard_postings TO service_role;
+GRANT USAGE, SELECT ON SEQUENCE loadboard_postings_id_seq TO authenticated, service_role;
 
 -- ── Realtime publication (migration 0041) ────────────────────────────────
 -- loads/driver_messages Postgres Changes subscriptions (dispatch map,

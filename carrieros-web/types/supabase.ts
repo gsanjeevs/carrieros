@@ -1642,6 +1642,113 @@ export type Database = {
           },
         ]
       }
+      loadboard_integrations: {
+        Row: {
+          api_key_encrypted: string | null
+          carrier_org_id: number
+          created_at: string
+          enabled: boolean
+          id: number
+          provider: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          api_key_encrypted?: string | null
+          carrier_org_id: number
+          created_at?: string
+          enabled?: boolean
+          id?: number
+          provider: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          api_key_encrypted?: string | null
+          carrier_org_id?: number
+          created_at?: string
+          enabled?: boolean
+          id?: number
+          provider?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loadboard_integrations_carrier_org_id_fkey"
+            columns: ["carrier_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loadboard_integrations_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loadboard_postings: {
+        Row: {
+          carrier_org_id: number
+          external_posting_id: string
+          id: number
+          load_id: number
+          posted_at: string
+          posted_by: string | null
+          provider: string
+        }
+        Insert: {
+          carrier_org_id: number
+          external_posting_id: string
+          id?: number
+          load_id: number
+          posted_at?: string
+          posted_by?: string | null
+          provider: string
+        }
+        Update: {
+          carrier_org_id?: number
+          external_posting_id?: string
+          id?: number
+          load_id?: number
+          posted_at?: string
+          posted_by?: string | null
+          provider?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loadboard_postings_carrier_org_id_fkey"
+            columns: ["carrier_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loadboard_postings_load_id_fkey"
+            columns: ["load_id"]
+            isOneToOne: false
+            referencedRelation: "loads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loadboard_postings_load_id_fkey"
+            columns: ["load_id"]
+            isOneToOne: false
+            referencedRelation: "loads_driver_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loadboard_postings_posted_by_fkey"
+            columns: ["posted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       loads: {
         Row: {
           carrier_org_id: number

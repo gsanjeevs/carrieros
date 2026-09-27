@@ -3,7 +3,7 @@
 > **Generated** by `node scripts/db/gen-erd.mjs` from the live schema. Do not edit by hand:
 > change the database via a migration, then re-run the generator. CI runs it with `--check`.
 
-58 tables, 106 foreign keys, split into 7 domain diagrams (one diagram of every table is unreadable).
+60 tables, 111 foreign keys, split into 7 domain diagrams (one diagram of every table is unreadable).
 A box drawn without columns belongs to another domain; find it in its own section.
 `||` = the FK is required (NOT NULL); `|o` = the FK is optional (nullable). `PK`/`FK` mark keys.
 
@@ -783,7 +783,7 @@ erDiagram
 
 Tables not yet placed in a domain: add them to DOMAINS in scripts/db/gen-erd.mjs.
 
-Tables: `ai_feature_overrides`, `app_error_log`, `telematics_integrations`, `vehicle_locations`, `webhook_deliveries`, `webhooks`
+Tables: `ai_feature_overrides`, `app_error_log`, `loadboard_integrations`, `loadboard_postings`, `telematics_integrations`, `vehicle_locations`, `webhook_deliveries`, `webhooks`
 
 ```mermaid
 erDiagram
@@ -811,6 +811,25 @@ erDiagram
     text request_id
     text route
     uuid user_id FK
+  }
+  loadboard_integrations {
+    bigint id PK
+    text api_key_encrypted
+    bigint carrier_org_id FK
+    timestamptz created_at
+    boolean enabled
+    text provider
+    timestamptz updated_at
+    uuid updated_by FK
+  }
+  loadboard_postings {
+    bigint id PK
+    bigint carrier_org_id FK
+    text external_posting_id
+    bigint load_id FK
+    timestamptz posted_at
+    uuid posted_by FK
+    text provider
   }
   telematics_integrations {
     bigint id PK
@@ -858,6 +877,11 @@ erDiagram
   profiles |o--o{ ai_feature_overrides : "updated_by"
   organizations |o--o{ app_error_log : "org_id"
   profiles |o--o{ app_error_log : "user_id"
+  organizations ||--o{ loadboard_integrations : "carrier_org_id"
+  profiles |o--o{ loadboard_integrations : "updated_by"
+  organizations ||--o{ loadboard_postings : "carrier_org_id"
+  loads ||--o{ loadboard_postings : "load_id"
+  profiles |o--o{ loadboard_postings : "posted_by"
   organizations ||--o{ telematics_integrations : "carrier_org_id"
   profiles |o--o{ telematics_integrations : "updated_by"
   organizations ||--o{ vehicle_locations : "carrier_org_id"
