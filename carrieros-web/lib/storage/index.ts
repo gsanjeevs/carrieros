@@ -6,8 +6,8 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { SupabaseStorageProvider } from './supabase-storage-provider'
 import type { StorageProvider } from './types'
 
-export function createStorageProvider(supabase: SupabaseClient): StorageProvider {
-  return new SupabaseStorageProvider(supabase)
+export function createStorageProvider(supabase: SupabaseClient, bucket?: string): StorageProvider {
+  return new SupabaseStorageProvider(supabase, bucket)
 }
 
 export type { StorageProvider } from './types'
