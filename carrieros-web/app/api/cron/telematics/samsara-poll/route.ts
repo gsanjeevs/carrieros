@@ -32,7 +32,11 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { decryptSecret } from '@/lib/crypto/secrets'
 import { logError } from '@/lib/observability'
 
-const SAMSARA_API_BASE = 'https://api.samsara.com'
+// Configurable so a local demo/mock server (scripts/demo-samsara-mock, exercising this exact
+// adapter code end-to-end without a real Samsara account) can stand in for the real API by setting
+// SAMSARA_API_BASE_URL -- never used to change behavior in a real deployment, which always falls
+// back to the real API.
+const SAMSARA_API_BASE = process.env.SAMSARA_API_BASE_URL || 'https://api.samsara.com'
 
 function isAuthorized(request: NextRequest): boolean {
   const secret = process.env.CRON_SECRET
@@ -72,7 +76,15 @@ async function fetchAllVehicleLocations(apiKey: string): Promise<SamsaraVehicleL
   const all: SamsaraVehicleLocations[] = []
   let after: string | undefined
   for (let page = 0; page < 20; page++) {
-    const url = new URL('/fleet/vehicles/locations/feed', SAMSARA_API_BASE)
+    // Real bug found while building the local demo mock (which needs a base URL WITH its own path,
+    // e.g. http://localhost:3001/api/dev/samsara-mock): a leading '/' in the relative reference makes
+    // URL resolution treat it as absolute-path, silently discarding any path segment already present
+    // in the base and resolving against the origin alone. This never surfaced against the real
+    // Samsara base (https://api.samsara.com has no path to lose), which is exactly why it went
+    // undetected until a base URL with a path was actually exercised. Fix: no leading slash on the
+    // relative reference, base normalized to always end in '/', so resolution APPENDS instead of
+    // REPLACING.
+    const url = new URL('fleet/vehicles/locations/feed', SAMSARA_API_BASE.endsWith('/') ? SAMSARA_API_BASE : `${SAMSARA_API_BASE}/`)
     if (after) url.searchParams.set('after', after)
     const res = await fetch(url, { headers: { Authorization: `Bearer ${apiKey}` } })
     if (!res.ok) throw new Error(`Samsara locations feed returned HTTP ${res.status}`)
