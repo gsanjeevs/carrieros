@@ -50,7 +50,12 @@ CREATE TABLE carrier_details (
   -- Carrier-level default language (added 2026-07-21, decisions.md L4) -- new
   -- team members with a NULL profiles.preferred_language inherit this, same
   -- inheritance shape as uom_system above. Unrelated to roles.
-  default_language TEXT NOT NULL DEFAULT 'en' CHECK (default_language IN ('en','es','pa','ur')),
+  -- Widened from 4 to 24 codes by migration 0054 (US trucking workforce
+  -- language expansion) -- keep in sync with profiles.preferred_language
+  -- below and the `languages` reference table.
+  default_language TEXT NOT NULL DEFAULT 'en' CHECK (default_language IN (
+    'en','es','pa','ur','ru','uk','mn','ar','so','ht','pt','vi','zh','ko','tl','fr','pl','ro','de','hi','gu','am','fa','ne'
+  )),
   -- Default billing rail for new invoices (decision R1). Per-invoice override
   -- lives on invoices.payment_method.
   default_payment_method TEXT NOT NULL DEFAULT 'other'
@@ -438,11 +443,32 @@ CREATE TABLE languages (
   flag_emoji    TEXT NOT NULL,
   display_order INT NOT NULL
 );
+-- Rows 5-24 added by migration 0054 (US trucking workforce language expansion).
 INSERT INTO languages (code, label, native_name, flag_emoji, display_order) VALUES
   ('en','English','English','🇺🇸',1),
   ('es','Spanish','Español','🇲🇽',2),
   ('pa','Punjabi','ਪੰਜਾਬੀ','🇮🇳',3),
-  ('ur','Urdu','اردو','🇵🇰',4);
+  ('ur','Urdu','اردو','🇵🇰',4),
+  ('ru','Russian','Русский','🇷🇺',5),
+  ('uk','Ukrainian','Українська','🇺🇦',6),
+  ('mn','Mongolian','Монгол','🇲🇳',7),
+  ('ar','Arabic','العربية','🇸🇦',8),
+  ('so','Somali','Soomaali','🇸🇴',9),
+  ('ht','Haitian Creole','Kreyòl Ayisyen','🇭🇹',10),
+  ('pt','Portuguese','Português','🇧🇷',11),
+  ('vi','Vietnamese','Tiếng Việt','🇻🇳',12),
+  ('zh','Chinese (Simplified)','简体中文','🇨🇳',13),
+  ('ko','Korean','한국어','🇰🇷',14),
+  ('tl','Tagalog','Tagalog','🇵🇭',15),
+  ('fr','French','Français','🇫🇷',16),
+  ('pl','Polish','Polski','🇵🇱',17),
+  ('ro','Romanian','Română','🇷🇴',18),
+  ('de','German','Deutsch','🇩🇪',19),
+  ('hi','Hindi','हिन्दी','🇮🇳',20),
+  ('gu','Gujarati','ગુજરાતી','🇮🇳',21),
+  ('am','Amharic','አማርኛ','🇪🇹',22),
+  ('fa','Persian/Farsi','فارسی','🇮🇷',23),
+  ('ne','Nepali','नेपाली','🇳🇵',24);
 
 -- Tier entitlements master data (2026-07-21, decisions.md S11). Cumulative/
 -- ordered by `rank`, not a many-to-many join -- Growth includes everything
@@ -542,7 +568,11 @@ CREATE TABLE profiles (
   phone              TEXT,
   -- Nullable as of 2026-07-21 (decisions.md L4) -- NULL means "inherit
   -- carrier_details.default_language", same shape as uom_system below.
-  preferred_language TEXT CHECK (preferred_language IN ('en','es','pa','ur')),
+  -- Widened from 4 to 24 codes by migration 0054 -- keep in sync with
+  -- carrier_details.default_language above and the `languages` table.
+  preferred_language TEXT CHECK (preferred_language IN (
+    'en','es','pa','ur','ru','uk','mn','ar','so','ht','pt','vi','zh','ko','tl','fr','pl','ro','de','hi','gu','am','fa','ne'
+  )),
   timezone           TEXT,
   -- Per-user overrides of carrier_details defaults (decisions.md L2 — personal
   -- prefs follow the user). NULL uom_system means "inherit from carrier_details".

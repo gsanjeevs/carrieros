@@ -1,3566 +1,1814 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
+  
+  "graphql_public": {
+          Tables: {
+            [_ in never]: never
+          }
+          Views: {
+            [_ in never]: never
+          }
+          Functions: {
+            "graphql":
+{ Args: { "extensions"?: Json,"operationName"?: string,"query"?: string,"variables"?: Json }; Returns: Json
+                           }
+          }
+          Enums: {
+            [_ in never]: never
+          }
+          CompositeTypes: {
+            [_ in never]: never
+          }
+        },"public": {
+          Tables: {
+            "admin_events": {
+                  Row: {
+                    "admin_id": string | null,"created_at": string | null,"event_type": string,"id": number,"metadata": Json | null,"org_id": number | null
+                  }
+                  Insert: {
+                    "admin_id"?: string | null,"created_at"?: string | null,"event_type": string,"id"?: number,"metadata"?: Json | null,"org_id"?: number | null
+                  }
+                  Update: {
+                    "admin_id"?: string | null,"created_at"?: string | null,"event_type"?: string,"id"?: number,"metadata"?: Json | null,"org_id"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "admin_events_admin_id_fkey"
+      columns: ["admin_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "admin_events_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
     }
-    Views: {
-      [_ in never]: never
+                  ]
+                },"admin_notes": {
+                  Row: {
+                    "admin_id": string | null,"body": string,"created_at": string | null,"id": number,"org_id": number
+                  }
+                  Insert: {
+                    "admin_id"?: string | null,"body": string,"created_at"?: string | null,"id"?: number,"org_id": number
+                  }
+                  Update: {
+                    "admin_id"?: string | null,"body"?: string,"created_at"?: string | null,"id"?: number,"org_id"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "admin_notes_admin_id_fkey"
+      columns: ["admin_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "admin_notes_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
     }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
+                  ]
+                },"ai_feature_overrides": {
+                  Row: {
+                    "anthropic_api_key_encrypted": string | null,"anthropic_api_key_preview": string | null,"compatible_base_url": string | null,"feature": string,"model": string,"openai_api_key_encrypted": string | null,"openai_api_key_preview": string | null,"openai_compatible_api_key_encrypted": string | null,"openai_compatible_api_key_preview": string | null,"provider": string,"updated_at": string,"updated_by": string | null
+                  }
+                  Insert: {
+                    "anthropic_api_key_encrypted"?: string | null,"anthropic_api_key_preview"?: string | null,"compatible_base_url"?: string | null,"feature": string,"model": string,"openai_api_key_encrypted"?: string | null,"openai_api_key_preview"?: string | null,"openai_compatible_api_key_encrypted"?: string | null,"openai_compatible_api_key_preview"?: string | null,"provider": string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "anthropic_api_key_encrypted"?: string | null,"anthropic_api_key_preview"?: string | null,"compatible_base_url"?: string | null,"feature"?: string,"model"?: string,"openai_api_key_encrypted"?: string | null,"openai_api_key_preview"?: string | null,"openai_compatible_api_key_encrypted"?: string | null,"openai_compatible_api_key_preview"?: string | null,"provider"?: string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ai_feature_overrides_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
     }
-    Enums: {
-      [_ in never]: never
+                  ]
+                },"ai_provider_config": {
+                  Row: {
+                    "anthropic_api_key_encrypted": string | null,"anthropic_api_key_preview": string | null,"compatible_base_url": string | null,"id": number,"model": string,"openai_api_key_encrypted": string | null,"openai_api_key_preview": string | null,"openai_compatible_api_key_encrypted": string | null,"openai_compatible_api_key_preview": string | null,"provider": string,"updated_at": string,"updated_by": string | null
+                  }
+                  Insert: {
+                    "anthropic_api_key_encrypted"?: string | null,"anthropic_api_key_preview"?: string | null,"compatible_base_url"?: string | null,"id"?: number,"model"?: string,"openai_api_key_encrypted"?: string | null,"openai_api_key_preview"?: string | null,"openai_compatible_api_key_encrypted"?: string | null,"openai_compatible_api_key_preview"?: string | null,"provider"?: string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "anthropic_api_key_encrypted"?: string | null,"anthropic_api_key_preview"?: string | null,"compatible_base_url"?: string | null,"id"?: number,"model"?: string,"openai_api_key_encrypted"?: string | null,"openai_api_key_preview"?: string | null,"openai_compatible_api_key_encrypted"?: string | null,"openai_compatible_api_key_preview"?: string | null,"provider"?: string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ai_provider_config_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
     }
-    CompositeTypes: {
-      [_ in never]: never
+                  ]
+                },"app_error_log": {
+                  Row: {
+                    "context": Json | null,"created_at": string,"id": number,"level": string,"message": string,"org_id": number | null,"request_id": string | null,"route": string,"user_id": string | null
+                  }
+                  Insert: {
+                    "context"?: Json | null,"created_at"?: string,"id"?: number,"level"?: string,"message": string,"org_id"?: number | null,"request_id"?: string | null,"route": string,"user_id"?: string | null
+                  }
+                  Update: {
+                    "context"?: Json | null,"created_at"?: string,"id"?: number,"level"?: string,"message"?: string,"org_id"?: number | null,"request_id"?: string | null,"route"?: string,"user_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "app_error_log_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "app_error_log_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
     }
-  }
-  public: {
-    Tables: {
-      admin_events: {
-        Row: {
-          admin_id: string | null
-          created_at: string | null
-          event_type: string
-          id: number
-          metadata: Json | null
-          org_id: number | null
-        }
-        Insert: {
-          admin_id?: string | null
-          created_at?: string | null
-          event_type: string
-          id?: number
-          metadata?: Json | null
-          org_id?: number | null
-        }
-        Update: {
-          admin_id?: string | null
-          created_at?: string | null
-          event_type?: string
-          id?: number
-          metadata?: Json | null
-          org_id?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "admin_events_admin_id_fkey"
-            columns: ["admin_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "admin_events_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      admin_notes: {
-        Row: {
-          admin_id: string | null
-          body: string
-          created_at: string | null
-          id: number
-          org_id: number
-        }
-        Insert: {
-          admin_id?: string | null
-          body: string
-          created_at?: string | null
-          id?: number
-          org_id: number
-        }
-        Update: {
-          admin_id?: string | null
-          body?: string
-          created_at?: string | null
-          id?: number
-          org_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "admin_notes_admin_id_fkey"
-            columns: ["admin_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "admin_notes_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      ai_feature_overrides: {
-        Row: {
-          anthropic_api_key_encrypted: string | null
-          anthropic_api_key_preview: string | null
-          compatible_base_url: string | null
-          feature: string
-          model: string
-          openai_api_key_encrypted: string | null
-          openai_api_key_preview: string | null
-          openai_compatible_api_key_encrypted: string | null
-          openai_compatible_api_key_preview: string | null
-          provider: string
-          updated_at: string
-          updated_by: string | null
-        }
-        Insert: {
-          anthropic_api_key_encrypted?: string | null
-          anthropic_api_key_preview?: string | null
-          compatible_base_url?: string | null
-          feature: string
-          model: string
-          openai_api_key_encrypted?: string | null
-          openai_api_key_preview?: string | null
-          openai_compatible_api_key_encrypted?: string | null
-          openai_compatible_api_key_preview?: string | null
-          provider: string
-          updated_at?: string
-          updated_by?: string | null
-        }
-        Update: {
-          anthropic_api_key_encrypted?: string | null
-          anthropic_api_key_preview?: string | null
-          compatible_base_url?: string | null
-          feature?: string
-          model?: string
-          openai_api_key_encrypted?: string | null
-          openai_api_key_preview?: string | null
-          openai_compatible_api_key_encrypted?: string | null
-          openai_compatible_api_key_preview?: string | null
-          provider?: string
-          updated_at?: string
-          updated_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ai_feature_overrides_updated_by_fkey"
-            columns: ["updated_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      ai_provider_config: {
-        Row: {
-          anthropic_api_key_encrypted: string | null
-          anthropic_api_key_preview: string | null
-          compatible_base_url: string | null
-          id: number
-          model: string
-          openai_api_key_encrypted: string | null
-          openai_api_key_preview: string | null
-          openai_compatible_api_key_encrypted: string | null
-          openai_compatible_api_key_preview: string | null
-          provider: string
-          updated_at: string
-          updated_by: string | null
-        }
-        Insert: {
-          anthropic_api_key_encrypted?: string | null
-          anthropic_api_key_preview?: string | null
-          compatible_base_url?: string | null
-          id?: number
-          model?: string
-          openai_api_key_encrypted?: string | null
-          openai_api_key_preview?: string | null
-          openai_compatible_api_key_encrypted?: string | null
-          openai_compatible_api_key_preview?: string | null
-          provider?: string
-          updated_at?: string
-          updated_by?: string | null
-        }
-        Update: {
-          anthropic_api_key_encrypted?: string | null
-          anthropic_api_key_preview?: string | null
-          compatible_base_url?: string | null
-          id?: number
-          model?: string
-          openai_api_key_encrypted?: string | null
-          openai_api_key_preview?: string | null
-          openai_compatible_api_key_encrypted?: string | null
-          openai_compatible_api_key_preview?: string | null
-          provider?: string
-          updated_at?: string
-          updated_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ai_provider_config_updated_by_fkey"
-            columns: ["updated_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      app_error_log: {
-        Row: {
-          context: Json | null
-          created_at: string
-          id: number
-          level: string
-          message: string
-          org_id: number | null
-          request_id: string | null
-          route: string
-          user_id: string | null
-        }
-        Insert: {
-          context?: Json | null
-          created_at?: string
-          id?: number
-          level?: string
-          message: string
-          org_id?: number | null
-          request_id?: string | null
-          route: string
-          user_id?: string | null
-        }
-        Update: {
-          context?: Json | null
-          created_at?: string
-          id?: number
-          level?: string
-          message?: string
-          org_id?: number | null
-          request_id?: string | null
-          route?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "app_error_log_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "app_error_log_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      audit_events: {
-        Row: {
-          action: string
-          actor_user_id: string | null
-          aggregate_id: string
-          aggregate_type: string
-          correlation_id: string
-          expected_version: number | null
-          id: number
-          metadata: Json | null
-          new_state: string | null
-          occurred_at: string
-          org_id: number
-          prior_state: string | null
-          reason: string | null
-        }
-        Insert: {
-          action: string
-          actor_user_id?: string | null
-          aggregate_id: string
-          aggregate_type: string
-          correlation_id: string
-          expected_version?: number | null
-          id?: number
-          metadata?: Json | null
-          new_state?: string | null
-          occurred_at?: string
-          org_id: number
-          prior_state?: string | null
-          reason?: string | null
-        }
-        Update: {
-          action?: string
-          actor_user_id?: string | null
-          aggregate_id?: string
-          aggregate_type?: string
-          correlation_id?: string
-          expected_version?: number | null
-          id?: number
-          metadata?: Json | null
-          new_state?: string | null
-          occurred_at?: string
-          org_id?: number
-          prior_state?: string | null
-          reason?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "audit_events_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      billing_events: {
-        Row: {
-          amount: number | null
-          card_last4: string | null
-          created_at: string | null
-          event_type: string
-          id: number
-          org_id: number
-          resolved_at: string | null
-          status: string | null
-          stripe_event_id: string | null
-        }
-        Insert: {
-          amount?: number | null
-          card_last4?: string | null
-          created_at?: string | null
-          event_type: string
-          id?: number
-          org_id: number
-          resolved_at?: string | null
-          status?: string | null
-          stripe_event_id?: string | null
-        }
-        Update: {
-          amount?: number | null
-          card_last4?: string | null
-          created_at?: string | null
-          event_type?: string
-          id?: number
-          org_id?: number
-          resolved_at?: string | null
-          status?: string | null
-          stripe_event_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "billing_events_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      carrier_details: {
-        Row: {
-          billing_status: string
-          brand_accent_color: string | null
-          brand_primary_color: string | null
-          card_brand: string | null
-          card_last4: string | null
-          default_language: string
-          default_net_terms_days: number
-          default_payment_method: string
-          dot_number: string | null
-          factoring_company: string | null
-          grace_period_until: string | null
-          load_email: string | null
-          mc_number: string | null
-          org_id: number
-          stripe_customer_id: string | null
-          tier: string | null
-          timezone: string | null
-          trial_ends_at: string | null
-          uom_system: string | null
-        }
-        Insert: {
-          billing_status?: string
-          brand_accent_color?: string | null
-          brand_primary_color?: string | null
-          card_brand?: string | null
-          card_last4?: string | null
-          default_language?: string
-          default_net_terms_days?: number
-          default_payment_method?: string
-          dot_number?: string | null
-          factoring_company?: string | null
-          grace_period_until?: string | null
-          load_email?: string | null
-          mc_number?: string | null
-          org_id: number
-          stripe_customer_id?: string | null
-          tier?: string | null
-          timezone?: string | null
-          trial_ends_at?: string | null
-          uom_system?: string | null
-        }
-        Update: {
-          billing_status?: string
-          brand_accent_color?: string | null
-          brand_primary_color?: string | null
-          card_brand?: string | null
-          card_last4?: string | null
-          default_language?: string
-          default_net_terms_days?: number
-          default_payment_method?: string
-          dot_number?: string | null
-          factoring_company?: string | null
-          grace_period_until?: string | null
-          load_email?: string | null
-          mc_number?: string | null
-          org_id?: number
-          stripe_customer_id?: string | null
-          tier?: string | null
-          timezone?: string | null
-          trial_ends_at?: string | null
-          uom_system?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "carrier_details_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: true
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      change_events: {
-        Row: {
-          created_at: string
-          entity: string
-          entity_id: number | null
-          id: number
-          op: string
-          org_id: number
-        }
-        Insert: {
-          created_at?: string
-          entity: string
-          entity_id?: number | null
-          id?: number
-          op: string
-          org_id: number
-        }
-        Update: {
-          created_at?: string
-          entity?: string
-          entity_id?: number | null
-          id?: number
-          op?: string
-          org_id?: number
-        }
-        Relationships: []
-      }
-      customer_contacts: {
-        Row: {
-          carrier_org_id: number
-          created_at: string | null
-          email: string | null
-          id: number
-          is_primary: boolean
-          name: string
-          org_id: number
-          phone: string | null
-          portal_profile_id: string | null
-          title: string | null
-        }
-        Insert: {
-          carrier_org_id: number
-          created_at?: string | null
-          email?: string | null
-          id?: number
-          is_primary?: boolean
-          name: string
-          org_id: number
-          phone?: string | null
-          portal_profile_id?: string | null
-          title?: string | null
-        }
-        Update: {
-          carrier_org_id?: number
-          created_at?: string | null
-          email?: string | null
-          id?: number
-          is_primary?: boolean
-          name?: string
-          org_id?: number
-          phone?: string | null
-          portal_profile_id?: string | null
-          title?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "customer_contacts_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "customer_contacts_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "customer_contacts_portal_profile_id_fkey"
-            columns: ["portal_profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      customer_details: {
-        Row: {
-          carrier_org_id: number
-          contact_name: string | null
-          customer_number: string | null
-          notes: string | null
-          org_id: number
-          tags: string[] | null
-        }
-        Insert: {
-          carrier_org_id: number
-          contact_name?: string | null
-          customer_number?: string | null
-          notes?: string | null
-          org_id: number
-          tags?: string[] | null
-        }
-        Update: {
-          carrier_org_id?: number
-          contact_name?: string | null
-          customer_number?: string | null
-          notes?: string | null
-          org_id?: number
-          tags?: string[] | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "customer_details_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "customer_details_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: true
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      documents: {
-        Row: {
-          carrier_org_id: number | null
-          created_at: string | null
-          id: number
-          load_id: number | null
-          storage_path: string
-          type: string | null
-          uploaded_by: string | null
-        }
-        Insert: {
-          carrier_org_id?: number | null
-          created_at?: string | null
-          id?: number
-          load_id?: number | null
-          storage_path: string
-          type?: string | null
-          uploaded_by?: string | null
-        }
-        Update: {
-          carrier_org_id?: number | null
-          created_at?: string | null
-          id?: number
-          load_id?: number | null
-          storage_path?: string
-          type?: string | null
-          uploaded_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "documents_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "documents_load_id_fkey"
-            columns: ["load_id"]
-            isOneToOne: false
-            referencedRelation: "loads"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "documents_load_id_fkey"
-            columns: ["load_id"]
-            isOneToOne: false
-            referencedRelation: "loads_driver_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "documents_uploaded_by_fkey"
-            columns: ["uploaded_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      driver_documents: {
-        Row: {
-          carrier_org_id: number | null
-          created_at: string | null
-          doc_type: string
-          driver_id: number | null
-          expiry_date: string | null
-          id: number
-          label: string | null
-          storage_path: string
-          uploaded_by: string | null
-        }
-        Insert: {
-          carrier_org_id?: number | null
-          created_at?: string | null
-          doc_type: string
-          driver_id?: number | null
-          expiry_date?: string | null
-          id?: number
-          label?: string | null
-          storage_path: string
-          uploaded_by?: string | null
-        }
-        Update: {
-          carrier_org_id?: number | null
-          created_at?: string | null
-          doc_type?: string
-          driver_id?: number | null
-          expiry_date?: string | null
-          id?: number
-          label?: string | null
-          storage_path?: string
-          uploaded_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "driver_documents_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "driver_documents_driver_id_fkey"
-            columns: ["driver_id"]
-            isOneToOne: false
-            referencedRelation: "drivers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "driver_documents_uploaded_by_fkey"
-            columns: ["uploaded_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      driver_message_translations: {
-        Row: {
-          id: number
-          message_id: number
-          target_language: string
-          translated_at: string | null
-          translated_body: string
-        }
-        Insert: {
-          id?: number
-          message_id: number
-          target_language: string
-          translated_at?: string | null
-          translated_body: string
-        }
-        Update: {
-          id?: number
-          message_id?: number
-          target_language?: string
-          translated_at?: string | null
-          translated_body?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "driver_message_translations_message_id_fkey"
-            columns: ["message_id"]
-            isOneToOne: false
-            referencedRelation: "driver_messages"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      driver_messages: {
-        Row: {
-          body: string
-          carrier_org_id: number
-          id: number
-          load_id: number
-          original_language: string | null
-          read_at: string | null
-          sender_id: string | null
-          sent_at: string
-        }
-        Insert: {
-          body: string
-          carrier_org_id: number
-          id?: number
-          load_id: number
-          original_language?: string | null
-          read_at?: string | null
-          sender_id?: string | null
-          sent_at?: string
-        }
-        Update: {
-          body?: string
-          carrier_org_id?: number
-          id?: number
-          load_id?: number
-          original_language?: string | null
-          read_at?: string | null
-          sender_id?: string | null
-          sent_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "driver_messages_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "driver_messages_load_id_fkey"
-            columns: ["load_id"]
-            isOneToOne: false
-            referencedRelation: "loads"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "driver_messages_load_id_fkey"
-            columns: ["load_id"]
-            isOneToOne: false
-            referencedRelation: "loads_driver_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "driver_messages_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      driver_settlements: {
-        Row: {
-          advance_amount: number | null
-          carrier_org_id: number
-          created_at: string | null
-          created_by: string | null
-          driver_id: number | null
-          gross_revenue: number
-          id: number
-          load_id: number | null
-          loads_count: number | null
-          net_pay: number
-          pay_method: string
-          payment_status: string
-          pdf_statement_path: string | null
-          period_end: string | null
-          period_start: string | null
-          rate_value: number | null
-        }
-        Insert: {
-          advance_amount?: number | null
-          carrier_org_id: number
-          created_at?: string | null
-          created_by?: string | null
-          driver_id?: number | null
-          gross_revenue: number
-          id?: number
-          load_id?: number | null
-          loads_count?: number | null
-          net_pay: number
-          pay_method: string
-          payment_status?: string
-          pdf_statement_path?: string | null
-          period_end?: string | null
-          period_start?: string | null
-          rate_value?: number | null
-        }
-        Update: {
-          advance_amount?: number | null
-          carrier_org_id?: number
-          created_at?: string | null
-          created_by?: string | null
-          driver_id?: number | null
-          gross_revenue?: number
-          id?: number
-          load_id?: number | null
-          loads_count?: number | null
-          net_pay?: number
-          pay_method?: string
-          payment_status?: string
-          pdf_statement_path?: string | null
-          period_end?: string | null
-          period_start?: string | null
-          rate_value?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "driver_settlements_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "driver_settlements_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "driver_settlements_driver_id_fkey"
-            columns: ["driver_id"]
-            isOneToOne: false
-            referencedRelation: "drivers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "driver_settlements_load_id_fkey"
-            columns: ["load_id"]
-            isOneToOne: false
-            referencedRelation: "loads"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "driver_settlements_load_id_fkey"
-            columns: ["load_id"]
-            isOneToOne: false
-            referencedRelation: "loads_driver_view"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      drivers: {
-        Row: {
-          carrier_org_id: number
-          cdl_class: string | null
-          cdl_expiry: string | null
-          cdl_number: string | null
-          cdl_state: string | null
-          created_at: string | null
-          default_vehicle_id: number | null
-          driver_number: string | null
-          emergency_contact_name: string | null
-          emergency_contact_phone: string | null
-          emergency_contact_relation: string | null
-          endorsements: string[] | null
-          id: number
-          invite_status: string | null
-          is_active: boolean | null
-          med_cert_expiry: string | null
-          profile_id: string
-          settlement_rate: number | null
-          settlement_type: string | null
-        }
-        Insert: {
-          carrier_org_id: number
-          cdl_class?: string | null
-          cdl_expiry?: string | null
-          cdl_number?: string | null
-          cdl_state?: string | null
-          created_at?: string | null
-          default_vehicle_id?: number | null
-          driver_number?: string | null
-          emergency_contact_name?: string | null
-          emergency_contact_phone?: string | null
-          emergency_contact_relation?: string | null
-          endorsements?: string[] | null
-          id?: number
-          invite_status?: string | null
-          is_active?: boolean | null
-          med_cert_expiry?: string | null
-          profile_id: string
-          settlement_rate?: number | null
-          settlement_type?: string | null
-        }
-        Update: {
-          carrier_org_id?: number
-          cdl_class?: string | null
-          cdl_expiry?: string | null
-          cdl_number?: string | null
-          cdl_state?: string | null
-          created_at?: string | null
-          default_vehicle_id?: number | null
-          driver_number?: string | null
-          emergency_contact_name?: string | null
-          emergency_contact_phone?: string | null
-          emergency_contact_relation?: string | null
-          endorsements?: string[] | null
-          id?: number
-          invite_status?: string | null
-          is_active?: boolean | null
-          med_cert_expiry?: string | null
-          profile_id?: string
-          settlement_rate?: number | null
-          settlement_type?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "drivers_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "drivers_default_vehicle_id_fkey"
-            columns: ["default_vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "drivers_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      dvir_defects: {
-        Row: {
-          area: string
-          created_at: string | null
-          description: string | null
-          id: number
-          inspection_id: number | null
-          photo_path: string | null
-          severity: string | null
-        }
-        Insert: {
-          area: string
-          created_at?: string | null
-          description?: string | null
-          id?: number
-          inspection_id?: number | null
-          photo_path?: string | null
-          severity?: string | null
-        }
-        Update: {
-          area?: string
-          created_at?: string | null
-          description?: string | null
-          id?: number
-          inspection_id?: number | null
-          photo_path?: string | null
-          severity?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "dvir_defects_inspection_id_fkey"
-            columns: ["inspection_id"]
-            isOneToOne: false
-            referencedRelation: "dvir_inspections"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      dvir_inspections: {
-        Row: {
-          carrier_org_id: number | null
-          condition: string
-          created_at: string | null
-          driver_id: number | null
-          id: number
-          load_id: number | null
-          odometer: number | null
-          signature_url: string | null
-          submitted_at: string | null
-          type: string
-          vehicle_id: number | null
-        }
-        Insert: {
-          carrier_org_id?: number | null
-          condition: string
-          created_at?: string | null
-          driver_id?: number | null
-          id?: number
-          load_id?: number | null
-          odometer?: number | null
-          signature_url?: string | null
-          submitted_at?: string | null
-          type: string
-          vehicle_id?: number | null
-        }
-        Update: {
-          carrier_org_id?: number | null
-          condition?: string
-          created_at?: string | null
-          driver_id?: number | null
-          id?: number
-          load_id?: number | null
-          odometer?: number | null
-          signature_url?: string | null
-          submitted_at?: string | null
-          type?: string
-          vehicle_id?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "dvir_inspections_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "dvir_inspections_driver_id_fkey"
-            columns: ["driver_id"]
-            isOneToOne: false
-            referencedRelation: "drivers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "dvir_inspections_load_id_fkey"
-            columns: ["load_id"]
-            isOneToOne: false
-            referencedRelation: "loads"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "dvir_inspections_load_id_fkey"
-            columns: ["load_id"]
-            isOneToOne: false
-            referencedRelation: "loads_driver_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "dvir_inspections_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      exception_events: {
-        Row: {
-          carrier_org_id: number
-          created_at: string | null
-          detail: string | null
-          entity_id: number
-          entity_type: string
-          event_type: string
-          id: number
-          occurred_at: string
-          severity: string | null
-          title: string
-        }
-        Insert: {
-          carrier_org_id: number
-          created_at?: string | null
-          detail?: string | null
-          entity_id: number
-          entity_type: string
-          event_type: string
-          id?: number
-          occurred_at?: string
-          severity?: string | null
-          title: string
-        }
-        Update: {
-          carrier_org_id?: number
-          created_at?: string | null
-          detail?: string | null
-          entity_id?: number
-          entity_type?: string
-          event_type?: string
-          id?: number
-          occurred_at?: string
-          severity?: string | null
-          title?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "exception_events_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      features: {
-        Row: {
-          display_order: number
-          key: string
-          label: string
-          min_tier: string
-          retained_when_delinquent: boolean
-        }
-        Insert: {
-          display_order: number
-          key: string
-          label: string
-          min_tier: string
-          retained_when_delinquent?: boolean
-        }
-        Update: {
-          display_order?: number
-          key?: string
-          label?: string
-          min_tier?: string
-          retained_when_delinquent?: boolean
-        }
-        Relationships: [
-          {
-            foreignKeyName: "features_min_tier_fkey"
-            columns: ["min_tier"]
-            isOneToOne: false
-            referencedRelation: "tiers"
-            referencedColumns: ["code"]
-          },
-        ]
-      }
-      fuel_stops: {
-        Row: {
-          carrier_org_id: number
-          created_at: string | null
-          driver_id: number | null
-          gallons: number
-          id: number
-          load_id: number | null
-          logged_by: string | null
-          odometer: number | null
-          price_per_gallon: number | null
-          receipt_path: string | null
-          state: string
-          station: string | null
-          stop_date: string
-          total_cost: number
-          vehicle_id: number | null
-        }
-        Insert: {
-          carrier_org_id: number
-          created_at?: string | null
-          driver_id?: number | null
-          gallons: number
-          id?: number
-          load_id?: number | null
-          logged_by?: string | null
-          odometer?: number | null
-          price_per_gallon?: number | null
-          receipt_path?: string | null
-          state: string
-          station?: string | null
-          stop_date: string
-          total_cost: number
-          vehicle_id?: number | null
-        }
-        Update: {
-          carrier_org_id?: number
-          created_at?: string | null
-          driver_id?: number | null
-          gallons?: number
-          id?: number
-          load_id?: number | null
-          logged_by?: string | null
-          odometer?: number | null
-          price_per_gallon?: number | null
-          receipt_path?: string | null
-          state?: string
-          station?: string | null
-          stop_date?: string
-          total_cost?: number
-          vehicle_id?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fuel_stops_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fuel_stops_driver_id_fkey"
-            columns: ["driver_id"]
-            isOneToOne: false
-            referencedRelation: "drivers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fuel_stops_load_id_fkey"
-            columns: ["load_id"]
-            isOneToOne: false
-            referencedRelation: "loads"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fuel_stops_load_id_fkey"
-            columns: ["load_id"]
-            isOneToOne: false
-            referencedRelation: "loads_driver_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fuel_stops_logged_by_fkey"
-            columns: ["logged_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fuel_stops_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      idempotency_keys: {
-        Row: {
-          correlation_id: string
-          created_at: string
-          endpoint: string
-          expires_at: string
-          id: number
-          idempotency_key: string
-          org_id: number
-          request_hash: string
-          response_body: Json | null
-          status_code: number
-          user_id: string
-        }
-        Insert: {
-          correlation_id: string
-          created_at?: string
-          endpoint: string
-          expires_at?: string
-          id?: number
-          idempotency_key: string
-          org_id: number
-          request_hash: string
-          response_body?: Json | null
-          status_code: number
-          user_id: string
-        }
-        Update: {
-          correlation_id?: string
-          created_at?: string
-          endpoint?: string
-          expires_at?: string
-          id?: number
-          idempotency_key?: string
-          org_id?: number
-          request_hash?: string
-          response_body?: Json | null
-          status_code?: number
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "idempotency_keys_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      ifta_state_crossings: {
-        Row: {
-          carrier_org_id: number
-          created_at: string | null
-          crossed_at: string
-          driver_id: number | null
-          id: number
-          lat: number | null
-          lng: number | null
-          load_id: number | null
-          odometer_est: number | null
-          source: string
-          state: string
-          vehicle_id: number | null
-        }
-        Insert: {
-          carrier_org_id: number
-          created_at?: string | null
-          crossed_at: string
-          driver_id?: number | null
-          id?: number
-          lat?: number | null
-          lng?: number | null
-          load_id?: number | null
-          odometer_est?: number | null
-          source: string
-          state: string
-          vehicle_id?: number | null
-        }
-        Update: {
-          carrier_org_id?: number
-          created_at?: string | null
-          crossed_at?: string
-          driver_id?: number | null
-          id?: number
-          lat?: number | null
-          lng?: number | null
-          load_id?: number | null
-          odometer_est?: number | null
-          source?: string
-          state?: string
-          vehicle_id?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ifta_state_crossings_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ifta_state_crossings_driver_id_fkey"
-            columns: ["driver_id"]
-            isOneToOne: false
-            referencedRelation: "drivers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ifta_state_crossings_load_id_fkey"
-            columns: ["load_id"]
-            isOneToOne: false
-            referencedRelation: "loads"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ifta_state_crossings_load_id_fkey"
-            columns: ["load_id"]
-            isOneToOne: false
-            referencedRelation: "loads_driver_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ifta_state_crossings_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      ifta_tax_rates: {
-        Row: {
-          id: number
-          quarter: string
-          rate_per_gallon: number
-          state: string
-        }
-        Insert: {
-          id?: number
-          quarter: string
-          rate_per_gallon: number
-          state: string
-        }
-        Update: {
-          id?: number
-          quarter?: string
-          rate_per_gallon?: number
-          state?: string
-        }
-        Relationships: []
-      }
-      invoices: {
-        Row: {
-          amount: number
-          carrier_org_id: number
-          created_at: string | null
-          customer_org_id: number | null
-          due_date: string | null
-          factored_at: string | null
-          factoring_company: string | null
-          factoring_reference: string | null
-          id: number
-          invoice_number: string
-          load_id: number | null
-          notes: string | null
-          opened_at: string | null
-          paid_at: string | null
-          payment_method: string
-          sent_at: string | null
-          status: string | null
-        }
-        Insert: {
-          amount: number
-          carrier_org_id: number
-          created_at?: string | null
-          customer_org_id?: number | null
-          due_date?: string | null
-          factored_at?: string | null
-          factoring_company?: string | null
-          factoring_reference?: string | null
-          id?: number
-          invoice_number: string
-          load_id?: number | null
-          notes?: string | null
-          opened_at?: string | null
-          paid_at?: string | null
-          payment_method?: string
-          sent_at?: string | null
-          status?: string | null
-        }
-        Update: {
-          amount?: number
-          carrier_org_id?: number
-          created_at?: string | null
-          customer_org_id?: number | null
-          due_date?: string | null
-          factored_at?: string | null
-          factoring_company?: string | null
-          factoring_reference?: string | null
-          id?: number
-          invoice_number?: string
-          load_id?: number | null
-          notes?: string | null
-          opened_at?: string | null
-          paid_at?: string | null
-          payment_method?: string
-          sent_at?: string | null
-          status?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "invoices_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "invoices_customer_org_id_fkey"
-            columns: ["customer_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "invoices_load_id_fkey"
-            columns: ["load_id"]
-            isOneToOne: false
-            referencedRelation: "loads"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "invoices_load_id_fkey"
-            columns: ["load_id"]
-            isOneToOne: false
-            referencedRelation: "loads_driver_view"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      languages: {
-        Row: {
-          code: string
-          display_order: number
-          flag_emoji: string
-          label: string
-          native_name: string
-        }
-        Insert: {
-          code: string
-          display_order: number
-          flag_emoji: string
-          label: string
-          native_name: string
-        }
-        Update: {
-          code?: string
-          display_order?: number
-          flag_emoji?: string
-          label?: string
-          native_name?: string
-        }
-        Relationships: []
-      }
-      load_events: {
-        Row: {
-          created_at: string | null
-          created_by: string | null
-          event_type: string
-          id: number
-          load_id: number
-          location_lat: number | null
-          location_lng: number | null
-          note: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          created_by?: string | null
-          event_type: string
-          id?: number
-          load_id: number
-          location_lat?: number | null
-          location_lng?: number | null
-          note?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          created_by?: string | null
-          event_type?: string
-          id?: number
-          load_id?: number
-          location_lat?: number | null
-          location_lng?: number | null
-          note?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "load_events_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "load_events_load_id_fkey"
-            columns: ["load_id"]
-            isOneToOne: false
-            referencedRelation: "loads"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "load_events_load_id_fkey"
-            columns: ["load_id"]
-            isOneToOne: false
-            referencedRelation: "loads_driver_view"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      load_expenses: {
-        Row: {
-          amount: number
-          carrier_org_id: number
-          created_at: string | null
-          expense_type: string
-          id: number
-          load_id: number
-          logged_by: string | null
-          note: string | null
-        }
-        Insert: {
-          amount: number
-          carrier_org_id: number
-          created_at?: string | null
-          expense_type: string
-          id?: number
-          load_id: number
-          logged_by?: string | null
-          note?: string | null
-        }
-        Update: {
-          amount?: number
-          carrier_org_id?: number
-          created_at?: string | null
-          expense_type?: string
-          id?: number
-          load_id?: number
-          logged_by?: string | null
-          note?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "load_expenses_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "load_expenses_load_id_fkey"
-            columns: ["load_id"]
-            isOneToOne: false
-            referencedRelation: "loads"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "load_expenses_load_id_fkey"
-            columns: ["load_id"]
-            isOneToOne: false
-            referencedRelation: "loads_driver_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "load_expenses_logged_by_fkey"
-            columns: ["logged_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      loads: {
-        Row: {
-          carrier_org_id: number
-          commodity: string | null
-          created_at: string | null
-          customer_name_raw: string | null
-          customer_org_id: number | null
-          delivery_address: string | null
-          delivery_city: string | null
-          delivery_date: string | null
-          delivery_lat: number | null
-          delivery_lng: number | null
-          delivery_state: string | null
-          delivery_time: string | null
-          delivery_zip: string | null
-          driver_id: number | null
-          extraction_data: Json | null
-          id: number
-          intake_method: string | null
-          last_location_at: string | null
-          last_location_lat: number | null
-          last_location_lng: number | null
-          load_number: string
-          pickup_address: string | null
-          pickup_city: string | null
-          pickup_date: string | null
-          pickup_lat: number | null
-          pickup_lng: number | null
-          pickup_state: string | null
-          pickup_time: string | null
-          pickup_zip: string | null
-          rate: number | null
-          raw_intake_text: string | null
-          status: string | null
-          total_miles: number | null
-          tracking_token: string | null
-          updated_at: string | null
-          vehicle_id: number | null
-          weight_lbs: number | null
-        }
-        Insert: {
-          carrier_org_id: number
-          commodity?: string | null
-          created_at?: string | null
-          customer_name_raw?: string | null
-          customer_org_id?: number | null
-          delivery_address?: string | null
-          delivery_city?: string | null
-          delivery_date?: string | null
-          delivery_lat?: number | null
-          delivery_lng?: number | null
-          delivery_state?: string | null
-          delivery_time?: string | null
-          delivery_zip?: string | null
-          driver_id?: number | null
-          extraction_data?: Json | null
-          id?: number
-          intake_method?: string | null
-          last_location_at?: string | null
-          last_location_lat?: number | null
-          last_location_lng?: number | null
-          load_number: string
-          pickup_address?: string | null
-          pickup_city?: string | null
-          pickup_date?: string | null
-          pickup_lat?: number | null
-          pickup_lng?: number | null
-          pickup_state?: string | null
-          pickup_time?: string | null
-          pickup_zip?: string | null
-          rate?: number | null
-          raw_intake_text?: string | null
-          status?: string | null
-          total_miles?: number | null
-          tracking_token?: string | null
-          updated_at?: string | null
-          vehicle_id?: number | null
-          weight_lbs?: number | null
-        }
-        Update: {
-          carrier_org_id?: number
-          commodity?: string | null
-          created_at?: string | null
-          customer_name_raw?: string | null
-          customer_org_id?: number | null
-          delivery_address?: string | null
-          delivery_city?: string | null
-          delivery_date?: string | null
-          delivery_lat?: number | null
-          delivery_lng?: number | null
-          delivery_state?: string | null
-          delivery_time?: string | null
-          delivery_zip?: string | null
-          driver_id?: number | null
-          extraction_data?: Json | null
-          id?: number
-          intake_method?: string | null
-          last_location_at?: string | null
-          last_location_lat?: number | null
-          last_location_lng?: number | null
-          load_number?: string
-          pickup_address?: string | null
-          pickup_city?: string | null
-          pickup_date?: string | null
-          pickup_lat?: number | null
-          pickup_lng?: number | null
-          pickup_state?: string | null
-          pickup_time?: string | null
-          pickup_zip?: string | null
-          rate?: number | null
-          raw_intake_text?: string | null
-          status?: string | null
-          total_miles?: number | null
-          tracking_token?: string | null
-          updated_at?: string | null
-          vehicle_id?: number | null
-          weight_lbs?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "loads_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "loads_customer_org_id_fkey"
-            columns: ["customer_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "loads_driver_id_fkey"
-            columns: ["driver_id"]
-            isOneToOne: false
-            referencedRelation: "drivers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "loads_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      maintenance_reminders: {
-        Row: {
-          carrier_org_id: number | null
-          created_at: string | null
-          id: number
-          is_active: boolean | null
-          last_odometer: number | null
-          last_service_date: string | null
-          next_due_date: string | null
-          next_due_miles: number | null
-          reminder_type: string
-          trigger_miles: number | null
-          trigger_months: number | null
-          vehicle_id: number | null
-        }
-        Insert: {
-          carrier_org_id?: number | null
-          created_at?: string | null
-          id?: number
-          is_active?: boolean | null
-          last_odometer?: number | null
-          last_service_date?: string | null
-          next_due_date?: string | null
-          next_due_miles?: number | null
-          reminder_type: string
-          trigger_miles?: number | null
-          trigger_months?: number | null
-          vehicle_id?: number | null
-        }
-        Update: {
-          carrier_org_id?: number | null
-          created_at?: string | null
-          id?: number
-          is_active?: boolean | null
-          last_odometer?: number | null
-          last_service_date?: string | null
-          next_due_date?: string | null
-          next_due_miles?: number | null
-          reminder_type?: string
-          trigger_miles?: number | null
-          trigger_months?: number | null
-          vehicle_id?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "maintenance_reminders_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "maintenance_reminders_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      oauth_client_rate_limits: {
-        Row: {
-          client_id: string
-          request_count: number
-          window_start: string
-        }
-        Insert: {
-          client_id: string
-          request_count?: number
-          window_start: string
-        }
-        Update: {
-          client_id?: string
-          request_count?: number
-          window_start?: string
-        }
-        Relationships: []
-      }
-      oauth_clients: {
-        Row: {
-          client_id: string
-          client_secret_hash: string
-          created_at: string
-          id: number
-          last_used_at: string | null
-          name: string
-          org_id: number
-          revoked_at: string | null
-        }
-        Insert: {
-          client_id: string
-          client_secret_hash: string
-          created_at?: string
-          id?: number
-          last_used_at?: string | null
-          name: string
-          org_id: number
-          revoked_at?: string | null
-        }
-        Update: {
-          client_id?: string
-          client_secret_hash?: string
-          created_at?: string
-          id?: number
-          last_used_at?: string | null
-          name?: string
-          org_id?: number
-          revoked_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "oauth_clients_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      org_documents: {
-        Row: {
-          created_at: string | null
-          doc_type: string
-          expiry_date: string | null
-          id: number
-          label: string | null
-          org_id: number | null
-          storage_path: string
-          updated_at: string | null
-          uploaded_by: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          doc_type: string
-          expiry_date?: string | null
-          id?: number
-          label?: string | null
-          org_id?: number | null
-          storage_path: string
-          updated_at?: string | null
-          uploaded_by?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          doc_type?: string
-          expiry_date?: string | null
-          id?: number
-          label?: string | null
-          org_id?: number | null
-          storage_path?: string
-          updated_at?: string | null
-          uploaded_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "org_documents_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "org_documents_uploaded_by_fkey"
-            columns: ["uploaded_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      org_feature_overrides: {
-        Row: {
-          effect: string
-          expires_at: string | null
-          feature_key: string
-          org_id: number
-          reason: string
-          set_at: string
-          set_by: string | null
-        }
-        Insert: {
-          effect: string
-          expires_at?: string | null
-          feature_key: string
-          org_id: number
-          reason: string
-          set_at?: string
-          set_by?: string | null
-        }
-        Update: {
-          effect?: string
-          expires_at?: string | null
-          feature_key?: string
-          org_id?: number
-          reason?: string
-          set_at?: string
-          set_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "org_feature_overrides_feature_key_fkey"
-            columns: ["feature_key"]
-            isOneToOne: false
-            referencedRelation: "features"
-            referencedColumns: ["key"]
-          },
-          {
-            foreignKeyName: "org_feature_overrides_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "org_feature_overrides_set_by_fkey"
-            columns: ["set_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      org_flag_overrides: {
-        Row: {
-          enabled: boolean
-          flag_key: string
-          org_id: number
-          set_at: string | null
-          set_by: string | null
-        }
-        Insert: {
-          enabled: boolean
-          flag_key: string
-          org_id: number
-          set_at?: string | null
-          set_by?: string | null
-        }
-        Update: {
-          enabled?: boolean
-          flag_key?: string
-          org_id?: number
-          set_at?: string | null
-          set_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "org_flag_overrides_flag_key_fkey"
-            columns: ["flag_key"]
-            isOneToOne: false
-            referencedRelation: "platform_flags"
-            referencedColumns: ["flag_key"]
-          },
-          {
-            foreignKeyName: "org_flag_overrides_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "org_flag_overrides_set_by_fkey"
-            columns: ["set_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      org_sequences: {
-        Row: {
-          entity: string
-          last_val: number | null
-          org_id: number
-        }
-        Insert: {
-          entity: string
-          last_val?: number | null
-          org_id: number
-        }
-        Update: {
-          entity?: string
-          last_val?: number | null
-          org_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "org_sequences_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      organizations: {
-        Row: {
-          address: string | null
-          city: string | null
-          country: string | null
-          created_at: string | null
-          currency: string | null
-          ein: string | null
-          email: string | null
-          id: number
-          logo_path: string | null
-          name: string
-          phone: string | null
-          state: string | null
-          type: string
-          zip: string | null
-        }
-        Insert: {
-          address?: string | null
-          city?: string | null
-          country?: string | null
-          created_at?: string | null
-          currency?: string | null
-          ein?: string | null
-          email?: string | null
-          id?: number
-          logo_path?: string | null
-          name: string
-          phone?: string | null
-          state?: string | null
-          type: string
-          zip?: string | null
-        }
-        Update: {
-          address?: string | null
-          city?: string | null
-          country?: string | null
-          created_at?: string | null
-          currency?: string | null
-          ein?: string | null
-          email?: string | null
-          id?: number
-          logo_path?: string | null
-          name?: string
-          phone?: string | null
-          state?: string | null
-          type?: string
-          zip?: string | null
-        }
-        Relationships: []
-      }
-      outbox_events: {
-        Row: {
-          aggregate_id: string
-          aggregate_type: string
-          attempts: number
-          correlation_id: string
-          event_type: string
-          id: number
-          idempotency_key: string
-          last_error: string | null
-          max_attempts: number
-          next_attempt_at: string
-          occurred_at: string
-          org_id: number
-          payload: Json
-          processed_at: string | null
-          replayed_by: string | null
-          replayed_from_id: number | null
-          status: string
-        }
-        Insert: {
-          aggregate_id: string
-          aggregate_type: string
-          attempts?: number
-          correlation_id: string
-          event_type: string
-          id?: number
-          idempotency_key: string
-          last_error?: string | null
-          max_attempts?: number
-          next_attempt_at?: string
-          occurred_at?: string
-          org_id: number
-          payload: Json
-          processed_at?: string | null
-          replayed_by?: string | null
-          replayed_from_id?: number | null
-          status?: string
-        }
-        Update: {
-          aggregate_id?: string
-          aggregate_type?: string
-          attempts?: number
-          correlation_id?: string
-          event_type?: string
-          id?: number
-          idempotency_key?: string
-          last_error?: string | null
-          max_attempts?: number
-          next_attempt_at?: string
-          occurred_at?: string
-          org_id?: number
-          payload?: Json
-          processed_at?: string | null
-          replayed_by?: string | null
-          replayed_from_id?: number | null
-          status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "outbox_events_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "outbox_events_replayed_from_id_fkey"
-            columns: ["replayed_from_id"]
-            isOneToOne: false
-            referencedRelation: "outbox_events"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      platform_flags: {
-        Row: {
-          created_at: string | null
-          default_enabled: boolean
-          description: string
-          flag_key: string
-        }
-        Insert: {
-          created_at?: string | null
-          default_enabled?: boolean
-          description: string
-          flag_key: string
-        }
-        Update: {
-          created_at?: string | null
-          default_enabled?: boolean
-          description?: string
-          flag_key?: string
-        }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
-          avatar_path: string | null
-          created_at: string | null
-          date_format: string | null
-          first_name: string | null
-          id: string
-          is_active: boolean
-          last_name: string | null
-          org_id: number
-          phone: string | null
-          preferred_language: string | null
-          push_token: string | null
-          role: string
-          theme_preference: string
-          time_format: string | null
-          timezone: string | null
-          uom_system: string | null
-        }
-        Insert: {
-          avatar_path?: string | null
-          created_at?: string | null
-          date_format?: string | null
-          first_name?: string | null
-          id: string
-          is_active?: boolean
-          last_name?: string | null
-          org_id: number
-          phone?: string | null
-          preferred_language?: string | null
-          push_token?: string | null
-          role: string
-          theme_preference?: string
-          time_format?: string | null
-          timezone?: string | null
-          uom_system?: string | null
-        }
-        Update: {
-          avatar_path?: string | null
-          created_at?: string | null
-          date_format?: string | null
-          first_name?: string | null
-          id?: string
-          is_active?: boolean
-          last_name?: string | null
-          org_id?: number
-          phone?: string | null
-          preferred_language?: string | null
-          push_token?: string | null
-          role?: string
-          theme_preference?: string
-          time_format?: string | null
-          timezone?: string | null
-          uom_system?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      role_capabilities: {
-        Row: {
-          capability: string
-          role: string
-        }
-        Insert: {
-          capability: string
-          role: string
-        }
-        Update: {
-          capability?: string
-          role?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "role_capabilities_role_fkey"
-            columns: ["role"]
-            isOneToOne: false
-            referencedRelation: "roles"
-            referencedColumns: ["code"]
-          },
-        ]
-      }
-      roles: {
-        Row: {
-          abbreviation: string
-          code: string
-          color_token: string
-          display_order: number
-          id: number
-          label: string
-          scope: string
-        }
-        Insert: {
-          abbreviation: string
-          code: string
-          color_token: string
-          display_order: number
-          id?: number
-          label: string
-          scope: string
-        }
-        Update: {
-          abbreviation?: string
-          code?: string
-          color_token?: string
-          display_order?: number
-          id?: number
-          label?: string
-          scope?: string
-        }
-        Relationships: []
-      }
-      schema_migrations: {
-        Row: {
-          applied_at: string
-          checksum: string
-          duration_ms: number | null
-          name: string
-          version: string
-        }
-        Insert: {
-          applied_at?: string
-          checksum: string
-          duration_ms?: number | null
-          name: string
-          version: string
-        }
-        Update: {
-          applied_at?: string
-          checksum?: string
-          duration_ms?: number | null
-          name?: string
-          version?: string
-        }
-        Relationships: []
-      }
-      service_logs: {
-        Row: {
-          carrier_org_id: number | null
-          cost: number | null
-          created_at: string | null
-          id: number
-          logged_by: string | null
-          notes: string | null
-          odometer: number | null
-          receipt_path: string | null
-          service_date: string
-          service_type: string
-          shop_name: string | null
-          vehicle_id: number | null
-        }
-        Insert: {
-          carrier_org_id?: number | null
-          cost?: number | null
-          created_at?: string | null
-          id?: number
-          logged_by?: string | null
-          notes?: string | null
-          odometer?: number | null
-          receipt_path?: string | null
-          service_date: string
-          service_type: string
-          shop_name?: string | null
-          vehicle_id?: number | null
-        }
-        Update: {
-          carrier_org_id?: number | null
-          cost?: number | null
-          created_at?: string | null
-          id?: number
-          logged_by?: string | null
-          notes?: string | null
-          odometer?: number | null
-          receipt_path?: string | null
-          service_date?: string
-          service_type?: string
-          shop_name?: string | null
-          vehicle_id?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "service_logs_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "service_logs_logged_by_fkey"
-            columns: ["logged_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "service_logs_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      settlement_deductions: {
-        Row: {
-          amount: number
-          deduction_type: string
-          id: number
-          note: string | null
-          settlement_id: number
-        }
-        Insert: {
-          amount: number
-          deduction_type: string
-          id?: number
-          note?: string | null
-          settlement_id: number
-        }
-        Update: {
-          amount?: number
-          deduction_type?: string
-          id?: number
-          note?: string | null
-          settlement_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "settlement_deductions_settlement_id_fkey"
-            columns: ["settlement_id"]
-            isOneToOne: false
-            referencedRelation: "driver_settlements"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      support_ticket_messages: {
-        Row: {
-          body: string
-          carrier_org_id: number
-          created_at: string
-          id: number
-          is_ai_generated: boolean
-          sender_id: string | null
-          ticket_id: number
-        }
-        Insert: {
-          body: string
-          carrier_org_id: number
-          created_at?: string
-          id?: number
-          is_ai_generated?: boolean
-          sender_id?: string | null
-          ticket_id: number
-        }
-        Update: {
-          body?: string
-          carrier_org_id?: number
-          created_at?: string
-          id?: number
-          is_ai_generated?: boolean
-          sender_id?: string | null
-          ticket_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "support_ticket_messages_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "support_ticket_messages_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "support_ticket_messages_ticket_id_fkey"
-            columns: ["ticket_id"]
-            isOneToOne: false
-            referencedRelation: "support_tickets"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      support_tickets: {
-        Row: {
-          ai_answer: string | null
-          ai_confidence: number | null
-          body: string
-          carrier_org_id: number
-          category: string
-          created_at: string
-          fallback_queue: string | null
-          id: number
-          queue: string
-          related_load_number: string | null
-          resolved_at: string | null
-          status: string
-          submitted_by: string
-          submitter_role: string
-          submitter_tier: string | null
-          updated_at: string
-        }
-        Insert: {
-          ai_answer?: string | null
-          ai_confidence?: number | null
-          body: string
-          carrier_org_id: number
-          category: string
-          created_at?: string
-          fallback_queue?: string | null
-          id?: number
-          queue: string
-          related_load_number?: string | null
-          resolved_at?: string | null
-          status?: string
-          submitted_by: string
-          submitter_role: string
-          submitter_tier?: string | null
-          updated_at?: string
-        }
-        Update: {
-          ai_answer?: string | null
-          ai_confidence?: number | null
-          body?: string
-          carrier_org_id?: number
-          category?: string
-          created_at?: string
-          fallback_queue?: string | null
-          id?: number
-          queue?: string
-          related_load_number?: string | null
-          resolved_at?: string | null
-          status?: string
-          submitted_by?: string
-          submitter_role?: string
-          submitter_tier?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "support_tickets_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "support_tickets_submitted_by_fkey"
-            columns: ["submitted_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      telematics_integrations: {
-        Row: {
-          api_key_encrypted: string | null
-          carrier_org_id: number
-          created_at: string
-          enabled: boolean
-          id: number
-          provider: string
-          updated_at: string
-          updated_by: string | null
-          webhook_secret_encrypted: string | null
-        }
-        Insert: {
-          api_key_encrypted?: string | null
-          carrier_org_id: number
-          created_at?: string
-          enabled?: boolean
-          id?: number
-          provider: string
-          updated_at?: string
-          updated_by?: string | null
-          webhook_secret_encrypted?: string | null
-        }
-        Update: {
-          api_key_encrypted?: string | null
-          carrier_org_id?: number
-          created_at?: string
-          enabled?: boolean
-          id?: number
-          provider?: string
-          updated_at?: string
-          updated_by?: string | null
-          webhook_secret_encrypted?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "telematics_integrations_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "telematics_integrations_updated_by_fkey"
-            columns: ["updated_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      tiers: {
-        Row: {
-          code: string
-          included_trucks: number
-          label: string
-          monthly_price: number
-          price_per_additional_truck: number
-          rank: number
-        }
-        Insert: {
-          code: string
-          included_trucks: number
-          label: string
-          monthly_price: number
-          price_per_additional_truck: number
-          rank: number
-        }
-        Update: {
-          code?: string
-          included_trucks?: number
-          label?: string
-          monthly_price?: number
-          price_per_additional_truck?: number
-          rank?: number
-        }
-        Relationships: []
-      }
-      vehicle_classifications: {
-        Row: {
-          code: string
-          display_order: number
-          id: number
-          label: string
-          license_category_note: string | null
-          max_weight_kg: number | null
-          min_weight_kg: number | null
-          region: string
-          requires_special_license: boolean
-          scheme_name: string
-        }
-        Insert: {
-          code: string
-          display_order: number
-          id?: number
-          label: string
-          license_category_note?: string | null
-          max_weight_kg?: number | null
-          min_weight_kg?: number | null
-          region: string
-          requires_special_license?: boolean
-          scheme_name: string
-        }
-        Update: {
-          code?: string
-          display_order?: number
-          id?: number
-          label?: string
-          license_category_note?: string | null
-          max_weight_kg?: number | null
-          min_weight_kg?: number | null
-          region?: string
-          requires_special_license?: boolean
-          scheme_name?: string
-        }
-        Relationships: []
-      }
-      vehicle_documents: {
-        Row: {
-          carrier_org_id: number | null
-          created_at: string | null
-          doc_type: string
-          expiry_date: string | null
-          id: number
-          label: string | null
-          storage_path: string
-          uploaded_by: string | null
-          vehicle_id: number | null
-        }
-        Insert: {
-          carrier_org_id?: number | null
-          created_at?: string | null
-          doc_type: string
-          expiry_date?: string | null
-          id?: number
-          label?: string | null
-          storage_path: string
-          uploaded_by?: string | null
-          vehicle_id?: number | null
-        }
-        Update: {
-          carrier_org_id?: number | null
-          created_at?: string | null
-          doc_type?: string
-          expiry_date?: string | null
-          id?: number
-          label?: string | null
-          storage_path?: string
-          uploaded_by?: string | null
-          vehicle_id?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "vehicle_documents_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vehicle_documents_uploaded_by_fkey"
-            columns: ["uploaded_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vehicle_documents_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      vehicle_locations: {
-        Row: {
-          carrier_org_id: number
-          created_at: string
-          id: number
-          lat: number
-          lng: number
-          recorded_at: string
-          source: string
-          vehicle_id: number
-        }
-        Insert: {
-          carrier_org_id: number
-          created_at?: string
-          id?: number
-          lat: number
-          lng: number
-          recorded_at: string
-          source: string
-          vehicle_id: number
-        }
-        Update: {
-          carrier_org_id?: number
-          created_at?: string
-          id?: number
-          lat?: number
-          lng?: number
-          recorded_at?: string
-          source?: string
-          vehicle_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "vehicle_locations_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vehicle_locations_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      vehicle_type_classifications: {
-        Row: {
-          classification_id: number
-          vehicle_type_id: number
-        }
-        Insert: {
-          classification_id: number
-          vehicle_type_id: number
-        }
-        Update: {
-          classification_id?: number
-          vehicle_type_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "vehicle_type_classifications_classification_id_fkey"
-            columns: ["classification_id"]
-            isOneToOne: false
-            referencedRelation: "vehicle_classifications"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vehicle_type_classifications_vehicle_type_id_fkey"
-            columns: ["vehicle_type_id"]
-            isOneToOne: false
-            referencedRelation: "vehicle_types"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      vehicle_types: {
-        Row: {
-          code: string
-          display_order: number
-          generic_photo_path: string | null
-          icon: string
-          id: number
-          label: string
-          specialized_capacity_note: string | null
-          typical_cargo_volume_cuft: number | null
-          typical_length_ft: number | null
-          typical_payload_capacity_lbs: number | null
-        }
-        Insert: {
-          code: string
-          display_order: number
-          generic_photo_path?: string | null
-          icon: string
-          id?: number
-          label: string
-          specialized_capacity_note?: string | null
-          typical_cargo_volume_cuft?: number | null
-          typical_length_ft?: number | null
-          typical_payload_capacity_lbs?: number | null
-        }
-        Update: {
-          code?: string
-          display_order?: number
-          generic_photo_path?: string | null
-          icon?: string
-          id?: number
-          label?: string
-          specialized_capacity_note?: string | null
-          typical_cargo_volume_cuft?: number | null
-          typical_length_ft?: number | null
-          typical_payload_capacity_lbs?: number | null
-        }
-        Relationships: []
-      }
-      vehicles: {
-        Row: {
-          cab_type: string | null
-          carrier_org_id: number
-          color: string | null
-          created_at: string | null
-          dimensions: string | null
-          id: number
-          is_active: boolean | null
-          license_plate: string | null
-          license_state: string | null
-          make: string | null
-          model: string | null
-          nickname: string
-          photo_path: string | null
-          status: string
-          telematics_device_id: string | null
-          telematics_provider: string | null
-          vehicle_number: string | null
-          vehicle_type_id: number
-          vin: string | null
-          year: number | null
-        }
-        Insert: {
-          cab_type?: string | null
-          carrier_org_id: number
-          color?: string | null
-          created_at?: string | null
-          dimensions?: string | null
-          id?: number
-          is_active?: boolean | null
-          license_plate?: string | null
-          license_state?: string | null
-          make?: string | null
-          model?: string | null
-          nickname: string
-          photo_path?: string | null
-          status?: string
-          telematics_device_id?: string | null
-          telematics_provider?: string | null
-          vehicle_number?: string | null
-          vehicle_type_id: number
-          vin?: string | null
-          year?: number | null
-        }
-        Update: {
-          cab_type?: string | null
-          carrier_org_id?: number
-          color?: string | null
-          created_at?: string | null
-          dimensions?: string | null
-          id?: number
-          is_active?: boolean | null
-          license_plate?: string | null
-          license_state?: string | null
-          make?: string | null
-          model?: string | null
-          nickname?: string
-          photo_path?: string | null
-          status?: string
-          telematics_device_id?: string | null
-          telematics_provider?: string | null
-          vehicle_number?: string | null
-          vehicle_type_id?: number
-          vin?: string | null
-          year?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "vehicles_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vehicles_vehicle_type_id_fkey"
-            columns: ["vehicle_type_id"]
-            isOneToOne: false
-            referencedRelation: "vehicle_types"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      webhook_deliveries: {
-        Row: {
-          attempt_count: number
-          created_at: string
-          event_type: string
-          id: number
-          last_attempted_at: string | null
-          last_response_status: number | null
-          org_id: number
-          payload: Json
-          status: string
-          webhook_id: number
-        }
-        Insert: {
-          attempt_count?: number
-          created_at?: string
-          event_type: string
-          id?: number
-          last_attempted_at?: string | null
-          last_response_status?: number | null
-          org_id: number
-          payload: Json
-          status?: string
-          webhook_id: number
-        }
-        Update: {
-          attempt_count?: number
-          created_at?: string
-          event_type?: string
-          id?: number
-          last_attempted_at?: string | null
-          last_response_status?: number | null
-          org_id?: number
-          payload?: Json
-          status?: string
-          webhook_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "webhook_deliveries_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "webhook_deliveries_webhook_id_fkey"
-            columns: ["webhook_id"]
-            isOneToOne: false
-            referencedRelation: "webhooks"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      webhooks: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          enabled: boolean
-          id: number
-          org_id: number
-          secret: string
-          subscribed_events: string[]
-          url: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          enabled?: boolean
-          id?: number
-          org_id: number
-          secret: string
-          subscribed_events?: string[]
-          url: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          enabled?: boolean
-          id?: number
-          org_id?: number
-          secret?: string
-          subscribed_events?: string[]
-          url?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "webhooks_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "webhooks_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+                  ]
+                },"audit_events": {
+                  Row: {
+                    "action": string,"actor_user_id": string | null,"aggregate_id": string,"aggregate_type": string,"correlation_id": string,"expected_version": number | null,"id": number,"metadata": Json | null,"new_state": string | null,"occurred_at": string,"org_id": number,"prior_state": string | null,"reason": string | null
+                  }
+                  Insert: {
+                    "action": string,"actor_user_id"?: string | null,"aggregate_id": string,"aggregate_type": string,"correlation_id": string,"expected_version"?: number | null,"id"?: number,"metadata"?: Json | null,"new_state"?: string | null,"occurred_at"?: string,"org_id": number,"prior_state"?: string | null,"reason"?: string | null
+                  }
+                  Update: {
+                    "action"?: string,"actor_user_id"?: string | null,"aggregate_id"?: string,"aggregate_type"?: string,"correlation_id"?: string,"expected_version"?: number | null,"id"?: number,"metadata"?: Json | null,"new_state"?: string | null,"occurred_at"?: string,"org_id"?: number,"prior_state"?: string | null,"reason"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "audit_events_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
     }
-    Views: {
-      loads_driver_view: {
-        Row: {
-          carrier_org_id: number | null
-          commodity: string | null
-          created_at: string | null
-          customer_name_raw: string | null
-          customer_org_id: number | null
-          delivery_address: string | null
-          delivery_city: string | null
-          delivery_date: string | null
-          delivery_lat: number | null
-          delivery_lng: number | null
-          delivery_state: string | null
-          delivery_time: string | null
-          delivery_zip: string | null
-          driver_id: number | null
-          id: number | null
-          intake_method: string | null
-          last_location_at: string | null
-          last_location_lat: number | null
-          last_location_lng: number | null
-          load_number: string | null
-          pickup_address: string | null
-          pickup_city: string | null
-          pickup_date: string | null
-          pickup_lat: number | null
-          pickup_lng: number | null
-          pickup_state: string | null
-          pickup_time: string | null
-          pickup_zip: string | null
-          status: string | null
-          total_miles: number | null
-          tracking_token: string | null
-          updated_at: string | null
-          vehicle_id: number | null
-          weight_lbs: number | null
-        }
-        Insert: {
-          carrier_org_id?: number | null
-          commodity?: string | null
-          created_at?: string | null
-          customer_name_raw?: string | null
-          customer_org_id?: number | null
-          delivery_address?: string | null
-          delivery_city?: string | null
-          delivery_date?: string | null
-          delivery_lat?: number | null
-          delivery_lng?: number | null
-          delivery_state?: string | null
-          delivery_time?: string | null
-          delivery_zip?: string | null
-          driver_id?: number | null
-          id?: number | null
-          intake_method?: string | null
-          last_location_at?: string | null
-          last_location_lat?: number | null
-          last_location_lng?: number | null
-          load_number?: string | null
-          pickup_address?: string | null
-          pickup_city?: string | null
-          pickup_date?: string | null
-          pickup_lat?: number | null
-          pickup_lng?: number | null
-          pickup_state?: string | null
-          pickup_time?: string | null
-          pickup_zip?: string | null
-          status?: string | null
-          total_miles?: number | null
-          tracking_token?: string | null
-          updated_at?: string | null
-          vehicle_id?: number | null
-          weight_lbs?: number | null
-        }
-        Update: {
-          carrier_org_id?: number | null
-          commodity?: string | null
-          created_at?: string | null
-          customer_name_raw?: string | null
-          customer_org_id?: number | null
-          delivery_address?: string | null
-          delivery_city?: string | null
-          delivery_date?: string | null
-          delivery_lat?: number | null
-          delivery_lng?: number | null
-          delivery_state?: string | null
-          delivery_time?: string | null
-          delivery_zip?: string | null
-          driver_id?: number | null
-          id?: number | null
-          intake_method?: string | null
-          last_location_at?: string | null
-          last_location_lat?: number | null
-          last_location_lng?: number | null
-          load_number?: string | null
-          pickup_address?: string | null
-          pickup_city?: string | null
-          pickup_date?: string | null
-          pickup_lat?: number | null
-          pickup_lng?: number | null
-          pickup_state?: string | null
-          pickup_time?: string | null
-          pickup_zip?: string | null
-          status?: string | null
-          total_miles?: number | null
-          tracking_token?: string | null
-          updated_at?: string | null
-          vehicle_id?: number | null
-          weight_lbs?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "loads_carrier_org_id_fkey"
-            columns: ["carrier_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "loads_customer_org_id_fkey"
-            columns: ["customer_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "loads_driver_id_fkey"
-            columns: ["driver_id"]
-            isOneToOne: false
-            referencedRelation: "drivers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "loads_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+                  ]
+                },"billing_events": {
+                  Row: {
+                    "amount": number | null,"card_last4": string | null,"created_at": string | null,"currency": string,"event_type": string,"id": number,"is_simulated": boolean,"org_id": number,"payment_reference": string | null,"plan_code": string | null,"resolved_at": string | null,"status": string | null,"stripe_event_id": string | null
+                  }
+                  Insert: {
+                    "amount"?: number | null,"card_last4"?: string | null,"created_at"?: string | null,"currency"?: string,"event_type": string,"id"?: number,"is_simulated"?: boolean,"org_id": number,"payment_reference"?: string | null,"plan_code"?: string | null,"resolved_at"?: string | null,"status"?: string | null,"stripe_event_id"?: string | null
+                  }
+                  Update: {
+                    "amount"?: number | null,"card_last4"?: string | null,"created_at"?: string | null,"currency"?: string,"event_type"?: string,"id"?: number,"is_simulated"?: boolean,"org_id"?: number,"payment_reference"?: string | null,"plan_code"?: string | null,"resolved_at"?: string | null,"status"?: string | null,"stripe_event_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "billing_events_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
     }
-    Functions: {
-      bulk_import_customers: {
-        Args: { p_rows: Json }
-        Returns: {
-          customer_number: string
-          org_id: number
-          row_action: string
-          row_name: string
-        }[]
-      }
-      caller_may_act_on_load: { Args: { p_load_id: number }; Returns: boolean }
-      check_ifta_completeness: { Args: { p_load_id: number }; Returns: boolean }
-      check_public_api_rate_limit: {
-        Args: { p_client_id: string; p_limit: number; p_window_seconds: number }
-        Returns: {
-          allowed: boolean
-          current_count: number
-          retry_after_seconds: number
-        }[]
-      }
-      create_customer_org: {
-        Args: {
-          p_address?: string
-          p_city?: string
-          p_contact_name?: string
-          p_country?: string
-          p_email?: string
-          p_name: string
-          p_notes?: string
-          p_phone?: string
-          p_state?: string
-          p_zip?: string
-        }
-        Returns: {
-          customer_number: string
-          name: string
-          org_id: number
-        }[]
-      }
-      create_driver_settlement_command: {
-        Args: {
-          p_correlation_id: string
-          p_driver_id: number
-          p_gross_revenue: number
-          p_idempotency_key: string
-          p_loads_count: number
-          p_net_pay: number
-          p_pay_method: string
-          p_period_end: string
-          p_period_start: string
-          p_rate_value: number
-        }
-        Returns: Json
-      }
-      create_invoice_command: {
-        Args: {
-          p_advance_load_status: boolean
-          p_amount: number
-          p_correlation_id: string
-          p_customer_org_id: number
-          p_due_date: string
-          p_factoring_company: string
-          p_idempotency_key: string
-          p_invoice_number: string
-          p_load_id: number
-          p_payment_method: string
-        }
-        Returns: Json
-      }
-      driver_self_update_allowed: {
-        Args: {
-          p_active: boolean
-          p_cdl_expiry: string
-          p_med_expiry: string
-          p_number: string
-          p_org: number
-        }
-        Returns: boolean
-      }
-      entitlement_decision: {
-        Args: { p_key: string; p_org_id: number }
-        Returns: {
-          allowed: boolean
-          reason: string
-        }[]
-      }
-      escalate_support_ticket: {
-        Args: { p_ticket_id: number }
-        Returns: {
-          ai_answer: string | null
-          ai_confidence: number | null
-          body: string
-          carrier_org_id: number
-          category: string
-          created_at: string
-          fallback_queue: string | null
-          id: number
-          queue: string
-          related_load_number: string | null
-          resolved_at: string | null
-          status: string
-          submitted_by: string
-          submitter_role: string
-          submitter_tier: string | null
-          updated_at: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "support_tickets"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
-      get_customer_health_score: {
-        Args: { customer_org_id: number }
-        Returns: number
-      }
-      get_exceptions: {
-        Args: never
-        Returns: {
-          detail: string
-          due_at: string
-          entity_id: number
-          entity_type: string
-          exception_type: string
-          tier: string
-          title: string
-        }[]
-      }
-      get_exceptions_unchecked: {
-        Args: never
-        Returns: {
-          detail: string
-          due_at: string
-          entity_id: number
-          entity_type: string
-          exception_type: string
-          tier: string
-          title: string
-        }[]
-      }
-      get_ifta_quarterly_summary: {
-        Args: { p_carrier_org_id: number; p_quarter: string }
-        Returns: {
-          state: string
-          total_miles: number
-        }[]
-      }
-      get_ifta_tax_summary: {
-        Args: { p_carrier_org_id: number; p_quarter: string }
-        Returns: {
-          miles_in_state: number
-          net_tax_due: number
-          state: string
-        }[]
-      }
-      get_my_entitlement: {
-        Args: { p_key: string }
-        Returns: {
-          allowed: boolean
-          reason: string
-        }[]
-      }
-      get_my_entitlements: {
-        Args: never
-        Returns: {
-          key: string
-        }[]
-      }
-      get_org_branding: {
-        Args: never
-        Returns: {
-          accent_color: string
-          enabled: boolean
-          logo_path: string
-          primary_color: string
-        }[]
-      }
-      get_public_tracking: {
-        Args: { p_token: string }
-        Returns: {
-          brand_accent_color: string
-          brand_logo_path: string
-          brand_primary_color: string
-          carrier_email: string
-          carrier_name: string
-          carrier_phone: string
-          delivery_city: string
-          delivery_date: string
-          delivery_state: string
-          last_location_at: string
-          last_location_lat: number
-          last_location_lng: number
-          load_number: string
-          pickup_city: string
-          pickup_date: string
-          pickup_state: string
-          status: string
-        }[]
-      }
-      get_public_tracking_events: {
-        Args: { p_token: string }
-        Returns: {
-          created_at: string
-          event_type: string
-        }[]
-      }
-      has_feature: { Args: { feature_key: string }; Returns: boolean }
-      list_message_conversations: {
-        Args: never
-        Returns: {
-          last_message_at: string
-          last_message_body: string
-          load_id: number
-          load_number: string
-          unread_count: number
-        }[]
-      }
-      log_vehicle_service: {
-        Args: {
-          p_cost: number
-          p_next_due_date: string
-          p_next_due_miles: number
-          p_notes: string
-          p_odometer: number
-          p_reminder_id: number
-          p_service_date: string
-          p_service_type: string
-          p_shop_name: string
-          p_vehicle_id: number
-        }
-        Returns: number
-      }
-      mark_invoice_paid: {
-        Args: {
-          p_correlation_id: string
-          p_idempotency_key: string
-          p_invoice_id: number
-          p_paid_at: string
-        }
-        Returns: Json
-      }
-      mark_invoice_sent_command: {
-        Args: {
-          p_correlation_id: string
-          p_idempotency_key: string
-          p_invoice_id: number
-          p_sent_at: string
-        }
-        Returns: Json
-      }
-      mark_overdue_invoices: { Args: never; Returns: number }
-      my_driver_id: { Args: never; Returns: number }
-      my_org_id: { Args: never; Returns: number }
-      my_role: { Args: never; Returns: string }
-      next_entity_val: {
-        Args: { carrier_org_bigint: number; entity_name: string }
-        Returns: number
-      }
-      record_load_expense_command: {
-        Args: {
-          p_amount: number
-          p_correlation_id: string
-          p_expense_type: string
-          p_idempotency_key: string
-          p_load_id: number
-          p_note: string
-        }
-        Returns: Json
-      }
-      replace_ifta_crossings_with_manual: {
-        Args: { p_load_id: number; p_rows: Json }
-        Returns: number
-      }
-      send_expiry_reminders: { Args: never; Returns: number }
-      submit_dvir_inspection: {
-        Args: {
-          p_condition: string
-          p_defects: Json
-          p_driver_id: number
-          p_load_id: number
-          p_odometer: number
-          p_type: string
-          p_vehicle_id: number
-        }
-        Returns: Json
-      }
-      submit_shipment_milestone: {
-        Args: {
-          p_correlation_id: string
-          p_event_type: string
-          p_expected_status: string
-          p_idempotency_key: string
-          p_load_id: number
-          p_new_status: string
-          p_occurred_at: string
-          p_reason: string
-        }
-        Returns: Json
-      }
-      update_customer_org: {
-        Args: {
-          p_address?: string
-          p_city?: string
-          p_contact_name?: string
-          p_country?: string
-          p_customer_org_id: number
-          p_email?: string
-          p_name?: string
-          p_notes?: string
-          p_phone?: string
-          p_set_contact_name?: boolean
-          p_set_notes?: boolean
-          p_state?: string
-          p_zip?: string
-        }
-        Returns: {
-          customer_number: string
-          name: string
-          org_id: number
-        }[]
-      }
-      update_settlement_payment_status_command: {
-        Args: {
-          p_correlation_id: string
-          p_expected_status: string
-          p_idempotency_key: string
-          p_new_status: string
-          p_settlement_id: number
-        }
-        Returns: Json
-      }
+                  ]
+                },"carrier_details": {
+                  Row: {
+                    "billing_status": string,"brand_accent_color": string | null,"brand_primary_color": string | null,"card_brand": string | null,"card_last4": string | null,"default_language": string,"default_net_terms_days": number,"default_payment_method": string,"dot_number": string | null,"factoring_company": string | null,"grace_period_until": string | null,"load_email": string | null,"mc_number": string | null,"org_id": number,"stripe_customer_id": string | null,"tier": string | null,"timezone": string | null,"trial_ends_at": string | null,"uom_system": string | null
+                  }
+                  Insert: {
+                    "billing_status"?: string,"brand_accent_color"?: string | null,"brand_primary_color"?: string | null,"card_brand"?: string | null,"card_last4"?: string | null,"default_language"?: string,"default_net_terms_days"?: number,"default_payment_method"?: string,"dot_number"?: string | null,"factoring_company"?: string | null,"grace_period_until"?: string | null,"load_email"?: string | null,"mc_number"?: string | null,"org_id": number,"stripe_customer_id"?: string | null,"tier"?: string | null,"timezone"?: string | null,"trial_ends_at"?: string | null,"uom_system"?: string | null
+                  }
+                  Update: {
+                    "billing_status"?: string,"brand_accent_color"?: string | null,"brand_primary_color"?: string | null,"card_brand"?: string | null,"card_last4"?: string | null,"default_language"?: string,"default_net_terms_days"?: number,"default_payment_method"?: string,"dot_number"?: string | null,"factoring_company"?: string | null,"grace_period_until"?: string | null,"load_email"?: string | null,"mc_number"?: string | null,"org_id"?: number,"stripe_customer_id"?: string | null,"tier"?: string | null,"timezone"?: string | null,"trial_ends_at"?: string | null,"uom_system"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "carrier_details_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: true
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
     }
-    Enums: {
-      [_ in never]: never
+                  ]
+                },"change_events": {
+                  Row: {
+                    "created_at": string,"entity": string,"entity_id": number | null,"id": number,"op": string,"org_id": number
+                  }
+                  Insert: {
+                    "created_at"?: string,"entity": string,"entity_id"?: number | null,"id"?: number,"op": string,"org_id": number
+                  }
+                  Update: {
+                    "created_at"?: string,"entity"?: string,"entity_id"?: number | null,"id"?: number,"op"?: string,"org_id"?: number
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"customer_contacts": {
+                  Row: {
+                    "carrier_org_id": number,"created_at": string | null,"email": string | null,"id": number,"is_primary": boolean,"name": string,"org_id": number,"phone": string | null,"portal_profile_id": string | null,"title": string | null
+                  }
+                  Insert: {
+                    "carrier_org_id": number,"created_at"?: string | null,"email"?: string | null,"id"?: number,"is_primary"?: boolean,"name": string,"org_id": number,"phone"?: string | null,"portal_profile_id"?: string | null,"title"?: string | null
+                  }
+                  Update: {
+                    "carrier_org_id"?: number,"created_at"?: string | null,"email"?: string | null,"id"?: number,"is_primary"?: boolean,"name"?: string,"org_id"?: number,"phone"?: string | null,"portal_profile_id"?: string | null,"title"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "customer_contacts_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "customer_contacts_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "customer_contacts_portal_profile_id_fkey"
+      columns: ["portal_profile_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
     }
-    CompositeTypes: {
-      [_ in never]: never
+                  ]
+                },"customer_details": {
+                  Row: {
+                    "carrier_org_id": number,"contact_name": string | null,"customer_number": string | null,"notes": string | null,"org_id": number,"tags": (string)[] | null
+                  }
+                  Insert: {
+                    "carrier_org_id": number,"contact_name"?: string | null,"customer_number"?: string | null,"notes"?: string | null,"org_id": number,"tags"?: (string)[] | null
+                  }
+                  Update: {
+                    "carrier_org_id"?: number,"contact_name"?: string | null,"customer_number"?: string | null,"notes"?: string | null,"org_id"?: number,"tags"?: (string)[] | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "customer_details_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "customer_details_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: true
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
     }
-  }
+                  ]
+                },"documents": {
+                  Row: {
+                    "carrier_org_id": number | null,"created_at": string | null,"id": number,"load_id": number | null,"storage_path": string,"type": string | null,"uploaded_by": string | null
+                  }
+                  Insert: {
+                    "carrier_org_id"?: number | null,"created_at"?: string | null,"id"?: number,"load_id"?: number | null,"storage_path": string,"type"?: string | null,"uploaded_by"?: string | null
+                  }
+                  Update: {
+                    "carrier_org_id"?: number | null,"created_at"?: string | null,"id"?: number,"load_id"?: number | null,"storage_path"?: string,"type"?: string | null,"uploaded_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "documents_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "documents_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "documents_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads_driver_view"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "documents_uploaded_by_fkey"
+      columns: ["uploaded_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"driver_documents": {
+                  Row: {
+                    "carrier_org_id": number | null,"created_at": string | null,"doc_type": string,"driver_id": number | null,"expiry_date": string | null,"id": number,"label": string | null,"storage_path": string,"uploaded_by": string | null
+                  }
+                  Insert: {
+                    "carrier_org_id"?: number | null,"created_at"?: string | null,"doc_type": string,"driver_id"?: number | null,"expiry_date"?: string | null,"id"?: number,"label"?: string | null,"storage_path": string,"uploaded_by"?: string | null
+                  }
+                  Update: {
+                    "carrier_org_id"?: number | null,"created_at"?: string | null,"doc_type"?: string,"driver_id"?: number | null,"expiry_date"?: string | null,"id"?: number,"label"?: string | null,"storage_path"?: string,"uploaded_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "driver_documents_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "driver_documents_driver_id_fkey"
+      columns: ["driver_id"]
+isOneToOne: false
+      referencedRelation: "drivers"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "driver_documents_uploaded_by_fkey"
+      columns: ["uploaded_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"driver_message_translations": {
+                  Row: {
+                    "id": number,"message_id": number,"target_language": string,"translated_at": string | null,"translated_body": string
+                  }
+                  Insert: {
+                    "id"?: number,"message_id": number,"target_language": string,"translated_at"?: string | null,"translated_body": string
+                  }
+                  Update: {
+                    "id"?: number,"message_id"?: number,"target_language"?: string,"translated_at"?: string | null,"translated_body"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "driver_message_translations_message_id_fkey"
+      columns: ["message_id"]
+isOneToOne: false
+      referencedRelation: "driver_messages"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"driver_messages": {
+                  Row: {
+                    "body": string,"carrier_org_id": number,"id": number,"load_id": number,"original_language": string | null,"read_at": string | null,"sender_id": string | null,"sent_at": string
+                  }
+                  Insert: {
+                    "body": string,"carrier_org_id": number,"id"?: number,"load_id": number,"original_language"?: string | null,"read_at"?: string | null,"sender_id"?: string | null,"sent_at"?: string
+                  }
+                  Update: {
+                    "body"?: string,"carrier_org_id"?: number,"id"?: number,"load_id"?: number,"original_language"?: string | null,"read_at"?: string | null,"sender_id"?: string | null,"sent_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "driver_messages_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "driver_messages_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "driver_messages_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads_driver_view"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "driver_messages_sender_id_fkey"
+      columns: ["sender_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"driver_settlements": {
+                  Row: {
+                    "advance_amount": number | null,"carrier_org_id": number,"created_at": string | null,"created_by": string | null,"driver_id": number | null,"gross_revenue": number,"id": number,"load_id": number | null,"loads_count": number | null,"net_pay": number,"pay_method": string,"payment_status": string,"pdf_statement_path": string | null,"period_end": string | null,"period_start": string | null,"rate_value": number | null
+                  }
+                  Insert: {
+                    "advance_amount"?: number | null,"carrier_org_id": number,"created_at"?: string | null,"created_by"?: string | null,"driver_id"?: number | null,"gross_revenue": number,"id"?: number,"load_id"?: number | null,"loads_count"?: number | null,"net_pay": number,"pay_method": string,"payment_status"?: string,"pdf_statement_path"?: string | null,"period_end"?: string | null,"period_start"?: string | null,"rate_value"?: number | null
+                  }
+                  Update: {
+                    "advance_amount"?: number | null,"carrier_org_id"?: number,"created_at"?: string | null,"created_by"?: string | null,"driver_id"?: number | null,"gross_revenue"?: number,"id"?: number,"load_id"?: number | null,"loads_count"?: number | null,"net_pay"?: number,"pay_method"?: string,"payment_status"?: string,"pdf_statement_path"?: string | null,"period_end"?: string | null,"period_start"?: string | null,"rate_value"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "driver_settlements_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "driver_settlements_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "driver_settlements_driver_id_fkey"
+      columns: ["driver_id"]
+isOneToOne: false
+      referencedRelation: "drivers"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "driver_settlements_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "driver_settlements_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads_driver_view"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"drivers": {
+                  Row: {
+                    "carrier_org_id": number,"cdl_class": string | null,"cdl_expiry": string | null,"cdl_number": string | null,"cdl_state": string | null,"created_at": string | null,"default_vehicle_id": number | null,"driver_number": string | null,"emergency_contact_name": string | null,"emergency_contact_phone": string | null,"emergency_contact_relation": string | null,"endorsements": (string)[] | null,"id": number,"invite_status": string | null,"is_active": boolean | null,"med_cert_expiry": string | null,"profile_id": string,"settlement_rate": number | null,"settlement_type": string | null
+                  }
+                  Insert: {
+                    "carrier_org_id": number,"cdl_class"?: string | null,"cdl_expiry"?: string | null,"cdl_number"?: string | null,"cdl_state"?: string | null,"created_at"?: string | null,"default_vehicle_id"?: number | null,"driver_number"?: string | null,"emergency_contact_name"?: string | null,"emergency_contact_phone"?: string | null,"emergency_contact_relation"?: string | null,"endorsements"?: (string)[] | null,"id"?: number,"invite_status"?: string | null,"is_active"?: boolean | null,"med_cert_expiry"?: string | null,"profile_id": string,"settlement_rate"?: number | null,"settlement_type"?: string | null
+                  }
+                  Update: {
+                    "carrier_org_id"?: number,"cdl_class"?: string | null,"cdl_expiry"?: string | null,"cdl_number"?: string | null,"cdl_state"?: string | null,"created_at"?: string | null,"default_vehicle_id"?: number | null,"driver_number"?: string | null,"emergency_contact_name"?: string | null,"emergency_contact_phone"?: string | null,"emergency_contact_relation"?: string | null,"endorsements"?: (string)[] | null,"id"?: number,"invite_status"?: string | null,"is_active"?: boolean | null,"med_cert_expiry"?: string | null,"profile_id"?: string,"settlement_rate"?: number | null,"settlement_type"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "drivers_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "drivers_default_vehicle_id_fkey"
+      columns: ["default_vehicle_id"]
+isOneToOne: false
+      referencedRelation: "vehicles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "drivers_profile_id_fkey"
+      columns: ["profile_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"dvir_defects": {
+                  Row: {
+                    "area": string,"created_at": string | null,"description": string | null,"id": number,"inspection_id": number | null,"photo_path": string | null,"severity": string | null
+                  }
+                  Insert: {
+                    "area": string,"created_at"?: string | null,"description"?: string | null,"id"?: number,"inspection_id"?: number | null,"photo_path"?: string | null,"severity"?: string | null
+                  }
+                  Update: {
+                    "area"?: string,"created_at"?: string | null,"description"?: string | null,"id"?: number,"inspection_id"?: number | null,"photo_path"?: string | null,"severity"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "dvir_defects_inspection_id_fkey"
+      columns: ["inspection_id"]
+isOneToOne: false
+      referencedRelation: "dvir_inspections"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"dvir_inspections": {
+                  Row: {
+                    "carrier_org_id": number | null,"condition": string,"created_at": string | null,"driver_id": number | null,"id": number,"load_id": number | null,"odometer": number | null,"signature_url": string | null,"submitted_at": string | null,"type": string,"vehicle_id": number | null
+                  }
+                  Insert: {
+                    "carrier_org_id"?: number | null,"condition": string,"created_at"?: string | null,"driver_id"?: number | null,"id"?: number,"load_id"?: number | null,"odometer"?: number | null,"signature_url"?: string | null,"submitted_at"?: string | null,"type": string,"vehicle_id"?: number | null
+                  }
+                  Update: {
+                    "carrier_org_id"?: number | null,"condition"?: string,"created_at"?: string | null,"driver_id"?: number | null,"id"?: number,"load_id"?: number | null,"odometer"?: number | null,"signature_url"?: string | null,"submitted_at"?: string | null,"type"?: string,"vehicle_id"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "dvir_inspections_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "dvir_inspections_driver_id_fkey"
+      columns: ["driver_id"]
+isOneToOne: false
+      referencedRelation: "drivers"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "dvir_inspections_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "dvir_inspections_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads_driver_view"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "dvir_inspections_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "vehicles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"exception_events": {
+                  Row: {
+                    "carrier_org_id": number,"created_at": string | null,"customer_message": string | null,"customer_visible": boolean,"detail": string | null,"entity_id": number,"entity_type": string,"event_type": string,"id": number,"occurred_at": string,"severity": string | null,"title": string
+                  }
+                  Insert: {
+                    "carrier_org_id": number,"created_at"?: string | null,"customer_message"?: string | null,"customer_visible"?: boolean,"detail"?: string | null,"entity_id": number,"entity_type": string,"event_type": string,"id"?: number,"occurred_at"?: string,"severity"?: string | null,"title": string
+                  }
+                  Update: {
+                    "carrier_org_id"?: number,"created_at"?: string | null,"customer_message"?: string | null,"customer_visible"?: boolean,"detail"?: string | null,"entity_id"?: number,"entity_type"?: string,"event_type"?: string,"id"?: number,"occurred_at"?: string,"severity"?: string | null,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "exception_events_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"features": {
+                  Row: {
+                    "display_order": number,"key": string,"label": string,"min_tier": string,"retained_when_delinquent": boolean
+                  }
+                  Insert: {
+                    "display_order": number,"key": string,"label": string,"min_tier": string,"retained_when_delinquent"?: boolean
+                  }
+                  Update: {
+                    "display_order"?: number,"key"?: string,"label"?: string,"min_tier"?: string,"retained_when_delinquent"?: boolean
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "features_min_tier_fkey"
+      columns: ["min_tier"]
+isOneToOne: false
+      referencedRelation: "tiers"
+      referencedColumns: ["code"]
+    }
+                  ]
+                },"fuel_stops": {
+                  Row: {
+                    "carrier_org_id": number,"created_at": string | null,"driver_id": number | null,"gallons": number,"id": number,"load_id": number | null,"logged_by": string | null,"odometer": number | null,"price_per_gallon": number | null,"receipt_path": string | null,"state": string,"station": string | null,"stop_date": string,"total_cost": number,"vehicle_id": number | null
+                  }
+                  Insert: {
+                    "carrier_org_id": number,"created_at"?: string | null,"driver_id"?: number | null,"gallons": number,"id"?: number,"load_id"?: number | null,"logged_by"?: string | null,"odometer"?: number | null,"price_per_gallon"?: number | null,"receipt_path"?: string | null,"state": string,"station"?: string | null,"stop_date": string,"total_cost": number,"vehicle_id"?: number | null
+                  }
+                  Update: {
+                    "carrier_org_id"?: number,"created_at"?: string | null,"driver_id"?: number | null,"gallons"?: number,"id"?: number,"load_id"?: number | null,"logged_by"?: string | null,"odometer"?: number | null,"price_per_gallon"?: number | null,"receipt_path"?: string | null,"state"?: string,"station"?: string | null,"stop_date"?: string,"total_cost"?: number,"vehicle_id"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "fuel_stops_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "fuel_stops_driver_id_fkey"
+      columns: ["driver_id"]
+isOneToOne: false
+      referencedRelation: "drivers"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "fuel_stops_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "fuel_stops_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads_driver_view"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "fuel_stops_logged_by_fkey"
+      columns: ["logged_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "fuel_stops_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "vehicles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"idempotency_keys": {
+                  Row: {
+                    "correlation_id": string,"created_at": string,"endpoint": string,"expires_at": string,"id": number,"idempotency_key": string,"org_id": number,"request_hash": string,"response_body": Json | null,"status_code": number,"user_id": string
+                  }
+                  Insert: {
+                    "correlation_id": string,"created_at"?: string,"endpoint": string,"expires_at"?: string,"id"?: number,"idempotency_key": string,"org_id": number,"request_hash": string,"response_body"?: Json | null,"status_code": number,"user_id": string
+                  }
+                  Update: {
+                    "correlation_id"?: string,"created_at"?: string,"endpoint"?: string,"expires_at"?: string,"id"?: number,"idempotency_key"?: string,"org_id"?: number,"request_hash"?: string,"response_body"?: Json | null,"status_code"?: number,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "idempotency_keys_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"ifta_state_crossings": {
+                  Row: {
+                    "carrier_org_id": number,"created_at": string | null,"crossed_at": string,"driver_id": number | null,"id": number,"lat": number | null,"lng": number | null,"load_id": number | null,"odometer_est": number | null,"source": string,"state": string,"vehicle_id": number | null
+                  }
+                  Insert: {
+                    "carrier_org_id": number,"created_at"?: string | null,"crossed_at": string,"driver_id"?: number | null,"id"?: number,"lat"?: number | null,"lng"?: number | null,"load_id"?: number | null,"odometer_est"?: number | null,"source": string,"state": string,"vehicle_id"?: number | null
+                  }
+                  Update: {
+                    "carrier_org_id"?: number,"created_at"?: string | null,"crossed_at"?: string,"driver_id"?: number | null,"id"?: number,"lat"?: number | null,"lng"?: number | null,"load_id"?: number | null,"odometer_est"?: number | null,"source"?: string,"state"?: string,"vehicle_id"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ifta_state_crossings_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ifta_state_crossings_driver_id_fkey"
+      columns: ["driver_id"]
+isOneToOne: false
+      referencedRelation: "drivers"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ifta_state_crossings_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ifta_state_crossings_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads_driver_view"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ifta_state_crossings_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "vehicles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"ifta_tax_rates": {
+                  Row: {
+                    "id": number,"quarter": string,"rate_per_gallon": number,"state": string
+                  }
+                  Insert: {
+                    "id"?: number,"quarter": string,"rate_per_gallon": number,"state": string
+                  }
+                  Update: {
+                    "id"?: number,"quarter"?: string,"rate_per_gallon"?: number,"state"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"invoice_order_allocations": {
+                  Row: {
+                    "amount": number,"carrier_org_id": number,"created_at": string,"id": number,"invoice_id": number,"load_order_id": number
+                  }
+                  Insert: {
+                    "amount": number,"carrier_org_id": number,"created_at"?: string,"id"?: number,"invoice_id": number,"load_order_id": number
+                  }
+                  Update: {
+                    "amount"?: number,"carrier_org_id"?: number,"created_at"?: string,"id"?: number,"invoice_id"?: number,"load_order_id"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "invoice_order_allocations_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "invoice_order_allocations_invoice_id_fkey"
+      columns: ["invoice_id"]
+isOneToOne: false
+      referencedRelation: "invoices"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "invoice_order_allocations_load_order_id_fkey"
+      columns: ["load_order_id"]
+isOneToOne: true
+      referencedRelation: "load_orders"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"invoices": {
+                  Row: {
+                    "amount": number,"carrier_org_id": number,"created_at": string | null,"customer_org_id": number | null,"due_date": string | null,"factored_at": string | null,"factoring_company": string | null,"factoring_reference": string | null,"id": number,"invoice_number": string,"load_id": number | null,"notes": string | null,"opened_at": string | null,"paid_at": string | null,"payment_method": string,"sent_at": string | null,"status": string | null
+                  }
+                  Insert: {
+                    "amount": number,"carrier_org_id": number,"created_at"?: string | null,"customer_org_id"?: number | null,"due_date"?: string | null,"factored_at"?: string | null,"factoring_company"?: string | null,"factoring_reference"?: string | null,"id"?: number,"invoice_number": string,"load_id"?: number | null,"notes"?: string | null,"opened_at"?: string | null,"paid_at"?: string | null,"payment_method"?: string,"sent_at"?: string | null,"status"?: string | null
+                  }
+                  Update: {
+                    "amount"?: number,"carrier_org_id"?: number,"created_at"?: string | null,"customer_org_id"?: number | null,"due_date"?: string | null,"factored_at"?: string | null,"factoring_company"?: string | null,"factoring_reference"?: string | null,"id"?: number,"invoice_number"?: string,"load_id"?: number | null,"notes"?: string | null,"opened_at"?: string | null,"paid_at"?: string | null,"payment_method"?: string,"sent_at"?: string | null,"status"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "invoices_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "invoices_customer_org_id_fkey"
+      columns: ["customer_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "invoices_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "invoices_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads_driver_view"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"languages": {
+                  Row: {
+                    "code": string,"display_order": number,"flag_emoji": string,"label": string,"native_name": string
+                  }
+                  Insert: {
+                    "code": string,"display_order": number,"flag_emoji": string,"label": string,"native_name": string
+                  }
+                  Update: {
+                    "code"?: string,"display_order"?: number,"flag_emoji"?: string,"label"?: string,"native_name"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"load_events": {
+                  Row: {
+                    "created_at": string | null,"created_by": string | null,"event_type": string,"id": number,"load_id": number,"location_lat": number | null,"location_lng": number | null,"note": string | null
+                  }
+                  Insert: {
+                    "created_at"?: string | null,"created_by"?: string | null,"event_type": string,"id"?: number,"load_id": number,"location_lat"?: number | null,"location_lng"?: number | null,"note"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string | null,"created_by"?: string | null,"event_type"?: string,"id"?: number,"load_id"?: number,"location_lat"?: number | null,"location_lng"?: number | null,"note"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "load_events_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "load_events_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "load_events_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads_driver_view"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"load_expenses": {
+                  Row: {
+                    "amount": number,"carrier_org_id": number,"created_at": string | null,"expense_type": string,"id": number,"load_id": number,"logged_by": string | null,"note": string | null
+                  }
+                  Insert: {
+                    "amount": number,"carrier_org_id": number,"created_at"?: string | null,"expense_type": string,"id"?: number,"load_id": number,"logged_by"?: string | null,"note"?: string | null
+                  }
+                  Update: {
+                    "amount"?: number,"carrier_org_id"?: number,"created_at"?: string | null,"expense_type"?: string,"id"?: number,"load_id"?: number,"logged_by"?: string | null,"note"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "load_expenses_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "load_expenses_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "load_expenses_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads_driver_view"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "load_expenses_logged_by_fkey"
+      columns: ["logged_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"load_orders": {
+                  Row: {
+                    "billable_amount": number | null,"carrier_org_id": number,"commodity": string | null,"created_at": string,"customer_org_id": number,"customer_reference": string | null,"delivery_address": string | null,"delivery_city": string | null,"delivery_date": string | null,"delivery_state": string | null,"id": number,"load_id": number,"order_number": string,"pickup_address": string | null,"pickup_city": string | null,"pickup_date": string | null,"pickup_state": string | null,"status": string,"updated_at": string,"weight_lbs": number | null
+                  }
+                  Insert: {
+                    "billable_amount"?: number | null,"carrier_org_id": number,"commodity"?: string | null,"created_at"?: string,"customer_org_id": number,"customer_reference"?: string | null,"delivery_address"?: string | null,"delivery_city"?: string | null,"delivery_date"?: string | null,"delivery_state"?: string | null,"id"?: number,"load_id": number,"order_number": string,"pickup_address"?: string | null,"pickup_city"?: string | null,"pickup_date"?: string | null,"pickup_state"?: string | null,"status"?: string,"updated_at"?: string,"weight_lbs"?: number | null
+                  }
+                  Update: {
+                    "billable_amount"?: number | null,"carrier_org_id"?: number,"commodity"?: string | null,"created_at"?: string,"customer_org_id"?: number,"customer_reference"?: string | null,"delivery_address"?: string | null,"delivery_city"?: string | null,"delivery_date"?: string | null,"delivery_state"?: string | null,"id"?: number,"load_id"?: number,"order_number"?: string,"pickup_address"?: string | null,"pickup_city"?: string | null,"pickup_date"?: string | null,"pickup_state"?: string | null,"status"?: string,"updated_at"?: string,"weight_lbs"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "load_orders_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "load_orders_customer_org_id_fkey"
+      columns: ["customer_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "load_orders_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "load_orders_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads_driver_view"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"loadboard_integrations": {
+                  Row: {
+                    "api_key_encrypted": string | null,"carrier_org_id": number,"created_at": string,"enabled": boolean,"id": number,"provider": string,"updated_at": string,"updated_by": string | null
+                  }
+                  Insert: {
+                    "api_key_encrypted"?: string | null,"carrier_org_id": number,"created_at"?: string,"enabled"?: boolean,"id"?: number,"provider": string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "api_key_encrypted"?: string | null,"carrier_org_id"?: number,"created_at"?: string,"enabled"?: boolean,"id"?: number,"provider"?: string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "loadboard_integrations_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "loadboard_integrations_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"loadboard_postings": {
+                  Row: {
+                    "carrier_org_id": number,"external_posting_id": string,"id": number,"load_id": number,"posted_at": string,"posted_by": string | null,"provider": string
+                  }
+                  Insert: {
+                    "carrier_org_id": number,"external_posting_id": string,"id"?: number,"load_id": number,"posted_at"?: string,"posted_by"?: string | null,"provider": string
+                  }
+                  Update: {
+                    "carrier_org_id"?: number,"external_posting_id"?: string,"id"?: number,"load_id"?: number,"posted_at"?: string,"posted_by"?: string | null,"provider"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "loadboard_postings_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "loadboard_postings_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "loadboard_postings_load_id_fkey"
+      columns: ["load_id"]
+isOneToOne: false
+      referencedRelation: "loads_driver_view"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "loadboard_postings_posted_by_fkey"
+      columns: ["posted_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"loads": {
+                  Row: {
+                    "carrier_org_id": number,"commodity": string | null,"created_at": string | null,"customer_name_raw": string | null,"customer_org_id": number | null,"delivery_address": string | null,"delivery_city": string | null,"delivery_date": string | null,"delivery_lat": number | null,"delivery_lng": number | null,"delivery_state": string | null,"delivery_time": string | null,"delivery_zip": string | null,"driver_id": number | null,"extraction_data": Json | null,"id": number,"intake_method": string | null,"last_location_at": string | null,"last_location_lat": number | null,"last_location_lng": number | null,"load_number": string,"pickup_address": string | null,"pickup_city": string | null,"pickup_date": string | null,"pickup_lat": number | null,"pickup_lng": number | null,"pickup_state": string | null,"pickup_time": string | null,"pickup_zip": string | null,"rate": number | null,"raw_intake_text": string | null,"status": string | null,"total_miles": number | null,"tracking_token": string | null,"updated_at": string | null,"vehicle_id": number | null,"weight_lbs": number | null
+                  }
+                  Insert: {
+                    "carrier_org_id": number,"commodity"?: string | null,"created_at"?: string | null,"customer_name_raw"?: string | null,"customer_org_id"?: number | null,"delivery_address"?: string | null,"delivery_city"?: string | null,"delivery_date"?: string | null,"delivery_lat"?: number | null,"delivery_lng"?: number | null,"delivery_state"?: string | null,"delivery_time"?: string | null,"delivery_zip"?: string | null,"driver_id"?: number | null,"extraction_data"?: Json | null,"id"?: number,"intake_method"?: string | null,"last_location_at"?: string | null,"last_location_lat"?: number | null,"last_location_lng"?: number | null,"load_number": string,"pickup_address"?: string | null,"pickup_city"?: string | null,"pickup_date"?: string | null,"pickup_lat"?: number | null,"pickup_lng"?: number | null,"pickup_state"?: string | null,"pickup_time"?: string | null,"pickup_zip"?: string | null,"rate"?: number | null,"raw_intake_text"?: string | null,"status"?: string | null,"total_miles"?: number | null,"tracking_token"?: string | null,"updated_at"?: string | null,"vehicle_id"?: number | null,"weight_lbs"?: number | null
+                  }
+                  Update: {
+                    "carrier_org_id"?: number,"commodity"?: string | null,"created_at"?: string | null,"customer_name_raw"?: string | null,"customer_org_id"?: number | null,"delivery_address"?: string | null,"delivery_city"?: string | null,"delivery_date"?: string | null,"delivery_lat"?: number | null,"delivery_lng"?: number | null,"delivery_state"?: string | null,"delivery_time"?: string | null,"delivery_zip"?: string | null,"driver_id"?: number | null,"extraction_data"?: Json | null,"id"?: number,"intake_method"?: string | null,"last_location_at"?: string | null,"last_location_lat"?: number | null,"last_location_lng"?: number | null,"load_number"?: string,"pickup_address"?: string | null,"pickup_city"?: string | null,"pickup_date"?: string | null,"pickup_lat"?: number | null,"pickup_lng"?: number | null,"pickup_state"?: string | null,"pickup_time"?: string | null,"pickup_zip"?: string | null,"rate"?: number | null,"raw_intake_text"?: string | null,"status"?: string | null,"total_miles"?: number | null,"tracking_token"?: string | null,"updated_at"?: string | null,"vehicle_id"?: number | null,"weight_lbs"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "loads_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "loads_customer_org_id_fkey"
+      columns: ["customer_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "loads_driver_id_fkey"
+      columns: ["driver_id"]
+isOneToOne: false
+      referencedRelation: "drivers"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "loads_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "vehicles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"maintenance_reminders": {
+                  Row: {
+                    "carrier_org_id": number | null,"created_at": string | null,"id": number,"is_active": boolean | null,"last_odometer": number | null,"last_service_date": string | null,"next_due_date": string | null,"next_due_miles": number | null,"reminder_type": string,"trigger_miles": number | null,"trigger_months": number | null,"vehicle_id": number | null
+                  }
+                  Insert: {
+                    "carrier_org_id"?: number | null,"created_at"?: string | null,"id"?: number,"is_active"?: boolean | null,"last_odometer"?: number | null,"last_service_date"?: string | null,"next_due_date"?: string | null,"next_due_miles"?: number | null,"reminder_type": string,"trigger_miles"?: number | null,"trigger_months"?: number | null,"vehicle_id"?: number | null
+                  }
+                  Update: {
+                    "carrier_org_id"?: number | null,"created_at"?: string | null,"id"?: number,"is_active"?: boolean | null,"last_odometer"?: number | null,"last_service_date"?: string | null,"next_due_date"?: string | null,"next_due_miles"?: number | null,"reminder_type"?: string,"trigger_miles"?: number | null,"trigger_months"?: number | null,"vehicle_id"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "maintenance_reminders_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "maintenance_reminders_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "vehicles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"oauth_client_rate_limits": {
+                  Row: {
+                    "client_id": string,"request_count": number,"window_start": string
+                  }
+                  Insert: {
+                    "client_id": string,"request_count"?: number,"window_start": string
+                  }
+                  Update: {
+                    "client_id"?: string,"request_count"?: number,"window_start"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"oauth_clients": {
+                  Row: {
+                    "client_id": string,"client_secret_hash": string,"created_at": string,"id": number,"last_used_at": string | null,"name": string,"org_id": number,"revoked_at": string | null
+                  }
+                  Insert: {
+                    "client_id": string,"client_secret_hash": string,"created_at"?: string,"id"?: number,"last_used_at"?: string | null,"name": string,"org_id": number,"revoked_at"?: string | null
+                  }
+                  Update: {
+                    "client_id"?: string,"client_secret_hash"?: string,"created_at"?: string,"id"?: number,"last_used_at"?: string | null,"name"?: string,"org_id"?: number,"revoked_at"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "oauth_clients_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"org_documents": {
+                  Row: {
+                    "created_at": string | null,"doc_type": string,"expiry_date": string | null,"id": number,"label": string | null,"org_id": number | null,"storage_path": string,"updated_at": string | null,"uploaded_by": string | null
+                  }
+                  Insert: {
+                    "created_at"?: string | null,"doc_type": string,"expiry_date"?: string | null,"id"?: number,"label"?: string | null,"org_id"?: number | null,"storage_path": string,"updated_at"?: string | null,"uploaded_by"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string | null,"doc_type"?: string,"expiry_date"?: string | null,"id"?: number,"label"?: string | null,"org_id"?: number | null,"storage_path"?: string,"updated_at"?: string | null,"uploaded_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "org_documents_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "org_documents_uploaded_by_fkey"
+      columns: ["uploaded_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"org_feature_overrides": {
+                  Row: {
+                    "effect": string,"expires_at": string | null,"feature_key": string,"org_id": number,"reason": string,"set_at": string,"set_by": string | null
+                  }
+                  Insert: {
+                    "effect": string,"expires_at"?: string | null,"feature_key": string,"org_id": number,"reason": string,"set_at"?: string,"set_by"?: string | null
+                  }
+                  Update: {
+                    "effect"?: string,"expires_at"?: string | null,"feature_key"?: string,"org_id"?: number,"reason"?: string,"set_at"?: string,"set_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "org_feature_overrides_feature_key_fkey"
+      columns: ["feature_key"]
+isOneToOne: false
+      referencedRelation: "features"
+      referencedColumns: ["key"]
+    },{
+      foreignKeyName: "org_feature_overrides_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "org_feature_overrides_set_by_fkey"
+      columns: ["set_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"org_flag_overrides": {
+                  Row: {
+                    "enabled": boolean,"flag_key": string,"org_id": number,"set_at": string | null,"set_by": string | null
+                  }
+                  Insert: {
+                    "enabled": boolean,"flag_key": string,"org_id": number,"set_at"?: string | null,"set_by"?: string | null
+                  }
+                  Update: {
+                    "enabled"?: boolean,"flag_key"?: string,"org_id"?: number,"set_at"?: string | null,"set_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "org_flag_overrides_flag_key_fkey"
+      columns: ["flag_key"]
+isOneToOne: false
+      referencedRelation: "platform_flags"
+      referencedColumns: ["flag_key"]
+    },{
+      foreignKeyName: "org_flag_overrides_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "org_flag_overrides_set_by_fkey"
+      columns: ["set_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"org_sequences": {
+                  Row: {
+                    "entity": string,"last_val": number | null,"org_id": number
+                  }
+                  Insert: {
+                    "entity": string,"last_val"?: number | null,"org_id": number
+                  }
+                  Update: {
+                    "entity"?: string,"last_val"?: number | null,"org_id"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "org_sequences_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"organizations": {
+                  Row: {
+                    "address": string | null,"city": string | null,"country": string | null,"created_at": string | null,"currency": string | null,"ein": string | null,"email": string | null,"id": number,"logo_path": string | null,"name": string,"phone": string | null,"state": string | null,"type": string,"zip": string | null
+                  }
+                  Insert: {
+                    "address"?: string | null,"city"?: string | null,"country"?: string | null,"created_at"?: string | null,"currency"?: string | null,"ein"?: string | null,"email"?: string | null,"id"?: number,"logo_path"?: string | null,"name": string,"phone"?: string | null,"state"?: string | null,"type": string,"zip"?: string | null
+                  }
+                  Update: {
+                    "address"?: string | null,"city"?: string | null,"country"?: string | null,"created_at"?: string | null,"currency"?: string | null,"ein"?: string | null,"email"?: string | null,"id"?: number,"logo_path"?: string | null,"name"?: string,"phone"?: string | null,"state"?: string | null,"type"?: string,"zip"?: string | null
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"outbox_events": {
+                  Row: {
+                    "aggregate_id": string,"aggregate_type": string,"attempts": number,"correlation_id": string,"event_type": string,"id": number,"idempotency_key": string,"last_error": string | null,"max_attempts": number,"next_attempt_at": string,"occurred_at": string,"org_id": number,"payload": NonNullable<Json>,"processed_at": string | null,"replayed_by": string | null,"replayed_from_id": number | null,"status": string
+                  }
+                  Insert: {
+                    "aggregate_id": string,"aggregate_type": string,"attempts"?: number,"correlation_id": string,"event_type": string,"id"?: number,"idempotency_key": string,"last_error"?: string | null,"max_attempts"?: number,"next_attempt_at"?: string,"occurred_at"?: string,"org_id": number,"payload": NonNullable<Json>,"processed_at"?: string | null,"replayed_by"?: string | null,"replayed_from_id"?: number | null,"status"?: string
+                  }
+                  Update: {
+                    "aggregate_id"?: string,"aggregate_type"?: string,"attempts"?: number,"correlation_id"?: string,"event_type"?: string,"id"?: number,"idempotency_key"?: string,"last_error"?: string | null,"max_attempts"?: number,"next_attempt_at"?: string,"occurred_at"?: string,"org_id"?: number,"payload"?: NonNullable<Json>,"processed_at"?: string | null,"replayed_by"?: string | null,"replayed_from_id"?: number | null,"status"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "outbox_events_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "outbox_events_replayed_from_id_fkey"
+      columns: ["replayed_from_id"]
+isOneToOne: false
+      referencedRelation: "outbox_events"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"platform_flags": {
+                  Row: {
+                    "created_at": string | null,"default_enabled": boolean,"description": string,"flag_key": string
+                  }
+                  Insert: {
+                    "created_at"?: string | null,"default_enabled"?: boolean,"description": string,"flag_key": string
+                  }
+                  Update: {
+                    "created_at"?: string | null,"default_enabled"?: boolean,"description"?: string,"flag_key"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"profiles": {
+                  Row: {
+                    "avatar_path": string | null,"created_at": string | null,"date_format": string | null,"first_name": string | null,"id": string,"is_active": boolean,"last_name": string | null,"org_id": number,"phone": string | null,"preferred_language": string | null,"push_token": string | null,"role": string,"theme_preference": string,"time_format": string | null,"timezone": string | null,"uom_system": string | null
+                  }
+                  Insert: {
+                    "avatar_path"?: string | null,"created_at"?: string | null,"date_format"?: string | null,"first_name"?: string | null,"id": string,"is_active"?: boolean,"last_name"?: string | null,"org_id": number,"phone"?: string | null,"preferred_language"?: string | null,"push_token"?: string | null,"role": string,"theme_preference"?: string,"time_format"?: string | null,"timezone"?: string | null,"uom_system"?: string | null
+                  }
+                  Update: {
+                    "avatar_path"?: string | null,"created_at"?: string | null,"date_format"?: string | null,"first_name"?: string | null,"id"?: string,"is_active"?: boolean,"last_name"?: string | null,"org_id"?: number,"phone"?: string | null,"preferred_language"?: string | null,"push_token"?: string | null,"role"?: string,"theme_preference"?: string,"time_format"?: string | null,"timezone"?: string | null,"uom_system"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "profiles_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"role_capabilities": {
+                  Row: {
+                    "capability": string,"role": string
+                  }
+                  Insert: {
+                    "capability": string,"role": string
+                  }
+                  Update: {
+                    "capability"?: string,"role"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "role_capabilities_role_fkey"
+      columns: ["role"]
+isOneToOne: false
+      referencedRelation: "roles"
+      referencedColumns: ["code"]
+    }
+                  ]
+                },"roles": {
+                  Row: {
+                    "abbreviation": string,"code": string,"color_token": string,"display_order": number,"id": number,"label": string,"scope": string
+                  }
+                  Insert: {
+                    "abbreviation": string,"code": string,"color_token": string,"display_order": number,"id"?: number,"label": string,"scope": string
+                  }
+                  Update: {
+                    "abbreviation"?: string,"code"?: string,"color_token"?: string,"display_order"?: number,"id"?: number,"label"?: string,"scope"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"schema_migrations": {
+                  Row: {
+                    "applied_at": string,"checksum": string,"duration_ms": number | null,"name": string,"version": string
+                  }
+                  Insert: {
+                    "applied_at"?: string,"checksum": string,"duration_ms"?: number | null,"name": string,"version": string
+                  }
+                  Update: {
+                    "applied_at"?: string,"checksum"?: string,"duration_ms"?: number | null,"name"?: string,"version"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"service_logs": {
+                  Row: {
+                    "carrier_org_id": number | null,"cost": number | null,"created_at": string | null,"id": number,"logged_by": string | null,"notes": string | null,"odometer": number | null,"receipt_path": string | null,"service_date": string,"service_type": string,"shop_name": string | null,"vehicle_id": number | null
+                  }
+                  Insert: {
+                    "carrier_org_id"?: number | null,"cost"?: number | null,"created_at"?: string | null,"id"?: number,"logged_by"?: string | null,"notes"?: string | null,"odometer"?: number | null,"receipt_path"?: string | null,"service_date": string,"service_type": string,"shop_name"?: string | null,"vehicle_id"?: number | null
+                  }
+                  Update: {
+                    "carrier_org_id"?: number | null,"cost"?: number | null,"created_at"?: string | null,"id"?: number,"logged_by"?: string | null,"notes"?: string | null,"odometer"?: number | null,"receipt_path"?: string | null,"service_date"?: string,"service_type"?: string,"shop_name"?: string | null,"vehicle_id"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "service_logs_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "service_logs_logged_by_fkey"
+      columns: ["logged_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "service_logs_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "vehicles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"settlement_deductions": {
+                  Row: {
+                    "amount": number,"deduction_type": string,"id": number,"note": string | null,"settlement_id": number
+                  }
+                  Insert: {
+                    "amount": number,"deduction_type": string,"id"?: number,"note"?: string | null,"settlement_id": number
+                  }
+                  Update: {
+                    "amount"?: number,"deduction_type"?: string,"id"?: number,"note"?: string | null,"settlement_id"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "settlement_deductions_settlement_id_fkey"
+      columns: ["settlement_id"]
+isOneToOne: false
+      referencedRelation: "driver_settlements"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"support_ticket_messages": {
+                  Row: {
+                    "body": string,"carrier_org_id": number,"created_at": string,"id": number,"is_ai_generated": boolean,"sender_id": string | null,"ticket_id": number
+                  }
+                  Insert: {
+                    "body": string,"carrier_org_id": number,"created_at"?: string,"id"?: number,"is_ai_generated"?: boolean,"sender_id"?: string | null,"ticket_id": number
+                  }
+                  Update: {
+                    "body"?: string,"carrier_org_id"?: number,"created_at"?: string,"id"?: number,"is_ai_generated"?: boolean,"sender_id"?: string | null,"ticket_id"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "support_ticket_messages_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "support_ticket_messages_sender_id_fkey"
+      columns: ["sender_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "support_ticket_messages_ticket_id_fkey"
+      columns: ["ticket_id"]
+isOneToOne: false
+      referencedRelation: "support_tickets"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"support_tickets": {
+                  Row: {
+                    "ai_answer": string | null,"ai_confidence": number | null,"body": string,"carrier_org_id": number,"category": string,"created_at": string,"fallback_queue": string | null,"id": number,"queue": string,"related_load_number": string | null,"resolved_at": string | null,"status": string,"submitted_by": string,"submitter_role": string,"submitter_tier": string | null,"updated_at": string
+                  }
+                  Insert: {
+                    "ai_answer"?: string | null,"ai_confidence"?: number | null,"body": string,"carrier_org_id": number,"category": string,"created_at"?: string,"fallback_queue"?: string | null,"id"?: number,"queue": string,"related_load_number"?: string | null,"resolved_at"?: string | null,"status"?: string,"submitted_by": string,"submitter_role": string,"submitter_tier"?: string | null,"updated_at"?: string
+                  }
+                  Update: {
+                    "ai_answer"?: string | null,"ai_confidence"?: number | null,"body"?: string,"carrier_org_id"?: number,"category"?: string,"created_at"?: string,"fallback_queue"?: string | null,"id"?: number,"queue"?: string,"related_load_number"?: string | null,"resolved_at"?: string | null,"status"?: string,"submitted_by"?: string,"submitter_role"?: string,"submitter_tier"?: string | null,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "support_tickets_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "support_tickets_submitted_by_fkey"
+      columns: ["submitted_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"telematics_integrations": {
+                  Row: {
+                    "api_key_encrypted": string | null,"carrier_org_id": number,"created_at": string,"enabled": boolean,"id": number,"provider": string,"updated_at": string,"updated_by": string | null,"webhook_secret_encrypted": string | null
+                  }
+                  Insert: {
+                    "api_key_encrypted"?: string | null,"carrier_org_id": number,"created_at"?: string,"enabled"?: boolean,"id"?: number,"provider": string,"updated_at"?: string,"updated_by"?: string | null,"webhook_secret_encrypted"?: string | null
+                  }
+                  Update: {
+                    "api_key_encrypted"?: string | null,"carrier_org_id"?: number,"created_at"?: string,"enabled"?: boolean,"id"?: number,"provider"?: string,"updated_at"?: string,"updated_by"?: string | null,"webhook_secret_encrypted"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "telematics_integrations_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "telematics_integrations_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"tiers": {
+                  Row: {
+                    "code": string,"included_trucks": number,"label": string,"monthly_price": number,"price_per_additional_truck": number,"rank": number
+                  }
+                  Insert: {
+                    "code": string,"included_trucks": number,"label": string,"monthly_price": number,"price_per_additional_truck": number,"rank": number
+                  }
+                  Update: {
+                    "code"?: string,"included_trucks"?: number,"label"?: string,"monthly_price"?: number,"price_per_additional_truck"?: number,"rank"?: number
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"vehicle_classifications": {
+                  Row: {
+                    "code": string,"display_order": number,"id": number,"label": string,"license_category_note": string | null,"max_weight_kg": number | null,"min_weight_kg": number | null,"region": string,"requires_special_license": boolean,"scheme_name": string
+                  }
+                  Insert: {
+                    "code": string,"display_order": number,"id"?: number,"label": string,"license_category_note"?: string | null,"max_weight_kg"?: number | null,"min_weight_kg"?: number | null,"region": string,"requires_special_license"?: boolean,"scheme_name": string
+                  }
+                  Update: {
+                    "code"?: string,"display_order"?: number,"id"?: number,"label"?: string,"license_category_note"?: string | null,"max_weight_kg"?: number | null,"min_weight_kg"?: number | null,"region"?: string,"requires_special_license"?: boolean,"scheme_name"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"vehicle_documents": {
+                  Row: {
+                    "carrier_org_id": number | null,"created_at": string | null,"doc_type": string,"expiry_date": string | null,"id": number,"label": string | null,"storage_path": string,"uploaded_by": string | null,"vehicle_id": number | null
+                  }
+                  Insert: {
+                    "carrier_org_id"?: number | null,"created_at"?: string | null,"doc_type": string,"expiry_date"?: string | null,"id"?: number,"label"?: string | null,"storage_path": string,"uploaded_by"?: string | null,"vehicle_id"?: number | null
+                  }
+                  Update: {
+                    "carrier_org_id"?: number | null,"created_at"?: string | null,"doc_type"?: string,"expiry_date"?: string | null,"id"?: number,"label"?: string | null,"storage_path"?: string,"uploaded_by"?: string | null,"vehicle_id"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "vehicle_documents_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "vehicle_documents_uploaded_by_fkey"
+      columns: ["uploaded_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "vehicle_documents_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "vehicles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"vehicle_locations": {
+                  Row: {
+                    "carrier_org_id": number,"created_at": string,"id": number,"lat": number,"lng": number,"recorded_at": string,"source": string,"vehicle_id": number
+                  }
+                  Insert: {
+                    "carrier_org_id": number,"created_at"?: string,"id"?: number,"lat": number,"lng": number,"recorded_at": string,"source": string,"vehicle_id": number
+                  }
+                  Update: {
+                    "carrier_org_id"?: number,"created_at"?: string,"id"?: number,"lat"?: number,"lng"?: number,"recorded_at"?: string,"source"?: string,"vehicle_id"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "vehicle_locations_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "vehicle_locations_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "vehicles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"vehicle_type_classifications": {
+                  Row: {
+                    "classification_id": number,"vehicle_type_id": number
+                  }
+                  Insert: {
+                    "classification_id": number,"vehicle_type_id": number
+                  }
+                  Update: {
+                    "classification_id"?: number,"vehicle_type_id"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "vehicle_type_classifications_classification_id_fkey"
+      columns: ["classification_id"]
+isOneToOne: false
+      referencedRelation: "vehicle_classifications"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "vehicle_type_classifications_vehicle_type_id_fkey"
+      columns: ["vehicle_type_id"]
+isOneToOne: false
+      referencedRelation: "vehicle_types"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"vehicle_types": {
+                  Row: {
+                    "code": string,"display_order": number,"generic_photo_path": string | null,"icon": string,"id": number,"label": string,"specialized_capacity_note": string | null,"typical_cargo_volume_cuft": number | null,"typical_length_ft": number | null,"typical_payload_capacity_lbs": number | null
+                  }
+                  Insert: {
+                    "code": string,"display_order": number,"generic_photo_path"?: string | null,"icon": string,"id"?: number,"label": string,"specialized_capacity_note"?: string | null,"typical_cargo_volume_cuft"?: number | null,"typical_length_ft"?: number | null,"typical_payload_capacity_lbs"?: number | null
+                  }
+                  Update: {
+                    "code"?: string,"display_order"?: number,"generic_photo_path"?: string | null,"icon"?: string,"id"?: number,"label"?: string,"specialized_capacity_note"?: string | null,"typical_cargo_volume_cuft"?: number | null,"typical_length_ft"?: number | null,"typical_payload_capacity_lbs"?: number | null
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"vehicles": {
+                  Row: {
+                    "cab_type": string | null,"carrier_org_id": number,"color": string | null,"created_at": string | null,"dimensions": string | null,"id": number,"is_active": boolean | null,"license_plate": string | null,"license_state": string | null,"make": string | null,"model": string | null,"nickname": string,"photo_path": string | null,"status": string,"telematics_device_id": string | null,"telematics_provider": string | null,"vehicle_number": string | null,"vehicle_type_id": number,"vin": string | null,"year": number | null
+                  }
+                  Insert: {
+                    "cab_type"?: string | null,"carrier_org_id": number,"color"?: string | null,"created_at"?: string | null,"dimensions"?: string | null,"id"?: number,"is_active"?: boolean | null,"license_plate"?: string | null,"license_state"?: string | null,"make"?: string | null,"model"?: string | null,"nickname": string,"photo_path"?: string | null,"status"?: string,"telematics_device_id"?: string | null,"telematics_provider"?: string | null,"vehicle_number"?: string | null,"vehicle_type_id": number,"vin"?: string | null,"year"?: number | null
+                  }
+                  Update: {
+                    "cab_type"?: string | null,"carrier_org_id"?: number,"color"?: string | null,"created_at"?: string | null,"dimensions"?: string | null,"id"?: number,"is_active"?: boolean | null,"license_plate"?: string | null,"license_state"?: string | null,"make"?: string | null,"model"?: string | null,"nickname"?: string,"photo_path"?: string | null,"status"?: string,"telematics_device_id"?: string | null,"telematics_provider"?: string | null,"vehicle_number"?: string | null,"vehicle_type_id"?: number,"vin"?: string | null,"year"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "vehicles_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "vehicles_vehicle_type_id_fkey"
+      columns: ["vehicle_type_id"]
+isOneToOne: false
+      referencedRelation: "vehicle_types"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"webhook_deliveries": {
+                  Row: {
+                    "attempt_count": number,"created_at": string,"event_type": string,"id": number,"last_attempted_at": string | null,"last_response_status": number | null,"org_id": number,"payload": NonNullable<Json>,"status": string,"webhook_id": number
+                  }
+                  Insert: {
+                    "attempt_count"?: number,"created_at"?: string,"event_type": string,"id"?: number,"last_attempted_at"?: string | null,"last_response_status"?: number | null,"org_id": number,"payload": NonNullable<Json>,"status"?: string,"webhook_id": number
+                  }
+                  Update: {
+                    "attempt_count"?: number,"created_at"?: string,"event_type"?: string,"id"?: number,"last_attempted_at"?: string | null,"last_response_status"?: number | null,"org_id"?: number,"payload"?: NonNullable<Json>,"status"?: string,"webhook_id"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "webhook_deliveries_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "webhook_deliveries_webhook_id_fkey"
+      columns: ["webhook_id"]
+isOneToOne: false
+      referencedRelation: "webhooks"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"webhooks": {
+                  Row: {
+                    "created_at": string,"created_by": string | null,"enabled": boolean,"id": number,"org_id": number,"secret": string,"subscribed_events": (string)[],"url": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string | null,"enabled"?: boolean,"id"?: number,"org_id": number,"secret": string,"subscribed_events"?: (string)[],"url": string
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string | null,"enabled"?: boolean,"id"?: number,"org_id"?: number,"secret"?: string,"subscribed_events"?: (string)[],"url"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "webhooks_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "webhooks_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                }
+          }
+          Views: {
+            "loads_driver_view": {
+                  Row: {
+                    "carrier_org_id": number | null,"commodity": string | null,"created_at": string | null,"customer_name_raw": string | null,"customer_org_id": number | null,"delivery_address": string | null,"delivery_city": string | null,"delivery_date": string | null,"delivery_lat": number | null,"delivery_lng": number | null,"delivery_state": string | null,"delivery_time": string | null,"delivery_zip": string | null,"driver_id": number | null,"id": number | null,"intake_method": string | null,"last_location_at": string | null,"last_location_lat": number | null,"last_location_lng": number | null,"load_number": string | null,"pickup_address": string | null,"pickup_city": string | null,"pickup_date": string | null,"pickup_lat": number | null,"pickup_lng": number | null,"pickup_state": string | null,"pickup_time": string | null,"pickup_zip": string | null,"status": string | null,"total_miles": number | null,"tracking_token": string | null,"updated_at": string | null,"vehicle_id": number | null,"weight_lbs": number | null
+                  }
+                  Insert: {
+                           "carrier_org_id"?: number | null,"commodity"?: string | null,"created_at"?: string | null,"customer_name_raw"?: string | null,"customer_org_id"?: number | null,"delivery_address"?: string | null,"delivery_city"?: string | null,"delivery_date"?: string | null,"delivery_lat"?: number | null,"delivery_lng"?: number | null,"delivery_state"?: string | null,"delivery_time"?: string | null,"delivery_zip"?: string | null,"driver_id"?: number | null,"id"?: number | null,"intake_method"?: string | null,"last_location_at"?: string | null,"last_location_lat"?: number | null,"last_location_lng"?: number | null,"load_number"?: string | null,"pickup_address"?: string | null,"pickup_city"?: string | null,"pickup_date"?: string | null,"pickup_lat"?: number | null,"pickup_lng"?: number | null,"pickup_state"?: string | null,"pickup_time"?: string | null,"pickup_zip"?: string | null,"status"?: string | null,"total_miles"?: number | null,"tracking_token"?: string | null,"updated_at"?: string | null,"vehicle_id"?: number | null,"weight_lbs"?: number | null
+                         }
+                        Update: {
+                           "carrier_org_id"?: number | null,"commodity"?: string | null,"created_at"?: string | null,"customer_name_raw"?: string | null,"customer_org_id"?: number | null,"delivery_address"?: string | null,"delivery_city"?: string | null,"delivery_date"?: string | null,"delivery_lat"?: number | null,"delivery_lng"?: number | null,"delivery_state"?: string | null,"delivery_time"?: string | null,"delivery_zip"?: string | null,"driver_id"?: number | null,"id"?: number | null,"intake_method"?: string | null,"last_location_at"?: string | null,"last_location_lat"?: number | null,"last_location_lng"?: number | null,"load_number"?: string | null,"pickup_address"?: string | null,"pickup_city"?: string | null,"pickup_date"?: string | null,"pickup_lat"?: number | null,"pickup_lng"?: number | null,"pickup_state"?: string | null,"pickup_time"?: string | null,"pickup_zip"?: string | null,"status"?: string | null,"total_miles"?: number | null,"tracking_token"?: string | null,"updated_at"?: string | null,"vehicle_id"?: number | null,"weight_lbs"?: number | null
+                         }
+                        Relationships: [
+                    {
+      foreignKeyName: "loads_carrier_org_id_fkey"
+      columns: ["carrier_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "loads_customer_org_id_fkey"
+      columns: ["customer_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "loads_driver_id_fkey"
+      columns: ["driver_id"]
+isOneToOne: false
+      referencedRelation: "drivers"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "loads_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "vehicles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                }
+          }
+          Functions: {
+            "bulk_import_customers":
+{ Args: { "p_rows": Json }; Returns: {
+              "customer_number": string,"org_id": number,"row_action": string,"row_name": string
+            }[]
+                           },
+"caller_may_act_on_load":
+{ Args: { "p_load_id": number }; Returns: boolean
+                           },
+"check_ifta_completeness":
+{ Args: { "p_load_id": number }; Returns: boolean
+                           },
+"check_public_api_rate_limit":
+{ Args: { "p_client_id": string,"p_limit": number,"p_window_seconds": number }; Returns: {
+              "allowed": boolean,"current_count": number,"retry_after_seconds": number
+            }[]
+                           },
+"create_customer_org":
+{ Args: { "p_address"?: string,"p_city"?: string,"p_contact_name"?: string,"p_country"?: string,"p_email"?: string,"p_name": string,"p_notes"?: string,"p_phone"?: string,"p_state"?: string,"p_zip"?: string }; Returns: {
+              "customer_number": string,"name": string,"org_id": number
+            }[]
+                           },
+"create_driver_settlement_command":
+{ Args: { "p_correlation_id": string,"p_driver_id": number,"p_gross_revenue": number,"p_idempotency_key": string,"p_loads_count": number,"p_net_pay": number,"p_pay_method": string,"p_period_end": string,"p_period_start": string,"p_rate_value": number }; Returns: Json
+                           },
+"create_invoice_command":
+{ Args: { "p_advance_load_status": boolean,"p_amount": number,"p_correlation_id": string,"p_customer_org_id": number,"p_due_date": string,"p_factoring_company": string,"p_idempotency_key": string,"p_invoice_number": string,"p_load_id": number,"p_payment_method": string }; Returns: Json
+                           },
+"create_load_invoices_command":
+{ Args: { "p_advance_load_status": boolean,"p_correlation_id": string,"p_due_date": string,"p_factoring_company": string,"p_idempotency_key": string,"p_invoice_rows": Json,"p_load_id": number,"p_payment_method": string }; Returns: Json
+                           },
+"demo_change_plan":
+{ Args: { "p_org_id": number,"p_payment_reference": string,"p_tier": string }; Returns: {
+              "amount": number,"currency": string,"event_id": number,"event_status": string,"tier": string
+            }[]
+                           },
+"driver_self_update_allowed":
+{ Args: { "p_active": boolean,"p_cdl_expiry": string,"p_med_expiry": string,"p_number": string,"p_org": number }; Returns: boolean
+                           },
+"entitlement_decision":
+{ Args: { "p_key": string,"p_org_id": number }; Returns: {
+              "allowed": boolean,"reason": string
+            }[]
+                           },
+"escalate_support_ticket":
+{ Args: { "p_ticket_id": number }; Returns: {
+              "ai_answer": string | null,
+"ai_confidence": number | null,
+"body": string,
+"carrier_org_id": number,
+"category": string,
+"created_at": string,
+"fallback_queue": string | null,
+"id": number,
+"queue": string,
+"related_load_number": string | null,
+"resolved_at": string | null,
+"status": string,
+"submitted_by": string,
+"submitter_role": string,
+"submitter_tier": string | null,
+"updated_at": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "support_tickets"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"get_customer_health_score":
+{ Args: { "customer_org_id": number }; Returns: number
+                           },
+"get_exceptions":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "detail": string,"due_at": string,"entity_id": number,"entity_type": string,"exception_type": string,"tier": string,"title": string
+            }[]
+                           },
+"get_exceptions_unchecked":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "detail": string,"due_at": string,"entity_id": number,"entity_type": string,"exception_type": string,"tier": string,"title": string
+            }[]
+                           },
+"get_ifta_quarterly_summary":
+{ Args: { "p_carrier_org_id": number,"p_quarter": string }; Returns: {
+              "state": string,"total_miles": number
+            }[]
+                           },
+"get_ifta_tax_summary":
+{ Args: { "p_carrier_org_id": number,"p_quarter": string }; Returns: {
+              "miles_in_state": number,"net_tax_due": number,"state": string
+            }[]
+                           },
+"get_my_entitlement":
+{ Args: { "p_key": string }; Returns: {
+              "allowed": boolean,"reason": string
+            }[]
+                           },
+"get_my_entitlements":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "key": string
+            }[]
+                           },
+"get_org_branding":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "accent_color": string,"enabled": boolean,"logo_path": string,"primary_color": string
+            }[]
+                           },
+"get_public_tracking":
+{ Args: { "p_token": string }; Returns: {
+              "brand_accent_color": string,"brand_logo_path": string,"brand_primary_color": string,"carrier_email": string,"carrier_name": string,"carrier_phone": string,"delivery_city": string,"delivery_date": string,"delivery_state": string,"last_location_at": string,"last_location_lat": number,"last_location_lng": number,"load_number": string,"pickup_city": string,"pickup_date": string,"pickup_state": string,"status": string
+            }[]
+                           },
+"get_public_tracking_events":
+{ Args: { "p_token": string }; Returns: {
+              "created_at": string,"event_type": string
+            }[]
+                           },
+"get_public_tracking_exceptions":
+{ Args: { "p_token": string }; Returns: {
+              "customer_message": string,"occurred_at": string,"severity": string
+            }[]
+                           },
+"has_feature":
+{ Args: { "feature_key": string }; Returns: boolean
+                           },
+"list_message_conversations":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "last_message_at": string,"last_message_body": string,"load_id": number,"load_number": string,"unread_count": number
+            }[]
+                           },
+"log_vehicle_service":
+{ Args: { "p_cost": number,"p_next_due_date": string,"p_next_due_miles": number,"p_notes": string,"p_odometer": number,"p_reminder_id": number,"p_service_date": string,"p_service_type": string,"p_shop_name": string,"p_vehicle_id": number }; Returns: number
+                           },
+"mark_invoice_paid":
+{ Args: { "p_correlation_id": string,"p_idempotency_key": string,"p_invoice_id": number,"p_paid_at": string }; Returns: Json
+                           },
+"mark_invoice_sent_command":
+{ Args: { "p_correlation_id": string,"p_idempotency_key": string,"p_invoice_id": number,"p_sent_at": string }; Returns: Json
+                           },
+"mark_overdue_invoices":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
+"my_driver_id":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
+"my_org_id":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
+"my_role":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
+"next_entity_val":
+{ Args: { "carrier_org_bigint": number,"entity_name": string }; Returns: number
+                           },
+"record_load_expense_command":
+{ Args: { "p_amount": number,"p_correlation_id": string,"p_expense_type": string,"p_idempotency_key": string,"p_load_id": number,"p_note": string }; Returns: Json
+                           },
+"replace_ifta_crossings_with_manual":
+{ Args: { "p_load_id": number,"p_rows": Json }; Returns: number
+                           },
+"send_expiry_reminders":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
+"set_load_order_billable_amount":
+{ Args: { "p_amount": number,"p_order_id": number }; Returns: number
+                           },
+"set_tracking_exception_visibility":
+{ Args: { "p_customer_message": string,"p_exception_id": number,"p_visible": boolean }; Returns: boolean
+                           },
+"submit_dvir_inspection":
+{ Args: { "p_condition": string,"p_defects": Json,"p_driver_id": number,"p_load_id": number,"p_odometer": number,"p_type": string,"p_vehicle_id": number }; Returns: Json
+                           },
+"submit_shipment_milestone":
+{ Args: { "p_correlation_id": string,"p_event_type": string,"p_expected_status": string,"p_idempotency_key": string,"p_load_id": number,"p_new_status": string,"p_occurred_at": string,"p_reason": string }; Returns: Json
+                           },
+"update_customer_org":
+{ Args: { "p_address"?: string,"p_city"?: string,"p_contact_name"?: string,"p_country"?: string,"p_customer_org_id": number,"p_email"?: string,"p_name"?: string,"p_notes"?: string,"p_phone"?: string,"p_set_contact_name"?: boolean,"p_set_notes"?: boolean,"p_state"?: string,"p_zip"?: string }; Returns: {
+              "customer_number": string,"name": string,"org_id": number
+            }[]
+                           },
+"update_settlement_payment_status_command":
+{ Args: { "p_correlation_id": string,"p_expected_status": string,"p_idempotency_key": string,"p_new_status": string,"p_settlement_id": number }; Returns: Json
+                           }
+          }
+          Enums: {
+            [_ in never]: never
+          }
+          CompositeTypes: {
+            [_ in never]: never
+          }
+        }
 }
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>
 
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
@@ -3568,121 +1816,112 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never) = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
+    : never = never
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
       DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+  ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+      Row: infer R
+    }
+    ? R
     : never
+  : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
+    : never = never
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+      Insert: infer I
+    }
+    ? I
     : never
+  : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
+    : never = never
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+      Update: infer U
+    }
+    ? U
     : never
+  : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never) = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
+    : never = never
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+  : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never) = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
+    : never = never
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
-  public: {
-    Enums: {},
-  },
+  "graphql_public": {
+          Enums: {
+            
+          }
+        },"public": {
+          Enums: {
+            
+          }
+        }
 } as const
 

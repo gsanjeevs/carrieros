@@ -3,7 +3,7 @@
 > **Generated** by `node scripts/db/gen-erd.mjs` from the live schema. Do not edit by hand:
 > change the database via a migration, then re-run the generator. CI runs it with `--check`.
 
-58 tables, 106 foreign keys, split into 7 domain diagrams (one diagram of every table is unreadable).
+62 tables, 117 foreign keys, split into 7 domain diagrams (one diagram of every table is unreadable).
 A box drawn without columns belongs to another domain; find it in its own section.
 `||` = the FK is required (NOT NULL); `|o` = the FK is optional (nullable). `PK`/`FK` mark keys.
 
@@ -417,6 +417,8 @@ erDiagram
     bigint id PK
     bigint carrier_org_id FK
     timestamptz created_at
+    text customer_message
+    boolean customer_visible
     text detail
     bigint entity_id
     text entity_type
@@ -518,8 +520,12 @@ erDiagram
     numeric amount
     text card_last4
     timestamptz created_at
+    text currency
     text event_type
+    boolean is_simulated
     bigint org_id FK
+    text payment_reference
+    text plan_code
     timestamptz resolved_at
     text status
     text stripe_event_id
@@ -783,7 +789,7 @@ erDiagram
 
 Tables not yet placed in a domain: add them to DOMAINS in scripts/db/gen-erd.mjs.
 
-Tables: `ai_feature_overrides`, `app_error_log`, `telematics_integrations`, `vehicle_locations`, `webhook_deliveries`, `webhooks`
+Tables: `ai_feature_overrides`, `app_error_log`, `invoice_order_allocations`, `load_orders`, `loadboard_integrations`, `loadboard_postings`, `telematics_integrations`, `vehicle_locations`, `webhook_deliveries`, `webhooks`
 
 ```mermaid
 erDiagram
@@ -811,6 +817,55 @@ erDiagram
     text request_id
     text route
     uuid user_id FK
+  }
+  invoice_order_allocations {
+    bigint id PK
+    numeric amount
+    bigint carrier_org_id FK
+    timestamptz created_at
+    bigint invoice_id FK
+    bigint load_order_id FK
+  }
+  load_orders {
+    bigint id PK
+    numeric billable_amount
+    bigint carrier_org_id FK
+    text commodity
+    timestamptz created_at
+    bigint customer_org_id FK
+    text customer_reference
+    text delivery_address
+    text delivery_city
+    date delivery_date
+    text delivery_state
+    bigint load_id FK
+    text order_number
+    text pickup_address
+    text pickup_city
+    date pickup_date
+    text pickup_state
+    text status
+    timestamptz updated_at
+    integer weight_lbs
+  }
+  loadboard_integrations {
+    bigint id PK
+    text api_key_encrypted
+    bigint carrier_org_id FK
+    timestamptz created_at
+    boolean enabled
+    text provider
+    timestamptz updated_at
+    uuid updated_by FK
+  }
+  loadboard_postings {
+    bigint id PK
+    bigint carrier_org_id FK
+    text external_posting_id
+    bigint load_id FK
+    timestamptz posted_at
+    uuid posted_by FK
+    text provider
   }
   telematics_integrations {
     bigint id PK
@@ -858,6 +913,17 @@ erDiagram
   profiles |o--o{ ai_feature_overrides : "updated_by"
   organizations |o--o{ app_error_log : "org_id"
   profiles |o--o{ app_error_log : "user_id"
+  organizations ||--o{ invoice_order_allocations : "carrier_org_id"
+  invoices ||--o{ invoice_order_allocations : "invoice_id"
+  load_orders ||--o{ invoice_order_allocations : "load_order_id"
+  organizations ||--o{ load_orders : "carrier_org_id"
+  organizations ||--o{ load_orders : "customer_org_id"
+  loads ||--o{ load_orders : "load_id"
+  organizations ||--o{ loadboard_integrations : "carrier_org_id"
+  profiles |o--o{ loadboard_integrations : "updated_by"
+  organizations ||--o{ loadboard_postings : "carrier_org_id"
+  loads ||--o{ loadboard_postings : "load_id"
+  profiles |o--o{ loadboard_postings : "posted_by"
   organizations ||--o{ telematics_integrations : "carrier_org_id"
   profiles |o--o{ telematics_integrations : "updated_by"
   organizations ||--o{ vehicle_locations : "carrier_org_id"

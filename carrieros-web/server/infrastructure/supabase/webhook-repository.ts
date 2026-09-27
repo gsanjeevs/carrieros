@@ -185,7 +185,7 @@ export class SupabaseWebhookDeliveryWriter implements WebhookDeliveryWriter {
         webhook_id: input.webhookId,
         org_id: input.orgId,
         event_type: input.eventType,
-        payload: input.payload as Json,
+        payload: input.payload as NonNullable<Json>,
         status: input.status,
         attempt_count: input.attemptCount,
         last_attempted_at: new Date().toISOString(),
