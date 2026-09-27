@@ -117,8 +117,8 @@ async function must(promise, what) {
 // real-person or scraped images are checked in. Keep the selection stable so
 // rerunning the loader does not reshuffle the demo.
 const DEMO_ASSET_DIR = join(__dirname, 'demo-assets')
-const DRIVER_ASSETS = ['driver-01.png', 'driver-02.png']
-const VEHICLE_ASSETS = ['vehicle-01.png', 'vehicle-02.png']
+const DRIVER_ASSETS = ['driver-01.webp', 'driver-02.webp']
+const VEHICLE_ASSETS = ['vehicle-01.webp', 'vehicle-02.webp']
 function demoAsset(names, seed) {
   return readFileSync(join(DEMO_ASSET_DIR, names[Math.abs(Number(seed)) % names.length]))
 }
@@ -129,10 +129,10 @@ async function ensureDemoCompliance(orgId, driverId, profileId, vehicles) {
   const { data: profile } = await admin.from('profiles').select('avatar_path').eq('id', profileId).single()
   // Migrate the pre-release temporary avatars bucket fixture once; preserve
   // any real/user-edited avatar path after it has moved to documents.
-  const isLegacyDemoAvatar = profile?.avatar_path && /\/avatar-00000000-0000-0000-0000-\d+\.png$/.test(profile.avatar_path)
+  const isLegacyDemoAvatar = profile?.avatar_path && (/\/avatar-00000000-0000-0000-0000-\d+\.png$/.test(profile.avatar_path) || /\/demo-driver-\d+\.png$/.test(profile.avatar_path))
   if (profile && (!profile.avatar_path || /\/demo-profile\.png$/.test(profile.avatar_path) || isLegacyDemoAvatar)) {
-    const path = `${orgId}/profiles/${profileId}/demo-driver-${String(driverId).padStart(5, '0')}.png`
-    const uploaded = await admin.storage.from('documents').upload(path, driverImage(driverId), { contentType: 'image/png', upsert: true })
+    const path = `${orgId}/profiles/${profileId}/demo-driver-${String(driverId).padStart(5, '0')}.webp`
+    const uploaded = await admin.storage.from('documents').upload(path, driverImage(driverId), { contentType: 'image/webp', upsert: true })
     if (!uploaded.error) await must(admin.from('profiles').update({ avatar_path: path }).eq('id', profileId), 'demo avatar path')
   }
 
@@ -152,7 +152,7 @@ async function ensureDemoCompliance(orgId, driverId, profileId, vehicles) {
   if (!docCount) {
     for (const [docType, expiry, suffix] of [['cdl_scan', '2028-06-30', 'cdl'], ['medical_cert', '2027-12-31', 'medical']]) {
       const path = `${orgId}/drivers/${driverId}/demo-${suffix}.png`
-      const uploaded = await admin.storage.from('documents').upload(path, driverImage(driverId + suffix.length), { contentType: 'image/png', upsert: true })
+      const uploaded = await admin.storage.from('documents').upload(path, driverImage(driverId + suffix.length), { contentType: 'image/webp', upsert: true })
       if (!uploaded.error) await must(admin.from('driver_documents').insert({ driver_id: driverId, carrier_org_id: orgId, doc_type: docType, label: `DEMO ${docType.replace('_', ' ')}`, storage_path: path, expiry_date: expiry, uploaded_by: profileId }), `demo ${docType}`)
     }
   }
@@ -163,10 +163,10 @@ async function ensureDemoCompliance(orgId, driverId, profileId, vehicles) {
     if (!current?.license_plate) vehiclePatch.license_plate = `DEMO${String(vehicle.id).padStart(4, '0')}`
     if (!current?.license_state) vehiclePatch.license_state = 'TX'
     if (Object.keys(vehiclePatch).length) await must(admin.from('vehicles').update(vehiclePatch).eq('id', vehicle.id), 'demo vehicle license fields')
-    const isLegacyDemoVehicle = current?.photo_path?.endsWith('/demo-vehicle.png')
+    const isLegacyDemoVehicle = current?.photo_path && (/\/demo-vehicle\.png$/.test(current.photo_path) || /\/demo-vehicle-\d+\.png$/.test(current.photo_path))
     if (!current?.photo_path || isLegacyDemoVehicle) {
-      const path = `${orgId}/vehicles/${vehicle.id}/demo-vehicle-${String(vehicle.id).padStart(5, '0')}.png`
-      const uploaded = await admin.storage.from('documents').upload(path, vehicleImage(vehicle.id), { contentType: 'image/png', upsert: true })
+      const path = `${orgId}/vehicles/${vehicle.id}/demo-vehicle-${String(vehicle.id).padStart(5, '0')}.webp`
+      const uploaded = await admin.storage.from('documents').upload(path, vehicleImage(vehicle.id), { contentType: 'image/webp', upsert: true })
       if (!uploaded.error) await must(admin.from('vehicles').update({ photo_path: path }).eq('id', vehicle.id), 'demo vehicle photo path')
     }
   }
