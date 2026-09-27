@@ -1,5 +1,6 @@
 // app/(app)/drivers/page.tsx
 import { createClient } from '@/lib/supabase/server'
+import { createStorageProvider } from '@/lib/storage'
 import { redirect } from 'next/navigation'
 import { getTranslations, getLocale } from 'next-intl/server'
 import Link from 'next/link'
@@ -25,7 +26,7 @@ type Driver = {
   med_cert_expiry: string | null
   endorsements: string[] | null
   is_active: boolean
-  profiles: { first_name: string | null; last_name: string | null; phone: string | null } | null
+  profiles: { first_name: string | null; last_name: string | null; phone: string | null; avatar_path: string | null } | null
 }
 
 type Vehicle = {
@@ -74,6 +75,17 @@ export default async function DriversPage({
       vehicles = vehicleData ?? []
     }
   }
+
+  const avatarUrlByDriver = new Map<number, string>()
+  const storage = createStorageProvider(supabase)
+  await Promise.all(drivers.map(async (driver) => {
+    if (!driver.profiles?.avatar_path) return
+    try {
+      avatarUrlByDriver.set(driver.id, await storage.getSignedUrl(driver.profiles.avatar_path, 60 * 60))
+    } catch {
+      // A missing demo object or revoked path should fall back to initials.
+    }
+  }))
 
   // get_exceptions() is already sorted most-urgent-first — first match per
   // driver is its top exception.
@@ -133,6 +145,8 @@ export default async function DriversPage({
                   glow === 'warning' ? 'bg-amber-500 shadow-glow-warning' :
                   'bg-rose-500 shadow-glow-danger'
                 const topException = topExceptionByDriver.get(driver.id)
+                const avatarUrl = avatarUrlByDriver.get(driver.id)
+                const initials = name.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase()
 
                 return (
                   <TableRow key={driver.id}>
@@ -144,7 +158,18 @@ export default async function DriversPage({
                         {driver.driver_number}
                       </Link>
                     </TableCell>
-                    <TableCell>{name}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        {avatarUrl ? (
+                          <img src={avatarUrl} alt="" className="h-9 w-9 rounded-full object-cover ring-2 ring-border-ui" />
+                        ) : (
+                          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-blue/20 text-xs font-semibold text-brand-blue ring-2 ring-border-ui">
+                            {initials || '?'}
+                          </span>
+                        )}
+                        <span>{name}</span>
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <StatusBadge variant={inviteStatusVariant(inviteStatus)} size="sm">
                         {t(`inviteStatus_${inviteStatus}`)}

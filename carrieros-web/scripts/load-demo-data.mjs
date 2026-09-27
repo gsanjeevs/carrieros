@@ -323,6 +323,75 @@ async function ensureLoads(orgId, customerOrgId, driverId, vehicleId, loadSpecs)
   return rows
 }
 
+// Give the dispatch command center a believable first paint even when no
+// external Samsara/Motive account is configured. These are explicitly marked
+// as synthetic vendor pings and are only added when the org has no locations;
+// reruns never append an unbounded stream or overwrite a real integration.
+async function ensureDemoDispatchData(orgId, loads, vehicles, driverId) {
+  const vehicle = vehicles[0]
+  if (!vehicle) return
+
+  const deviceId = `demo-samsara-${vehicle.id}`
+  await must(
+    admin.from('vehicles').update({ telematics_provider: 'samsara', telematics_device_id: deviceId }).eq('id', vehicle.id).is('telematics_device_id', null),
+    `demo telematics registration for vehicle ${vehicle.id}`
+  ).catch(() => {})
+
+  const { count: locationCount } = await admin.from('vehicle_locations').select('id', { count: 'exact', head: true }).eq('carrier_org_id', orgId)
+  if (!locationCount) {
+    const route = [
+      [32.7767, -96.7970], [32.8626, -96.7740], [32.9537, -96.7299],
+      [33.0198, -96.6989], [33.1032, -96.6706], [33.2148, -96.6389],
+    ]
+    await must(
+      admin.from('vehicle_locations').insert(route.map(([lat, lng], index) => ({
+        vehicle_id: vehicle.id,
+        carrier_org_id: orgId,
+        lat,
+        lng,
+        recorded_at: new Date(Date.now() - (route.length - index - 1) * 5 * 60_000).toISOString(),
+        source: 'samsara',
+      }))),
+      `demo GPS pings for vehicle ${vehicle.id}`
+    )
+  }
+
+  const activeLoad = loads.find((load) => ['dispatched', 'picked_up', 'in_transit'].includes(load.status))
+  if (activeLoad) {
+    const latest = [33.2148, -96.6389]
+    await must(
+      admin.from('loads').update({ last_location_lat: latest[0], last_location_lng: latest[1], last_location_at: new Date().toISOString() }).eq('id', activeLoad.id),
+      `demo load GPS location ${activeLoad.id}`
+    )
+    const { count: exceptionCount } = await admin.from('exception_events').select('id', { count: 'exact', head: true }).eq('carrier_org_id', orgId).eq('entity_id', activeLoad.id).eq('event_type', 'late_delivery')
+    if (!exceptionCount) {
+      await must(admin.from('exception_events').insert({
+        carrier_org_id: orgId,
+        entity_type: 'load',
+        entity_id: activeLoad.id,
+        event_type: 'late_delivery',
+        severity: 'warning',
+        title: 'Traffic delay on active load',
+        detail: 'Synthetic demo GPS shows the shipment running 30 minutes behind its delivery window.',
+        occurred_at: new Date().toISOString(),
+      }), `demo load exception ${activeLoad.id}`)
+    }
+  }
+  const { count: vehicleExceptionCount } = await admin.from('exception_events').select('id', { count: 'exact', head: true }).eq('carrier_org_id', orgId).eq('entity_id', vehicle.id).eq('event_type', 'dvir_defect')
+  if (!vehicleExceptionCount) {
+    await must(admin.from('exception_events').insert({
+      carrier_org_id: orgId,
+      entity_type: 'vehicle',
+      entity_id: vehicle.id,
+      event_type: 'dvir_defect',
+      severity: 'info',
+      title: 'Pre-trip inspection complete',
+      detail: 'No safety defects reported. Synthetic demo event for the fleet activity timeline.',
+      occurred_at: daysAgo(0.15),
+    }), `demo vehicle event ${vehicle.id}`)
+  }
+}
+
 function daysAgo(n) {
   return new Date(Date.now() - n * 86_400_000).toISOString()
 }
@@ -507,6 +576,7 @@ async function seedPersistentAccounts() {
     { status: 'dispatched', pickupDate: dateOnly(daysAgo(1)), deliveryDate: dateOnly(daysFromNow(1)), createdAt: daysAgo(1) },
     { status: 'draft', pickupDate: dateOnly(daysFromNow(3)), deliveryDate: dateOnly(daysFromNow(4)), createdAt: daysAgo(0) },
   ])
+  await ensureDemoDispatchData(sierra.id, loads, vehicles, driverId)
 
   await ensureWebhook(sierra.id, ownerId)
   const dispatchedLoad = loads.find((l) => l.status === 'dispatched') ?? loads[1]
@@ -537,6 +607,7 @@ async function seedExtraOrg({ name, carrierDetails, loadStatuses, driverName }) 
       createdAt: daysAgo(10 - i),
     }))
   )
+  await ensureDemoDispatchData(org.id, loads, vehicles, driverId)
   return { orgId: org.id, ownerId, driverProfileId, driverId, loads }
 }
 

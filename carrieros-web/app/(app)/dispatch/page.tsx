@@ -51,7 +51,7 @@ export default async function DispatchPage() {
 
   const { data: activeLoadsData } = await supabase
     .from('loads')
-    .select('id, load_number, status, vehicle_id, last_location_lat, last_location_lng, last_location_at, drivers(profiles(first_name, last_name))')
+    .select('id, load_number, status, vehicle_id, last_location_lat, last_location_lng, last_location_at, pickup_city, pickup_state, delivery_city, delivery_state, customer_name_raw, drivers(profiles(first_name, last_name))')
     .eq('carrier_org_id', profile.org_id)
     .in('status', ['dispatched', 'picked_up', 'in_transit'])
     .not('last_location_lat', 'is', null)
@@ -70,7 +70,17 @@ export default async function DispatchPage() {
     lng: Number(l.last_location_lng),
     lastLocationAt: l.last_location_at as string,
     source: 'phone',
+    shipment: {
+      customer: l.customer_name_raw,
+      origin: [l.pickup_city, l.pickup_state].filter(Boolean).join(', ') || null,
+      destination: [l.delivery_city, l.delivery_state].filter(Boolean).join(', ') || null,
+    },
   }))
+  const activeLoadByVehicle = new Map(
+    (activeLoadsData ?? [])
+      .filter((load) => load.vehicle_id != null)
+      .map((load) => [load.vehicle_id as number, load])
+  )
 
   // Idle-truck telematics (migration 0042): every vehicle with a registered device that has EVER
   // reported a position, regardless of whether it currently has an active load. Latest fix per
@@ -104,6 +114,7 @@ export default async function DispatchPage() {
     .map((v): DispatchMapPin | null => {
       const loc = latestByVehicle.get(v.id)
       if (!loc) return null
+      const shipment = activeLoadByVehicle.get(v.id)
       return {
         id: `vehicle-${v.id}`,
         kind: 'vehicle',
@@ -115,6 +126,11 @@ export default async function DispatchPage() {
         lng: Number(loc.lng),
         lastLocationAt: loc.recorded_at,
         source: loc.source === 'samsara' || loc.source === 'motive' ? loc.source : 'phone',
+        shipment: shipment ? {
+          customer: shipment.customer_name_raw,
+          origin: [shipment.pickup_city, shipment.pickup_state].filter(Boolean).join(', ') || null,
+          destination: [shipment.delivery_city, shipment.delivery_state].filter(Boolean).join(', ') || null,
+        } : undefined,
       }
     })
     .filter((p): p is DispatchMapPin => p !== null)

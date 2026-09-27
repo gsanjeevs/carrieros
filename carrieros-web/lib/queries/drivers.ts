@@ -29,7 +29,7 @@ export async function getDriverIdForProfile(supabase: AnySupabaseClient, profile
 export async function listActiveDriversForOrg(supabase: AnySupabaseClient, orgId: number) {
   return supabase
     .from('drivers')
-    .select('id, driver_number, profile_id, invite_status, default_vehicle_id, cdl_number, cdl_class, cdl_state, cdl_expiry, med_cert_expiry, endorsements, is_active, settlement_type, settlement_rate, profiles(first_name, last_name, phone)')
+    .select('id, driver_number, profile_id, invite_status, default_vehicle_id, cdl_number, cdl_class, cdl_state, cdl_expiry, med_cert_expiry, endorsements, is_active, settlement_type, settlement_rate, profiles(first_name, last_name, phone, avatar_path)')
     .eq('carrier_org_id', orgId)
     .eq('is_active', true)
     .order('driver_number', { ascending: true })

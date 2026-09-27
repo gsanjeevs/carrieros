@@ -107,6 +107,7 @@ export default function DispatchMapClient({ pins, locale, orgId }: { pins: Dispa
               lng: Number(row.last_location_lng),
               lastLocationAt: row.last_location_at as string,
               source: 'phone',
+              shipment: prev.find((p) => p.id === id)?.shipment,
             }
             const exists = prev.some((p) => p.id === id)
             return exists ? prev.map((p) => (p.id === id ? updated : p)) : [...prev, updated]

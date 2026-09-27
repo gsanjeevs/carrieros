@@ -130,6 +130,15 @@ export default function DispatchMap({ pins, locale, now }: { pins: DispatchMapPi
                 <br />
                 {p.driverName ?? '—'}
                 <br />
+                {((p as DispatchMapPin & { shipment?: { customer: string | null; origin: string | null; destination: string | null } }).shipment) ? (
+                  <>
+                    <strong>Shipment</strong><br />
+                    {((p as DispatchMapPin & { shipment?: { customer: string | null; origin: string | null; destination: string | null } }).shipment)?.customer ?? 'Customer not assigned'}<br />
+                    {((p as DispatchMapPin & { shipment?: { customer: string | null; origin: string | null; destination: string | null } }).shipment)?.origin ?? 'Origin'} → {((p as DispatchMapPin & { shipment?: { customer: string | null; origin: string | null; destination: string | null } }).shipment)?.destination ?? 'Destination'}<br />
+                  </>
+                ) : p.kind === 'vehicle' ? (
+                  <span style={{ color: '#64748b' }}>No active shipment</span>
+                ) : null}
                 {new Date(p.lastLocationAt).toLocaleString(locale)}
                 <br />
                 <span style={{ color: isStale ? '#b45309' : '#16a34a', fontWeight: 600 }}>
