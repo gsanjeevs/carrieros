@@ -18,7 +18,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Card, Button, Input, Field, Callout } from '@/components/ui'
-import { AI_FEATURES } from '@/lib/ai'
+import { AI_FEATURES } from '@/lib/ai/types'
 import { REQUIRED_ENV_VAR, KEY_FIELDS, type Provider } from './shared'
 import FeatureOverrideCard from './FeatureOverrideCard'
 

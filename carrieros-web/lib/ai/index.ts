@@ -10,20 +10,14 @@
 // inside the provider constructors (lib/ai/*-provider.ts), never here. Never call this from a
 // browser client.
 import { createAdminClient } from '@/lib/supabase/server'
-import type { LLMProvider } from './types'
+import type { LLMProvider, AiFeature } from './types'
 import { LLMProviderNotConfiguredError } from './types'
 import { AnthropicProvider } from './anthropic-provider'
 import { OpenAIProvider } from './openai-provider'
 import { OpenAICompatibleProvider } from './openai-compatible-provider'
 
-export type { LLMProvider, LLMCallOptions, LLMCallResult, LLMContentBlock, LLMFailureMode } from './types'
-export { LLMCallError, LLMProviderNotConfiguredError } from './types'
-
-// The only per-feature override the DB CHECK on ai_feature_overrides.feature allows today. Extend
-// both together (a migration adding the value to the CHECK, and this union) when another feature
-// opts in — mismatched, and either the DB rejects the row or no code path ever selects it.
-export const AI_FEATURES = ['translation'] as const
-export type AiFeature = (typeof AI_FEATURES)[number]
+export type { LLMProvider, LLMCallOptions, LLMCallResult, LLMContentBlock, LLMFailureMode, AiFeature } from './types'
+export { LLMCallError, LLMProviderNotConfiguredError, AI_FEATURES } from './types'
 
 export interface ActiveLLMProvider {
   provider: LLMProvider

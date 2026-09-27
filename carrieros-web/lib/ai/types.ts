@@ -37,6 +37,15 @@ export interface LLMCallResult {
 
 export type LLMFailureMode = 'rate_limited' | 'auth_error' | 'provider_outage' | 'unknown'
 
+// The only per-feature override the DB CHECK on ai_feature_overrides.feature allows today. Extend
+// both together (a migration adding the value to the CHECK, and this union) when another feature
+// opts in — mismatched, and either the DB rejects the row or no code path ever selects it.
+//
+// Lives here (not lib/ai/index.ts) because index.ts imports lib/supabase/server.ts (next/headers,
+// server-only) — client components need AI_FEATURES/AiFeature without pulling that in.
+export const AI_FEATURES = ['translation'] as const
+export type AiFeature = (typeof AI_FEATURES)[number]
+
 /** Thrown by every provider's call() on a transport-level failure (the underlying SDK error, or a
  * missing API key). `failureMode` is the same rate_limited/auth_error/provider_outage/unknown
  * classification lib/extract-load.ts and lib/support-triage.ts already computed from Anthropic's

@@ -13,7 +13,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Card, Button, Input, Field, Callout, SegmentedControl } from '@/components/ui'
-import type { AiFeature } from '@/lib/ai'
+import type { AiFeature } from '@/lib/ai/types'
 import { REQUIRED_ENV_VAR, KEY_FIELDS, type Provider, type KeyState } from './shared'
 
 interface FeatureOverride extends KeyState {
