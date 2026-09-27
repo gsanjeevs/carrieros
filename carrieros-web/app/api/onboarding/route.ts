@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { logError, logEvent } from '@/lib/observability'
 import { getProfileForUser, upsertProfile } from '@/lib/queries/profiles'
+import { deriveDefaultCurrency } from '@/server/domain/onboarding/draft'
 
 // Inbound load-email domain. Env-overridable so staging doesn't mint
 // addresses that collide with production's namespace.
@@ -122,7 +123,7 @@ export async function POST(request: NextRequest) {
 
   const timezone  = deriveTimezone(country ?? 'US', state)
   const uom       = country === 'CA' ? 'metric' : 'imperial'
-  const currency  = country === 'CA' ? 'CAD' : country === 'MX' ? 'MXN' : 'USD'
+  const currency  = deriveDefaultCurrency(country ?? 'US')
 
   // Use admin client for all DB writes — bypasses RLS during initial setup
   const admin = createAdminClient()

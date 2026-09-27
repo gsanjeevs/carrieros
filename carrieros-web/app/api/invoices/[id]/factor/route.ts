@@ -21,6 +21,7 @@ import { getAuthedContext, isErrorResponse, apiError } from '@/lib/api-auth'
 import { INVOICE_ROLES } from '@/lib/roles-policy'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { logEvent } from '@/lib/observability'
+import { resolveCurrency } from '@/lib/format-money'
 
 /** The one thing a real integration replaces. */
 export interface FactoringNotification {
@@ -131,7 +132,7 @@ export async function POST(
   await notifyFactor({
     invoice_number:      invoice.invoice_number,
     amount:              Number(invoice.amount),
-    currency:            org?.currency ?? 'USD',
+    currency:            resolveCurrency(org?.currency),
     due_date:            invoice.due_date,
     load_number:         invoice.loads?.load_number ?? null,
     carrier_org_id:      invoice.carrier_org_id,

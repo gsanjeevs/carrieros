@@ -11,7 +11,7 @@ import VehiclePhotoUpload from './VehiclePhotoUpload'
 import { VEHICLE_TYPE_ICONS } from '@/components/icons/vehicle-types'
 import { MAINTENANCE_ICONS } from '@/components/icons/maintenance'
 import { formatDate, formatDateTime, toDate } from '@/lib/format-datetime'
-import { formatMoney } from '@/lib/format-money'
+import { formatMoney, resolveCurrency } from '@/lib/format-money'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import { vehicleStatusVariant, type VehicleStatus } from '@/lib/domain/vehicle-status'
 import { Card, CardHeader, CardBody, KpiTile, StatusBadge, type StatusBadgeVariant, Table, TableHeaderCell, TableRow, TableCell, ProgressBar, EmptyState } from '@/components/ui'
@@ -312,13 +312,13 @@ export default async function VehicleDetailPage({
           <Card>
             <CardBody>
               <p className="text-[10px] font-bold tracking-[0.08em] uppercase text-text-sec mb-2">{t('statRevenue')}</p>
-              <p className="text-[26px] font-extrabold tracking-tight text-brand-orange leading-none">{formatMoney(totalRevenue, carrierOrg?.currency ?? 'USD', locale)}</p>
+              <p className="text-[26px] font-extrabold tracking-tight text-brand-orange leading-none">{formatMoney(totalRevenue, resolveCurrency(carrierOrg?.currency), locale)}</p>
             </CardBody>
           </Card>
         )}
         <KpiTile label={t('statMiles')} value={totalMiles.toLocaleString()} />
         {showRate && (
-          <KpiTile label={t('statAvgPerLoad')} value={formatMoney(avgPerLoad, carrierOrg?.currency ?? 'USD', locale)} />
+          <KpiTile label={t('statAvgPerLoad')} value={formatMoney(avgPerLoad, resolveCurrency(carrierOrg?.currency), locale)} />
         )}
       </div>
 
@@ -357,7 +357,7 @@ export default async function VehicleDetailPage({
                   <TableCell>{l.delivery_date ? formatDate(l.delivery_date, profile) : '—'}</TableCell>
                   {showRate && (
                     <TableCell numeric className="font-medium text-text-pri">
-                      {formatMoney(l.rate, carrierOrg?.currency ?? 'USD', locale)}
+                      {formatMoney(l.rate, resolveCurrency(carrierOrg?.currency), locale)}
                     </TableCell>
                   )}
                 </TableRow>
@@ -449,7 +449,7 @@ export default async function VehicleDetailPage({
                   <TableCell className="font-medium text-text-pri">{log.service_type}</TableCell>
                   <TableCell>{log.shop_name ?? '—'}</TableCell>
                   <TableCell>{log.odometer ? log.odometer.toLocaleString() : '—'}</TableCell>
-                  <TableCell numeric className="font-medium text-text-pri">{log.cost != null ? formatMoney(log.cost, carrierOrg?.currency ?? 'USD', locale) : '—'}</TableCell>
+                  <TableCell numeric className="font-medium text-text-pri">{log.cost != null ? formatMoney(log.cost, resolveCurrency(carrierOrg?.currency), locale) : '—'}</TableCell>
                   <TableCell numeric>
                     {log.receiptUrl ? (
                       <a href={log.receiptUrl} target="_blank" rel="noreferrer" className="text-brand-orange hover:underline text-xs font-medium">
@@ -473,7 +473,7 @@ export default async function VehicleDetailPage({
       orgId={profile.org_id}
       userId={user.id}
       canLog={canLogFuel}
-      currency={carrierOrg?.currency ?? 'USD'}
+      currency={resolveCurrency(carrierOrg?.currency)}
       locale={locale}
     />
   )

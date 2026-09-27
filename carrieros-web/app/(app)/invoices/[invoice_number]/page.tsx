@@ -4,7 +4,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { formatDate, formatDateTime } from '@/lib/format-datetime'
-import { formatMoney } from '@/lib/format-money'
+import { formatMoney, resolveCurrency } from '@/lib/format-money'
 import InvoiceActions from '../InvoiceActions'
 import EditInvoiceCard from '../EditInvoiceCard'
 import { INVOICE_ROLES } from '@/lib/roles-policy'
@@ -65,7 +65,7 @@ export default async function InvoiceDetailPage({
     .select('name, currency')
     .eq('id', profile.org_id)
     .maybeSingle()
-  const currency = org?.currency ?? 'USD'
+  const currency = resolveCurrency(org?.currency)
 
   const { data: carrier } = await supabase
     .from('carrier_details')

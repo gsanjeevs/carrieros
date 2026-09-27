@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { formatDate } from '@/lib/format-datetime'
-import { formatMoney } from '@/lib/format-money'
+import { formatMoney, resolveCurrency } from '@/lib/format-money'
 import { INVOICE_ROLES } from '@/lib/roles-policy'
 import PrintButton from './PrintButton'
 import { getProfileForUser } from '@/lib/queries/profiles'
@@ -52,7 +52,7 @@ export default async function InvoicePrintPage({
     .select('name, email, phone, address, city, state, zip, currency')
     .eq('id', profile.org_id)
     .maybeSingle()
-  const currency = org?.currency ?? 'USD'
+  const currency = resolveCurrency(org?.currency)
 
   const customerName = invoice.organizations?.name ?? invoice.loads?.customer_name_raw ?? '—'
   const customerAddress = [invoice.organizations?.address, invoice.organizations?.city, invoice.organizations?.state, invoice.organizations?.zip]

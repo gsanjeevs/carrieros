@@ -61,6 +61,18 @@ export function deriveTimezone(country: string, state: string): string {
   return US_TIMEZONES[state] ?? 'America/Chicago'
 }
 
+// The one-time "what currency does a brand-new org start with" decision,
+// made before an org row (and its `currency` column) exists at all — not
+// to be confused with lib/format-money.ts's resolveCurrency(), which
+// resolves an EXISTING org's already-stored currency for ongoing rendering
+// and always falls back to USD regardless of country. This derives the
+// initial default from the org's country, same shape as uomSystem below.
+export function deriveDefaultCurrency(country: string): string {
+  if (country === 'CA') return 'CAD'
+  if (country === 'MX') return 'MXN'
+  return 'USD'
+}
+
 export function buildOnboardingDraft(input: OnboardingDraftInput): Result<OnboardingDraft> {
   const country = input.country ?? 'US'
   return ok({
@@ -77,7 +89,7 @@ export function buildOnboardingDraft(input: OnboardingDraftInput): Result<Onboar
     tier: input.tier ?? 'starter',
     timezone: deriveTimezone(country, input.state),
     uomSystem: country === 'CA' ? 'metric' : 'imperial',
-    currency: country === 'CA' ? 'CAD' : country === 'MX' ? 'MXN' : 'USD',
+    currency: deriveDefaultCurrency(country),
     firstName: input.firstName.trim(),
     lastName: input.lastName.trim(),
     role: input.role ?? 'owner',

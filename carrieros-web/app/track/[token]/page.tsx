@@ -11,26 +11,21 @@
 // here, and do NOT widen that RPC's return columns without re-reading the
 // security note next to its definition in supabase/schema/schema.sql.
 //
-// Deliberately does not import STATUS_BADGE from the authenticated
-// loads pages — this page must keep working even if that module changes.
-// Text still comes from the tracking.*/loads.status_* message catalogs.
+// Rule A: status-color mapping comes from lib/domain/load-status.ts's
+// shared STATUS_COLOR, the same single source the authenticated loads/
+// dispatch UI uses — no more hand-written duplicate map here. That module
+// was previously deliberately NOT imported here out of caution about
+// pulling auth/server code into this public, unauthenticated page, but it
+// is plain domain logic (a status enum + string-literal color lookups) with
+// no supabase/auth/server-only imports of its own, so importing it does not
+// widen this page's trust boundary. Text still comes from the
+// tracking.*/loads.status_* message catalogs, independently of this map.
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { toDate } from '@/lib/format-datetime'
 import { createStorageProvider } from '@/lib/storage'
 import { brandingCssVars } from '@/lib/domain/branding'
-
-const STATUS_COLOR: Record<string, string> = {
-  draft:       'bg-slate-500/20 text-slate-400',
-  scheduled:   'bg-blue-500/20 text-blue-400',
-  dispatched:  'bg-brand-orange/20 text-brand-orange',
-  picked_up:   'bg-amber-500/20 text-amber-400',
-  in_transit:  'bg-teal/20 text-teal',
-  delivered:   'bg-success/20 text-success',
-  invoiced:    'bg-purple-500/20 text-purple-400',
-  paid:        'bg-success/20 text-success',
-  cancelled:   'bg-rose-500/10 text-rose-400',
-}
+import { STATUS_COLOR } from '@/lib/domain/load-status'
 
 function formatDate(value: string | null, locale: string): string {
   if (!value) return '—'

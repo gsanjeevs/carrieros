@@ -68,6 +68,18 @@ export class SupabaseInvoiceWriteRepository implements InvoiceWriteRepository {
 
     const customerOrg = Array.isArray(data.organizations) ? data.organizations[0] : data.organizations
     const load = Array.isArray(data.loads) ? data.loads[0] : data.loads
+
+    // Separate query (not folded into the select above) so the mirrored
+    // legacy select shape stays byte-for-byte identical — this is the
+    // carrier's own org (actor.orgId, already the findForSend filter),
+    // not the customer org joined above. Rule I: never fall back to a
+    // literal currency here — resolveCurrency() at the call site owns that.
+    const { data: carrierOrg } = await this.supabase
+      .from('organizations')
+      .select('currency')
+      .eq('id', actor.orgId)
+      .maybeSingle()
+
     return ok({
       invoiceNumber: data.invoice_number,
       amount: data.amount,
@@ -75,6 +87,7 @@ export class SupabaseInvoiceWriteRepository implements InvoiceWriteRepository {
       recipient: customerOrg?.email ?? null,
       customerName: customerOrg?.name ?? null,
       loadTrackingToken: load?.tracking_token ?? null,
+      currency: carrierOrg?.currency ?? null,
     })
   }
 

@@ -414,6 +414,8 @@ export interface InvoiceSendRecord {
   readonly recipient: string | null
   readonly customerName: string | null
   readonly loadTrackingToken: string | null
+  /** Carrier org's currency (organizations.currency); null if unavailable. Resolve via lib/format-money.ts's resolveCurrency(), never a literal fallback. */
+  readonly currency: string | null
 }
 
 export interface EmailGateway {

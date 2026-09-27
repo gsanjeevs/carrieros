@@ -11,7 +11,7 @@ import DriverMessageThread from '@/components/DriverMessageThread'
 import IftaCrossingsSection, { type IftaCrossingRow } from '@/components/IftaCrossingsSection'
 import { hasFeature } from '@/lib/entitlements'
 import { formatDateTime, toDate } from '@/lib/format-datetime'
-import { formatMoney } from '@/lib/format-money'
+import { formatMoney, resolveCurrency } from '@/lib/format-money'
 import CreateInvoiceButton from './CreateInvoiceButton'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import { Card, CardHeader, CardBody, StatusBadge } from '@/components/ui'
@@ -237,7 +237,7 @@ export default async function LoadDetailPage({
           <CardBody className="flex flex-col items-center text-center">
             <p className="text-[11px] uppercase tracking-wider text-text-sec font-semibold mb-1">{t('rateHero')}</p>
             <p className="text-4xl font-extrabold text-brand-orange">
-              {load.rate != null ? formatMoney(load.rate, carrierOrg?.currency ?? 'USD', locale) : '—'}
+              {load.rate != null ? formatMoney(load.rate, resolveCurrency(carrierOrg?.currency), locale) : '—'}
             </p>
           </CardBody>
         </Card>
@@ -442,7 +442,7 @@ export default async function LoadDetailPage({
               loadId={load.id}
               billable={billable}
               existingInvoiceNumber={existingInvoiceNumber}
-              amountLabel={formatMoney(load.rate, carrierOrg?.currency ?? 'USD', locale)}
+              amountLabel={formatMoney(load.rate, resolveCurrency(carrierOrg?.currency), locale)}
               customerName={customerName ?? load.customer_name_raw}
             />
           )}

@@ -13,7 +13,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { formatDate } from '@/lib/format-datetime'
-import { formatMoney } from '@/lib/format-money'
+import { formatMoney, resolveCurrency } from '@/lib/format-money'
 import { hasFeature } from '@/lib/entitlements'
 import CustomerTabs from './CustomerTabs'
 import EditCustomerButton from './EditCustomerButton'
@@ -126,7 +126,7 @@ export default async function CustomerDetailPage({
     .select('currency')
     .eq('id', profile.org_id)
     .maybeSingle()
-  const currency = carrierOrg?.currency ?? 'USD'
+  const currency = resolveCurrency(carrierOrg?.currency)
 
   const canSeeRevenue = roleHasCapability(profile.role, 'rate_visibility')
   const canBill = INVOICE_ROLES.includes(profile.role)

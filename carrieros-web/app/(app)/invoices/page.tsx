@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { formatDate } from '@/lib/format-datetime'
-import { formatMoney } from '@/lib/format-money'
+import { formatMoney, resolveCurrency } from '@/lib/format-money'
 import { INVOICE_ROLES } from '@/lib/roles-policy'
 import { invoiceStatusVariant, type InvoiceStatus } from '@/lib/domain/invoice-status'
 import { Card, EmptyState, StatusBadge, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
@@ -42,7 +42,7 @@ export default async function InvoicesPage({
     .select('currency')
     .eq('id', profile.org_id)
     .maybeSingle()
-  const currency = org?.currency ?? 'USD'
+  const currency = resolveCurrency(org?.currency)
 
   // Opportunistic housekeeping: there's no cron/job scheduler in this project
   // yet, so we flip 'sent' invoices past their due_date to 'overdue' right

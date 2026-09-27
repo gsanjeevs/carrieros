@@ -11,10 +11,12 @@
 // token already used in 3 of 4 consuming files), consolidating a decision
 // that had drifted rather than been made once.
 //
-// Deliberately NOT consumed by app/track/[token]/page.tsx — that page has
-// its own pre-existing, deliberate isolation comment ("must keep working
-// even if that module changes") since it's a public/anon-facing security
-// boundary, not the kind of duplication this module is meant to eliminate.
+// Also consumed by the public app/track/[token]/page.tsx (via STATUS_COLOR
+// only) — this module has no supabase/auth/server-only imports of its own,
+// so importing it doesn't widen that page's public/anon trust boundary.
+// Previously deliberately excluded there out of caution; Rule A's own hit
+// on that page's hand-written duplicate map is what prompted re-checking
+// that caution and switching to this shared map instead (2026-09-26).
 //
 // Not yet shared with carrieros-mobile (separate TS setup, no shared
 // package today) — mobile's own copy lives in

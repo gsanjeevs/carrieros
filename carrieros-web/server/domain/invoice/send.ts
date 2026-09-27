@@ -1,3 +1,5 @@
+import { resolveCurrency } from '@/lib/format-money'
+
 export interface InvoiceEmailInput {
   readonly invoiceId: number
   readonly invoiceNumber: string
@@ -5,6 +7,8 @@ export interface InvoiceEmailInput {
   readonly dueDate: string | null
   readonly customerName: string | null
   readonly loadTrackingToken: string | null
+  /** organizations.currency for the carrier org; resolved via resolveCurrency() at the call site if null. */
+  readonly currency: string | null
 }
 
 export function buildInvoiceEmail(input: InvoiceEmailInput, appUrl: string) {
@@ -12,7 +16,7 @@ export function buildInvoiceEmail(input: InvoiceEmailInput, appUrl: string) {
   const trackingPixel = `<img src="${appUrl}/api/invoices/${input.invoiceId}/track" width="1" height="1" alt="" style="display:none" />`
   const amount = new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency: resolveCurrency(input.currency),
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(input.amount)

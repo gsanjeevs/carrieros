@@ -7,7 +7,7 @@ import DriverTabs from './DriverTabs'
 import DriverDocuments, { type DriverDocType, type DriverDocument } from '@/components/DriverDocuments'
 import DriverPayConfig from '@/components/DriverPayConfig'
 import { formatDate, formatDateTime } from '@/lib/format-datetime'
-import { formatMoney } from '@/lib/format-money'
+import { formatMoney, resolveCurrency } from '@/lib/format-money'
 import { inviteStatusVariant, type InviteStatus } from '@/lib/domain/invite-status'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import { cdlGlowStatus } from '@/lib/domain/driver-compliance'
@@ -273,13 +273,13 @@ export default async function DriverDetailPage({
           <Card>
             <CardBody>
               <p className="text-[10px] font-bold tracking-[0.08em] uppercase text-text-sec mb-2">{t('statRevenue')}</p>
-              <p className="text-[26px] font-extrabold tracking-tight text-brand-orange leading-none">{formatMoney(totalRevenue, carrierOrg?.currency ?? 'USD', locale)}</p>
+              <p className="text-[26px] font-extrabold tracking-tight text-brand-orange leading-none">{formatMoney(totalRevenue, resolveCurrency(carrierOrg?.currency), locale)}</p>
             </CardBody>
           </Card>
         )}
         <KpiTile label={t('statMiles')} value={totalMiles.toLocaleString()} />
         {showRate && (
-          <KpiTile label={t('statAvgPerLoad')} value={formatMoney(avgPerLoad, carrierOrg?.currency ?? 'USD', locale)} />
+          <KpiTile label={t('statAvgPerLoad')} value={formatMoney(avgPerLoad, resolveCurrency(carrierOrg?.currency), locale)} />
         )}
       </div>
 
@@ -318,7 +318,7 @@ export default async function DriverDetailPage({
                   <TableCell>{l.delivery_date ? formatDate(l.delivery_date, profile) : '—'}</TableCell>
                   {showRate && (
                     <TableCell numeric className="font-medium text-text-pri">
-                      {formatMoney(l.rate, carrierOrg?.currency ?? 'USD', locale)}
+                      {formatMoney(l.rate, resolveCurrency(carrierOrg?.currency), locale)}
                     </TableCell>
                   )}
                 </TableRow>

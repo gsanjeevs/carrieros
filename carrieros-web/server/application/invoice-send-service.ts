@@ -27,6 +27,7 @@ export class InvoiceSendService {
         dueDate: found.value.dueDate,
         customerName: found.value.customerName,
         loadTrackingToken: found.value.loadTrackingToken,
+        currency: found.value.currency,
       }, this.deps.appUrl)
       const sent = await this.deps.email.send({ to: found.value.recipient, ...message })
       if (!sent.ok) return err(domainError('EMAIL_SEND_FAILED', 'Could not send invoice'))

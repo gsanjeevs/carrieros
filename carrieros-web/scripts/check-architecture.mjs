@@ -199,19 +199,21 @@ for (const [table, severity] of Object.entries(QUERY_ENCAPSULATION_SEVERITY)) {
 // unrelated `'active'`/`'pending'` checklist-row states — same
 // false-positive-avoidance discipline as Rule C's precedent below. Run
 // against the current tree before this was added: it found ONE real hit,
-// app/track/[token]/page.tsx's STATUS_COLOR map (deliberately not sharing
-// the authenticated pages' module per that file's own header comment, but
-// still the exact duplication shape Rule A exists to prevent) — so this
-// stays `warn`, not the hard gate the zero-violations precedent (Rule G)
-// would otherwise justify.
+// app/track/[token]/page.tsx's STATUS_COLOR map (previously deliberately
+// not sharing the authenticated pages' module per that file's own header
+// comment). That page was migrated to import lib/domain/load-status.ts's
+// STATUS_COLOR directly on 2026-09-26 (it has no auth/server-only imports
+// of its own, so importing it doesn't widen the public page's trust
+// boundary) — zero violations now, so this is a hard gate (Rule G
+// precedent): any new hand-written duplicate map fails the check.
 checkPattern({
   label: 'rule-a-status-color-duplication',
   dirs: ['app', 'components', '../carrieros-mobile/src'],
   exts: ['ts', 'tsx'],
   exclude: ['../carrieros-mobile/src/constants/theme.ts'],
   forbiddenPattern: /^\s*(draft|scheduled|dispatched|picked_up|in_transit|delivered|invoiced|paid|cancelled|declined)\s*:\s*['"](#|bg-|text-)/,
-  message: "Hand-written status-color mapping outside the shared Rule A module (lib/domain/load-status.ts web, constants/theme.ts mobile). See architecture-principles.md Rule A. (warn-only — one pre-existing, documented exception found; see check-architecture.mjs comment.)",
-  severity: 'warn',
+  message: "Hand-written status-color mapping outside the shared Rule A module (lib/domain/load-status.ts web, constants/theme.ts mobile). See architecture-principles.md Rule A.",
+  severity: 'error',
 })
 
 // Rule H — cross-client business/gating logic must not be hand-duplicated
@@ -245,12 +247,16 @@ checkPattern({
 // default parameter (formatMoney's `currency = 'USD'` is a generic
 // formatter's last-resort default, not a per-call-site duplication of an
 // org's actual currency — the thing Rule I's entry 1 is actually about).
-// Run against the current tree: found the ~20-site pattern architecture-
-// principles.md's Rule I entry 1 describes (`carrierOrg?.currency ?? 'USD'`
-// repeated per page, plus api/onboarding/route.ts's country->currency
-// ternary computing it inline instead of through a shared resolver) — not
-// yet fixed, so `warn`; see the task report for the exact count and a note
-// on how it compares to the doc's approximate figure.
+// Run against the current tree originally: found the ~20-site pattern
+// architecture-principles.md's Rule I entry 1 describes
+// (`carrierOrg?.currency ?? 'USD'` repeated per page, plus
+// api/onboarding/route.ts's/server/domain/onboarding/draft.ts's
+// country->currency ternary computing it inline). Fixed on 2026-09-26: every
+// call site now goes through lib/format-money.ts's resolveCurrency()
+// (resolving an EXISTING org's stored currency, ultimate fallback USD) or
+// server/domain/onboarding/draft.ts's deriveDefaultCurrency() (the one-time
+// country-based default for a brand-new org, before an org row exists) —
+// zero violations now, so this is a hard gate.
 checkPattern({
   label: 'rule-i-currency-literal-fallback',
   dirs: ['app', 'lib', 'components', 'server', '../carrieros-mobile/src'],
@@ -258,8 +264,8 @@ checkPattern({
   exclude: ['lib/format-money.ts', '../carrieros-mobile/src/lib/format-money.ts'],
   forbiddenPattern: /(\?\?|\?|:)\s*'(USD|CAD|MXN)'/,
   skipComments: true,
-  message: "Literal currency fallback outside a single designated resolver. Every locale-varying value must resolve through one inheritance chain, the same shape already correctly used for preferred_language/uom_system — never a literal default typed inline at each call site. See architecture-principles.md Rule I. (warn-only — not yet fixed, tracked as a living list per Rule I's own text.)",
-  severity: 'warn',
+  message: "Literal currency fallback outside a single designated resolver. Every locale-varying value must resolve through one inheritance chain, the same shape already correctly used for preferred_language/uom_system — never a literal default typed inline at each call site. Use lib/format-money.ts's resolveCurrency() or server/domain/onboarding/draft.ts's deriveDefaultCurrency(). See architecture-principles.md Rule I.",
+  severity: 'error',
 })
 
 // ── ADR 0003: no frontend data access except through the API ────────────────
