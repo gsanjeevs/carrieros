@@ -32,6 +32,46 @@ check it for anything not covered here.
 - `.claude/launch.json` — dev server configs for the Browser-pane preview
   tool (`carrieros-web`, `carrieros-mobile (web preview)`, `supabase`).
 
+## Architectural rules — hard constraints, checked by tooling not memory (2026-09-27)
+
+Both sessions working this repo (whatever LLM/tool is driving) must not violate these. Each is
+enforced by a git hook, CI check, or generator — not just documentation — so a violation should fail
+fast rather than merge silently. This list is the index; full rationale lives at each link.
+
+1. **API-only data access (ADR 0003)** — UI code (mobile screens, web client components, web Server
+   Components) never calls `.from()`/`.rpc()`/`.storage` directly. Data goes through `/api/v1`
+   (mobile: `apiClient`) or in-process `server/composition.ts` (web pages). See "API-only data access"
+   below; enforced by `check-architecture.mjs`'s `API_ONLY` list.
+2. **Migrations are immutable once applied** — never edit, delete, or rename a committed migration
+   file; fix forward with a new, uniquely-numbered one. Enforced in `scripts/git-hooks/pre-commit`
+   (blocks edits/deletions/renames of committed migrations and duplicate migration numbers).
+3. **`supabase/schema/schema.sql` must match the migrations** — hand-update it alongside any new
+   migration; `node scripts/db/verify-migrations.mjs` catches drift but does not generate it for you.
+   See "After any schema change" below.
+4. **No raw Tailwind card/badge styling outside `components/ui/*`** — flagged by
+   `eslint.config.mjs`'s `no-restricted-syntax` guard (`warn` repo-wide, `error` on surfaces listed in
+   `ERROR_SURFACES` once fully migrated).
+5. **Hot tables (`profiles`/`loads`/`drivers`) go through `lib/queries/*.ts`**, not ad hoc `.from()`
+   calls — `check-architecture.mjs` Rule B, currently `warn` (large existing debt), tightens to
+   `error` table-by-table as each gets a `lib/queries/` module.
+6. **Role→capability logic has one source of truth**: the generated `ROLE_CAPABILITIES` /
+   `roleHasCapability()` (from the `role_capabilities` Postgres table via
+   `scripts/gen-role-capabilities.mjs`), consumed identically by both apps. Never hand-roll a
+   role-list literal (e.g. a second `BILLING_ROLES`-style array) — that's the exact drift bug that
+   already happened once.
+7. **Design tokens have one source of truth**: `carrieros-web/app/globals.css`'s `@theme` block mirrors
+   into `carrieros-mobile/src/constants/theme.ts`'s `BrandColors`; `check-tokens.mjs` fails the build
+   on drift. Never hand-pick a one-off color in a new screen.
+8. **`git push` / relying on GitHub Actions as verification requires the account owner's explicit
+   ask**, in either session — see "Test scope and when to push" below.
+9. **Read and update `CURRENT_WORK.md`** before starting a task and when finishing one, and prefer a
+   git worktree per session/task for anything beyond a quick fix — see "Multiple LLM sessions working
+   on this repo at once" below.
+
+When you find or fix a real architectural violation, log it in `CURRENT_WORK.md`'s "Flagged by
+cross-session review" section (not just in this file) so the other session sees it without needing to
+re-derive it.
+
 ## Persistent demo accounts
 Not deleted between sessions — reused for manual/browser testing.
 - `demo@carrieros.dev` / `Demo123!` — owner, "Sierra Freight Co" (org 12),
