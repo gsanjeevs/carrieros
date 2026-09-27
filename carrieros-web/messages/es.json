@@ -696,7 +696,9 @@
     "noQueue": "No hay nada esperando ser despachado.",
     "dispatchAction": "Despachar →",
     "dispatchModalTitle": "Despachar {loadNumber}",
-    "loadingMap": "Cargando mapa…"
+    "loadingMap": "Cargando mapa…",
+    "locationStale": "⚠ Sin actualización en más de 15 min",
+    "locationLive": "● En vivo"
   },
   "settings": {
     "title": "Configuración de perfil",

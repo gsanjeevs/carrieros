@@ -696,7 +696,9 @@
     "noQueue": "ਡਿਸਪੈਚ ਹੋਣ ਦੀ ਉਡੀਕ ਵਿੱਚ ਕੁਝ ਨਹੀਂ।",
     "dispatchAction": "ਡਿਸਪੈਚ →",
     "dispatchModalTitle": "{loadNumber} ਡਿਸਪੈਚ ਕਰੋ",
-    "loadingMap": "ਨਕਸ਼ਾ ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ…"
+    "loadingMap": "ਨਕਸ਼ਾ ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ…",
+    "locationStale": "⚠ 15 ਮਿੰਟ ਤੋਂ ਵੱਧ ਸਮੇਂ ਤੋਂ ਕੋਈ ਅੱਪਡੇਟ ਨਹੀਂ",
+    "locationLive": "● ਲਾਈਵ"
   },
   "settings": {
     "title": "ਪ੍ਰੋਫਾਈਲ ਸੈਟਿੰਗਾਂ",

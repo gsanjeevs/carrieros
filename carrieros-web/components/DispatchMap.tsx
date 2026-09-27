@@ -13,7 +13,15 @@
 // page.tsx call site).
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
+import { useTranslations } from 'next-intl'
 import 'leaflet/dist/leaflet.css'
+
+// No fixed GPS ping interval exists today (share-location-section.tsx samples
+// on 50m of movement, not a timer), so this is a judgment threshold, not a
+// hard SLA: a pin older than this is shown faded with a stale badge rather
+// than looking identical to a fresh one (there was previously no distinction
+// at all between a 3-minute-old and a 3-day-old position).
+const STALE_THRESHOLD_MS = 15 * 60 * 1000
 
 // Leaflet's default marker icon references image paths that don't survive
 // a webpack bundle. CDN-hosted icons sidestep needing new webpack asset
@@ -40,7 +48,8 @@ export interface DispatchMapLoad {
 
 const US_CENTER: [number, number] = [39.8283, -98.5795]
 
-export default function DispatchMap({ loads, locale }: { loads: DispatchMapLoad[]; locale: string }) {
+export default function DispatchMap({ loads, locale, now }: { loads: DispatchMapLoad[]; locale: string; now: number }) {
+  const t = useTranslations('dispatch')
   const center: [number, number] =
     loads.length > 0
       ? [loads.reduce((s, l) => s + l.lat, 0) / loads.length, loads.reduce((s, l) => s + l.lng, 0) / loads.length]
@@ -57,19 +66,26 @@ export default function DispatchMap({ loads, locale }: { loads: DispatchMapLoad[
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {loads.map((l) => (
-        <Marker key={l.id} position={[l.lat, l.lng]} icon={DEFAULT_ICON}>
-          <Popup>
-            <div style={{ fontSize: '13px' }}>
-              <strong>{l.loadNumber}</strong>
-              <br />
-              {l.driverName ?? '—'}
-              <br />
-              {new Date(l.lastLocationAt).toLocaleString(locale)}
-            </div>
-          </Popup>
-        </Marker>
-      ))}
+      {loads.map((l) => {
+        const isStale = now - new Date(l.lastLocationAt).getTime() > STALE_THRESHOLD_MS
+        return (
+          <Marker key={l.id} position={[l.lat, l.lng]} icon={DEFAULT_ICON} opacity={isStale ? 0.45 : 1}>
+            <Popup>
+              <div style={{ fontSize: '13px' }}>
+                <strong>{l.loadNumber}</strong>
+                <br />
+                {l.driverName ?? '—'}
+                <br />
+                {new Date(l.lastLocationAt).toLocaleString(locale)}
+                <br />
+                <span style={{ color: isStale ? '#b45309' : '#16a34a', fontWeight: 600 }}>
+                  {isStale ? t('locationStale') : t('locationLive')}
+                </span>
+              </div>
+            </Popup>
+          </Marker>
+        )
+      })}
     </MapContainer>
   )
 }

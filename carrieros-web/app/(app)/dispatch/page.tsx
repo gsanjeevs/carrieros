@@ -81,7 +81,7 @@ export default async function DispatchPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <DispatchMapClient loads={mapLoads} locale={locale} />
+          <DispatchMapClient loads={mapLoads} locale={locale} orgId={profile.org_id} />
           {mapLoads.length === 0 && (
             <p className="text-text-mut text-xs mt-2">{t('noActiveLocations')}</p>
           )}

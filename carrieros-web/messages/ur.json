@@ -696,7 +696,9 @@
     "noQueue": "ڈسپیچ ہونے کے انتظار میں کچھ نہیں۔",
     "dispatchAction": "ڈسپیچ →",
     "dispatchModalTitle": "{loadNumber} ڈسپیچ کریں",
-    "loadingMap": "نقشہ لوڈ ہو رہا ہے…"
+    "loadingMap": "نقشہ لوڈ ہو رہا ہے…",
+    "locationStale": "⚠ 15 منٹ سے زیادہ سے کوئی اپ ڈیٹ نہیں",
+    "locationLive": "● لائیو"
   },
   "settings": {
     "title": "پروفائل کی ترتیبات",

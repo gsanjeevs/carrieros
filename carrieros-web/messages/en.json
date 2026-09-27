@@ -696,7 +696,9 @@
     "noQueue": "Nothing waiting to be dispatched.",
     "dispatchAction": "Dispatch →",
     "dispatchModalTitle": "Dispatch {loadNumber}",
-    "loadingMap": "Loading map…"
+    "loadingMap": "Loading map…",
+    "locationStale": "⚠ No update in over 15 min",
+    "locationLive": "● Live"
   },
   "settings": {
     "title": "Profile settings",
