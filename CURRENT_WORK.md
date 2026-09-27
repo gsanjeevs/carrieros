@@ -26,7 +26,7 @@ the other session), and mention the commit(s) so the other session can `git log`
 
 | Session | Task | Files/areas | Started |
 |---|---|---|---|
-| _(none active)_ | | | |
+| Claude | DAT load-board integration Phase 1 (posting only, mocked client): schema, settings UI, load-detail action | new migration 0052+, `server/contract/`, `app/(app)/settings/integrations`, `app/(app)/loads/[load_number]`; worktree `../carrieros-loadboard` on `feature/dat-loadboard` | 2026-09-27 |
 
 ## Recently finished (for context, not a permanent log — prune entries older than a day or two)
 
@@ -36,6 +36,8 @@ the other session), and mention the commit(s) so the other session can `git log`
 | Claude | Found + fixed 4 missing table-grant bugs (0037, 0042) surfaced by running the real demo seed against staging | `2358438` | 2026-09-27 |
 | Claude | `/api/version` + staging drift-check tooling | `fdf5e10` | 2026-09-27 |
 | Codex (GPT-5) | Restored immutable 0048; added pre-commit migration immutability guard (uncommitted) | local only | 2026-09-27 |
+| Codex (GPT-5) | Customer exception email-on-publish/resend; locally verified 0051 legacy invoice count | local only, uncommitted | 2026-09-27 |
+| Codex (GPT-5) | Read-only design-system, light/dark theme, and tenant branding audit; Playwright samples at desktop light/dark | local audit only | 2026-09-27 |
 
 ## Flagged by cross-session review (2026-09-27)
 
