@@ -3,7 +3,7 @@
 > **Generated** by `node scripts/db/gen-erd.mjs` from the live schema. Do not edit by hand:
 > change the database via a migration, then re-run the generator. CI runs it with `--check`.
 
-56 tables, 102 foreign keys, split into 7 domain diagrams (one diagram of every table is unreadable).
+58 tables, 106 foreign keys, split into 7 domain diagrams (one diagram of every table is unreadable).
 A box drawn without columns belongs to another domain; find it in its own section.
 `||` = the FK is required (NOT NULL); `|o` = the FK is optional (nullable). `PK`/`FK` mark keys.
 
@@ -198,6 +198,8 @@ erDiagram
     text nickname
     text photo_path
     text status
+    text telematics_device_id
+    text telematics_provider
     text vehicle_number
     bigint vehicle_type_id FK
     text vin
@@ -781,7 +783,7 @@ erDiagram
 
 Tables not yet placed in a domain: add them to DOMAINS in scripts/db/gen-erd.mjs.
 
-Tables: `ai_feature_overrides`, `app_error_log`, `webhook_deliveries`, `webhooks`
+Tables: `ai_feature_overrides`, `app_error_log`, `telematics_integrations`, `vehicle_locations`, `webhook_deliveries`, `webhooks`
 
 ```mermaid
 erDiagram
@@ -810,6 +812,27 @@ erDiagram
     text route
     uuid user_id FK
   }
+  telematics_integrations {
+    bigint id PK
+    text api_key_encrypted
+    bigint carrier_org_id FK
+    timestamptz created_at
+    boolean enabled
+    text provider
+    timestamptz updated_at
+    uuid updated_by FK
+    text webhook_secret_encrypted
+  }
+  vehicle_locations {
+    bigint id PK
+    bigint carrier_org_id FK
+    timestamptz created_at
+    float8 lat
+    float8 lng
+    timestamptz recorded_at
+    text source
+    bigint vehicle_id FK
+  }
   webhook_deliveries {
     bigint id PK
     integer attempt_count
@@ -835,6 +858,10 @@ erDiagram
   profiles |o--o{ ai_feature_overrides : "updated_by"
   organizations |o--o{ app_error_log : "org_id"
   profiles |o--o{ app_error_log : "user_id"
+  organizations ||--o{ telematics_integrations : "carrier_org_id"
+  profiles |o--o{ telematics_integrations : "updated_by"
+  organizations ||--o{ vehicle_locations : "carrier_org_id"
+  vehicles ||--o{ vehicle_locations : "vehicle_id"
   organizations ||--o{ webhook_deliveries : "org_id"
   webhooks ||--o{ webhook_deliveries : "webhook_id"
   profiles |o--o{ webhooks : "created_by"
