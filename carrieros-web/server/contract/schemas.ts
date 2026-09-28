@@ -703,6 +703,45 @@ export const UpsertTelematicsIntegrationBodySchema = z.object({
 })
 export const UpsertTelematicsIntegrationResponseSchema = z.object({ integration: TelematicsIntegrationSummarySchema })
 
+// ── Loadboard integrations (Settings > Integrations > Load Board, migration 0052) ────────────────
+// DAT integration, Phase 1 (posting only, mocked client). Same shape/posture as telematics above:
+// ordinary session-authenticated /api/v1, credential never returned (only credential_configured).
+// Unlike telematics, this capability (loadboard_posting) is owner/solo/dispatcher, not owner/solo
+// only -- see server/application/loadboard-service.ts's header comment.
+export const LoadboardIntegrationSummarySchema = z.object({
+  provider: z.enum(['dat']),
+  enabled: z.boolean(),
+  credential_configured: z.boolean(),
+  updated_at: z.string(),
+  updated_by: z.string().nullable(),
+})
+export const ListLoadboardIntegrationsResponseSchema = z.object({
+  integrations: z.array(LoadboardIntegrationSummarySchema),
+})
+
+// Omitted api_key = leave the stored credential untouched (the common case: toggling `enabled`
+// alone); empty string = explicit clear, matching telematics' UpsertTelematicsIntegrationBodySchema
+// convention.
+export const UpsertLoadboardIntegrationBodySchema = z.object({
+  provider: z.enum(['dat']),
+  enabled: z.boolean().optional(),
+  api_key: z.string().optional(),
+})
+export const UpsertLoadboardIntegrationResponseSchema = z.object({ integration: LoadboardIntegrationSummarySchema })
+
+// ── Loadboard postings (load-detail "Post to DAT" button, migration 0052) ────────────────────────
+export const LoadboardPostingSchema = z.object({
+  load_id: z.number().int(),
+  provider: z.enum(['dat']),
+  external_posting_id: z.string(),
+  posted_at: z.string(),
+  posted_by: z.string().nullable(),
+})
+export const LoadboardPostingParamsSchema = z.object({ id: z.coerce.number().int().positive() })
+export const GetLoadboardPostingResponseSchema = z.object({ posting: LoadboardPostingSchema.nullable() })
+export const CreateLoadboardPostingBodySchema = z.object({ provider: z.enum(['dat']).optional() })
+export const CreateLoadboardPostingResponseSchema = z.object({ posting: LoadboardPostingSchema })
+
 // ── Financial events (T19: accounting-integration readiness layer) ──────────
 // Ledger-shaped export of the outbox events emitted by the five financial
 // mutations migration 0033 instruments: invoice created/sent/paid, driver

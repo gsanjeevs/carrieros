@@ -13,6 +13,7 @@ import { hasFeature } from '@/lib/entitlements'
 import { formatDateTime, toDate } from '@/lib/format-datetime'
 import { formatMoney, resolveCurrency } from '@/lib/format-money'
 import CreateInvoiceButton from './CreateInvoiceButton'
+import PostToDatButton from './PostToDatButton'
 import DriverLoadActions from './DriverLoadActions'
 import DvirForm from './DvirForm'
 import LoadFuelStops from './LoadFuelStops'
@@ -22,6 +23,8 @@ import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import { Card, CardHeader, CardBody, StatusBadge } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { roleHasCapability } from '@/lib/generated/role-capabilities'
+import { buildActorContext } from '@/server/infrastructure/supabase/actor-context'
+import { createLoadboardPostingService } from '@/server/composition'
 
 const STATUS_FLOW_KEYS = [
   { key: 'draft',      icon: 'draft' },
@@ -225,6 +228,26 @@ export default async function LoadDetailPage({
       crossedAt: c.crossed_at,
       odometerEst: c.odometer_est,
     }))
+  }
+
+  // DAT load board (Phase 1, posting only, migration 0052): `loadboard_posting` — owner/solo/
+  // dispatcher, Growth+. Uses the same in-process application service (server/composition.ts) the
+  // API routes use, per ADR 0003, rather than a raw .from('loadboard_postings') query.
+  const canLoadboard = roleHasCapability(profile.role, 'loadboard_posting')
+  let loadboardEntitled = false
+  let existingDatPosting: { externalPostingId: string; postedAt: string } | null = null
+  if (canLoadboard) {
+    const actor = await buildActorContext(supabase, user, crypto.randomUUID())
+    if (actor.ok) {
+      const status = await createLoadboardPostingService(supabase).getPostingStatus(actor.value, load.id)
+      if (status.ok) {
+        loadboardEntitled = true
+        existingDatPosting = status.value ? { externalPostingId: status.value.externalPostingId, postedAt: status.value.postedAt } : null
+      }
+      // status.ok === false with ENTITLEMENT_REQUIRED just means the org isn't Growth+ yet —
+      // loadboardEntitled stays false and PostToDatButton renders nothing, same
+      // "gated but not entitled" posture as dispatch/page.tsx's hasFeature check.
+    }
   }
 
   const isCancelled = load.status === 'cancelled'
@@ -510,6 +533,10 @@ export default async function LoadDetailPage({
               amountLabel={formatMoney(load.rate, resolveCurrency(carrierOrg?.currency), locale)}
               customerName={customerName ?? load.customer_name_raw}
             />
+          )}
+
+          {loadboardEntitled && (
+            <PostToDatButton loadId={load.id} existingPosting={existingDatPosting} />
           )}
         </div>
 

@@ -15,8 +15,8 @@ if [ -n "$WEB_FILES" ]; then
   echo "→ carrieros-web: eslint"
   (cd carrieros-web && npx eslint $(echo "$WEB_FILES" | sed 's|^carrieros-web/||'))
 
-  echo "→ carrieros-web: tsc --noEmit"
-  (cd carrieros-web && npx tsc --noEmit)
+  echo "→ carrieros-web: tsc --noEmit (no incremental cache)"
+  (cd carrieros-web && npx tsc --noEmit --incremental false)
 
   echo "→ carrieros-web: architecture check (Rule B/D/G decoupling)"
   (cd carrieros-web && node scripts/check-architecture.mjs)
@@ -45,6 +45,18 @@ fi
 # is a hard requirement (scripts/db/migrate.mjs applies them in order), so this is a real block, not a
 # nudge — catches the collision here instead of at merge/push time or, worse, after both are applied.
 MIGRATION_FILES=$(echo "$STAGED" | grep -E '^supabase/migrations/.*\.sql$' || true)
+MIGRATION_CHANGES=$(git diff --cached --name-status -- supabase/migrations/)
+if [ -n "$MIGRATION_CHANGES" ]; then
+  echo "→ applied-migration immutability check"
+  EDITED_MIGRATIONS=$(echo "$MIGRATION_CHANGES" | awk '$1 ~ /^[MDRTU]/ { print }')
+  if [ -n "$EDITED_MIGRATIONS" ]; then
+    echo "✗ Existing migration files are immutable once committed:"
+    echo "$EDITED_MIGRATIONS" | sed 's/^/    /'
+    echo "  Add a new, uniquely numbered migration to fix forward; do not edit, delete, or rename an applied migration."
+    exit 1
+  fi
+fi
+
 if [ -n "$MIGRATION_FILES" ]; then
   echo "→ migration number collision check"
   DUPES=$(ls supabase/migrations/*.sql | xargs -n1 basename | grep -oE '^[0-9]+' | sort | uniq -d)

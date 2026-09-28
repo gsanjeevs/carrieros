@@ -26,15 +26,15 @@ the other session), and mention the commit(s) so the other session can `git log`
 
 | Session | Task | Files/areas | Started |
 |---|---|---|---|
-| Codex (GPT-6) | Review/fix and locally commit the in-progress billing/GPS/customer-order work; preserve unrelated local edits | `carrieros-web/app/(app)/billing/`, `dispatch/`, `invoices/`, `loads/`, `track/`, related APIs/server/types/tests, migrations 0047/0049-0051 and `supabase/schema/schema.sql`; do not touch active Claude worktrees | 2026-09-27 |
+| Codex (GPT-6) | Review/fix and locally commit the in-progress billing/GPS/customer-order work; preserve unrelated local edits — **done, committed as `8f9d429`** | `carrieros-web/app/(app)/billing/`, `dispatch/`, `invoices/`, `loads/`, `track/`, related APIs/server/types/tests, migrations 0047/0049-0051 and `supabase/schema/schema.sql` | 2026-09-27 |
 
 ## Recently finished (for context, not a permanent log — prune entries older than a day or two)
 
 | Session | Task | Commits | Finished |
 |---|---|---|---|
-| Claude | Timezone-aware datetime rendering + expanded languages 4→24 with full translations + `LanguagePicker` component (not yet wired in) | `2312367`,`cbdf82e`,`5d9c02f`,`1e08b43`,`01d1c37`,`b117943` on branch `feature/i18n-timezone`, worktree `../carrieros-i18n-tz` — **not yet merged to main**, uses migration `0054` (reserved to avoid colliding with `feature/dat-loadboard`'s 0052-0053) | 2026-09-27 |
-| Claude | Breadcrumb/back-navigation audit + fix (vehicle/driver/customer detail pages + exceptions-inbox CTA plumbing); load/invoice-detail breadcrumb UI itself deferred, was blocked on your in-progress work | `89345cc`,`ec09d7b`,`7dd76ba`,`7f81ae5` on branch `feature/breadcrumb-nav`, worktree `../carrieros-nav-ux` — **not yet merged to main** | 2026-09-27 |
-| Claude | DAT load-board integration Phase 1 (posting only, mocked `DatClient`), incl. a real tenancy-gap fix found + fixed via 0053 while writing tests | `95c0e24`,`f675cf2`,`88211c0`,`59995b1` on branch `feature/dat-loadboard`, worktree `../carrieros-loadboard` — **not yet merged to main**, see note below | 2026-09-27 |
+| Claude | Timezone-aware datetime rendering + expanded languages 4→24 with full translations + `LanguagePicker` component (not yet wired in) | `2312367`,`cbdf82e`,`5d9c02f`,`1e08b43`,`01d1c37`,`b117943` on branch `feature/i18n-timezone`, worktree `../carrieros-i18n-tz` — **not yet merged to main** | 2026-09-27 |
+| Claude | Breadcrumb/back-navigation audit + fix (vehicle/driver/customer detail pages + exceptions-inbox CTA plumbing, incl. a follow-up fix for a hardcoded-English `fromLabel`); load/invoice-detail breadcrumb UI itself deferred | `89345cc`,`ec09d7b`,`7dd76ba`,`7f81ae5`,`1991bef` on branch `feature/breadcrumb-nav`, worktree `../carrieros-nav-ux` — **not yet merged to main** | 2026-09-27 |
+| Claude | DAT load-board integration Phase 1 (posting only, mocked `DatClient`), incl. a real tenancy-gap fix found + fixed via 0053 while writing tests — **merged to main in this commit** | `95c0e24`,`f675cf2`,`88211c0`,`59995b1` on branch `feature/dat-loadboard` | 2026-09-27 |
 | Claude | UX/navigation review + 3 fixes (customer-role login loop, Settings nav consolidation, theme flash) | `edadaca`, `da0e791`, `374c235` | 2026-09-27 |
 | Claude | Found + fixed 4 missing table-grant bugs (0037, 0042) surfaced by running the real demo seed against staging | `2358438` | 2026-09-27 |
 | Claude | `/api/version` + staging drift-check tooling | `fdf5e10` | 2026-09-27 |

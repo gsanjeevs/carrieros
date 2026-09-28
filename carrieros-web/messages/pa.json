@@ -1586,7 +1586,9 @@
     "deliveriesTitle": "ਹਾਲੀਆ ਡਿਲੀਵਰੀਆਂ",
     "noDeliveries": "ਹਾਲੇ ਤੱਕ ਕੋਈ ਡਿਲੀਵਰੀ ਨਹੀਂ",
     "emptyTitle": "ਹਾਲੇ ਤੱਕ ਕੋਈ ਵੈੱਬਹੁੱਕ ਨਹੀਂ",
-    "emptyDescription": "ਇੱਕ ਵੈੱਬਹੁੱਕ ਰਜਿਸਟਰ ਕਰੋ ਤਾਂ ਜੋ CarrierOS ਕਿਸੇ ਹੋਰ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਸੂਚਿਤ ਕਰੇ ਜਦੋਂ ਲੋਡ ਦੀ ਸਥਿਤੀ ਬਦਲੇ ਜਾਂ ਇਨਵੌਇਸ ਦਾ ਭੁਗਤਾਨ ਹੋਵੇ।"
+    "emptyDescription": "ਇੱਕ ਵੈੱਬਹੁੱਕ ਰਜਿਸਟਰ ਕਰੋ ਤਾਂ ਜੋ CarrierOS ਕਿਸੇ ਹੋਰ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਸੂਚਿਤ ਕਰੇ ਜਦੋਂ ਲੋਡ ਦੀ ਸਥਿਤੀ ਬਦਲੇ ਜਾਂ ਇਨਵੌਇਸ ਦਾ ਭੁਗਤਾਨ ਹੋਵੇ।",
+    "loadboardTitle": "Load Board",
+    "loadboardUpgradeRequired": "Load board posting requires the Growth plan or higher."
   },
   "telematics": {
     "title": "ਟੈਲੀਮੈਟਿਕਸ",
@@ -1609,5 +1611,24 @@
     "save": "ਸੰਭਾਲੋ",
     "saved": "ਸੰਭਾਲਿਆ ਗਿਆ",
     "credentialRequired": "ਇਸਨੂੰ ਪਹਿਲੀ ਵਾਰ ਸੈੱਟਅੱਪ ਕਰਨ ਲਈ ਇੱਕ ਕ੍ਰੇਡੈਂਸ਼ੀਅਲ ਦਰਜ ਕਰੋ।"
+  },
+  "loadboard": {
+    "settingsTitle": "Load Board",
+    "settingsSubtitle": "Connect a load-board provider so dispatchers can post loads for other carriers to find.",
+    "datTitle": "DAT Load Board",
+    "datDescription": "Post loads to DAT's load board (posting only -- search and booking are not part of this integration).",
+    "enabled": "Enabled",
+    "apiKeyLabel": "DAT API Key",
+    "apiKeyPlaceholder": "Enter to set or rotate",
+    "apiKeyConfigured": "A key is configured. Leave blank to keep it, or enter a new one to rotate.",
+    "apiKeyNotConfigured": "No key configured yet.",
+    "credentialRequired": "Enter a credential to set this up for the first time.",
+    "save": "Save",
+    "saved": "Saved",
+    "title": "Load Board",
+    "description": "Post this load to DAT's load board so other carriers can find it.",
+    "postButton": "Post to DAT",
+    "posting": "Posting...",
+    "alreadyPosted": "This load has been posted to DAT."
   }
 }

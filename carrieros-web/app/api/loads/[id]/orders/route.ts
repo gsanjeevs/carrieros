@@ -97,7 +97,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const { data: loadOrder, error: loadOrderError } = await supabase.from('load_orders')
     .select('id').eq('id', orderId).eq('load_id', loadId).eq('carrier_org_id', profile.org_id).maybeSingle()
   if (loadOrderError || !loadOrder) return apiError('NOT_FOUND', 'Order not found', 404)
-  const { data, error } = await supabase.rpc('set_load_order_billable_amount', { p_order_id: orderId, p_amount: amount })
+  // `set_load_order_billable_amount`'s SQL body explicitly branches on `p_amount IS NULL` (clearing
+  // the override) -- a plain NUMERIC param with no NOT NULL/DEFAULT, so `supabase gen types` has no
+  // signal to type it as nullable and always emits `number`. Cast rather than change runtime
+  // behavior (found blocking tsc after a routine type regeneration, 2026-09-27).
+  const { data, error } = await supabase.rpc('set_load_order_billable_amount', { p_order_id: orderId, p_amount: amount as number })
   if (error?.code === 'PT409') return apiError('VALIDATION_ERROR', 'Order charges cannot change after an invoice is created', 409)
   if (error?.code === 'PT400') return apiError('VALIDATION_ERROR', 'Order charge must not exceed the load rate', 400)
   if (error?.code === 'PT404') return apiError('NOT_FOUND', 'Order not found', 404)
