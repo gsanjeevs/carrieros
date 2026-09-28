@@ -333,9 +333,13 @@ export type Database = {
           amount: number | null
           card_last4: string | null
           created_at: string | null
+          currency: string
           event_type: string
           id: number
+          is_simulated: boolean
           org_id: number
+          payment_reference: string | null
+          plan_code: string | null
           resolved_at: string | null
           status: string | null
           stripe_event_id: string | null
@@ -344,9 +348,13 @@ export type Database = {
           amount?: number | null
           card_last4?: string | null
           created_at?: string | null
+          currency?: string
           event_type: string
           id?: number
+          is_simulated?: boolean
           org_id: number
+          payment_reference?: string | null
+          plan_code?: string | null
           resolved_at?: string | null
           status?: string | null
           stripe_event_id?: string | null
@@ -355,9 +363,13 @@ export type Database = {
           amount?: number | null
           card_last4?: string | null
           created_at?: string | null
+          currency?: string
           event_type?: string
           id?: number
+          is_simulated?: boolean
           org_id?: number
+          payment_reference?: string | null
+          plan_code?: string | null
           resolved_at?: string | null
           status?: string | null
           stripe_event_id?: string | null
@@ -1088,6 +1100,8 @@ export type Database = {
         Row: {
           carrier_org_id: number
           created_at: string | null
+          customer_message: string | null
+          customer_visible: boolean
           detail: string | null
           entity_id: number
           entity_type: string
@@ -1100,6 +1114,8 @@ export type Database = {
         Insert: {
           carrier_org_id: number
           created_at?: string | null
+          customer_message?: string | null
+          customer_visible?: boolean
           detail?: string | null
           entity_id: number
           entity_type: string
@@ -1112,6 +1128,8 @@ export type Database = {
         Update: {
           carrier_org_id?: number
           created_at?: string | null
+          customer_message?: string | null
+          customer_visible?: boolean
           detail?: string | null
           entity_id?: number
           entity_type?: string
@@ -1501,6 +1519,16 @@ export type Database = {
           },
         ]
       }
+      invoice_order_allocations: {
+        Row: { amount: number; carrier_org_id: number; created_at: string; id: number; invoice_id: number; load_order_id: number }
+        Insert: { amount: number; carrier_org_id: number; created_at?: string; id?: number; invoice_id: number; load_order_id: number }
+        Update: { amount?: number; carrier_org_id?: number; created_at?: string; id?: number; invoice_id?: number; load_order_id?: number }
+        Relationships: [
+          { foreignKeyName: 'invoice_order_allocations_carrier_org_id_fkey'; columns: ['carrier_org_id']; isOneToOne: false; referencedRelation: 'organizations'; referencedColumns: ['id'] },
+          { foreignKeyName: 'invoice_order_allocations_invoice_id_fkey'; columns: ['invoice_id']; isOneToOne: false; referencedRelation: 'invoices'; referencedColumns: ['id'] },
+          { foreignKeyName: 'invoice_order_allocations_load_order_id_fkey'; columns: ['load_order_id']; isOneToOne: false; referencedRelation: 'load_orders'; referencedColumns: ['id'] },
+        ]
+      },
       languages: {
         Row: {
           code: string
@@ -1789,6 +1817,79 @@ export type Database = {
             referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      load_orders: {
+        Row: {
+          carrier_org_id: number
+          commodity: string | null
+          created_at: string
+          customer_org_id: number
+          customer_reference: string | null
+          delivery_address: string | null
+          delivery_city: string | null
+          delivery_date: string | null
+          delivery_state: string | null
+          id: number
+          load_id: number
+          order_number: string
+          pickup_address: string | null
+          pickup_city: string | null
+          pickup_date: string | null
+          pickup_state: string | null
+          status: string
+          billable_amount: number | null
+          updated_at: string
+          weight_lbs: number | null
+        }
+        Insert: {
+          carrier_org_id: number
+          commodity?: string | null
+          created_at?: string
+          customer_org_id: number
+          customer_reference?: string | null
+          delivery_address?: string | null
+          delivery_city?: string | null
+          delivery_date?: string | null
+          delivery_state?: string | null
+          id?: number
+          load_id: number
+          order_number: string
+          pickup_address?: string | null
+          pickup_city?: string | null
+          pickup_date?: string | null
+          pickup_state?: string | null
+          status?: string
+          billable_amount?: number | null
+          updated_at?: string
+          weight_lbs?: number | null
+        }
+        Update: {
+          carrier_org_id?: number
+          commodity?: string | null
+          created_at?: string
+          customer_org_id?: number
+          customer_reference?: string | null
+          delivery_address?: string | null
+          delivery_city?: string | null
+          delivery_date?: string | null
+          delivery_state?: string | null
+          id?: number
+          load_id?: number
+          order_number?: string
+          pickup_address?: string | null
+          pickup_city?: string | null
+          pickup_date?: string | null
+          pickup_state?: string | null
+          status?: string
+          billable_amount?: number | null
+          updated_at?: string
+          weight_lbs?: number | null
+        }
+        Relationships: [
+          { foreignKeyName: "load_orders_carrier_org_id_fkey"; columns: ["carrier_org_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] },
+          { foreignKeyName: "load_orders_customer_org_id_fkey"; columns: ["customer_org_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] },
+          { foreignKeyName: "load_orders_load_id_fkey"; columns: ["load_id"]; isOneToOne: false; referencedRelation: "loads"; referencedColumns: ["id"] },
         ]
       }
       maintenance_reminders: {
@@ -3219,6 +3320,10 @@ export type Database = {
       }
     }
     Functions: {
+      demo_change_plan: {
+        Args: { p_org_id: number; p_payment_reference: string; p_tier: string }
+        Returns: { amount: number; currency: string; event_id: number | null; event_status: string; tier: string }[]
+      }
       bulk_import_customers: {
         Args: { p_rows: Json }
         Returns: {
@@ -3424,6 +3529,26 @@ export type Database = {
           created_at: string
           event_type: string
         }[]
+      }
+      get_public_tracking_exceptions: {
+        Args: { p_token: string }
+        Returns: {
+          customer_message: string
+          occurred_at: string
+          severity: string | null
+        }[]
+      }
+      set_load_order_billable_amount: {
+        Args: { p_amount: number | null; p_order_id: number }
+        Returns: number | null
+      }
+      create_load_invoices_command: {
+        Args: { p_advance_load_status: boolean; p_correlation_id: string; p_due_date: string; p_factoring_company: string | null; p_idempotency_key: string; p_invoice_rows: Json; p_load_id: number; p_payment_method: string }
+        Returns: Json
+      }
+      set_tracking_exception_visibility: {
+        Args: { p_customer_message: string | null; p_exception_id: number; p_visible: boolean }
+        Returns: boolean
       }
       has_feature: { Args: { feature_key: string }; Returns: boolean }
       list_message_conversations: {
@@ -3685,4 +3810,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

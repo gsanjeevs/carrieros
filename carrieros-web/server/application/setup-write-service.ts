@@ -11,6 +11,7 @@ import type {
   DriverSummaryRecord,
   IdempotencyRepository,
   PaymentMethodRecord,
+  PlanChangeRecord,
   UpdateVehicleInput,
   VehicleWriteRepository,
 } from '../ports'
@@ -69,8 +70,8 @@ export class SetupWriteService {
     return this.deps.vehicles.update(actor, vehicleId, input)
   }
 
-  changeTier(actor: ActorContext, tier: string) {
+  changeTier(actor: ActorContext, tier: string, paymentReference: string): Promise<Result<PlanChangeRecord>> {
     if (!roleHasCapability(actor.role, 'subscription_management')) return Promise.resolve(err(forbidden('This role cannot manage billing', { role: actor.role })))
-    return this.deps.billing.changeTier(actor, tier)
+    return this.deps.billing.changeTier(actor, tier, paymentReference)
   }
 }

@@ -259,10 +259,11 @@ async function orgHasAnyRows(table, orgColumn, orgId) {
 }
 
 async function ensureVehicles(orgId, specs) {
-  if (await orgHasAnyRows('vehicles', 'carrier_org_id', orgId)) return await must(admin.from('vehicles').select('id').eq('carrier_org_id', orgId).order('id'), 'list vehicles')
+  const existing = await must(admin.from('vehicles').select('id, nickname, vehicle_number').eq('carrier_org_id', orgId).order('id'), 'list vehicles')
+  if (existing.length >= specs.length) return existing
   const vehicleType = await must(admin.from('vehicle_types').select('id').limit(1).single(), 'vehicle_types')
-  const rows = []
-  for (const spec of specs) {
+  const rows = [...existing]
+  for (const spec of specs.slice(existing.length)) {
     const vehicleNumber = await nextNumber(orgId, 'vehicle', 'T')
     const row = await must(
       admin.from('vehicles').insert({ carrier_org_id: orgId, vehicle_number: vehicleNumber, vehicle_type_id: vehicleType.id, ...spec }).select('id').single(),
@@ -278,7 +279,8 @@ async function ensureCustomer(orgId, spec) {
     .from('customer_details')
     .select('org_id, organizations!customer_details_org_id_fkey(name)')
     .eq('carrier_org_id', orgId)
-  if (existing && existing.length > 0) return existing[0].org_id
+  const matched = existing?.find((row) => row.organizations?.name === spec.name)
+  if (matched) return matched.org_id
   const customerOrg = await must(
     admin.from('organizations').insert({ type: 'customer', name: spec.name, city: spec.city, state: spec.state }).select('id').single(),
     `customer org ${spec.name}`
@@ -292,9 +294,10 @@ async function ensureCustomer(orgId, spec) {
 }
 
 async function ensureLoads(orgId, customerOrgId, driverId, vehicleId, loadSpecs) {
-  if (await orgHasAnyRows('loads', 'carrier_org_id', orgId)) return await must(admin.from('loads').select('id, status').eq('carrier_org_id', orgId).order('id'), 'list loads')
-  const rows = []
-  for (const spec of loadSpecs) {
+  const existing = await must(admin.from('loads').select('id, load_number, customer_org_id, status, driver_id, vehicle_id, last_location_lat, last_location_lng, pickup_address, pickup_city, pickup_state, pickup_date, delivery_address, delivery_city, delivery_state, delivery_date').eq('carrier_org_id', orgId).order('id'), 'list loads')
+  if (existing.length >= loadSpecs.length) return existing
+  const rows = [...existing]
+  for (const spec of loadSpecs.slice(existing.length)) {
     const loadNumber = await nextNumber(orgId, 'load', 'L')
     const row = await must(
       admin
@@ -304,17 +307,17 @@ async function ensureLoads(orgId, customerOrgId, driverId, vehicleId, loadSpecs)
           customer_org_id: customerOrgId,
           customer_name_raw: 'Acme Distribution',
           load_number: loadNumber,
-          driver_id: spec.status === 'draft' ? null : driverId,
-          vehicle_id: spec.status === 'draft' ? null : vehicleId,
-          pickup_address: '100 Industrial Pkwy', pickup_city: 'Dallas', pickup_state: 'TX', pickup_zip: '75201',
+          driver_id: spec.status === 'draft' ? null : (spec.driverId ?? driverId),
+          vehicle_id: spec.status === 'draft' ? null : (spec.vehicleId ?? vehicleId),
+          pickup_address: spec.pickupAddress ?? '100 Industrial Pkwy', pickup_city: spec.pickupCity ?? 'Dallas', pickup_state: spec.pickupState ?? 'TX', pickup_zip: '75201',
           pickup_date: spec.pickupDate, pickup_time: '08:00',
-          delivery_address: '400 Commerce St', delivery_city: 'Houston', delivery_state: 'TX', delivery_zip: '77002',
+          delivery_address: spec.deliveryAddress ?? '400 Commerce St', delivery_city: spec.deliveryCity ?? 'Houston', delivery_state: spec.deliveryState ?? 'TX', delivery_zip: '77002',
           delivery_date: spec.deliveryDate, delivery_time: '14:00',
           commodity: 'General Freight', weight_lbs: 22000, rate: spec.rate ?? 1850, total_miles: 240,
           intake_method: 'manual', status: spec.status,
           created_at: spec.createdAt,
         })
-        .select('id, status')
+        .select('id, load_number, customer_org_id, status, driver_id, vehicle_id, last_location_lat, last_location_lng, pickup_address, pickup_city, pickup_state, pickup_date, delivery_address, delivery_city, delivery_state, delivery_date')
         .single(),
       `load ${loadNumber} (${spec.status})`
     )
@@ -323,73 +326,159 @@ async function ensureLoads(orgId, customerOrgId, driverId, vehicleId, loadSpecs)
   return rows
 }
 
-// Give the dispatch command center a believable first paint even when no
-// external Samsara/Motive account is configured. These are explicitly marked
-// as synthetic vendor pings and are only added when the org has no locations;
-// reruns never append an unbounded stream or overwrite a real integration.
-async function ensureDemoDispatchData(orgId, loads, vehicles, driverId) {
-  const vehicle = vehicles[0]
-  if (!vehicle) return
-
-  const deviceId = `demo-samsara-${vehicle.id}`
-  await must(
-    admin.from('vehicles').update({ telematics_provider: 'samsara', telematics_device_id: deviceId }).eq('id', vehicle.id).is('telematics_device_id', null),
-    `demo telematics registration for vehicle ${vehicle.id}`
-  ).catch(() => {})
-
-  const { count: locationCount } = await admin.from('vehicle_locations').select('id', { count: 'exact', head: true }).eq('carrier_org_id', orgId)
-  if (!locationCount) {
-    const route = [
-      [32.7767, -96.7970], [32.8626, -96.7740], [32.9537, -96.7299],
-      [33.0198, -96.6989], [33.1032, -96.6706], [33.2148, -96.6389],
-    ]
-    await must(
-      admin.from('vehicle_locations').insert(route.map(([lat, lng], index) => ({
-        vehicle_id: vehicle.id,
-        carrier_org_id: orgId,
-        lat,
-        lng,
-        recorded_at: new Date(Date.now() - (route.length - index - 1) * 5 * 60_000).toISOString(),
-        source: 'samsara',
-      }))),
-      `demo GPS pings for vehicle ${vehicle.id}`
-    )
-  }
-
-  const activeLoad = loads.find((load) => ['dispatched', 'picked_up', 'in_transit'].includes(load.status))
-  if (activeLoad) {
-    const latest = [33.2148, -96.6389]
-    await must(
-      admin.from('loads').update({ last_location_lat: latest[0], last_location_lng: latest[1], last_location_at: new Date().toISOString() }).eq('id', activeLoad.id),
-      `demo load GPS location ${activeLoad.id}`
-    )
-    const { count: exceptionCount } = await admin.from('exception_events').select('id', { count: 'exact', head: true }).eq('carrier_org_id', orgId).eq('entity_id', activeLoad.id).eq('event_type', 'late_delivery')
-    if (!exceptionCount) {
-      await must(admin.from('exception_events').insert({
-        carrier_org_id: orgId,
-        entity_type: 'load',
-        entity_id: activeLoad.id,
-        event_type: 'late_delivery',
-        severity: 'warning',
-        title: 'Traffic delay on active load',
-        detail: 'Synthetic demo GPS shows the shipment running 30 minutes behind its delivery window.',
-        occurred_at: new Date().toISOString(),
-      }), `demo load exception ${activeLoad.id}`)
+async function ensureDemoLoadOrders(orgId, loads, primaryCustomerId, secondaryCustomerId) {
+  for (const load of loads) {
+    const consolidated = load.status === 'in_transit' && secondaryCustomerId !== primaryCustomerId
+    const customers = consolidated ? [primaryCustomerId, secondaryCustomerId] : [load.customer_org_id ?? primaryCustomerId]
+    const weights = customers.map((_, index) => index === 1 ? 6800 : 14000)
+    let allocatedSoFar = 0
+    for (let index = 0; index < customers.length; index++) {
+      const orderNumber = `DEMO-${load.id}-${String(index + 1).padStart(2, '0')}`
+      const amount = index === customers.length - 1
+        ? Number((Number(load.rate ?? 0) - allocatedSoFar).toFixed(2))
+        : Number((Number(load.rate ?? 0) * weights[index] / weights.reduce((sum, weight) => sum + weight, 0)).toFixed(2))
+      allocatedSoFar += amount
+      const { data: existing } = await admin.from('load_orders').select('id, billable_amount').eq('carrier_org_id', orgId).eq('order_number', orderNumber).maybeSingle()
+      if (existing) {
+        if (existing.billable_amount == null) await must(admin.from('load_orders').update({ billable_amount: amount }).eq('id', existing.id), `demo order allocation ${orderNumber}`)
+        continue
+      }
+      const status = ['cancelled', 'declined'].includes(load.status) ? 'cancelled'
+        : ['delivered', 'invoiced', 'paid'].includes(load.status) ? 'delivered' : load.status
+      await must(admin.from('load_orders').insert({
+        carrier_org_id: orgId, load_id: load.id, customer_org_id: customers[index], order_number: orderNumber,
+        customer_reference: `PO-${String(load.id).padStart(5, '0')}-${index + 1}`,
+        commodity: index === 1 ? 'Palletized medical supplies' : 'General Freight',
+        weight_lbs: index === 1 ? 6800 : 14000,
+        billable_amount: amount,
+        pickup_address: load.pickup_address, pickup_city: load.pickup_city, pickup_state: load.pickup_state, pickup_date: load.pickup_date,
+        delivery_address: load.delivery_address, delivery_city: load.delivery_city, delivery_state: load.delivery_state, delivery_date: load.delivery_date,
+        status: status === 'draft' ? 'scheduled' : status,
+      }), `demo order ${orderNumber}`)
     }
   }
-  const { count: vehicleExceptionCount } = await admin.from('exception_events').select('id', { count: 'exact', head: true }).eq('carrier_org_id', orgId).eq('entity_id', vehicle.id).eq('event_type', 'dvir_defect')
-  if (!vehicleExceptionCount) {
-    await must(admin.from('exception_events').insert({
-      carrier_org_id: orgId,
-      entity_type: 'vehicle',
-      entity_id: vehicle.id,
-      event_type: 'dvir_defect',
-      severity: 'info',
-      title: 'Pre-trip inspection complete',
-      detail: 'No safety defects reported. Synthetic demo event for the fleet activity timeline.',
-      occurred_at: daysAgo(0.15),
-    }), `demo vehicle event ${vehicle.id}`)
+  console.log(`  ensured customer-order rows for ${loads.length} loads; the in-transit demo load carries two customers`)
+}
+
+// Seed one current position for every synthetic-demo truck; the UI's opt-in
+// loop adds fresh positions only while a dispatcher has the control enabled.
+async function ensureDemoDispatchData(orgId, loads, vehicles) {
+  const devicePatches = vehicles.map((vehicle) => admin.from('vehicles')
+    .update({ telematics_provider: 'samsara', telematics_device_id: `demo-samsara-${vehicle.id}` })
+    .eq('id', vehicle.id).is('telematics_device_id', null))
+  for (const [index, patch] of devicePatches.entries()) await must(patch, `demo telematics registration ${index + 1}`)
+
+  const { data: existingLocations } = await admin.from('vehicle_locations').select('vehicle_id').eq('carrier_org_id', orgId)
+  const located = new Set((existingLocations ?? []).map((row) => row.vehicle_id))
+  const route = [
+    [32.7767, -96.7970], [32.8626, -96.7740], [32.9537, -96.7299],
+    [33.0198, -96.6989], [33.1032, -96.6706], [33.2148, -96.6389],
+    [33.3400, -96.6100], [33.4700, -96.5800],
+  ]
+  const initialRows = vehicles.filter((vehicle) => !located.has(vehicle.id)).map((vehicle, index) => ({
+    vehicle_id: vehicle.id,
+    carrier_org_id: orgId,
+    lat: route[index % route.length][0],
+    lng: route[index % route.length][1],
+    recorded_at: new Date(Date.now() - (vehicles.length - index) * 60_000).toISOString(),
+    source: 'samsara',
+  }))
+  if (initialRows.length) await must(admin.from('vehicle_locations').insert(initialRows), 'initial demo vehicle locations')
+
+  // Seed a prior fix for demo-owned devices so the dispatch map can honestly
+  // distinguish a stopped vehicle from one whose movement is simply unknown.
+  const { data: demoDevices } = await admin.from('vehicles').select('id, telematics_device_id').eq('carrier_org_id', orgId).like('telematics_device_id', 'demo-samsara-%')
+  const { data: allLocations } = await admin.from('vehicle_locations').select('vehicle_id, lat, lng, recorded_at').eq('carrier_org_id', orgId).eq('source', 'samsara').order('recorded_at', { ascending: false })
+  for (const device of demoDevices ?? []) {
+    const samples = (allLocations ?? []).filter((location) => location.vehicle_id === device.id)
+    if (samples.length >= 2) continue
+    const latest = samples[0]
+    const fallback = route[vehicles.findIndex((vehicle) => vehicle.id === device.id) % route.length]
+    const referenceTime = latest ? new Date(latest.recorded_at).getTime() : Date.now()
+    await must(admin.from('vehicle_locations').insert({
+      vehicle_id: device.id, carrier_org_id: orgId,
+      lat: Number(latest?.lat ?? fallback[0]) + 0.00004,
+      lng: Number(latest?.lng ?? fallback[1]) - 0.00004,
+      recorded_at: new Date(referenceTime - 180_000).toISOString(), source: 'samsara',
+    }), `prior synthetic location for vehicle ${device.id}`)
   }
+
+  const activeLoads = loads.filter((load) => ['dispatched', 'picked_up', 'in_transit'].includes(load.status))
+  for (const [index, load] of activeLoads.entries()) {
+    const point = route[(index + 3) % route.length]
+    if (load.vehicle_id && load.last_location_lat == null && load.last_location_lng == null) await must(admin.from('loads').update({ last_location_lat: point[0], last_location_lng: point[1], last_location_at: new Date().toISOString() }).eq('id', load.id), `demo load location ${load.id}`)
+    const { count } = await admin.from('exception_events').select('id', { count: 'exact', head: true }).eq('carrier_org_id', orgId).eq('entity_id', load.id).eq('event_type', 'late_delivery')
+    if (!count) await must(admin.from('exception_events').insert({ carrier_org_id: orgId, entity_type: 'load', entity_id: load.id, event_type: 'late_delivery', severity: 'warning', title: 'Traffic delay on active load', detail: 'Synthetic demo GPS indicates a 30-minute delay on the delivery estimate.', occurred_at: new Date().toISOString() }), `demo load exception ${load.id}`)
+  }
+  const customerDemoLoad = activeLoads.find((load) => load.status === 'in_transit')
+  if (customerDemoLoad) {
+    const { count } = await admin.from('exception_events').select('id', { count: 'exact', head: true })
+      .eq('carrier_org_id', orgId).eq('entity_id', customerDemoLoad.id).eq('event_type', 'customer_tracking_update')
+    if (!count) await must(admin.from('exception_events').insert({
+      carrier_org_id: orgId, entity_type: 'load', entity_id: customerDemoLoad.id,
+      event_type: 'customer_tracking_update', severity: 'warning', title: 'Customer tracking update',
+      detail: 'A dispatcher-published status update is visible to the customer tracking link.',
+      customer_visible: true,
+      customer_message: 'Traffic is adding about 30 minutes to the delivery estimate. The driver is moving safely, and we will share another update if timing changes.',
+      occurred_at: new Date().toISOString(),
+    }), `public tracking exception ${customerDemoLoad.id}`)
+  }
+  for (const vehicle of vehicles.slice(0, 3)) {
+    const { count } = await admin.from('exception_events').select('id', { count: 'exact', head: true }).eq('carrier_org_id', orgId).eq('entity_id', vehicle.id).eq('event_type', 'dvir_defect')
+    if (!count) await must(admin.from('exception_events').insert({ carrier_org_id: orgId, entity_type: 'vehicle', entity_id: vehicle.id, event_type: 'dvir_defect', severity: 'warning', title: 'Vehicle inspection alert', detail: 'Synthetic demo event: review the reported tire / lighting inspection note.', occurred_at: daysAgo(0.15) }), `demo vehicle alert ${vehicle.id}`)
+  }
+  if (vehicles[1]) {
+    const { count } = await admin.from('dvir_inspections').select('id', { count: 'exact', head: true }).eq('carrier_org_id', orgId).eq('vehicle_id', vehicles[1].id)
+    if (!count) {
+      const driver = loads.find((load) => load.vehicle_id === vehicles[1].id)?.driver_id
+      const inspection = await must(admin.from('dvir_inspections').insert({
+        carrier_org_id: orgId, vehicle_id: vehicles[1].id, driver_id: driver ?? null,
+        type: 'pre_trip', condition: 'defects_noted', odometer: 386420,
+      }).select('id').single(), `demo DVIR inspection for vehicle ${vehicles[1].id}`)
+      await must(admin.from('dvir_defects').insert({ inspection_id: inspection.id, area: 'Tires', description: 'Right rear outer tire pressure below operating range; service requested before next dispatch.', severity: 'minor' }), `demo DVIR defect for vehicle ${vehicles[1].id}`)
+    }
+  }
+}
+
+async function ensureDemoTeam(orgId, secondCustomerOrgId) {
+  const additions = [
+    ['alex.dispatcher@carrieros.dev', 'dispatcher', 'Alex', 'Morgan'],
+    ['taylor.finance@carrieros.dev', 'finance', 'Taylor', 'Chen'],
+  ]
+  for (const [email, role, firstName, lastName] of additions) await ensureUser(email, orgId, role, firstName, lastName)
+  const { data: customerLink } = await admin.from('customer_details').select('org_id').eq('carrier_org_id', orgId).limit(1).maybeSingle()
+  if (customerLink) {
+    await ensureUser('jordan.shipper@carrieros.dev', customerLink.org_id, 'customer_admin', 'Jordan', 'Blake')
+    await ensureUser('casey.tracking@carrieros.dev', customerLink.org_id, 'customer_viewer', 'Casey', 'Lane')
+    for (const [name, email, title, role] of [
+      ['Jordan Blake', 'jordan.shipper@carrieros.dev', 'Logistics Manager', 'customer_admin'],
+      ['Casey Lane', 'casey.tracking@carrieros.dev', 'Receiving Coordinator', 'customer_viewer'],
+    ]) {
+      const { data: profile } = await admin.from('profiles').select('id').eq('org_id', customerLink.org_id).eq('role', role).maybeSingle()
+      const { data: current } = await admin.from('customer_contacts').select('id').eq('org_id', customerLink.org_id).eq('email', email).maybeSingle()
+      if (!current) await must(admin.from('customer_contacts').insert({ org_id: customerLink.org_id, carrier_org_id: orgId, name, email, title, portal_profile_id: profile?.id ?? null }), `customer contact ${email}`)
+    }
+  }
+  if (secondCustomerOrgId) {
+    const email = 'riley.receiving@carrieros.dev'
+    await ensureUser(email, secondCustomerOrgId, 'customer_viewer', 'Riley', 'Receiving')
+    const { data: profile } = await admin.from('profiles').select('id').eq('org_id', secondCustomerOrgId).eq('role', 'customer_viewer').maybeSingle()
+    const { data: current } = await admin.from('customer_contacts').select('id').eq('org_id', secondCustomerOrgId).eq('email', email).maybeSingle()
+    if (!current) await must(admin.from('customer_contacts').insert({ org_id: secondCustomerOrgId, carrier_org_id: orgId, name: 'Riley Receiving', email, title: 'Receiving Coordinator', portal_profile_id: profile?.id ?? null }), `customer contact ${email}`)
+  }
+}
+
+async function ensureDemoDrivers(orgId, existingProfileIds, desiredCount = 5) {
+  const names = [['Avery', 'Brooks'], ['Morgan', 'Patel'], ['Riley', 'Torres'], ['Jamie', 'Kim']]
+  const result = [...existingProfileIds]
+  for (let index = 0; result.length < desiredCount; index++) {
+    const [first, last] = names[index % names.length]
+    const email = `demo.driver${result.length + 1}@carrieros.dev`
+    const profileId = await ensureUser(email, orgId, 'driver', first, last)
+    await ensureDriver(orgId, profileId)
+    result.push(profileId)
+  }
+  return result
 }
 
 function daysAgo(n) {
@@ -557,26 +646,74 @@ async function seedPersistentAccounts() {
   const sierra = await ensureCarrierOrg('Sierra Freight Co', { tier: 'growth' })
   const ownerId = await ensureUser('demo@carrieros.dev', sierra.id, 'owner', 'Sam', 'Rivera')
   const driverProfileId = await ensureUser('mike.driver@carrieros.dev', sierra.id, 'driver', 'Mike', 'Rodriguez')
-  const driverId = await ensureDriver(sierra.id, driverProfileId)
+  const driverProfileIds = await ensureDemoDrivers(sierra.id, [driverProfileId], 5)
+  const driverIds = []
+  for (const profileId of driverProfileIds) driverIds.push(await ensureDriver(sierra.id, profileId))
+  const driverId = driverIds[0]
 
   const platform = await findOrgByName('platform', 'ShipmentX')
   const platformOrgId = platform
     ? platform.id
     : (await must(admin.from('organizations').insert({ type: 'platform', name: 'ShipmentX' }).select('id').single(), 'create ShipmentX org')).id
   await ensureUser('info@shipmentx.com', platformOrgId, 'sx_owner', 'ShipmentX', 'Admin')
+  await ensureUser('finance@shipmentx.com', platformOrgId, 'sx_finance', 'ShipmentX', 'Finance')
+  await ensureUser('support@shipmentx.com', platformOrgId, 'sx_support', 'ShipmentX', 'Support')
 
   const vehicles = await ensureVehicles(sierra.id, [
     { nickname: 'Freightliner Cascadia', year: 2022, make: 'Freightliner', model: 'Cascadia 126', cab_type: 'sleeper', color: 'Blue' },
     { nickname: 'Peterbilt 579', year: 2021, make: 'Peterbilt', model: '579', cab_type: 'day_cab', color: 'Red' },
+    { nickname: 'Kenworth T680', year: 2023, make: 'Kenworth', model: 'T680', cab_type: 'sleeper', color: 'White' },
+    { nickname: 'Volvo VNL 760', year: 2022, make: 'Volvo', model: 'VNL 760', cab_type: 'sleeper', color: 'Silver' },
+    { nickname: 'International LT', year: 2021, make: 'International', model: 'LT', cab_type: 'day_cab', color: 'Black' },
+    { nickname: 'Freightliner M2', year: 2020, make: 'Freightliner', model: 'M2 106', cab_type: 'day_cab', color: 'White' },
+    { nickname: 'Peterbilt 579 #2', year: 2024, make: 'Peterbilt', model: '579', cab_type: 'sleeper', color: 'Navy' },
+    { nickname: 'Mack Anthem', year: 2023, make: 'Mack', model: 'Anthem', cab_type: 'sleeper', color: 'Silver' },
+    { nickname: 'Volvo VNR', year: 2022, make: 'Volvo', model: 'VNR', cab_type: 'day_cab', color: 'Blue' },
+    { nickname: 'International MV', year: 2021, make: 'International', model: 'MV', cab_type: 'day_cab', color: 'Red' },
   ])
-  await ensureDemoCompliance(sierra.id, driverId, driverProfileId, vehicles)
+  for (let index = 0; index < driverIds.length; index++) await ensureDemoCompliance(sierra.id, driverIds[index], driverProfileIds[index], index === 0 ? vehicles : [])
   const customerOrgId = await ensureCustomer(sierra.id, { name: 'Sierra Steel Fabricators', city: 'Dallas', state: 'TX' })
-  const loads = await ensureLoads(sierra.id, customerOrgId, driverId, vehicles[0]?.id, [
-    { status: 'invoiced', pickupDate: dateOnly(daysAgo(6)), deliveryDate: dateOnly(daysAgo(5)), createdAt: daysAgo(6) },
-    { status: 'dispatched', pickupDate: dateOnly(daysAgo(1)), deliveryDate: dateOnly(daysFromNow(1)), createdAt: daysAgo(1) },
-    { status: 'draft', pickupDate: dateOnly(daysFromNow(3)), deliveryDate: dateOnly(daysFromNow(4)), createdAt: daysAgo(0) },
-  ])
-  await ensureDemoDispatchData(sierra.id, loads, vehicles, driverId)
+  const secondCustomerOrgId = await ensureCustomer(sierra.id, { name: 'Metro Medical Supply', city: 'Houston', state: 'TX' })
+  await ensureDemoTeam(sierra.id, secondCustomerOrgId)
+  const stages = ['invoiced', 'dispatched', 'draft', 'scheduled', 'picked_up', 'in_transit', 'delivered', 'paid', 'cancelled', 'declined']
+  const cities = [
+    ['Dallas', 'TX', 'Houston', 'TX'], ['Fort Worth', 'TX', 'Austin', 'TX'], ['Dallas', 'TX', 'San Antonio', 'TX'],
+    ['Oklahoma City', 'OK', 'Dallas', 'TX'], ['Austin', 'TX', 'Houston', 'TX'], ['Houston', 'TX', 'Shreveport', 'LA'],
+    ['Dallas', 'TX', 'Memphis', 'TN'], ['Waco', 'TX', 'Tulsa', 'OK'], ['Houston', 'TX', 'Baton Rouge', 'LA'], ['Austin', 'TX', 'Dallas', 'TX'],
+  ]
+  const loads = await ensureLoads(sierra.id, customerOrgId, driverId, vehicles[0]?.id, stages.map((status, index) => ({
+    status,
+    driverId: status === 'draft' ? null : driverIds[index % driverIds.length],
+    vehicleId: status === 'draft' ? null : vehicles[index % vehicles.length]?.id,
+    pickupCity: cities[index][0], pickupState: cities[index][1], deliveryCity: cities[index][2], deliveryState: cities[index][3],
+    pickupDate: dateOnly(daysAgo(index === 0 || index === 6 ? 5 + index : 0)),
+    deliveryDate: dateOnly(['delivered', 'invoiced', 'paid'].includes(status) ? daysAgo(2) : daysFromNow(1 + index % 3)),
+    createdAt: daysAgo(index), rate: 1450 + index * 175,
+  })))
+  await ensureDemoLoadOrders(sierra.id, loads, customerOrgId, secondCustomerOrgId)
+  await ensureDemoDispatchData(sierra.id, loads, vehicles)
+  await ensureInvoices(sierra.id, loads)
+  const { data: alertDriver } = await admin.from('drivers').select('id, cdl_expiry, med_cert_expiry').eq('carrier_org_id', sierra.id).eq('profile_id', driverProfileIds[4]).single()
+  if (alertDriver && ['2028-06-30', null].includes(alertDriver.cdl_expiry) && ['2027-12-31', null].includes(alertDriver.med_cert_expiry)) {
+    await must(admin.from('drivers').update({ cdl_expiry: dateOnly(daysFromNow(12)), med_cert_expiry: dateOnly(daysFromNow(24)) }).eq('id', alertDriver.id), 'demo compliance alert dates')
+  }
+  const { count: maintenanceCount } = await admin.from('maintenance_reminders').select('id', { count: 'exact', head: true }).eq('carrier_org_id', sierra.id)
+  if (!maintenanceCount && vehicles[0]) await must(admin.from('maintenance_reminders').insert({ carrier_org_id: sierra.id, vehicle_id: vehicles[0].id, reminder_type: 'Annual inspection', next_due_date: dateOnly(daysFromNow(4)), is_active: true }), 'demo maintenance alert')
+  for (const [vehicle, label, expiry, docType] of [
+    [vehicles[1], 'DEMO annual inspection expired', dateOnly(daysAgo(2)), 'annual_inspection'],
+    [vehicles[2], 'DEMO registration renewal upcoming', dateOnly(daysFromNow(18)), 'registration'],
+  ]) {
+    if (!vehicle) continue
+    const { data: existingDoc } = await admin.from('vehicle_documents').select('id').eq('carrier_org_id', sierra.id).eq('vehicle_id', vehicle.id).eq('label', label).maybeSingle()
+    if (!existingDoc) await must(admin.from('vehicle_documents').insert({ carrier_org_id: sierra.id, vehicle_id: vehicle.id, doc_type: docType, label, storage_path: `${sierra.id}/vehicles/${vehicle.id}/demo-vehicle-${String(vehicle.id).padStart(5, '0')}.webp`, expiry_date: expiry, uploaded_by: ownerId }), `demo vehicle document ${label}`)
+  }
+  const { data: demoOrgDoc } = await admin.from('org_documents').select('id').eq('org_id', sierra.id).eq('label', 'DEMO general liability certificate').maybeSingle()
+  if (!demoOrgDoc) {
+    const path = `${sierra.id}/organization/demo-general-liability.webp`
+    const upload = await admin.storage.from('documents').upload(path, vehicleImage(sierra.id), { contentType: 'image/webp', upsert: true })
+    if (upload.error) throw new Error(`demo org compliance image: ${upload.error.message}`)
+    await must(admin.from('org_documents').insert({ org_id: sierra.id, doc_type: 'general_liability', label: 'DEMO general liability certificate', storage_path: path, expiry_date: dateOnly(daysFromNow(90)), uploaded_by: ownerId }), 'demo organization compliance document')
+  }
 
   await ensureWebhook(sierra.id, ownerId)
   const dispatchedLoad = loads.find((l) => l.status === 'dispatched') ?? loads[1]
@@ -590,6 +727,7 @@ async function seedExtraOrg({ name, carrierDetails, loadStatuses, driverName }) 
   const org = await ensureCarrierOrg(name, carrierDetails)
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
   const ownerId = await ensureUser(`${slug}-owner@demo.carrieros.dev`, org.id, 'owner', name.split(' ')[0], 'Owner')
+  if (name === 'Cascade Freightways') await ensureUser('cascade-solo@demo.carrieros.dev', org.id, 'solo', 'Solo', 'Operator')
   const driverProfileId = await ensureUser(`${slug}-driver@demo.carrieros.dev`, org.id, 'driver', driverName[0], driverName[1])
   const driverId = await ensureDriver(org.id, driverProfileId)
   const vehicles = await ensureVehicles(org.id, [{ nickname: `${name} Truck 1`, year: 2020, make: 'Kenworth' }])
@@ -656,6 +794,9 @@ async function main() {
   console.log('  demo@carrieros.dev            owner, Sierra Freight Co (growth, healthy)')
   console.log('  mike.driver@carrieros.dev     driver, same org')
   console.log('  info@shipmentx.com            sx_owner, ShipmentX -- log in here to see /admin')
+  console.log('Sierra team roles (password Demo123!): alex.dispatcher@carrieros.dev, taylor.finance@carrieros.dev; customer portal: jordan.shipper@carrieros.dev (admin), casey.tracking@carrieros.dev (viewer), riley.receiving@carrieros.dev (Metro Medical Supply viewer)')
+  console.log('ShipmentX platform roles: finance@shipmentx.com (sx_finance), support@shipmentx.com (sx_support)')
+  console.log('  cascade-solo@demo.carrieros.dev -- solo carrier role (password Demo123!)')
   console.log('Extra demo orgs for /admin screens (owner logins: <slug>-owner@demo.carrieros.dev / Demo123!):')
   console.log('  Trailhead Transport  -- trialing, trial ends in ~4 days')
   console.log('  Redline Logistics    -- past_due + grace period + 1 open support ticket')

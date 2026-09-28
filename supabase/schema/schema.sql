@@ -5402,3 +5402,323 @@ ALTER PUBLICATION supabase_realtime ADD TABLE loads;
 ALTER PUBLICATION supabase_realtime ADD TABLE driver_messages;
 -- vehicle_locations (migration 0042) -- idle-truck telematics pins on the dispatch map.
 ALTER PUBLICATION supabase_realtime ADD TABLE vehicle_locations;
+
+-- ── Demo-only subscription payment ledger + multi-customer load orders (0047) ──
+ALTER TABLE billing_events
+  ADD COLUMN payment_reference TEXT UNIQUE,
+  ADD COLUMN plan_code TEXT,
+  ADD COLUMN currency TEXT NOT NULL DEFAULT 'USD',
+  ADD COLUMN is_simulated BOOLEAN NOT NULL DEFAULT FALSE;
+
+CREATE OR REPLACE FUNCTION demo_change_plan(
+  p_org_id BIGINT,
+  p_tier TEXT,
+  p_payment_reference TEXT
+)
+RETURNS TABLE(tier TEXT, amount NUMERIC, currency TEXT, event_id BIGINT, event_status TEXT)
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_existing billing_events%ROWTYPE;
+  v_current_tier TEXT;
+  v_amount NUMERIC(10,2);
+  v_event_id BIGINT;
+BEGIN
+  IF p_org_id IS NULL OR p_tier IS NULL OR p_payment_reference IS NULL OR length(p_payment_reference) > 200 THEN
+    RAISE EXCEPTION 'Invalid plan-change request';
+  END IF;
+  -- Lock the carrier row first so same-key retries serialize cleanly.
+  SELECT cd.tier INTO v_current_tier FROM carrier_details cd WHERE cd.org_id = p_org_id FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Carrier billing profile not found'; END IF;
+  SELECT * INTO v_existing FROM billing_events WHERE payment_reference = p_payment_reference;
+  IF FOUND THEN
+    IF v_existing.org_id <> p_org_id OR v_existing.plan_code <> p_tier OR NOT v_existing.is_simulated THEN
+      RAISE EXCEPTION 'Payment reference was already used for a different request';
+    END IF;
+    RETURN QUERY SELECT p_tier, v_existing.amount, v_existing.currency, v_existing.id, COALESCE(v_existing.status, 'simulated_succeeded');
+    RETURN;
+  END IF;
+  SELECT monthly_price INTO v_amount FROM tiers WHERE code = p_tier;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Unknown plan'; END IF;
+  IF v_current_tier = p_tier THEN
+    RETURN QUERY SELECT p_tier, 0::NUMERIC, 'USD'::TEXT, NULL::BIGINT, 'no_change'::TEXT;
+    RETURN;
+  END IF;
+  UPDATE carrier_details SET tier = p_tier, billing_status = 'active', trial_ends_at = NULL WHERE org_id = p_org_id;
+  INSERT INTO billing_events(org_id, event_type, amount, currency, status, is_simulated, plan_code, payment_reference)
+    VALUES (p_org_id, 'demo.subscription.payment_succeeded', v_amount, 'USD', 'simulated_succeeded', TRUE, p_tier, p_payment_reference)
+    RETURNING id INTO v_event_id;
+  RETURN QUERY SELECT p_tier, v_amount, 'USD'::TEXT, v_event_id, 'simulated_succeeded'::TEXT;
+END;
+$$;
+REVOKE ALL ON FUNCTION demo_change_plan(BIGINT, TEXT, TEXT) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION demo_change_plan(BIGINT, TEXT, TEXT) TO service_role;
+
+-- Migration 0049: carrier-controlled, customer-safe exception updates on token tracking pages.
+ALTER TABLE exception_events
+  ADD COLUMN customer_visible BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN customer_message TEXT;
+ALTER TABLE exception_events
+  ADD CONSTRAINT exception_events_customer_message_length
+  CHECK (customer_message IS NULL OR char_length(customer_message) BETWEEN 1 AND 280);
+
+CREATE OR REPLACE FUNCTION set_tracking_exception_visibility(
+  p_exception_id BIGINT, p_visible BOOLEAN, p_customer_message TEXT
+)
+RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE v_org_id BIGINT := my_org_id();
+BEGIN
+  IF auth.uid() IS NULL OR v_org_id IS NULL THEN RAISE EXCEPTION 'AUTH_REQUIRED' USING ERRCODE = '28000'; END IF;
+  IF my_role() NOT IN ('owner','solo','dispatcher') THEN RAISE EXCEPTION 'FORBIDDEN' USING ERRCODE = '42501'; END IF;
+  IF p_visible IS NULL OR (p_visible AND (p_customer_message IS NULL OR char_length(btrim(p_customer_message)) NOT BETWEEN 1 AND 280)) THEN
+    RAISE EXCEPTION 'VALIDATION: customer message must contain 1 to 280 characters' USING ERRCODE = 'PT400';
+  END IF;
+  UPDATE exception_events e
+     SET customer_visible = p_visible,
+         customer_message = CASE WHEN p_visible THEN btrim(p_customer_message) ELSE NULL END
+    FROM loads l
+   WHERE e.id = p_exception_id AND e.carrier_org_id = v_org_id AND e.entity_type = 'load'
+     AND l.id = e.entity_id AND l.carrier_org_id = v_org_id AND l.tracking_token IS NOT NULL;
+  IF NOT FOUND THEN RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404'; END IF;
+  RETURN p_visible;
+END $$;
+REVOKE ALL ON FUNCTION set_tracking_exception_visibility(BIGINT, BOOLEAN, TEXT) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION set_tracking_exception_visibility(BIGINT, BOOLEAN, TEXT) TO authenticated;
+
+CREATE OR REPLACE FUNCTION get_public_tracking_exceptions(p_token TEXT)
+RETURNS TABLE(customer_message TEXT, severity TEXT, occurred_at TIMESTAMPTZ)
+LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public AS $$
+  SELECT e.customer_message, e.severity, e.occurred_at
+    FROM exception_events e
+    JOIN loads l ON l.id = e.entity_id AND l.carrier_org_id = e.carrier_org_id
+   WHERE l.tracking_token = p_token AND e.entity_type = 'load' AND e.customer_visible AND e.customer_message IS NOT NULL
+   ORDER BY e.occurred_at DESC LIMIT 20;
+$$;
+REVOKE ALL ON FUNCTION get_public_tracking_exceptions(TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION get_public_tracking_exceptions(TEXT) TO anon, authenticated;
+
+CREATE TABLE load_orders (
+  id BIGSERIAL PRIMARY KEY,
+  carrier_org_id BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  load_id BIGINT NOT NULL REFERENCES loads(id) ON DELETE CASCADE,
+  customer_org_id BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  order_number TEXT NOT NULL,
+  customer_reference TEXT,
+  commodity TEXT,
+  weight_lbs INT CHECK (weight_lbs IS NULL OR weight_lbs > 0),
+  pickup_address TEXT,
+  pickup_city TEXT,
+  pickup_state TEXT,
+  pickup_date DATE,
+  delivery_address TEXT,
+  delivery_city TEXT,
+  delivery_state TEXT,
+  delivery_date DATE,
+  status TEXT NOT NULL DEFAULT 'scheduled' CHECK (status IN ('scheduled','dispatched','picked_up','in_transit','delivered','cancelled')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (carrier_org_id, order_number)
+);
+CREATE INDEX load_orders_load_idx ON load_orders(load_id);
+CREATE INDEX load_orders_customer_idx ON load_orders(customer_org_id, load_id);
+ALTER TABLE load_orders ENABLE ROW LEVEL SECURITY;
+GRANT SELECT, INSERT, UPDATE, DELETE ON load_orders TO authenticated;
+GRANT ALL ON load_orders TO service_role;
+GRANT USAGE, SELECT ON SEQUENCE load_orders_id_seq TO authenticated, service_role;
+CREATE POLICY carrier_load_orders_select ON load_orders FOR SELECT TO authenticated USING (
+  carrier_org_id = my_org_id() AND (
+    my_role() IN ('owner','solo','dispatcher','finance')
+    OR (my_role() = 'driver' AND EXISTS (
+      SELECT 1 FROM loads l JOIN drivers d ON d.id = l.driver_id
+      WHERE l.id = load_orders.load_id AND d.profile_id = auth.uid()
+    ))
+  )
+);
+CREATE POLICY carrier_load_orders_insert ON load_orders FOR INSERT TO authenticated WITH CHECK (
+  carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher')
+  AND EXISTS (SELECT 1 FROM loads l WHERE l.id = load_orders.load_id AND l.carrier_org_id = load_orders.carrier_org_id)
+  AND EXISTS (SELECT 1 FROM customer_details cd WHERE cd.org_id = load_orders.customer_org_id AND cd.carrier_org_id = load_orders.carrier_org_id)
+);
+CREATE POLICY carrier_load_orders_update ON load_orders FOR UPDATE TO authenticated
+  USING (carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher'))
+  WITH CHECK (
+    carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','dispatcher')
+    AND EXISTS (SELECT 1 FROM loads l WHERE l.id = load_orders.load_id AND l.carrier_org_id = load_orders.carrier_org_id)
+    AND EXISTS (SELECT 1 FROM customer_details cd WHERE cd.org_id = load_orders.customer_org_id AND cd.carrier_org_id = load_orders.carrier_org_id)
+  );
+CREATE POLICY customer_own_load_orders_select ON load_orders FOR SELECT TO authenticated USING (
+  customer_org_id = my_org_id() AND my_role() IN ('customer_admin','customer_viewer')
+);
+CREATE TRIGGER load_orders_updated_at BEFORE UPDATE ON load_orders FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- Migration 0050: order-charge allocation, per-customer invoices, and invoice line allocations.
+ALTER TABLE load_orders ADD COLUMN billable_amount NUMERIC(10,2);
+ALTER TABLE load_orders ADD CONSTRAINT load_orders_billable_amount_nonnegative CHECK (billable_amount IS NULL OR billable_amount >= 0);
+WITH ranked AS (
+  SELECT o.id, o.load_id, COALESCE(l.rate, 0)::NUMERIC(10,2) AS load_rate,
+         row_number() OVER (PARTITION BY o.load_id ORDER BY o.id) AS row_num,
+         count(*) OVER (PARTITION BY o.load_id) AS row_count,
+         sum(COALESCE(o.weight_lbs, 0)) OVER (PARTITION BY o.load_id) AS total_weight,
+         COALESCE(o.weight_lbs, 0) AS weight_lbs
+    FROM load_orders o JOIN loads l ON l.id = o.load_id WHERE o.billable_amount IS NULL
+), shares AS (
+  SELECT r.*, CASE WHEN total_weight > 0 THEN weight_lbs::NUMERIC / total_weight ELSE 1::NUMERIC / row_count END AS share FROM ranked r
+), rounded AS (
+  SELECT s.*, CASE WHEN row_num < row_count THEN round(load_rate * share, 2) ELSE NULL END AS rounded_share FROM shares s
+), allocated AS (
+  SELECT r.*, COALESCE(sum(rounded_share) OVER (PARTITION BY load_id ORDER BY row_num ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING), 0) AS prior_amount FROM rounded r
+)
+UPDATE load_orders o SET billable_amount = CASE WHEN a.row_num = a.row_count THEN round(a.load_rate - a.prior_amount, 2) ELSE a.rounded_share END FROM allocated a WHERE o.id = a.id;
+DROP INDEX invoices_load_unique;
+UPDATE invoices i SET customer_org_id = l.customer_org_id
+  FROM loads l
+ WHERE i.load_id = l.id AND i.carrier_org_id = l.carrier_org_id
+   AND i.customer_org_id IS NULL AND l.customer_org_id IS NOT NULL;
+CREATE UNIQUE INDEX invoices_load_customer_unique ON invoices(load_id, customer_org_id) WHERE load_id IS NOT NULL AND customer_org_id IS NOT NULL;
+CREATE UNIQUE INDEX invoices_load_legacy_unique ON invoices(load_id) WHERE load_id IS NOT NULL AND customer_org_id IS NULL;
+CREATE TABLE invoice_order_allocations (
+  id BIGSERIAL PRIMARY KEY,
+  carrier_org_id BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  invoice_id BIGINT NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
+  load_order_id BIGINT NOT NULL REFERENCES load_orders(id) ON DELETE RESTRICT,
+  amount NUMERIC(10,2) NOT NULL CHECK (amount >= 0),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(load_order_id), UNIQUE(invoice_id, load_order_id)
+);
+CREATE INDEX invoice_order_allocations_invoice_idx ON invoice_order_allocations(invoice_id);
+ALTER TABLE invoice_order_allocations ENABLE ROW LEVEL SECURITY;
+GRANT SELECT ON invoice_order_allocations TO authenticated;
+GRANT ALL ON invoice_order_allocations TO service_role;
+GRANT USAGE, SELECT ON SEQUENCE invoice_order_allocations_id_seq TO authenticated, service_role;
+CREATE POLICY carrier_invoice_order_allocations_select ON invoice_order_allocations FOR SELECT TO authenticated USING (carrier_org_id = my_org_id() AND my_role() IN ('owner','solo','finance'));
+INSERT INTO invoice_order_allocations(carrier_org_id, invoice_id, load_order_id, amount)
+SELECT i.carrier_org_id, i.id, o.id, o.billable_amount FROM invoices i
+JOIN load_orders o ON o.load_id = i.load_id AND o.carrier_org_id = i.carrier_org_id AND o.customer_org_id = i.customer_org_id
+WHERE i.load_id IS NOT NULL AND o.billable_amount IS NOT NULL ON CONFLICT (load_order_id) DO NOTHING;
+
+CREATE OR REPLACE FUNCTION prevent_order_changes_after_invoicing()
+RETURNS TRIGGER LANGUAGE plpgsql SET search_path = public AS $$
+DECLARE v_load_id BIGINT := COALESCE(NEW.load_id, OLD.load_id);
+BEGIN
+  IF pg_trigger_depth() <= 1 AND EXISTS (SELECT 1 FROM invoices WHERE load_id = v_load_id)
+     AND (TG_OP = 'INSERT' OR TG_OP = 'DELETE' OR OLD.load_id IS DISTINCT FROM NEW.load_id
+          OR OLD.customer_org_id IS DISTINCT FROM NEW.customer_org_id OR OLD.billable_amount IS DISTINCT FROM NEW.billable_amount) THEN
+    RAISE EXCEPTION 'ORDER_LOCKED_AFTER_INVOICE' USING ERRCODE = '23514';
+  END IF;
+  IF TG_OP = 'DELETE' THEN RETURN OLD; END IF;
+  RETURN NEW;
+END $$;
+CREATE TRIGGER load_orders_lock_after_invoice BEFORE INSERT OR UPDATE OR DELETE ON load_orders FOR EACH ROW EXECUTE FUNCTION prevent_order_changes_after_invoicing();
+
+CREATE OR REPLACE FUNCTION set_load_order_billable_amount(p_order_id BIGINT, p_amount NUMERIC)
+RETURNS NUMERIC LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE v_org_id BIGINT := my_org_id(); v_rate NUMERIC; v_load_id BIGINT;
+BEGIN
+  IF auth.uid() IS NULL OR v_org_id IS NULL THEN RAISE EXCEPTION 'AUTH_REQUIRED' USING ERRCODE = '28000'; END IF;
+  IF my_role() NOT IN ('owner','solo','finance') THEN RAISE EXCEPTION 'FORBIDDEN' USING ERRCODE = '42501'; END IF;
+  IF p_amount IS NOT NULL AND (p_amount < 0 OR round(p_amount, 2) <> p_amount) THEN RAISE EXCEPTION 'VALIDATION: invalid order amount' USING ERRCODE = 'PT400'; END IF;
+  SELECT o.load_id, l.rate INTO v_load_id, v_rate FROM load_orders o JOIN loads l ON l.id = o.load_id WHERE o.id = p_order_id AND o.carrier_org_id = v_org_id FOR UPDATE OF l;
+  IF NOT FOUND THEN RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404'; END IF;
+  IF p_amount IS NOT NULL AND p_amount > COALESCE(v_rate, 0) THEN RAISE EXCEPTION 'VALIDATION: order amount exceeds load rate' USING ERRCODE = 'PT400'; END IF;
+  IF EXISTS (SELECT 1 FROM invoices WHERE load_id = v_load_id AND carrier_org_id = v_org_id) THEN RAISE EXCEPTION 'ORDER_LOCKED_AFTER_INVOICE' USING ERRCODE = 'PT409'; END IF;
+  UPDATE load_orders SET billable_amount = p_amount WHERE id = p_order_id AND carrier_org_id = v_org_id;
+  RETURN p_amount;
+END $$;
+REVOKE ALL ON FUNCTION set_load_order_billable_amount(BIGINT, NUMERIC) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION set_load_order_billable_amount(BIGINT, NUMERIC) TO authenticated;
+
+CREATE OR REPLACE FUNCTION create_load_invoices_command(
+  p_load_id BIGINT, p_invoice_rows JSONB, p_due_date DATE, p_payment_method TEXT,
+  p_factoring_company TEXT, p_advance_load_status BOOLEAN, p_correlation_id TEXT, p_idempotency_key TEXT
+)
+RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_org_id BIGINT := my_org_id(); v_actor UUID := auth.uid(); v_load loads%ROWTYPE;
+  v_existing BIGINT; v_order_count BIGINT; v_allocation_total NUMERIC(10,2); v_unallocated BIGINT;
+  v_expected_count BIGINT; v_input_count BIGINT; v_row RECORD; v_invoice RECORD; v_result JSONB;
+BEGIN
+  IF v_actor IS NULL OR v_org_id IS NULL THEN RAISE EXCEPTION 'AUTH_REQUIRED' USING ERRCODE = '28000'; END IF;
+  IF my_role() NOT IN ('owner','solo','finance') THEN RAISE EXCEPTION 'FORBIDDEN' USING ERRCODE = '42501'; END IF;
+  IF p_payment_method NOT IN ('stripe','factoring','other') OR jsonb_typeof(p_invoice_rows) IS DISTINCT FROM 'array' THEN RAISE EXCEPTION 'VALIDATION: invalid invoice rows or payment method' USING ERRCODE = 'PT400'; END IF;
+  SELECT * INTO v_load FROM loads WHERE id = p_load_id AND carrier_org_id = v_org_id FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'PT404'; END IF;
+  IF v_load.status NOT IN ('delivered','invoiced') THEN RAISE EXCEPTION 'LOAD_NOT_DELIVERED' USING ERRCODE = 'PT400'; END IF;
+  SELECT id INTO v_existing FROM outbox_events WHERE idempotency_key = p_idempotency_key;
+  IF v_existing IS NOT NULL THEN
+    SELECT COALESCE(jsonb_agg(jsonb_build_object('invoice_id', id, 'invoice_number', invoice_number) ORDER BY customer_org_id), '[]'::JSONB)
+      INTO v_result FROM invoices WHERE load_id = p_load_id AND carrier_org_id = v_org_id;
+    RETURN jsonb_build_object('outcome', 'REPLAYED', 'invoices', v_result);
+  END IF;
+  SELECT count(*), sum(billable_amount), count(*) FILTER (WHERE billable_amount IS NULL)
+    INTO v_order_count, v_allocation_total, v_unallocated FROM load_orders WHERE carrier_org_id = v_org_id AND load_id = p_load_id;
+  IF v_order_count > 0 THEN
+    IF v_unallocated > 0 OR round(COALESCE(v_allocation_total, 0), 2) <> round(COALESCE(v_load.rate, 0), 2) THEN RAISE EXCEPTION 'ORDER_ALLOCATION_MISMATCH' USING ERRCODE = 'PT400'; END IF;
+    SELECT count(*) INTO v_expected_count FROM (
+      SELECT o.customer_org_id FROM load_orders o WHERE o.carrier_org_id = v_org_id AND o.load_id = p_load_id
+        AND NOT EXISTS (SELECT 1 FROM invoices i WHERE i.load_id = p_load_id AND i.carrier_org_id = v_org_id AND i.customer_org_id = o.customer_org_id)
+      GROUP BY o.customer_org_id
+    ) expected;
+    SELECT count(*) INTO v_input_count FROM jsonb_to_recordset(p_invoice_rows) AS r(customer_org_id BIGINT, invoice_number TEXT, amount NUMERIC);
+    IF v_input_count <> v_expected_count THEN RAISE EXCEPTION 'ORDER_INVOICE_SET_MISMATCH' USING ERRCODE = 'PT400'; END IF;
+    IF EXISTS (SELECT 1 FROM jsonb_to_recordset(p_invoice_rows) AS r(customer_org_id BIGINT, invoice_number TEXT, amount NUMERIC)
+       GROUP BY r.customer_org_id HAVING count(*) <> 1 OR min(r.invoice_number) IS NULL OR min(r.amount) IS NULL OR min(r.amount) < 0) THEN
+      RAISE EXCEPTION 'VALIDATION: invalid invoice row' USING ERRCODE = 'PT400';
+    END IF;
+    IF EXISTS (
+      SELECT 1 FROM (SELECT o.customer_org_id, round(sum(o.billable_amount), 2) AS expected_amount FROM load_orders o
+        WHERE o.carrier_org_id = v_org_id AND o.load_id = p_load_id GROUP BY o.customer_org_id) expected
+      JOIN jsonb_to_recordset(p_invoice_rows) AS r(customer_org_id BIGINT, invoice_number TEXT, amount NUMERIC)
+        ON r.customer_org_id = expected.customer_org_id WHERE round(r.amount, 2) <> expected.expected_amount
+    ) THEN RAISE EXCEPTION 'ORDER_CUSTOMER_AMOUNT_MISMATCH' USING ERRCODE = 'PT400'; END IF;
+    IF EXISTS (SELECT 1 FROM jsonb_to_recordset(p_invoice_rows) AS r(customer_org_id BIGINT, invoice_number TEXT, amount NUMERIC)
+        WHERE NOT EXISTS (SELECT 1 FROM load_orders o WHERE o.carrier_org_id = v_org_id AND o.load_id = p_load_id AND o.customer_org_id = r.customer_org_id)) THEN
+      RAISE EXCEPTION 'ORDER_INVOICE_SET_MISMATCH' USING ERRCODE = 'PT400';
+    END IF;
+  ELSE
+    v_input_count := jsonb_array_length(p_invoice_rows);
+    IF v_input_count <> 1 THEN RAISE EXCEPTION 'ORDER_INVOICE_SET_MISMATCH' USING ERRCODE = 'PT400'; END IF;
+    SELECT * INTO v_row FROM jsonb_to_recordset(p_invoice_rows) AS r(customer_org_id BIGINT, invoice_number TEXT, amount NUMERIC) LIMIT 1;
+    IF v_row.customer_org_id IS DISTINCT FROM v_load.customer_org_id OR v_row.amount IS NULL OR v_row.amount < 0
+       OR round(v_row.amount, 2) <> round(COALESCE(v_load.rate, 0), 2) THEN RAISE EXCEPTION 'ORDER_CUSTOMER_AMOUNT_MISMATCH' USING ERRCODE = 'PT400'; END IF;
+  END IF;
+  FOR v_row IN SELECT * FROM jsonb_to_recordset(p_invoice_rows) AS r(customer_org_id BIGINT, invoice_number TEXT, amount NUMERIC) ORDER BY customer_org_id NULLS FIRST LOOP
+    BEGIN
+      INSERT INTO invoices(carrier_org_id, customer_org_id, load_id, invoice_number, amount, status, due_date, payment_method, factoring_company)
+      VALUES (v_org_id, v_row.customer_org_id, p_load_id, v_row.invoice_number, v_row.amount, 'draft', p_due_date, p_payment_method, p_factoring_company)
+      RETURNING id, invoice_number INTO v_invoice;
+    EXCEPTION WHEN unique_violation THEN RAISE EXCEPTION 'INVOICE_EXISTS' USING ERRCODE = '23505'; END;
+    IF v_order_count > 0 THEN
+      INSERT INTO invoice_order_allocations(carrier_org_id, invoice_id, load_order_id, amount)
+      SELECT v_org_id, v_invoice.id, o.id, o.billable_amount FROM load_orders o
+       WHERE o.carrier_org_id = v_org_id AND o.load_id = p_load_id AND o.customer_org_id = v_row.customer_org_id;
+    END IF;
+    INSERT INTO outbox_events(event_type, aggregate_type, aggregate_id, org_id, payload, correlation_id, idempotency_key)
+    VALUES ('InvoiceCreated', 'Invoice', v_invoice.id::TEXT, v_org_id,
+      jsonb_build_object('invoiceId', v_invoice.id, 'invoiceNumber', v_invoice.invoice_number, 'loadId', p_load_id, 'amount', v_row.amount, 'customerOrgId', v_row.customer_org_id),
+      p_correlation_id, p_idempotency_key || ':' || COALESCE(v_row.customer_org_id::TEXT, 'unassigned'));
+  END LOOP;
+  IF p_advance_load_status AND v_load.status = 'delivered' THEN UPDATE loads SET status = 'invoiced' WHERE id = p_load_id AND carrier_org_id = v_org_id AND status = 'delivered'; END IF;
+  INSERT INTO outbox_events(event_type, aggregate_type, aggregate_id, org_id, payload, correlation_id, idempotency_key)
+  VALUES ('InvoiceBatchCreated', 'Load', p_load_id::TEXT, v_org_id, jsonb_build_object('loadId', p_load_id, 'invoiceCount', v_input_count), p_correlation_id, p_idempotency_key);
+  SELECT COALESCE(jsonb_agg(jsonb_build_object('invoice_id', id, 'invoice_number', invoice_number) ORDER BY customer_org_id), '[]'::JSONB)
+    INTO v_result FROM invoices WHERE load_id = p_load_id AND carrier_org_id = v_org_id;
+  RETURN jsonb_build_object('outcome', 'APPLIED', 'invoices', v_result);
+END $$;
+REVOKE ALL ON FUNCTION create_load_invoices_command(BIGINT, JSONB, DATE, TEXT, TEXT, BOOLEAN, TEXT, TEXT) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION create_load_invoices_command(BIGINT, JSONB, DATE, TEXT, TEXT, BOOLEAN, TEXT, TEXT) TO authenticated;
+CREATE OR REPLACE FUNCTION create_invoice_command(
+  p_load_id BIGINT, p_customer_org_id BIGINT, p_invoice_number TEXT, p_amount NUMERIC,
+  p_due_date DATE, p_payment_method TEXT, p_factoring_company TEXT, p_advance_load_status BOOLEAN,
+  p_correlation_id TEXT, p_idempotency_key TEXT
+)
+RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE v_result JSONB;
+BEGIN
+  v_result := create_load_invoices_command(p_load_id,
+    jsonb_build_array(jsonb_build_object('customer_org_id', p_customer_org_id, 'invoice_number', p_invoice_number, 'amount', p_amount)),
+    p_due_date, p_payment_method, p_factoring_company, p_advance_load_status, p_correlation_id, p_idempotency_key);
+  RETURN jsonb_build_object('outcome', v_result->>'outcome', 'invoice_id', v_result #>> '{invoices,0,invoice_id}',
+                            'invoice_number', v_result #>> '{invoices,0,invoice_number}');
+END $$;
+REVOKE EXECUTE ON FUNCTION create_invoice_command(BIGINT, BIGINT, TEXT, NUMERIC, DATE, TEXT, TEXT, BOOLEAN, TEXT, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION create_invoice_command(BIGINT, BIGINT, TEXT, NUMERIC, DATE, TEXT, TEXT, BOOLEAN, TEXT, TEXT) TO authenticated;
+COMMENT ON TABLE invoice_order_allocations IS 'Immutable per-customer order charges captured when carrier invoices are created.';

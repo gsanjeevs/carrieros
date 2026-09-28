@@ -26,9 +26,10 @@ import { redirect } from 'next/navigation'
 import { getTranslations, getLocale } from 'next-intl/server'
 import DispatchMapClient from './DispatchMapClient'
 import DispatchQueueRow from './DispatchQueueRow'
+import DemoGpsControl from './DemoGpsControl'
 import { hasFeature } from '@/lib/entitlements'
 import { Card, CardHeader, EmptyState } from '@/components/ui'
-import { dedupeByVehicle, type DispatchMapPin } from '@/lib/dispatch-map-pins'
+import { dedupeByVehicle, estimateMovement, type DispatchMapPin } from '@/lib/dispatch-map-pins'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
@@ -79,12 +80,14 @@ export default async function DispatchPage() {
     lng: Number(l.last_location_lng),
     lastLocationAt: l.last_location_at as string,
     source: 'phone',
+    onActiveLoad: true,
+    movement: 'unknown',
     shipment: {
       customer: l.customer_name_raw,
       origin: [l.pickup_city, l.pickup_state].filter(Boolean).join(', ') || null,
       destination: [l.delivery_city, l.delivery_state].filter(Boolean).join(', ') || null,
     },
-  }) as DispatchMapPin)
+  }))
   const activeLoadByVehicle = new Map(
     (activeLoadsData ?? [])
       .filter((load) => load.vehicle_id != null)
@@ -98,11 +101,14 @@ export default async function DispatchPage() {
   // matter (same tradeoff the rest of this page already makes with plain .select() calls).
   const { data: telematicsVehicles } = await supabase
     .from('vehicles')
-    .select('id, nickname, vehicle_number, status')
+    .select('id, nickname, vehicle_number, status, telematics_provider')
     .eq('carrier_org_id', profile.org_id)
     .not('telematics_device_id', 'is', null)
 
   const telematicsVehicleIds = (telematicsVehicles ?? []).map((v) => v.id)
+  const demoVehicleIds = new Set((telematicsVehicles ?? [])
+    .filter((vehicle) => vehicle.telematics_provider === 'samsara')
+    .map((vehicle) => vehicle.id))
 
   const { data: recentLocations } = telematicsVehicleIds.length
     ? await supabase
@@ -115,9 +121,20 @@ export default async function DispatchPage() {
     : { data: [] }
 
   const latestByVehicle = new Map<number, { lat: number; lng: number; recorded_at: string; source: string }>()
+  const samplesByVehicle = new Map<number, Array<{ lat: number; lng: number; recorded_at: string }>>()
   for (const loc of recentLocations ?? []) {
     if (!latestByVehicle.has(loc.vehicle_id)) latestByVehicle.set(loc.vehicle_id, loc)
+    const samples = samplesByVehicle.get(loc.vehicle_id) ?? []
+    if (samples.length < 2) samples.push({ lat: Number(loc.lat), lng: Number(loc.lng), recorded_at: loc.recorded_at })
+    samplesByVehicle.set(loc.vehicle_id, samples)
   }
+  const movementByVehicle = new Map([...samplesByVehicle].map(([vehicleId, samples]) => [
+    vehicleId,
+    estimateMovement(
+      samples[1] ? { lat: samples[1].lat, lng: samples[1].lng, lastLocationAt: samples[1].recorded_at } : null,
+      { lat: samples[0].lat, lng: samples[0].lng, lastLocationAt: samples[0].recorded_at },
+    ),
+  ]))
 
   const vehiclePins: DispatchMapPin[] = (telematicsVehicles ?? [])
     .map((v): DispatchMapPin | null => {
@@ -135,16 +152,21 @@ export default async function DispatchPage() {
         lng: Number(loc.lng),
         lastLocationAt: loc.recorded_at,
         source: loc.source === 'samsara' || loc.source === 'motive' ? loc.source : 'phone',
+        onActiveLoad: Boolean(shipment),
+        movement: movementByVehicle.get(v.id) ?? 'unknown',
         shipment: shipment ? {
           customer: shipment.customer_name_raw,
           origin: [shipment.pickup_city, shipment.pickup_state].filter(Boolean).join(', ') || null,
           destination: [shipment.delivery_city, shipment.delivery_state].filter(Boolean).join(', ') || null,
         } : undefined,
-      } as DispatchMapPin
+      }
     })
     .filter((p): p is DispatchMapPin => p !== null)
 
-  const mapPins = dedupeByVehicle([...loadPins, ...vehiclePins])
+  const mapPins = dedupeByVehicle([
+    ...loadPins.map((pin) => ({ ...pin, movement: pin.vehicleId == null ? 'unknown' as const : movementByVehicle.get(pin.vehicleId) ?? 'unknown' as const })),
+    ...vehiclePins,
+  ])
 
   const { data: queueData } = await supabase
     .from('loads')
@@ -161,6 +183,14 @@ export default async function DispatchPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-text-pri">{t('title')}</h1>
         <p className="text-text-sec text-sm mt-1">{t('subtitle', { count: mapPins.length })}</p>
+        <div className="mt-4"><DemoGpsControl loads={(activeLoadsData ?? [])
+          .filter((load) => load.vehicle_id != null && demoVehicleIds.has(load.vehicle_id))
+          .map((load) => ({
+            id: load.id,
+            loadNumber: load.load_number,
+            customer: load.customer_name_raw,
+            destination: [load.delivery_city, load.delivery_state].filter(Boolean).join(', ') || null,
+          }))} /></div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -6,7 +6,7 @@ import { getTranslations, getLocale } from 'next-intl/server'
 import { formatMoney } from '@/lib/format-money'
 import { toDate } from '@/lib/format-datetime'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
-import { Card, EmptyState, Input, StatusBadge } from '@/components/ui'
+import { ButtonLink, Card, EmptyState, FilterLink, Input, StatusBadge } from '@/components/ui'
 import LiveRefresh from '@/components/LiveRefresh'
 import { createLoadQueryService } from '@/server/composition'
 import { buildActorContext } from '@/server/infrastructure/supabase/actor-context'
@@ -75,13 +75,10 @@ export default async function LoadsPage({
               </button>
             </form>
           )}
-          <Link
-            href="/loads/new"
-            className="flex items-center gap-2 px-4 py-2 bg-brand-orange hover:bg-brand-orange-hover text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-          >
+          <ButtonLink href="/loads/new" size="lg">
             <span className="material-symbols-outlined text-[18px]">add</span>
             {t('addLoad')}
-          </Link>
+          </ButtonLink>
         </div>
       </div>
 
@@ -96,40 +93,26 @@ export default async function LoadsPage({
         <Card>
           <div className="flex flex-col items-center pb-8">
             <EmptyState icon="local_shipping" title={t('noLoadsYet')} />
-            <Link
-              href="/loads/new"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-brand-orange hover:bg-brand-orange-hover text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-            >
+            <ButtonLink href="/loads/new" size="lg">
               <span className="material-symbols-outlined text-[16px]">add</span>
               {t('createFirstLoad')}
-            </Link>
+            </ButtonLink>
           </div>
         </Card>
       ) : (
         <>
           <div className="flex flex-wrap items-center gap-2 mb-6">
-            <Link
-              href="/loads"
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
-                !activeGroup
-                  ? 'bg-brand-orange text-white'
-                  : 'bg-surface-subtle text-text-sec hover:bg-surface-subtle/70 hover:text-text-pri'
-              }`}
-            >
+            <FilterLink href="/loads" active={!activeGroup}>
               {t('filterAll')}
-            </Link>
+            </FilterLink>
             {GROUPS.map((group) => (
-              <Link
+              <FilterLink
                 key={group.key}
                 href={`/loads?status=${group.key}`}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
-                  activeGroup?.key === group.key
-                    ? 'bg-brand-orange text-white'
-                    : 'bg-surface-subtle text-text-sec hover:bg-surface-subtle/70 hover:text-text-pri'
-                }`}
+                active={activeGroup?.key === group.key}
               >
                 {t(group.labelKey)}
-              </Link>
+              </FilterLink>
             ))}
           </div>
 

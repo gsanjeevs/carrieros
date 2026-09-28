@@ -887,7 +887,7 @@ export const endpoints: readonly Endpoint[] = [
     operationId: 'changeTier',
     method: 'post',
     path: '/api/v1/billing/change-tier',
-    summary: 'Change the organization\'s subscription tier (demo mode - writes carrier_details.tier directly)',
+    summary: 'Change the subscription tier with an explicitly simulated demo payment (no Stripe charge)',
     tag: 'billing',
     body: ChangeTierBodySchema,
     response: ChangeTierResponseSchema,

@@ -12,6 +12,7 @@ import type {
   DriverSummaryRecord,
   OnboardingRepository,
   PaymentMethodRecord,
+  PlanChangeRecord,
   UpdateCustomerInput,
   UpdateVehicleInput,
   VehicleWriteRepository,
@@ -84,17 +85,19 @@ export class SupabaseSetupRepository implements BillingWriteRepository, Customer
   // access is fine under RLS), then writes carrier_details.tier with the
   // admin client the same way the legacy route does (carrier_details is
   // server-write-only, migration 0019).
-  async changeTier(actor: ActorContext, tier: string): Promise<Result<string>> {
-    const { data: tierRow, error: tierError } = await this.session.from('tiers').select('code').eq('code', tier).maybeSingle()
-    if (tierError) return fail('tier lookup', tierError.message)
-    if (!tierRow) return err(validationFailed('Unknown tier', { tier: 'INVALID' }))
-
-    const { data, error } = await this.admin.from('carrier_details').update({ tier }).eq('org_id', actor.orgId).select('tier').single()
-    if (error || !data) return fail('tier change', error?.message ?? 'No row returned')
-    // `tier` (the just-validated, just-written input) rather than `data.tier`:
-    // the column is nullable in the generated type even though this update
-    // just set it to a real value, so `data.tier` is `string | null` here.
-    return ok(tier)
+  async changeTier(actor: ActorContext, tier: string, paymentReference: string): Promise<Result<PlanChangeRecord>> {
+    const { data, error } = await this.admin.rpc('demo_change_plan', {
+      p_org_id: actor.orgId,
+      p_tier: tier,
+      p_payment_reference: paymentReference,
+    })
+    if (error) {
+      if (error.message.includes('Unknown plan')) return err(validationFailed('Unknown tier', { tier: 'INVALID' }))
+      return fail('simulated plan payment', error.message)
+    }
+    const result = data?.[0]
+    if (!result) return fail('simulated plan payment', 'No transaction result returned')
+    return ok(result)
   }
 
   async create(actor: ActorContext, input: CreateCustomerInput): Promise<Result<{ org_id: number; name: string; customer_number: string | null }>>

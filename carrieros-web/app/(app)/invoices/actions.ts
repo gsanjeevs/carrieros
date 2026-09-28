@@ -18,7 +18,7 @@ import { getProfileForUser } from '@/lib/queries/profiles'
 import { getLoadForOrg } from '@/lib/queries/loads'
 
 export type ActionResult =
-  | { ok: true; invoice_number?: string; warning_code?: string }
+  | { ok: true; invoice_number?: string; invoice_numbers?: string[]; warning_code?: string }
   | { ok: false; error_code: string }
 const PAYMENT_METHODS = ['stripe', 'factoring', 'other']
 
@@ -60,24 +60,31 @@ export async function createInvoiceForLoad(loadId: number): Promise<ActionResult
   if (loadError) return { ok: false, error_code: 'SERVER_ERROR' }
   if (!load) return { ok: false, error_code: 'NOT_FOUND' }
 
-  // Only a load that has actually been delivered can be billed. 'invoiced' is
-  // allowed too: the status may already have been advanced by hand, and the
-  // unique index below is the real guard against a duplicate.
+  // Only a delivered load can be billed; invoiced loads remain eligible for
+  // any remaining customer invoices when a multi-customer load is billed.
   if (!['delivered', 'invoiced'].includes(load.status ?? '')) {
     return { ok: false, error_code: 'LOAD_NOT_DELIVERED' }
   }
 
-  // One invoice per load (enforced by UNIQUE INDEX invoices_load_unique).
-  // Checked here first so the common case never reaches the DB error path —
-  // and, critically, never burns an invoice number.
-  const { data: existing, error: existingError } = await supabase
-    .from('invoices')
-    .select('invoice_number')
-    .eq('load_id', load.id)
-    .maybeSingle()
+  const [{ data: orderRows, error: orderError }, { data: existingInvoices, error: invoiceError }] = await Promise.all([
+    supabase.from('load_orders').select('id, customer_org_id, billable_amount').eq('carrier_org_id', orgId).eq('load_id', load.id),
+    supabase.from('invoices').select('customer_org_id, invoice_number').eq('carrier_org_id', orgId).eq('load_id', load.id),
+  ])
+  if (orderError || invoiceError) return { ok: false, error_code: 'SERVER_ERROR' }
 
-  if (existingError) return { ok: false, error_code: 'SERVER_ERROR' }
-  if (existing) return { ok: false, error_code: 'INVOICE_EXISTS' }
+  const groups = new Map<number | null, number>()
+  if (orderRows?.length) {
+    if (orderRows.some((order) => order.billable_amount == null)) return { ok: false, error_code: 'VALIDATION_ERROR' }
+    const total = orderRows.reduce((sum, order) => sum + Number(order.billable_amount), 0)
+    if (Math.round(total * 100) !== Math.round(Number(load.rate ?? 0) * 100)) return { ok: false, error_code: 'VALIDATION_ERROR' }
+    for (const order of orderRows) groups.set(order.customer_org_id, (groups.get(order.customer_org_id) ?? 0) + Number(order.billable_amount))
+  } else {
+    groups.set(load.customer_org_id as number | null, Number(load.rate ?? 0))
+  }
+
+  const alreadyInvoiced = new Set((existingInvoices ?? []).map((invoice) => invoice.customer_org_id))
+  const pendingGroups = [...groups].filter(([customerId]) => !alreadyInvoiced.has(customerId))
+  if (pendingGroups.length === 0) return { ok: false, error_code: 'INVOICE_EXISTS' }
 
   // Default payment method comes from the carrier's own setting (decision R1).
   const { data: carrier } = await supabase
@@ -89,28 +96,23 @@ export async function createInvoiceForLoad(loadId: number): Promise<ActionResult
   const dueDate = new Date()
   dueDate.setDate(dueDate.getDate() + NET_DAYS)
 
-  // Everything above is validated — safe to burn a sequence value now.
-  let invoiceNumber: string
-  try {
-    invoiceNumber = await generateInvoiceNumber(supabase, orgId)
-  } catch {
-    return { ok: false, error_code: 'SERVER_ERROR' }
+  // All charge allocations are validated before numbering. Each customer gets
+  // one invoice containing their orders; the RPC persists the batch atomically.
+  const invoiceRows: Array<{ customer_org_id: number | null; invoice_number: string; amount: number }> = []
+  for (const [customerId, amount] of pendingGroups) {
+    try {
+      invoiceRows.push({ customer_org_id: customerId, invoice_number: await generateInvoiceNumber(supabase, orgId), amount })
+    } catch {
+      return { ok: false, error_code: 'SERVER_ERROR' }
+    }
   }
 
   const paymentMethod = carrier?.default_payment_method ?? 'other'
 
-  // Atomic insert + (conditional) load status advance + outbox event (T19
-  // readiness layer, migration 0033), replacing the old two-statement
-  // insert-then-updateLoadStatus sequence — a failure between those two used
-  // to leave an invoice created with its load still 'delivered'. Idempotency
-  // key is deterministic per load: invoices_load_unique already enforces
-  // "one invoice per load" at the DB level, so a retried create targets the
-  // same business fact.
-  const { data: cmdData, error } = await supabase.rpc('create_invoice_command', {
+  // Atomic invoice batch + order allocations + load status advance + outbox.
+  const { data: cmdData, error } = await supabase.rpc('create_load_invoices_command', {
     p_load_id: load.id,
-    p_customer_org_id: load.customer_org_id as number,
-    p_invoice_number: invoiceNumber,
-    p_amount: Number(load.rate ?? 0),
+    p_invoice_rows: invoiceRows as unknown as import('@/types/supabase').Json,
     p_due_date: dueDate.toISOString().slice(0, 10),
     p_payment_method: paymentMethod,
     p_factoring_company: (paymentMethod === 'factoring' ? carrier?.factoring_company ?? null : null) as string,
@@ -120,16 +122,17 @@ export async function createInvoiceForLoad(loadId: number): Promise<ActionResult
   })
 
   if (error) {
-    // 23505 = unique violation — someone else invoiced this load in the gap
-    // between the check above and this insert.
     if (error.code === '23505' || error.message?.includes('INVOICE_EXISTS')) return { ok: false, error_code: 'INVOICE_EXISTS' }
+    if (error.code === 'PT400') return { ok: false, error_code: 'VALIDATION_ERROR' }
+    if (error.code === 'PT404') return { ok: false, error_code: 'NOT_FOUND' }
     return { ok: false, error_code: 'SERVER_ERROR' }
   }
-  const invoice = cmdData as unknown as { invoice_number: string }
+  const invoiceNumbers = ((cmdData as { invoices?: Array<{ invoice_number: string }> } | null)?.invoices ?? []).map((invoice) => invoice.invoice_number)
+  if (invoiceNumbers.length === 0) return { ok: false, error_code: 'SERVER_ERROR' }
 
   revalidatePath('/invoices')
   revalidatePath(`/loads/${load.load_number}`)
-  return { ok: true, invoice_number: invoice.invoice_number }
+  return { ok: true, invoice_number: invoiceNumbers[0], invoice_numbers: invoiceNumbers }
 }
 
 /**

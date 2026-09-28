@@ -16,6 +16,8 @@ import CreateInvoiceButton from './CreateInvoiceButton'
 import DriverLoadActions from './DriverLoadActions'
 import DvirForm from './DvirForm'
 import LoadFuelStops from './LoadFuelStops'
+import LoadOrdersSection from './LoadOrdersSection'
+import CustomerExceptionControls from './CustomerExceptionControls'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import { Card, CardHeader, CardBody, StatusBadge } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
@@ -136,14 +138,17 @@ export default async function LoadDetailPage({
   // invoice routes gate on and the same roles as the `billing_invoices_all`
   // RLS policy; for anyone else this query returns nothing anyway.
   const canBill = roleHasCapability(profile.role, 'invoice_actions')
-  let existingInvoiceNumber: string | null = null
+  let existingInvoices: Array<{ invoice_number: string; customer_org_id: number | null; customer_name: string | null }> = []
   if (canBill) {
-    const { data: existingInvoice } = await supabase
+    const { data } = await supabase
       .from('invoices')
-      .select('invoice_number')
+      .select('invoice_number, customer_org_id, organizations!invoices_customer_org_id_fkey(name)')
       .eq('load_id', load.id)
-      .maybeSingle()
-    existingInvoiceNumber = existingInvoice?.invoice_number ?? null
+      .order('created_at', { ascending: true })
+    existingInvoices = (data ?? []).map((invoice) => {
+      const customer = Array.isArray(invoice.organizations) ? invoice.organizations[0] : invoice.organizations
+      return { invoice_number: invoice.invoice_number, customer_org_id: invoice.customer_org_id, customer_name: customer?.name ?? null }
+    })
   }
   const billable = canBill && ['delivered', 'invoiced'].includes(load.status ?? '')
 
@@ -157,6 +162,41 @@ export default async function LoadDetailPage({
   // role_capabilities row means "may see the rate", so this stays explicit.
   const showRate    = roleHasCapability(profile.role, 'rate_visibility')
   const canDispatch = roleHasCapability(profile.role, 'loads_manage')
+  const [orderQuery, customerQuery] = await Promise.all([
+    canBill
+      ? supabase.from('load_orders').select('id, order_number, customer_reference, commodity, weight_lbs, customer_org_id, billable_amount').eq('load_id', load.id).order('created_at', { ascending: true })
+      : supabase.from('load_orders').select('id, order_number, customer_reference, commodity, weight_lbs, customer_org_id').eq('load_id', load.id).order('created_at', { ascending: true }),
+    canDispatch
+      ? supabase.from('customer_details').select('org_id, organizations!customer_details_org_id_fkey(name)').eq('carrier_org_id', profile.org_id)
+      : Promise.resolve({ data: [] }),
+  ])
+  const orderRows = (orderQuery.data ?? []) as unknown as Array<{
+    id: number; order_number: string; customer_reference: string | null; commodity: string | null;
+    weight_lbs: number | null; customer_org_id: number; billable_amount?: number | null;
+  }>
+  const customerRows = customerQuery.data ?? []
+  const orderCustomerIds = [...new Set(orderRows.map((order) => order.customer_org_id))]
+  const { data: orderCustomerOrgs } = orderCustomerIds.length
+    ? await supabase.from('organizations').select('id, name').in('id', orderCustomerIds)
+    : { data: [] }
+  const orderCustomerNames = new Map((orderCustomerOrgs ?? []).map((org) => [org.id, org.name]))
+  const loadOrders = orderRows.map((order) => ({
+    ...order,
+    billable_amount: canBill ? order.billable_amount ?? null : null,
+    customer_name: orderCustomerNames.get(order.customer_org_id) ?? t('customer'),
+  }))
+  const orderCustomers = (customerRows ?? []).map((customer) => ({
+    id: customer.org_id,
+    name: customer.organizations?.name ?? t('customer'),
+  }))
+  const { data: customerExceptionRows } = canDispatch && load.tracking_token
+    ? await supabase.from('exception_events')
+      .select('id, title, detail, severity, occurred_at, customer_visible, customer_message')
+      .eq('carrier_org_id', profile.org_id)
+      .eq('entity_type', 'load')
+      .eq('entity_id', load.id)
+      .order('occurred_at', { ascending: false })
+    : { data: [] }
   // Upload/delete stay explicit: `documents_upload` also includes the driver
   // (who uploads from the truck), and no capability covers deleting a
   // document — converting either would widen access.
@@ -250,6 +290,11 @@ export default async function LoadDetailPage({
       <div className="mb-6">
         <LoadActionGrid trackingToken={load.tracking_token ?? null} loadNumber={load.load_number} canCancel={canCancelLoad} />
       </div>
+      {canDispatch && load.tracking_token && (customerExceptionRows?.length ?? 0) > 0 && (
+        <div className="mb-6">
+          <CustomerExceptionControls loadId={load.id} exceptions={customerExceptionRows ?? []} />
+        </div>
+      )}
 
       {/* Status timeline */}
       <Card className="mb-6">
@@ -266,7 +311,7 @@ export default async function LoadDetailPage({
                     done    ? 'bg-brand-orange/20' : 'bg-surface-subtle'
                   }`}>
                     <span className={`material-symbols-outlined text-[16px] ${
-                      current ? 'text-white' : done ? 'text-brand-orange' : 'text-text-mut'
+                      current ? 'text-brand-on-primary' : done ? 'text-brand-orange' : 'text-text-mut'
                     }`}>{s.icon}</span>
                   </div>
                   <span className={`text-[10px] font-medium whitespace-nowrap ${
@@ -282,16 +327,16 @@ export default async function LoadDetailPage({
         </div>
         {isCancelled && (
           <div className="flex items-center gap-2 mt-4 pt-4 border-t border-divider-ui">
-            <span className="material-symbols-outlined text-[18px] text-rose-400">cancel</span>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400">
+            <span className="material-symbols-outlined text-[18px] text-status-danger">cancel</span>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-status-danger-surface text-status-danger">
               {t('cancelledEndState')}
             </span>
           </div>
         )}
         {isDeclined && (
           <div className="flex items-center gap-2 mt-4 pt-4 border-t border-divider-ui">
-            <span className="material-symbols-outlined text-[18px] text-rose-400">block</span>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400">
+            <span className="material-symbols-outlined text-[18px] text-status-danger">block</span>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-status-danger-surface text-status-danger">
               {t('declinedEndState')}
             </span>
           </div>
@@ -336,6 +381,12 @@ export default async function LoadDetailPage({
             <InfoRow label={t('intake')}    value={load.intake_method} />
             </CardBody>
           </Card>
+
+          <LoadOrdersSection
+            loadId={load.id} orders={loadOrders} customers={orderCustomers} canAdd={canDispatch}
+            canBill={canBill} loadRate={canBill ? load.rate : null}
+            currency={resolveCurrency(carrierOrg?.currency)} locale={locale}
+          />
 
           {/* Documents */}
           <div id="documents">
@@ -454,7 +505,8 @@ export default async function LoadDetailPage({
             <CreateInvoiceButton
               loadId={load.id}
               billable={billable}
-              existingInvoiceNumber={existingInvoiceNumber}
+              existingInvoices={existingInvoices}
+              expectedCustomerIds={orderCustomerIds.length ? orderCustomerIds : [load.customer_org_id]}
               amountLabel={formatMoney(load.rate, resolveCurrency(carrierOrg?.currency), locale)}
               customerName={customerName ?? load.customer_name_raw}
             />

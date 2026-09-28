@@ -931,7 +931,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Change the organization's subscription tier (demo mode - writes carrier_details.tier directly) */
+        /** Change the subscription tier with an explicitly simulated demo payment (no Stripe charge) */
         post: operations["changeTier"];
         delete?: never;
         options?: never;
@@ -8711,6 +8711,14 @@ export interface operations {
                 content: {
                     "application/json": {
                         tier: string;
+                        payment: {
+                            reference: string | null;
+                            amount: number;
+                            currency: string;
+                            status: string;
+                            /** @enum {boolean} */
+                            simulated: true;
+                        };
                     };
                 };
             };

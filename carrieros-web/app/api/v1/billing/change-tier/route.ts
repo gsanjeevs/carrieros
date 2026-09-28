@@ -1,8 +1,5 @@
-// POST /api/v1/billing/change-tier — mirrors app/api/billing/change-tier/route.ts
-// (demo mode: writes carrier_details.tier directly, validated against the
-// real tiers table). Naturally idempotent (sets an absolute value), so no
-// Idempotency-Key is required, same as updateDraftInvoice/assignLoad-style
-// state-setting endpoints.
+// POST /api/v1/billing/change-tier — the demo payment and plan update are
+// committed atomically; no Stripe call or real card charge is made.
 import { NextRequest, NextResponse } from 'next/server'
 import { apiError, getAuthedContext, isErrorResponse } from '@/lib/api-auth'
 import { createSetupWriteService } from '@/server/composition'
@@ -24,7 +21,20 @@ export async function POST(request: NextRequest) {
   const actor = await buildActorContext(authed.supabase, authed.user, requestId ?? crypto.randomUUID())
   if (!actor.ok) return domainErrorResponse(actor.error)
 
-  const result = await createSetupWriteService(authed.supabase).changeTier(actor.value, body.data.tier)
+  const suppliedKey = request.headers.get('idempotency-key')
+  if (suppliedKey && !/^[0-9a-f-]{36}$/i.test(suppliedKey)) return apiError('VALIDATION_ERROR', 'Idempotency-Key must be a UUID', 400)
+  const paymentReference = `demo:${authed.user.id}:${suppliedKey ?? crypto.randomUUID()}`
+  const result = await createSetupWriteService(authed.supabase).changeTier(actor.value, body.data.tier, paymentReference)
   if (!result.ok) return domainErrorResponse(result.error)
-  return NextResponse.json(ChangeTierResponseSchema.parse({ tier: result.value }))
+  const payment = result.value
+  return NextResponse.json(ChangeTierResponseSchema.parse({
+    tier: payment.tier,
+    payment: {
+      reference: payment.event_id == null ? null : `DEMO-${payment.event_id}`,
+      amount: Number(payment.amount),
+      currency: payment.currency,
+      status: payment.event_status,
+      simulated: true,
+    },
+  }))
 }

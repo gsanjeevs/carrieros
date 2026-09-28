@@ -12,6 +12,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { apiClient } from '@/lib/api-client'
+import { Button } from '@/components/ui'
 
 export default function UpgradeTierButton({
   tierCode,
@@ -27,6 +28,7 @@ export default function UpgradeTierButton({
   const tErrors = useTranslations('errors')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [receipt, setReceipt] = useState('')
 
   function friendly(code?: string) {
     try {
@@ -39,11 +41,16 @@ export default function UpgradeTierButton({
   async function changeTier() {
     setLoading(true)
     setError('')
+    setReceipt('')
     try {
       const { data, error: err } = await apiClient.http.POST('/api/v1/billing/change-tier', {
+        headers: { 'Idempotency-Key': crypto.randomUUID() },
         body: { tier: tierCode },
       })
       if (err || !data) throw new Error(friendly((err as { error_code?: string } | undefined)?.error_code))
+      setReceipt(data.payment.reference
+        ? t('demoPaymentReceipt', { amount: data.payment.amount.toFixed(2), currency: data.payment.currency, reference: data.payment.reference })
+        : t('planAlreadyCurrent'))
       router.refresh()
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : t('changeTierFailed'))
@@ -62,14 +69,16 @@ export default function UpgradeTierButton({
 
   return (
     <div className="flex flex-col items-center gap-1">
-      <button
+      <Button
+        size="lg"
+        className="w-full"
         onClick={changeTier}
         disabled={loading}
-        className="w-full px-3 py-2 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
       >
         {loading ? t('changingPlan') : isDowngrade ? t('downgrade') : t('upgrade')}
-      </button>
-      {error && <p className="text-red-400 text-xs">{error}</p>}
+      </Button>
+      {error && <p className="text-danger text-xs">{error}</p>}
+      {receipt && <p role="status" className="text-success-dark text-xs text-center">{receipt}</p>}
     </div>
   )
 }

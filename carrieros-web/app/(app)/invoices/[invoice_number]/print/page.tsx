@@ -47,6 +47,14 @@ export default async function InvoicePrintPage({
 
   if (!invoice) notFound()
 
+  const { data: allocations } = await supabase.from('invoice_order_allocations')
+    .select('load_order_id, amount').eq('invoice_id', invoice.id).order('load_order_id')
+  const allocationOrderIds = (allocations ?? []).map((row) => row.load_order_id)
+  const { data: allocationOrders } = allocationOrderIds.length
+    ? await supabase.from('load_orders').select('id, order_number, customer_reference, commodity, weight_lbs').in('id', allocationOrderIds)
+    : { data: [] }
+  const orderById = new Map((allocationOrders ?? []).map((order) => [order.id, order]))
+
   const { data: org } = await supabase
     .from('organizations')
     .select('name, email, phone, address, city, state, zip, currency')
@@ -109,15 +117,23 @@ export default async function InvoicePrintPage({
             </tr>
           </thead>
           <tbody>
-            <tr className="border-b border-slate-200">
+            {(allocations ?? []).length > 0 ? allocations!.map((allocation) => {
+              const order = orderById.get(allocation.load_order_id)
+              return <tr key={allocation.load_order_id} className="border-b border-slate-200">
+                <td className="py-3">
+                  {order?.order_number ?? t('lineItemGeneric')}
+                  {order?.customer_reference && <span className="block text-slate-500 text-xs mt-0.5">{order.customer_reference}</span>}
+                  {(order?.commodity || order?.weight_lbs) && <span className="block text-slate-500 text-xs mt-0.5">{order.commodity ?? ''}{order?.weight_lbs ? ` · ${Number(order.weight_lbs).toLocaleString()} lb` : ''}</span>}
+                </td>
+                <td className="py-3 text-right">{formatMoney(allocation.amount, currency, locale)}</td>
+              </tr>
+            }) : <tr className="border-b border-slate-200">
               <td className="py-3">
-                {invoice.loads?.load_number
-                  ? t('lineItemLinehaul', { loadNumber: invoice.loads.load_number, route: route ?? '—' })
-                  : t('lineItemGeneric')}
+                {invoice.loads?.load_number ? t('lineItemLinehaul', { loadNumber: invoice.loads.load_number, route: route ?? '—' }) : t('lineItemGeneric')}
                 {invoice.loads?.commodity && <span className="block text-slate-500 text-xs mt-0.5">{invoice.loads.commodity}</span>}
               </td>
               <td className="py-3 text-right">{formatMoney(invoice.amount, currency, locale)}</td>
-            </tr>
+            </tr>}
           </tbody>
           <tfoot>
             <tr>

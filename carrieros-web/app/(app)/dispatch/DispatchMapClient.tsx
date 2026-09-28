@@ -26,7 +26,7 @@ import { useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
-import { dedupeByVehicle, type DispatchMapPin } from '@/lib/dispatch-map-pins'
+import { dedupeByVehicle, estimateMovement, type DispatchMapPin } from '@/lib/dispatch-map-pins'
 
 const ACTIVE_STATUSES = new Set(['dispatched', 'picked_up', 'in_transit'])
 
@@ -66,6 +66,7 @@ type VehicleLocationRow = {
 
 export default function DispatchMapClient({ pins, locale, orgId }: { pins: DispatchMapPin[]; locale: string; orgId: number }) {
   const [rawPins, setRawPins] = useState(pins)
+  const [view, setView] = useState<'all' | 'moving' | 'loads' | 'parked' | 'unloaded' | 'stale'>('all')
   // DispatchMap derives each pin's live/stale badge from `now`, not by calling
   // Date.now() itself during render (impure, react-hooks/purity flags it) --
   // with no state changing otherwise, nothing would ever re-render it as time
@@ -94,6 +95,10 @@ export default function DispatchMapClient({ pins, locale, orgId }: { pins: Dispa
 
           setRawPins((prev) => {
             if (!hasLocation || !isActive) return prev.filter((p) => p.id !== id)
+            const previous = prev.find((p) => p.id === id)
+            const lat = Number(row.last_location_lat)
+            const lng = Number(row.last_location_lng)
+            const lastLocationAt = row.last_location_at as string
             const updated: DispatchMapPin = {
               id,
               kind: 'load',
@@ -103,11 +108,13 @@ export default function DispatchMapClient({ pins, locale, orgId }: { pins: Dispa
               // driverName isn't in this payload (Realtime sends the raw row, no joins) — keep
               // whatever the last known name was rather than blanking it out on every location tick.
               driverName: prev.find((p) => p.id === id)?.driverName ?? null,
-              lat: Number(row.last_location_lat),
-              lng: Number(row.last_location_lng),
-              lastLocationAt: row.last_location_at as string,
+              lat,
+              lng,
+              lastLocationAt,
               source: 'phone',
-              shipment: (prev.find((p) => p.id === id) as (DispatchMapPin & { shipment?: unknown }) | undefined)?.shipment,
+              onActiveLoad: true,
+              movement: estimateMovement(previous, { lat, lng, lastLocationAt }),
+              shipment: previous?.shipment,
             }
             const exists = prev.some((p) => p.id === id)
             return exists ? prev.map((p) => (p.id === id ? updated : p)) : [...prev, updated]
@@ -138,6 +145,9 @@ export default function DispatchMapClient({ pins, locale, orgId }: { pins: Dispa
               lng: Number(row.lng),
               lastLocationAt: row.recorded_at,
               source,
+              onActiveLoad: existing?.onActiveLoad ?? false,
+              movement: estimateMovement(existing, { lat: Number(row.lat), lng: Number(row.lng), lastLocationAt: row.recorded_at }),
+              shipment: existing?.shipment,
             }
             const exists = prev.some((p) => p.id === id)
             return exists ? prev.map((p) => (p.id === id ? updated : p)) : [...prev, updated]
@@ -152,6 +162,39 @@ export default function DispatchMapClient({ pins, locale, orgId }: { pins: Dispa
   }, [orgId])
 
   const dedupedPins = useMemo(() => dedupeByVehicle(rawPins), [rawPins])
+  const visiblePins = useMemo(() => dedupedPins.filter((pin) => {
+    if (view === 'moving') return pin.movement === 'moving'
+    if (view === 'loads') return pin.onActiveLoad
+    if (view === 'parked') return pin.movement === 'stationary' && !pin.onActiveLoad
+    if (view === 'unloaded') return !pin.onActiveLoad
+    if (view === 'stale') return now - new Date(pin.lastLocationAt).getTime() > 15 * 60 * 1000
+    return true
+  }), [dedupedPins, now, view])
+  const t = useTranslations('dispatch')
 
-  return <DispatchMap pins={dedupedPins} locale={locale} now={now} />
+  const views = [
+    ['all', t('mapViewAll'), dedupedPins.length],
+    ['moving', t('mapViewMoving'), dedupedPins.filter((pin) => pin.movement === 'moving').length],
+    ['loads', t('mapViewLoads'), dedupedPins.filter((pin) => pin.onActiveLoad).length],
+    ['parked', t('mapViewParked'), dedupedPins.filter((pin) => pin.movement === 'stationary' && !pin.onActiveLoad).length],
+    ['unloaded', t('mapViewUnloaded'), dedupedPins.filter((pin) => !pin.onActiveLoad).length],
+    ['stale', t('mapViewStale'), dedupedPins.filter((pin) => now - new Date(pin.lastLocationAt).getTime() > 15 * 60 * 1000).length],
+  ] as const
+
+  return (
+    <>
+      <div className="mb-3 flex flex-wrap gap-2" role="group" aria-label={t('mapViews')}>
+        {views.map(([key, label, count]) => (
+          <button
+            key={key}
+            type="button"
+            aria-pressed={view === key}
+            onClick={() => setView(key)}
+            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${view === key ? 'border-brand-orange bg-brand-orange/10 text-brand-orange' : 'border-border-ui text-text-sec hover:text-text-pri'}`}
+          >{label} <span className="tabular-nums">{count}</span></button>
+        ))}
+      </div>
+      <DispatchMap pins={visiblePins} locale={locale} now={now} />
+    </>
+  )
 }

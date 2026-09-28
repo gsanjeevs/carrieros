@@ -12,6 +12,7 @@
 // import from here directly; components/DispatchMap.tsx re-exports these for any other client-side
 // caller that still imports them from there.
 export type DispatchMapPinSource = 'phone' | 'samsara' | 'motive'
+export type DispatchMapMovement = 'moving' | 'stationary' | 'unknown'
 
 export interface DispatchMapPin {
   /** Stable React/Leaflet key, unique across BOTH kinds — `load-<load id>` or `vehicle-<vehicle id>`. */
@@ -29,11 +30,31 @@ export interface DispatchMapPin {
   lng: number
   lastLocationAt: string
   source: DispatchMapPinSource
+  movement: DispatchMapMovement
+  /** True means assigned to a currently active shipment; it does not imply motion. */
+  onActiveLoad: boolean
   shipment?: {
     customer: string | null
     origin: string | null
     destination: string | null
   }
+}
+
+/** Estimate motion only from two time-separated location fixes; a load status alone never means a truck is moving. */
+export function estimateMovement(
+  previous: { lat: number; lng: number; lastLocationAt: string } | null | undefined,
+  current: { lat: number; lng: number; lastLocationAt: string },
+): DispatchMapMovement {
+  if (!previous) return 'unknown'
+  const elapsedSeconds = (new Date(current.lastLocationAt).getTime() - new Date(previous.lastLocationAt).getTime()) / 1000
+  if (!Number.isFinite(elapsedSeconds) || elapsedSeconds < 2 || elapsedSeconds > 5 * 60) return 'unknown'
+  const radians = (degrees: number) => degrees * Math.PI / 180
+  const latDelta = radians(current.lat - previous.lat)
+  const lngDelta = radians(current.lng - previous.lng)
+  const a = Math.sin(latDelta / 2) ** 2
+    + Math.cos(radians(previous.lat)) * Math.cos(radians(current.lat)) * Math.sin(lngDelta / 2) ** 2
+  const meters = 6_371_000 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return (meters / elapsedSeconds) * 2.23694 >= 5 ? 'moving' : 'stationary'
 }
 
 /** @deprecated renamed to DispatchMapPin — kept as an alias so any straggling import doesn't need to

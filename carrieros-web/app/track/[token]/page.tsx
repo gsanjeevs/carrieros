@@ -26,6 +26,7 @@ import { toDate } from '@/lib/format-datetime'
 import { createStorageProvider } from '@/lib/storage'
 import { brandingCssVars } from '@/lib/domain/branding'
 import { STATUS_COLOR } from '@/lib/domain/load-status'
+import TrackingRefresh from './TrackingRefresh'
 
 function formatDate(value: string | null, locale: string): string {
   if (!value) return '—'
@@ -86,10 +87,10 @@ function Logo({ logoUrl }: { logoUrl?: string | null }) {
         <img src={logoUrl} alt="" className="w-8 h-8 rounded-lg object-cover" />
       ) : (
         <div className="w-8 h-8 rounded-lg bg-brand-orange flex items-center justify-center">
-          <span className="text-white font-bold text-sm">C</span>
+          <span className="text-brand-on-primary font-bold text-sm">C</span>
         </div>
       )}
-      <span className="text-white font-semibold text-xl tracking-tight">CarrierOS</span>
+      <span className="text-text-pri font-semibold text-xl tracking-tight">CarrierOS</span>
     </div>
   )
 }
@@ -112,15 +113,15 @@ export default async function TrackingPage({
 
   if (!load) {
     return (
-      <div className="min-h-screen bg-navy flex items-center justify-center px-4">
+      <div className="auth-shell min-h-screen bg-surface-page text-text-pri flex items-center justify-center px-4">
         <div className="w-full max-w-sm text-center">
           <div className="mb-8 flex justify-center">
             <Logo />
           </div>
-          <div className="bg-white/5 border border-white/8 rounded-xl px-6 py-12 shadow-card-dark">
-            <span className="material-symbols-outlined text-slate-600 text-4xl">search_off</span>
-            <h1 className="text-white text-lg font-semibold mt-4">{t('notFoundTitle')}</h1>
-            <p className="text-slate-400 text-sm mt-2">
+          <div className="bg-surface-card border border-border-ui rounded-xl px-6 py-12 shadow-card-dark">
+            <span className="material-symbols-outlined text-text-mut text-4xl">search_off</span>
+            <h1 className="text-text-pri text-lg font-semibold mt-4">{t('notFoundTitle')}</h1>
+            <p className="text-text-sec text-sm mt-2">
               {t('notFoundBody')}
             </p>
           </div>
@@ -135,8 +136,12 @@ export default async function TrackingPage({
   const destination = [load.delivery_city, load.delivery_state].filter(Boolean).join(', ') || '—'
   const hasCarrierInfo = load.carrier_name || load.carrier_phone || load.carrier_email
 
-  const { data: events } = await supabase.rpc('get_public_tracking_events', { p_token: token })
+  const [{ data: events }, { data: customerUpdates }] = await Promise.all([
+    supabase.rpc('get_public_tracking_events', { p_token: token }),
+    supabase.rpc('get_public_tracking_exceptions', { p_token: token }),
+  ])
   const timeline = events ?? []
+  const updates = customerUpdates ?? []
 
   // Enterprise branding customization (decisions.md PR1 amendment). Already
   // NULL from get_public_tracking() unless the carrier's org is Enterprise-
@@ -158,19 +163,20 @@ export default async function TrackingPage({
   })
 
   return (
-    <div className="min-h-screen bg-navy px-4 py-10 sm:py-16" style={brandingStyle as React.CSSProperties}>
+    <div className="auth-shell min-h-screen bg-surface-page text-text-pri px-4 py-10 sm:py-16" style={brandingStyle as React.CSSProperties}>
+      <TrackingRefresh />
       <div className="w-full max-w-md mx-auto">
 
         <div className="mb-8 flex justify-center">
           <Logo logoUrl={brandLogoUrl} />
         </div>
 
-        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden shadow-card-dark">
-          <div className="px-5 sm:px-6 py-5 border-b border-white/5">
+        <div className="bg-surface-card border border-border-ui rounded-xl overflow-hidden shadow-card-dark">
+          <div className="px-5 sm:px-6 py-5 border-b border-divider-ui">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-slate-500 text-xs uppercase tracking-wide">{t('loadLabel')}</p>
-                <p className="text-white text-lg font-semibold">{load.load_number}</p>
+                <p className="text-text-mut text-xs uppercase tracking-wide">{t('loadLabel')}</p>
+                <p className="text-text-pri text-lg font-semibold">{load.load_number}</p>
               </div>
               <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${badgeColor}`}>
                 {badgeLabel}
@@ -179,36 +185,36 @@ export default async function TrackingPage({
           </div>
 
           {load.delivery_date && (
-            <div className="px-5 sm:px-6 py-5 border-b border-white/5 text-center bg-gradient-to-b from-white/[0.03] to-transparent">
-              <p className="text-slate-500 text-xs uppercase tracking-wide mb-2">{t('estimatedDelivery')}</p>
-              <p className="text-white text-2xl font-extrabold tracking-tight">
+            <div className="px-5 sm:px-6 py-5 border-b border-divider-ui text-center bg-gradient-to-b from-surface-subtle to-transparent">
+              <p className="text-text-mut text-xs uppercase tracking-wide mb-2">{t('estimatedDelivery')}</p>
+              <p className="text-text-pri text-2xl font-extrabold tracking-tight">
                 {formatDate(load.delivery_date, locale)}
               </p>
             </div>
           )}
 
-          <div className="px-5 sm:px-6 py-5 border-b border-white/5">
-            <p className="text-slate-500 text-xs uppercase tracking-wide mb-3">{tLoads('route')}</p>
+          <div className="px-5 sm:px-6 py-5 border-b border-divider-ui">
+            <p className="text-text-mut text-xs uppercase tracking-wide mb-3">{tLoads('route')}</p>
             <div className="flex items-start gap-3">
               <div className="flex flex-col items-center pt-1">
                 <div className="w-2 h-2 rounded-full bg-brand-orange" />
-                <div className="w-px h-8 bg-white/10" />
+                <div className="w-px h-8 bg-divider-ui" />
                 <div className="w-2 h-2 rounded-full bg-teal" />
               </div>
               <div className="flex-1 space-y-6">
                 <div>
-                  <p className="text-white text-sm font-medium">{origin}</p>
-                  <p className="text-slate-500 text-xs mt-0.5">{tLoads('pickup')} {formatDate(load.pickup_date, locale)}</p>
+                  <p className="text-text-pri text-sm font-medium">{origin}</p>
+                  <p className="text-text-mut text-xs mt-0.5">{tLoads('pickup')} {formatDate(load.pickup_date, locale)}</p>
                 </div>
                 <div>
-                  <p className="text-white text-sm font-medium">{destination}</p>
-                  <p className="text-slate-500 text-xs mt-0.5">{tLoads('delivery')} {formatDate(load.delivery_date, locale)}</p>
+                  <p className="text-text-pri text-sm font-medium">{destination}</p>
+                  <p className="text-text-mut text-xs mt-0.5">{tLoads('delivery')} {formatDate(load.delivery_date, locale)}</p>
                 </div>
               </div>
             </div>
 
             {load.last_location_at && (
-              <p className="text-slate-500 text-xs mt-4 flex items-center gap-1.5">
+              <p className="text-text-mut text-xs mt-4 flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[14px]">schedule</span>
                 {timeAgo(load.last_location_at, t)}
               </p>
@@ -216,19 +222,33 @@ export default async function TrackingPage({
           </div>
 
           {timeline.length > 0 && (
-            <div className="px-5 sm:px-6 py-5 border-b border-white/5">
-              <p className="text-slate-500 text-xs uppercase tracking-wide mb-3">{t('timeline')}</p>
+            <div className="px-5 sm:px-6 py-5 border-b border-divider-ui">
+              <p className="text-text-mut text-xs uppercase tracking-wide mb-3">{t('timeline')}</p>
               <div className="space-y-4">
                 {timeline.map((event, i) => (
                   <div key={`${event.event_type}-${event.created_at}`} className="flex items-start gap-3">
                     <div className="flex flex-col items-center pt-1">
-                      <div className={`w-2 h-2 rounded-full ${i === timeline.length - 1 ? 'bg-teal' : 'bg-white/20'}`} />
-                      {i < timeline.length - 1 && <div className="w-px h-6 bg-white/10 mt-1" />}
+                      <div className={`w-2 h-2 rounded-full ${i === timeline.length - 1 ? 'bg-teal' : 'bg-divider-ui'}`} />
+                      {i < timeline.length - 1 && <div className="w-px h-6 bg-divider-ui mt-1" />}
                     </div>
                     <div className="flex-1 pb-0.5">
-                      <p className="text-white text-sm font-medium">{eventLabel(event.event_type, tLoads)}</p>
-                      <p className="text-slate-500 text-xs mt-0.5">{formatDateTime(event.created_at, locale)}</p>
+                      <p className="text-text-pri text-sm font-medium">{eventLabel(event.event_type, tLoads)}</p>
+                      <p className="text-text-mut text-xs mt-0.5">{formatDateTime(event.created_at, locale)}</p>
                     </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {updates.length > 0 && (
+            <div className="px-5 sm:px-6 py-5 border-b border-divider-ui" aria-live="polite">
+              <p className="text-text-mut text-xs uppercase tracking-wide mb-3">{t('shipmentUpdates')}</p>
+              <div className="space-y-3">
+                {updates.map((update, i) => (
+                  <div key={`${update.occurred_at}-${i}`} className={`rounded-lg border px-3 py-3 ${update.severity === 'urgent' ? 'border-danger/40 bg-danger/10' : update.severity === 'warning' ? 'border-warning/40 bg-warning/10' : 'border-border-ui bg-surface-subtle'}`}>
+                    <p className="text-text-pri text-sm">{update.customer_message}</p>
+                    <p className="mt-2 text-text-sec text-xs">{formatDateTime(update.occurred_at, locale)}</p>
                   </div>
                 ))}
               </div>
@@ -237,15 +257,15 @@ export default async function TrackingPage({
 
           {hasCarrierInfo && (
             <div className="px-5 sm:px-6 py-5">
-              <p className="text-slate-500 text-xs uppercase tracking-wide mb-3">{t('carrierContact')}</p>
+              <p className="text-text-mut text-xs uppercase tracking-wide mb-3">{t('carrierContact')}</p>
               <div className="space-y-2">
                 {load.carrier_name && (
-                  <p className="text-white text-sm font-medium">{load.carrier_name}</p>
+                  <p className="text-text-pri text-sm font-medium">{load.carrier_name}</p>
                 )}
                 {load.carrier_phone && (
                   <a
                     href={`tel:${load.carrier_phone}`}
-                    className="flex items-center gap-2 text-slate-300 text-sm hover:text-brand-orange transition-colors"
+                    className="flex items-center gap-2 text-text-sec text-sm hover:text-brand-orange transition-colors"
                   >
                     <span className="material-symbols-outlined text-[16px]">call</span>
                     {load.carrier_phone}
@@ -254,7 +274,7 @@ export default async function TrackingPage({
                 {load.carrier_email && (
                   <a
                     href={`mailto:${load.carrier_email}`}
-                    className="flex items-center gap-2 text-slate-300 text-sm hover:text-brand-orange transition-colors"
+                    className="flex items-center gap-2 text-text-sec text-sm hover:text-brand-orange transition-colors"
                   >
                     <span className="material-symbols-outlined text-[16px]">mail</span>
                     {load.carrier_email}
@@ -265,7 +285,7 @@ export default async function TrackingPage({
           )}
         </div>
 
-        <p className="text-center text-xs text-slate-600 mt-6">
+        <p className="text-center text-xs text-text-mut mt-6">
           {t('poweredBy')}
         </p>
       </div>

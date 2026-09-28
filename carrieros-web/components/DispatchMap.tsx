@@ -58,10 +58,21 @@ const DEFAULT_ICON = L.icon({
   shadowSize: [41, 41],
 })
 
+function truckIcon(pin: DispatchMapPin) {
+  const color = pin.movement === 'moving'
+    ? (pin.onActiveLoad ? 'var(--color-map-pin-moving-loaded)' : 'var(--color-map-pin-moving-unassigned)')
+    : pin.movement === 'stationary'
+      ? (pin.onActiveLoad ? 'var(--color-map-pin-stationary-loaded)' : 'var(--color-map-pin-stationary-unassigned)')
+      : (pin.onActiveLoad ? 'var(--color-map-pin-unknown-loaded)' : 'var(--color-map-pin-unknown-unassigned)')
+  const html = `<span style="display:grid;place-items:center;width:38px;height:38px;border:2px solid var(--color-map-pin-foreground);border-radius:50%;background:${color};box-shadow:var(--shadow-map-pin)"><svg viewBox="0 0 40 40" width="25" height="25" aria-hidden="true"><path fill="var(--color-map-pin-foreground)" d="M4 10a2 2 0 0 1 2-2h17a2 2 0 0 1 2 2v4h5a3 3 0 0 1 2.4 1.2l4.2 5.6a3 3 0 0 1 .6 1.8V28a2 2 0 0 1-2 2h-2.2a5 5 0 0 1-9.6 0h-8.8a5 5 0 0 1-9.6 0H6a2 2 0 0 1-2-2V10Zm21 7v6h9.4l-3.5-4.7a1 1 0 0 0-.8-.4H25Zm-14 8a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm17 0a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/></svg></span>`
+  return L.divIcon({ className: '', html, iconSize: [38, 38], iconAnchor: [19, 19], popupAnchor: [0, -18] })
+}
+
 const US_CENTER: [number, number] = [39.8283, -98.5795]
 
 export default function DispatchMap({ pins, locale, now }: { pins: DispatchMapPin[]; locale: string; now: number }) {
   const t = useTranslations('dispatch')
+  const tLoads = useTranslations('loads')
   const center: [number, number] =
     pins.length > 0
       ? [pins.reduce((s, p) => s + p.lat, 0) / pins.length, pins.reduce((s, p) => s + p.lng, 0) / pins.length]
@@ -71,7 +82,7 @@ export default function DispatchMap({ pins, locale, now }: { pins: DispatchMapPi
     <MapContainer
       center={center}
       zoom={pins.length > 0 ? 6 : 4}
-      style={{ height: '480px', width: '100%', borderRadius: '12px' }}
+      className="h-[480px] w-full rounded-xl"
       scrollWheelZoom={true}
     >
       <TileLayer
@@ -80,32 +91,30 @@ export default function DispatchMap({ pins, locale, now }: { pins: DispatchMapPi
       />
       {pins.map((p) => {
         const isStale = now - new Date(p.lastLocationAt).getTime() > STALE_THRESHOLD_MS
+        const shipment = p.shipment
         return (
-          <Marker key={p.id} position={[p.lat, p.lng]} icon={DEFAULT_ICON} opacity={isStale ? 0.45 : 1}>
+          <Marker key={p.id} position={[p.lat, p.lng]} icon={p.vehicleId != null ? truckIcon(p) : DEFAULT_ICON} opacity={isStale ? 0.45 : 1}>
             <Popup>
-              <div style={{ fontSize: '13px' }}>
+              <div className="text-[13px]">
                 <strong>{p.label}</strong>
-                {p.kind === 'vehicle' && (
-                  <>
-                    {' '}
-                    <span style={{ color: '#64748b' }}>({t('idleVehicleBadge')})</span>
-                  </>
-                )}
+                {p.kind === 'vehicle' && <><br /><span className={`font-semibold ${p.onActiveLoad ? 'text-map-assigned' : 'text-map-idle'}`}>{t(p.onActiveLoad ? 'assignedVehicleBadge' : 'idleVehicleBadge')}</span></>}
                 <br />
                 {p.driverName ?? '—'}
                 <br />
-                {((p as DispatchMapPin & { shipment?: { customer: string | null; origin: string | null; destination: string | null } }).shipment) ? (
+                {p.kind === 'load' && <><strong>{tLoads(`status_${p.status}` as never)}</strong><br /></>}
+                <span className={`font-semibold ${p.movement === 'moving' ? 'text-map-moving' : p.movement === 'stationary' ? 'text-map-stationary' : 'text-map-unknown'}`}>{t(`motion${p.movement === 'moving' ? 'Moving' : p.movement === 'stationary' ? 'Stationary' : 'Unknown'}` as never)}</span><br />
+                {shipment ? (
                   <>
-                    <strong>Shipment</strong><br />
-                    {((p as DispatchMapPin & { shipment?: { customer: string | null; origin: string | null; destination: string | null } }).shipment)?.customer ?? 'Customer not assigned'}<br />
-                    {((p as DispatchMapPin & { shipment?: { customer: string | null; origin: string | null; destination: string | null } }).shipment)?.origin ?? 'Origin'} → {((p as DispatchMapPin & { shipment?: { customer: string | null; origin: string | null; destination: string | null } }).shipment)?.destination ?? 'Destination'}<br />
+                    <strong>{t('shipmentLabel')}</strong><br />
+                    {shipment.customer ?? t('customerUnassigned')}<br />
+                    {shipment.origin ?? t('origin')} → {shipment.destination ?? t('destination')}<br />
                   </>
                 ) : p.kind === 'vehicle' ? (
-                  <span style={{ color: '#64748b' }}>No active shipment</span>
+                  <span className="text-map-idle">{t('noActiveShipment')}</span>
                 ) : null}
                 {new Date(p.lastLocationAt).toLocaleString(locale)}
                 <br />
-                <span style={{ color: isStale ? '#b45309' : '#16a34a', fontWeight: 600 }}>
+                <span className={`font-semibold ${isStale ? 'text-map-stale' : 'text-map-live'}`}>
                   {isStale ? t('locationStale') : t('locationLive')}
                 </span>
               </div>

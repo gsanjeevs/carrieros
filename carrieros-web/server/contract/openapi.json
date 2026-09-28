@@ -20745,7 +20745,7 @@
     "/api/v1/billing/change-tier": {
       "post": {
         "operationId": "changeTier",
-        "summary": "Change the organization's subscription tier (demo mode - writes carrier_details.tier directly)",
+        "summary": "Change the subscription tier with an explicitly simulated demo payment (no Stripe charge)",
         "tags": [
           "billing"
         ],
@@ -20778,10 +20778,43 @@
                   "properties": {
                     "tier": {
                       "type": "string"
+                    },
+                    "payment": {
+                      "type": "object",
+                      "properties": {
+                        "reference": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "amount": {
+                          "type": "number"
+                        },
+                        "currency": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "simulated": {
+                          "type": "boolean",
+                          "enum": [
+                            true
+                          ]
+                        }
+                      },
+                      "required": [
+                        "reference",
+                        "amount",
+                        "currency",
+                        "status",
+                        "simulated"
+                      ],
+                      "additionalProperties": false
                     }
                   },
                   "required": [
-                    "tier"
+                    "tier",
+                    "payment"
                   ],
                   "additionalProperties": false
                 }

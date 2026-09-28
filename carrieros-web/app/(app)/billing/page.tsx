@@ -19,13 +19,6 @@ import { Card, CardBody } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
-const TIER_PRICE: Record<string, string> = {
-  starter: '$49/mo',
-  growth: '$99/mo',
-  pro: '$199/mo',
-  enterprise: '$349/mo',
-}
-
 export default async function BillingPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -97,7 +90,7 @@ export default async function BillingPage() {
             <p className="text-xs font-medium text-text-sec uppercase tracking-wide mb-2">{t('currentPlan')}</p>
             <div className="flex items-center justify-between">
               <span className="text-text-pri text-lg font-semibold capitalize">{t(`tier_${tier}` as never)}</span>
-              <span className="text-text-sec text-sm">{TIER_PRICE[tier] ?? ''}</span>
+              <span className="text-text-sec text-sm">{currentTierRow ? `$${Number(currentTierRow.monthly_price).toFixed(0)}/mo` : ''}</span>
             </div>
           </CardBody>
         </Card>
@@ -175,7 +168,7 @@ export default async function BillingPage() {
               className="flex flex-col gap-2"
             >
               <p className="text-text-pri text-sm font-semibold">{t(`tier_${row.code}` as never)}</p>
-              <p className="text-text-sec text-xs">{TIER_PRICE[row.code] ?? ''}</p>
+              <p className="text-text-sec text-xs">${Number(row.monthly_price).toFixed(0)}/mo</p>
               <p className="text-text-mut text-xs">
                 {t('includedTrucks', { count: row.included_trucks })}
               </p>

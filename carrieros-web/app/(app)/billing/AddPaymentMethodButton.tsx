@@ -13,6 +13,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { apiClient } from '@/lib/api-client'
+import { Button } from '@/components/ui'
 
 export default function AddPaymentMethodButton({ hasPaymentMethod }: { hasPaymentMethod: boolean }) {
   const router = useRouter()
@@ -47,15 +48,16 @@ export default function AddPaymentMethodButton({ hasPaymentMethod }: { hasPaymen
 
   return (
     <div className="flex flex-col items-end gap-1.5">
-      <button
+      <Button
+        size="lg"
+        className="whitespace-nowrap"
         onClick={addPaymentMethod}
         disabled={loading}
-        className="flex items-center gap-2 px-4 py-2 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
       >
         <span className="material-symbols-outlined text-[18px]">credit_card</span>
         {loading ? t('addingPaymentMethod') : hasPaymentMethod ? t('replacePaymentMethod') : t('addPaymentMethod')}
-      </button>
-      {error && <p className="text-red-400 text-xs">{error}</p>}
+      </Button>
+      {error && <p className="text-danger text-xs">{error}</p>}
     </div>
   )
 }

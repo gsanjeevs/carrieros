@@ -141,7 +141,7 @@ export default function DispatchPanel({
   return (
     <div className="space-y-3">
       <div>
-        <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">{t('assignDriver')}</label>
+        <label className="block text-[10px] uppercase tracking-wider text-text-mut mb-1.5">{t('assignDriver')}</label>
         <div className="flex flex-wrap gap-2">
           <Card
             variant="selectable"
@@ -152,7 +152,7 @@ export default function DispatchPanel({
             <span className="w-7 h-7 rounded-full bg-navy-light flex items-center justify-center flex-shrink-0">
               <span className="material-symbols-outlined text-avatar-text text-[16px]">person_off</span>
             </span>
-            <span className="text-white text-xs font-medium">— {t('unassigned')} —</span>
+            <span className="text-text-pri text-xs font-medium">— {t('unassigned')} —</span>
           </Card>
           {drivers.map(d => {
             const name = (d.first_name || d.last_name)
@@ -171,8 +171,8 @@ export default function DispatchPanel({
                   <span className="text-avatar-text text-xs font-semibold">{driverInitials(d)}</span>
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-white text-xs font-medium truncate max-w-[9rem]">{name}</span>
-                  <span className="block text-slate-500 text-[10px]">{d.driver_number}</span>
+                  <span className="block text-text-pri text-xs font-medium truncate max-w-[9rem]">{name}</span>
+                  <span className="block text-text-mut text-[10px]">{d.driver_number}</span>
                 </span>
               </Card>
             )
@@ -181,7 +181,7 @@ export default function DispatchPanel({
       </div>
 
       <div>
-        <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">{t('assignTruck')}</label>
+        <label className="block text-[10px] uppercase tracking-wider text-text-mut mb-1.5">{t('assignTruck')}</label>
         <div className="flex flex-wrap gap-2">
           <Card
             variant="selectable"
@@ -192,7 +192,7 @@ export default function DispatchPanel({
             <span className="w-7 h-7 rounded-full bg-navy-light flex items-center justify-center flex-shrink-0">
               <span className="material-symbols-outlined text-avatar-text text-[16px]">block</span>
             </span>
-            <span className="text-white text-xs font-medium">— {t('unassigned')} —</span>
+            <span className="text-text-pri text-xs font-medium">— {t('unassigned')} —</span>
           </Card>
           {vehicles.map(v => {
             const isSelected = vehicleId === v.id.toString()
@@ -208,8 +208,8 @@ export default function DispatchPanel({
                   <span className="material-symbols-outlined text-avatar-text text-[16px]">local_shipping</span>
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-white text-xs font-medium truncate max-w-[9rem]">{v.vehicle_number}</span>
-                  <span className="block text-slate-500 text-[10px] truncate max-w-[9rem]">{v.nickname}</span>
+                  <span className="block text-text-pri text-xs font-medium truncate max-w-[9rem]">{v.vehicle_number}</span>
+                  <span className="block text-text-mut text-[10px] truncate max-w-[9rem]">{v.nickname}</span>
                 </span>
               </Card>
             )
@@ -217,38 +217,38 @@ export default function DispatchPanel({
         </div>
       </div>
 
-      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {error && <p className="text-danger text-xs">{error}</p>}
 
       <div className="flex gap-2 pt-1">
         <Button variant="secondary" onClick={() => save()} disabled={saving} className="flex-1">
           {tCommon('save')}
         </Button>
         {nextStatus && actionKey && (
-          <button
+          <Button variant="primary" size="lg"
             onClick={() => save(nextStatus)}
             disabled={saving}
-            className="flex-1 py-2 bg-brand-orange hover:bg-brand-orange-hover text-white text-sm font-semibold rounded-lg transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+            className="flex-1"
           >
             {saving ? '…' : t(actionKey as never)}
-          </button>
+          </Button>
         )}
         {canCancel && (
-          <button
+          <Button variant="danger" size="lg"
             onClick={cancelLoad}
             disabled={saving}
-            className="flex-1 py-2 bg-transparent border border-red-500/30 text-red-400 hover:bg-red-500/10 text-sm font-medium rounded-lg transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-red-500/40"
+            className="flex-1"
           >
             {t('actionCancelLoad')}
-          </button>
+          </Button>
         )}
         {canDecline && (
-          <button
+          <Button variant="danger" size="lg"
             onClick={declineLoad}
             disabled={saving}
-            className="flex-1 py-2 bg-transparent border border-red-500/30 text-red-400 hover:bg-red-500/10 text-sm font-medium rounded-lg transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-red-500/40"
+            className="flex-1"
           >
             {t('actionDeclineLoad')}
-          </button>
+          </Button>
         )}
       </div>
     </div>

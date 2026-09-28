@@ -508,11 +508,19 @@ export interface PaymentMethodRecord {
   readonly trial_ends_at: string | null
 }
 
+export interface PlanChangeRecord {
+  readonly tier: string
+  readonly amount: number
+  readonly currency: string
+  readonly event_id: number | null
+  readonly event_status: string
+}
+
 export interface BillingWriteRepository {
   organizationName(actor: ActorContext): Promise<Result<string | null>>
   savePaymentMethod(actor: ActorContext, value: { stripeCustomerId: string; cardBrand: string; cardLast4: string }): Promise<Result<PaymentMethodRecord>>
-  /** Validates against the real `tiers` table, not a hardcoded list — mirrors app/api/billing/change-tier/route.ts. */
-  changeTier(actor: ActorContext, tier: string): Promise<Result<string>>
+  /** Atomically records a clearly simulated demo payment and applies the plan change. */
+  changeTier(actor: ActorContext, tier: string, paymentReference: string): Promise<Result<PlanChangeRecord>>
 }
 
 export interface CreateCustomerInput {

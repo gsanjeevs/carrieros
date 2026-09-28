@@ -483,12 +483,18 @@ export const GetBillingResponseSchema = z.object({
   price_per_additional_truck: z.number(),
 })
 
-// Mirrors app/api/billing/change-tier/route.ts POST — demo mode (decisions.md):
-// writes carrier_details.tier directly, validated against the real `tiers`
-// table rather than a hardcoded list. A real Stripe integration replaces this
-// route's body, not this contract.
+// Demo payment is explicitly simulated; plan and billing-event writes are atomic.
 export const ChangeTierBodySchema = z.object({ tier: z.string().min(1) })
-export const ChangeTierResponseSchema = z.object({ tier: z.string() })
+export const ChangeTierResponseSchema = z.object({
+  tier: z.string(),
+  payment: z.object({
+    reference: z.string().nullable(),
+    amount: z.number(),
+    currency: z.string(),
+    status: z.string(),
+    simulated: z.literal(true),
+  }),
+})
 
 // ── Maintenance reminders (fleet-wide) ──────────────────────────────────────
 

@@ -46,17 +46,17 @@ export default function BillingStep({ onNext }: { onNext: (added: boolean) => vo
 
   return (
     <div className="space-y-4">
-      <h2 className="text-white font-semibold text-lg mb-1">{t('stepBillingTitle')}</h2>
-      <p className="text-slate-400 text-sm mb-4">{t('stepBillingSubtitle')}</p>
+      <h2 className="text-text-pri font-semibold text-lg mb-1">{t('stepBillingTitle')}</h2>
+      <p className="text-text-sec text-sm mb-4">{t('stepBillingSubtitle')}</p>
 
       <Card className="px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="material-symbols-outlined text-slate-400">credit_card</span>
+          <span className="material-symbols-outlined text-text-sec">credit_card</span>
           <div>
-            <p className="text-white text-sm font-medium">
+            <p className="text-text-pri text-sm font-medium">
               {card ? tBilling('cardOnFile', { brand: card.brand, last4: card.last4 }) : t('noPaymentMethodYet')}
             </p>
-            <p className="text-slate-500 text-xs mt-0.5">{t('trialNotice')}</p>
+            <p className="text-text-mut text-xs mt-0.5">{t('trialNotice')}</p>
           </div>
         </div>
         {!card && (

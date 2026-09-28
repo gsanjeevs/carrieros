@@ -1,6 +1,4 @@
-// Audit probes: can a carrier really pay to upgrade? Read-only w.r.t. production code.
-// Uses throwaway orgs only. Assertions document CURRENT behaviour; tests titled
-// "GAP:" pass when the gap EXISTS (i.e. they are evidence, flip when fixed).
+// Billing-upgrade regression probes use throwaway organizations only.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { adminClient, createTestOrg, createTestUser, signInAs, cleanupTestOrg, apiFetch, type TestOrg } from '../helpers'
 
@@ -59,24 +57,36 @@ describe('validation', () => {
   })
 })
 
-describe('GAP: tier change is a free column flip', () => {
-  it('owner with NO payment method, trialing, jumps to enterprise for free and nothing is recorded', async () => {
+describe('demo subscription payment and plan change', () => {
+  it('owner without a payment method gets an explicit simulated payment and persisted tier change', async () => {
     const before = await details(orgA.orgId)
     expect(before.stripe_customer_id).toBeNull()
     const r = await post(ownerS.accessToken, { tier: 'enterprise' })
     expect(r.status).toBe(200)
+    const body = await r.json()
+    expect(body.payment).toMatchObject({ amount: 349, currency: 'USD', status: 'simulated_succeeded', simulated: true })
+    expect(body.payment.reference).toMatch(/^DEMO-/)
     const after = await details(orgA.orgId)
     expect(after.tier).toBe('enterprise')
-    expect(after.billing_status).toBe('trialing') // no status transition
-    const { data: ev } = await admin.from('billing_events').select('id').eq('org_id', orgA.orgId)
-    expect(ev).toHaveLength(0) // no billing event
+    expect(after.billing_status).toBe('active')
+    expect(after.trial_ends_at).toBeNull()
+    const { data: ev } = await admin.from('billing_events').select('*').eq('org_id', orgA.orgId)
+    expect(ev).toHaveLength(1)
+    expect(ev?.[0]).toMatchObject({ event_type: 'demo.subscription.payment_succeeded', amount: 349, currency: 'USD', status: 'simulated_succeeded', is_simulated: true, plan_code: 'enterprise' })
+    expect(ev?.[0].payment_reference).toContain(owner.userId)
     const { data: au } = await admin.from('audit_events').select('*').eq('org_id', orgA.orgId).limit(20)
     console.log('audit_events rows after tier change:', au?.length, JSON.stringify(au?.map((a: any) => a.action ?? a.event_type)))
   })
-  it('replay of same request is 200 again (no idempotency key, no versioning) and honours no Idempotency-Key', async () => {
-    const a = await apiFetch('/api/billing/change-tier', ownerS.accessToken, { method: 'POST', headers: { 'Idempotency-Key': 'k1' }, body: '{"tier":"enterprise"}' })
-    const b = await apiFetch('/api/billing/change-tier', ownerS.accessToken, { method: 'POST', headers: { 'Idempotency-Key': 'k1' }, body: '{"tier":"enterprise"}' })
+  it('same idempotency key replays one simulated transaction, not a duplicate charge', async () => {
+    await admin.from('carrier_details').update({ tier: 'starter', billing_status: 'trialing', trial_ends_at: '2030-01-01T00:00:00Z' }).eq('org_id', orgA.orgId)
+    const key = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d'
+    const a = await apiFetch('/api/billing/change-tier', ownerS.accessToken, { method: 'POST', headers: { 'Idempotency-Key': key }, body: '{"tier":"enterprise"}' })
+    const b = await apiFetch('/api/billing/change-tier', ownerS.accessToken, { method: 'POST', headers: { 'Idempotency-Key': key }, body: '{"tier":"enterprise"}' })
     expect([a.status, b.status]).toEqual([200, 200])
+    const [first, second] = await Promise.all([a.json(), b.json()])
+    expect(first.payment.reference).toBe(second.payment.reference)
+    const { data: events } = await admin.from('billing_events').select('id').eq('org_id', orgA.orgId).eq('payment_reference', `demo:${owner.userId}:${key}`)
+    expect(events).toHaveLength(1)
   })
   it('concurrent conflicting changes: last write wins, no conflict detection', async () => {
     const rs = await Promise.all(['starter', 'pro', 'growth', 'enterprise'].map((t) => post(ownerS.accessToken, { tier: t })))
@@ -84,31 +94,35 @@ describe('GAP: tier change is a free column flip', () => {
   })
 })
 
-describe('GAP: owner can bypass the API and write billing columns directly via RLS', () => {
-  it('owner PATCHes carrier_details.tier directly with own JWT', async () => {
+describe('billing columns cannot be changed directly through client RLS', () => {
+  it('owner tier changes must go through the billing endpoint', async () => {
     await admin.from('carrier_details').update({ tier: 'starter' }).eq('org_id', orgA.orgId)
     const { data, error } = await ownerS.client.from('carrier_details').update({ tier: 'pro' }).eq('org_id', orgA.orgId).select('tier')
-    console.log('direct tier write:', error?.message, JSON.stringify(data))
-    expect((await details(orgA.orgId)).tier).toBe('pro')
+    expect(error || data?.length === 0).toBeTruthy()
+    expect((await details(orgA.orgId)).tier).toBe('starter')
   })
-  it('owner can forge billing_status/trial/grace/stripe ids/card directly', async () => {
+  it('owner cannot forge billing status, trial dates, or payment details', async () => {
+    const before = await details(orgA.orgId)
     const { error } = await ownerS.client.from('carrier_details').update({
       billing_status: 'active', trial_ends_at: '2099-01-01T00:00:00Z', grace_period_until: null,
       stripe_customer_id: 'cus_FORGED', card_brand: 'amex', card_last4: '0000',
     }).eq('org_id', orgA.orgId)
-    console.log('direct forge error:', error?.message)
     const d = await details(orgA.orgId)
-    expect(d.billing_status).toBe('active')
-    expect(d.trial_ends_at).toMatch(/2099/)
-    expect(d.stripe_customer_id).toBe('cus_FORGED')
+    expect(error || d.billing_status === before.billing_status).toBeTruthy()
+    expect(d.billing_status).toBe(before.billing_status)
+    expect(d.trial_ends_at).toBe(before.trial_ends_at)
+    expect(d.grace_period_until).toBe(before.grace_period_until)
+    expect(d.stripe_customer_id).toBe(before.stripe_customer_id)
+    expect(d.card_brand).toBe(before.card_brand)
+    expect(d.card_last4).toBe(before.card_last4)
   })
-  it('a dispatcher cannot do the same (RLS holds)', async () => {
+  it('a dispatcher cannot change the tier', async () => {
     await dispS.client.from('carrier_details').update({ tier: 'enterprise' }).eq('org_id', orgA.orgId)
-    expect((await details(orgA.orgId)).tier).toBe('pro')
+    expect((await details(orgA.orgId)).tier).toBe('starter')
   })
-  it('owner cannot touch another org row', async () => {
+  it('a different tenant owner cannot change this org tier', async () => {
     await otherS.client.from('carrier_details').update({ tier: 'enterprise' }).eq('org_id', orgA.orgId)
-    expect((await details(orgA.orgId)).tier).toBe('pro')
+    expect((await details(orgA.orgId)).tier).toBe('starter')
   })
 })
 
@@ -124,16 +138,20 @@ describe('entitlements after tier change; delinquency and downgrade', () => {
     await post(ownerS.accessToken, { tier: 'starter' })
     expect(await keys(ownerS)).toEqual(low)
   })
-  it('GAP: past_due / canceled / expired trial / lapsed grace keep full paid entitlements', async () => {
+  it('past_due / canceled / expired trial / lapsed grace retain only designated capabilities', async () => {
     await admin.from('carrier_details').update({ tier: 'enterprise' }).eq('org_id', orgA.orgId)
     const full = await keys(ownerS)
-    for (const patch of [
-      { billing_status: 'past_due' }, { billing_status: 'canceled' },
-      { billing_status: 'trialing', trial_ends_at: '2020-01-01T00:00:00Z' },
-      { billing_status: 'past_due', grace_period_until: '2020-01-01T00:00:00Z' },
+    const { data: retainedFeatures } = await admin.from('features').select('key').eq('retained_when_delinquent', true)
+    const retained = (retainedFeatures ?? []).map((feature: { key: string }) => feature.key).sort()
+    expect(full.length).toBeGreaterThan(retained.length)
+    for (const [patch, expected] of [
+      [{ billing_status: 'past_due' }, full], // no grace deadline means access remains enabled
+      [{ billing_status: 'canceled' }, retained],
+      [{ billing_status: 'trialing', trial_ends_at: '2020-01-01T00:00:00Z' }, retained],
+      [{ billing_status: 'past_due', grace_period_until: '2020-01-01T00:00:00Z' }, retained],
     ]) {
       await admin.from('carrier_details').update(patch as any).eq('org_id', orgA.orgId)
-      expect(await keys(ownerS)).toEqual(full)
+      expect(await keys(ownerS)).toEqual(expected)
     }
   })
   it('GAP: downgrade with fleet above new tier included_trucks is accepted (no usage check)', async () => {

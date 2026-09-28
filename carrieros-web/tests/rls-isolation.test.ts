@@ -40,6 +40,8 @@ let telematicsIntegrationAId: number
 let vehicleLocationAId: number
 let vehicleDocAId: number
 let customerContactAId: number
+let loadOrderAId: number
+let invoiceOrderAllocationAId: number
 
 beforeAll(async () => {
   orgA = await createTestOrg(admin, 'carrier')
@@ -137,6 +139,34 @@ beforeAll(async () => {
     .select('id')
     .single()
   customerContactAId = Number(contact!.id)
+
+  // Orders and their invoice allocations are carrier-tenant financial data.
+  // Build the order before linking an invoice because invoiced order composition
+  // is intentionally immutable.
+  const { data: order, error: orderError } = await admin.from('load_orders').insert({
+    carrier_org_id: orgA.orgId,
+    load_id: loadAId,
+    customer_org_id: custOrgA.orgId,
+    order_number: `ORDER-TEST-${orgA.orgId}`,
+    billable_amount: 100,
+  }).select('id').single()
+  if (orderError || !order) throw new Error(`load_orders fixture: ${orderError?.message}`)
+  loadOrderAId = Number(order.id)
+
+  const { error: invoiceUpdateError } = await admin.from('invoices').update({
+    load_id: loadAId,
+    customer_org_id: custOrgA.orgId,
+  }).eq('id', invoiceAId)
+  if (invoiceUpdateError) throw new Error(`invoice fixture update: ${invoiceUpdateError.message}`)
+
+  const { data: allocation, error: allocationError } = await admin.from('invoice_order_allocations').insert({
+    carrier_org_id: orgA.orgId,
+    invoice_id: invoiceAId,
+    load_order_id: loadOrderAId,
+    amount: 100,
+  }).select('id').single()
+  if (allocationError || !allocation) throw new Error(`invoice allocation fixture: ${allocationError?.message}`)
+  invoiceOrderAllocationAId = Number(allocation.id)
 })
 
 afterAll(async () => {
@@ -166,6 +196,26 @@ describe('cross-tenant isolation — org B cannot see org A data', () => {
 
   it('invoices: org B session sees zero rows for org A invoice', async () => {
     const { data, error } = await sessionB.client.from('invoices').select('id').eq('id', invoiceAId)
+    expect(error).toBeNull()
+    expect(data).toEqual([])
+  })
+
+  it('load_orders: org B session cannot see or update org A customer orders', async () => {
+    const { data, error } = await sessionB.client.from('load_orders').select('id').eq('id', loadOrderAId)
+    expect(error).toBeNull()
+    expect(data).toEqual([])
+
+    const { data: updated, error: updateError } = await sessionB.client
+      .from('load_orders').update({ commodity: 'cross-tenant edit' }).eq('id', loadOrderAId).select('id')
+    expect(updateError).toBeNull()
+    expect(updated).toEqual([])
+    const { data: intact } = await admin.from('load_orders').select('commodity').eq('id', loadOrderAId).single()
+    expect(intact?.commodity).not.toBe('cross-tenant edit')
+  })
+
+  it('invoice_order_allocations: org B session cannot see org A invoice breakdowns', async () => {
+    const { data, error } = await sessionB.client
+      .from('invoice_order_allocations').select('id').eq('id', invoiceOrderAllocationAId)
     expect(error).toBeNull()
     expect(data).toEqual([])
   })

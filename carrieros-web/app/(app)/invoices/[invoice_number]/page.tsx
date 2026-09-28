@@ -60,6 +60,14 @@ export default async function InvoiceDetailPage({
   if (error) logError({ route: 'invoices' }, error.message, { step: 'detail query failed' })
   if (!invoice) notFound()
 
+  const { data: allocations } = await supabase.from('invoice_order_allocations')
+    .select('load_order_id, amount').eq('invoice_id', invoice.id).order('load_order_id')
+  const allocationOrderIds = (allocations ?? []).map((row) => row.load_order_id)
+  const { data: allocationOrders } = allocationOrderIds.length
+    ? await supabase.from('load_orders').select('id, order_number, customer_reference, commodity, weight_lbs').in('id', allocationOrderIds)
+    : { data: [] }
+  const orderById = new Map((allocationOrders ?? []).map((order) => [order.id, order]))
+
   const { data: org } = await supabase
     .from('organizations')
     .select('name, currency')
@@ -168,22 +176,23 @@ export default async function InvoiceDetailPage({
                 </tr>
               </thead>
               <tbody>
-                <TableRow>
+                {(allocations ?? []).length > 0 ? allocations!.map((allocation) => {
+                  const order = orderById.get(allocation.load_order_id)
+                  return <TableRow key={allocation.load_order_id}>
+                    <TableCell>
+                      {order?.order_number ?? t('lineItemGeneric')}
+                      {order?.customer_reference && <span className="block text-text-sec text-xs mt-0.5">{order.customer_reference}</span>}
+                      {(order?.commodity || order?.weight_lbs) && <span className="block text-text-sec text-xs mt-0.5">{order.commodity ?? ''}{order?.weight_lbs ? ` · ${Number(order.weight_lbs).toLocaleString()} lb` : ''}</span>}
+                    </TableCell>
+                    <TableCell numeric>{formatMoney(allocation.amount, currency, locale)}</TableCell>
+                  </TableRow>
+                }) : <TableRow>
                   <TableCell>
-                    {invoice.loads?.load_number
-                      ? t('lineItemLinehaul', {
-                          loadNumber: invoice.loads.load_number,
-                          route: route ?? '—',
-                        })
-                      : t('lineItemGeneric')}
-                    {invoice.loads?.commodity && (
-                      <span className="block text-text-sec text-xs mt-0.5">{invoice.loads.commodity}</span>
-                    )}
+                    {invoice.loads?.load_number ? t('lineItemLinehaul', { loadNumber: invoice.loads.load_number, route: route ?? '—' }) : t('lineItemGeneric')}
+                    {invoice.loads?.commodity && <span className="block text-text-sec text-xs mt-0.5">{invoice.loads.commodity}</span>}
                   </TableCell>
-                  <TableCell numeric>
-                    {formatMoney(invoice.amount, currency, locale)}
-                  </TableCell>
-                </TableRow>
+                  <TableCell numeric>{formatMoney(invoice.amount, currency, locale)}</TableCell>
+                </TableRow>}
                 <TableRow>
                   <TableCell className="font-medium">{t('total')}</TableCell>
                   <TableCell numeric className="font-semibold">
