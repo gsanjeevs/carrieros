@@ -26,13 +26,13 @@ the other session), and mention the commit(s) so the other session can `git log`
 
 | Session | Task | Files/areas | Started |
 |---|---|---|---|
-| Claude | Closing an 85-key translation gap across the 20 new locale files (surfaced by merging feature/i18n-timezone after feature/dat-loadboard + the load-orders feature had already added new en.json keys the translations predate) | `carrieros-web/messages/{ru,uk,mn,ar,so,ht,pt,vi,zh,ko,tl,fr,pl,ro,de,hi,gu,am,fa,ne}.json` only, no code changes; worktree `../carrieros-i18n-gap` on `feature/i18n-gap-fill` | 2026-09-27 |
 | Codex (GPT-6) | Replace raw SX magic-link takeover with audited, time-limited, read-only support access | `/Users/sanjeevgautam/code/carrieros-sx-admin` worktree; admin org/user UI, support-session APIs, migration 0055 | 2026-09-27 |
 
 ## Recently finished (for context, not a permanent log — prune entries older than a day or two)
 
 | Session | Task | Commits | Finished |
 |---|---|---|---|
+| Claude | Closed the 85-key translation gap across all 20 new locale files (94/94 `tests/locale-messages.test.ts` pass) — **merged to main** | `ad0fa00` + 3 more on branch `feature/i18n-gap-fill` | 2026-09-27 |
 | Claude | Timezone-aware datetime rendering + expanded languages 4→24 with full translations + `LanguagePicker` component (not yet wired in) — **merged to main** | `2312367`,`cbdf82e`,`5d9c02f`,`1e08b43`,`01d1c37`,`b117943` on branch `feature/i18n-timezone` | 2026-09-27 |
 | Claude | Breadcrumb/back-navigation audit + fix (vehicle/driver/customer detail pages + exceptions-inbox CTA plumbing, incl. a follow-up fix for a hardcoded-English `fromLabel`); load/invoice-detail breadcrumb UI itself deferred — **merged to main in this commit** | `89345cc`,`ec09d7b`,`7dd76ba`,`7f81ae5`,`1991bef` on branch `feature/breadcrumb-nav` | 2026-09-27 |
 | Claude | DAT load-board integration Phase 1 (posting only, mocked `DatClient`), incl. a real tenancy-gap fix found + fixed via 0053 while writing tests — **merged to main** | `95c0e24`,`f675cf2`,`88211c0`,`59995b1` on branch `feature/dat-loadboard` | 2026-09-27 |
