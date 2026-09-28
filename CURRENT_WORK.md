@@ -27,6 +27,8 @@ the other session), and mention the commit(s) so the other session can `git log`
 | Session | Task | Files/areas | Started |
 |---|---|---|---|
 | Codex (GPT-6) | Replace raw SX magic-link takeover with audited, time-limited, read-only support access | `/Users/sanjeevgautam/code/carrieros-sx-admin` worktree; admin org/user UI, support-session APIs, migration 0055 | 2026-09-27 |
+| Claude | Wire `PageBackLink` into load/invoice detail pages (the actual product-owner-reported "exceptions -> detail page, no way back" case) | `app/(app)/loads/[load_number]/page.tsx`, `app/(app)/invoices/[invoice_number]/page.tsx`, `messages/{en,es,pa,ur}.json` (new `backToInvoices` key); worktree `../carrieros-detail-breadcrumb` on `feature/detail-page-breadcrumb` | 2026-09-27 |
+| Claude | Wire the existing `LanguagePicker` component into Sidebar/Settings (24-language selector, replacing the current 4-language `LanguageSwitcher`) | `components/Sidebar.tsx`, `components/LanguageSwitcher.tsx`, `app/(app)/settings/page.tsx` or equivalent; worktree `../carrieros-language-picker` on `feature/wire-language-picker` | 2026-09-27 |
 
 ## Recently finished (for context, not a permanent log — prune entries older than a day or two)
 
