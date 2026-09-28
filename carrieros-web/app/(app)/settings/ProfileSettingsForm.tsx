@@ -3,19 +3,23 @@
 // Plain CRUD on the caller's own profiles row — direct Supabase call from
 // the browser client, no API route needed (decision R3b; RLS already grants
 // own_profile_update). Mirrors the pattern LanguageSwitcher.tsx established.
-import { useState } from 'react'
+//
+// Language options come from the `languages` master-data table (same
+// client-side fetch pattern as components/LanguageSwitcher.tsx — reading
+// the language list only, not the write) rather than the hardcoded 4-entry
+// list this used to have, and render through LanguagePicker (2026-09-27,
+// see components/LanguagePicker.tsx) so all 24 languages are searchable
+// instead of a plain <select> the user has to scroll.
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { Button, Input } from '@/components/ui'
 import { updateProfilePreferences } from '@/lib/queries/profiles'
+import { SUPPORTED_LOCALES } from '@/i18n/locales'
+import LanguagePicker, { type LanguageOption } from '@/components/LanguagePicker'
 
-const LANGUAGES = [
-  { code: 'en', label: 'English' },
-  { code: 'es', label: 'Español' },
-  { code: 'pa', label: 'ਪੰਜਾਬੀ' },
-  { code: 'ur', label: 'اردو' },
-]
+const SUPPORTED_LOCALE_SET = new Set<string>(SUPPORTED_LOCALES)
 
 const DATE_FORMAT_EXAMPLES: Record<string, string> = {
   'MM/DD/YYYY': '07/20/2026',
@@ -49,6 +53,22 @@ export default function ProfileSettingsForm({
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
+  const [languages, setLanguages] = useState<LanguageOption[]>([])
+
+  useEffect(() => {
+    let cancelled = false
+    const supabase = createClient()
+    supabase
+      .from('languages')
+      .select('code, label, native_name, flag_emoji')
+      .order('display_order')
+      .then(({ data }) => {
+        if (!cancelled && data) setLanguages(data.filter((language) => SUPPORTED_LOCALE_SET.has(language.code)))
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   async function save() {
     setSaving(true)
@@ -83,13 +103,16 @@ export default function ProfileSettingsForm({
 
       <div>
         <label className={labelCls}>{t('language')}</label>
-        <Input
-          as="select"
-          value={form.preferred_language}
-          onChange={(e) => setForm(f => ({ ...f, preferred_language: e.target.value }))}
-        >
-          {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
-        </Input>
+        {languages.length === 0 ? (
+          <div className="h-9" aria-hidden />
+        ) : (
+          <LanguagePicker
+            languages={languages}
+            value={form.preferred_language}
+            onSelect={(code) => setForm(f => ({ ...f, preferred_language: code }))}
+            className="w-full"
+          />
+        )}
       </div>
 
       <div>
