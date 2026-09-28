@@ -2,6 +2,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { getTranslations, getLocale } from 'next-intl/server'
+import type { ReactNode } from 'react'
 import DispatchPanel from '@/components/DispatchPanel'
 import LoadActionGrid from '@/components/LoadActionGrid'
 import LoadDocuments, { type DocType, type LoadDocument } from '@/components/LoadDocuments'
@@ -18,6 +19,7 @@ import DvirForm from './DvirForm'
 import LoadFuelStops from './LoadFuelStops'
 import LoadOrdersSection from './LoadOrdersSection'
 import CustomerExceptionControls from './CustomerExceptionControls'
+import LoadTabs, { type LoadTabKey } from './LoadTabs'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import { Card, CardHeader, CardBody, StatusBadge, PageBackLink } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
@@ -266,6 +268,147 @@ export default async function LoadDetailPage({
     ? `${load.vehicles.vehicle_number ?? ''} ${load.vehicles.nickname}`.trim()
     : null
 
+  // ─── Tab content ───
+  // Only the "Compliance & Fuel" and "Messages" tabs are ever omitted — the
+  // others (Overview, Documents, Activity) always render something (an
+  // empty state where relevant), same posture as VehicleTabs/DriverTabs.
+  const hasDriverActions = roleHasCapability(profile.role, 'location_share') || roleHasCapability(profile.role, 'problem_report')
+  const hasDvir = roleHasCapability(profile.role, 'dvir_file')
+  const hasFuelLog = roleHasCapability(profile.role, 'fuel_log')
+  const hasComplianceFuelTab = hasDriverActions || hasDvir || hasFuelLog || iftaEntitled
+
+  const overviewTab = (
+    <div className="space-y-6">
+      {/* Route */}
+      <Card>
+        <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('route')}</h2></CardHeader>
+        <CardBody>
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-brand-orange font-semibold mb-2">{t('pickup')}</p>
+            <p className="text-text-pri text-sm font-medium">{load.pickup_address ?? '—'}</p>
+            <p className="text-text-sec text-sm">{[load.pickup_city, load.pickup_state, load.pickup_zip].filter(Boolean).join(', ')}</p>
+            <p className="text-text-mut text-xs mt-2">{fmt(load.pickup_date, locale)}{load.pickup_time ? ` · ${load.pickup_time}` : ''}</p>
+          </div>
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-teal font-semibold mb-2">{t('delivery')}</p>
+            <p className="text-text-pri text-sm font-medium">{load.delivery_address ?? '—'}</p>
+            <p className="text-text-sec text-sm">{[load.delivery_city, load.delivery_state, load.delivery_zip].filter(Boolean).join(', ')}</p>
+            <p className="text-text-mut text-xs mt-2">{fmt(load.delivery_date, locale)}{load.delivery_time ? ` · ${load.delivery_time}` : ''}</p>
+          </div>
+        </div>
+        </CardBody>
+      </Card>
+
+      {/* Load info */}
+      <Card>
+        <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('loadDetails')}</h2></CardHeader>
+        <CardBody>
+        <InfoRow label={t('customer')}  value={customerName ?? load.customer_name_raw} />
+        <InfoRow label={t('commodity')} value={load.commodity} />
+        <InfoRow label={t('weight')}    value={load.weight_lbs ? `${Number(load.weight_lbs).toLocaleString()} lbs` : null} />
+        <InfoRow label={t('miles')}     value={load.total_miles ? `${load.total_miles} mi` : null} />
+        <InfoRow label={t('intake')}    value={load.intake_method} />
+        </CardBody>
+      </Card>
+
+      <LoadOrdersSection
+        loadId={load.id} orders={loadOrders} customers={orderCustomers} canAdd={canDispatch}
+        canBill={canBill} loadRate={canBill ? load.rate : null}
+        currency={resolveCurrency(carrierOrg?.currency)} locale={locale}
+      />
+    </div>
+  )
+
+  const documentsTab = (
+    <div id="documents">
+      <LoadDocuments
+        documents={documents}
+        loadId={load.id}
+        orgId={profile.org_id}
+        userId={user.id}
+        canUpload={canUploadDoc}
+        canDelete={canDeleteDoc}
+      />
+      {canUploadDoc && (
+        <div className="mt-3 flex justify-end">
+          <SendDocumentsButton
+            loadId={load.id}
+            documents={documents.map((d) => ({ id: d.id, type: d.type, fileName: d.fileName }))}
+            customerEmail={customerEmail}
+          />
+        </div>
+      )}
+    </div>
+  )
+
+  const complianceFuelTab = (
+    <div className="space-y-6">
+      {hasDriverActions && (
+        <DriverLoadActions
+          loadId={load.id}
+          active={['dispatched', 'picked_up', 'in_transit'].includes(load.status ?? '')}
+        />
+      )}
+
+      {hasDvir && <DvirForm loadId={load.id} />}
+      {hasFuelLog && <LoadFuelStops loadId={load.id} />}
+
+      {iftaEntitled && (
+        <IftaCrossingsSection
+          loadId={load.id}
+          orgId={profile.org_id}
+          crossings={iftaCrossings}
+          canManage={canIfta}
+          locale={locale}
+        />
+      )}
+    </div>
+  )
+
+  const messagesTab = (
+    <DriverMessageThread loadId={load.id} currentUserId={user.id} locale={locale} />
+  )
+
+  const activityTab = (
+    <Card>
+      <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('activity')}</h2></CardHeader>
+      <CardBody>
+      {!events || events.length === 0 ? (
+        <p className="text-text-sec text-sm">{t('noActivityYet')}</p>
+      ) : (
+        <div className="space-y-3">
+          {events.map((e) => {
+            const actor = e.profiles
+              ? [e.profiles.first_name, e.profiles.last_name].filter(Boolean).join(' ')
+              : 'System'
+            return (
+              <div key={e.id} className="flex gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-brand-orange mt-2 shrink-0" />
+                <div>
+                  <p className="text-text-pri text-sm">{e.event_type.replace(/_/g, ' ')}</p>
+                  {e.note && <p className="text-text-sec text-xs mt-0.5">{e.note}</p>}
+                  <p className="text-text-mut text-xs mt-0.5">
+                    {actor} · {new Date(e.created_at ?? now).toLocaleString(locale, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                  </p>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+      </CardBody>
+    </Card>
+  )
+
+  const loadTabs: { key: LoadTabKey; content: ReactNode }[] = [
+    { key: 'overview', content: overviewTab },
+    { key: 'documents', content: documentsTab },
+    ...(hasComplianceFuelTab ? [{ key: 'complianceFuel' as const, content: complianceFuelTab }] : []),
+    ...(chatEntitled ? [{ key: 'messages' as const, content: messagesTab }] : []),
+    { key: 'activity', content: activityTab },
+  ]
+
   return (
     <div className="p-8 max-w-5xl mx-auto">
 
@@ -371,124 +514,9 @@ export default async function LoadDetailPage({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* Left: Load details */}
-        <div className="lg:col-span-2 space-y-6">
-
-          {/* Route */}
-          <Card>
-            <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('route')}</h2></CardHeader>
-            <CardBody>
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-brand-orange font-semibold mb-2">{t('pickup')}</p>
-                <p className="text-text-pri text-sm font-medium">{load.pickup_address ?? '—'}</p>
-                <p className="text-text-sec text-sm">{[load.pickup_city, load.pickup_state, load.pickup_zip].filter(Boolean).join(', ')}</p>
-                <p className="text-text-mut text-xs mt-2">{fmt(load.pickup_date, locale)}{load.pickup_time ? ` · ${load.pickup_time}` : ''}</p>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-teal font-semibold mb-2">{t('delivery')}</p>
-                <p className="text-text-pri text-sm font-medium">{load.delivery_address ?? '—'}</p>
-                <p className="text-text-sec text-sm">{[load.delivery_city, load.delivery_state, load.delivery_zip].filter(Boolean).join(', ')}</p>
-                <p className="text-text-mut text-xs mt-2">{fmt(load.delivery_date, locale)}{load.delivery_time ? ` · ${load.delivery_time}` : ''}</p>
-              </div>
-            </div>
-            </CardBody>
-          </Card>
-
-          {/* Load info */}
-          <Card>
-            <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('loadDetails')}</h2></CardHeader>
-            <CardBody>
-            <InfoRow label={t('customer')}  value={customerName ?? load.customer_name_raw} />
-            <InfoRow label={t('commodity')} value={load.commodity} />
-            <InfoRow label={t('weight')}    value={load.weight_lbs ? `${Number(load.weight_lbs).toLocaleString()} lbs` : null} />
-            <InfoRow label={t('miles')}     value={load.total_miles ? `${load.total_miles} mi` : null} />
-            <InfoRow label={t('intake')}    value={load.intake_method} />
-            </CardBody>
-          </Card>
-
-          <LoadOrdersSection
-            loadId={load.id} orders={loadOrders} customers={orderCustomers} canAdd={canDispatch}
-            canBill={canBill} loadRate={canBill ? load.rate : null}
-            currency={resolveCurrency(carrierOrg?.currency)} locale={locale}
-          />
-
-          {/* Documents */}
-          <div id="documents">
-          <LoadDocuments
-            documents={documents}
-            loadId={load.id}
-            orgId={profile.org_id}
-            userId={user.id}
-            canUpload={canUploadDoc}
-            canDelete={canDeleteDoc}
-          />
-          {canUploadDoc && (
-            <div className="mt-3 flex justify-end">
-              <SendDocumentsButton
-                loadId={load.id}
-                documents={documents.map((d) => ({ id: d.id, type: d.type, fileName: d.fileName }))}
-                customerEmail={customerEmail}
-              />
-            </div>
-          )}
-          </div>
-
-          {(roleHasCapability(profile.role, 'location_share') || roleHasCapability(profile.role, 'problem_report')) && (
-            <DriverLoadActions
-              loadId={load.id}
-              active={['dispatched', 'picked_up', 'in_transit'].includes(load.status ?? '')}
-            />
-          )}
-
-          {roleHasCapability(profile.role, 'dvir_file') && <DvirForm loadId={load.id} />}
-          {roleHasCapability(profile.role, 'fuel_log') && <LoadFuelStops loadId={load.id} />}
-
-          {/* Driver chat */}
-          {chatEntitled && (
-            <DriverMessageThread loadId={load.id} currentUserId={user.id} locale={locale} />
-          )}
-
-          {/* IFTA mileage log */}
-          {iftaEntitled && (
-            <IftaCrossingsSection
-              loadId={load.id}
-              orgId={profile.org_id}
-              crossings={iftaCrossings}
-              canManage={canIfta}
-              locale={locale}
-            />
-          )}
-
-          {/* Timeline */}
-          <Card>
-            <CardHeader><h2 className="text-text-pri font-medium text-sm">{t('activity')}</h2></CardHeader>
-            <CardBody>
-            {!events || events.length === 0 ? (
-              <p className="text-text-sec text-sm">{t('noActivityYet')}</p>
-            ) : (
-              <div className="space-y-3">
-                {events.map((e) => {
-                  const actor = e.profiles
-                    ? [e.profiles.first_name, e.profiles.last_name].filter(Boolean).join(' ')
-                    : 'System'
-                  return (
-                    <div key={e.id} className="flex gap-3">
-                      <div className="w-1.5 h-1.5 rounded-full bg-brand-orange mt-2 shrink-0" />
-                      <div>
-                        <p className="text-text-pri text-sm">{e.event_type.replace(/_/g, ' ')}</p>
-                        {e.note && <p className="text-text-sec text-xs mt-0.5">{e.note}</p>}
-                        <p className="text-text-mut text-xs mt-0.5">
-                          {actor} · {new Date(e.created_at ?? now).toLocaleString(locale, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
-                        </p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-            </CardBody>
-          </Card>
+        {/* Left: Tabbed load details */}
+        <div className="lg:col-span-2">
+          <LoadTabs tabs={loadTabs} />
         </div>
 
         {/* Right: Dispatch panel */}
