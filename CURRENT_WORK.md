@@ -26,8 +26,8 @@ the other session), and mention the commit(s) so the other session can `git log`
 
 | Session | Task | Files/areas | Started |
 |---|---|---|---|
-| Codex (GPT-5) | Theme-safe web design-system rollout, auth/tracking surfaces, status contrast + lint ratchets | `carrieros-web/app/globals.css`, auth/onboarding/tracking/app UI, shared components, ESLint; local only | 2026-09-27 |
 | Claude | Timezone-aware datetime formatting + 20-language i18n expansion — backend/utility/content only, deliberately NOT touching any currently-dirty page/component (your design-system rollout owns those right now) | `lib/format-datetime.ts`, new migration `0054+` (`languages` rows, widen 2 CHECK constraints), new locale JSON files (`messages/{new-locale}.json`), new (not-yet-wired) searchable language-picker component; worktree `../carrieros-i18n-tz` on `feature/i18n-timezone`. **Migration numbers 0052-0053 are already used** by my unmerged `feature/dat-loadboard` branch — starting this one at 0054 to avoid a collision when both merge. | 2026-09-27 |
+| Claude | Breadcrumb/back-navigation audit + fix, user-requested. Scoped to currently-clean pages only (your design-system commit `50d8e39` cleared most of the app) — deliberately EXCLUDING `app/(app)/loads/[load_number]/`, `dispatch/`, `invoices/`, `billing/` since those are still dirty with your load-orders/invoice-allocation work; will pick those up once that lands. | `app/(app)/exceptions/`, `app/(app)/vehicles/`, `app/(app)/customers/`, `app/(app)/drivers/`, `app/(app)/maintenance/`, `app/(app)/team/`, `app/(app)/settings/`, plus a new shared breadcrumb/back-nav component; worktree `../carrieros-nav-ux` on `feature/breadcrumb-nav` | 2026-09-27 |
 
 ## Recently finished (for context, not a permanent log — prune entries older than a day or two)
 
@@ -41,6 +41,7 @@ the other session), and mention the commit(s) so the other session can `git log`
 | Codex (GPT-5) | Customer exception email-on-publish/resend; locally verified 0051 legacy invoice count | local only, uncommitted | 2026-09-27 |
 | Codex (GPT-5) | Read-only design-system, light/dark theme, and tenant branding audit; Playwright samples at desktop light/dark | local audit only | 2026-09-27 |
 | Codex (GPT-5) | Contrast-safe tenant tokens, fixed light/dark status pairs, shared branding preview, canonical Button/ButtonLink/FilterLink styles + scoped lint ratchets; production build verified | local only, uncommitted | 2026-09-27 |
+| Codex (GPT-5) | Theme-safe UI rollout with authenticated light/dark browser QA; fixed hydration mismatch, dark muted-copy contrast, unsupported locale choices, and vehicle cab-type translation | `50d8e39` (`Centralize web theme and shared UI styling`), local commit only | 2026-09-27 |
 
 **Merge note (2026-09-27, Claude → Codex session):** `feature/dat-loadboard` is complete, verified, and ready to merge, but I'm deliberately not merging it into `main` right now — `main`'s working tree has real uncommitted changes to `supabase/schema/schema.sql` and `carrieros-web/messages/*.json` (both hub files my branch also touched), and a `git merge` here would either get blocked by or silently interact with your in-progress uncommitted work rather than a clean commit. Once you've committed your current WIP (or if you'd rather I wait for something else), this branch merges cleanly — ping in this file or just merge it yourself, `git log feature/dat-loadboard` has the 4 commits.
 
