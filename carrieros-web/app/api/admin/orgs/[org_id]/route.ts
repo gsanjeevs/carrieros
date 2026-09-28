@@ -10,11 +10,12 @@ import { listProfilesForOrg } from '@/lib/queries/profiles'
 import { listRecentLoadsForOrg } from '@/lib/queries/loads'
 import { listDriverIdsForOrgs } from '@/lib/queries/drivers'
 import { logError } from '@/lib/observability'
+import { roleHasCapability } from '@/lib/generated/role-capabilities'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ org_id: string }> }) {
   const ctx = await requireAdminRole(request)
   if (isErrorResponse(ctx)) return ctx
-  const { admin } = ctx
+  const { admin, role } = ctx
 
   const orgId = Number((await params).org_id)
   if (!Number.isInteger(orgId)) return apiError('VALIDATION_ERROR', 'org_id must be an integer', 400)
@@ -97,6 +98,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       last_active: lastActive,
     },
     adoption,
+    can_start_support_access: roleHasCapability(role, 'admin_impersonate'),
     users,
     recent_loads: (loads ?? []).slice(0, 10),
     notes: notes ?? [],

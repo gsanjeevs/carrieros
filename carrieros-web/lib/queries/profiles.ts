@@ -51,6 +51,17 @@ export async function getProfileById(supabase: AnySupabaseClient, targetId: stri
     .maybeSingle()
 }
 
+// Target profile lookup for the SX read-only support context. The org predicate is part of the
+// shared query so callers cannot accidentally look up a tenant user without its carrier boundary.
+export async function getOrgUserForSupportAccess(supabase: AnySupabaseClient, profileId: string, orgId: number) {
+  return supabase
+    .from('profiles')
+    .select('id, org_id, role, first_name, last_name, is_active, created_at')
+    .eq('id', profileId)
+    .eq('org_id', orgId)
+    .maybeSingle()
+}
+
 // Team roster — every profile in an org, for the team management page/API.
 export async function listProfilesForOrg(supabase: AnySupabaseClient, orgId: number) {
   return supabase
@@ -77,22 +88,8 @@ export async function listProfilesForOrgs(supabase: AnySupabaseClient, orgIds: n
     .in('org_id', orgIds)
 }
 
-// Owners/solos for an org — used both by the impersonate-as-owner admin
-// action and the reminder cron (both want "who can act as this org's
-// primary account").
-// Single owner/solo lookup for the impersonate-as-owner admin action —
-// deliberately separate from getOrgOwnersAndSolos() below since it needs
-// .limit(1).maybeSingle() rather than a full list.
-export async function getOrgOwnerOrSolo(supabase: AnySupabaseClient, orgId: number) {
-  return supabase
-    .from('profiles')
-    .select('id')
-    .eq('org_id', orgId)
-    .in('role', rolesWithCapability('team_manage'))
-    .limit(1)
-    .maybeSingle()
-}
-
+// Owners/solos for an org — used by the reminder cron to identify who can
+// act as the carrier's primary account.
 export async function getOrgOwnersAndSolos(supabase: AnySupabaseClient, orgId: number) {
   return supabase
     .from('profiles')

@@ -1,9 +1,8 @@
 'use client'
 // app/(admin)/admin/orgs/[org_id]/page.tsx — Org Detail (audit gap #14).
 // Client-fetched from GET /api/admin/orgs/[org_id] (KPIs, adoption
-// checklist, users, recent loads, notes) plus the notes/tier/trial/
-// grace-period/impersonate action routes, all of which already existed
-// except trial and grace-period (added this pass).
+// checklist, users, recent loads, notes) plus the notes/tier/trial/grace-period
+// actions and the actor-bound read-only support-access workflow.
 //
 // Uses components/ui/* (Card/CardHeader/CardBody/KpiTile/Button/Input) per
 // docs/design/carrieros-design-system.md §5 rather than hand-rolled Tailwind.
@@ -11,6 +10,7 @@ import { useEffect, useState, use as usePromise } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { Card, CardHeader, CardBody, KpiTile, Button, Input } from '@/components/ui'
+import SupportAccessLauncher from './SupportAccessLauncher'
 
 interface OrgDetail {
   org: { id: number; name: string; created_at: string }
@@ -24,6 +24,7 @@ interface OrgDetail {
   } | null
   kpis: { loads_this_month: number; uninvoiced_revenue: number; last_active: string | null }
   adoption: Record<string, boolean>
+  can_start_support_access: boolean
   users: { id: string; name: string | null; role: string; email: string | null; last_sign_in_at: string | null }[]
   recent_loads: { id: number; status: string | null; rate: number | null; created_at: string }[]
   notes: { id: number; body: string; admin_id: string | null; created_at: string }[]
@@ -50,7 +51,6 @@ export default function OrgDetailPage({ params }: { params: Promise<{ org_id: st
   const [noteDraft, setNoteDraft] = useState('')
   const [savingNote, setSavingNote] = useState(false)
   const [savingTier, setSavingTier] = useState(false)
-  const [impersonateLink, setImpersonateLink] = useState('')
   const [busyAction, setBusyAction] = useState('')
 
   async function load() {
@@ -92,16 +92,6 @@ export default function OrgDetailPage({ params }: { params: Promise<{ org_id: st
     })
     setSavingTier(false)
     load()
-  }
-
-  async function impersonate() {
-    setBusyAction('impersonate')
-    const res = await fetch(`/api/admin/orgs/${org_id}/impersonate`, { method: 'POST' })
-    setBusyAction('')
-    if (res.ok) {
-      const json = await res.json()
-      setImpersonateLink(json.magic_link)
-    }
   }
 
   async function extendTrial() {
@@ -146,17 +136,7 @@ export default function OrgDetailPage({ params }: { params: Promise<{ org_id: st
             {cd?.trial_ends_at && t('trialEndsLabel', { date: new Date(cd.trial_ends_at).toLocaleDateString() })}
           </p>
         </div>
-        <Button onClick={impersonate} loading={busyAction === 'impersonate'}>
-          {t('impersonateOwner')}
-        </Button>
       </div>
-
-      {impersonateLink && (
-        <div className="mb-6 rounded-lg bg-brand-orange/10 border border-brand-orange/20 px-4 py-3">
-          <p className="text-brand-orange text-xs mb-1">{t('magicLink')}</p>
-          <code className="text-text-sec text-xs break-all">{impersonateLink}</code>
-        </div>
-      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
@@ -197,9 +177,13 @@ export default function OrgDetailPage({ params }: { params: Promise<{ org_id: st
             </CardHeader>
             <div className="divide-y divide-divider-ui">
               {data.users.map((u) => (
-                <div key={u.id} className="px-5 py-2.5 flex items-center justify-between text-sm">
-                  <span className="text-text-pri">{u.name ?? u.email ?? u.id}</span>
-                  <span className="text-text-mut text-xs capitalize">{u.role}</span>
+                <div key={u.id} className="px-5 py-3 flex items-start justify-between gap-4 text-sm">
+                  <div className="min-w-0">
+                    <p className="text-text-pri">{u.name ?? u.email ?? u.id}</p>
+                    <p className="text-text-mut text-xs">{u.email ?? u.id}</p>
+                    <p className="text-text-mut text-xs capitalize">{u.role} · {u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString() : t('never')}</p>
+                  </div>
+                  {data.can_start_support_access && <SupportAccessLauncher orgId={data.org.id} userId={u.id} />}
                 </div>
               ))}
             </div>

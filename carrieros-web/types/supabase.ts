@@ -73,6 +73,49 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"admin_support_access_sessions": {
+                  Row: {
+                    "admin_id": string,"ended_at": string | null,"ended_by": string | null,"expires_at": string,"id": string,"last_accessed_at": string,"org_id": number,"reason": string,"started_at": string,"target_user_id": string,"ticket_id": number | null
+                  }
+                  Insert: {
+                    "admin_id": string,"ended_at"?: string | null,"ended_by"?: string | null,"expires_at"?: string,"id"?: string,"last_accessed_at"?: string,"org_id": number,"reason": string,"started_at"?: string,"target_user_id": string,"ticket_id"?: number | null
+                  }
+                  Update: {
+                    "admin_id"?: string,"ended_at"?: string | null,"ended_by"?: string | null,"expires_at"?: string,"id"?: string,"last_accessed_at"?: string,"org_id"?: number,"reason"?: string,"started_at"?: string,"target_user_id"?: string,"ticket_id"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "admin_support_access_sessions_admin_id_fkey"
+      columns: ["admin_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "admin_support_access_sessions_ended_by_fkey"
+      columns: ["ended_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "admin_support_access_sessions_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "admin_support_access_sessions_target_user_id_fkey"
+      columns: ["target_user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "admin_support_access_sessions_ticket_id_fkey"
+      columns: ["ticket_id"]
+isOneToOne: false
+      referencedRelation: "support_tickets"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"ai_feature_overrides": {
                   Row: {
                     "anthropic_api_key_encrypted": string | null,"anthropic_api_key_preview": string | null,"compatible_base_url": string | null,"feature": string,"model": string,"openai_api_key_encrypted": string | null,"openai_api_key_preview": string | null,"openai_compatible_api_key_encrypted": string | null,"openai_compatible_api_key_preview": string | null,"provider": string,"updated_at": string,"updated_by": string | null
@@ -1924,4 +1967,3 @@ export const Constants = {
           }
         }
 } as const
-

@@ -1026,6 +1026,31 @@ CREATE TABLE admin_events (
 CREATE INDEX idx_admin_events_org ON admin_events(org_id);
 CREATE INDEX idx_admin_events_created ON admin_events(created_at);
 
+-- Short-lived, actor-bound support inspection; never authenticates as the tenant user.
+CREATE TABLE admin_support_access_sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  admin_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  target_user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  org_id BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  ticket_id BIGINT REFERENCES support_tickets(id) ON DELETE SET NULL,
+  reason TEXT NOT NULL CHECK (char_length(trim(reason)) BETWEEN 10 AND 500),
+  started_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  expires_at TIMESTAMPTZ NOT NULL DEFAULT (now() + interval '15 minutes'),
+  ended_at TIMESTAMPTZ,
+  ended_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  last_accessed_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT admin_support_access_expiry_window CHECK (
+    expires_at > started_at AND expires_at <= started_at + interval '15 minutes'
+  )
+);
+COMMENT ON TABLE admin_support_access_sessions IS
+  'Actor-bound, read-only SX support inspection sessions; never authenticates as or mutates the target user.';
+CREATE INDEX idx_admin_support_access_admin_active
+  ON admin_support_access_sessions(admin_id, expires_at DESC)
+  WHERE ended_at IS NULL;
+CREATE INDEX idx_admin_support_access_org_started
+  ON admin_support_access_sessions(org_id, started_at DESC);
+
 -- Scaffolded now per the 2026-07-22 decision even though Stripe is still a
 -- demo-only stub (lib/stripe.ts) -- populated once real Stripe webhooks
 -- exist; the Billing & Payments admin screen shows empty/demo state until
@@ -2777,6 +2802,11 @@ CREATE POLICY "sx_admin_notes_all" ON admin_notes FOR ALL TO authenticated
 ALTER TABLE admin_events ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "sx_admin_events_select" ON admin_events FOR SELECT TO authenticated
   USING (my_role() IN ('sx_owner','sx_finance','sx_support'));
+
+ALTER TABLE admin_support_access_sessions ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON admin_support_access_sessions FROM anon, authenticated;
+GRANT SELECT, INSERT ON admin_support_access_sessions TO service_role;
+GRANT UPDATE (ended_at, ended_by, last_accessed_at) ON admin_support_access_sessions TO service_role;
 
 ALTER TABLE billing_events ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "sx_billing_events_select" ON billing_events FOR SELECT TO authenticated
