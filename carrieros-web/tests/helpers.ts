@@ -135,7 +135,14 @@ export async function cleanupTestUser(admin: SupabaseClient<Database>, userId: s
 // action" from profiles/organizations. Deleting it by carrier_org_id here, before the profile-cleanup
 // step below, also CASCADEs support_ticket_messages (ticket_id ON DELETE CASCADE) — no separate entry
 // needed for that table.
-const ORG_SCOPED_BLOCKERS = ['dvir_inspections', 'ifta_state_crossings', 'driver_settlements', 'fuel_stops', 'maintenance_reminders', 'support_tickets'] as const
+// vehicle_documents/driver_documents/service_logs each ALSO carry their own direct "no action"
+// carrier_org_id FK to organizations (confirmed via pg_constraint, 2026-09-27) — separate from, and in
+// addition to, their profile-scoped uploaded_by/logged_by FK already cleared in
+// PROFILE_REFERENCING_TABLES below. Clearing only by uploaded_by/logged_by misses any row whose
+// uploader/logger wasn't one of THIS org's own profiles (e.g. a since-removed member, or NULL), which
+// is exactly the shape of the "org N failed: ... vehicle_documents_carrier_org_id_fkey" leaks found
+// accumulating via tests/global-teardown.ts.
+const ORG_SCOPED_BLOCKERS = ['dvir_inspections', 'ifta_state_crossings', 'driver_settlements', 'fuel_stops', 'maintenance_reminders', 'support_tickets', 'vehicle_documents', 'driver_documents', 'service_logs'] as const
 
 // Every profiles(id) FK below is "no action" — none cascade. A live row in
 // any of them blocks deleting the profile, which in turn blocks deleting
@@ -156,6 +163,15 @@ const PROFILE_REFERENCING_TABLES: { table: string; col: string }[] = [
   { table: 'admin_notes', col: 'admin_id' },
   { table: 'admin_events', col: 'admin_id' },
   { table: 'org_flag_overrides', col: 'set_by' },
+  // Found 2026-09-27 via pg_constraint re-audit (a test profile used to update the platform's
+  // singleton ai_provider_config row was blocking its own org's deletion) — these 4 were missing
+  // from this list entirely, same root cause as the ORG_SCOPED_BLOCKERS gap above.
+  { table: 'admin_carrier_onboarding', col: 'created_by' },
+  { table: 'ai_feature_overrides', col: 'updated_by' },
+  { table: 'ai_provider_config', col: 'updated_by' },
+  { table: 'org_feature_overrides', col: 'set_by' },
+  { table: 'support_ticket_messages', col: 'sender_id' },
+  { table: 'support_tickets', col: 'submitted_by' },
 ]
 
 export async function cleanupTestOrg(admin: SupabaseClient<Database>, orgId: number) {
@@ -187,6 +203,17 @@ export async function cleanupTestOrg(admin: SupabaseClient<Database>, orgId: num
   // *customer* on another carrier's load, not just as the carrier itself.
   await admin.from('loads').delete().eq('carrier_org_id', orgId)
   await admin.from('loads').delete().eq('customer_org_id', orgId)
+  // vehicles.carrier_org_id DOES cascade from organizations, so this delete looks redundant on
+  // paper — but every INSERT/UPDATE/DELETE on vehicles fires an AFTER trigger
+  // (capture_tenant_activity) that inserts a row into tenant_activity_events(org_id). Relying on the
+  // organizations-cascade to remove vehicles fires that trigger AFTER the parent organizations row is
+  // already gone (same DELETE statement, cascaded), so the trigger's own INSERT fails its FK check
+  // against an org that no longer exists. Deleting vehicles explicitly here — after drivers/loads/
+  // dvir_inspections/fuel_stops/ifta_state_crossings (the only "no action" referrers to vehicles.id)
+  // are already cleared above — lets the trigger fire while organizations still exists. Found
+  // 2026-09-27 via the "tenant_activity_events_org_id_fkey" leak this surfaced once the
+  // vehicle_documents/driver_documents/service_logs blockers above stopped masking it.
+  await admin.from('vehicles').delete().eq('carrier_org_id', orgId)
 
   const { data: remainingProfiles } = await admin.from('profiles').select('id').eq('org_id', orgId)
   const profileIds = (remainingProfiles ?? []).map((p) => p.id)

@@ -40,7 +40,14 @@ export default async function globalSetup() {
     // back to one of those that blocks deletion unless cleared first. See
     // tests/helpers.ts's cleanupTestOrg for the single-org version and the
     // pg_constraint query that found these.
-    for (const table of ['dvir_inspections', 'ifta_state_crossings', 'driver_settlements', 'fuel_stops', 'maintenance_reminders'] as const) {
+    //
+    // This list was missing support_tickets/vehicle_documents/driver_documents/service_logs (each
+    // has its own direct "no action" carrier_org_id FK to organizations, separate from the
+    // profile-scoped uploaded_by/logged_by FK cleared further below) — the actual cause of the
+    // recurring "org N failed: ... {table}_carrier_org_id_fkey" leaks this sweep was supposed to
+    // catch (found 2026-09-27; re-verified against pg_constraint, kept in sync with
+    // helpers.ts's ORG_SCOPED_BLOCKERS).
+    for (const table of ['dvir_inspections', 'ifta_state_crossings', 'driver_settlements', 'fuel_stops', 'maintenance_reminders', 'support_tickets', 'vehicle_documents', 'driver_documents', 'service_logs'] as const) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (admin.from(table as any).delete().in('carrier_org_id', ids) as any)
     }
@@ -58,6 +65,15 @@ export default async function globalSetup() {
     await admin.from('drivers').delete().in('carrier_org_id', ids)
     await admin.from('loads').delete().in('carrier_org_id', ids)
     await admin.from('loads').delete().in('customer_org_id', ids)
+    // vehicles.carrier_org_id cascades from organizations, so this looks redundant — but every
+    // delete on vehicles fires an AFTER trigger (capture_tenant_activity) that inserts into
+    // tenant_activity_events(org_id). Relying on the organizations-cascade fires that trigger AFTER
+    // the parent organizations row is already gone (same statement), so its own INSERT fails its FK
+    // check. Deleting vehicles explicitly here — after drivers/loads/dvir_inspections/fuel_stops/
+    // ifta_state_crossings (the only "no action" referrers to vehicles.id) are already cleared above
+    // — lets the trigger fire while organizations still exists. See tests/helpers.ts's
+    // cleanupTestOrg for the single-org version of this same fix.
+    await admin.from('vehicles').delete().in('carrier_org_id', ids)
 
     const { data: profileRows } = await admin.from('profiles').select('id').in('org_id', ids)
     const profileIds = (profileRows ?? []).map((p) => p.id)
@@ -85,6 +101,16 @@ export default async function globalSetup() {
         { table: 'admin_notes', col: 'admin_id' },
         { table: 'admin_events', col: 'admin_id' },
         { table: 'org_flag_overrides', col: 'set_by' },
+        // Found 2026-09-27 via pg_constraint re-audit (a test profile that had updated the
+        // platform's singleton ai_provider_config row was blocking its own org's deletion) — same
+        // root cause as the vehicle_documents/driver_documents/service_logs gap above. See
+        // tests/helpers.ts's PROFILE_REFERENCING_TABLES for the single-org version of this same fix.
+        { table: 'admin_carrier_onboarding', col: 'created_by' },
+        { table: 'ai_feature_overrides', col: 'updated_by' },
+        { table: 'ai_provider_config', col: 'updated_by' },
+        { table: 'org_feature_overrides', col: 'set_by' },
+        { table: 'support_ticket_messages', col: 'sender_id' },
+        { table: 'support_tickets', col: 'submitted_by' },
       ]
       for (const { table, col } of referencingTables) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
