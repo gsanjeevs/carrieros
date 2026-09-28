@@ -319,7 +319,38 @@
     "shareViaEmail": "이메일로 공유",
     "shareMessage": "화물 {loadNumber} 조회:",
     "shareEmailSubject": "화물 {loadNumber}의 배송 조회 링크",
-    "myLoadsTitle": "내 화물"
+    "myLoadsTitle": "내 화물",
+    "customerOrders": "고객 주문",
+    "noCustomerOrders": "아직 연결된 고객 주문이 없습니다.",
+    "orderNumber": "주문 번호",
+    "orderReference": "고객 참조 번호",
+    "orderWeight": "중량(lb)",
+    "selectOrderCustomer": "고객 선택",
+    "addCustomerOrder": "주문 추가",
+    "savingOrder": "저장 중…",
+    "ordersAddFailed": "이 주문을 추가할 수 없었습니다. 고객을 확인한 후 다시 시도해 주세요.",
+    "ordersKeepCustomerScoped": "각 고객 포털에는 해당 고객의 주문만 표시되며, 운송업체 직원에게는 전체 적재 목록이 표시됩니다.",
+    "orderCharge": "고객 청구액",
+    "orderAllocationComplete": "주문 청구액 합계가 {allocated}(으)로 일치합니다.",
+    "orderAllocationIncomplete": "{target} 중 {allocated}만 배분되었습니다. 인보이스를 발행하기 전에 주문 청구액 합계가 화물 운임과 일치해야 합니다.",
+    "saveOrderCharge": "청구액 저장",
+    "orderChargeUpdateFailed": "주문 청구액을 저장할 수 없었습니다. 인보이스가 아직 생성되지 않았는지 확인하세요.",
+    "customerExceptionUpdates": "고객 배송 업데이트",
+    "noCustomerExceptions": "지금 공유할 화물 예외 사항이 없습니다.",
+    "customerUpdateShared": "고객에게 공유됨",
+    "customerUpdatePrivate": "내부 전용",
+    "customerUpdateMessageLabel": "고객에게 공개할 업데이트",
+    "customerUpdateMessagePlaceholder": "영향과 향후 조치를 설명하세요. 내부 메모는 포함하지 마세요.",
+    "savingCustomerUpdate": "저장 중…",
+    "hideCustomerUpdate": "고객에게 숨기기",
+    "shareCustomerUpdate": "업데이트 공유",
+    "customerExceptionSaveFailed": "고객 공개 여부를 업데이트할 수 없었습니다. 다시 시도해 주세요.",
+    "resendCustomerUpdateEmail": "고객 이메일 재전송",
+    "customerUpdateEmailSent": "주 고객 담당자 {count}명에게 이메일을 전송했습니다.",
+    "customerUpdateEmailPartial": "담당자 {sent}명에게 이메일을 전송했지만 {failed}명에게는 실패했습니다.",
+    "customerUpdateNoRecipient": "업데이트는 배송 조회 페이지에 공유되었지만, 등록된 주 고객 이메일이 없습니다.",
+    "customerUpdateEmailFailed": "업데이트는 배송 조회 페이지에 공유되었지만, 이메일을 전송하지 못했습니다.",
+    "customerExceptionPrivacy": "여기에 작성한 메시지만 배송 조회 링크에 표시됩니다. 내부 예외 사항 세부 정보는 비공개로 유지됩니다."
   },
   "drivers": {
     "title": "기사",
@@ -415,7 +446,8 @@
     "dvirPreTrip": "운행 전",
     "dvirPostTrip": "운행 후",
     "dvirDefectsNoted": "결함 발견",
-    "dvirSatisfactory": "양호"
+    "dvirSatisfactory": "양호",
+    "backToDrivers": "기사 목록으로 돌아가기"
   },
   "vehicles": {
     "title": "차량",
@@ -548,7 +580,8 @@
     "uploadPhoto": "사진 업로드",
     "replacePhoto": "사진 교체",
     "photoUploadFailed": "사진을 업로드할 수 없었습니다. 다시 시도해 주세요.",
-    "dvirNotSigned": "서명되지 않음"
+    "dvirNotSigned": "서명되지 않음",
+    "backToVehicles": "차량 목록으로 돌아가기"
   },
   "companyDocuments": {
     "title": "회사 문서",
@@ -646,7 +679,9 @@
     "creating": "생성 중…",
     "opened": "열람됨",
     "openedAt": "열람됨",
-    "notOpenedYet": "아직 열람되지 않음"
+    "notOpenedYet": "아직 열람되지 않음",
+    "loadInvoicesCreated": "{count, plural, other {고객 인보이스 #건 생성됨}}",
+    "createRemainingCustomerInvoices": "나머지 고객에 대해 주문 배분 내역을 사용하여 인보이스를 생성하세요."
   },
   "settlements": {
     "title": "정산",
@@ -692,7 +727,8 @@
     "daySingular": "일",
     "dayPlural": "일",
     "loadLabel": "화물",
-    "poweredBy": "CarrierOS 제공"
+    "poweredBy": "CarrierOS 제공",
+    "shipmentUpdates": "배송 업데이트"
   },
   "dispatch": {
     "title": "배차",
@@ -706,7 +742,32 @@
     "loadingMap": "지도를 불러오는 중…",
     "locationStale": "⚠ 15분 이상 업데이트 없음",
     "locationLive": "● 실시간",
-    "idleVehicleBadge": "대기 중, 진행 중인 화물 없음"
+    "idleVehicleBadge": "대기 중, 진행 중인 화물 없음",
+    "assignedVehicleBadge": "진행 중인 화물에 배정됨",
+    "mapViews": "지도 보기",
+    "mapViewAll": "전체 차량",
+    "mapViewMoving": "이동 중(GPS)",
+    "mapViewLoads": "진행 중인 화물",
+    "mapViewParked": "주차됨(화물 없음)",
+    "mapViewUnloaded": "진행 중인 화물 없음",
+    "mapViewStale": "위치 정보 오래됨",
+    "motionMoving": "이동 중(GPS)",
+    "motionStationary": "정차 중(GPS)",
+    "motionUnknown": "이동 상태 알 수 없음",
+    "demoGpsStart": "데모 GPS 시작",
+    "demoGpsStop": "데모 GPS 중지",
+    "demoGpsRunning": "4초마다 업데이트되는 가상 활성 차량 위치",
+    "demoGpsHelp": "선택한 데모 차량 한 대를 휴스턴~오스틴 별도 경로로 이동시킵니다",
+    "demoGpsSelectLoad": "이동시킬 데모 화물 선택",
+    "demoGpsNoLoads": "이용 가능한 진행 중인 데모 화물이 없습니다",
+    "demoGpsUpdated": "선택한 차량 위치를 업데이트했습니다",
+    "demoGpsStopped": "데모 GPS가 중지되었습니다",
+    "demoGpsError": "데모 GPS 위치를 업데이트할 수 없었습니다",
+    "shipmentLabel": "배송",
+    "customerUnassigned": "고객 미배정",
+    "origin": "출발지",
+    "destination": "도착지",
+    "noActiveShipment": "진행 중인 배송 없음"
   },
   "settings": {
     "title": "프로필 설정",
@@ -842,7 +903,9 @@
     "upgrade": "업그레이드",
     "downgrade": "다운그레이드",
     "changingPlan": "업데이트 중…",
-    "changeTierFailed": "플랜을 변경할 수 없었습니다. 다시 시도해 주세요."
+    "changeTierFailed": "플랜을 변경할 수 없었습니다. 다시 시도해 주세요.",
+    "demoPaymentReceipt": "시뮬레이션 결제: {currency} {amount} · 참조 번호 {reference}. 실제 청구는 발생하지 않았습니다.",
+    "planAlreadyCurrent": "이 플랜은 이미 활성 상태이므로 결제가 기록되지 않았습니다."
   },
   "developerApi": {
     "title": "개발자 API",
@@ -887,7 +950,9 @@
     "colorHelp": "CarrierOS 기본 색상을 사용하려면 색상을 비워두세요.",
     "invalidColor": "#RRGGBB 형식으로 색상을 입력하세요(예: #f47920).",
     "save": "변경 사항 저장",
-    "saved": "브랜딩이 업데이트되었습니다."
+    "saved": "브랜딩이 업데이트되었습니다.",
+    "previewLabel": "실시간 미리보기",
+    "trackingPreviewTitle": "화물 배송 조회"
   },
   "customers": {
     "title": "고객",
@@ -978,7 +1043,8 @@
     "lastLoad": "최근 화물",
     "daysAgo": "{days, plural, =0 {오늘} other {#일 전}}",
     "relationshipsGoingCold": "{count, plural, other {거래가 뜸해지고 있는 관계 #건}}",
-    "coldCustomerLine": "{name} — {days}일"
+    "coldCustomerLine": "{name} — {days}일",
+    "backToCustomers": "고객 목록으로 돌아가기"
   },
   "maintenance": {
     "title": "정비",
@@ -1523,7 +1589,28 @@
     "deliveriesTitle": "최근 전송 내역",
     "noDeliveries": "아직 전송 내역이 없습니다",
     "emptyTitle": "아직 웹훅이 없습니다",
-    "emptyDescription": "화물 상태가 변경되거나 인보이스가 결제될 때 CarrierOS가 다른 애플리케이션에 알리도록 웹훅을 등록하세요."
+    "emptyDescription": "화물 상태가 변경되거나 인보이스가 결제될 때 CarrierOS가 다른 애플리케이션에 알리도록 웹훅을 등록하세요.",
+    "loadboardTitle": "화물 게시판",
+    "loadboardUpgradeRequired": "화물 게시판 게시 기능을 사용하려면 Growth 플랜 이상이 필요합니다."
+  },
+  "loadboard": {
+    "settingsTitle": "화물 게시판",
+    "settingsSubtitle": "화물 게시판 제공업체를 연결하여 배차 담당자가 다른 운송업체가 찾을 수 있도록 화물을 게시할 수 있게 하세요.",
+    "datTitle": "DAT 화물 게시판",
+    "datDescription": "DAT의 화물 게시판에 화물을 게시합니다(게시 전용 — 검색 및 예약은 이 연동에 포함되지 않습니다).",
+    "enabled": "활성화됨",
+    "apiKeyLabel": "DAT API 키",
+    "apiKeyPlaceholder": "설정 또는 교체하려면 입력하세요",
+    "apiKeyConfigured": "키가 설정되어 있습니다. 그대로 유지하려면 비워두고, 교체하려면 새 키를 입력하세요.",
+    "apiKeyNotConfigured": "아직 설정된 키가 없습니다.",
+    "credentialRequired": "처음 설정하려면 자격 증명을 입력하세요.",
+    "save": "저장",
+    "saved": "저장됨",
+    "title": "화물 게시판",
+    "description": "다른 운송업체가 찾을 수 있도록 이 화물을 DAT의 화물 게시판에 게시하세요.",
+    "postButton": "DAT에 게시",
+    "posting": "게시 중…",
+    "alreadyPosted": "이 화물은 이미 DAT에 게시되었습니다."
   },
   "telematics": {
     "title": "텔레매틱스",
