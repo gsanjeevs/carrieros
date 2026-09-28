@@ -654,6 +654,7 @@
     "editInvoice": "인보이스 수정",
     "printDownload": "인쇄 / PDF 다운로드",
     "backToInvoice": "인보이스로 돌아가기",
+    "backToInvoices": "인보이스 목록으로 돌아가기",
     "invoice": "인보이스",
     "billTo": "청구 대상",
     "actions": "작업",
