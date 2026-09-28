@@ -654,6 +654,7 @@
     "editInvoice": "编辑发票",
     "printDownload": "打印 / 下载 PDF",
     "backToInvoice": "返回发票",
+    "backToInvoices": "返回发票列表",
     "invoice": "发票",
     "billTo": "开票给",
     "actions": "操作",
