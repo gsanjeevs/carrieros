@@ -319,7 +319,38 @@
     "shareViaEmail": "Поділитися через електронну пошту",
     "shareMessage": "Відстежити вантаж {loadNumber}:",
     "shareEmailSubject": "Посилання для відстеження вантажу {loadNumber}",
-    "myLoadsTitle": "Мої вантажі"
+    "myLoadsTitle": "Мої вантажі",
+    "customerOrders": "Замовлення клієнта",
+    "noCustomerOrders": "Поки що немає прикріплених замовлень клієнта.",
+    "orderNumber": "Номер замовлення",
+    "orderReference": "Референс клієнта",
+    "orderWeight": "Вага (фунти)",
+    "selectOrderCustomer": "Обрати клієнта",
+    "addCustomerOrder": "Додати замовлення",
+    "savingOrder": "Збереження…",
+    "ordersAddFailed": "Не вдалося додати це замовлення. Перевірте клієнта і спробуйте ще раз.",
+    "ordersKeepCustomerScoped": "Кожен портал клієнта бачить лише свої замовлення; персонал перевізника бачить повний маніфест.",
+    "orderCharge": "Плата з клієнта",
+    "orderAllocationComplete": "Плата за замовленнями узгоджується з {allocated}.",
+    "orderAllocationIncomplete": "Розподілено {allocated} з {target}; плата за замовленнями має дорівнювати ставці вантажу перед виставленням рахунку.",
+    "saveOrderCharge": "Зберегти плату",
+    "orderChargeUpdateFailed": "Не вдалося зберегти плату за замовленням. Перевірте, чи не створено вже рахунок.",
+    "customerExceptionUpdates": "Оновлення для клієнта щодо перевезення",
+    "noCustomerExceptions": "Наразі немає винятків вантажу для передачі клієнту.",
+    "customerUpdateShared": "Доступно клієнту",
+    "customerUpdatePrivate": "Лише внутрішнє",
+    "customerUpdateMessageLabel": "Оновлення для клієнта",
+    "customerUpdateMessagePlaceholder": "Поясніть вплив і подальші кроки. Не додавайте внутрішні нотатки.",
+    "savingCustomerUpdate": "Збереження…",
+    "hideCustomerUpdate": "Приховати від клієнта",
+    "shareCustomerUpdate": "Поділитися оновленням",
+    "customerExceptionSaveFailed": "Не вдалося оновити видимість для клієнта. Спробуйте ще раз.",
+    "resendCustomerUpdateEmail": "Повторно надіслати email клієнту",
+    "customerUpdateEmailSent": "Email надіслано {count} основному контакту(ам) клієнта.",
+    "customerUpdateEmailPartial": "Email надіслано {sent} контакту(ам), але не вдалося надіслати {failed}.",
+    "customerUpdateNoRecipient": "Оновлення доступне на сторінці відстеження, але основна електронна адреса клієнта не вказана.",
+    "customerUpdateEmailFailed": "Оновлення доступне на сторінці відстеження, але email не вдалося доставити.",
+    "customerExceptionPrivacy": "На сторінці відстеження показується лише повідомлення, написане тут. Внутрішні деталі винятку залишаються приватними."
   },
   "drivers": {
     "title": "Водії",
@@ -415,7 +446,8 @@
     "dvirPreTrip": "Перед поїздкою",
     "dvirPostTrip": "Після поїздки",
     "dvirDefectsNoted": "Виявлено несправності",
-    "dvirSatisfactory": "Задовільно"
+    "dvirSatisfactory": "Задовільно",
+    "backToDrivers": "Назад до водіїв"
   },
   "vehicles": {
     "title": "Транспортні засоби",
@@ -548,7 +580,8 @@
     "uploadPhoto": "Завантажити фото",
     "replacePhoto": "Замінити фото",
     "photoUploadFailed": "Не вдалося завантажити фото. Спробуйте ще раз.",
-    "dvirNotSigned": "Не підписано"
+    "dvirNotSigned": "Не підписано",
+    "backToVehicles": "Назад до транспортних засобів"
   },
   "companyDocuments": {
     "title": "Документи компанії",
@@ -646,7 +679,9 @@
     "creating": "Створення…",
     "opened": "Відкрито",
     "openedAt": "Відкрито",
-    "notOpenedYet": "Ще не відкрито"
+    "notOpenedYet": "Ще не відкрито",
+    "loadInvoicesCreated": "{count, plural, one {# рахунок клієнту створено} few {# рахунки клієнту створено} many {# рахунків клієнту створено} other {# рахунка клієнту створено}}",
+    "createRemainingCustomerInvoices": "Створіть рахунки для інших клієнтів, використовуючи розподіл за їхніми замовленнями."
   },
   "settlements": {
     "title": "Розрахунки з водіями",
@@ -692,7 +727,8 @@
     "daySingular": "день",
     "dayPlural": "днів",
     "loadLabel": "Вантаж",
-    "poweredBy": "Створено на платформі CarrierOS"
+    "poweredBy": "Створено на платформі CarrierOS",
+    "shipmentUpdates": "Оновлення щодо перевезення"
   },
   "dispatch": {
     "title": "Диспетчеризація",
@@ -706,7 +742,32 @@
     "loadingMap": "Завантаження карти…",
     "locationStale": "⚠ Немає оновлень понад 15 хв",
     "locationLive": "● У реальному часі",
-    "idleVehicleBadge": "простій, немає активного вантажу"
+    "idleVehicleBadge": "простій, немає активного вантажу",
+    "assignedVehicleBadge": "призначено на активний вантаж",
+    "mapViews": "Види карти",
+    "mapViewAll": "Весь транспорт",
+    "mapViewMoving": "У русі (GPS)",
+    "mapViewLoads": "Активні вантажі",
+    "mapViewParked": "На стоянці (без вантажу)",
+    "mapViewUnloaded": "Немає активного вантажу",
+    "mapViewStale": "Застаріле місцезнаходження",
+    "motionMoving": "У русі (GPS)",
+    "motionStationary": "Зупинено (GPS)",
+    "motionUnknown": "Рух невідомий",
+    "demoGpsStart": "Запустити демо GPS",
+    "demoGpsStop": "Зупинити демо GPS",
+    "demoGpsRunning": "Синтетичні місцезнаходження активного транспорту оновлюються кожні 4 секунди",
+    "demoGpsHelp": "Перемістити один обраний демо-транспорт окремим маршрутом Х'юстон–Остін",
+    "demoGpsSelectLoad": "Оберіть демо-вантаж для переміщення",
+    "demoGpsNoLoads": "Немає доступних активних демо-вантажів",
+    "demoGpsUpdated": "Місцезнаходження обраного транспорту оновлено",
+    "demoGpsStopped": "Демо GPS зупинено",
+    "demoGpsError": "Не вдалося оновити місцезнаходження демо GPS",
+    "shipmentLabel": "Перевезення",
+    "customerUnassigned": "Клієнта не призначено",
+    "origin": "Пункт відправлення",
+    "destination": "Пункт призначення",
+    "noActiveShipment": "Немає активного перевезення"
   },
   "settings": {
     "title": "Налаштування профілю",
@@ -842,7 +903,9 @@
     "upgrade": "Оновити",
     "downgrade": "Понизити",
     "changingPlan": "Оновлення…",
-    "changeTierFailed": "Не вдалося змінити ваш тариф. Спробуйте ще раз."
+    "changeTierFailed": "Не вдалося змінити ваш тариф. Спробуйте ще раз.",
+    "demoPaymentReceipt": "Змодельований платіж: {currency} {amount} · референс {reference}. Реального списання не відбулося.",
+    "planAlreadyCurrent": "Цей тариф уже активний; платіж не було зафіксовано."
   },
   "developerApi": {
     "title": "API для розробників",
@@ -887,7 +950,9 @@
     "colorHelp": "Залиште поле кольору порожнім, щоб використовувати стандартний колір CarrierOS.",
     "invalidColor": "Введіть колір у форматі #RRGGBB, наприклад #f47920.",
     "save": "Зберегти зміни",
-    "saved": "Брендинг оновлено."
+    "saved": "Брендинг оновлено.",
+    "previewLabel": "Попередній перегляд у реальному часі",
+    "trackingPreviewTitle": "Відстеження вантажу"
   },
   "customers": {
     "title": "Клієнти",
@@ -978,7 +1043,8 @@
     "lastLoad": "Останній вантаж",
     "daysAgo": "{days, plural, =0 {Сьогодні} one {# день тому} few {# дні тому} many {# днів тому} other {# дня тому}}",
     "relationshipsGoingCold": "{count, plural, one {# стосунок охолоджується} few {# стосунки охолоджуються} many {# стосунків охолоджується} other {# стосунку охолоджується}}",
-    "coldCustomerLine": "{name} — {days} дн."
+    "coldCustomerLine": "{name} — {days} дн.",
+    "backToCustomers": "Назад до клієнтів"
   },
   "maintenance": {
     "title": "Технічне обслуговування",
@@ -1523,7 +1589,9 @@
     "deliveriesTitle": "Останні доставки",
     "noDeliveries": "Поки що немає доставок",
     "emptyTitle": "Поки що немає вебхуків",
-    "emptyDescription": "Зареєструйте вебхук, щоб CarrierOS сповіщав інший застосунок, коли статус вантажу змінюється або рахунок оплачено."
+    "emptyDescription": "Зареєструйте вебхук, щоб CarrierOS сповіщав інший застосунок, коли статус вантажу змінюється або рахунок оплачено.",
+    "loadboardTitle": "Біржа вантажів",
+    "loadboardUpgradeRequired": "Публікація на біржі вантажів потребує тарифу Growth або вищого."
   },
   "telematics": {
     "title": "Телематика",
@@ -1546,5 +1614,24 @@
     "save": "Зберегти",
     "saved": "Збережено",
     "credentialRequired": "Введіть облікові дані, щоб налаштувати це вперше."
+  },
+  "loadboard": {
+    "settingsTitle": "Біржа вантажів",
+    "settingsSubtitle": "Підключіть постачальника біржі вантажів, щоб диспетчери могли публікувати вантажі для інших перевізників.",
+    "datTitle": "Біржа вантажів DAT",
+    "datDescription": "Публікуйте вантажі на біржі DAT (лише публікація — пошук і бронювання не є частиною цієї інтеграції).",
+    "enabled": "Увімкнено",
+    "apiKeyLabel": "API-ключ DAT",
+    "apiKeyPlaceholder": "Введіть, щоб встановити або оновити",
+    "apiKeyConfigured": "Ключ налаштовано. Залиште поле порожнім, щоб зберегти його, або введіть новий, щоб оновити.",
+    "apiKeyNotConfigured": "Ключ ще не налаштовано.",
+    "credentialRequired": "Введіть облікові дані, щоб налаштувати це вперше.",
+    "save": "Зберегти",
+    "saved": "Збережено",
+    "title": "Біржа вантажів",
+    "description": "Опублікуйте цей вантаж на біржі DAT, щоб інші перевізники могли його знайти.",
+    "postButton": "Опублікувати на DAT",
+    "posting": "Публікація...",
+    "alreadyPosted": "Цей вантаж уже опубліковано на DAT."
   }
 }

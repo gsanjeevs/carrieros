@@ -319,7 +319,38 @@
     "shareViaEmail": "Поделиться по email",
     "shareMessage": "Отследить груз {loadNumber}:",
     "shareEmailSubject": "Ссылка для отслеживания груза {loadNumber}",
-    "myLoadsTitle": "Мои грузы"
+    "myLoadsTitle": "Мои грузы",
+    "customerOrders": "Заказы клиента",
+    "noCustomerOrders": "Заказов клиента пока нет.",
+    "orderNumber": "Номер заказа",
+    "orderReference": "Референс клиента",
+    "orderWeight": "Вес (фунты)",
+    "selectOrderCustomer": "Выбрать клиента",
+    "addCustomerOrder": "Добавить заказ",
+    "savingOrder": "Сохранение…",
+    "ordersAddFailed": "Не удалось добавить этот заказ. Проверьте клиента и попробуйте снова.",
+    "ordersKeepCustomerScoped": "Каждый портал клиента видит только свои заказы; персонал перевозчика видит полный манифест.",
+    "orderCharge": "Плата с клиента",
+    "orderAllocationComplete": "Плата по заказам сверяется с {allocated}.",
+    "orderAllocationIncomplete": "Распределено {allocated} из {target}; плата по заказам должна равняться ставке груза перед выставлением счёта.",
+    "saveOrderCharge": "Сохранить плату",
+    "orderChargeUpdateFailed": "Не удалось сохранить плату по заказу. Убедитесь, что счёт ещё не создан.",
+    "customerExceptionUpdates": "Обновления по грузу для клиента",
+    "noCustomerExceptions": "Сейчас нет исключений по грузу для передачи клиенту.",
+    "customerUpdateShared": "Доступно клиенту",
+    "customerUpdatePrivate": "Только внутреннее",
+    "customerUpdateMessageLabel": "Обновление для клиента",
+    "customerUpdateMessagePlaceholder": "Объясните влияние и дальнейшие шаги. Не включайте внутренние заметки.",
+    "savingCustomerUpdate": "Сохранение…",
+    "hideCustomerUpdate": "Скрыть от клиента",
+    "shareCustomerUpdate": "Поделиться обновлением",
+    "customerExceptionSaveFailed": "Не удалось обновить видимость для клиента. Пожалуйста, попробуйте снова.",
+    "resendCustomerUpdateEmail": "Повторно отправить email клиенту",
+    "customerUpdateEmailSent": "Email отправлен {count} основному контакту(ам) клиента.",
+    "customerUpdateEmailPartial": "Email отправлен {sent} контакту(ам), но не удалось отправить {failed}.",
+    "customerUpdateNoRecipient": "Обновление доступно на странице отслеживания, но основной email клиента не указан.",
+    "customerUpdateEmailFailed": "Обновление доступно на странице отслеживания, но email не удалось доставить.",
+    "customerExceptionPrivacy": "На странице отслеживания отображается только написанное здесь сообщение. Внутренние детали исключения остаются закрытыми."
   },
   "drivers": {
     "title": "Водители",
@@ -415,7 +446,8 @@
     "dvirPreTrip": "Перед рейсом",
     "dvirPostTrip": "После рейса",
     "dvirDefectsNoted": "Обнаружены неисправности",
-    "dvirSatisfactory": "Удовлетворительно"
+    "dvirSatisfactory": "Удовлетворительно",
+    "backToDrivers": "Назад к водителям"
   },
   "vehicles": {
     "title": "Транспорт",
@@ -548,7 +580,8 @@
     "uploadPhoto": "Загрузить фото",
     "replacePhoto": "Заменить фото",
     "photoUploadFailed": "Не удалось загрузить фото. Пожалуйста, попробуйте снова.",
-    "dvirNotSigned": "Не подписано"
+    "dvirNotSigned": "Не подписано",
+    "backToVehicles": "Назад к транспорту"
   },
   "companyDocuments": {
     "title": "Документы компании",
@@ -646,7 +679,9 @@
     "creating": "Создание…",
     "opened": "Открыт",
     "openedAt": "Открыт",
-    "notOpenedYet": "Ещё не открыт"
+    "notOpenedYet": "Ещё не открыт",
+    "loadInvoicesCreated": "{count, plural, one {# счёт клиенту создан} few {# счёта клиенту созданы} many {# счетов клиенту создано} other {# счёта клиенту созданы}}",
+    "createRemainingCustomerInvoices": "Создайте счета для остальных клиентов, используя распределение по их заказам."
   },
   "settlements": {
     "title": "Расчёты с водителями",
@@ -692,7 +727,8 @@
     "daySingular": "день",
     "dayPlural": "дней",
     "loadLabel": "Груз",
-    "poweredBy": "Работает на CarrierOS"
+    "poweredBy": "Работает на CarrierOS",
+    "shipmentUpdates": "Обновления по отправке"
   },
   "dispatch": {
     "title": "Диспетчеризация",
@@ -706,7 +742,32 @@
     "loadingMap": "Загрузка карты…",
     "locationStale": "⚠ Нет обновлений более 15 минут",
     "locationLive": "● В сети",
-    "idleVehicleBadge": "простаивает, нет активного груза"
+    "idleVehicleBadge": "простаивает, нет активного груза",
+    "assignedVehicleBadge": "назначен на активный груз",
+    "mapViews": "Виды карты",
+    "mapViewAll": "Весь транспорт",
+    "mapViewMoving": "В движении (GPS)",
+    "mapViewLoads": "Активные грузы",
+    "mapViewParked": "На стоянке (без груза)",
+    "mapViewUnloaded": "Нет активного груза",
+    "mapViewStale": "Устаревшее местоположение",
+    "motionMoving": "В движении (GPS)",
+    "motionStationary": "Остановлен (GPS)",
+    "motionUnknown": "Движение неизвестно",
+    "demoGpsStart": "Запустить демо GPS",
+    "demoGpsStop": "Остановить демо GPS",
+    "demoGpsRunning": "Синтетические местоположения активного транспорта обновляются каждые 4 секунды",
+    "demoGpsHelp": "Переместить один выбранный демо-транспорт по отдельному маршруту Хьюстон–Остин",
+    "demoGpsSelectLoad": "Выберите демо-груз для перемещения",
+    "demoGpsNoLoads": "Нет доступных активных демо-грузов",
+    "demoGpsUpdated": "Местоположение выбранного транспорта обновлено",
+    "demoGpsStopped": "Демо GPS остановлен",
+    "demoGpsError": "Не удалось обновить местоположения демо GPS",
+    "shipmentLabel": "Отправка",
+    "customerUnassigned": "Клиент не назначен",
+    "origin": "Пункт отправления",
+    "destination": "Пункт назначения",
+    "noActiveShipment": "Нет активной отправки"
   },
   "settings": {
     "title": "Настройки профиля",
@@ -842,7 +903,9 @@
     "upgrade": "Повысить тариф",
     "downgrade": "Понизить тариф",
     "changingPlan": "Обновление…",
-    "changeTierFailed": "Не удалось изменить ваш тариф. Пожалуйста, попробуйте снова."
+    "changeTierFailed": "Не удалось изменить ваш тариф. Пожалуйста, попробуйте снова.",
+    "demoPaymentReceipt": "Смоделированный платёж: {currency} {amount} · референс {reference}. Реальное списание не производилось.",
+    "planAlreadyCurrent": "Этот тариф уже активен; платёж не был зафиксирован."
   },
   "developerApi": {
     "title": "API для разработчиков",
@@ -887,7 +950,9 @@
     "colorHelp": "Оставьте поле цвета пустым, чтобы использовать цвет CarrierOS по умолчанию.",
     "invalidColor": "Введите цвет в формате #RRGGBB, например #f47920.",
     "save": "Сохранить изменения",
-    "saved": "Брендинг обновлён."
+    "saved": "Брендинг обновлён.",
+    "previewLabel": "Предпросмотр в реальном времени",
+    "trackingPreviewTitle": "Отслеживание груза"
   },
   "customers": {
     "title": "Клиенты",
@@ -978,7 +1043,8 @@
     "lastLoad": "Последний груз",
     "daysAgo": "{days, plural, =0 {Сегодня} one {# день назад} few {# дня назад} many {# дней назад} other {# дня назад}}",
     "relationshipsGoingCold": "{count, plural, one {# отношение остывает} few {# отношения остывают} many {# отношений остывает} other {# отношения остывают}}",
-    "coldCustomerLine": "{name} — {days} дн."
+    "coldCustomerLine": "{name} — {days} дн.",
+    "backToCustomers": "Назад к клиентам"
   },
   "maintenance": {
     "title": "Техобслуживание",
@@ -1523,7 +1589,9 @@
     "deliveriesTitle": "Недавние доставки",
     "noDeliveries": "Доставок пока нет",
     "emptyTitle": "Вебхуков пока нет",
-    "emptyDescription": "Зарегистрируйте вебхук, чтобы CarrierOS уведомлял другое приложение при изменении статуса груза или оплате счёта."
+    "emptyDescription": "Зарегистрируйте вебхук, чтобы CarrierOS уведомлял другое приложение при изменении статуса груза или оплате счёта.",
+    "loadboardTitle": "Биржа грузов",
+    "loadboardUpgradeRequired": "Публикация на бирже грузов требует тариф Growth или выше."
   },
   "telematics": {
     "title": "Телематика",
@@ -1546,5 +1614,24 @@
     "save": "Сохранить",
     "saved": "Сохранено",
     "credentialRequired": "Введите учетные данные, чтобы настроить это в первый раз."
+  },
+  "loadboard": {
+    "settingsTitle": "Биржа грузов",
+    "settingsSubtitle": "Подключите провайдера биржи грузов, чтобы диспетчеры могли публиковать грузы для других перевозчиков.",
+    "datTitle": "Биржа грузов DAT",
+    "datDescription": "Публикуйте грузы на бирже DAT (только публикация — поиск и бронирование не входят в эту интеграцию).",
+    "enabled": "Включено",
+    "apiKeyLabel": "API-ключ DAT",
+    "apiKeyPlaceholder": "Введите, чтобы задать или обновить",
+    "apiKeyConfigured": "Ключ настроен. Оставьте поле пустым, чтобы сохранить его, или введите новый, чтобы обновить.",
+    "apiKeyNotConfigured": "Ключ пока не настроен.",
+    "credentialRequired": "Введите учётные данные, чтобы настроить это в первый раз.",
+    "save": "Сохранить",
+    "saved": "Сохранено",
+    "title": "Биржа грузов",
+    "description": "Опубликуйте этот груз на бирже DAT, чтобы другие перевозчики могли его найти.",
+    "postButton": "Опубликовать на DAT",
+    "posting": "Публикация...",
+    "alreadyPosted": "Этот груз уже опубликован на DAT."
   }
 }

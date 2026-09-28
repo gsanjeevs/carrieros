@@ -319,7 +319,38 @@
     "shareViaEmail": "La wadaag Email",
     "shareMessage": "La socod shixnadda {loadNumber}:",
     "shareEmailSubject": "Linkiga la socodka shixnadda {loadNumber}",
-    "myLoadsTitle": "Shixnadahayga"
+    "myLoadsTitle": "Shixnadahayga",
+    "customerOrders": "Dalabyada Macmiilka",
+    "noCustomerOrders": "Wali dalab macmiil lama xidhin.",
+    "orderNumber": "Lambarka dalabka",
+    "orderReference": "Tixraaca macmiilka",
+    "orderWeight": "Miisaanka (lb)",
+    "selectOrderCustomer": "Dooro macmiilka",
+    "addCustomerOrder": "Ku dar dalab",
+    "savingOrder": "Waa la keydinayaa…",
+    "ordersAddFailed": "Dalabkan lama darsan karin. Hubi macmiilka oo isku day mar kale.",
+    "ordersKeepCustomerScoped": "Portal macmiil kastaa wuxuu arkaa oo kaliya dalabyadiisa; shaqaalaha kiriyaha waxay arkaan manifesto-ga oo dhan.",
+    "orderCharge": "Lacagta macmiilka",
+    "orderAllocationComplete": "Lacagaha dalabyadu waxay la mid yihiin {allocated}.",
+    "orderAllocationIncomplete": "{allocated} ayaa laga qoondeeyay {target}; lacagaha dalabyadu waa inay la mid noqdaan qiimaha shixnadda ka hor inta aan qaansheegad la sameyn.",
+    "saveOrderCharge": "Keydi lacagta",
+    "orderChargeUpdateFailed": "Lacagta dalabka lama keydin karin. Hubi in aan qaansheegad la abuurin.",
+    "customerExceptionUpdates": "Cusbooneysiinta shixnadda ee macmiilka",
+    "noCustomerExceptions": "Hadda wax ku-caadi-dhaaf shixnad ah oo lala wadaago macmiilka ma jiraan.",
+    "customerUpdateShared": "Lala wadaagay macmiilka",
+    "customerUpdatePrivate": "Gudaha kaliya",
+    "customerUpdateMessageLabel": "Cusbooneysiinta macmiilka amaanka ah",
+    "customerUpdateMessagePlaceholder": "Sharax saameynta iyo waxa xiga. Ha ku darin fiiro gudaha ah.",
+    "savingCustomerUpdate": "Waa la keydinayaa…",
+    "hideCustomerUpdate": "Ka qari macmiilka",
+    "shareCustomerUpdate": "La wadaag cusbooneysiinta",
+    "customerExceptionSaveFailed": "Waan ku guuldareystay in aan cusbooneysiiyo muuqashada macmiilka. Fadlan isku day mar kale.",
+    "resendCustomerUpdateEmail": "Dib u dir email-ka macmiilka",
+    "customerUpdateEmailSent": "Email ayaa loo diray {count} xiriirre oo aasaasi ah oo macmiilka ah.",
+    "customerUpdateEmailPartial": "Email ayaa loo diray {sent} xiriirre, laakiin waa ku guuldareystay {failed}.",
+    "customerUpdateNoRecipient": "Cusbooneysiinta waa lala wadaagay boggga la socodka, laakiin wax email aasaasi ah oo macmiilka ah lama diiwaan gelin.",
+    "customerUpdateEmailFailed": "Cusbooneysiinta waa lala wadaagay boggga la socodka, laakiin email-ka lama gudbin karin.",
+    "customerExceptionPrivacy": "Linkiga la socodka waxaa lagu tusaa oo kaliya fariinta aad halkan qorto. Faahfaahinta ku-caadi-dhaafka gudaha ah way qarsoodi ahaanayaan."
   },
   "drivers": {
     "title": "Darawallada",
@@ -415,7 +446,8 @@
     "dvirPreTrip": "Ka hor Safarka",
     "dvirPostTrip": "Ka dib Safarka",
     "dvirDefectsNoted": "Cillado La Xusay",
-    "dvirSatisfactory": "Wanaagsan"
+    "dvirSatisfactory": "Wanaagsan",
+    "backToDrivers": "Ku noqo Darawallada"
   },
   "vehicles": {
     "title": "Gaadiidka",
@@ -548,7 +580,8 @@
     "uploadPhoto": "Soo Rar Sawirka",
     "replacePhoto": "Bedel Sawirka",
     "photoUploadFailed": "Sawirka lama soo rari karin. Fadlan isku day mar kale.",
-    "dvirNotSigned": "Lama saxeexin"
+    "dvirNotSigned": "Lama saxeexin",
+    "backToVehicles": "Ku noqo Gaadiidka"
   },
   "companyDocuments": {
     "title": "Dukumeentiyada Shirkadda",
@@ -646,7 +679,9 @@
     "creating": "Waa la abuurayaa…",
     "opened": "La furay",
     "openedAt": "La furay",
-    "notOpenedYet": "Wali lama furin"
+    "notOpenedYet": "Wali lama furin",
+    "loadInvoicesCreated": "{count, plural, one {# qaansheegad macmiil ayaa la abuuray} other {# qaansheegadood macmiil ayaa la abuuray}}",
+    "createRemainingCustomerInvoices": "Samee qaansheegadaha macaamiisha soo hara adigoo isticmaalaya qoondaynta dalabkooda."
   },
   "settlements": {
     "title": "Xisaabinta Darawalka",
@@ -692,7 +727,8 @@
     "daySingular": "maalin",
     "dayPlural": "maalmood",
     "loadLabel": "Shixnad",
-    "poweredBy": "Waxaa taageeraya CarrierOS"
+    "poweredBy": "Waxaa taageeraya CarrierOS",
+    "shipmentUpdates": "Cusbooneysiinta shixnadda"
   },
   "dispatch": {
     "title": "Dirista",
@@ -706,7 +742,32 @@
     "loadingMap": "Khariidadda waa la soo rarayaa…",
     "locationStale": "⚠ Wax cusbooneysiin ah lama helin in ka badan 15 daqiiqo",
     "locationLive": "● Tooska ah",
-    "idleVehicleBadge": "fadhiya, wax shixnad firfircoon ah ma leh"
+    "idleVehicleBadge": "fadhiya, wax shixnad firfircoon ah ma leh",
+    "assignedVehicleBadge": "loo qoondeeyay shixnad firfircoon",
+    "mapViews": "Aragtiyada khariidadda",
+    "mapViewAll": "Dhammaan gaadiidka",
+    "mapViewMoving": "Socda (GPS)",
+    "mapViewLoads": "Shixnadaha firfircoon",
+    "mapViewParked": "Taagan (wax shixnad ah ma haysto)",
+    "mapViewUnloaded": "Wax shixnad firfircoon ah ma haysto",
+    "mapViewStale": "Goob duugoobay",
+    "motionMoving": "Socda (GPS)",
+    "motionStationary": "Joogsaday (GPS)",
+    "motionUnknown": "Dhaqdhaqaaqa lama garanayo",
+    "demoGpsStart": "Bilow GPS tijaabo ah",
+    "demoGpsStop": "Jooji GPS tijaabo ah",
+    "demoGpsRunning": "Goobaha gaadiidka firfircoon ee macmalka ah ayaa la cusbooneysiinayaa 4 ilbiriqsi kasta",
+    "demoGpsHelp": "Dhaqaajii hal gaadhi tijaabo ah oo la doortay jid gaar ah oo Houston–Austin ah",
+    "demoGpsSelectLoad": "Dooro shixnad tijaabo ah si aad u dhaqaajiso",
+    "demoGpsNoLoads": "Wax shixnado tijaabo ah oo firfircoon ah ma jiraan",
+    "demoGpsUpdated": "Waa la cusbooneysiiyay goobta gaadhiga la doortay",
+    "demoGpsStopped": "GPS tijaabo ah waa la joojiyay",
+    "demoGpsError": "Lama cusbooneysiin karin goobaha GPS tijaabo ah",
+    "shipmentLabel": "Shixnad",
+    "customerUnassigned": "Macmiil lama qoondayn",
+    "origin": "Meesha laga bilaabo",
+    "destination": "Meesha loo socdo",
+    "noActiveShipment": "Wax shixnad firfircoon ah ma jirto"
   },
   "settings": {
     "title": "Dejinta Profile-ka",
@@ -842,7 +903,9 @@
     "upgrade": "U kac",
     "downgrade": "Hoos u dhig",
     "changingPlan": "Waa la cusbooneysiinayaa…",
-    "changeTierFailed": "Qorshahaaga lama bedeli karin. Fadlan isku day mar kale."
+    "changeTierFailed": "Qorshahaaga lama bedeli karin. Fadlan isku day mar kale.",
+    "demoPaymentReceipt": "Lacag-bixin la dayday: {currency} {amount} · tixraac {reference}. Wax lacag dhab ah lama qaadan.",
+    "planAlreadyCurrent": "Qorshahan mar hore ayuu firfircoon yahay; wax lacag-bixin ah lama diiwaan gelin."
   },
   "developerApi": {
     "title": "API-ga Horumariyaha",
@@ -887,7 +950,9 @@
     "colorHelp": "Midabka banaan ka dhig si aad u isticmaasho midabka caadiga ah ee CarrierOS.",
     "invalidColor": "Geli midab qaabka #RRGGBB, tusaale #f47920.",
     "save": "Keydi isbedelada",
-    "saved": "Sumadda waa la cusbooneysiiyay."
+    "saved": "Sumadda waa la cusbooneysiiyay.",
+    "previewLabel": "Horeyn Tooska ah",
+    "trackingPreviewTitle": "La socodka Shixnadda"
   },
   "customers": {
     "title": "Macaamiisha",
@@ -978,7 +1043,8 @@
     "lastLoad": "Shixnaddii Ugu Dambeysay",
     "daysAgo": "{days, plural, =0 {Maanta} one {# maalin ka hor} other {# maalmood ka hor}}",
     "relationshipsGoingCold": "{count, plural, one {# xiriir ayaa qaboobaya} other {# xiriirood ayaa qaboobaya}}",
-    "coldCustomerLine": "{name} — {days} maalmood"
+    "coldCustomerLine": "{name} — {days} maalmood",
+    "backToCustomers": "Ku noqo Macaamiisha"
   },
   "maintenance": {
     "title": "Dayactirka",
@@ -1523,7 +1589,9 @@
     "deliveriesTitle": "Gaarsiimooyinka dhawaan",
     "noDeliveries": "Wali gaarsiimo ma jirto",
     "emptyTitle": "Wali webhook ma jiraan",
-    "emptyDescription": "Diiwaan geli webhook si CarrierOS ugu ogeysiiso app kale marka xaalada shixnad ay bedesho ama qaansheegad la bixiyo."
+    "emptyDescription": "Diiwaan geli webhook si CarrierOS ugu ogeysiiso app kale marka xaalada shixnad ay bedesho ama qaansheegad la bixiyo.",
+    "loadboardTitle": "Guddiga Shixnadaha",
+    "loadboardUpgradeRequired": "Dhajinta guddiga shixnadaha waxay u baahan tahay qorshaha Growth ama ka sarreeya."
   },
   "telematics": {
     "title": "Telematics",
@@ -1546,5 +1614,24 @@
     "save": "Keydi",
     "saved": "La keydiyay",
     "credentialRequired": "Geli aqoonsi si aad markii ugu horreysay tan u dejiso."
+  },
+  "loadboard": {
+    "settingsTitle": "Guddiga Shixnadaha",
+    "settingsSubtitle": "Ku xir bixiye guddiga shixnadaha si dispatcher-adu ugu dhajiyaan shixnadaha kiriyayaal kale ay ka heli karaan.",
+    "datTitle": "Guddiga Shixnadaha ee DAT",
+    "datDescription": "Ku dhaji shixnadaha guddiga shixnadaha ee DAT (dhajin kaliya -- raadinta iyo ballan qaadashada kama mid aha isku-xirkan).",
+    "enabled": "La furay",
+    "apiKeyLabel": "Furaha API-ga DAT",
+    "apiKeyPlaceholder": "Geli si aad u dejiso ama u beddesho",
+    "apiKeyConfigured": "Furaha waa la dejiyay. Ka tag banaan si aad u sii haysato, ama geli mid cusub si aad u beddesho.",
+    "apiKeyNotConfigured": "Wali furaha lama dejin.",
+    "credentialRequired": "Geli xogta aqoonsiga si aad tan markii ugu horreysay u dejiso.",
+    "save": "Keydi",
+    "saved": "La keydiyay",
+    "title": "Guddiga Shixnadaha",
+    "description": "Ku dhaji shixnaddan guddiga shixnadaha ee DAT si kiriyayaal kale ay ugu heli karaan.",
+    "postButton": "Ku dhaji DAT",
+    "posting": "Waa la dhajinayaa...",
+    "alreadyPosted": "Shixnaddan waxaa lagu dhajiyay DAT."
   }
 }
