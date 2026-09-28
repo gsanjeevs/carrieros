@@ -88,6 +88,14 @@ export async function listProfilesForOrgs(supabase: AnySupabaseClient, orgIds: n
     .in('org_id', orgIds)
 }
 
+// Bulk profile identities for a bounded support-ticket list (never auth credentials).
+export async function listProfileIdentities(supabase: AnySupabaseClient, profileIds: string[]) {
+  return supabase
+    .from('profiles')
+    .select('id, first_name, last_name, role')
+    .in('id', profileIds)
+}
+
 // Owners/solos for an org — used by the reminder cron to identify who can
 // act as the carrier's primary account.
 export async function getOrgOwnersAndSolos(supabase: AnySupabaseClient, orgId: number) {

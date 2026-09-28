@@ -1,7 +1,6 @@
 'use client'
 // app/(admin)/admin/support/[id]/page.tsx — carrieros_support ticket detail/reply for ShipmentX
-// staff (decisions.md T16). Reached from the Triage Queue's "Reply Now" link (admin/page.tsx) rather
-// than from a second, separate list screen — per T16's explicit instruction not to build one.
+// staff (decisions.md T16). This detail view is reached from the dedicated carrieros_support inbox.
 // Client-fetched from GET/PATCH /api/admin/support-tickets/[id] + POST .../reply, same pattern
 // app/(admin)/admin/orgs/[org_id]/page.tsx already uses for its notes thread.
 import { useEffect, useState, use as usePromise } from 'react'
@@ -63,25 +62,37 @@ export default function AdminSupportTicketPage({ params }: { params: Promise<{ i
   async function sendReply() {
     if (!reply.trim()) return
     setSending(true)
-    await fetch(`/api/admin/support-tickets/${id}/reply`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ body: reply.trim() }),
-    })
-    setReply('')
-    setSending(false)
-    load()
+    try {
+      const response = await fetch(`/api/admin/support-tickets/${id}/reply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ body: reply.trim() }),
+      })
+      if (!response.ok) throw new Error()
+      setReply('')
+      await load()
+    } catch {
+      setError(t('replyError'))
+    } finally {
+      setSending(false)
+    }
   }
 
   async function setStatus(status: 'resolved' | 'closed') {
     setUpdatingStatus(true)
-    await fetch(`/api/admin/support-tickets/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status }),
-    })
-    setUpdatingStatus(false)
-    load()
+    try {
+      const response = await fetch(`/api/admin/support-tickets/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      })
+      if (!response.ok) throw new Error()
+      await load()
+    } catch {
+      setError(t('updateError'))
+    } finally {
+      setUpdatingStatus(false)
+    }
   }
 
   if (error) return <div className="p-8 text-danger text-sm">{error}</div>
@@ -89,7 +100,7 @@ export default function AdminSupportTicketPage({ params }: { params: Promise<{ i
 
   return (
     <div className="p-8 max-w-3xl mx-auto">
-      <Link href="/admin" className="text-text-sec text-sm hover:text-text-pri mb-4 inline-block">
+      <Link href="/admin/support" className="text-text-sec text-sm hover:text-text-pri mb-4 inline-block">
         ← {t('backToTriage')}
       </Link>
 

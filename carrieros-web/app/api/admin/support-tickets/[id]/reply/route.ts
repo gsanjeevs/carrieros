@@ -22,6 +22,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
   const messageBody = typeof (body as { body?: unknown }).body === 'string' ? (body as { body: string }).body.trim() : ''
   if (!messageBody) return apiError('VALIDATION_ERROR', 'A non-empty message is required', 400)
+  if (messageBody.length > 10_000) return apiError('VALIDATION_ERROR', 'Message must be 10,000 characters or fewer', 400)
 
   const { data: ticket, error: ticketErr } = await admin
     .from('support_tickets')
@@ -51,6 +52,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   if (error) {
     logError({ route: 'admin/support-tickets/:id/reply', requestId: request.headers.get('x-request-id') }, error, { step: 'insert' })
     return apiError('SERVER_ERROR', error.message, 500)
+  }
+
+  // Record who replied without copying support-message content into the administrative audit log.
+  const { error: auditError } = await admin.from('admin_events').insert({
+    org_id: ticket.carrier_org_id,
+    admin_id: userId,
+    event_type: 'admin.support_ticket_reply',
+    metadata: { ticket_id: ticketId, message_id: message.id },
+  })
+  if (auditError) {
+    logError({ route: 'admin/support-tickets/:id/reply', requestId: request.headers.get('x-request-id') }, auditError, { step: 'audit_reply' })
   }
 
   return NextResponse.json({ message }, { status: 201 })
