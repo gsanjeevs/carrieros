@@ -37,7 +37,9 @@ export default function SegmentedControl({ items, value, onChange, className }: 
             className={cn(
               'px-3.5 py-1.5 rounded-md text-[12px] transition-colors',
               'focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/50',
-              active ? 'font-semibold bg-navy text-white' : 'font-medium text-text-sec hover:text-text-pri'
+              active
+                ? 'font-semibold bg-brand-orange text-brand-on-primary'
+                : 'font-medium text-text-sec hover:text-text-pri'
             )}
           >
             {item.label}

@@ -29,10 +29,10 @@ const SIZE_CLASSES: Record<AvatarSize, string> = {
 // colorIndex always resolves to the same pair for a given entity.
 const COLOR_VARIANTS = [
   'bg-navy-light text-avatar-text',
-  'bg-[#1a3a2f] text-green-400',
-  'bg-[#2a1f3a] text-purple-400',
-  'bg-[#1a2f3a] text-blue-400',
-  'bg-[#3a1f1f] text-red-400',
+  'bg-avatar-green text-avatar-green-text',
+  'bg-avatar-purple text-avatar-purple-text',
+  'bg-avatar-blue text-avatar-blue-text',
+  'bg-avatar-red text-avatar-red-text',
 ]
 
 export default function Avatar({ initials, variant = 'circle', size = 'md', colorIndex = 0, className }: AvatarProps) {

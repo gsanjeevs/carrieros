@@ -16,6 +16,7 @@ import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { isPasskeySupported } from '@/lib/webauthn-support'
 import { logError } from '@/lib/observability'
+import { Button } from '@/components/ui'
 
 export default function PasskeySignInButton() {
   const router = useRouter()
@@ -70,23 +71,24 @@ export default function PasskeySignInButton() {
   return (
     <div className="mt-4">
       <div className="flex items-center gap-3 mb-4">
-        <div className="h-px flex-1 bg-white/10" />
-        <span className="text-xs text-slate-500">{t('or')}</span>
-        <div className="h-px flex-1 bg-white/10" />
+        <div className="h-px flex-1 bg-divider-ui" />
+        <span className="text-xs text-text-mut">{t('or')}</span>
+        <div className="h-px flex-1 bg-divider-ui" />
       </div>
 
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="lg"
         onClick={handleClick}
         disabled={loading}
-        className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-white font-medium py-2.5 text-sm transition focus:outline-none focus:ring-2 focus:ring-brand-orange focus:ring-offset-2 focus:ring-offset-navy disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full py-2.5 text-text-pri"
       >
         <span className="material-symbols-outlined text-[18px]" aria-hidden="true">passkey</span>
         {loading ? t('passkeySigningIn') : t('signInWithPasskey')}
-      </button>
+      </Button>
 
       {error && (
-        <p className="mt-2 text-center text-xs text-red-400">{t('passkeyError')}</p>
+        <p className="mt-2 text-center text-xs text-status-danger">{t('passkeyError')}</p>
       )}
     </div>
   )

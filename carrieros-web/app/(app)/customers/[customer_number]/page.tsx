@@ -23,7 +23,6 @@ import { invoiceStatusVariant, type InvoiceStatus } from '@/lib/domain/invoice-s
 import { Card, CardHeader, CardBody, KpiTile, StatusBadge, Table, TableHeaderCell, TableRow, TableCell, EmptyState } from '@/components/ui'
 
 import { INVOICE_ROLES } from '@/lib/roles-policy'
-import { SCORE_CRITICAL, SCORE_WARNING, SUCCESS } from '@/lib/design-tokens'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { listLoadsForCustomer } from '@/lib/queries/loads'
 import { logError } from '@/lib/observability'
@@ -33,15 +32,15 @@ import { roleHasCapability } from '@/lib/generated/role-capabilities'
 // (finance reads the directory), so no capability's role set covers it.
 
 const SEVERITY_COLOR: Record<string, string> = {
-  info:    'bg-blue-500/20 text-blue-400',
-  warning: 'bg-amber-500/20 text-amber-400',
-  urgent:  'bg-rose-500/20 text-rose-400',
+  info:    'bg-status-info-surface text-status-info',
+  warning: 'bg-status-warning-surface text-status-warning',
+  urgent:  'bg-status-danger-surface text-status-danger',
 }
 
 function scoreColor(score: number): { stroke: string; text: string } {
-  if (score >= 80) return { stroke: SUCCESS, text: 'text-success' }
-  if (score >= 50) return { stroke: SCORE_WARNING, text: 'text-amber-500' }
-  return { stroke: SCORE_CRITICAL, text: 'text-rose-500' }
+  if (score >= 80) return { stroke: 'var(--color-status-success)', text: 'text-status-success' }
+  if (score >= 50) return { stroke: 'var(--color-status-warning)', text: 'text-status-warning' }
+  return { stroke: 'var(--color-status-danger)', text: 'text-status-danger' }
 }
 
 function HealthScoreRing({ score }: { score: number }) {
@@ -334,7 +333,7 @@ export default async function CustomerDetailPage({
       <div className="space-y-4">
         {exceptions.map((e) => (
           <div key={e.id} className="flex gap-3">
-            <div className={`w-1.5 h-1.5 rounded-full mt-2 shrink-0 ${e.severity === 'urgent' ? 'bg-rose-400' : e.severity === 'warning' ? 'bg-amber-400' : 'bg-blue-400'}`} />
+            <div className={`w-1.5 h-1.5 rounded-full mt-2 shrink-0 ${e.severity === 'urgent' ? 'bg-status-danger' : e.severity === 'warning' ? 'bg-status-warning' : 'bg-status-info'}`} />
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <p className="text-text-pri text-sm font-medium">{e.title}</p>

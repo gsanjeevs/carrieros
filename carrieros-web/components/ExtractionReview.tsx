@@ -64,7 +64,7 @@ function Field({
   return (
     <div>
       <div className="flex items-center justify-between mb-1.5">
-        <label className="text-xs font-medium text-slate-400 uppercase tracking-wide">{label}</label>
+        <label className="text-xs font-medium text-text-sec uppercase tracking-wide">{label}</label>
         {confidence && (
           <span className={`text-xs ${CONFIDENCE_COLOR[confidence]}`}>
             {confidenceLabels[confidence]}
@@ -183,16 +183,16 @@ export default function ExtractionReview() {
     <div className="p-8 max-w-3xl mx-auto">
 
       <div className="mb-8">
-        <Link href="/loads/new/paste" className="text-slate-400 text-sm hover:text-white flex items-center gap-1.5 mb-4">
+        <Link href="/loads/new/paste" className="text-text-sec text-sm hover:text-text-pri flex items-center gap-1.5 mb-4">
           <span className="material-symbols-outlined text-[16px]">arrow_back</span>
           {t('back')}
         </Link>
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-text-pri">{t('title')}</h1>
-            <p className="text-slate-400 text-sm mt-1">{t('subtitle')}</p>
+            <p className="text-text-sec text-sm mt-1">{t('subtitle')}</p>
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-400 bg-surface-card border border-border-ui rounded-lg px-3 py-1.5">
+          <div className="flex items-center gap-2 text-xs text-text-sec bg-surface-card border border-border-ui rounded-lg px-3 py-1.5">
             <span className="material-symbols-outlined text-[14px] text-brand-orange">auto_awesome</span>
             {t('aiExtracted')}
           </div>
@@ -200,7 +200,7 @@ export default function ExtractionReview() {
       </div>
 
       {error && (
-        <div className="mb-6 rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-red-400 text-sm">
+        <div className="mb-6 rounded-lg bg-danger/10 border border-danger/20 px-4 py-3 text-danger text-sm">
           {error}
         </div>
       )}
@@ -285,7 +285,7 @@ export default function ExtractionReview() {
       <div className="flex items-center justify-between mt-8">
         <Link
           href="/loads/new/paste"
-          className="text-slate-400 text-sm hover:text-white transition"
+          className="text-text-sec text-sm hover:text-text-pri transition"
         >
           {t('reExtract')}
         </Link>

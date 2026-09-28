@@ -53,8 +53,8 @@ export default function AddVehicleStep({ onNext }: { onNext: (added: boolean) =>
 
   return (
     <div className="space-y-4">
-      <h2 className="text-white font-semibold text-lg mb-1">{t('stepVehicleTitle')}</h2>
-      <p className="text-slate-400 text-sm mb-4">{t('stepVehicleSubtitle')}</p>
+      <h2 className="text-text-pri font-semibold text-lg mb-1">{t('stepVehicleTitle')}</h2>
+      <p className="text-text-sec text-sm mb-4">{t('stepVehicleSubtitle')}</p>
 
       <Field label={tVehicles('nickname')}>
         <Input size="lg" placeholder="Big Red"

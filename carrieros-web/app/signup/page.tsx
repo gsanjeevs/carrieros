@@ -15,6 +15,7 @@ import { useTranslations } from 'next-intl'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { signUpWithEmail } from './actions'
+import { Button, Callout, Card, CardBody, Field, Input } from '@/components/ui'
 
 type TierRow = {
   code: string
@@ -65,117 +66,123 @@ function SignupForm() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-navy flex items-center justify-center px-4 py-10">
+    <div className="auth-shell min-h-screen bg-surface-page text-text-pri flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md">
 
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-2">
             <div className="w-8 h-8 rounded-lg bg-brand-orange flex items-center justify-center">
-              <span className="text-white font-bold text-sm">C</span>
+              <span className="text-brand-on-primary font-bold text-sm">C</span>
             </div>
-            <span className="text-white font-semibold text-xl tracking-tight">CarrierOS</span>
+            <span className="text-text-pri font-semibold text-xl tracking-tight">CarrierOS</span>
           </div>
-          <p className="text-slate-400 text-sm">{t('tagline')}</p>
+          <p className="text-text-sec text-sm">{t('tagline')}</p>
         </div>
 
         {step === 'plan' && (
           <div className="space-y-3">
-            <h1 className="text-white font-semibold text-lg mb-1 text-center">{t('choosePlan')}</h1>
-            <p className="text-slate-400 text-sm text-center mb-4">{t('trialNotice')}</p>
+            <h1 className="text-text-pri font-semibold text-lg mb-1 text-center">{t('choosePlan')}</h1>
+            <p className="text-text-sec text-sm text-center mb-4">{t('trialNotice')}</p>
 
             {tiers.map(tier => (
-              <button
+              <Card
                 key={tier.code}
+                variant="selectable"
+                selected={selectedTier === tier.code}
                 onClick={() => setSelectedTier(tier.code)}
-                className={`w-full text-left rounded-xl border-2 p-4 transition ${
-                  selectedTier === tier.code ? 'border-brand-orange bg-brand-orange/5' : 'border-white/10 bg-white/5 hover:border-white/20'
-                }`}
+                className="w-full text-left !p-4"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-white font-bold">{tier.label}</span>
+                  <span className="text-text-pri font-bold">{tier.label}</span>
                   {tier.code === 'growth' && (
-                    <span className="text-[10px] font-bold tracking-wide uppercase bg-brand-orange text-white rounded-full px-2 py-0.5">
+                    <span className="text-[10px] font-bold tracking-wide uppercase bg-brand-orange text-brand-on-primary rounded-full px-2 py-0.5">
                       {t('mostPopular')}
                     </span>
                   )}
                 </div>
                 <div className="text-2xl font-extrabold text-brand-orange mt-1">
-                  ${tier.monthly_price}<span className="text-sm font-medium text-slate-400">{t('perMonth')}</span>
+                  ${tier.monthly_price}<span className="text-sm font-medium text-text-sec">{t('perMonth')}</span>
                 </div>
-                <div className="text-xs text-slate-400 mt-1">
+                <div className="text-xs text-text-sec mt-1">
                   {t('trucksIncluded', { count: tier.included_trucks, additional: tier.price_per_additional_truck })}
                 </div>
-              </button>
+              </Card>
             ))}
 
-            <button
+            <Button
+              variant="primary"
+              size="lg"
               onClick={() => setStep('account')}
               disabled={!selectedTier}
-              className="w-full mt-2 py-2.5 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white font-semibold rounded-lg transition text-sm"
+              className="w-full mt-2 py-2.5"
             >
               {t('continueBtn')}
-            </button>
+            </Button>
 
-            <p className="mt-4 text-center text-xs text-slate-500">
+            <p className="mt-4 text-center text-xs text-text-mut">
               {t('alreadyHaveAccount')} <a href="/login" className="text-brand-orange hover:underline">{t('signIn')}</a>
             </p>
           </div>
         )}
 
         {step === 'account' && (
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+          <Card className="p-6">
+            <CardBody className="p-0">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-white font-semibold text-lg">{t('createAccount')}</h2>
-              <button onClick={() => setStep('plan')} className="text-xs text-slate-400 hover:text-white">
+              <h2 className="text-text-pri font-semibold text-lg">{t('createAccount')}</h2>
+              <Button variant="ghost" size="sm" onClick={() => setStep('plan')} className="text-xs">
                 {t('changePlan')}
-              </button>
+              </Button>
             </div>
 
             {errorCode && (
-              <div className="mb-4 rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-red-400 text-sm">
+              <Callout tone="danger" className="mb-4 text-sm">
                 {t(ERROR_KEYS[errorCode] ?? 'signupFailed')}
-              </div>
+              </Callout>
             )}
 
             <form action={signUpWithEmail} className="space-y-4" onSubmit={() => setLoading(true)}>
               <input type="hidden" name="tier" value={selectedTier} />
 
-              <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">{t('yourName')}</label>
-                <input
+              <Field label={t('yourName')} htmlFor="signup-name" required>
+                <Input
+                  id="signup-name"
                   name="name" type="text" required autoComplete="name" placeholder="Sam Johnson"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3.5 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition"
+                  size="lg"
                 />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">{t('email')}</label>
-                <input
+              </Field>
+              <Field label={t('email')} htmlFor="signup-email" required>
+                <Input
+                  id="signup-email"
                   name="email" type="email" required autoComplete="email" placeholder="you@yourcompany.com"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3.5 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition"
+                  size="lg"
                 />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">{t('password')}</label>
-                <input
+              </Field>
+              <Field label={t('password')} htmlFor="signup-password" required hint={t('passwordHint')}>
+                <Input
+                  id="signup-password"
                   name="password" type="password" required autoComplete="new-password" minLength={MIN_PASSWORD_LENGTH} placeholder="••••••••"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3.5 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition"
+                  size="lg"
                 />
-                <p className="text-[11px] text-slate-500 mt-1">{t('passwordHint')}</p>
-              </div>
+              </Field>
 
-              <button
+              <Button
+                variant="primary"
+                size="lg"
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white font-semibold rounded-lg transition text-sm"
+                loading={loading}
+                className="w-full py-2.5"
               >
                 {loading ? t('creatingAccount') : t('createAccountBtn')}
-              </button>
+              </Button>
             </form>
 
-            <p className="mt-6 text-center text-xs text-slate-500">
+            <p className="mt-6 text-center text-xs text-text-mut">
               {t('alreadyHaveAccount')} <a href="/login" className="text-brand-orange hover:underline">{t('signIn')}</a>
             </p>
-          </div>
+            </CardBody>
+          </Card>
         )}
       </div>
     </div>

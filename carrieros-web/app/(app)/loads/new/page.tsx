@@ -59,8 +59,8 @@ export default async function NewLoadPage() {
             Disabled and labeled honestly instead of silently building a PDF
             extraction feature that hasn't been scoped. */}
         <Card aria-disabled="true" className="flex items-start gap-4 p-5 opacity-50 cursor-not-allowed">
-          <div className="w-10 h-10 rounded-lg bg-teal/15 flex items-center justify-center flex-shrink-0">
-            <span className="material-symbols-outlined text-teal text-[20px]">upload_file</span>
+          <div className="w-10 h-10 rounded-lg bg-surface-subtle flex items-center justify-center flex-shrink-0">
+            <span className="material-symbols-outlined text-text-mut text-[20px]">upload_file</span>
           </div>
           <div className="flex-1">
             <p className="text-text-pri font-medium text-sm">{t('uploadTitle')}</p>
@@ -72,7 +72,7 @@ export default async function NewLoadPage() {
         {/* Manual entry */}
         <Link href="/loads/new/manual" className="block">
           <Card variant="interactive" className="group flex items-start gap-4 p-5 hover:border-brand-orange/40 hover:bg-brand-orange/5">
-            <div className="w-10 h-10 rounded-lg bg-surface-subtle flex items-center justify-center flex-shrink-0 group-hover:bg-white/15 transition-colors">
+            <div className="w-10 h-10 rounded-lg bg-surface-subtle flex items-center justify-center flex-shrink-0 group-hover:bg-surface-hover transition-colors">
               <span className="material-symbols-outlined text-text-sec text-[20px]">edit</span>
             </div>
             <div className="flex-1">
@@ -90,14 +90,14 @@ export default async function NewLoadPage() {
             that consumes it. */}
         {intakeEmail && (
           <Card className="flex items-start gap-4 p-5">
-            <div className="w-10 h-10 rounded-lg bg-sky-500/15 flex items-center justify-center flex-shrink-0">
-              <span className="material-symbols-outlined text-sky-400 text-[20px]">forward_to_inbox</span>
+            <div className="w-10 h-10 rounded-lg bg-info-light flex items-center justify-center flex-shrink-0">
+              <span className="material-symbols-outlined text-info text-[20px]">forward_to_inbox</span>
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-text-pri font-medium text-sm">{t('forwardTitle')}</p>
               <p className="text-text-sec text-sm mt-0.5">{t('forwardDesc')}</p>
               <div className="flex items-center gap-2 mt-2">
-                <code className="text-text-sec text-xs bg-black/20 px-2 py-1 rounded truncate">{intakeEmail}</code>
+                <code className="text-text-sec text-xs bg-surface-subtle border border-border-ui px-2 py-1 rounded truncate">{intakeEmail}</code>
                 <CopyIntakeEmailButton email={intakeEmail} />
               </div>
             </div>

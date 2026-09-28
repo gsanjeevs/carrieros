@@ -112,16 +112,16 @@ function OnboardingFlow() {
   const stepIndex = STEPS.indexOf(step)
 
   return (
-    <div className="min-h-screen bg-navy flex items-center justify-center p-6">
+    <div className="auth-shell min-h-screen bg-surface-page text-text-pri flex items-center justify-center p-6">
       <div className="w-full max-w-lg">
 
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-2">
             <span className="text-brand-orange text-2xl font-bold tracking-tight">Carrier</span>
-            <span className="text-white text-2xl font-bold tracking-tight">OS</span>
+            <span className="text-text-pri text-2xl font-bold tracking-tight">OS</span>
           </div>
-          <p className="text-slate-400 text-sm">{t('heading')}</p>
+          <p className="text-text-sec text-sm">{t('heading')}</p>
         </div>
 
         <div className="mb-8">
@@ -132,7 +132,7 @@ function OnboardingFlow() {
 
           {step === 'company' && (
             <div className="space-y-4">
-              <h2 className="text-white font-semibold text-lg mb-5">{t('companyDetails')}</h2>
+              <h2 className="text-text-pri font-semibold text-lg mb-5">{t('companyDetails')}</h2>
 
               <Field label={t('companyName')} required>
                 <Input size="lg" placeholder="Acme Trucking LLC"
@@ -208,7 +208,7 @@ function OnboardingFlow() {
 
           {step === 'profile' && (
             <div className="space-y-4">
-              <h2 className="text-white font-semibold text-lg mb-5">{t('yourInfo')}</h2>
+              <h2 className="text-text-pri font-semibold text-lg mb-5">{t('yourInfo')}</h2>
 
               <div className="grid grid-cols-2 gap-3">
                 <Field label={t('firstName')} required>

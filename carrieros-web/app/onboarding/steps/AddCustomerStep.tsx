@@ -66,8 +66,8 @@ export default function AddCustomerStep({ onNext }: { onNext: (added: boolean) =
 
   return (
     <div className="space-y-4">
-      <h2 className="text-white font-semibold text-lg mb-1">{t('stepCustomerTitle')}</h2>
-      <p className="text-slate-400 text-sm mb-4">{t('stepCustomerSubtitle')}</p>
+      <h2 className="text-text-pri font-semibold text-lg mb-1">{t('stepCustomerTitle')}</h2>
+      <p className="text-text-sec text-sm mb-4">{t('stepCustomerSubtitle')}</p>
 
       <Field label={t('customerName')}>
         <Input size="lg" placeholder="Pacific Produce Distributors"

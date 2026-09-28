@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { createStorageProvider } from '@/lib/storage'
-import { Card, CardHeader, CardBody } from '@/components/ui'
+import { Card, CardHeader, CardBody, Input, Button, StatusBadge } from '@/components/ui'
 
 export type VehicleDocType = 'registration' | 'insurance_cert' | 'dot_authority' | 'annual_inspection' | 'other'
 
@@ -143,17 +143,16 @@ export default function VehicleDocuments({
     router.refresh()
   }
 
-  const selectCls =
-    'bg-surface-input border border-border-ui rounded-lg px-3 py-2 text-text-pri text-sm focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/40 transition'
-
   return (
     <Card>
       <CardHeader className="flex-wrap gap-3">
         <h2 className="text-text-pri font-medium text-sm">{t('vehicleDocuments')}</h2>
         {canUpload && (
           <div className="flex items-center gap-2 flex-wrap">
-            <select
-              className={selectCls}
+            <Input
+              as="select"
+              size="md"
+              className="w-auto"
               value={docType}
               onChange={(e) => setDocType(e.target.value as VehicleDocType)}
               disabled={busy}
@@ -162,10 +161,11 @@ export default function VehicleDocuments({
               {DOC_TYPES.map((ty) => (
                 <option key={ty} value={ty}>{t(`vdocType_${ty}`)}</option>
               ))}
-            </select>
-            <input
+            </Input>
+            <Input
               type="date"
-              className={selectCls}
+              size="md"
+              className="w-auto"
               value={expiryDate}
               onChange={(e) => setExpiryDate(e.target.value)}
               disabled={busy}
@@ -181,25 +181,25 @@ export default function VehicleDocuments({
                 if (f) handleFile(f)
               }}
             />
-            <button
-              type="button"
+            <Button
+              size="lg"
               onClick={() => fileRef.current?.click()}
               disabled={busy}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+              className="gap-1.5 px-3"
             >
               <span className="material-symbols-outlined text-[18px]">upload</span>
               {busy ? t('docUploading') : t('docUpload')}
-            </button>
+            </Button>
           </div>
         )}
       </CardHeader>
 
       <CardBody>
 
-      {error && <p className="text-red-400 text-xs mb-3">{error}</p>}
+      {error && <p className="text-danger text-xs mb-3">{error}</p>}
 
       {documents.length === 0 ? (
-        <p className="text-slate-500 text-sm">{t('noDocumentsYet')}</p>
+        <p className="text-text-mut text-sm">{t('noDocumentsYet')}</p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {documents.map((doc) => {
@@ -220,14 +220,14 @@ export default function VehicleDocuments({
                     <img
                       src={doc.signedUrl}
                       alt={doc.fileName}
-                      className="w-full h-28 object-cover bg-black/30"
+                      className="w-full h-28 object-cover bg-image-scrim"
                     />
                   ) : (
-                    <div className="w-full h-28 flex flex-col items-center justify-center gap-1 bg-black/20">
-                      <span className="material-symbols-outlined text-slate-500 text-[28px]">
+                    <div className="w-full h-28 flex flex-col items-center justify-center gap-1 bg-surface-subtle">
+                      <span className="material-symbols-outlined text-text-mut text-[28px]">
                         description
                       </span>
-                      <span className="text-slate-400 text-[11px] px-2 truncate max-w-full">
+                      <span className="text-text-sec text-[11px] px-2 truncate max-w-full">
                         {doc.fileName}
                       </span>
                     </div>
@@ -235,22 +235,18 @@ export default function VehicleDocuments({
                 </a>
 
                 {status && (
-                  <span
-                    className={`absolute top-1.5 left-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                      status === 'expired' ? 'bg-red-500/80 text-white' : 'bg-amber-500/80 text-white'
-                    }`}
-                  >
+                  <StatusBadge variant={status === 'expired' ? 'danger' : 'warning'} size="sm" className="absolute top-1.5 left-1.5">
                     {status === 'expired' ? t('docExpired') : t('docExpiringSoon')}
-                  </span>
+                  </StatusBadge>
                 )}
 
                 <div className="p-2.5">
-                  <p className="text-white text-xs font-medium">{t(`vdocType_${doc.type}`)}</p>
+                  <p className="text-text-pri text-xs font-medium">{t(`vdocType_${doc.type}`)}</p>
                   {doc.expiryDate && (
-                    <p className="text-slate-500 text-[11px] mt-0.5">{t('docExpiresLabel', { date: doc.expiryDate })}</p>
+                    <p className="text-text-sec text-[11px] mt-0.5">{t('docExpiresLabel', { date: doc.expiryDate })}</p>
                   )}
-                  <p className="text-slate-500 text-[11px] mt-0.5">{doc.createdAtLabel}</p>
-                  <p className="text-slate-500 text-[11px]">
+                  <p className="text-text-sec text-[11px] mt-0.5">{doc.createdAtLabel}</p>
+                  <p className="text-text-sec text-[11px]">
                     {doc.uploaderName ?? t('docUnknownUploader')}
                   </p>
                 </div>
@@ -262,7 +258,7 @@ export default function VehicleDocuments({
                     disabled={deletingId === doc.id}
                     title={t('docDelete')}
                     aria-label={t('docDelete')}
-                    className="absolute top-1.5 right-1.5 w-7 h-7 rounded-md bg-black/60 hover:bg-red-500/80 text-white flex items-center justify-center transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+                    className="absolute top-1.5 right-1.5 w-7 h-7 rounded-md bg-danger text-danger-on-primary hover:bg-danger-dark flex items-center justify-center transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
                   >
                     <span className="material-symbols-outlined text-[16px]">delete</span>
                   </button>

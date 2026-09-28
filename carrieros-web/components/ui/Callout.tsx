@@ -17,11 +17,11 @@ export interface CalloutProps {
 }
 
 const TONE_CLASSES: Record<CalloutTone, string> = {
-  orange: 'bg-brand-orange/10 border-brand-orange/25 text-brand-orange-light',
-  success: 'bg-success/10 border-success/25 text-success',
-  warning: 'bg-warning/10 border-warning/25 text-warning',
-  danger: 'bg-danger/10 border-danger/25 text-danger',
-  info: 'bg-info/10 border-info/25 text-info',
+  orange: 'bg-brand-orange/10 border-brand-orange/25 text-text-pri',
+  success: 'bg-status-success-surface border-status-success/25 text-status-success',
+  warning: 'bg-status-warning-surface border-status-warning/25 text-status-warning',
+  danger: 'bg-status-danger-surface border-status-danger/25 text-status-danger',
+  info: 'bg-status-info-surface border-status-info/25 text-status-info',
 }
 
 export default function Callout({ tone = 'orange', icon, children, className }: CalloutProps) {

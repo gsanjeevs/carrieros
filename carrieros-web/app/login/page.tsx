@@ -3,6 +3,7 @@ import { getTranslations, getLocale } from 'next-intl/server'
 import { signInWithEmail } from './actions'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 import PasskeySignInButton from '@/components/passkey/PasskeySignInButton'
+import { Button, Callout, Field, Input } from '@/components/ui'
 
 interface Props {
   searchParams: Promise<{ error?: string; next?: string }>
@@ -24,7 +25,7 @@ export default async function LoginPage({ searchParams }: Props) {
   const locale = await getLocale()
 
   return (
-    <div className="min-h-screen bg-navy flex items-center justify-center px-4">
+    <div className="auth-shell min-h-screen bg-surface-page text-text-pri flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
 
         <div className="flex justify-end mb-4">
@@ -35,64 +36,63 @@ export default async function LoginPage({ searchParams }: Props) {
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-2">
             <div className="w-8 h-8 rounded-lg bg-brand-orange flex items-center justify-center">
-              <span className="text-white font-bold text-sm">C</span>
+              <span className="text-brand-on-primary font-bold text-sm">C</span>
             </div>
-            <span className="text-white font-semibold text-xl tracking-tight">CarrierOS</span>
+            <span className="text-text-pri font-semibold text-xl tracking-tight">CarrierOS</span>
           </div>
-          <p className="text-slate-400 text-sm">{t('title')}</p>
+          <p className="text-text-sec text-sm">{t('title')}</p>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="mb-4 rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-red-400 text-sm">
+          <Callout tone="danger" className="mb-4 text-sm">
             {t(ERROR_KEYS[error] ?? 'invalidCredentials')}
-          </div>
+          </Callout>
         )}
 
         {/* Form */}
         <form action={signInWithEmail} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-1.5">
-              {t('email')}
-            </label>
-            <input
+          <Field label={t('email')} htmlFor="email" required>
+            <Input
               id="email"
               name="email"
               type="email"
               autoComplete="email"
               required
               placeholder="you@example.com"
-              className="w-full rounded-lg bg-white/5 border border-white/10 px-3.5 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition"
+              size="lg"
             />
-          </div>
+          </Field>
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label htmlFor="password" className="block text-sm font-medium text-slate-300">
-                {t('password')}
+              <label htmlFor="password" className="text-2xs font-bold uppercase tracking-[1px] text-text-sec">
+                {t('password')} <span className="text-brand-orange"> *</span>
               </label>
               {/* Forgot password — hook up later */}
               <span className="text-xs text-brand-orange cursor-pointer hover:underline">
                 {t('forgotPassword')}
               </span>
             </div>
-            <input
+            <Input
               id="password"
               name="password"
               type="password"
               autoComplete="current-password"
               required
               placeholder="••••••••"
-              className="w-full rounded-lg bg-white/5 border border-white/10 px-3.5 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition"
+              size="lg"
             />
           </div>
 
-          <button
+          <Button
+            variant="primary"
+            size="lg"
             type="submit"
-            className="w-full rounded-lg bg-brand-orange hover:bg-brand-orange-hover text-white font-semibold py-2.5 text-sm transition focus:outline-none focus:ring-2 focus:ring-brand-orange focus:ring-offset-2 focus:ring-offset-navy"
+            className="w-full py-2.5"
           >
             {t('signIn')}
-          </button>
+          </Button>
         </form>
 
         {/* Additive — never replaces the password form above (decisions.md
@@ -100,10 +100,10 @@ export default async function LoginPage({ searchParams }: Props) {
             support. */}
         <PasskeySignInButton />
 
-        <p className="mt-6 text-center text-xs text-slate-500">
+        <p className="mt-6 text-center text-xs text-text-mut">
           {t('noAccount')} <a href="/signup" className="text-brand-orange hover:underline">{t('signUpFree')}</a>
         </p>
-        <p className="mt-2 text-center text-xs text-slate-500">
+        <p className="mt-2 text-center text-xs text-text-mut">
           <a href="mailto:info@shipmentx.com" className="text-brand-orange hover:underline">
             {t('needAccess')}
           </a>

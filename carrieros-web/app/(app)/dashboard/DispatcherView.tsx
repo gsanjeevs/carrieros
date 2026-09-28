@@ -9,7 +9,7 @@ import { getTranslations } from 'next-intl/server'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import StatusBadge from '@/components/ui/StatusBadge'
 import ExceptionsBanner from './ExceptionsBanner'
-import { Card, CardHeader, KpiTile } from '@/components/ui'
+import { ButtonLink, Card, CardHeader, KpiTile } from '@/components/ui'
 import { SLATE, SUCCESS, TEAL, WARNING } from '@/lib/design-tokens'
 import { listLoadIdsAndStatusForOrg, listRecentLoadsForOrg } from '@/lib/queries/loads'
 
@@ -90,9 +90,9 @@ export default async function DispatcherView({ orgId }: { orgId: number | undefi
           <div className="px-5 py-12 text-center">
             <span className="material-symbols-outlined text-text-mut text-4xl">local_shipping</span>
             <p className="text-text-mut text-sm mt-3">{t('noLoadsYet')}</p>
-            <Link href="/loads/new" className="inline-block mt-4 px-4 py-2 bg-brand-orange hover:bg-brand-orange/90 text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
+            <ButtonLink href="/loads/new" size="lg" className="mt-4">
               {t('createFirstLoad')}
-            </Link>
+            </ButtonLink>
           </div>
         ) : (
           <div className="divide-y divide-divider-ui">

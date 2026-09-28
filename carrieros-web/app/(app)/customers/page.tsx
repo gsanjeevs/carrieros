@@ -218,7 +218,7 @@ export default async function CustomersPage({
                   <div className="flex items-center gap-3">
                     {logoUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element -- signed, expiring Supabase Storage URL, not a static asset next/image can cache
-                      <img src={logoUrl} alt="" className="w-8 h-8 rounded-full object-cover shrink-0 bg-white/10" />
+                      <img src={logoUrl} alt="" className="w-8 h-8 rounded-full object-cover shrink-0 bg-surface-subtle" />
                     ) : (
                       <Avatar initials={initialsFor(org?.name)} />
                     )}

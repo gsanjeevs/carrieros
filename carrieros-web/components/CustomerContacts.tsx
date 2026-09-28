@@ -150,11 +150,11 @@ export default function CustomerContacts({
                   <TableCell className="text-text-sec">{[c.email, c.phone].filter(Boolean).join(' · ') || '—'}</TableCell>
                   <TableCell>
                     {c.portal_profile_id ? (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-success/20 text-success">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-status-success-surface text-status-success">
                         {t('contactsLinked')}
                       </span>
                     ) : (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-500/20 text-slate-400">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-surface-subtle text-text-sec">
                         {t('contactsNotLinked')}
                       </span>
                     )}
@@ -165,7 +165,7 @@ export default function CustomerContacts({
                         <button
                           onClick={() => revoke(c.id)}
                           disabled={busyId === c.id}
-                          className="text-xs font-medium text-red-400 hover:text-red-300 disabled:opacity-40 transition"
+                          className="text-xs font-medium text-danger hover:text-danger-dark disabled:opacity-40 transition"
                         >
                           {busyId === c.id ? '…' : t('contactsRevoke')}
                         </button>
@@ -191,7 +191,7 @@ export default function CustomerContacts({
       {canManage && (
         <Card>
           <CardBody>
-          <h2 className="text-white font-medium text-sm mb-3">{t('contactsAddNew')}</h2>
+          <h2 className="text-text-pri font-medium text-sm mb-3">{t('contactsAddNew')}</h2>
           <div className="grid grid-cols-2 gap-3 mb-3">
             <Field label={t('contactsName')} required>
               <Input size="lg" value={form.name} onChange={e => set('name', e.target.value)} />
@@ -206,7 +206,7 @@ export default function CustomerContacts({
               <Input size="lg" value={form.phone} onChange={e => set('phone', e.target.value)} />
             </Field>
           </div>
-          {error && <p className="text-red-400 text-xs mb-3">{error}</p>}
+          {error && <p className="text-danger text-xs mb-3">{error}</p>}
           <Button variant="primary" onClick={addContact} disabled={adding || !form.name.trim()}>
             {adding ? '…' : t('contactsAdd')}
           </Button>

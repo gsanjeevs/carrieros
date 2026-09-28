@@ -142,8 +142,8 @@ export default async function DriversPage({
                 const glow = cdlGlowStatus(driver.cdl_expiry)
                 const glowDotClass =
                   glow === 'success' ? 'bg-success shadow-glow-success' :
-                  glow === 'warning' ? 'bg-amber-500 shadow-glow-warning' :
-                  'bg-rose-500 shadow-glow-danger'
+                  glow === 'warning' ? 'bg-status-warning shadow-glow-warning' :
+                  'bg-status-danger shadow-glow-danger'
                 const topException = topExceptionByDriver.get(driver.id)
                 const avatarUrl = avatarUrlByDriver.get(driver.id)
                 const initials = name.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase()
@@ -179,7 +179,7 @@ export default async function DriversPage({
                     <TableCell>
                       <div className="inline-flex flex-col gap-1.5 rounded-lg border border-border-ui bg-surface-subtle px-3 py-2 min-w-[148px]">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-400 text-2xs font-semibold tracking-wide">
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-status-info-surface text-status-info text-2xs font-semibold tracking-wide">
                             {driver.cdl_class ? t('cdlClass', { class: driver.cdl_class }) : t('cdlClassUnknown')}
                           </span>
                           <span
@@ -202,7 +202,7 @@ export default async function DriversPage({
                             {driver.endorsements.map((code) => (
                               <span
                                 key={code}
-                                className="inline-flex items-center px-1.5 py-0.5 rounded border border-amber-500/40 bg-amber-500/5 text-amber-400 text-2xs font-medium"
+                                className="inline-flex items-center px-1.5 py-0.5 rounded border border-status-warning/40 bg-status-warning-surface/35 text-status-warning text-2xs font-medium"
                               >
                                 {t.has(`endorsement_${code}`) ? t(`endorsement_${code}`) : code}
                               </span>

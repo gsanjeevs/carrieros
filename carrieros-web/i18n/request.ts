@@ -6,10 +6,9 @@
 // logged-out visitors (login page, public tracking page, etc).
 import { cookies } from 'next/headers'
 import { getRequestConfig } from 'next-intl/server'
-
-export const SUPPORTED_LOCALES = ['en', 'es', 'pa', 'ur'] as const
-export type Locale = (typeof SUPPORTED_LOCALES)[number]
-export const RTL_LOCALES: Locale[] = ['ur']
+import { SUPPORTED_LOCALES, type Locale } from './locales'
+export { RTL_LOCALES, SUPPORTED_LOCALES } from './locales'
+export type { Locale } from './locales'
 
 export default getRequestConfig(async () => {
   const store = await cookies()

@@ -10,7 +10,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { updateInvoiceDraft, type ActionResult } from './actions'
-import { Card, CardHeader, CardBody, Button, Input } from '@/components/ui'
+import { Card, CardHeader, CardBody, Button, Input, Callout } from '@/components/ui'
 
 const labelCls = 'block text-xs font-medium text-text-sec mb-1.5'
 
@@ -117,11 +117,7 @@ export default function EditInvoiceCard({
           </div>
         </div>
 
-        {error && (
-          <div className="mt-3 rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2.5 text-red-400 text-xs">
-            {error}
-          </div>
-        )}
+        {error && <Callout tone="danger" className="mt-3">{error}</Callout>}
 
         <div className="flex gap-2 mt-4">
           <Button variant="secondary" className="flex-1" onClick={cancel} disabled={pending}>

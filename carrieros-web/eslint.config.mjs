@@ -93,10 +93,9 @@ function cardPatternRule(severity) {
   ];
 }
 
-// Component files were previously entirely unguarded by this rule (glob was
-// app/**/*.tsx only) — a real gap the raw-hex audit found, since several
-// components/*.tsx files hand-roll the exact patterns this guard exists to
-// catch. Both globs share the same "warn repo-wide" ratchet posture as app/.
+// Shared components outside the primitive library use the same warn posture
+// as application pages; components/ui gets a stricter migrated-surface gate
+// below after the semantic palette conversion.
 const uiComponentPatternGuardWarn = {
   files: ["app/**/*.tsx", "components/**/*.tsx"],
   rules: { "no-restricted-syntax": cardPatternRule("warn").slice(1) },
@@ -227,6 +226,98 @@ const textPatternGuardError = {
   rules: { "no-restricted-syntax": textPatternRule("error").slice(1) },
 };
 
+// Ratchet the migrated dashboard/load-board action links onto the shared
+// ButtonLink/FilterLink primitives. This is intentionally scoped to these
+// surfaces; broader rollout follows after legacy link treatments are migrated.
+const PRIMARY_LINK_SELECTOR_LITERAL =
+  "JSXOpeningElement[name.name='Link'] > JSXAttribute[name.name='className'] > Literal[value=/bg-brand-orange/]";
+const PRIMARY_LINK_SELECTOR_TEMPLATE =
+  "JSXOpeningElement[name.name='Link'] > JSXAttribute[name.name='className'] JSXExpressionContainer > TemplateLiteral TemplateElement[value.raw=/bg-brand-orange/]";
+const primaryLinkStyleGuard = {
+  files: ["app/(app)/dashboard/**/*.tsx", "app/(app)/loads/page.tsx"],
+  rules: {
+    "no-restricted-syntax": [
+      "error",
+      {
+        selector: PRIMARY_LINK_SELECTOR_LITERAL,
+        message: "Use ButtonLink or FilterLink from components/ui instead of page-owned brand link styles.",
+      },
+      {
+        selector: PRIMARY_LINK_SELECTOR_TEMPLATE,
+        message: "Use ButtonLink or FilterLink from components/ui instead of page-owned brand link styles.",
+      },
+    ],
+  },
+};
+
+// Migrated page/component surfaces use semantic surface/feedback tokens.
+// Keep them clean of fixed light/dark palette utilities; purpose-built
+// photographic, print, and status treatments remain outside this ratchet.
+const FIXED_PALETTE_SELECTOR_LITERAL =
+  "JSXAttribute[name.name='className'] Literal[value=/(bg|text|border)-(white|black|slate|gray|sky|red|emerald|amber|yellow|green|blue|purple|orange|indigo|cyan|pink|rose|lime|zinc|neutral|stone)(-|\\/)/]";
+const FIXED_PALETTE_SELECTOR_TEMPLATE =
+  "JSXAttribute[name.name='className'] TemplateElement[value.raw=/(bg|text|border)-(white|black|slate|gray|sky|red|emerald|amber|yellow|green|blue|purple|orange|indigo|cyan|pink|rose|lime|zinc|neutral|stone)(-|\\/)/]";
+const semanticPaletteGuard = {
+  files: [
+    "app/(app)/**/*.tsx",
+    "app/(admin)/**/*.tsx",
+    "app/login/page.tsx",
+    "app/signup/page.tsx",
+    "app/signup/**/*.tsx",
+    "app/onboarding/page.tsx",
+    "app/onboarding/**/*.tsx",
+    "app/track/**/*.tsx",
+    "components/**/*.tsx",
+  ],
+  ignores: ["app/(app)/invoices/**/print/page.tsx"],
+  rules: {
+    "no-restricted-syntax": [
+      "error",
+      {
+        selector: FIXED_PALETTE_SELECTOR_LITERAL,
+        message: "Use semantic design tokens instead of fixed light/dark palette utilities on this migrated surface.",
+      },
+      {
+        selector: FIXED_PALETTE_SELECTOR_TEMPLATE,
+        message: "Use semantic design tokens instead of fixed light/dark palette utilities on this migrated surface.",
+      },
+    ],
+  },
+};
+
+// The primitive library is the canonical home for component styling. Keep its
+// JSX out of fixed palette utilities so every variant follows semantic theme
+// tokens; modal backdrops and data-driven color mappings are deliberate
+// non-utility exceptions and are not matched by this selector.
+const UI_FIXED_PALETTE_SELECTOR_LITERAL =
+  "JSXAttribute[name.name='className'] Literal[value=/text-white|text-slate-[0-9]+|text-gray-[0-9]+|bg-white|border-white/]";
+const UI_FIXED_PALETTE_SELECTOR_TEMPLATE =
+  "JSXAttribute[name.name='className'] TemplateElement[value.raw=/text-white|text-slate-[0-9]+|text-gray-[0-9]+|bg-white|border-white/]";
+const UI_FIXED_PALETTE_SELECTOR_STRING =
+  "Literal[value=/text-white|text-slate-[0-9]+|text-gray-[0-9]+|bg-white|border-white/]";
+const uiSemanticPaletteGuard = {
+  files: ["components/ui/**/*.ts", "components/ui/**/*.tsx"],
+  rules: {
+    "no-restricted-syntax": [
+      "error",
+      ...cardPatternRule("error").slice(2),
+      ...textPatternRule("error").slice(2),
+      {
+        selector: UI_FIXED_PALETTE_SELECTOR_LITERAL,
+        message: "Use semantic theme tokens in components/ui instead of fixed light/dark palette utilities.",
+      },
+      {
+        selector: UI_FIXED_PALETTE_SELECTOR_TEMPLATE,
+        message: "Use semantic theme tokens in components/ui instead of fixed light/dark palette utilities.",
+      },
+      {
+        selector: UI_FIXED_PALETTE_SELECTOR_STRING,
+        message: "Use semantic theme tokens in components/ui instead of fixed light/dark palette utilities.",
+      },
+    ],
+  },
+};
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -235,6 +326,9 @@ const eslintConfig = defineConfig([
   libHexPatternGuard,
   textPatternGuardWarn,
   textPatternGuardError,
+  primaryLinkStyleGuard,
+  semanticPaletteGuard,
+  uiSemanticPaletteGuard,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Sources copied verbatim into both apps by scripts/gen-api-client.ts; they

@@ -18,7 +18,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { Card, CardBody, Field, Input } from '@/components/ui'
+import { Button, Card, CardBody, Callout, Field, Input } from '@/components/ui'
 import { apiClient } from '@/lib/api-client'
 
 function FormField({
@@ -118,25 +118,25 @@ export default function ManualLoadForm() {
     <div className="p-8 max-w-3xl mx-auto">
 
       <div className="mb-8">
-        <Link href="/loads/new" className="text-slate-400 text-sm hover:text-white flex items-center gap-1.5 mb-4 rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
+        <Link href="/loads/new" className="text-text-sec text-sm hover:text-text-pri flex items-center gap-1.5 mb-4 rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
           <span className="material-symbols-outlined text-[16px]">arrow_back</span>
           {t('back')}
         </Link>
-        <h1 className="text-2xl font-semibold text-white">{t('title')}</h1>
-        <p className="text-slate-400 text-sm mt-1">{t('subtitle')}</p>
+        <h1 className="text-2xl font-semibold text-text-pri">{t('title')}</h1>
+        <p className="text-text-sec text-sm mt-1">{t('subtitle')}</p>
       </div>
 
       {error && (
-        <div className="mb-6 rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-red-400 text-sm">
+        <Callout tone="danger" className="mb-6 text-sm">
           {error}
-        </div>
+        </Callout>
       )}
 
       <div className="space-y-6">
 
         <Card>
           <CardBody>
-          <h2 className="text-white text-sm font-medium mb-4">{tSections('customerReference')}</h2>
+          <h2 className="text-text-pri text-sm font-medium mb-4">{tSections('customerReference')}</h2>
           <div className="grid grid-cols-2 gap-4">
             <FormField label={tFields('customerBroker')} name="customer_name_raw" value={fields.customer_name_raw} onChange={update} placeholder="Company name" />
             <FormField label={tFields('loadReference')} name="load_number_raw" value={fields.load_number_raw} onChange={update} placeholder="RC-12345" />
@@ -146,7 +146,7 @@ export default function ManualLoadForm() {
 
         <Card>
           <CardBody>
-          <h2 className="text-white text-sm font-medium mb-4 flex items-center gap-2">
+          <h2 className="text-text-pri text-sm font-medium mb-4 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-brand-orange"></span>
             {tSections('pickup')}
           </h2>
@@ -169,7 +169,7 @@ export default function ManualLoadForm() {
 
         <Card>
           <CardBody>
-          <h2 className="text-white text-sm font-medium mb-4 flex items-center gap-2">
+          <h2 className="text-text-pri text-sm font-medium mb-4 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-success"></span>
             {tSections('delivery')}
           </h2>
@@ -192,7 +192,7 @@ export default function ManualLoadForm() {
 
         <Card>
           <CardBody>
-          <h2 className="text-white text-sm font-medium mb-4">{tSections('loadDetails')}</h2>
+          <h2 className="text-text-pri text-sm font-medium mb-4">{tSections('loadDetails')}</h2>
           <div className="grid grid-cols-2 gap-4">
             <FormField label={tFields('commodity')} name="commodity" value={fields.commodity} onChange={update} placeholder="General freight" />
             <FormField label={tFields('weight')} name="weight_lbs" value={fields.weight_lbs} onChange={update} type="number" placeholder="42000" />
@@ -205,14 +205,14 @@ export default function ManualLoadForm() {
       </div>
 
       <div className="flex items-center justify-end mt-8">
-        <button
+        <Button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-6 py-2.5 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+          loading={saving}
+          className="px-6"
         >
           {saving ? (
             <>
-              <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
               {t('saving')}
             </>
           ) : (
@@ -221,7 +221,7 @@ export default function ManualLoadForm() {
               {t('createLoad')}
             </>
           )}
-        </button>
+        </Button>
       </div>
 
     </div>

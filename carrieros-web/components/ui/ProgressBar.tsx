@@ -26,7 +26,7 @@ export default function ProgressBar({ value, variant = 'success', thin = false, 
 
   return (
     <div
-      className={cn('w-full rounded-full bg-white/10 overflow-hidden', thin ? 'h-1' : 'h-1.5', className)}
+      className={cn('w-full rounded-full bg-border-ui overflow-hidden', thin ? 'h-1' : 'h-1.5', className)}
       role="progressbar"
       aria-valuenow={clamped}
       aria-valuemin={0}

@@ -71,7 +71,7 @@ export default function Input(props: InputProps) {
     // takes over on top of it (matches the mockup: a filled field being
     // actively edited shows the orange focus ring, not the green one).
     resolvedState === 'filled' &&
-      'border-success/35 bg-success/5 focus:border-brand-orange/50 focus:bg-brand-orange/5 focus:ring-brand-orange/20',
+      'border-status-success/35 bg-status-success-surface/50 focus:border-brand-orange/50 focus:bg-brand-orange/5 focus:ring-brand-orange/20',
     resolvedState === 'default' && 'border-border-ui focus:border-brand-orange focus:ring-brand-orange/20',
     'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-surface-subtle',
     'read-only:bg-surface-subtle read-only:cursor-default',

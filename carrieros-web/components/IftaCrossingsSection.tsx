@@ -99,14 +99,14 @@ export default function IftaCrossingsSection({
       </div>
 
       {crossings.length === 0 ? (
-        <p className="text-slate-500 text-sm">{t('iftaNoCrossings')}</p>
+        <p className="text-text-mut text-sm">{t('iftaNoCrossings')}</p>
       ) : (
         <div className="space-y-1.5">
           {crossings.map((c) => (
             <div key={c.id} className="flex items-center justify-between px-3 py-2 bg-surface-subtle rounded-lg">
-              <span className="text-white text-sm font-medium">{c.state}</span>
-              <span className="text-slate-400 text-xs">{new Date(c.crossedAt).toLocaleString(locale)}</span>
-              <span className="text-slate-400 text-xs">{c.odometerEst != null ? `${c.odometerEst.toLocaleString()} mi` : '—'}</span>
+              <span className="text-text-pri text-sm font-medium">{c.state}</span>
+              <span className="text-text-sec text-xs">{new Date(c.crossedAt).toLocaleString(locale)}</span>
+              <span className="text-text-sec text-xs">{c.odometerEst != null ? `${c.odometerEst.toLocaleString()} mi` : '—'}</span>
             </div>
           ))}
         </div>
@@ -136,14 +136,14 @@ export default function IftaCrossingsSection({
             value={form.odometer_est}
             onChange={(e) => set('odometer_est', e.target.value)}
           />
-          {error && <p className="text-red-400 text-xs">{error}</p>}
+          {error && <p className="text-danger text-xs">{error}</p>}
           <div className="flex gap-2">
-            <button onClick={() => { setAdding(false); setError('') }} disabled={saving} className="flex-1 py-2 bg-surface-subtle hover:bg-white/10 disabled:opacity-40 text-white text-sm font-medium rounded-lg transition">
+            <Button variant="ghost" size="lg" onClick={() => { setAdding(false); setError('') }} disabled={saving} className="flex-1">
               {t('iftaCancel')}
-            </button>
-            <button onClick={submit} disabled={saving} className="flex-1 py-2 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition">
+            </Button>
+            <Button variant="primary" size="lg" onClick={submit} disabled={saving} className="flex-1">
               {saving ? t('iftaSaving') : t('iftaSave')}
-            </button>
+            </Button>
           </div>
         </div>
       )}

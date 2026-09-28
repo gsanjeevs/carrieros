@@ -49,25 +49,25 @@ export const LOAD_STATUSES: readonly LoadStatus[] = [
 export function loadStatusColor(status: LoadStatus): string {
   switch (status) {
     case 'draft':
-      return 'bg-slate-500/20 text-slate-400'
+      return 'bg-status-neutral-surface text-status-neutral'
     case 'scheduled':
-      return 'bg-blue-500/20 text-blue-400'
+      return 'bg-status-info-surface text-status-info'
     case 'dispatched':
-      return 'bg-brand-orange/20 text-brand-orange'
+      return 'bg-status-dispatched-surface text-status-dispatched'
     case 'picked_up':
-      return 'bg-amber-500/20 text-amber-400'
+      return 'bg-status-warning-surface text-status-warning'
     case 'in_transit':
-      return 'bg-teal/20 text-teal'
+      return 'bg-status-in-transit-surface text-status-in-transit'
     case 'delivered':
-      return 'bg-success/20 text-success'
+      return 'bg-status-success-surface text-status-success'
     case 'invoiced':
-      return 'bg-purple-500/20 text-purple-400'
+      return 'bg-status-purple-surface text-status-purple'
     case 'paid':
-      return 'bg-success/20 text-success'
+      return 'bg-status-success-surface text-status-success'
     case 'cancelled':
-      return 'bg-rose-500/10 text-rose-400'
+      return 'bg-status-danger-surface text-status-danger'
     case 'declined':
-      return 'bg-rose-500/10 text-rose-400'
+      return 'bg-status-danger-surface text-status-danger'
     default: {
       // Compile-time exhaustiveness check — a new LOAD_STATUS value with no
       // case above fails `tsc`, not silently renders blank.
