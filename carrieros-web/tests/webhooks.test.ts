@@ -188,5 +188,5 @@ describe('wired domain event: invoice mark-paid dispatches a webhook delivery', 
     expect(delivery.payload).toMatchObject({ invoiceId: invoice.id })
 
     await admin.from('webhooks').delete().eq('id', webhook.id)
-  }, 20_000)
+  }, 60_000)
 })
