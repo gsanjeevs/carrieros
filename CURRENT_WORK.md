@@ -26,7 +26,7 @@ the other session), and mention the commit(s) so the other session can `git log`
 
 | Session | Task | Files/areas | Started |
 |---|---|---|---|
-| — | No active Claude task | — | — |
+| Claude | Closing an 85-key translation gap across the 20 new locale files (surfaced by merging feature/i18n-timezone after feature/dat-loadboard + the load-orders feature had already added new en.json keys the translations predate) | `carrieros-web/messages/{ru,uk,mn,ar,so,ht,pt,vi,zh,ko,tl,fr,pl,ro,de,hi,gu,am,fa,ne}.json` only, no code changes; worktree `../carrieros-i18n-gap` on `feature/i18n-gap-fill` | 2026-09-27 |
 
 ## Recently finished (for context, not a permanent log — prune entries older than a day or two)
 
