@@ -14,7 +14,7 @@ import { formatDate, formatDateTime, toDate } from '@/lib/format-datetime'
 import { formatMoney, resolveCurrency } from '@/lib/format-money'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import { vehicleStatusVariant, type VehicleStatus } from '@/lib/domain/vehicle-status'
-import { Card, CardHeader, CardBody, KpiTile, StatusBadge, type StatusBadgeVariant, Table, TableHeaderCell, TableRow, TableCell, ProgressBar, EmptyState } from '@/components/ui'
+import { Card, CardHeader, CardBody, KpiTile, StatusBadge, type StatusBadgeVariant, Table, TableHeaderCell, TableRow, TableCell, ProgressBar, EmptyState, PageBackLink } from '@/components/ui'
 import { createStorageProvider } from '@/lib/storage'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { listLoadsForVehicle } from '@/lib/queries/loads'
@@ -90,10 +90,13 @@ function InfoRow({ label, value }: { label: string; value: string | number | nul
 
 export default async function VehicleDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ vehicle_number: string }>
+  searchParams: Promise<{ from?: string; fromLabel?: string }>
 }) {
   const { vehicle_number } = await params
+  const { from, fromLabel } = await searchParams
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -546,10 +549,8 @@ export default async function VehicleDetailPage({
   return (
     <div className="p-8 max-w-5xl mx-auto">
       <div className="mb-6">
-        <div className="flex items-center gap-3 mb-1">
-          <Link href="/vehicles" className="text-text-sec hover:text-text-pri transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
-            <span className="material-symbols-outlined text-[20px]">arrow_back</span>
-          </Link>
+        <PageBackLink from={from} fromLabel={fromLabel} defaultHref="/vehicles" defaultLabel={t('backToVehicles')} />
+        <div className="flex items-center gap-3 mb-1 mt-2">
           <h1 className="text-2xl font-semibold text-text-pri">{label}</h1>
           <StatusBadge variant={vehicleStatusVariant((vehicle.status ?? 'active') as VehicleStatus)}>
             {t(`vstatus_${vehicle.status ?? 'active'}` as never)}
@@ -576,8 +577,8 @@ export default async function VehicleDetailPage({
             </div>
           )}
         </div>
-        <p className="text-text-sec text-sm ml-9">{ymm || vt ? [ymm, vt ? t(`type_${vt.code}` as never) : null].filter(Boolean).join(' · ') : ''}</p>
-        <div className="ml-9 mt-2">
+        <p className="text-text-sec text-sm">{ymm || vt ? [ymm, vt ? t(`type_${vt.code}` as never) : null].filter(Boolean).join(' · ') : ''}</p>
+        <div className="mt-2">
           <VehiclePhotoUpload vehicleId={vehicle.id} orgId={profile.org_id} photoUrl={photoUrl} canUpload={canManage} />
         </div>
       </div>

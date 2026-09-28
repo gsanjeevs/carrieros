@@ -20,7 +20,7 @@ import EditCustomerButton from './EditCustomerButton'
 import CustomerContacts from '@/components/CustomerContacts'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
 import { invoiceStatusVariant, type InvoiceStatus } from '@/lib/domain/invoice-status'
-import { Card, CardHeader, CardBody, KpiTile, StatusBadge, Table, TableHeaderCell, TableRow, TableCell, EmptyState } from '@/components/ui'
+import { Card, CardHeader, CardBody, KpiTile, StatusBadge, Table, TableHeaderCell, TableRow, TableCell, EmptyState, PageBackLink } from '@/components/ui'
 
 import { INVOICE_ROLES } from '@/lib/roles-policy'
 import { getProfileForUser } from '@/lib/queries/profiles'
@@ -91,10 +91,13 @@ function InfoRow({ label, value }: { label: string; value: string | number | nul
 
 export default async function CustomerDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ customer_number: string }>
+  searchParams: Promise<{ from?: string; fromLabel?: string }>
 }) {
   const { customer_number } = await params
+  const { from, fromLabel } = await searchParams
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -398,10 +401,8 @@ export default async function CustomerDetailPage({
   return (
     <div className="p-8 max-w-5xl mx-auto">
       <div className="mb-6">
-        <div className="flex items-center gap-3 mb-1">
-          <Link href="/customers" className="text-text-sec hover:text-text-pri transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
-            <span className="material-symbols-outlined text-[20px]">arrow_back</span>
-          </Link>
+        <PageBackLink from={from} fromLabel={fromLabel} defaultHref="/customers" defaultLabel={t('backToCustomers')} />
+        <div className="flex items-center gap-3 mb-1 mt-2">
           <h1 className="text-2xl font-semibold text-text-pri">{org?.name ?? '—'}</h1>
           <span className="text-text-sec text-sm">{customer.customer_number}</span>
         </div>

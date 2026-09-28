@@ -323,6 +323,7 @@
   },
   "drivers": {
     "title": "Drivers",
+    "backToDrivers": "Back to Drivers",
     "driverCount": "{count} drivers",
     "inviteDriver": "Invite Driver",
     "driverNumber": "Driver #",
@@ -419,6 +420,7 @@
   },
   "vehicles": {
     "title": "Vehicles",
+    "backToVehicles": "Back to Vehicles",
     "truckCount": "{count} vehicles",
     "addTruck": "Add Vehicle",
     "editTruck": "Edit Vehicle",
@@ -891,6 +893,7 @@
   },
   "customers": {
     "title": "Customers",
+    "backToCustomers": "Back to Customers",
     "customerCount": "{count, plural, =0 {No customers} one {# customer} other {# customers}}",
     "addCustomer": "Add Customer",
     "addFirstCustomer": "Add first customer",
