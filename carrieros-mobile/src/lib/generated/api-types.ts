@@ -1427,7 +1427,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         /** @enum {string|null} */
-                        preferred_language: "en" | "es" | "pa" | "ur" | null;
+                        preferred_language: "en" | "es" | "pa" | "ur" | "ru" | "uk" | "mn" | "ar" | "so" | "ht" | "pt" | "vi" | "zh" | "ko" | "tl" | "fr" | "pl" | "ro" | "de" | "hi" | "gu" | "am" | "fa" | "ne" | null;
                         /**
                          * @description null = inherit org_default_uom_system.
                          * @enum {string|null}
@@ -1439,6 +1439,8 @@ export interface operations {
                         time_format: "12h" | "24h" | null;
                         /** @enum {string|null} */
                         theme_preference: "light" | "dark" | "system" | null;
+                        /** @description null = inherit the organization's carrier_details.timezone default. */
+                        timezone: string | null;
                         /** @enum {string} */
                         org_default_uom_system: "imperial" | "metric";
                     };
@@ -1491,7 +1493,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /** @enum {string} */
-                    preferred_language?: "en" | "es" | "pa" | "ur";
+                    preferred_language?: "en" | "es" | "pa" | "ur" | "ru" | "uk" | "mn" | "ar" | "so" | "ht" | "pt" | "vi" | "zh" | "ko" | "tl" | "fr" | "pl" | "ro" | "de" | "hi" | "gu" | "am" | "fa" | "ne";
                     /**
                      * @description null = inherit the organization's setting.
                      * @enum {string|null}
@@ -1503,6 +1505,8 @@ export interface operations {
                     time_format?: "12h" | "24h";
                     /** @enum {string} */
                     theme_preference?: "light" | "dark" | "system";
+                    /** @description null = inherit the organization's setting. */
+                    timezone?: string | null;
                 };
             };
         };

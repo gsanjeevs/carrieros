@@ -814,7 +814,27 @@
                         "en",
                         "es",
                         "pa",
-                        "ur"
+                        "ur",
+                        "ru",
+                        "uk",
+                        "mn",
+                        "ar",
+                        "so",
+                        "ht",
+                        "pt",
+                        "vi",
+                        "zh",
+                        "ko",
+                        "tl",
+                        "fr",
+                        "pl",
+                        "ro",
+                        "de",
+                        "hi",
+                        "gu",
+                        "am",
+                        "fa",
+                        "ne"
                       ]
                     },
                     "uom_system": {
@@ -852,6 +872,11 @@
                         "system"
                       ]
                     },
+                    "timezone": {
+                      "nullable": true,
+                      "description": "null = inherit the organization's carrier_details.timezone default.",
+                      "type": "string"
+                    },
                     "org_default_uom_system": {
                       "type": "string",
                       "enum": [
@@ -866,6 +891,7 @@
                     "date_format",
                     "time_format",
                     "theme_preference",
+                    "timezone",
                     "org_default_uom_system"
                   ],
                   "additionalProperties": false
@@ -990,7 +1016,27 @@
                       "en",
                       "es",
                       "pa",
-                      "ur"
+                      "ur",
+                      "ru",
+                      "uk",
+                      "mn",
+                      "ar",
+                      "so",
+                      "ht",
+                      "pt",
+                      "vi",
+                      "zh",
+                      "ko",
+                      "tl",
+                      "fr",
+                      "pl",
+                      "ro",
+                      "de",
+                      "hi",
+                      "gu",
+                      "am",
+                      "fa",
+                      "ne"
                     ]
                   },
                   "uom_system": {
@@ -1024,6 +1070,11 @@
                       "dark",
                       "system"
                     ]
+                  },
+                  "timezone": {
+                    "description": "null = inherit the organization's setting.",
+                    "nullable": true,
+                    "type": "string"
                   }
                 }
               }

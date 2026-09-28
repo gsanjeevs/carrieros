@@ -147,12 +147,22 @@ export const MilestoneResponseSchema = z.object({
   load_number: z.string().nullable(),
 })
 
+// Real IANA zone names, per the runtime's own tzdata -- no extra dependency.
+// Computed once at module load; Node/V8 have supported this since Node 18.
+const VALID_TIME_ZONES = new Set<string>(
+  typeof Intl.supportedValuesOf === 'function' ? Intl.supportedValuesOf('timeZone') : [],
+)
+const timezoneSchema = z.string().refine((v) => VALID_TIME_ZONES.has(v), {
+  message: 'Must be a valid IANA timezone name (e.g. America/Los_Angeles)',
+})
+
 export const PreferencesResponseSchema = z.object({
   preferred_language: z.enum(LANGUAGES).nullable(),
   uom_system: z.enum(UOM_SYSTEMS).nullable().describe('null = inherit org_default_uom_system.'),
   date_format: z.enum(DATE_FORMATS).nullable(),
   time_format: z.enum(TIME_FORMATS).nullable(),
   theme_preference: z.enum(THEMES).nullable(),
+  timezone: z.string().nullable().describe('null = inherit the organization\'s carrier_details.timezone default.'),
   org_default_uom_system: z.enum(UOM_SYSTEMS),
 })
 
@@ -163,6 +173,7 @@ export const UpdatePreferencesBodySchema = z
     date_format: z.enum(DATE_FORMATS).optional(),
     time_format: z.enum(TIME_FORMATS).optional(),
     theme_preference: z.enum(THEMES).optional(),
+    timezone: timezoneSchema.nullable().optional().describe('null = inherit the organization\'s setting.'),
   })
   .refine((v) => Object.keys(v).length > 0, { message: 'Provide at least one preference to update' })
 

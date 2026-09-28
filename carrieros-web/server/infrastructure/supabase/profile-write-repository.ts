@@ -14,7 +14,7 @@ export class SupabaseProfileWriteRepository implements ProfileWriteRepository {
   async getPreferences(actor: ActorContext): Promise<Result<ProfilePreferencesRecord>> {
     const { data: profile, error } = await this.supabase
       .from('profiles')
-      .select('preferred_language, uom_system, date_format, time_format, theme_preference, org_id')
+      .select('preferred_language, uom_system, date_format, time_format, theme_preference, timezone, org_id')
       .eq('id', actor.userId)
       .single()
     if (error) return err(domainError('PRECONDITION_FAILED', `preferences lookup failed: ${error.message}`))
@@ -37,6 +37,7 @@ export class SupabaseProfileWriteRepository implements ProfileWriteRepository {
       date_format: profile.date_format,
       time_format: profile.time_format,
       theme_preference: profile.theme_preference,
+      timezone: profile.timezone,
       org_default_uom_system: orgDefaultUom,
     })
   }

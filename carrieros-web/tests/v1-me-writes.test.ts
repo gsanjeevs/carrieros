@@ -53,7 +53,10 @@ describe('PATCH /api/v1/me/preferences', () => {
   })
 
   it('rejects out-of-range values with 400 and an empty body with 400', async () => {
-    const bad = await send('PATCH', '/api/v1/me/preferences', { preferred_language: 'fr' })
+    // 'fr' used to be out-of-range when LANGUAGES had only 4 codes; migration
+    // 0054 (2026-09-27) legitimately added it as a supported language, so
+    // this now uses a code that's still not in the closed set.
+    const bad = await send('PATCH', '/api/v1/me/preferences', { preferred_language: 'zz' })
     expect(bad.res.status).toBe(400)
     expect(bad.json.error_code).toBe('VALIDATION_ERROR')
     expect((await send('PATCH', '/api/v1/me/preferences', {})).res.status).toBe(400)

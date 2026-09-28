@@ -303,6 +303,8 @@ export interface ProfilePreferencesRecord {
   readonly date_format: string | null
   readonly time_format: string | null
   readonly theme_preference: string | null
+  /** null = inherit the org's carrier_details.timezone default. */
+  readonly timezone: string | null
   /** carrier_details.uom_system for the actor's org — the fallback when the profile's own uom_system is null. */
   readonly org_default_uom_system: 'imperial' | 'metric'
 }
