@@ -1389,6 +1389,7 @@
       "error": "Không thể tải năng lực theo vai trò.",
       "notLiveNotice": "Chỉnh sửa bảng này không có hiệu lực trực tiếp. Việc kiểm soát truy cập được thực thi từ một tệp được tạo tự động (scripts/gen-role-capabilities.mjs), không phải bảng này — các thay đổi ở đây chỉ có hiệu lực sau khi chạy Tạo lại và các tệp kết quả được commit và triển khai.",
       "savedRegenerateToApply": "Đã lưu. Tạo lại để áp dụng.",
+      "savedRegenerateUnavailable": "Đã lưu. Tạo lại chỉ hoạt động trong môi trường phát triển cục bộ — hãy nhờ kỹ sư chạy scripts/gen-role-capabilities.mjs ở đó, sau đó commit và triển khai (deploy) kết quả.",
       "regenerateButton": "Tạo lại",
       "regenerateError": "Tạo lại thất bại.",
       "regenerateChanged": "Đã tạo lại — các tệp đã thay đổi: {files}.",

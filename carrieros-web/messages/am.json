@@ -1389,6 +1389,7 @@
       "error": "የሚና ብቃቶችን መጫን አልተቻለም።",
       "notLiveNotice": "ይህን ሰንጠረዥ ማርትዕ ቀጥታ አይደለም። ቁጥጥር የሚተገበረው ከተፈጠረ ፋይል (scripts/gen-role-capabilities.mjs) ነው፣ ከዚህ ሰንጠረዥ አይደለም — እዚህ የተደረጉ ለውጦች ተፈጻሚ የሚሆኑት Regenerate ከተካሄደ እና የተገኙት ፋይሎች ከተላኩ እና ከተሰማሩ በኋላ ብቻ ነው።",
       "savedRegenerateToApply": "ተቀምጧል። ለመተግበር Regenerate ያድርጉ።",
+      "savedRegenerateUnavailable": "ተቀምጧል። Regenerate የሚሰራው በአካባቢያዊ ልማት ኮፒ ውስጥ ብቻ ነው — አንድ መሐንዲስ እዚያ scripts/gen-role-capabilities.mjs እንዲያሄድ ይጠይቁ፣ ከዚያም ውጤቱን commit እና deploy ያድርጉ።",
       "regenerateButton": "Regenerate",
       "regenerateError": "Regenerate አልተሳካም።",
       "regenerateChanged": "Regenerate ተደርጓል — የተቀየሩ ፋይሎች፦ {files}።",

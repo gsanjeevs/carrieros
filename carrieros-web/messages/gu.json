@@ -1389,6 +1389,7 @@
       "error": "ભૂમિકા ક્ષમતાઓ લોડ થઈ શકી નહીં.",
       "notLiveNotice": "આ ટેબલનું સંપાદન લાઇવ નથી. ગેટિંગ એક જનરેટ થયેલી ફાઇલ (scripts/gen-role-capabilities.mjs) પરથી લાગુ થાય છે, આ ટેબલ પરથી નહીં — અહીં કરેલા ફેરફારો ત્યારે જ અસરકારક બને છે જ્યારે Regenerate ચલાવવામાં આવે અને પરિણામી ફાઇલો કમિટ અને ડિપ્લોય કરવામાં આવે.",
       "savedRegenerateToApply": "સાચવ્યું. લાગુ કરવા Regenerate કરો.",
+      "savedRegenerateUnavailable": "સાચવ્યું. Regenerate ફક્ત લોકલ ડેવ ચેકઆઉટમાં કામ કરે છે — કોઈ એન્જિનિયરને ત્યાં scripts/gen-role-capabilities.mjs ચલાવવા કહો, પછી પરિણામ કમિટ અને ડિપ્લોય કરો.",
       "regenerateButton": "Regenerate",
       "regenerateError": "Regenerate નિષ્ફળ.",
       "regenerateChanged": "Regenerate થયું — બદલાયેલી ફાઇલો: {files}.",

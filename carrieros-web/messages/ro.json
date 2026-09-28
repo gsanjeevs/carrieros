@@ -1389,6 +1389,7 @@
       "error": "Nu am putut încărca capabilitățile pe rol.",
       "notLiveNotice": "Editarea acestui tabel nu este live. Restricțiile sunt aplicate dintr-un fișier generat (scripts/gen-role-capabilities.mjs), nu din acest tabel — modificările de aici au efect doar după ce Regenerare este rulată, iar fișierele rezultate sunt comise (commit) și implementate (deploy).",
       "savedRegenerateToApply": "Salvat. Regenerează pentru a aplica.",
+      "savedRegenerateUnavailable": "Salvat. Regenerarea funcționează doar într-un mediu de dezvoltare local — cere unui inginer să ruleze scripts/gen-role-capabilities.mjs acolo, apoi să facă commit și deploy rezultatului.",
       "regenerateButton": "Regenerează",
       "regenerateError": "Regenerarea a eșuat.",
       "regenerateChanged": "Regenerat — fișiere modificate: {files}.",

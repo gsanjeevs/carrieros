@@ -1389,6 +1389,7 @@
       "error": "No se pudieron cargar las capacidades por rol.",
       "notLiveNotice": "Editar esta tabla no tiene efecto inmediato. El control de acceso se aplica desde un archivo generado (scripts/gen-role-capabilities.mjs), no desde esta tabla — los cambios aquí solo tienen efecto después de ejecutar Regenerar y de confirmar y desplegar los archivos resultantes.",
       "savedRegenerateToApply": "Guardado. Regenere para aplicar.",
+      "savedRegenerateUnavailable": "Guardado. Regenerar solo funciona en una copia de desarrollo local — pida a un ingeniero que ejecute scripts/gen-role-capabilities.mjs allí, y luego confirme (commit) y despliegue el resultado.",
       "regenerateButton": "Regenerar",
       "regenerateError": "No se pudo regenerar.",
       "regenerateChanged": "Regenerado — archivos modificados: {files}.",

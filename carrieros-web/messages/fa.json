@@ -1389,6 +1389,7 @@
       "error": "بارگذاری قابلیت‌های نقش ممکن نشد.",
       "notLiveNotice": "ویرایش این جدول زنده نیست. کنترل دسترسی از یک فایل تولیدشده (scripts/gen-role-capabilities.mjs) اعمال می‌شود، نه از این جدول — تغییرات در اینجا فقط پس از اجرای Regenerate و کامیت و استقرار فایل‌های حاصل‌شده اعمال می‌شوند.",
       "savedRegenerateToApply": "ذخیره شد. برای اعمال، Regenerate کنید.",
+      "savedRegenerateUnavailable": "ذخیره شد. Regenerate فقط در یک نسخه توسعه محلی کار می‌کند — از یک مهندس بخواهید scripts/gen-role-capabilities.mjs را آنجا اجرا کند، سپس نتیجه را commit و deploy کند.",
       "regenerateButton": "Regenerate",
       "regenerateError": "Regenerate ناموفق بود.",
       "regenerateChanged": "Regenerate شد — فایل‌های تغییریافته: {files}.",

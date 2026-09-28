@@ -1389,6 +1389,7 @@
       "error": "无法加载角色能力。",
       "notLiveNotice": "编辑此表不会立即生效。访问控制由生成的文件（scripts/gen-role-capabilities.mjs）强制执行，而非此表 — 此处的更改只有在运行“重新生成”并将生成的文件提交和部署后才会生效。",
       "savedRegenerateToApply": "已保存。请重新生成以应用。",
+      "savedRegenerateUnavailable": "已保存。重新生成仅在本地开发环境中有效——请让工程师在本地运行 scripts/gen-role-capabilities.mjs，然后提交并部署结果。",
       "regenerateButton": "重新生成",
       "regenerateError": "重新生成失败。",
       "regenerateChanged": "已重新生成 — 已更改的文件：{files}。",

@@ -1389,6 +1389,7 @@
       "error": "Nou pa t kapab chaje kapasite pa wòl yo.",
       "notLiveNotice": "Modifye tablo sa a pa an dirèk. Kontwòl aksè a aplike apati yon fichye ki jenere (scripts/gen-role-capabilities.mjs), pa tablo sa a — chanjman isit la pran efè sèlman apre Regenerate egzekite epi fichye rezilta yo komèt ak deplwaye.",
       "savedRegenerateToApply": "Anrejistre. Regenerate pou aplike.",
+      "savedRegenerateUnavailable": "Anrejistre. Regenerate sèlman fonksyone nan yon anviwonman devlopman lokal — mande yon enjenyè kouri scripts/gen-role-capabilities.mjs la, epi commit epi deploy rezilta a.",
       "regenerateButton": "Regenerate",
       "regenerateError": "Regenerate echwe.",
       "regenerateChanged": "Regenere — fichye ki chanje: {files}.",
