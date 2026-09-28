@@ -27,6 +27,7 @@ import { getProfileForUser } from '@/lib/queries/profiles'
 import { listLoadsForCustomer } from '@/lib/queries/loads'
 import { logError } from '@/lib/observability'
 import { roleHasCapability } from '@/lib/generated/role-capabilities'
+import { resolveFromLabel } from '@/lib/resolve-from-label'
 
 // Matches customers/page.tsx's list gate — wider than `customers_manage`
 // (finance reads the directory), so no capability's role set covers it.
@@ -97,7 +98,8 @@ export default async function CustomerDetailPage({
   searchParams: Promise<{ from?: string; fromLabel?: string }>
 }) {
   const { customer_number } = await params
-  const { from, fromLabel } = await searchParams
+  const { from, fromLabel: fromLabelKey } = await searchParams
+  const fromLabel = await resolveFromLabel(fromLabelKey)
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()

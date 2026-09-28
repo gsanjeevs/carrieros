@@ -15,6 +15,7 @@ import { Card, CardHeader, CardBody, KpiTile, StatusBadge, Table, TableHeaderCel
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { listLoadsForDriver } from '@/lib/queries/loads'
 import { roleHasCapability } from '@/lib/generated/role-capabilities'
+import { resolveFromLabel } from '@/lib/resolve-from-label'
 import { createStorageProvider } from '@/lib/storage'
 
 function InfoRow({ label, value }: { label: string; value: string | number | null | undefined }) {
@@ -34,7 +35,8 @@ export default async function DriverDetailPage({
   searchParams: Promise<{ from?: string; fromLabel?: string }>
 }) {
   const { driver_number } = await params
-  const { from, fromLabel } = await searchParams
+  const { from, fromLabel: fromLabelKey } = await searchParams
+  const fromLabel = await resolveFromLabel(fromLabelKey)
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()

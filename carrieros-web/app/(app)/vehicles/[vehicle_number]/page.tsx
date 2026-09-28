@@ -19,6 +19,7 @@ import { createStorageProvider } from '@/lib/storage'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { listLoadsForVehicle } from '@/lib/queries/loads'
 import { roleHasCapability } from '@/lib/generated/role-capabilities'
+import { resolveFromLabel } from '@/lib/resolve-from-label'
 
 type MaintStatus = 'overdue' | 'dueSoon' | 'ok' | 'noDate'
 
@@ -96,7 +97,8 @@ export default async function VehicleDetailPage({
   searchParams: Promise<{ from?: string; fromLabel?: string }>
 }) {
   const { vehicle_number } = await params
-  const { from, fromLabel } = await searchParams
+  const { from, fromLabel: fromLabelKey } = await searchParams
+  const fromLabel = await resolveFromLabel(fromLabelKey)
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()

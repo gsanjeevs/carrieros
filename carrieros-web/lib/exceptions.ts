@@ -76,12 +76,18 @@ export function sortExceptions<T extends ExceptionRow>(rows: T[]): T[] {
 // Navigation-context query params appended to every CTA that lands on a
 // detail page reached from more than one place in the app (breadcrumb/
 // back-link convention — see components/ui/PageBackLink.tsx). `from` is the
-// origin path, `fromLabel` a human label for it. Detail pages that don't yet
-// read these back (e.g. /invoices/[invoice_number], /loads/[load_number] —
-// out of scope here, see PageBackLink's doc comment) just ignore the extra
-// params today; this only wires the origin side so a future breadcrumb on
-// those pages has the context available without another audit pass.
-const FROM_EXCEPTIONS = 'from=%2Fexceptions&fromLabel=Exceptions'
+// origin path; `fromLabel` is a STABLE KEY (not display text) that the
+// destination page resolves through its own `getTranslations('nav')` call
+// (see FROM_LABEL_KEY_TO_NAV_KEY in components/ui/resolveFromLabel.ts) —
+// never pass literal English text here, or a non-English user reading the
+// resulting "Back to X" link sees an untranslated label while the rest of
+// the page is localized (caught in review, 2026-09-27, before this shipped).
+// Detail pages that don't yet read these back (e.g. /invoices/[invoice_number],
+// /loads/[load_number] — out of scope here, see PageBackLink's doc comment)
+// just ignore the extra params today; this only wires the origin side so a
+// future breadcrumb on those pages has the context available without
+// another audit pass.
+const FROM_EXCEPTIONS = 'from=%2Fexceptions&fromLabel=exceptions'
 
 function withOrigin(href: string): string {
   return `${href}${href.includes('?') ? '&' : '?'}${FROM_EXCEPTIONS}`
