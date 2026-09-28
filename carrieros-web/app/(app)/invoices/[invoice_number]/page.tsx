@@ -10,9 +10,10 @@ import EditInvoiceCard from '../EditInvoiceCard'
 import { INVOICE_ROLES } from '@/lib/roles-policy'
 import { invoiceStatusVariant, type InvoiceStatus } from '@/lib/domain/invoice-status'
 import StatusBadge from '@/components/ui/StatusBadge'
-import { Card, CardHeader, CardBody, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
+import { Card, CardHeader, CardBody, Table, TableHeaderCell, TableRow, TableCell, PageBackLink } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { logError } from '@/lib/observability'
+import { resolveFromLabel } from '@/lib/resolve-from-label'
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -25,10 +26,14 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
 
 export default async function InvoiceDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ invoice_number: string }>
+  searchParams: Promise<{ from?: string; fromLabel?: string }>
 }) {
   const { invoice_number } = await params
+  const { from, fromLabel: fromLabelKey } = await searchParams
+  const fromLabel = await resolveFromLabel(fromLabelKey)
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -93,18 +98,18 @@ export default async function InvoiceDetailPage({
     <div className="p-8 max-w-5xl mx-auto">
 
       {/* Header */}
+      <div className="mb-3">
+        <PageBackLink from={from} fromLabel={fromLabel} defaultHref="/invoices" defaultLabel={t('backToInvoices')} />
+      </div>
       <div className="flex items-start justify-between mb-8">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <Link href="/invoices" className="text-text-sec hover:text-text-pri transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
-              <span className="material-symbols-outlined text-[20px]">arrow_back</span>
-            </Link>
             <h1 className="text-2xl font-semibold text-text-pri">{invoice.invoice_number}</h1>
             <StatusBadge variant={invoiceStatusVariant((invoice.status ?? 'draft') as InvoiceStatus)}>
               {t(`status_${invoice.status ?? 'draft'}`)}
             </StatusBadge>
           </div>
-          <p className="text-text-sec text-sm ml-9">
+          <p className="text-text-sec text-sm">
             {t('billedTo', { customer: customerName ?? '—' })}
           </p>
         </div>

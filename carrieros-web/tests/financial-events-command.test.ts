@@ -86,7 +86,11 @@ describe('create_invoice_command', () => {
     const { data: load } = await admin.from('loads').select('status').eq('id', loadId).single()
     expect(load?.status).toBe('invoiced')
 
-    const row = await outboxRow(idempotencyKey)
+    // migration 0050 routes create_invoice_command through create_load_invoices_command,
+    // which suffixes the per-invoice idempotency key with the customer org id
+    // (or 'unassigned' when none was passed) so it can also emit a batch-level
+    // InvoiceBatchCreated event under the exact idempotency key.
+    const row = await outboxRow(`${idempotencyKey}:unassigned`)
     expect(row).not.toBeNull()
     expect(row?.event_type).toBe('InvoiceCreated')
     expect(row?.aggregate_type).toBe('Invoice')

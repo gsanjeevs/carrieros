@@ -26,57 +26,33 @@ the other session), and mention the commit(s) so the other session can `git log`
 
 | Session | Task | Files/areas | Started |
 |---|---|---|---|
+| — | No active task recorded | — | — |
 
 ## Recently finished (for context, not a permanent log — prune entries older than a day or two)
 
 | Session | Task | Commits | Finished |
 |---|---|---|---|
-| Codex (GPT-6) | SX admin support operations: audited read-only support view, ticket inbox, per-user investigation, normalized carrier analytics, and guided onboarding | `cbbc040`,`615ae16`,`19f8ad4`,`8920ef7` on `feature/sx-admin-support`; not pushed | 2026-09-27 |
-| Claude | Closed the 85-key translation gap across all 20 new locale files (94/94 `tests/locale-messages.test.ts` pass) — **merged to main** | `ad0fa00` + 3 more on branch `feature/i18n-gap-fill` | 2026-09-27 |
-| Claude | Timezone-aware datetime rendering + expanded languages 4→24 with full translations + `LanguagePicker` component (not yet wired in) — **merged to main** | `2312367`,`cbdf82e`,`5d9c02f`,`1e08b43`,`01d1c37`,`b117943` on branch `feature/i18n-timezone` | 2026-09-27 |
-| Claude | Breadcrumb/back-navigation audit + fix (vehicle/driver/customer detail pages + exceptions-inbox CTA plumbing, incl. a follow-up fix for a hardcoded-English `fromLabel`); load/invoice-detail breadcrumb UI itself deferred — **merged to main in this commit** | `89345cc`,`ec09d7b`,`7dd76ba`,`7f81ae5`,`1991bef` on branch `feature/breadcrumb-nav` | 2026-09-27 |
-| Claude | DAT load-board integration Phase 1 (posting only, mocked `DatClient`), incl. a real tenancy-gap fix found + fixed via 0053 while writing tests — **merged to main** | `95c0e24`,`f675cf2`,`88211c0`,`59995b1` on branch `feature/dat-loadboard` | 2026-09-27 |
-| Codex (GPT-6) | Review/fix and locally commit the in-progress billing/GPS/customer-order work; preserve unrelated local edits | `8f9d429` | 2026-09-27 |
-| Claude | UX/navigation review + 3 fixes (customer-role login loop, Settings nav consolidation, theme flash) | `edadaca`, `da0e791`, `374c235` | 2026-09-27 |
-| Claude | Found + fixed 4 missing table-grant bugs (0037, 0042) surfaced by running the real demo seed against staging | `2358438` | 2026-09-27 |
-| Claude | `/api/version` + staging drift-check tooling | `fdf5e10` | 2026-09-27 |
-| Codex (GPT-5) | Restored immutable 0048; added pre-commit migration immutability guard (uncommitted) | local only | 2026-09-27 |
-| Codex (GPT-5) | Customer exception email-on-publish/resend; locally verified 0051 legacy invoice count | local only, uncommitted | 2026-09-27 |
-| Codex (GPT-5) | Read-only design-system, light/dark theme, and tenant branding audit; Playwright samples at desktop light/dark | local audit only | 2026-09-27 |
-| Codex (GPT-5) | Contrast-safe tenant tokens, fixed light/dark status pairs, shared branding preview, canonical Button/ButtonLink/FilterLink styles + scoped lint ratchets; production build verified | local only, uncommitted | 2026-09-27 |
-| Codex (GPT-5) | Theme-safe UI rollout with authenticated light/dark browser QA; fixed hydration mismatch, dark muted-copy contrast, unsupported locale choices, and vehicle cab-type translation | `50d8e39` (`Centralize web theme and shared UI styling`), local commit only | 2026-09-27 |
-
+| Codex (GPT-6) | SX admin support operations: audited read-only support view, ticket inbox, per-user investigation, normalized carrier analytics, and guided onboarding | `cbbc040`,`615ae16`,`19f8ad4`,`7704495` on `feature/sx-admin-support`; not pushed | 2026-09-27 |
+| Claude | Fixed the test-suite orphaned-org leak (46 → 0, validated against real accumulated data): 3 tables missing their own direct carrier_org_id-to-organizations cleanup, `vehicles` never explicitly deleted (relied on cascade, which fired an activity-log trigger AFTER the org row was already gone), 6 more profile-referencing tables missing from the sweep — **pushed** | one commit on `main` | 2026-09-27 |
+| Claude | Load-detail-page reorganization — applied the existing `VehicleTabs`/`DriverTabs`/`CustomerTabs` pattern via new `LoadTabs.tsx` (Overview/Documents/Compliance & Fuel/Messages/Activity tabs; header, rate card, action grid, status timeline, and assignment/invoice/loadboard sidebar stay outside the tabs unchanged); added `loads.tab_*` keys to all 24 locales — **merged to main** | `1c570b5`,`f8424ff` on branch `feature/load-detail-redesign` | 2026-09-27 |
+| Claude | Wired the 24-language `LanguagePicker` into `LanguageSwitcher` (Sidebar + login) and the Settings page; also found and fixed a real latent bug — `i18n/locales.ts`'s `SUPPORTED_LOCALES` was still stuck at 4 codes despite the DB/message-catalog expansion to 24, silently capping the UI — **merged to main** | `26bf422`,`0926785`,`6253e9f` on branch `feature/wire-language-picker` | 2026-09-27 |
+| Claude | Wired `PageBackLink` into `loads/[load_number]` and `invoices/[invoice_number]` (the actual product-owner-reported "exceptions -> detail page, no way back" case) — closes the deferred item from `feature/breadcrumb-nav`; added new `backToInvoices` key translated across all 24 locales | `6ecb0b8`, `17403cb` on branch `feature/detail-page-breadcrumb` (not yet merged) | 2026-09-27 |
 ## Flagged by cross-session review (2026-09-27)
 
-**Deferred breadcrumb work on `loads`/`invoices` (from the `feature/breadcrumb-nav` audit, now
-merged):** the product-owner-reported case ("exceptions inbox links into a detail page with no way
-back") mostly resolves to `/loads/[load_number]` (`pod_missing`) and `/invoices/[invoice_number]`
-(`invoice_overdue`) — both off-limits when that branch was built, per the load-orders/invoice-allocation
-work that has since landed (`8f9d429`). Now that both pages are editable again, this is unblocked.
-`lib/exceptions.ts` already appends `?from=/exceptions&fromLabel=exceptions` to those CTAs (a stable
-KEY, not display text — see `lib/resolve-from-label.ts`, added in `1991bef` after a localization bug
-was caught in review), so dropping in `components/ui/PageBackLink.tsx` (same pattern as
-`vehicles/[vehicle_number]`, `drivers/[driver_number]`, `customers/[customer_number]`) should be close
-to copy-paste — `const { from, fromLabel: fromLabelKey } = await searchParams` then
-`const fromLabel = await resolveFromLabel(fromLabelKey)`, then
-`<PageBackLink from={from} fromLabel={fromLabel} defaultHref="/loads" defaultLabel={t('backToLoads')} />`
-(loads already has a `backToLoads` message key; invoices doesn't have a `backToInvoices` key yet,
-just the unrelated `backToInvoice` singular one, so that'd need adding). Not done in
-`feature/breadcrumb-nav` itself since it would touch the forbidden paths.
+**Deferred breadcrumb work on `loads`/`invoices` — RESOLVED:** the product-owner-reported case
+("exceptions inbox links into a detail page with no way back") is now fixed on
+`feature/detail-page-breadcrumb` (`6ecb0b8`, `17403cb`, not yet merged) — `PageBackLink` is wired into
+both `/loads/[load_number]` (`pod_missing`) and `/invoices/[invoice_number]` (`invoice_overdue`), same
+pattern as `vehicles/[vehicle_number]`/`drivers/[driver_number]`/`customers/[customer_number]`, and the
+new `backToInvoices` message key was added and translated across all 24 locales (kept
+`tests/locale-messages.test.ts` green). See "Recently finished" above.
 
-Claude reviewed the uncommitted `load_orders`/invoice-allocation work as a first test of periodic
-cross-session review. One real bug found, not yet fixed — flagging here rather than editing your
-uncommitted file directly:
-
-- **`supabase/migrations/0050_multi_customer_invoice_allocations.sql`,
-  `create_load_invoices_command()`**: `v_input_count` is only assigned inside the
-  `IF v_order_count > 0` branch (the new multi-customer-orders path). The `ELSE` branch (legacy
-  single-customer invoicing — the common case today, since `load_orders` is brand new and most loads
-  won't have any yet) never sets it, but it's used unconditionally in the final `InvoiceBatchCreated`
-  outbox event: `jsonb_build_object('loadId', p_load_id, 'invoiceCount', v_input_count)`. Every normal
-  single-customer invoice creation will log `invoiceCount: null` instead of `1` — silently wrong data
-  in an event any webhook consumer or audit trail reads. Fix: set `v_input_count := 1` in the `ELSE`
-  branch (or compute it as `jsonb_array_length(p_invoice_rows)` in both branches instead of only one).
+**`v_input_count` NULL-in-legacy-branch bug — RESOLVED.** Flagged here after a cross-session review of
+`supabase/migrations/0050_multi_customer_invoice_allocations.sql`'s `create_load_invoices_command()`
+(the `ELSE`/legacy-single-customer branch never set `v_input_count`, so `InvoiceBatchCreated` logged
+`invoiceCount: null` instead of `1`). Confirmed fixed by `supabase/migrations/0051_fix_legacy_invoice_batch_count.sql`
+(`v_input_count := jsonb_array_length(p_invoice_rows)` in the `ELSE` branch) — already on `main`,
+`verify-migrations.mjs` 11/11 clean. No further action needed.
 
 ## Why this exists — real collisions from before this file (2026-09-27)
 
