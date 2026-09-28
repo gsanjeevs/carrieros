@@ -12,12 +12,41 @@ export const metadata: Metadata = {
 };
 
 // Punjabi (Gurmukhi) and Urdu (Nastaliq) need their own webfonts — loaded
-// conditionally, never both, per decisions.md / tech-spec §14.
+// conditionally, never both, per decisions.md / tech-spec §14. The 20
+// languages added in migration 0054 (2026-09-27) fall back to `null` here
+// (system/browser default font stack) rather than a dedicated webfont per
+// script — several of them (Hindi/Nepali Devanagari, Amharic Ge'ez, Chinese
+// Han, Korean Hangul, Arabic/Persian) would benefit from one the same way
+// pa/ur do, but sourcing and vetting a Noto webfont per script is separate,
+// real typography work, not part of wiring the language picker in. Every
+// `Locale` key is required here (TS enforces it via `Record<Locale, ...>`),
+// so leaving one out is a compile error, not a silent gap — flagged as a
+// follow-up rather than done here.
 const LOCALE_FONT_LINKS: Record<Locale, string | null> = {
   en: null,
   es: null,
   pa: "https://fonts.googleapis.com/css2?family=Noto+Sans+Gurmukhi:wght@400;600;700&display=swap",
   ur: "https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap",
+  ru: null,
+  uk: null,
+  mn: null,
+  ar: null,
+  so: null,
+  ht: null,
+  pt: null,
+  vi: null,
+  zh: null,
+  ko: null,
+  tl: null,
+  fr: null,
+  pl: null,
+  ro: null,
+  de: null,
+  hi: null,
+  gu: null,
+  am: null,
+  fa: null,
+  ne: null,
 }
 
 export default async function RootLayout({
