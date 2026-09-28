@@ -60,19 +60,12 @@ pattern as `vehicles/[vehicle_number]`/`drivers/[driver_number]`/`customers/[cus
 new `backToInvoices` message key was added and translated across all 24 locales (kept
 `tests/locale-messages.test.ts` green). See "Recently finished" above.
 
-Claude reviewed the uncommitted `load_orders`/invoice-allocation work as a first test of periodic
-cross-session review. One real bug found, not yet fixed — flagging here rather than editing your
-uncommitted file directly:
-
-- **`supabase/migrations/0050_multi_customer_invoice_allocations.sql`,
-  `create_load_invoices_command()`**: `v_input_count` is only assigned inside the
-  `IF v_order_count > 0` branch (the new multi-customer-orders path). The `ELSE` branch (legacy
-  single-customer invoicing — the common case today, since `load_orders` is brand new and most loads
-  won't have any yet) never sets it, but it's used unconditionally in the final `InvoiceBatchCreated`
-  outbox event: `jsonb_build_object('loadId', p_load_id, 'invoiceCount', v_input_count)`. Every normal
-  single-customer invoice creation will log `invoiceCount: null` instead of `1` — silently wrong data
-  in an event any webhook consumer or audit trail reads. Fix: set `v_input_count := 1` in the `ELSE`
-  branch (or compute it as `jsonb_array_length(p_invoice_rows)` in both branches instead of only one).
+**`v_input_count` NULL-in-legacy-branch bug — RESOLVED.** Flagged here after a cross-session review of
+`supabase/migrations/0050_multi_customer_invoice_allocations.sql`'s `create_load_invoices_command()`
+(the `ELSE`/legacy-single-customer branch never set `v_input_count`, so `InvoiceBatchCreated` logged
+`invoiceCount: null` instead of `1`). Confirmed fixed by `supabase/migrations/0051_fix_legacy_invoice_batch_count.sql`
+(`v_input_count := jsonb_array_length(p_invoice_rows)` in the `ELSE` branch) — already on `main`,
+`verify-migrations.mjs` 11/11 clean. No further action needed.
 
 ## Why this exists — real collisions from before this file (2026-09-27)
 
