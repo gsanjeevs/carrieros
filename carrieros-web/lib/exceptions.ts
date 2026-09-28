@@ -73,6 +73,20 @@ export function sortExceptions<T extends ExceptionRow>(rows: T[]): T[] {
   })
 }
 
+// Navigation-context query params appended to every CTA that lands on a
+// detail page reached from more than one place in the app (breadcrumb/
+// back-link convention — see components/ui/PageBackLink.tsx). `from` is the
+// origin path, `fromLabel` a human label for it. Detail pages that don't yet
+// read these back (e.g. /invoices/[invoice_number], /loads/[load_number] —
+// out of scope here, see PageBackLink's doc comment) just ignore the extra
+// params today; this only wires the origin side so a future breadcrumb on
+// those pages has the context available without another audit pass.
+const FROM_EXCEPTIONS = 'from=%2Fexceptions&fromLabel=Exceptions'
+
+function withOrigin(href: string): string {
+  return `${href}${href.includes('?') ? '&' : '?'}${FROM_EXCEPTIONS}`
+}
+
 // Fetches get_exceptions() and resolves each row's CTA `href`:
 // - invoice_overdue -> /invoices/[invoice_number] (falls back to /invoices
 //   if the invoice_number lookup somehow misses)
@@ -83,6 +97,9 @@ export function sortExceptions<T extends ExceptionRow>(rows: T[]): T[] {
 // - doc_expired / doc_expiring -> no CTA. app/(app)/documents/page.tsx is
 //   still a "Coming soon" placeholder, so there's nowhere real to send the
 //   user for org/vehicle compliance documents yet.
+// Detail-page CTAs (invoice/load) carry the `from=/exceptions` origin-context
+// query param; list-page CTAs (drivers/maintenance) don't need it since the
+// sidebar already gets you back to those directly.
 export async function getExceptions(
   supabase: SupabaseClient<Database>,
   orgId: number | undefined
@@ -117,12 +134,12 @@ export async function getExceptions(
     switch (row.exception_type) {
       case 'invoice_overdue': {
         const num = invoiceNumberById.get(row.entity_id)
-        href = num ? `/invoices/${num}` : '/invoices'
+        href = withOrigin(num ? `/invoices/${num}` : '/invoices')
         break
       }
       case 'pod_missing': {
         const num = loadNumberById.get(row.entity_id)
-        href = num ? `/loads/${num}` : '/loads'
+        href = withOrigin(num ? `/loads/${num}` : '/loads')
         break
       }
       case 'cdl_expiring':
