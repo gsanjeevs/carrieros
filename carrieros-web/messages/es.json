@@ -354,6 +354,7 @@
   },
   "drivers": {
     "title": "Conductores",
+    "backToDrivers": "Volver a Conductores",
     "driverCount": "{count} conductores",
     "inviteDriver": "Invitar Conductor",
     "driverNumber": "Conductor #",
@@ -450,6 +451,7 @@
   },
   "vehicles": {
     "title": "Vehículos",
+    "backToVehicles": "Volver a Vehículos",
     "truckCount": "{count} vehículos",
     "addTruck": "Agregar Vehículo",
     "editTruck": "Editar Vehículo",
@@ -954,6 +956,7 @@
   },
   "customers": {
     "title": "Clientes",
+    "backToCustomers": "Volver a Clientes",
     "customerCount": "{count, plural, =0 {Sin clientes} one {# cliente} other {# clientes}}",
     "addCustomer": "Agregar Cliente",
     "addFirstCustomer": "Agregar primer cliente",

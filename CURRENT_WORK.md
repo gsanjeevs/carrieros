@@ -26,15 +26,16 @@ the other session), and mention the commit(s) so the other session can `git log`
 
 | Session | Task | Files/areas | Started |
 |---|---|---|---|
-| Codex (GPT-6) | Review/fix and locally commit the in-progress billing/GPS/customer-order work; preserve unrelated local edits — **done, committed as `8f9d429`** | `carrieros-web/app/(app)/billing/`, `dispatch/`, `invoices/`, `loads/`, `track/`, related APIs/server/types/tests, migrations 0047/0049-0051 and `supabase/schema/schema.sql` | 2026-09-27 |
+| — | No active Claude task | — | — |
 
 ## Recently finished (for context, not a permanent log — prune entries older than a day or two)
 
 | Session | Task | Commits | Finished |
 |---|---|---|---|
-| Claude | Timezone-aware datetime rendering + expanded languages 4→24 with full translations + `LanguagePicker` component (not yet wired in) | `2312367`,`cbdf82e`,`5d9c02f`,`1e08b43`,`01d1c37`,`b117943` on branch `feature/i18n-timezone`, worktree `../carrieros-i18n-tz` — **not yet merged to main** | 2026-09-27 |
-| Claude | Breadcrumb/back-navigation audit + fix (vehicle/driver/customer detail pages + exceptions-inbox CTA plumbing, incl. a follow-up fix for a hardcoded-English `fromLabel`); load/invoice-detail breadcrumb UI itself deferred | `89345cc`,`ec09d7b`,`7dd76ba`,`7f81ae5`,`1991bef` on branch `feature/breadcrumb-nav`, worktree `../carrieros-nav-ux` — **not yet merged to main** | 2026-09-27 |
-| Claude | DAT load-board integration Phase 1 (posting only, mocked `DatClient`), incl. a real tenancy-gap fix found + fixed via 0053 while writing tests — **merged to main in this commit** | `95c0e24`,`f675cf2`,`88211c0`,`59995b1` on branch `feature/dat-loadboard` | 2026-09-27 |
+| Claude | Timezone-aware datetime rendering + expanded languages 4→24 with full translations + `LanguagePicker` component (not yet wired in) — **merged to main** | `2312367`,`cbdf82e`,`5d9c02f`,`1e08b43`,`01d1c37`,`b117943` on branch `feature/i18n-timezone` | 2026-09-27 |
+| Claude | Breadcrumb/back-navigation audit + fix (vehicle/driver/customer detail pages + exceptions-inbox CTA plumbing, incl. a follow-up fix for a hardcoded-English `fromLabel`); load/invoice-detail breadcrumb UI itself deferred — **merged to main in this commit** | `89345cc`,`ec09d7b`,`7dd76ba`,`7f81ae5`,`1991bef` on branch `feature/breadcrumb-nav` | 2026-09-27 |
+| Claude | DAT load-board integration Phase 1 (posting only, mocked `DatClient`), incl. a real tenancy-gap fix found + fixed via 0053 while writing tests — **merged to main** | `95c0e24`,`f675cf2`,`88211c0`,`59995b1` on branch `feature/dat-loadboard` | 2026-09-27 |
+| Codex (GPT-6) | Review/fix and locally commit the in-progress billing/GPS/customer-order work; preserve unrelated local edits | `8f9d429` | 2026-09-27 |
 | Claude | UX/navigation review + 3 fixes (customer-role login loop, Settings nav consolidation, theme flash) | `edadaca`, `da0e791`, `374c235` | 2026-09-27 |
 | Claude | Found + fixed 4 missing table-grant bugs (0037, 0042) surfaced by running the real demo seed against staging | `2358438` | 2026-09-27 |
 | Claude | `/api/version` + staging drift-check tooling | `fdf5e10` | 2026-09-27 |
@@ -44,11 +45,23 @@ the other session), and mention the commit(s) so the other session can `git log`
 | Codex (GPT-5) | Contrast-safe tenant tokens, fixed light/dark status pairs, shared branding preview, canonical Button/ButtonLink/FilterLink styles + scoped lint ratchets; production build verified | local only, uncommitted | 2026-09-27 |
 | Codex (GPT-5) | Theme-safe UI rollout with authenticated light/dark browser QA; fixed hydration mismatch, dark muted-copy contrast, unsupported locale choices, and vehicle cab-type translation | `50d8e39` (`Centralize web theme and shared UI styling`), local commit only | 2026-09-27 |
 
-**Merge note (2026-09-27, Claude → Codex session):** `feature/dat-loadboard` is complete, verified, and ready to merge, but I'm deliberately not merging it into `main` right now — `main`'s working tree has real uncommitted changes to `supabase/schema/schema.sql` and `carrieros-web/messages/*.json` (both hub files my branch also touched), and a `git merge` here would either get blocked by or silently interact with your in-progress uncommitted work rather than a clean commit. Once you've committed your current WIP (or if you'd rather I wait for something else), this branch merges cleanly — ping in this file or just merge it yourself, `git log feature/dat-loadboard` has the 4 commits.
-
-**Update (2026-09-27):** two more branches are now also complete and waiting on the same thing — `feature/breadcrumb-nav` and `feature/i18n-timezone` (both worktrees above). All three (`dat-loadboard`, `breadcrumb-nav`, `i18n-timezone`) touch `supabase/schema/schema.sql` and/or `messages/*.json`, so they'll all hit the same hub-file collision against your current billing/GPS/customer-order commit-in-progress. Once your review/commit pass lands, these three should merge to main in this order to minimize re-conflict risk: `dat-loadboard` (0052-0053) → `i18n-timezone` (0054, widens 2 language CHECK constraints + adds `languages` rows) → `breadcrumb-nav` (no migrations, smallest diff). Happy to do the merges myself once your side is committed — just say so, or merge them yourself, whichever's easier.
-
 ## Flagged by cross-session review (2026-09-27)
+
+**Deferred breadcrumb work on `loads`/`invoices` (from the `feature/breadcrumb-nav` audit, now
+merged):** the product-owner-reported case ("exceptions inbox links into a detail page with no way
+back") mostly resolves to `/loads/[load_number]` (`pod_missing`) and `/invoices/[invoice_number]`
+(`invoice_overdue`) — both off-limits when that branch was built, per the load-orders/invoice-allocation
+work that has since landed (`8f9d429`). Now that both pages are editable again, this is unblocked.
+`lib/exceptions.ts` already appends `?from=/exceptions&fromLabel=exceptions` to those CTAs (a stable
+KEY, not display text — see `lib/resolve-from-label.ts`, added in `1991bef` after a localization bug
+was caught in review), so dropping in `components/ui/PageBackLink.tsx` (same pattern as
+`vehicles/[vehicle_number]`, `drivers/[driver_number]`, `customers/[customer_number]`) should be close
+to copy-paste — `const { from, fromLabel: fromLabelKey } = await searchParams` then
+`const fromLabel = await resolveFromLabel(fromLabelKey)`, then
+`<PageBackLink from={from} fromLabel={fromLabel} defaultHref="/loads" defaultLabel={t('backToLoads')} />`
+(loads already has a `backToLoads` message key; invoices doesn't have a `backToInvoices` key yet,
+just the unrelated `backToInvoice` singular one, so that'd need adding). Not done in
+`feature/breadcrumb-nav` itself since it would touch the forbidden paths.
 
 Claude reviewed the uncommitted `load_orders`/invoice-allocation work as a first test of periodic
 cross-session review. One real bug found, not yet fixed — flagging here rather than editing your

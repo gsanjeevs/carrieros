@@ -354,6 +354,7 @@
   },
   "drivers": {
     "title": "ڈرائیورز",
+    "backToDrivers": "ڈرائیورز پر واپس جائیں",
     "driverCount": "{count} ڈرائیورز",
     "inviteDriver": "ڈرائیور کو مدعو کریں",
     "driverNumber": "ڈرائیور #",
@@ -450,6 +451,7 @@
   },
   "vehicles": {
     "title": "گاڑیاں",
+    "backToVehicles": "گاڑیوں پر واپس جائیں",
     "truckCount": "{count} گاڑیاں",
     "addTruck": "گاڑی شامل کریں",
     "editTruck": "گاڑی میں ترمیم کریں",
@@ -954,6 +956,7 @@
   },
   "customers": {
     "title": "کسٹمرز",
+    "backToCustomers": "کسٹمرز پر واپس جائیں",
     "customerCount": "{count, plural, =0 {کوئی کسٹمر نہیں} one {# کسٹمر} other {# کسٹمرز}}",
     "addCustomer": "کسٹمر شامل کریں",
     "addFirstCustomer": "پہلا کسٹمر شامل کریں",

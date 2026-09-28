@@ -354,6 +354,7 @@
   },
   "drivers": {
     "title": "ਡਰਾਈਵਰ",
+    "backToDrivers": "ਡਰਾਈਵਰਾਂ ਤੇ ਵਾਪਸ ਜਾਓ",
     "driverCount": "{count} ਡਰਾਈਵਰ",
     "inviteDriver": "ਡਰਾਈਵਰ ਨੂੰ ਸੱਦਾ ਦਿਓ",
     "driverNumber": "ਡਰਾਈਵਰ #",
@@ -450,6 +451,7 @@
   },
   "vehicles": {
     "title": "ਵਾਹਨ",
+    "backToVehicles": "ਵਾਹਨਾਂ ਤੇ ਵਾਪਸ ਜਾਓ",
     "truckCount": "{count} ਵਾਹਨ",
     "addTruck": "ਵਾਹਨ ਸ਼ਾਮਲ ਕਰੋ",
     "editTruck": "ਵਾਹਨ ਸੋਧੋ",
@@ -954,6 +956,7 @@
   },
   "customers": {
     "title": "ਗਾਹਕ",
+    "backToCustomers": "ਗਾਹਕਾਂ ਤੇ ਵਾਪਸ ਜਾਓ",
     "customerCount": "{count, plural, =0 {ਕੋਈ ਗਾਹਕ ਨਹੀਂ} one {# ਗਾਹਕ} other {# ਗਾਹਕ}}",
     "addCustomer": "ਗਾਹਕ ਸ਼ਾਮਲ ਕਰੋ",
     "addFirstCustomer": "ਪਹਿਲਾ ਗਾਹਕ ਸ਼ਾਮਲ ਕਰੋ",
