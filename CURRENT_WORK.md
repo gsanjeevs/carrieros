@@ -27,11 +27,10 @@ the other session), and mention the commit(s) so the other session can `git log`
 | Session | Task | Files/areas | Started |
 |---|---|---|---|
 | Claude | Timezone-aware datetime formatting + 20-language i18n expansion — backend/utility/content only, deliberately NOT touching any currently-dirty page/component (your design-system rollout owns those right now) | `lib/format-datetime.ts`, new migration `0054+` (`languages` rows, widen 2 CHECK constraints), new locale JSON files (`messages/{new-locale}.json`), new (not-yet-wired) searchable language-picker component; worktree `../carrieros-i18n-tz` on `feature/i18n-timezone`. **Migration numbers 0052-0053 are already used** by my unmerged `feature/dat-loadboard` branch — starting this one at 0054 to avoid a collision when both merge. | 2026-09-27 |
-| Claude | Breadcrumb/back-navigation audit + fix, user-requested. Scoped to currently-clean pages only (your design-system commit `50d8e39` cleared most of the app) — deliberately EXCLUDING `app/(app)/loads/[load_number]/`, `dispatch/`, `invoices/`, `billing/` since those are still dirty with your load-orders/invoice-allocation work; will pick those up once that lands. | `app/(app)/exceptions/`, `app/(app)/vehicles/`, `app/(app)/customers/`, `app/(app)/drivers/`, `app/(app)/maintenance/`, `app/(app)/team/`, `app/(app)/settings/`, plus a new shared breadcrumb/back-nav component; worktree `../carrieros-nav-ux` on `feature/breadcrumb-nav` | 2026-09-27 |
-
 ## Recently finished (for context, not a permanent log — prune entries older than a day or two)
 
 | Session | Task | Commits | Finished |
+| Claude | Breadcrumb/back-navigation audit + fix, user-requested. Built `components/ui/PageBackLink.tsx` (from/fromLabel query-param convention, graceful fallback to a default parent list) and wired it into `vehicles/[vehicle_number]`, `drivers/[driver_number]`, `customers/[customer_number]` detail pages, replacing their hardcoded generic-list back-arrows. Also updated `lib/exceptions.ts`'s invoice/load CTA hrefs to carry `from=/exceptions&fromLabel=Exceptions` so a future breadcrumb on those (currently forbidden) detail pages works with zero extra plumbing — see the flagged item below for the actual UI wiring, deferred to whichever session picks up `loads`/`invoices` next. `maintenance`/`team` have no detail pages reached from elsewhere, so nothing to fix there. Touched `messages/{en,es,pa,ur}.json` to add `backToVehicles`/`backToDrivers`/`backToCustomers` labels (existing `backToLoads`/`backToInvoice` precedent). | `89345cc`, `ec09d7b`, `7dd76ba` on `feature/breadcrumb-nav`, worktree `../carrieros-nav-ux` — not yet merged to main | 2026-09-27 |
 |---|---|---|---|
 | Claude | DAT load-board integration Phase 1 (posting only, mocked `DatClient`), incl. a real tenancy-gap fix found + fixed via 0053 while writing tests | `95c0e24`,`f675cf2`,`88211c0`,`59995b1` on branch `feature/dat-loadboard`, worktree `../carrieros-loadboard` — **not yet merged to main**, see note below | 2026-09-27 |
 | Claude | UX/navigation review + 3 fixes (customer-role login loop, Settings nav consolidation, theme flash) | `edadaca`, `da0e791`, `374c235` | 2026-09-27 |
@@ -46,6 +45,19 @@ the other session), and mention the commit(s) so the other session can `git log`
 **Merge note (2026-09-27, Claude → Codex session):** `feature/dat-loadboard` is complete, verified, and ready to merge, but I'm deliberately not merging it into `main` right now — `main`'s working tree has real uncommitted changes to `supabase/schema/schema.sql` and `carrieros-web/messages/*.json` (both hub files my branch also touched), and a `git merge` here would either get blocked by or silently interact with your in-progress uncommitted work rather than a clean commit. Once you've committed your current WIP (or if you'd rather I wait for something else), this branch merges cleanly — ping in this file or just merge it yourself, `git log feature/dat-loadboard` has the 4 commits.
 
 ## Flagged by cross-session review (2026-09-27)
+
+**Deferred breadcrumb work on `loads`/`invoices` (from the `feature/breadcrumb-nav` audit):** the
+product-owner-reported case ("exceptions inbox links into a detail page with no way back") mostly
+resolves to `/loads/[load_number]` (`pod_missing`) and `/invoices/[invoice_number]`
+(`invoice_overdue`) — both off-limits right now per your in-progress load-orders/invoice-allocation
+work. `lib/exceptions.ts` already appends `?from=/exceptions&fromLabel=Exceptions` to those CTAs, so
+once those pages are free to edit, dropping in `components/ui/PageBackLink.tsx` (same pattern as
+`vehicles/[vehicle_number]`, `drivers/[driver_number]`, `customers/[customer_number]` in that branch)
+should be close to copy-paste — `const { from, fromLabel } = await searchParams`, then
+`<PageBackLink from={from} fromLabel={fromLabel} defaultHref="/loads" defaultLabel="Back to Loads" />`
+(loads already has a `backToLoads` message key; invoices doesn't have a `backToInvoices` key yet,
+just the unrelated `backToInvoice` singular one, so that'd need adding). Not done in
+`feature/breadcrumb-nav` itself since it would touch the forbidden paths.
 
 Claude reviewed the uncommitted `load_orders`/invoice-allocation work as a first test of periodic
 cross-session review. One real bug found, not yet fixed — flagging here rather than editing your
