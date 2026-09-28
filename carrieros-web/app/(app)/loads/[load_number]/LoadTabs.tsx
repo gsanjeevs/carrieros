@@ -1,0 +1,52 @@
+'use client'
+// app/(app)/loads/[load_number]/LoadTabs.tsx
+// Client-side tab switcher for the load detail page. Mirrors
+// vehicles/[vehicle_number]/VehicleTabs.tsx (and drivers'/customers'
+// equivalents) exactly — all tabs' content is server-rendered up front and
+// passed in as ReactNodes, this component only controls which one is
+// visible, no data fetching here. The tabs array itself is built by the
+// server page and may omit a tab entirely when the current viewer/load has
+// no content for it (see page.tsx).
+
+import { useState, type ReactNode } from 'react'
+import { useTranslations } from 'next-intl'
+
+export type LoadTabKey = 'overview' | 'documents' | 'complianceFuel' | 'messages' | 'activity'
+
+export default function LoadTabs({
+  tabs,
+}: {
+  tabs: { key: LoadTabKey; content: ReactNode }[]
+}) {
+  const t = useTranslations('loads')
+  const [active, setActive] = useState<LoadTabKey>(tabs[0]?.key ?? 'overview')
+
+  return (
+    <div>
+      <div className="flex items-center gap-1 border-b border-border-ui mb-6 overflow-x-auto" role="tablist">
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            role="tab"
+            aria-selected={active === tab.key}
+            onClick={() => setActive(tab.key)}
+            className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 rounded-t ${
+              active === tab.key
+                ? 'border-brand-orange text-text-pri'
+                : 'border-transparent text-text-sec hover:text-text-pri'
+            }`}
+          >
+            {t(`tab_${tab.key}`)}
+          </button>
+        ))}
+      </div>
+
+      {tabs.map((tab) => (
+        <div key={tab.key} role="tabpanel" hidden={active !== tab.key}>
+          {active === tab.key && tab.content}
+        </div>
+      ))}
+    </div>
+  )
+}

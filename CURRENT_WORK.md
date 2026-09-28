@@ -27,12 +27,13 @@ the other session), and mention the commit(s) so the other session can `git log`
 | Session | Task | Files/areas | Started |
 |---|---|---|---|
 | Codex (GPT-6) | Replace raw SX magic-link takeover with audited, time-limited, read-only support access | `/Users/sanjeevgautam/code/carrieros-sx-admin` worktree; admin org/user UI, support-session APIs, migration 0055 | 2026-09-27 |
-| Claude | Load-detail-page reorganization (user-requested: "very long scrollable page... reorganize to make it easy to read and act") — applying the existing `VehicleTabs`/`DriverTabs`/`CustomerTabs` pattern, the only major detail page not yet using it | `app/(app)/loads/[load_number]/page.tsx` + new `LoadTabs.tsx`; worktree `../carrieros-load-detail-redesign` on `feature/load-detail-redesign` | 2026-09-27 |
+| — | No active Claude task | — | — |
 
 ## Recently finished (for context, not a permanent log — prune entries older than a day or two)
 
 | Session | Task | Commits | Finished |
 |---|---|---|---|
+| Claude | Load-detail-page reorganization — applied the existing `VehicleTabs`/`DriverTabs`/`CustomerTabs` pattern via new `LoadTabs.tsx` (Overview/Documents/Compliance & Fuel/Messages/Activity tabs; header, rate card, action grid, status timeline, and assignment/invoice/loadboard sidebar stay outside the tabs unchanged); added `loads.tab_*` keys to all 24 locales — **merged to main** | `1c570b5`,`f8424ff` on branch `feature/load-detail-redesign` | 2026-09-27 |
 | Claude | Wired the 24-language `LanguagePicker` into `LanguageSwitcher` (Sidebar + login) and the Settings page; also found and fixed a real latent bug — `i18n/locales.ts`'s `SUPPORTED_LOCALES` was still stuck at 4 codes despite the DB/message-catalog expansion to 24, silently capping the UI — **merged to main** | `26bf422`,`0926785`,`6253e9f` on branch `feature/wire-language-picker` | 2026-09-27 |
 | Claude | Wired `PageBackLink` into `loads/[load_number]` and `invoices/[invoice_number]` (the actual product-owner-reported "exceptions -> detail page, no way back" case) — closes the deferred item from `feature/breadcrumb-nav`; added new `backToInvoices` key translated across all 24 locales | `6ecb0b8`, `17403cb` on branch `feature/detail-page-breadcrumb` (not yet merged) | 2026-09-27 |
 | Claude | Closed the 85-key translation gap across all 20 new locale files (94/94 `tests/locale-messages.test.ts` pass) — **merged to main** | `ad0fa00` + 3 more on branch `feature/i18n-gap-fill` | 2026-09-27 |
