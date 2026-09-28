@@ -1400,6 +1400,7 @@
       "error": "Hindi ma-load ang role capabilities.",
       "notLiveNotice": "Hindi live ang pag-edit ng table na ito. Ang gating ay ipinapatupad mula sa isang generated file (scripts/gen-role-capabilities.mjs), hindi sa table na ito — ang mga pagbabago dito ay magkakabisa lamang pagkatapos patakbuhin ang Regenerate at i-commit at i-deploy ang mga resultang file.",
       "savedRegenerateToApply": "Na-save na. I-regenerate para maipatupad.",
+      "savedRegenerateUnavailable": "Na-save na. Gumagana lang ang I-regenerate sa lokal na dev checkout — hilingin sa isang engineer na i-run ang scripts/gen-role-capabilities.mjs doon, pagkatapos ay i-commit at i-deploy ang resulta.",
       "regenerateButton": "I-regenerate",
       "regenerateError": "Nabigo ang Regenerate.",
       "regenerateChanged": "Na-regenerate — mga nabagong file: {files}.",

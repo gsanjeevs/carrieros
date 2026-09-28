@@ -1595,6 +1595,7 @@
       "error": "ਭੂਮਿਕਾ ਸਮਰੱਥਾਵਾਂ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀਆਂ।",
       "notLiveNotice": "ਇਸ ਸਾਰਣੀ ਨੂੰ ਸੋਧਣਾ ਤੁਰੰਤ ਲਾਗੂ ਨਹੀਂ ਹੁੰਦਾ। ਗੇਟਿੰਗ ਇੱਕ ਜਨਰੇਟ ਕੀਤੀ ਫਾਈਲ (scripts/gen-role-capabilities.mjs) ਤੋਂ ਲਾਗੂ ਹੁੰਦੀ ਹੈ, ਇਸ ਸਾਰਣੀ ਤੋਂ ਨਹੀਂ — ਇੱਥੇ ਤਬਦੀਲੀਆਂ ਸਿਰਫ਼ Regenerate ਚਲਾਉਣ ਅਤੇ ਨਤੀਜੇ ਵਾਲੀਆਂ ਫਾਈਲਾਂ ਨੂੰ ਕਮਿੱਟ ਅਤੇ ਡਿਪਲਾਏ ਕਰਨ ਤੋਂ ਬਾਅਦ ਹੀ ਲਾਗੂ ਹੁੰਦੀਆਂ ਹਨ।",
       "savedRegenerateToApply": "ਸੰਭਾਲਿਆ ਗਿਆ। ਲਾਗੂ ਕਰਨ ਲਈ Regenerate ਕਰੋ।",
+      "savedRegenerateUnavailable": "ਸੰਭਾਲਿਆ ਗਿਆ। Regenerate ਸਿਰਫ਼ ਲੋਕਲ ਡੈਵ ਚੈੱਕਆਊਟ ਵਿੱਚ ਕੰਮ ਕਰਦਾ ਹੈ — ਕਿਸੇ ਇੰਜੀਨੀਅਰ ਨੂੰ ਉੱਥੇ scripts/gen-role-capabilities.mjs ਚਲਾਉਣ ਲਈ ਕਹੋ, ਫਿਰ ਨਤੀਜੇ ਨੂੰ ਕਮਿਟ ਅਤੇ ਡਿਪਲੌਇ ਕਰੋ।",
       "regenerateButton": "Regenerate",
       "regenerateError": "Regenerate ਅਸਫਲ ਰਿਹਾ।",
       "regenerateChanged": "Regenerate ਹੋ ਗਿਆ — ਬਦਲੀਆਂ ਫਾਈਲਾਂ: {files}।",

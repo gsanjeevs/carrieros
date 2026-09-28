@@ -1400,6 +1400,7 @@
       "error": "Nie udało się wczytać uprawnień ról.",
       "notLiveNotice": "Edycja tej tabeli nie działa na żywo. Ograniczenia są egzekwowane na podstawie wygenerowanego pliku (scripts/gen-role-capabilities.mjs), a nie tej tabeli — zmiany tutaj zaczną obowiązywać dopiero po uruchomieniu Regeneruj i wdrożeniu powstałych plików.",
       "savedRegenerateToApply": "Zapisano. Uruchom Regeneruj, aby zastosować.",
+      "savedRegenerateUnavailable": "Zapisano. Regenerowanie działa tylko w lokalnym środowisku deweloperskim — poproś inżyniera o uruchomienie scripts/gen-role-capabilities.mjs tam, a następnie zatwierdzenie (commit) i wdrożenie (deploy) wyniku.",
       "regenerateButton": "Regeneruj",
       "regenerateError": "Regeneracja nie powiodła się.",
       "regenerateChanged": "Zregenerowano — zmienione pliki: {files}.",

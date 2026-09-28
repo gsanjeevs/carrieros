@@ -1400,6 +1400,7 @@
       "error": "역할별 권한을 불러올 수 없습니다.",
       "notLiveNotice": "이 표를 편집해도 즉시 반영되지 않습니다. 접근 제어는 이 표가 아닌 생성된 파일(scripts/gen-role-capabilities.mjs)을 통해 적용됩니다 — 여기서의 변경 사항은 '재생성'을 실행하고 생성된 파일을 커밋 및 배포한 후에만 적용됩니다.",
       "savedRegenerateToApply": "저장되었습니다. 적용하려면 재생성하세요.",
+      "savedRegenerateUnavailable": "저장되었습니다. 재생성은 로컬 개발 환경에서만 작동합니다 — 엔지니어에게 해당 환경에서 scripts/gen-role-capabilities.mjs를 실행하도록 요청한 후 결과를 커밋하고 배포하세요.",
       "regenerateButton": "재생성",
       "regenerateError": "재생성에 실패했습니다.",
       "regenerateChanged": "재생성됨 — 변경된 파일: {files}.",

@@ -1400,6 +1400,7 @@
       "error": "Impossible de charger les capacités des rôles.",
       "notLiveNotice": "La modification de cette table n'est pas appliquée en direct. Le contrôle d'accès est mis en œuvre à partir d'un fichier généré (scripts/gen-role-capabilities.mjs), pas de cette table — les modifications ici ne prennent effet qu'après l'exécution de Régénérer et le déploiement des fichiers résultants.",
       "savedRegenerateToApply": "Enregistré. Régénérez pour appliquer.",
+      "savedRegenerateUnavailable": "Enregistré. Régénérer ne fonctionne que dans un environnement de développement local — demandez à un ingénieur d'exécuter scripts/gen-role-capabilities.mjs là-bas, puis de commit et déployer le résultat.",
       "regenerateButton": "Régénérer",
       "regenerateError": "Échec de la régénération.",
       "regenerateChanged": "Régénéré — fichiers modifiés : {files}.",

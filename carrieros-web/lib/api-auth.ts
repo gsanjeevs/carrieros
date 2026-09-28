@@ -54,6 +54,7 @@ export type ErrorCode =
   | 'REQUEST_IN_PROGRESS'
   | 'SERVER_ERROR'
   | 'TRANSLATION_FAILED'
+  | 'NOT_AVAILABLE_IN_PRODUCTION'
 
 // message is an English fallback for logs/devs only — never render it
 // directly to end users. Each client maps `error_code` to a localized

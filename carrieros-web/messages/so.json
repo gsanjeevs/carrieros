@@ -1400,6 +1400,7 @@
       "error": "Awoodaha doorka lama soo rari karin.",
       "notLiveNotice": "Wax ka bedelka miiskan tooska ma aha. Xakamaynta waxaa lagu dhaqan geliyaa fayl la soo saaray (scripts/gen-role-capabilities.mjs), ma ahan miiskan — isbedelada halkan waxay dhaqan gali doonaan kaliya markii Regenerate la socodsiiyo oo faylasha soo baxa la geeyo oo la deploy-gareeyo.",
       "savedRegenerateToApply": "La keydiyay. Regenerate si ay u dhaqan galaan.",
+      "savedRegenerateUnavailable": "La keydiyay. Regenerate wuxuu ka shaqeeyaa kaliya deev lagu sameeyay si maxalli ah — waydiiso injineer inuu ku socodsiiyo scripts/gen-role-capabilities.mjs meesha, ka dibna commit oo deploy garee natiijada.",
       "regenerateButton": "Dib u Samee",
       "regenerateError": "Dib u samayntu way fashilantay.",
       "regenerateChanged": "Waa la dib u sameeyay — faylasha isbedelay: {files}.",

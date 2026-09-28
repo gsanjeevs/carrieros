@@ -31,6 +31,17 @@ export async function POST(request: NextRequest) {
   const ctx = await requireAdminRole(request, 'admin_flags')
   if (isErrorResponse(ctx)) return ctx
 
+  // A deployed production environment's filesystem is read-only (or ephemeral, reset on the next
+  // deploy) — this route writing lib/generated/role-capabilities.ts on disk there either fails
+  // outright or silently does nothing useful: the already-running process's bundled code doesn't
+  // reload it, and the edit is never committed to git, so it's gone on the next deploy regardless.
+  // Regenerating only ever does something real in a local dev checkout, where the operator can
+  // review, commit, and deploy the result themselves. Gated server-side (not just hidden in the UI)
+  // since this is a real capability boundary, not a cosmetic one.
+  if (process.env.NODE_ENV === 'production') {
+    return apiError('NOT_AVAILABLE_IN_PRODUCTION', 'Regenerate only works in a local dev checkout; edit role_capabilities, then have an engineer run scripts/gen-role-capabilities.mjs, commit, and deploy.', 400)
+  }
+
   const { readFileSync } = await import('node:fs')
   const before = GENERATED_FILES.map((f) => {
     try {

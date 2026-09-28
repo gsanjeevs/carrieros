@@ -1400,6 +1400,7 @@
       "error": "Rollenberechtigungen konnten nicht geladen werden.",
       "notLiveNotice": "Die Bearbeitung dieser Tabelle ist nicht live wirksam. Die Zugriffssteuerung wird aus einer generierten Datei (scripts/gen-role-capabilities.mjs) durchgesetzt, nicht aus dieser Tabelle — Änderungen hier wirken sich erst aus, nachdem „Neu generieren“ ausgeführt und die resultierenden Dateien committet und deployt wurden.",
       "savedRegenerateToApply": "Gespeichert. Zum Anwenden neu generieren.",
+      "savedRegenerateUnavailable": "Gespeichert. Neu generieren funktioniert nur in einem lokalen Entwicklungs-Checkout — bitten Sie einen Entwickler, dort scripts/gen-role-capabilities.mjs auszuführen und das Ergebnis anschließend zu committen und zu deployen.",
       "regenerateButton": "Neu generieren",
       "regenerateError": "Neu generieren fehlgeschlagen.",
       "regenerateChanged": "Neu generiert — geänderte Dateien: {files}.",

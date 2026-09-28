@@ -101,13 +101,21 @@ export default async function DispatchPage() {
   // matter (same tradeoff the rest of this page already makes with plain .select() calls).
   const { data: telematicsVehicles } = await supabase
     .from('vehicles')
-    .select('id, nickname, vehicle_number, status, telematics_provider')
+    .select('id, nickname, vehicle_number, status, telematics_provider, telematics_device_id')
     .eq('carrier_org_id', profile.org_id)
     .not('telematics_device_id', 'is', null)
 
   const telematicsVehicleIds = (telematicsVehicles ?? []).map((v) => v.id)
+  // Must match app/api/demo/gps/route.ts's own filter exactly (telematics_device_id LIKE
+  // 'demo-samsara-%', the naming convention load-demo-data.mjs seeds with) -- NOT just
+  // telematics_provider === 'samsara'. A real customer with a genuine Samsara integration also has
+  // provider === 'samsara', so that broader check showed every real customer's real trucks in this
+  // internal demo-only control, which is confusing at best (a "Start demo GPS" button they have no
+  // reason to understand) and always failed anyway once clicked (the route's own device-id filter
+  // rejects anything that isn't an actual demo-seeded device) -- found during a UX cleanup pass,
+  // 2026-09-27.
   const demoVehicleIds = new Set((telematicsVehicles ?? [])
-    .filter((vehicle) => vehicle.telematics_provider === 'samsara')
+    .filter((vehicle) => vehicle.telematics_device_id?.startsWith('demo-samsara-'))
     .map((vehicle) => vehicle.id))
 
   const { data: recentLocations } = telematicsVehicleIds.length
@@ -177,20 +185,26 @@ export default async function DispatchPage() {
     .limit(20)
 
   const queue = queueData ?? []
+  const demoLoads = (activeLoadsData ?? [])
+    .filter((load) => load.vehicle_id != null && demoVehicleIds.has(load.vehicle_id))
+    .map((load) => ({
+      id: load.id,
+      loadNumber: load.load_number,
+      customer: load.customer_name_raw,
+      destination: [load.delivery_city, load.delivery_state].filter(Boolean).join(', ') || null,
+    }))
 
   return (
     <div className="p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-text-pri">{t('title')}</h1>
         <p className="text-text-sec text-sm mt-1">{t('subtitle', { count: mapPins.length })}</p>
-        <div className="mt-4"><DemoGpsControl loads={(activeLoadsData ?? [])
-          .filter((load) => load.vehicle_id != null && demoVehicleIds.has(load.vehicle_id))
-          .map((load) => ({
-            id: load.id,
-            loadNumber: load.load_number,
-            customer: load.customer_name_raw,
-            destination: [load.delivery_city, load.delivery_state].filter(Boolean).join(', ') || null,
-          }))} /></div>
+        {/* Internal demo/sales-tooling only -- rendered only when this org actually has a
+            demo-seeded Samsara vehicle (demoVehicleIds above), never for a real customer's real
+            telematics integration. Previously rendered unconditionally for every org. */}
+        {demoVehicleIds.size > 0 && (
+          <div className="mt-4"><DemoGpsControl loads={demoLoads} /></div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

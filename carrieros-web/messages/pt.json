@@ -1400,6 +1400,7 @@
       "error": "Não foi possível carregar as capacidades por função.",
       "notLiveNotice": "Editar esta tabela não é aplicado em tempo real. O controle de acesso é imposto por um arquivo gerado (scripts/gen-role-capabilities.mjs), não por esta tabela — as alterações aqui só têm efeito depois que Regenerar for executado e os arquivos resultantes forem enviados e implantados.",
       "savedRegenerateToApply": "Salvo. Regenere para aplicar.",
+      "savedRegenerateUnavailable": "Salvo. Regenerar só funciona em um checkout de desenvolvimento local — peça a um engenheiro para executar scripts/gen-role-capabilities.mjs lá, depois fazer commit e deploy do resultado.",
       "regenerateButton": "Regenerar",
       "regenerateError": "Falha ao regenerar.",
       "regenerateChanged": "Regenerado — arquivos alterados: {files}.",

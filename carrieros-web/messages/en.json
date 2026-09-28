@@ -1595,6 +1595,7 @@
       "error": "Could not load role capabilities.",
       "notLiveNotice": "Editing this table is not live. Gating is enforced from a generated file (scripts/gen-role-capabilities.mjs), not this table — changes here only take effect after Regenerate is run and the resulting files are committed and deployed.",
       "savedRegenerateToApply": "Saved. Regenerate to apply.",
+      "savedRegenerateUnavailable": "Saved. Regenerate only works in a local dev checkout — have an engineer run scripts/gen-role-capabilities.mjs there, then commit and deploy the result.",
       "regenerateButton": "Regenerate",
       "regenerateError": "Regenerate failed.",
       "regenerateChanged": "Regenerated — changed files: {files}.",

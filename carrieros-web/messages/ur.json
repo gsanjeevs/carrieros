@@ -1595,6 +1595,7 @@
       "error": "کردار کی صلاحیتیں لوڈ نہیں ہو سکیں۔",
       "notLiveNotice": "اس جدول میں ترمیم فوری اثر انداز نہیں ہوتی۔ گیٹنگ ایک تیار کردہ فائل (scripts/gen-role-capabilities.mjs) سے لاگو ہوتی ہے، اس جدول سے نہیں — یہاں کی تبدیلیاں صرف Regenerate چلانے اور نتیجے میں آنے والی فائلوں کو کمٹ اور ڈیپلائے کرنے کے بعد ہی مؤثر ہوں گی۔",
       "savedRegenerateToApply": "محفوظ ہو گیا۔ لاگو کرنے کے لیے Regenerate کریں۔",
+      "savedRegenerateUnavailable": "محفوظ ہو گیا۔ Regenerate صرف مقامی ڈیو چیک آؤٹ میں کام کرتا ہے — کسی انجینئر سے وہاں scripts/gen-role-capabilities.mjs چلانے کو کہیں، پھر نتیجہ کمٹ اور ڈیپلائے کریں۔",
       "regenerateButton": "Regenerate",
       "regenerateError": "Regenerate ناکام ہو گیا۔",
       "regenerateChanged": "Regenerate ہو گیا — تبدیل شدہ فائلیں: {files}۔",

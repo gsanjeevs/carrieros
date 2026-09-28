@@ -26,6 +26,14 @@ interface Grant {
   capability: string
 }
 
+// Regenerate only ever does something real in a local dev checkout (it rewrites a file on disk that
+// must then be committed and deployed) — a deployed production environment's filesystem is
+// read-only/ephemeral, so the button there would either error or silently do nothing durable. Gated
+// here AND server-side in app/api/admin/roles/regenerate/route.ts (this is a UX improvement, not the
+// actual security boundary). `process.env.NODE_ENV` is inlined at build time by Next.js, safe to read
+// client-side.
+const REGENERATE_AVAILABLE = process.env.NODE_ENV !== 'production'
+
 export default function RoleCapabilitiesPage() {
   const t = useTranslations('admin.roles')
   const [roles, setRoles] = useState<Role[] | null>(null)
@@ -109,10 +117,12 @@ export default function RoleCapabilitiesPage() {
       {dirty && (
         <Callout tone="orange" icon="sync" className="mb-6 max-w-3xl">
           <div className="flex items-center justify-between gap-4 w-full">
-            <span>{t('savedRegenerateToApply')}</span>
-            <Button size="sm" variant="secondary" onClick={regenerate} loading={regenerating}>
-              {t('regenerateButton')}
-            </Button>
+            <span>{REGENERATE_AVAILABLE ? t('savedRegenerateToApply') : t('savedRegenerateUnavailable')}</span>
+            {REGENERATE_AVAILABLE && (
+              <Button size="sm" variant="secondary" onClick={regenerate} loading={regenerating}>
+                {t('regenerateButton')}
+              </Button>
+            )}
           </div>
         </Callout>
       )}
@@ -127,7 +137,7 @@ export default function RoleCapabilitiesPage() {
         </Callout>
       )}
 
-      {!dirty && !regenResult && (
+      {!dirty && !regenResult && REGENERATE_AVAILABLE && (
         <div className="mb-6">
           <Button size="sm" variant="secondary" onClick={regenerate} loading={regenerating}>
             {t('regenerateButton')}

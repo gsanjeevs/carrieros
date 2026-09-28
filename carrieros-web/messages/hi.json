@@ -1400,6 +1400,7 @@
       "error": "भूमिका क्षमताएं लोड नहीं हो सकीं।",
       "notLiveNotice": "इस टेबल को संपादित करना लाइव नहीं है। गेटिंग एक जनरेट की गई फ़ाइल (scripts/gen-role-capabilities.mjs) से लागू होती है, इस टेबल से नहीं — यहां किए गए बदलाव तभी प्रभावी होते हैं जब Regenerate चलाया जाता है और परिणामी फ़ाइलें कमिट और डिप्लॉय की जाती हैं।",
       "savedRegenerateToApply": "सेव हो गया। लागू करने के लिए Regenerate करें।",
+      "savedRegenerateUnavailable": "सेव हो गया। Regenerate केवल लोकल डेव चेकआउट में काम करता है — किसी इंजीनियर से वहाँ scripts/gen-role-capabilities.mjs चलाने को कहें, फिर परिणाम को कमिट और डिप्लॉय करें।",
       "regenerateButton": "Regenerate",
       "regenerateError": "Regenerate विफल।",
       "regenerateChanged": "Regenerate हो गया — बदली गई फ़ाइलें: {files}।",

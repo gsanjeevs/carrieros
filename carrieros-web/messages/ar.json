@@ -1400,6 +1400,7 @@
       "error": "تعذّر تحميل صلاحيات الأدوار.",
       "notLiveNotice": "تعديل هذا الجدول ليس مباشرًا. يتم فرض التحكم من ملف مُولَّد (scripts/gen-role-capabilities.mjs)، وليس من هذا الجدول — التغييرات هنا تصبح فعّالة فقط بعد تشغيل \"إعادة التوليد\" ونشر الملفات الناتجة والتزامها.",
       "savedRegenerateToApply": "تم الحفظ. أعد التوليد للتطبيق.",
+      "savedRegenerateUnavailable": "تم الحفظ. تعمل ميزة إعادة التوليد فقط في بيئة تطوير محلية — اطلب من أحد المهندسين تشغيل scripts/gen-role-capabilities.mjs هناك، ثم عمل commit ونشر (deploy) النتيجة.",
       "regenerateButton": "إعادة التوليد",
       "regenerateError": "فشلت إعادة التوليد.",
       "regenerateChanged": "تمت إعادة التوليد — الملفات التي تغيّرت: {files}.",
