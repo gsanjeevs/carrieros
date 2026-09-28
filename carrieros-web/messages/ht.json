@@ -319,7 +319,38 @@
     "shareViaEmail": "Pataje pa Imel",
     "shareMessage": "Swiv chajman {loadNumber}:",
     "shareEmailSubject": "Lyen swiv pou chajman {loadNumber}",
-    "myLoadsTitle": "Chajman Mwen Yo"
+    "myLoadsTitle": "Chajman Mwen Yo",
+    "customerOrders": "Kòmand kliyan",
+    "noCustomerOrders": "Poko gen kòmand kliyan ki atache.",
+    "orderNumber": "Nimewo kòmand",
+    "orderReference": "Referans kliyan",
+    "orderWeight": "Pwa (lb)",
+    "selectOrderCustomer": "Chwazi kliyan",
+    "addCustomerOrder": "Ajoute kòmand",
+    "savingOrder": "Ap anrejistre…",
+    "ordersAddFailed": "Nou pa t kapab ajoute kòmand sa a. Verifye kliyan an epi eseye ankò.",
+    "ordersKeepCustomerScoped": "Chak pòtay kliyan wè sèlman pwòp kòmand pa yo; anplwaye transpòtè wè manifès konplè a.",
+    "orderCharge": "Frè kliyan",
+    "orderAllocationComplete": "Frè kòmand yo egal ak {allocated}.",
+    "orderAllocationIncomplete": "Alokasyon {allocated} sou {target}; frè kòmand yo dwe egal ak tarif chajman an anvan fakti.",
+    "saveOrderCharge": "Anrejistre frè a",
+    "orderChargeUpdateFailed": "Nou pa t kapab anrejistre frè kòmand lan. Verifye pa gen fakti ki kreye deja.",
+    "customerExceptionUpdates": "Mizajou anvwa pou kliyan",
+    "noCustomerExceptions": "Pa gen okenn eksepsyon chajman pou pataje kounye a.",
+    "customerUpdateShared": "Pataje ak kliyan",
+    "customerUpdatePrivate": "Sèlman entèn",
+    "customerUpdateMessageLabel": "Mizajou san danje pou kliyan",
+    "customerUpdateMessagePlaceholder": "Eksplike enpak la ak sa k ap pase apre. Pa mete nòt entèn ladan.",
+    "savingCustomerUpdate": "Ap anrejistre…",
+    "hideCustomerUpdate": "Kache pou kliyan",
+    "shareCustomerUpdate": "Pataje mizajou a",
+    "customerExceptionSaveFailed": "Nou pa t kapab mete ajou vizibilite kliyan an. Tanpri eseye ankò.",
+    "resendCustomerUpdateEmail": "Voye imel kliyan an ankò",
+    "customerUpdateEmailSent": "Imel voye bay {count} kontak prensipal kliyan.",
+    "customerUpdateEmailPartial": "Imel voye bay {sent} kontak, men li echwe pou {failed}.",
+    "customerUpdateNoRecipient": "Mizajou a pataje sou paj swiv la, men pa gen okenn imel prensipal kliyan ki nan dosye a.",
+    "customerUpdateEmailFailed": "Mizajou a pataje sou paj swiv la, men imel la pa t kapab livre.",
+    "customerExceptionPrivacy": "Se sèlman mesaj ou ekri isit la ki parèt sou lyen swiv la. Detay eksepsyon entèn yo rete prive."
   },
   "drivers": {
     "title": "Chofè",
@@ -415,7 +446,8 @@
     "dvirPreTrip": "Anvan Vwayaj",
     "dvirPostTrip": "Apre Vwayaj",
     "dvirDefectsNoted": "Defo Note",
-    "dvirSatisfactory": "Satisfezan"
+    "dvirSatisfactory": "Satisfezan",
+    "backToDrivers": "Retounen nan Chofè"
   },
   "vehicles": {
     "title": "Machin",
@@ -548,7 +580,8 @@
     "uploadPhoto": "Telechaje Foto",
     "replacePhoto": "Ranplase Foto",
     "photoUploadFailed": "Nou pa t kapab telechaje foto a. Tanpri eseye ankò.",
-    "dvirNotSigned": "Pa siyen"
+    "dvirNotSigned": "Pa siyen",
+    "backToVehicles": "Retounen nan Machin"
   },
   "companyDocuments": {
     "title": "Dokiman Konpayi",
@@ -646,7 +679,9 @@
     "creating": "Ap kreye…",
     "opened": "Ouvri",
     "openedAt": "Ouvri",
-    "notOpenedYet": "Poko ouvri"
+    "notOpenedYet": "Poko ouvri",
+    "loadInvoicesCreated": "{count, plural, one {# fakti kliyan kreye} other {# fakti kliyan kreye}}",
+    "createRemainingCustomerInvoices": "Kreye fakti pou kliyan ki rete yo lè w itilize alokasyon kòmand yo."
   },
   "settlements": {
     "title": "Règleman",
@@ -692,7 +727,8 @@
     "daySingular": "jou",
     "dayPlural": "jou",
     "loadLabel": "Chajman",
-    "poweredBy": "Founi pa CarrierOS"
+    "poweredBy": "Founi pa CarrierOS",
+    "shipmentUpdates": "Mizajou anvwa"
   },
   "dispatch": {
     "title": "Dispatch",
@@ -706,7 +742,32 @@
     "loadingMap": "Ap chaje kat…",
     "locationStale": "⚠ Pa gen mizajou depi plis pase 15 min",
     "locationLive": "● An Dirèk",
-    "idleVehicleBadge": "san aktivite, pa gen chajman aktif"
+    "idleVehicleBadge": "san aktivite, pa gen chajman aktif",
+    "assignedVehicleBadge": "asiyen a yon chajman aktif",
+    "mapViews": "Vi kat",
+    "mapViewAll": "Tout kamyon",
+    "mapViewMoving": "Ap deplase (GPS)",
+    "mapViewLoads": "Chajman aktif",
+    "mapViewParked": "Estasyone (san chajman)",
+    "mapViewUnloaded": "Pa gen chajman aktif",
+    "mapViewStale": "Pozisyon depase",
+    "motionMoving": "Ap deplase (GPS)",
+    "motionStationary": "Kanpe (GPS)",
+    "motionUnknown": "Mouvman enkoni",
+    "demoGpsStart": "Kòmanse GPS demo",
+    "demoGpsStop": "Sispann GPS demo",
+    "demoGpsRunning": "Pozisyon kamyon aktif sentetik ap mete ajou chak 4 segond",
+    "demoGpsHelp": "Deplase yon sèl kamyon demo chwazi sou yon wout separe Houston–Austin",
+    "demoGpsSelectLoad": "Chwazi yon chajman demo pou deplase",
+    "demoGpsNoLoads": "Pa gen chajman demo aktif disponib",
+    "demoGpsUpdated": "Pozisyon kamyon chwazi a mete ajou",
+    "demoGpsStopped": "GPS demo sispann",
+    "demoGpsError": "Nou pa t kapab mete ajou pozisyon GPS demo yo",
+    "shipmentLabel": "Chajman",
+    "customerUnassigned": "Kliyan pa asiyen",
+    "origin": "Pwen depa",
+    "destination": "Destinasyon",
+    "noActiveShipment": "Pa gen chajman aktif"
   },
   "settings": {
     "title": "Paramèt pwofil",
@@ -842,7 +903,9 @@
     "upgrade": "Amelyore",
     "downgrade": "Diminye",
     "changingPlan": "Ap mete ajou…",
-    "changeTierFailed": "Nou pa t kapab chanje plan w. Tanpri eseye ankò."
+    "changeTierFailed": "Nou pa t kapab chanje plan w. Tanpri eseye ankò.",
+    "demoPaymentReceipt": "Peman simile: {currency} {amount} · referans {reference}. Pa gen okenn chaj reyèl ki fèt.",
+    "planAlreadyCurrent": "Plan sa a deja aktif; pa gen okenn peman ki anrejistre."
   },
   "developerApi": {
     "title": "API pou Devlopè",
@@ -887,7 +950,9 @@
     "colorHelp": "Kite yon koulè vid pou itilize koulè default CarrierOS la.",
     "invalidColor": "Antre yon koulè kòm #RRGGBB, egzanp: #f47920.",
     "save": "Anrejistre chanjman yo",
-    "saved": "Branding mete ajou."
+    "saved": "Branding mete ajou.",
+    "previewLabel": "Apèsi an dirèk",
+    "trackingPreviewTitle": "Swiv chajman"
   },
   "customers": {
     "title": "Kliyan",
@@ -978,7 +1043,8 @@
     "lastLoad": "Dènye Chajman",
     "daysAgo": "{days, plural, =0 {Jodi a} one {# jou pase} other {# jou pase}}",
     "relationshipsGoingCold": "{count, plural, one {# relasyon k ap vin frèt} other {# relasyon k ap vin frèt}}",
-    "coldCustomerLine": "{name} — {days} jou"
+    "coldCustomerLine": "{name} — {days} jou",
+    "backToCustomers": "Retounen nan Kliyan"
   },
   "maintenance": {
     "title": "Antretyen",
@@ -1523,7 +1589,9 @@
     "deliveriesTitle": "Livrezon resan",
     "noDeliveries": "Poko gen livrezon",
     "emptyTitle": "Poko gen webhook",
-    "emptyDescription": "Anrejistre yon webhook pou fè CarrierOS avèti yon lòt aplikasyon lè estati yon chajman chanje oswa yon fakti peye."
+    "emptyDescription": "Anrejistre yon webhook pou fè CarrierOS avèti yon lòt aplikasyon lè estati yon chajman chanje oswa yon fakti peye.",
+    "loadboardTitle": "Tablo Chajman",
+    "loadboardUpgradeRequired": "Pou poste sou tablo chajman an mande plan Growth oswa pi wo."
   },
   "telematics": {
     "title": "Telematics",
@@ -1546,5 +1614,24 @@
     "save": "Anrejistre",
     "saved": "Anrejistre",
     "credentialRequired": "Antre yon idantifyan pou konfigire sa a pou premye fwa."
+  },
+  "loadboard": {
+    "settingsTitle": "Tablo Chajman",
+    "settingsSubtitle": "Konekte yon founisè tablo chajman pou dispatcher yo ka poste chajman pou lòt transpòtè jwenn.",
+    "datTitle": "Tablo Chajman DAT",
+    "datDescription": "Poste chajman sou tablo chajman DAT (sèlman pou poste -- rechèch ak rezèvasyon pa fè pati entegrasyon sa a).",
+    "enabled": "Aktive",
+    "apiKeyLabel": "Kle API DAT",
+    "apiKeyPlaceholder": "Antre pou defini oswa wote",
+    "apiKeyConfigured": "Yon kle konfigire. Kite l vid pou konsève l, oswa antre yon nouvo pou wote l.",
+    "apiKeyNotConfigured": "Poko gen kle konfigire.",
+    "credentialRequired": "Antre yon idantifyan pou konfigire sa a pou premye fwa.",
+    "save": "Anrejistre",
+    "saved": "Anrejistre",
+    "title": "Tablo Chajman",
+    "description": "Poste chajman sa a sou tablo chajman DAT pou lòt transpòtè ka jwenn li.",
+    "postButton": "Poste sou DAT",
+    "posting": "Ap poste…",
+    "alreadyPosted": "Chajman sa a deja poste sou DAT."
   }
 }

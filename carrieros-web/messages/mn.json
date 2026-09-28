@@ -319,7 +319,38 @@
     "shareViaEmail": "Имэйлээр хуваалцах",
     "shareMessage": "{loadNumber} ачааг хянах:",
     "shareEmailSubject": "{loadNumber} ачааны хяналтын холбоос",
-    "myLoadsTitle": "Миний ачаанууд"
+    "myLoadsTitle": "Миний ачаанууд",
+    "customerOrders": "Захиалагчийн захиалгууд",
+    "noCustomerOrders": "Одоогоор захиалагчийн захиалга хавсаргаагүй байна.",
+    "orderNumber": "Захиалгын дугаар",
+    "orderReference": "Захиалагчийн лавлагаа",
+    "orderWeight": "Жин (фунт)",
+    "selectOrderCustomer": "Захиалагч сонгох",
+    "addCustomerOrder": "Захиалга нэмэх",
+    "savingOrder": "Хадгалж байна…",
+    "ordersAddFailed": "Энэ захиалгыг нэмж чадсангүй. Захиалагчийг шалгаад дахин оролдоно уу.",
+    "ordersKeepCustomerScoped": "Захиалагч бүрийн портал зөвхөн өөрийн захиалгыг харна; тээвэрлэгчийн ажилтнууд бүрэн манифестыг харна.",
+    "orderCharge": "Захиалагчийн төлбөр",
+    "orderAllocationComplete": "Захиалгын төлбөрүүд {allocated}-тэй тэнцэж байна.",
+    "orderAllocationIncomplete": "{target}-с {allocated} хуваарилагдсан; нэхэмжлэхийг үүсгэхийн өмнө захиалгын төлбөрүүд ачааны тарифтай тэнцэх ёстой.",
+    "saveOrderCharge": "Төлбөр хадгалах",
+    "orderChargeUpdateFailed": "Захиалгын төлбөрийг хадгалж чадсангүй. Нэхэмжлэх аль хэдийн үүссэн эсэхийг шалгана уу.",
+    "customerExceptionUpdates": "Захиалагчид зориулсан ачааны шинэчлэлт",
+    "noCustomerExceptions": "Одоогоор захиалагчтай хуваалцах ачааны онцгой тохиолдол алга байна.",
+    "customerUpdateShared": "Захиалагчтай хуваалцсан",
+    "customerUpdatePrivate": "Зөвхөн дотоод",
+    "customerUpdateMessageLabel": "Захиалагчид зориулсан шинэчлэлт",
+    "customerUpdateMessagePlaceholder": "Нөлөөлөл болон дараагийн алхмуудыг тайлбарлана уу. Дотоод тэмдэглэлийг оруулахгүй байна уу.",
+    "savingCustomerUpdate": "Хадгалж байна…",
+    "hideCustomerUpdate": "Захиалагчаас нуух",
+    "shareCustomerUpdate": "Шинэчлэлт хуваалцах",
+    "customerExceptionSaveFailed": "Захиалагчид харагдах байдлыг шинэчилж чадсангүй. Дахин оролдоно уу.",
+    "resendCustomerUpdateEmail": "Захиалагчийн имэйлийг дахин илгээх",
+    "customerUpdateEmailSent": "{count} үндсэн захиалагчийн харилцагчид имэйл илгээгдлээ.",
+    "customerUpdateEmailPartial": "{sent} харилцагчид имэйл илгээгдсэн боловч {failed}-д илгээж чадсангүй.",
+    "customerUpdateNoRecipient": "Шинэчлэлт хяналтын хуудсанд хуваалцагдсан боловч захиалагчийн үндсэн имэйл бүртгэгдээгүй байна.",
+    "customerUpdateEmailFailed": "Шинэчлэлт хяналтын хуудсанд хуваалцагдсан боловч имэйлийг хүргэж чадсангүй.",
+    "customerExceptionPrivacy": "Хяналтын холбоос дээр зөвхөн энд бичсэн зурвас харагдана. Дотоод онцгой тохиолдлын дэлгэрэнгүй мэдээлэл нууц хэвээр байна."
   },
   "drivers": {
     "title": "Жолооч нар",
@@ -415,7 +446,8 @@
     "dvirPreTrip": "Аяллын өмнөх",
     "dvirPostTrip": "Аяллын дараах",
     "dvirDefectsNoted": "Гэмтэл илэрсэн",
-    "dvirSatisfactory": "Хэвийн"
+    "dvirSatisfactory": "Хэвийн",
+    "backToDrivers": "Жолооч нар руу буцах"
   },
   "vehicles": {
     "title": "Тээврийн хэрэгсэл",
@@ -548,7 +580,8 @@
     "uploadPhoto": "Зураг оруулах",
     "replacePhoto": "Зураг солих",
     "photoUploadFailed": "Зургийг оруулж чадсангүй. Дахин оролдоно уу.",
-    "dvirNotSigned": "Гарын үсэг зураагүй"
+    "dvirNotSigned": "Гарын үсэг зураагүй",
+    "backToVehicles": "Тээврийн хэрэгсэл рүү буцах"
   },
   "companyDocuments": {
     "title": "Компанийн баримт бичиг",
@@ -646,7 +679,9 @@
     "creating": "Үүсгэж байна…",
     "opened": "Нээгдсэн",
     "openedAt": "Нээгдсэн",
-    "notOpenedYet": "Одоогоор нээгдээгүй"
+    "notOpenedYet": "Одоогоор нээгдээгүй",
+    "loadInvoicesCreated": "{count, plural, one {# захиалагчийн нэхэмжлэх үүсгэгдлээ} other {# захиалагчийн нэхэмжлэх үүсгэгдлээ}}",
+    "createRemainingCustomerInvoices": "Үлдсэн захиалагчдын хуваарилалтыг ашиглан тэдэнд зориулсан нэхэмжлэх үүсгэнэ үү."
   },
   "settlements": {
     "title": "Тооцоо нийлүүлэлт",
@@ -692,7 +727,8 @@
     "daySingular": "хоног",
     "dayPlural": "хоног",
     "loadLabel": "Ачаа",
-    "poweredBy": "CarrierOS-оор ажилладаг"
+    "poweredBy": "CarrierOS-оор ажилладаг",
+    "shipmentUpdates": "Ачааны шинэчлэлт"
   },
   "dispatch": {
     "title": "Диспетчерчлэл",
@@ -706,7 +742,32 @@
     "loadingMap": "Газрын зургийг ачаалж байна…",
     "locationStale": "⚠ 15 минутаас дээш хугацаанд шинэчлэгдээгүй",
     "locationLive": "● Шууд",
-    "idleVehicleBadge": "сул зогсонги, идэвхтэй ачаагүй"
+    "idleVehicleBadge": "сул зогсонги, идэвхтэй ачаагүй",
+    "assignedVehicleBadge": "идэвхтэй ачаанд хуваарилагдсан",
+    "mapViews": "Газрын зургийн харагдац",
+    "mapViewAll": "Бүх тээврийн хэрэгсэл",
+    "mapViewMoving": "Хөдөлж байгаа (GPS)",
+    "mapViewLoads": "Идэвхтэй ачаанууд",
+    "mapViewParked": "Зогсоолд (ачаагүй)",
+    "mapViewUnloaded": "Идэвхтэй ачаа алга",
+    "mapViewStale": "Хуучирсан байршил",
+    "motionMoving": "Хөдөлж байгаа (GPS)",
+    "motionStationary": "Зогссон (GPS)",
+    "motionUnknown": "Хөдөлгөөн тодорхойгүй",
+    "demoGpsStart": "Демо GPS эхлүүлэх",
+    "demoGpsStop": "Демо GPS зогсоох",
+    "demoGpsRunning": "Идэвхтэй тээврийн хэрэгслийн синтетик байршил 4 секунд тутамд шинэчлэгдэж байна",
+    "demoGpsHelp": "Сонгосон нэг демо тээврийн хэрэгслийг Хьюстон–Остины тусдаа маршрутаар хөдөлгөх",
+    "demoGpsSelectLoad": "Хөдөлгөх демо ачааг сонгоно уу",
+    "demoGpsNoLoads": "Идэвхтэй демо ачаа алга байна",
+    "demoGpsUpdated": "Сонгосон тээврийн хэрэгслийн байршил шинэчлэгдлээ",
+    "demoGpsStopped": "Демо GPS зогслоо",
+    "demoGpsError": "Демо GPS-ийн байршлыг шинэчилж чадсангүй",
+    "shipmentLabel": "Ачаа",
+    "customerUnassigned": "Захиалагч хуваарилагдаагүй",
+    "origin": "Гарах цэг",
+    "destination": "Очих цэг",
+    "noActiveShipment": "Идэвхтэй ачаа алга"
   },
   "settings": {
     "title": "Профайлын тохиргоо",
@@ -842,7 +903,9 @@
     "upgrade": "Шинэчлэх",
     "downgrade": "Бууруулах",
     "changingPlan": "Шинэчилж байна…",
-    "changeTierFailed": "Таны төлөвлөгөөг өөрчилж чадсангүй. Дахин оролдоно уу."
+    "changeTierFailed": "Таны төлөвлөгөөг өөрчилж чадсангүй. Дахин оролдоно уу.",
+    "demoPaymentReceipt": "Загварчилсан төлбөр: {currency} {amount} · лавлагаа {reference}. Бодит төлбөр хийгдээгүй.",
+    "planAlreadyCurrent": "Энэ төлөвлөгөө аль хэдийн идэвхтэй байгаа тул төлбөр бүртгэгдээгүй."
   },
   "developerApi": {
     "title": "Хөгжүүлэгчийн API",
@@ -887,7 +950,9 @@
     "colorHelp": "CarrierOS-ийн үндсэн өнгийг ашиглахын тулд өнгийг хоосон орхино уу.",
     "invalidColor": "Өнгийг #RRGGBB хэлбэрээр оруулна уу, жишээ нь #f47920.",
     "save": "Өөрчлөлтийг хадгалах",
-    "saved": "Брэндчлэл шинэчлэгдлээ."
+    "saved": "Брэндчлэл шинэчлэгдлээ.",
+    "previewLabel": "Шууд урьдчилан харах",
+    "trackingPreviewTitle": "Ачааны хяналт"
   },
   "customers": {
     "title": "Захиалагчид",
@@ -978,7 +1043,8 @@
     "lastLoad": "Сүүлийн ачаа",
     "daysAgo": "{days, plural, =0 {Өнөөдөр} one {# өдрийн өмнө} other {# өдрийн өмнө}}",
     "relationshipsGoingCold": "{count, plural, one {# харилцаа хөрч байна} other {# харилцаа хөрч байна}}",
-    "coldCustomerLine": "{name} — {days} хоног"
+    "coldCustomerLine": "{name} — {days} хоног",
+    "backToCustomers": "Захиалагчид руу буцах"
   },
   "maintenance": {
     "title": "Засвар үйлчилгээ",
@@ -1523,7 +1589,9 @@
     "deliveriesTitle": "Сүүлийн хүргэлтүүд",
     "noDeliveries": "Одоогоор хүргэлт алга байна",
     "emptyTitle": "Одоогоор webhook алга байна",
-    "emptyDescription": "Ачааны төлөв өөрчлөгдөх эсвэл нэхэмжлэх төлөгдөх үед CarrierOS-оос өөр програмд мэдэгдэхийн тулд webhook бүртгүүлнэ үү."
+    "emptyDescription": "Ачааны төлөв өөрчлөгдөх эсвэл нэхэмжлэх төлөгдөх үед CarrierOS-оос өөр програмд мэдэгдэхийн тулд webhook бүртгүүлнэ үү.",
+    "loadboardTitle": "Ачааны самбар",
+    "loadboardUpgradeRequired": "Ачааны самбарт нийтлэхийн тулд Growth төлөвлөгөө буюу түүнээс дээш шаардлагатай."
   },
   "telematics": {
     "title": "Телематик",
@@ -1546,5 +1614,24 @@
     "save": "Хадгалах",
     "saved": "Хадгалагдлаа",
     "credentialRequired": "Үүнийг анх удаа тохируулахын тулд эрх нэвтрэлт оруулна уу."
+  },
+  "loadboard": {
+    "settingsTitle": "Ачааны самбар",
+    "settingsSubtitle": "Диспетчерүүд бусад тээвэрлэгчдэд ачаа олж харуулахын тулд ачааны самбарын үйлчилгээ үзүүлэгчийг холбоно уу.",
+    "datTitle": "DAT Ачааны самбар",
+    "datDescription": "Ачааг DAT-ийн ачааны самбарт нийтэл (зөвхөн нийтлэх -- хайх, захиалах нь энэ интеграцид хамаарахгүй).",
+    "enabled": "Идэвхтэй",
+    "apiKeyLabel": "DAT API түлхүүр",
+    "apiKeyPlaceholder": "Тохируулах эсвэл солихын тулд оруулна уу",
+    "apiKeyConfigured": "Түлхүүр тохируулагдсан байна. Хэвээр үлдээхийн тулд хоосон орхино уу, эсвэл солихын тулд шинэ түлхүүр оруулна уу.",
+    "apiKeyNotConfigured": "Түлхүүр одоогоор тохируулаагүй байна.",
+    "credentialRequired": "Үүнийг анх удаа тохируулахын тулд эрх мэдэл оруулна уу.",
+    "save": "Хадгалах",
+    "saved": "Хадгалагдлаа",
+    "title": "Ачааны самбар",
+    "description": "Бусад тээвэрлэгчид олж харахын тулд энэ ачааг DAT-ийн ачааны самбарт нийтэл.",
+    "postButton": "DAT-д нийтлэх",
+    "posting": "Нийтэлж байна...",
+    "alreadyPosted": "Энэ ачаа DAT-д нийтлэгдсэн байна."
   }
 }

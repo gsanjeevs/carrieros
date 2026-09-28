@@ -319,7 +319,38 @@
     "shareViaEmail": "Per E-Mail teilen",
     "shareMessage": "Ladung {loadNumber} verfolgen:",
     "shareEmailSubject": "Tracking-Link für Ladung {loadNumber}",
-    "myLoadsTitle": "Meine Ladungen"
+    "myLoadsTitle": "Meine Ladungen",
+    "customerOrders": "Kundenaufträge",
+    "noCustomerOrders": "Noch keine Kundenaufträge zugeordnet.",
+    "orderNumber": "Auftragsnummer",
+    "orderReference": "Kundenreferenz",
+    "orderWeight": "Gewicht (lb)",
+    "selectOrderCustomer": "Kunde auswählen",
+    "addCustomerOrder": "Auftrag hinzufügen",
+    "savingOrder": "Wird gespeichert…",
+    "ordersAddFailed": "Dieser Auftrag konnte nicht hinzugefügt werden. Prüfen Sie den Kunden und versuchen Sie es erneut.",
+    "ordersKeepCustomerScoped": "Jedes Kundenportal sieht nur seine eigenen Aufträge; Mitarbeiter des Frachtführers sehen das vollständige Manifest.",
+    "orderCharge": "Kundenbetrag",
+    "orderAllocationComplete": "Auftragsbeträge stimmen mit {allocated} überein.",
+    "orderAllocationIncomplete": "{allocated} von {target} zugeordnet; die Auftragsbeträge müssen vor der Rechnungsstellung der Ladungsrate entsprechen.",
+    "saveOrderCharge": "Betrag speichern",
+    "orderChargeUpdateFailed": "Der Auftragsbetrag konnte nicht gespeichert werden. Prüfen Sie, ob bereits eine Rechnung erstellt wurde.",
+    "customerExceptionUpdates": "Kunden-Sendungsupdates",
+    "noCustomerExceptions": "Derzeit gibt es keine Ladungsausnahmen zum Teilen.",
+    "customerUpdateShared": "Mit Kunde geteilt",
+    "customerUpdatePrivate": "Nur intern",
+    "customerUpdateMessageLabel": "Kundentaugliches Update",
+    "customerUpdateMessagePlaceholder": "Erklären Sie die Auswirkung und die nächsten Schritte. Fügen Sie keine internen Notizen hinzu.",
+    "savingCustomerUpdate": "Wird gespeichert…",
+    "hideCustomerUpdate": "Vor Kunde verbergen",
+    "shareCustomerUpdate": "Update teilen",
+    "customerExceptionSaveFailed": "Die Kundensichtbarkeit konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.",
+    "resendCustomerUpdateEmail": "Kunden-E-Mail erneut senden",
+    "customerUpdateEmailSent": "E-Mail an {count} primäre(n) Kundenkontakt(e) gesendet.",
+    "customerUpdateEmailPartial": "E-Mail an {sent} Kontakt(e) gesendet, aber fehlgeschlagen bei {failed}.",
+    "customerUpdateNoRecipient": "Das Update ist auf der Tracking-Seite geteilt, aber es ist keine primäre Kunden-E-Mail hinterlegt.",
+    "customerUpdateEmailFailed": "Das Update ist auf der Tracking-Seite geteilt, aber die E-Mail konnte nicht zugestellt werden.",
+    "customerExceptionPrivacy": "Nur die hier verfasste Nachricht wird auf dem Tracking-Link angezeigt. Interne Ausnahmedetails bleiben privat."
   },
   "drivers": {
     "title": "Fahrer",
@@ -415,7 +446,8 @@
     "dvirPreTrip": "Vor der Fahrt",
     "dvirPostTrip": "Nach der Fahrt",
     "dvirDefectsNoted": "Mängel festgestellt",
-    "dvirSatisfactory": "Zufriedenstellend"
+    "dvirSatisfactory": "Zufriedenstellend",
+    "backToDrivers": "Zurück zu den Fahrern"
   },
   "vehicles": {
     "title": "Fahrzeuge",
@@ -548,7 +580,8 @@
     "uploadPhoto": "Foto hochladen",
     "replacePhoto": "Foto ersetzen",
     "photoUploadFailed": "Das Foto konnte nicht hochgeladen werden. Bitte versuchen Sie es erneut.",
-    "dvirNotSigned": "Nicht unterschrieben"
+    "dvirNotSigned": "Nicht unterschrieben",
+    "backToVehicles": "Zurück zu den Fahrzeugen"
   },
   "companyDocuments": {
     "title": "Unternehmensdokumente",
@@ -646,7 +679,9 @@
     "creating": "Wird erstellt…",
     "opened": "Geöffnet",
     "openedAt": "Geöffnet",
-    "notOpenedYet": "Noch nicht geöffnet"
+    "notOpenedYet": "Noch nicht geöffnet",
+    "loadInvoicesCreated": "{count, plural, one {# Kundenrechnung erstellt} other {# Kundenrechnungen erstellt}}",
+    "createRemainingCustomerInvoices": "Erstellen Sie Rechnungen für die übrigen Kunden anhand ihrer Auftragszuordnungen."
   },
   "settlements": {
     "title": "Abrechnungen",
@@ -692,7 +727,8 @@
     "daySingular": "Tag",
     "dayPlural": "Tage",
     "loadLabel": "Ladung",
-    "poweredBy": "Bereitgestellt von CarrierOS"
+    "poweredBy": "Bereitgestellt von CarrierOS",
+    "shipmentUpdates": "Sendungsupdates"
   },
   "dispatch": {
     "title": "Disposition",
@@ -706,7 +742,32 @@
     "loadingMap": "Karte wird geladen…",
     "locationStale": "⚠ Seit über 15 Min. kein Update",
     "locationLive": "● Live",
-    "idleVehicleBadge": "ungenutzt, keine aktive Ladung"
+    "idleVehicleBadge": "ungenutzt, keine aktive Ladung",
+    "assignedVehicleBadge": "einer aktiven Ladung zugewiesen",
+    "mapViews": "Kartenansichten",
+    "mapViewAll": "Alle Fahrzeuge",
+    "mapViewMoving": "In Bewegung (GPS)",
+    "mapViewLoads": "Aktive Ladungen",
+    "mapViewParked": "Geparkt (keine Ladung)",
+    "mapViewUnloaded": "Keine aktive Ladung",
+    "mapViewStale": "Veralteter Standort",
+    "motionMoving": "In Bewegung (GPS)",
+    "motionStationary": "Angehalten (GPS)",
+    "motionUnknown": "Bewegung unbekannt",
+    "demoGpsStart": "Demo-GPS starten",
+    "demoGpsStop": "Demo-GPS stoppen",
+    "demoGpsRunning": "Synthetische Standorte aktiver Fahrzeuge werden alle 4 Sekunden aktualisiert",
+    "demoGpsHelp": "Bewegen Sie ein ausgewähltes Demo-Fahrzeug auf einer separaten Houston–Austin-Route",
+    "demoGpsSelectLoad": "Wählen Sie eine Demo-Ladung zum Bewegen",
+    "demoGpsNoLoads": "Keine aktiven Demo-Ladungen verfügbar",
+    "demoGpsUpdated": "Standort des ausgewählten Fahrzeugs aktualisiert",
+    "demoGpsStopped": "Demo-GPS gestoppt",
+    "demoGpsError": "Die Demo-GPS-Standorte konnten nicht aktualisiert werden",
+    "shipmentLabel": "Sendung",
+    "customerUnassigned": "Kein Kunde zugewiesen",
+    "origin": "Ursprung",
+    "destination": "Ziel",
+    "noActiveShipment": "Keine aktive Sendung"
   },
   "settings": {
     "title": "Profileinstellungen",
@@ -842,7 +903,9 @@
     "upgrade": "Upgrade",
     "downgrade": "Downgrade",
     "changingPlan": "Wird aktualisiert…",
-    "changeTierFailed": "Ihr Plan konnte nicht geändert werden. Bitte versuchen Sie es erneut."
+    "changeTierFailed": "Ihr Plan konnte nicht geändert werden. Bitte versuchen Sie es erneut.",
+    "demoPaymentReceipt": "Simulierte Zahlung: {currency} {amount} · Referenz {reference}. Es wurde keine echte Belastung vorgenommen.",
+    "planAlreadyCurrent": "Dieser Plan ist bereits aktiv; es wurde keine Zahlung erfasst."
   },
   "developerApi": {
     "title": "Entwickler-API",
@@ -887,7 +950,9 @@
     "colorHelp": "Lassen Sie eine Farbe leer, um die CarrierOS-Standardfarbe zu verwenden.",
     "invalidColor": "Geben Sie eine Farbe als #RRGGBB ein, z. B. #f47920.",
     "save": "Änderungen speichern",
-    "saved": "Branding aktualisiert."
+    "saved": "Branding aktualisiert.",
+    "previewLabel": "Live-Vorschau",
+    "trackingPreviewTitle": "Sendungsverfolgung"
   },
   "customers": {
     "title": "Kunden",
@@ -978,7 +1043,8 @@
     "lastLoad": "Letzte Ladung",
     "daysAgo": "{days, plural, =0 {Heute} one {vor # Tag} other {vor # Tagen}}",
     "relationshipsGoingCold": "{count, plural, one {# Beziehung wird inaktiv} other {# Beziehungen werden inaktiv}}",
-    "coldCustomerLine": "{name} — {days} Tage"
+    "coldCustomerLine": "{name} — {days} Tage",
+    "backToCustomers": "Zurück zu den Kunden"
   },
   "maintenance": {
     "title": "Wartung",
@@ -1523,7 +1589,28 @@
     "deliveriesTitle": "Letzte Zustellungen",
     "noDeliveries": "Noch keine Zustellungen",
     "emptyTitle": "Noch keine Webhooks",
-    "emptyDescription": "Registrieren Sie einen Webhook, damit CarrierOS eine andere Anwendung benachrichtigt, wenn sich der Status einer Ladung ändert oder eine Rechnung bezahlt wird."
+    "emptyDescription": "Registrieren Sie einen Webhook, damit CarrierOS eine andere Anwendung benachrichtigt, wenn sich der Status einer Ladung ändert oder eine Rechnung bezahlt wird.",
+    "loadboardTitle": "Load Board",
+    "loadboardUpgradeRequired": "Für das Veröffentlichen auf dem Load Board ist der Growth-Plan oder höher erforderlich."
+  },
+  "loadboard": {
+    "settingsTitle": "Load Board",
+    "settingsSubtitle": "Verbinden Sie einen Load-Board-Anbieter, damit Disponenten Ladungen für andere Frachtführer veröffentlichen können.",
+    "datTitle": "DAT Load Board",
+    "datDescription": "Ladungen auf dem Load Board von DAT veröffentlichen (nur Veröffentlichung -- Suche und Buchung sind nicht Teil dieser Integration).",
+    "enabled": "Aktiviert",
+    "apiKeyLabel": "DAT API-Schlüssel",
+    "apiKeyPlaceholder": "Eingeben zum Festlegen oder Rotieren",
+    "apiKeyConfigured": "Ein Schlüssel ist konfiguriert. Lassen Sie das Feld leer, um ihn zu behalten, oder geben Sie einen neuen ein, um ihn zu rotieren.",
+    "apiKeyNotConfigured": "Noch kein Schlüssel konfiguriert.",
+    "credentialRequired": "Geben Sie Zugangsdaten ein, um dies erstmalig einzurichten.",
+    "save": "Speichern",
+    "saved": "Gespeichert",
+    "title": "Load Board",
+    "description": "Veröffentlichen Sie diese Ladung auf dem Load Board von DAT, damit andere Frachtführer sie finden können.",
+    "postButton": "Bei DAT veröffentlichen",
+    "posting": "Wird veröffentlicht...",
+    "alreadyPosted": "Diese Ladung wurde bei DAT veröffentlicht."
   },
   "telematics": {
     "title": "Telematik",

@@ -319,7 +319,38 @@
     "shareViaEmail": "Compartilhar por E-mail",
     "shareMessage": "Rastreie o frete {loadNumber}:",
     "shareEmailSubject": "Link de rastreamento do frete {loadNumber}",
-    "myLoadsTitle": "Meus Fretes"
+    "myLoadsTitle": "Meus Fretes",
+    "customerOrders": "Pedidos do cliente",
+    "noCustomerOrders": "Ainda não há pedidos de cliente anexados.",
+    "orderNumber": "Número do pedido",
+    "orderReference": "Referência do cliente",
+    "orderWeight": "Peso (lb)",
+    "selectOrderCustomer": "Selecionar cliente",
+    "addCustomerOrder": "Adicionar pedido",
+    "savingOrder": "Salvando…",
+    "ordersAddFailed": "Não foi possível adicionar esse pedido. Verifique o cliente e tente novamente.",
+    "ordersKeepCustomerScoped": "Cada portal de cliente vê apenas seus próprios pedidos; a equipe da transportadora vê o manifesto completo.",
+    "orderCharge": "Cobrança do cliente",
+    "orderAllocationComplete": "As cobranças dos pedidos totalizam {allocated}.",
+    "orderAllocationIncomplete": "Alocado {allocated} de {target}; as cobranças dos pedidos devem ser iguais à tarifa do frete antes do faturamento.",
+    "saveOrderCharge": "Salvar cobrança",
+    "orderChargeUpdateFailed": "Não foi possível salvar a cobrança do pedido. Verifique se nenhuma fatura foi criada.",
+    "customerExceptionUpdates": "Atualizações de envio para o cliente",
+    "noCustomerExceptions": "Não há exceções de frete para compartilhar no momento.",
+    "customerUpdateShared": "Compartilhado com o cliente",
+    "customerUpdatePrivate": "Apenas interno",
+    "customerUpdateMessageLabel": "Atualização segura para o cliente",
+    "customerUpdateMessagePlaceholder": "Explique o impacto e o que acontece a seguir. Não inclua notas internas.",
+    "savingCustomerUpdate": "Salvando…",
+    "hideCustomerUpdate": "Ocultar do cliente",
+    "shareCustomerUpdate": "Compartilhar atualização",
+    "customerExceptionSaveFailed": "Não foi possível atualizar a visibilidade para o cliente. Tente novamente.",
+    "resendCustomerUpdateEmail": "Reenviar e-mail ao cliente",
+    "customerUpdateEmailSent": "E-mail enviado para {count} contato(s) principal(is) do cliente.",
+    "customerUpdateEmailPartial": "E-mail enviado para {sent} contato(s), mas falhou para {failed}.",
+    "customerUpdateNoRecipient": "A atualização está compartilhada na página de rastreamento, mas nenhum e-mail principal do cliente está cadastrado.",
+    "customerUpdateEmailFailed": "A atualização está compartilhada na página de rastreamento, mas o e-mail não pôde ser entregue.",
+    "customerExceptionPrivacy": "Somente a mensagem que você escrever aqui é exibida no link de rastreamento. Os detalhes internos da exceção permanecem privados."
   },
   "drivers": {
     "title": "Motoristas",
@@ -415,7 +446,8 @@
     "dvirPreTrip": "Pré-Viagem",
     "dvirPostTrip": "Pós-Viagem",
     "dvirDefectsNoted": "Defeitos Observados",
-    "dvirSatisfactory": "Satisfatório"
+    "dvirSatisfactory": "Satisfatório",
+    "backToDrivers": "Voltar para Motoristas"
   },
   "vehicles": {
     "title": "Veículos",
@@ -468,6 +500,7 @@
     "tab_fuel": "Combustível",
     "tab_dvirs": "DVIRs",
     "vehicleDetails": "Detalhes do Veículo",
+    "backToVehicles": "Voltar para Veículos",
     "vin": "Chassi (VIN)",
     "vstatus_active": "Ativo",
     "vstatus_idle": "Ocioso",
@@ -592,6 +625,8 @@
     "noInvoicesForFilter": "Nenhuma fatura com este status.",
     "createFromLoadHint": "As faturas são criadas a partir de um frete entregue.",
     "goToLoads": "Ir para fretes",
+    "loadInvoicesCreated": "{count, plural, one {# fatura de cliente criada} other {# faturas de clientes criadas}}",
+    "createRemainingCustomerInvoices": "Crie faturas para os clientes restantes usando as alocações dos pedidos.",
     "invoiceNumber": "Fatura",
     "customer": "Cliente",
     "load": "Frete",
@@ -692,7 +727,8 @@
     "daySingular": "dia",
     "dayPlural": "dias",
     "loadLabel": "Frete",
-    "poweredBy": "Desenvolvido por CarrierOS"
+    "poweredBy": "Desenvolvido por CarrierOS",
+    "shipmentUpdates": "Atualizações de envio"
   },
   "dispatch": {
     "title": "Despacho",
@@ -706,7 +742,32 @@
     "loadingMap": "Carregando mapa…",
     "locationStale": "⚠ Sem atualização há mais de 15 min",
     "locationLive": "● Ao vivo",
-    "idleVehicleBadge": "ocioso, sem frete ativo"
+    "idleVehicleBadge": "ocioso, sem frete ativo",
+    "assignedVehicleBadge": "atribuído a um frete ativo",
+    "mapViews": "Visualizações do mapa",
+    "mapViewAll": "Todos os caminhões",
+    "mapViewMoving": "Em movimento (GPS)",
+    "mapViewLoads": "Fretes ativos",
+    "mapViewParked": "Estacionado (sem frete)",
+    "mapViewUnloaded": "Sem frete ativo",
+    "mapViewStale": "Localização desatualizada",
+    "motionMoving": "Em movimento (GPS)",
+    "motionStationary": "Parado (GPS)",
+    "motionUnknown": "Movimento desconhecido",
+    "demoGpsStart": "Iniciar GPS de demonstração",
+    "demoGpsStop": "Parar GPS de demonstração",
+    "demoGpsRunning": "Localizações sintéticas de caminhões ativos sendo atualizadas a cada 4 segundos",
+    "demoGpsHelp": "Mova um caminhão de demonstração selecionado em uma rota separada Houston–Austin",
+    "demoGpsSelectLoad": "Selecione um frete de demonstração para mover",
+    "demoGpsNoLoads": "Nenhum frete de demonstração ativo disponível",
+    "demoGpsUpdated": "Localização do caminhão selecionado atualizada",
+    "demoGpsStopped": "GPS de demonstração interrompido",
+    "demoGpsError": "Não foi possível atualizar as localizações de GPS de demonstração",
+    "shipmentLabel": "Envio",
+    "customerUnassigned": "Cliente não atribuído",
+    "origin": "Origem",
+    "destination": "Destino",
+    "noActiveShipment": "Nenhum envio ativo"
   },
   "settings": {
     "title": "Configurações do perfil",
@@ -842,7 +903,9 @@
     "upgrade": "Fazer Upgrade",
     "downgrade": "Fazer Downgrade",
     "changingPlan": "Atualizando…",
-    "changeTierFailed": "Não foi possível alterar seu plano. Tente novamente."
+    "changeTierFailed": "Não foi possível alterar seu plano. Tente novamente.",
+    "demoPaymentReceipt": "Pagamento simulado: {currency} {amount} · referência {reference}. Nenhuma cobrança real foi feita.",
+    "planAlreadyCurrent": "Este plano já está ativo; nenhum pagamento foi registrado."
   },
   "developerApi": {
     "title": "API para Desenvolvedores",
@@ -887,7 +950,9 @@
     "colorHelp": "Deixe uma cor em branco para usar a cor padrão do CarrierOS.",
     "invalidColor": "Insira uma cor no formato #RRGGBB, ex.: #f47920.",
     "save": "Salvar alterações",
-    "saved": "Identidade visual atualizada."
+    "saved": "Identidade visual atualizada.",
+    "previewLabel": "Pré-visualização ao vivo",
+    "trackingPreviewTitle": "Rastreamento de frete"
   },
   "customers": {
     "title": "Clientes",
@@ -978,7 +1043,8 @@
     "lastLoad": "Último Frete",
     "daysAgo": "{days, plural, =0 {Hoje} one {há # dia} other {há # dias}}",
     "relationshipsGoingCold": "{count, plural, one {# relacionamento esfriando} other {# relacionamentos esfriando}}",
-    "coldCustomerLine": "{name} — {days} dias"
+    "coldCustomerLine": "{name} — {days} dias",
+    "backToCustomers": "Voltar para Clientes"
   },
   "maintenance": {
     "title": "Manutenção",
@@ -1498,6 +1564,8 @@
     "title": "Integrações",
     "subtitle": "Registre uma URL para receber notificações de eventos do CarrierOS.",
     "signatureNote": "Toda solicitação é assinada com uma assinatura HMAC-SHA256 no cabeçalho X-CarrierOS-Signature para que você possa verificar que veio de nós.",
+    "loadboardTitle": "Painel de Fretes",
+    "loadboardUpgradeRequired": "A publicação no painel de fretes requer o plano Growth ou superior.",
     "createWebhook": "Novo Webhook",
     "create": "Criar",
     "webhookUrl": "URL do Endpoint",
@@ -1524,6 +1592,25 @@
     "noDeliveries": "Ainda não há entregas",
     "emptyTitle": "Ainda não há webhooks",
     "emptyDescription": "Registre um webhook para que o CarrierOS notifique outro aplicativo quando o status de um frete mudar ou uma fatura for paga."
+  },
+  "loadboard": {
+    "settingsTitle": "Painel de Fretes",
+    "settingsSubtitle": "Conecte um provedor de painel de fretes para que os despachantes possam publicar fretes para outras transportadoras encontrarem.",
+    "datTitle": "Painel de Fretes DAT",
+    "datDescription": "Publique fretes no painel de fretes da DAT (apenas publicação -- busca e reserva não fazem parte desta integração).",
+    "enabled": "Habilitado",
+    "apiKeyLabel": "Chave de API da DAT",
+    "apiKeyPlaceholder": "Insira para definir ou rotacionar",
+    "apiKeyConfigured": "Uma chave está configurada. Deixe em branco para mantê-la, ou insira uma nova para rotacioná-la.",
+    "apiKeyNotConfigured": "Nenhuma chave configurada ainda.",
+    "credentialRequired": "Insira uma credencial para configurar isso pela primeira vez.",
+    "save": "Salvar",
+    "saved": "Salvo",
+    "title": "Painel de Fretes",
+    "description": "Publique este frete no painel de fretes da DAT para que outras transportadoras possam encontrá-lo.",
+    "postButton": "Publicar na DAT",
+    "posting": "Publicando…",
+    "alreadyPosted": "Este frete foi publicado na DAT."
   },
   "telematics": {
     "title": "Telemetria",

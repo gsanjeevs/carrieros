@@ -319,7 +319,38 @@
     "shareViaEmail": "مشاركة عبر البريد الإلكتروني",
     "shareMessage": "تتبع الشحنة {loadNumber}:",
     "shareEmailSubject": "رابط تتبع الشحنة {loadNumber}",
-    "myLoadsTitle": "شحناتي"
+    "myLoadsTitle": "شحناتي",
+    "customerOrders": "طلبات العميل",
+    "noCustomerOrders": "لا توجد طلبات عميل مرفقة بعد.",
+    "orderNumber": "رقم الطلب",
+    "orderReference": "مرجع العميل",
+    "orderWeight": "الوزن (رطل)",
+    "selectOrderCustomer": "اختر العميل",
+    "addCustomerOrder": "إضافة طلب",
+    "savingOrder": "جارٍ الحفظ…",
+    "ordersAddFailed": "تعذّرت إضافة هذا الطلب. تحقّق من العميل وحاول مرة أخرى.",
+    "ordersKeepCustomerScoped": "لا يرى كل بوابة عميل سوى طلباته الخاصة؛ بينما يرى موظفو الناقل البيان الكامل.",
+    "orderCharge": "رسوم العميل",
+    "orderAllocationComplete": "تتطابق رسوم الطلبات مع {allocated}.",
+    "orderAllocationIncomplete": "تم تخصيص {allocated} من {target}؛ يجب أن تساوي رسوم الطلبات سعر الشحنة قبل الفوترة.",
+    "saveOrderCharge": "حفظ الرسوم",
+    "orderChargeUpdateFailed": "تعذّر حفظ رسوم الطلب. تحقّق من عدم إنشاء فاتورة بعد.",
+    "customerExceptionUpdates": "تحديثات الشحنة للعميل",
+    "noCustomerExceptions": "لا توجد استثناءات شحنة لمشاركتها مع العميل الآن.",
+    "customerUpdateShared": "تمت المشاركة مع العميل",
+    "customerUpdatePrivate": "داخلي فقط",
+    "customerUpdateMessageLabel": "تحديث آمن للعميل",
+    "customerUpdateMessagePlaceholder": "اشرح الأثر وما سيحدث لاحقًا. لا تُضمّن ملاحظات داخلية.",
+    "savingCustomerUpdate": "جارٍ الحفظ…",
+    "hideCustomerUpdate": "إخفاء عن العميل",
+    "shareCustomerUpdate": "مشاركة التحديث",
+    "customerExceptionSaveFailed": "تعذّر تحديث ظهور المعلومات للعميل. يرجى المحاولة مرة أخرى.",
+    "resendCustomerUpdateEmail": "إعادة إرسال بريد العميل",
+    "customerUpdateEmailSent": "تم إرسال البريد الإلكتروني إلى {count} من جهات اتصال العميل الأساسية.",
+    "customerUpdateEmailPartial": "تم إرسال البريد الإلكتروني إلى {sent} من جهات الاتصال، لكن فشل الإرسال إلى {failed}.",
+    "customerUpdateNoRecipient": "تمت مشاركة التحديث على صفحة التتبع، لكن لا يوجد بريد إلكتروني أساسي للعميل مسجّل.",
+    "customerUpdateEmailFailed": "تمت مشاركة التحديث على صفحة التتبع، لكن تعذّر تسليم البريد الإلكتروني.",
+    "customerExceptionPrivacy": "تُعرض على رابط التتبع فقط الرسالة التي تكتبها هنا. تبقى تفاصيل الاستثناء الداخلية خاصة."
   },
   "drivers": {
     "title": "السائقون",
@@ -415,7 +446,8 @@
     "dvirPreTrip": "قبل الرحلة",
     "dvirPostTrip": "بعد الرحلة",
     "dvirDefectsNoted": "تم تسجيل أعطال",
-    "dvirSatisfactory": "مُرضٍ"
+    "dvirSatisfactory": "مُرضٍ",
+    "backToDrivers": "العودة إلى السائقين"
   },
   "vehicles": {
     "title": "المركبات",
@@ -548,7 +580,8 @@
     "uploadPhoto": "رفع صورة",
     "replacePhoto": "استبدال الصورة",
     "photoUploadFailed": "تعذّر رفع الصورة. يرجى المحاولة مرة أخرى.",
-    "dvirNotSigned": "غير موقّع"
+    "dvirNotSigned": "غير موقّع",
+    "backToVehicles": "العودة إلى المركبات"
   },
   "companyDocuments": {
     "title": "مستندات الشركة",
@@ -646,7 +679,9 @@
     "creating": "جارٍ الإنشاء…",
     "opened": "تم الفتح",
     "openedAt": "تاريخ الفتح",
-    "notOpenedYet": "لم يتم الفتح بعد"
+    "notOpenedYet": "لم يتم الفتح بعد",
+    "loadInvoicesCreated": "{count, plural, one {تم إنشاء فاتورة عميل واحدة #} other {تم إنشاء # فواتير عملاء}}",
+    "createRemainingCustomerInvoices": "أنشئ فواتير للعملاء المتبقين باستخدام تخصيصات طلباتهم."
   },
   "settlements": {
     "title": "التسويات",
@@ -692,7 +727,8 @@
     "daySingular": "يوم",
     "dayPlural": "أيام",
     "loadLabel": "الشحنة",
-    "poweredBy": "مشغّل بواسطة CarrierOS"
+    "poweredBy": "مشغّل بواسطة CarrierOS",
+    "shipmentUpdates": "تحديثات الشحنة"
   },
   "dispatch": {
     "title": "الإرسال",
@@ -706,7 +742,32 @@
     "loadingMap": "جارٍ تحميل الخريطة…",
     "locationStale": "⚠ لا يوجد تحديث منذ أكثر من 15 دقيقة",
     "locationLive": "● مباشر",
-    "idleVehicleBadge": "خاملة، بلا شحنة نشطة"
+    "idleVehicleBadge": "خاملة، بلا شحنة نشطة",
+    "assignedVehicleBadge": "معيّنة لشحنة نشطة",
+    "mapViews": "طرق عرض الخريطة",
+    "mapViewAll": "كل الشاحنات",
+    "mapViewMoving": "متحركة (GPS)",
+    "mapViewLoads": "الشحنات النشطة",
+    "mapViewParked": "متوقفة (بلا شحنة)",
+    "mapViewUnloaded": "بلا شحنة نشطة",
+    "mapViewStale": "موقع قديم",
+    "motionMoving": "متحركة (GPS)",
+    "motionStationary": "متوقفة (GPS)",
+    "motionUnknown": "الحركة غير معروفة",
+    "demoGpsStart": "بدء GPS التجريبي",
+    "demoGpsStop": "إيقاف GPS التجريبي",
+    "demoGpsRunning": "يتم تحديث مواقع الشاحنات النشطة الاصطناعية كل 4 ثوانٍ",
+    "demoGpsHelp": "تحريك شاحنة تجريبية واحدة مختارة على مسار منفصل بين هيوستن وأوستن",
+    "demoGpsSelectLoad": "اختر شحنة تجريبية لتحريكها",
+    "demoGpsNoLoads": "لا توجد شحنات تجريبية نشطة متاحة",
+    "demoGpsUpdated": "تم تحديث موقع الشاحنة المختارة",
+    "demoGpsStopped": "تم إيقاف GPS التجريبي",
+    "demoGpsError": "تعذّر تحديث مواقع GPS التجريبية",
+    "shipmentLabel": "الشحنة",
+    "customerUnassigned": "لم يتم تعيين عميل",
+    "origin": "المنشأ",
+    "destination": "الوجهة",
+    "noActiveShipment": "لا توجد شحنة نشطة"
   },
   "settings": {
     "title": "إعدادات الملف الشخصي",
@@ -842,7 +903,9 @@
     "upgrade": "ترقية",
     "downgrade": "تخفيض",
     "changingPlan": "جارٍ التحديث…",
-    "changeTierFailed": "تعذّر تغيير خطتك. يرجى المحاولة مرة أخرى."
+    "changeTierFailed": "تعذّر تغيير خطتك. يرجى المحاولة مرة أخرى.",
+    "demoPaymentReceipt": "دفعة محاكاة: {currency} {amount} · المرجع {reference}. لم يتم إجراء أي رسوم حقيقية.",
+    "planAlreadyCurrent": "هذه الخطة مفعّلة بالفعل؛ لم يتم تسجيل أي دفعة."
   },
   "developerApi": {
     "title": "واجهة برمجة المطورين",
@@ -887,7 +950,9 @@
     "colorHelp": "اترك اللون فارغًا لاستخدام لون CarrierOS الافتراضي.",
     "invalidColor": "أدخل لونًا بصيغة #RRGGBB، مثال: #f47920.",
     "save": "حفظ التغييرات",
-    "saved": "تم تحديث العلامة التجارية."
+    "saved": "تم تحديث العلامة التجارية.",
+    "previewLabel": "معاينة مباشرة",
+    "trackingPreviewTitle": "تتبع الشحنة"
   },
   "customers": {
     "title": "العملاء",
@@ -978,7 +1043,8 @@
     "lastLoad": "آخر شحنة",
     "daysAgo": "{days, plural, =0 {اليوم} one {منذ يوم واحد #} other {منذ # أيام}}",
     "relationshipsGoingCold": "{count, plural, one {علاقة واحدة # في طريقها للفتور} other {# علاقات في طريقها للفتور}}",
-    "coldCustomerLine": "{name} — {days} يومًا"
+    "coldCustomerLine": "{name} — {days} يومًا",
+    "backToCustomers": "العودة إلى العملاء"
   },
   "maintenance": {
     "title": "الصيانة",
@@ -1523,7 +1589,9 @@
     "deliveriesTitle": "عمليات التسليم الأخيرة",
     "noDeliveries": "لا توجد عمليات تسليم بعد",
     "emptyTitle": "لا توجد ويب هوكس بعد",
-    "emptyDescription": "سجّل ويب هوك لتُعلم CarrierOS تطبيقًا آخر عند تغيّر حالة شحنة أو دفع فاتورة."
+    "emptyDescription": "سجّل ويب هوك لتُعلم CarrierOS تطبيقًا آخر عند تغيّر حالة شحنة أو دفع فاتورة.",
+    "loadboardTitle": "لوحة الشحنات",
+    "loadboardUpgradeRequired": "يتطلب نشر لوحة الشحنات خطة Growth أو أعلى."
   },
   "telematics": {
     "title": "التطبيقات القياسية (Telematics)",
@@ -1546,5 +1614,24 @@
     "save": "حفظ",
     "saved": "تم الحفظ",
     "credentialRequired": "أدخل بيانات اعتماد لإعداد هذا لأول مرة."
+  },
+  "loadboard": {
+    "settingsTitle": "لوحة الشحنات",
+    "settingsSubtitle": "اربط مزوّد لوحة شحنات حتى يتمكن المرسلون من نشر الشحنات ليجدها ناقلون آخرون.",
+    "datTitle": "لوحة شحنات DAT",
+    "datDescription": "انشر الشحنات على لوحة شحنات DAT (النشر فقط -- البحث والحجز ليسا جزءًا من هذا التكامل).",
+    "enabled": "مُفعّل",
+    "apiKeyLabel": "مفتاح API لـ DAT",
+    "apiKeyPlaceholder": "أدخل للتعيين أو التدوير",
+    "apiKeyConfigured": "تم تكوين مفتاح. اتركه فارغًا للاحتفاظ به، أو أدخل مفتاحًا جديدًا لتدويره.",
+    "apiKeyNotConfigured": "لم يتم تكوين مفتاح بعد.",
+    "credentialRequired": "أدخل بيانات اعتماد لإعداد هذا لأول مرة.",
+    "save": "حفظ",
+    "saved": "تم الحفظ",
+    "title": "لوحة الشحنات",
+    "description": "انشر هذه الشحنة على لوحة شحنات DAT حتى يتمكن ناقلون آخرون من العثور عليها.",
+    "postButton": "نشر على DAT",
+    "posting": "جارٍ النشر...",
+    "alreadyPosted": "تم نشر هذه الشحنة على DAT."
   }
 }

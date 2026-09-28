@@ -319,7 +319,38 @@
     "shareViaEmail": "Distribuie prin Email",
     "shareMessage": "Urmărește transportul {loadNumber}:",
     "shareEmailSubject": "Link de urmărire pentru transportul {loadNumber}",
-    "myLoadsTitle": "Transporturile Mele"
+    "myLoadsTitle": "Transporturile Mele",
+    "customerOrders": "Comenzi client",
+    "noCustomerOrders": "Nicio comandă client atașată încă.",
+    "orderNumber": "Număr comandă",
+    "orderReference": "Referință client",
+    "orderWeight": "Greutate (lb)",
+    "selectOrderCustomer": "Selectează clientul",
+    "addCustomerOrder": "Adaugă comanda",
+    "savingOrder": "Se salvează…",
+    "ordersAddFailed": "Nu am putut adăuga această comandă. Verifică clientul și încearcă din nou.",
+    "ordersKeepCustomerScoped": "Fiecare portal de client vede doar propriile comenzi; personalul transportatorului vede manifestul complet.",
+    "orderCharge": "Tarif client",
+    "orderAllocationComplete": "Tarifele comenzilor se reconciliază la {allocated}.",
+    "orderAllocationIncomplete": "S-au alocat {allocated} din {target}; tarifele comenzilor trebuie să fie egale cu tariful transportului înainte de facturare.",
+    "saveOrderCharge": "Salvează tariful",
+    "orderChargeUpdateFailed": "Nu am putut salva tariful comenzii. Verifică dacă nu a fost deja creată o factură.",
+    "customerExceptionUpdates": "Actualizări de transport pentru client",
+    "noCustomerExceptions": "Nu există excepții de transport de partajat momentan.",
+    "customerUpdateShared": "Partajat cu clientul",
+    "customerUpdatePrivate": "Doar intern",
+    "customerUpdateMessageLabel": "Actualizare vizibilă pentru client",
+    "customerUpdateMessagePlaceholder": "Explică impactul și ce urmează. Nu include note interne.",
+    "savingCustomerUpdate": "Se salvează…",
+    "hideCustomerUpdate": "Ascunde de client",
+    "shareCustomerUpdate": "Partajează actualizarea",
+    "customerExceptionSaveFailed": "Nu am putut actualiza vizibilitatea pentru client. Te rugăm să încerci din nou.",
+    "resendCustomerUpdateEmail": "Retrimite emailul către client",
+    "customerUpdateEmailSent": "Email trimis către {count} contact(e) principal(e) al(e) clientului.",
+    "customerUpdateEmailPartial": "Email trimis către {sent} contact(e), dar a eșuat pentru {failed}.",
+    "customerUpdateNoRecipient": "Actualizarea este partajată pe pagina de urmărire, dar nu există niciun email principal al clientului înregistrat.",
+    "customerUpdateEmailFailed": "Actualizarea este partajată pe pagina de urmărire, dar emailul nu a putut fi livrat.",
+    "customerExceptionPrivacy": "Doar mesajul pe care îl scrii aici este afișat pe linkul de urmărire. Detaliile interne ale excepției rămân private."
   },
   "drivers": {
     "title": "Șoferi",
@@ -415,7 +446,8 @@
     "dvirPreTrip": "Pre-Cursă",
     "dvirPostTrip": "Post-Cursă",
     "dvirDefectsNoted": "Defecțiuni Constatate",
-    "dvirSatisfactory": "Satisfăcător"
+    "dvirSatisfactory": "Satisfăcător",
+    "backToDrivers": "Înapoi la Șoferi"
   },
   "vehicles": {
     "title": "Vehicule",
@@ -548,7 +580,8 @@
     "uploadPhoto": "Încarcă Fotografie",
     "replacePhoto": "Înlocuiește Fotografia",
     "photoUploadFailed": "Nu am putut încărca fotografia. Te rugăm să încerci din nou.",
-    "dvirNotSigned": "Nesemnat"
+    "dvirNotSigned": "Nesemnat",
+    "backToVehicles": "Înapoi la Vehicule"
   },
   "companyDocuments": {
     "title": "Documente Companie",
@@ -646,7 +679,9 @@
     "creating": "Se creează…",
     "opened": "Deschisă",
     "openedAt": "Deschisă",
-    "notOpenedYet": "Nedeschisă încă"
+    "notOpenedYet": "Nedeschisă încă",
+    "loadInvoicesCreated": "{count, plural, one {# factură client creată} other {# facturi client create}}",
+    "createRemainingCustomerInvoices": "Creează facturi pentru clienții rămași folosind alocările comenzilor lor."
   },
   "settlements": {
     "title": "Decontări",
@@ -692,7 +727,8 @@
     "daySingular": "zi",
     "dayPlural": "zile",
     "loadLabel": "Transport",
-    "poweredBy": "Susținut de CarrierOS"
+    "poweredBy": "Susținut de CarrierOS",
+    "shipmentUpdates": "Actualizări transport"
   },
   "dispatch": {
     "title": "Expediere",
@@ -706,7 +742,32 @@
     "loadingMap": "Se încarcă harta…",
     "locationStale": "⚠ Nicio actualizare de peste 15 min",
     "locationLive": "● Live",
-    "idleVehicleBadge": "inactiv, fără transport activ"
+    "idleVehicleBadge": "inactiv, fără transport activ",
+    "assignedVehicleBadge": "repartizat unui transport activ",
+    "mapViews": "Vizualizări hartă",
+    "mapViewAll": "Toate camioanele",
+    "mapViewMoving": "În mișcare (GPS)",
+    "mapViewLoads": "Transporturi active",
+    "mapViewParked": "Parcate (fără transport)",
+    "mapViewUnloaded": "Fără transport activ",
+    "mapViewStale": "Locație expirată",
+    "motionMoving": "În mișcare (GPS)",
+    "motionStationary": "Oprit (GPS)",
+    "motionUnknown": "Mișcare necunoscută",
+    "demoGpsStart": "Pornește GPS demo",
+    "demoGpsStop": "Oprește GPS demo",
+    "demoGpsRunning": "Locații sintetice ale camioanelor active se actualizează la fiecare 4 secunde",
+    "demoGpsHelp": "Mută un camion demo selectat pe o rută separată Houston–Austin",
+    "demoGpsSelectLoad": "Selectează un transport demo de mutat",
+    "demoGpsNoLoads": "Niciun transport demo activ disponibil",
+    "demoGpsUpdated": "Locația camionului selectat a fost actualizată",
+    "demoGpsStopped": "GPS demo oprit",
+    "demoGpsError": "Nu am putut actualiza locațiile GPS demo",
+    "shipmentLabel": "Transport",
+    "customerUnassigned": "Client nerepartizat",
+    "origin": "Origine",
+    "destination": "Destinație",
+    "noActiveShipment": "Niciun transport activ"
   },
   "settings": {
     "title": "Setări profil",
@@ -842,7 +903,9 @@
     "upgrade": "Upgrade",
     "downgrade": "Downgrade",
     "changingPlan": "Se actualizează…",
-    "changeTierFailed": "Nu am putut schimba planul tău. Te rugăm să încerci din nou."
+    "changeTierFailed": "Nu am putut schimba planul tău. Te rugăm să încerci din nou.",
+    "demoPaymentReceipt": "Plată simulată: {currency} {amount} · referință {reference}. Nu s-a efectuat nicio taxă reală.",
+    "planAlreadyCurrent": "Acest plan este deja activ; nu s-a înregistrat nicio plată."
   },
   "developerApi": {
     "title": "API Dezvoltatori",
@@ -887,7 +950,9 @@
     "colorHelp": "Lasă o culoare necompletată pentru a folosi culoarea implicită CarrierOS.",
     "invalidColor": "Introdu o culoare în format #RRGGBB, ex. #f47920.",
     "save": "Salvează modificările",
-    "saved": "Branding actualizat."
+    "saved": "Branding actualizat.",
+    "previewLabel": "Previzualizare live",
+    "trackingPreviewTitle": "Urmărire transport"
   },
   "customers": {
     "title": "Clienți",
@@ -978,7 +1043,8 @@
     "lastLoad": "Ultimul Transport",
     "daysAgo": "{days, plural, =0 {Astăzi} one {acum # zi} other {acum # zile}}",
     "relationshipsGoingCold": "{count, plural, one {# relație care se răcește} other {# relații care se răcesc}}",
-    "coldCustomerLine": "{name} — {days} zile"
+    "coldCustomerLine": "{name} — {days} zile",
+    "backToCustomers": "Înapoi la Clienți"
   },
   "maintenance": {
     "title": "Mentenanță",
@@ -1523,7 +1589,28 @@
     "deliveriesTitle": "Livrări recente",
     "noDeliveries": "Nicio livrare încă",
     "emptyTitle": "Niciun webhook încă",
-    "emptyDescription": "Înregistrează un webhook pentru ca CarrierOS să notifice altă aplicație atunci când starea unui transport se schimbă sau o factură este plătită."
+    "emptyDescription": "Înregistrează un webhook pentru ca CarrierOS să notifice altă aplicație atunci când starea unui transport se schimbă sau o factură este plătită.",
+    "loadboardTitle": "Bursă de Transport",
+    "loadboardUpgradeRequired": "Postarea pe bursa de transport necesită planul Growth sau superior."
+  },
+  "loadboard": {
+    "settingsTitle": "Bursă de Transport",
+    "settingsSubtitle": "Conectează un furnizor de bursă de transport astfel încât dispecerii să poată posta transporturi pentru ca alți transportatori să le găsească.",
+    "datTitle": "Bursa de Transport DAT",
+    "datDescription": "Postează transporturi pe bursa de transport DAT (doar postare -- căutarea și rezervarea nu fac parte din această integrare).",
+    "enabled": "Activat",
+    "apiKeyLabel": "Cheie API DAT",
+    "apiKeyPlaceholder": "Introdu pentru a seta sau roti",
+    "apiKeyConfigured": "O cheie este configurată. Lasă necompletat pentru a o păstra, sau introdu una nouă pentru a o roti.",
+    "apiKeyNotConfigured": "Nicio cheie configurată încă.",
+    "credentialRequired": "Introdu o credențială pentru a configura acest lucru pentru prima dată.",
+    "save": "Salvează",
+    "saved": "Salvat",
+    "title": "Bursă de Transport",
+    "description": "Postează acest transport pe bursa de transport DAT astfel încât alți transportatori să îl poată găsi.",
+    "postButton": "Postează pe DAT",
+    "posting": "Se postează...",
+    "alreadyPosted": "Acest transport a fost postat pe DAT."
   },
   "telematics": {
     "title": "Telematică",

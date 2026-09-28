@@ -319,7 +319,38 @@
     "shareViaEmail": "Chia sẻ qua Email",
     "shareMessage": "Theo dõi lô hàng {loadNumber}:",
     "shareEmailSubject": "Liên kết theo dõi cho lô hàng {loadNumber}",
-    "myLoadsTitle": "Lô hàng của Tôi"
+    "myLoadsTitle": "Lô hàng của Tôi",
+    "customerOrders": "Đơn hàng của khách",
+    "noCustomerOrders": "Chưa có đơn hàng nào được đính kèm.",
+    "orderNumber": "Số đơn hàng",
+    "orderReference": "Mã tham chiếu của khách",
+    "orderWeight": "Trọng lượng (lb)",
+    "selectOrderCustomer": "Chọn khách hàng",
+    "addCustomerOrder": "Thêm đơn hàng",
+    "savingOrder": "Đang lưu…",
+    "ordersAddFailed": "Không thể thêm đơn hàng này. Vui lòng kiểm tra khách hàng và thử lại.",
+    "ordersKeepCustomerScoped": "Mỗi cổng khách hàng chỉ thấy đơn hàng của riêng mình; nhân viên hãng vận tải thấy toàn bộ danh sách.",
+    "orderCharge": "Cước phí khách hàng",
+    "orderAllocationComplete": "Cước phí đơn hàng khớp với {allocated}.",
+    "orderAllocationIncomplete": "Đã phân bổ {allocated} trên {target}; cước phí đơn hàng phải bằng giá lô hàng trước khi xuất hóa đơn.",
+    "saveOrderCharge": "Lưu cước phí",
+    "orderChargeUpdateFailed": "Không thể lưu cước phí đơn hàng. Hãy kiểm tra xem hóa đơn đã được tạo chưa.",
+    "customerExceptionUpdates": "Cập nhật lô hàng cho khách",
+    "noCustomerExceptions": "Hiện chưa có ngoại lệ lô hàng nào để chia sẻ.",
+    "customerUpdateShared": "Đã chia sẻ với khách hàng",
+    "customerUpdatePrivate": "Chỉ nội bộ",
+    "customerUpdateMessageLabel": "Cập nhật an toàn cho khách",
+    "customerUpdateMessagePlaceholder": "Giải thích tác động và các bước tiếp theo. Không bao gồm ghi chú nội bộ.",
+    "savingCustomerUpdate": "Đang lưu…",
+    "hideCustomerUpdate": "Ẩn khỏi khách hàng",
+    "shareCustomerUpdate": "Chia sẻ cập nhật",
+    "customerExceptionSaveFailed": "Không thể cập nhật chế độ hiển thị cho khách hàng. Vui lòng thử lại.",
+    "resendCustomerUpdateEmail": "Gửi lại email cho khách hàng",
+    "customerUpdateEmailSent": "Đã gửi email cho {count} liên hệ chính của khách hàng.",
+    "customerUpdateEmailPartial": "Đã gửi email cho {sent} liên hệ, nhưng thất bại đối với {failed}.",
+    "customerUpdateNoRecipient": "Cập nhật đã được chia sẻ trên trang theo dõi, nhưng không có email khách hàng chính nào được lưu.",
+    "customerUpdateEmailFailed": "Cập nhật đã được chia sẻ trên trang theo dõi, nhưng không thể gửi email.",
+    "customerExceptionPrivacy": "Chỉ tin nhắn bạn viết ở đây được hiển thị trên liên kết theo dõi. Chi tiết ngoại lệ nội bộ vẫn được giữ kín."
   },
   "drivers": {
     "title": "Tài xế",
@@ -415,7 +446,8 @@
     "dvirPreTrip": "Trước Chuyến đi",
     "dvirPostTrip": "Sau Chuyến đi",
     "dvirDefectsNoted": "Có Ghi nhận Lỗi",
-    "dvirSatisfactory": "Đạt yêu cầu"
+    "dvirSatisfactory": "Đạt yêu cầu",
+    "backToDrivers": "Quay lại Tài xế"
   },
   "vehicles": {
     "title": "Xe",
@@ -548,7 +580,8 @@
     "uploadPhoto": "Tải Ảnh lên",
     "replacePhoto": "Thay Ảnh",
     "photoUploadFailed": "Không thể tải ảnh lên. Vui lòng thử lại.",
-    "dvirNotSigned": "Chưa ký"
+    "dvirNotSigned": "Chưa ký",
+    "backToVehicles": "Quay lại Xe"
   },
   "companyDocuments": {
     "title": "Tài liệu Công ty",
@@ -646,7 +679,9 @@
     "creating": "Đang tạo…",
     "opened": "Đã mở",
     "openedAt": "Đã mở",
-    "notOpenedYet": "Chưa mở"
+    "notOpenedYet": "Chưa mở",
+    "loadInvoicesCreated": "{count, plural, other {Đã tạo # hóa đơn khách hàng}}",
+    "createRemainingCustomerInvoices": "Tạo hóa đơn cho các khách hàng còn lại bằng cách sử dụng phân bổ đơn hàng của họ."
   },
   "settlements": {
     "title": "Quyết toán",
@@ -692,7 +727,8 @@
     "daySingular": "ngày",
     "dayPlural": "ngày",
     "loadLabel": "Lô hàng",
-    "poweredBy": "Được cung cấp bởi CarrierOS"
+    "poweredBy": "Được cung cấp bởi CarrierOS",
+    "shipmentUpdates": "Cập nhật lô hàng"
   },
   "dispatch": {
     "title": "Điều phối",
@@ -706,7 +742,32 @@
     "loadingMap": "Đang tải bản đồ…",
     "locationStale": "⚠ Không cập nhật trong hơn 15 phút",
     "locationLive": "● Trực tiếp",
-    "idleVehicleBadge": "nhàn rỗi, không có lô hàng đang hoạt động"
+    "idleVehicleBadge": "nhàn rỗi, không có lô hàng đang hoạt động",
+    "assignedVehicleBadge": "đã phân công cho lô hàng đang hoạt động",
+    "mapViews": "Chế độ xem bản đồ",
+    "mapViewAll": "Tất cả xe tải",
+    "mapViewMoving": "Đang di chuyển (GPS)",
+    "mapViewLoads": "Lô hàng đang hoạt động",
+    "mapViewParked": "Đang đỗ (không có lô hàng)",
+    "mapViewUnloaded": "Không có lô hàng đang hoạt động",
+    "mapViewStale": "Vị trí đã cũ",
+    "motionMoving": "Đang di chuyển (GPS)",
+    "motionStationary": "Đang dừng (GPS)",
+    "motionUnknown": "Không rõ trạng thái di chuyển",
+    "demoGpsStart": "Bắt đầu GPS demo",
+    "demoGpsStop": "Dừng GPS demo",
+    "demoGpsRunning": "Vị trí xe tải hoạt động giả lập đang cập nhật mỗi 4 giây",
+    "demoGpsHelp": "Di chuyển một xe tải demo đã chọn theo một tuyến đường Houston–Austin riêng biệt",
+    "demoGpsSelectLoad": "Chọn một lô hàng demo để di chuyển",
+    "demoGpsNoLoads": "Không có lô hàng demo đang hoạt động",
+    "demoGpsUpdated": "Đã cập nhật vị trí xe tải đã chọn",
+    "demoGpsStopped": "Đã dừng GPS demo",
+    "demoGpsError": "Không thể cập nhật vị trí GPS demo",
+    "shipmentLabel": "Lô hàng",
+    "customerUnassigned": "Chưa gán khách hàng",
+    "origin": "Điểm xuất phát",
+    "destination": "Điểm đến",
+    "noActiveShipment": "Không có lô hàng đang hoạt động"
   },
   "settings": {
     "title": "Cài đặt hồ sơ",
@@ -842,7 +903,9 @@
     "upgrade": "Nâng cấp",
     "downgrade": "Hạ cấp",
     "changingPlan": "Đang cập nhật…",
-    "changeTierFailed": "Không thể thay đổi gói của bạn. Vui lòng thử lại."
+    "changeTierFailed": "Không thể thay đổi gói của bạn. Vui lòng thử lại.",
+    "demoPaymentReceipt": "Thanh toán giả lập: {currency} {amount} · mã tham chiếu {reference}. Không có khoản phí thực nào được thực hiện.",
+    "planAlreadyCurrent": "Gói này đã đang hoạt động; không có khoản thanh toán nào được ghi nhận."
   },
   "developerApi": {
     "title": "API cho Nhà phát triển",
@@ -887,7 +950,9 @@
     "colorHelp": "Để trống một màu để dùng màu mặc định của CarrierOS.",
     "invalidColor": "Nhập màu theo định dạng #RRGGBB, ví dụ: #f47920.",
     "save": "Lưu thay đổi",
-    "saved": "Đã cập nhật thương hiệu."
+    "saved": "Đã cập nhật thương hiệu.",
+    "previewLabel": "Xem trước trực tiếp",
+    "trackingPreviewTitle": "Theo dõi lô hàng"
   },
   "customers": {
     "title": "Khách hàng",
@@ -978,7 +1043,8 @@
     "lastLoad": "Lô hàng Gần nhất",
     "daysAgo": "{days, plural, =0 {Hôm nay} other {# ngày trước}}",
     "relationshipsGoingCold": "{count, plural, other {# mối quan hệ đang nguội dần}}",
-    "coldCustomerLine": "{name} — {days} ngày"
+    "coldCustomerLine": "{name} — {days} ngày",
+    "backToCustomers": "Quay lại Khách hàng"
   },
   "maintenance": {
     "title": "Bảo trì",
@@ -1523,7 +1589,28 @@
     "deliveriesTitle": "Lượt gửi gần đây",
     "noDeliveries": "Chưa có lượt gửi nào",
     "emptyTitle": "Chưa có webhook nào",
-    "emptyDescription": "Đăng ký một webhook để CarrierOS thông báo cho ứng dụng khác khi trạng thái lô hàng thay đổi hoặc hóa đơn được thanh toán."
+    "emptyDescription": "Đăng ký một webhook để CarrierOS thông báo cho ứng dụng khác khi trạng thái lô hàng thay đổi hoặc hóa đơn được thanh toán.",
+    "loadboardTitle": "Sàn giao dịch Vận tải",
+    "loadboardUpgradeRequired": "Đăng lô hàng lên sàn giao dịch vận tải yêu cầu gói Growth trở lên."
+  },
+  "loadboard": {
+    "settingsTitle": "Sàn giao dịch Vận tải",
+    "settingsSubtitle": "Kết nối một nhà cung cấp sàn giao dịch vận tải để điều phối viên có thể đăng lô hàng cho các hãng vận tải khác tìm thấy.",
+    "datTitle": "Sàn giao dịch Vận tải DAT",
+    "datDescription": "Đăng lô hàng lên sàn giao dịch vận tải của DAT (chỉ đăng tin -- tìm kiếm và đặt chỗ không thuộc tích hợp này).",
+    "enabled": "Đã bật",
+    "apiKeyLabel": "Khóa API DAT",
+    "apiKeyPlaceholder": "Nhập để thiết lập hoặc xoay vòng",
+    "apiKeyConfigured": "Đã cấu hình một khóa. Để trống để giữ nguyên, hoặc nhập khóa mới để xoay vòng.",
+    "apiKeyNotConfigured": "Chưa cấu hình khóa nào.",
+    "credentialRequired": "Nhập một thông tin xác thực để thiết lập lần đầu.",
+    "save": "Lưu",
+    "saved": "Đã lưu",
+    "title": "Sàn giao dịch Vận tải",
+    "description": "Đăng lô hàng này lên sàn giao dịch vận tải của DAT để các hãng vận tải khác có thể tìm thấy.",
+    "postButton": "Đăng lên DAT",
+    "posting": "Đang đăng...",
+    "alreadyPosted": "Lô hàng này đã được đăng lên DAT."
   },
   "telematics": {
     "title": "Telematics",
