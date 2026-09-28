@@ -319,7 +319,38 @@
     "shareViaEmail": "Partager par e-mail",
     "shareMessage": "Suivez le chargement {loadNumber} :",
     "shareEmailSubject": "Lien de suivi pour le chargement {loadNumber}",
-    "myLoadsTitle": "Mes chargements"
+    "myLoadsTitle": "Mes chargements",
+    "customerOrders": "Commandes clients",
+    "noCustomerOrders": "Aucune commande client rattachée pour l'instant.",
+    "orderNumber": "N° de commande",
+    "orderReference": "Référence client",
+    "orderWeight": "Poids (lb)",
+    "selectOrderCustomer": "Sélectionner un client",
+    "addCustomerOrder": "Ajouter une commande",
+    "savingOrder": "Enregistrement en cours…",
+    "ordersAddFailed": "Impossible d'ajouter cette commande. Vérifiez le client et réessayez.",
+    "ordersKeepCustomerScoped": "Chaque portail client ne voit que ses propres commandes ; le personnel du transporteur voit le manifeste complet.",
+    "orderCharge": "Frais client",
+    "orderAllocationComplete": "Les frais des commandes correspondent à {allocated}.",
+    "orderAllocationIncomplete": "{allocated} alloués sur {target} ; les frais des commandes doivent égaler le tarif du chargement avant la facturation.",
+    "saveOrderCharge": "Enregistrer les frais",
+    "orderChargeUpdateFailed": "Impossible d'enregistrer les frais de la commande. Vérifiez qu'aucune facture n'a été créée.",
+    "customerExceptionUpdates": "Mises à jour d'expédition pour le client",
+    "noCustomerExceptions": "Aucune exception de chargement à partager pour le moment.",
+    "customerUpdateShared": "Partagée avec le client",
+    "customerUpdatePrivate": "Interne uniquement",
+    "customerUpdateMessageLabel": "Mise à jour visible du client",
+    "customerUpdateMessagePlaceholder": "Expliquez l'impact et la suite. N'incluez pas de notes internes.",
+    "savingCustomerUpdate": "Enregistrement en cours…",
+    "hideCustomerUpdate": "Masquer au client",
+    "shareCustomerUpdate": "Partager la mise à jour",
+    "customerExceptionSaveFailed": "Impossible de mettre à jour la visibilité client. Veuillez réessayer.",
+    "resendCustomerUpdateEmail": "Renvoyer l'e-mail au client",
+    "customerUpdateEmailSent": "E-mail envoyé à {count} contact(s) client principal(aux).",
+    "customerUpdateEmailPartial": "E-mail envoyé à {sent} contact(s), mais échoué pour {failed}.",
+    "customerUpdateNoRecipient": "La mise à jour est partagée sur la page de suivi, mais aucun e-mail client principal n'est enregistré.",
+    "customerUpdateEmailFailed": "La mise à jour est partagée sur la page de suivi, mais l'e-mail n'a pas pu être livré.",
+    "customerExceptionPrivacy": "Seul le message que vous rédigez ici est affiché sur le lien de suivi. Les détails internes de l'exception restent privés."
   },
   "drivers": {
     "title": "Chauffeurs",
@@ -415,7 +446,8 @@
     "dvirPreTrip": "Avant le trajet",
     "dvirPostTrip": "Après le trajet",
     "dvirDefectsNoted": "Défauts constatés",
-    "dvirSatisfactory": "Satisfaisant"
+    "dvirSatisfactory": "Satisfaisant",
+    "backToDrivers": "Retour aux chauffeurs"
   },
   "vehicles": {
     "title": "Véhicules",
@@ -548,7 +580,8 @@
     "uploadPhoto": "Téléverser une photo",
     "replacePhoto": "Remplacer la photo",
     "photoUploadFailed": "Impossible de téléverser la photo. Veuillez réessayer.",
-    "dvirNotSigned": "Non signé"
+    "dvirNotSigned": "Non signé",
+    "backToVehicles": "Retour aux véhicules"
   },
   "companyDocuments": {
     "title": "Documents de l'entreprise",
@@ -646,7 +679,9 @@
     "creating": "Création en cours…",
     "opened": "Ouverte",
     "openedAt": "Ouverte",
-    "notOpenedYet": "Pas encore ouverte"
+    "notOpenedYet": "Pas encore ouverte",
+    "loadInvoicesCreated": "{count, plural, one {# facture client créée} other {# factures client créées}}",
+    "createRemainingCustomerInvoices": "Créez les factures pour les clients restants à partir de leurs allocations de commande."
   },
   "settlements": {
     "title": "Règlements",
@@ -692,7 +727,8 @@
     "daySingular": "jour",
     "dayPlural": "jours",
     "loadLabel": "Chargement",
-    "poweredBy": "Propulsé par CarrierOS"
+    "poweredBy": "Propulsé par CarrierOS",
+    "shipmentUpdates": "Mises à jour d'expédition"
   },
   "dispatch": {
     "title": "Répartition",
@@ -706,7 +742,32 @@
     "loadingMap": "Chargement de la carte…",
     "locationStale": "⚠ Aucune mise à jour depuis plus de 15 min",
     "locationLive": "● En direct",
-    "idleVehicleBadge": "inactif, aucun chargement actif"
+    "idleVehicleBadge": "inactif, aucun chargement actif",
+    "assignedVehicleBadge": "affecté à un chargement actif",
+    "mapViews": "Vues de la carte",
+    "mapViewAll": "Tous les véhicules",
+    "mapViewMoving": "En mouvement (GPS)",
+    "mapViewLoads": "Chargements actifs",
+    "mapViewParked": "Stationné (aucun chargement)",
+    "mapViewUnloaded": "Aucun chargement actif",
+    "mapViewStale": "Position obsolète",
+    "motionMoving": "En mouvement (GPS)",
+    "motionStationary": "Arrêté (GPS)",
+    "motionUnknown": "Mouvement inconnu",
+    "demoGpsStart": "Démarrer le GPS de démo",
+    "demoGpsStop": "Arrêter le GPS de démo",
+    "demoGpsRunning": "Positions synthétiques des véhicules actifs mises à jour toutes les 4 secondes",
+    "demoGpsHelp": "Déplacez un véhicule de démo sélectionné sur un itinéraire distinct Houston–Austin",
+    "demoGpsSelectLoad": "Sélectionnez un chargement de démo à déplacer",
+    "demoGpsNoLoads": "Aucun chargement de démo actif disponible",
+    "demoGpsUpdated": "Position du véhicule sélectionné mise à jour",
+    "demoGpsStopped": "GPS de démo arrêté",
+    "demoGpsError": "Impossible de mettre à jour les positions GPS de démo",
+    "shipmentLabel": "Expédition",
+    "customerUnassigned": "Client non affecté",
+    "origin": "Origine",
+    "destination": "Destination",
+    "noActiveShipment": "Aucune expédition active"
   },
   "settings": {
     "title": "Paramètres du profil",
@@ -842,7 +903,9 @@
     "upgrade": "Mettre à niveau",
     "downgrade": "Rétrograder",
     "changingPlan": "Mise à jour en cours…",
-    "changeTierFailed": "Impossible de changer votre forfait. Veuillez réessayer."
+    "changeTierFailed": "Impossible de changer votre forfait. Veuillez réessayer.",
+    "demoPaymentReceipt": "Paiement simulé : {currency} {amount} · référence {reference}. Aucun véritable prélèvement n'a été effectué.",
+    "planAlreadyCurrent": "Ce forfait est déjà actif ; aucun paiement n'a été enregistré."
   },
   "developerApi": {
     "title": "API développeur",
@@ -887,7 +950,9 @@
     "colorHelp": "Laissez une couleur vide pour utiliser la couleur par défaut de CarrierOS.",
     "invalidColor": "Saisissez une couleur au format #RRVVBB, p. ex. #f47920.",
     "save": "Enregistrer les modifications",
-    "saved": "Image de marque mise à jour."
+    "saved": "Image de marque mise à jour.",
+    "previewLabel": "Aperçu en direct",
+    "trackingPreviewTitle": "Suivi d'expédition"
   },
   "customers": {
     "title": "Clients",
@@ -978,7 +1043,8 @@
     "lastLoad": "Dernier chargement",
     "daysAgo": "{days, plural, =0 {Aujourd'hui} one {il y a # jour} other {il y a # jours}}",
     "relationshipsGoingCold": "{count, plural, one {# relation en refroidissement} other {# relations en refroidissement}}",
-    "coldCustomerLine": "{name} — {days} jours"
+    "coldCustomerLine": "{name} — {days} jours",
+    "backToCustomers": "Retour aux clients"
   },
   "maintenance": {
     "title": "Entretien",
@@ -1523,7 +1589,28 @@
     "deliveriesTitle": "Livraisons récentes",
     "noDeliveries": "Aucune livraison pour l'instant",
     "emptyTitle": "Aucun webhook pour l'instant",
-    "emptyDescription": "Enregistrez un webhook pour que CarrierOS notifie une autre application lorsque le statut d'un chargement change ou qu'une facture est payée."
+    "emptyDescription": "Enregistrez un webhook pour que CarrierOS notifie une autre application lorsque le statut d'un chargement change ou qu'une facture est payée.",
+    "loadboardTitle": "Bourse de fret",
+    "loadboardUpgradeRequired": "La publication sur la bourse de fret nécessite le forfait Growth ou supérieur."
+  },
+  "loadboard": {
+    "settingsTitle": "Bourse de fret",
+    "settingsSubtitle": "Connectez un fournisseur de bourse de fret afin que les répartiteurs puissent y publier des chargements pour d'autres transporteurs.",
+    "datTitle": "Bourse de fret DAT",
+    "datDescription": "Publiez des chargements sur la bourse de fret de DAT (publication uniquement -- la recherche et la réservation ne font pas partie de cette intégration).",
+    "enabled": "Activé",
+    "apiKeyLabel": "Clé API DAT",
+    "apiKeyPlaceholder": "Saisissez pour définir ou faire pivoter",
+    "apiKeyConfigured": "Une clé est configurée. Laissez vide pour la conserver, ou saisissez-en une nouvelle pour la faire pivoter.",
+    "apiKeyNotConfigured": "Aucune clé configurée pour l'instant.",
+    "credentialRequired": "Saisissez un identifiant pour configurer ceci pour la première fois.",
+    "save": "Enregistrer",
+    "saved": "Enregistré",
+    "title": "Bourse de fret",
+    "description": "Publiez ce chargement sur la bourse de fret de DAT afin que d'autres transporteurs puissent le trouver.",
+    "postButton": "Publier sur DAT",
+    "posting": "Publication en cours…",
+    "alreadyPosted": "Ce chargement a été publié sur DAT."
   },
   "telematics": {
     "title": "Télématique",

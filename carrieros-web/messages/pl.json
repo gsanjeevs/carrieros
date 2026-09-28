@@ -319,7 +319,38 @@
     "shareViaEmail": "Udostępnij przez e-mail",
     "shareMessage": "Śledź przewóz {loadNumber}:",
     "shareEmailSubject": "Link do śledzenia przewozu {loadNumber}",
-    "myLoadsTitle": "Moje przewozy"
+    "myLoadsTitle": "Moje przewozy",
+    "customerOrders": "Zamówienia klientów",
+    "noCustomerOrders": "Nie dodano jeszcze żadnych zamówień klientów.",
+    "orderNumber": "Nr zamówienia",
+    "orderReference": "Numer referencyjny klienta",
+    "orderWeight": "Waga (funty)",
+    "selectOrderCustomer": "Wybierz klienta",
+    "addCustomerOrder": "Dodaj zamówienie",
+    "savingOrder": "Zapisywanie…",
+    "ordersAddFailed": "Nie udało się dodać tego zamówienia. Sprawdź klienta i spróbuj ponownie.",
+    "ordersKeepCustomerScoped": "Każdy portal klienta widzi wyłącznie swoje zamówienia; pracownicy przewoźnika widzą pełny manifest.",
+    "orderCharge": "Opłata dla klienta",
+    "orderAllocationComplete": "Opłaty zamówień sumują się do {allocated}.",
+    "orderAllocationIncomplete": "Przypisano {allocated} z {target}; opłaty zamówień muszą być równe stawce przewozu przed fakturowaniem.",
+    "saveOrderCharge": "Zapisz opłatę",
+    "orderChargeUpdateFailed": "Nie udało się zapisać opłaty zamówienia. Sprawdź, czy nie utworzono już faktury.",
+    "customerExceptionUpdates": "Aktualizacje przesyłki dla klienta",
+    "noCustomerExceptions": "Obecnie nie ma żadnych wyjątków przewozu do udostępnienia.",
+    "customerUpdateShared": "Udostępnione klientowi",
+    "customerUpdatePrivate": "Tylko wewnętrznie",
+    "customerUpdateMessageLabel": "Aktualizacja bezpieczna dla klienta",
+    "customerUpdateMessagePlaceholder": "Wyjaśnij wpływ i dalsze kroki. Nie umieszczaj notatek wewnętrznych.",
+    "savingCustomerUpdate": "Zapisywanie…",
+    "hideCustomerUpdate": "Ukryj przed klientem",
+    "shareCustomerUpdate": "Udostępnij aktualizację",
+    "customerExceptionSaveFailed": "Nie udało się zaktualizować widoczności dla klienta. Spróbuj ponownie.",
+    "resendCustomerUpdateEmail": "Wyślij e-mail do klienta ponownie",
+    "customerUpdateEmailSent": "Wysłano e-mail do {count, plural, one {# głównego kontaktu klienta} few {# głównych kontaktów klienta} many {# głównych kontaktów klienta} other {# głównego kontaktu klienta}}.",
+    "customerUpdateEmailPartial": "Wysłano e-mail do {sent} kontaktów, ale nie udało się go wysłać do {failed}.",
+    "customerUpdateNoRecipient": "Aktualizacja jest udostępniona na stronie śledzenia, ale brak zapisanego głównego adresu e-mail klienta.",
+    "customerUpdateEmailFailed": "Aktualizacja jest udostępniona na stronie śledzenia, ale nie udało się dostarczyć e-maila.",
+    "customerExceptionPrivacy": "Na linku śledzenia widoczna jest wyłącznie wiadomość napisana tutaj. Szczegóły wyjątku wewnętrznego pozostają prywatne."
   },
   "drivers": {
     "title": "Kierowcy",
@@ -415,7 +446,8 @@
     "dvirPreTrip": "Przed jazdą",
     "dvirPostTrip": "Po jeździe",
     "dvirDefectsNoted": "Usterki zgłoszone",
-    "dvirSatisfactory": "Bez zastrzeżeń"
+    "dvirSatisfactory": "Bez zastrzeżeń",
+    "backToDrivers": "Powrót do Kierowców"
   },
   "vehicles": {
     "title": "Pojazdy",
@@ -548,7 +580,8 @@
     "uploadPhoto": "Prześlij zdjęcie",
     "replacePhoto": "Zmień zdjęcie",
     "photoUploadFailed": "Nie udało się przesłać zdjęcia. Spróbuj ponownie.",
-    "dvirNotSigned": "Niepodpisany"
+    "dvirNotSigned": "Niepodpisany",
+    "backToVehicles": "Powrót do Pojazdów"
   },
   "companyDocuments": {
     "title": "Dokumenty firmy",
@@ -646,7 +679,9 @@
     "creating": "Tworzenie…",
     "opened": "Otwarta",
     "openedAt": "Otwarta",
-    "notOpenedYet": "Jeszcze nie otwarta"
+    "notOpenedYet": "Jeszcze nie otwarta",
+    "loadInvoicesCreated": "{count, plural, one {Utworzono # fakturę klienta} few {Utworzono # faktury klienta} many {Utworzono # faktur klienta} other {Utworzono # faktury klienta}}",
+    "createRemainingCustomerInvoices": "Utwórz faktury dla pozostałych klientów na podstawie ich przypisań zamówień."
   },
   "settlements": {
     "title": "Rozliczenia",
@@ -692,7 +727,8 @@
     "daySingular": "dzień",
     "dayPlural": "dni",
     "loadLabel": "Przewóz",
-    "poweredBy": "Obsługiwane przez CarrierOS"
+    "poweredBy": "Obsługiwane przez CarrierOS",
+    "shipmentUpdates": "Aktualizacje przesyłki"
   },
   "dispatch": {
     "title": "Dyspozytorka",
@@ -706,7 +742,32 @@
     "loadingMap": "Ładowanie mapy…",
     "locationStale": "⚠ Brak aktualizacji od ponad 15 min",
     "locationLive": "● Na żywo",
-    "idleVehicleBadge": "bezczynny, brak aktywnego przewozu"
+    "idleVehicleBadge": "bezczynny, brak aktywnego przewozu",
+    "assignedVehicleBadge": "przypisany do aktywnego przewozu",
+    "mapViews": "Widoki mapy",
+    "mapViewAll": "Wszystkie pojazdy",
+    "mapViewMoving": "W ruchu (GPS)",
+    "mapViewLoads": "Aktywne przewozy",
+    "mapViewParked": "Zaparkowany (brak przewozu)",
+    "mapViewUnloaded": "Brak aktywnego przewozu",
+    "mapViewStale": "Nieaktualna lokalizacja",
+    "motionMoving": "W ruchu (GPS)",
+    "motionStationary": "Zatrzymany (GPS)",
+    "motionUnknown": "Nieznany ruch",
+    "demoGpsStart": "Uruchom demo GPS",
+    "demoGpsStop": "Zatrzymaj demo GPS",
+    "demoGpsRunning": "Symulowane lokalizacje aktywnych pojazdów aktualizowane co 4 sekundy",
+    "demoGpsHelp": "Przemieszczaj jeden wybrany demonstracyjny pojazd po osobnej trasie Houston–Austin",
+    "demoGpsSelectLoad": "Wybierz demonstracyjny przewóz do przemieszczenia",
+    "demoGpsNoLoads": "Brak dostępnych aktywnych przewozów demonstracyjnych",
+    "demoGpsUpdated": "Zaktualizowano lokalizację wybranego pojazdu",
+    "demoGpsStopped": "Zatrzymano demo GPS",
+    "demoGpsError": "Nie udało się zaktualizować lokalizacji demo GPS",
+    "shipmentLabel": "Przesyłka",
+    "customerUnassigned": "Klient nieprzypisany",
+    "origin": "Miejsce nadania",
+    "destination": "Miejsce docelowe",
+    "noActiveShipment": "Brak aktywnej przesyłki"
   },
   "settings": {
     "title": "Ustawienia profilu",
@@ -842,7 +903,9 @@
     "upgrade": "Uaktualnij",
     "downgrade": "Obniż plan",
     "changingPlan": "Aktualizowanie…",
-    "changeTierFailed": "Nie udało się zmienić planu. Spróbuj ponownie."
+    "changeTierFailed": "Nie udało się zmienić planu. Spróbuj ponownie.",
+    "demoPaymentReceipt": "Symulowana płatność: {currency} {amount} · numer referencyjny {reference}. Nie dokonano żadnej prawdziwej płatności.",
+    "planAlreadyCurrent": "Ten plan jest już aktywny; nie zarejestrowano żadnej płatności."
   },
   "developerApi": {
     "title": "API dla deweloperów",
@@ -887,7 +950,9 @@
     "colorHelp": "Pozostaw pole koloru puste, aby użyć domyślnego koloru CarrierOS.",
     "invalidColor": "Wprowadź kolor w formacie #RRGGBB, np. #f47920.",
     "save": "Zapisz zmiany",
-    "saved": "Branding zaktualizowany."
+    "saved": "Branding zaktualizowany.",
+    "previewLabel": "Podgląd na żywo",
+    "trackingPreviewTitle": "Śledzenie przesyłki"
   },
   "customers": {
     "title": "Klienci",
@@ -978,7 +1043,8 @@
     "lastLoad": "Ostatni przewóz",
     "daysAgo": "{days, plural, =0 {Dzisiaj} one {# dzień temu} few {# dni temu} many {# dni temu} other {# dnia temu}}",
     "relationshipsGoingCold": "{count, plural, one {# relacja słabnie} few {# relacje słabną} many {# relacji słabnie} other {# relacji słabnie}}",
-    "coldCustomerLine": "{name} — {days} dni"
+    "coldCustomerLine": "{name} — {days} dni",
+    "backToCustomers": "Powrót do Klientów"
   },
   "maintenance": {
     "title": "Serwis",
@@ -1523,7 +1589,28 @@
     "deliveriesTitle": "Ostatnie dostawy",
     "noDeliveries": "Brak dostaw",
     "emptyTitle": "Brak webhooków",
-    "emptyDescription": "Zarejestruj webhook, aby CarrierOS powiadamiał inną aplikację o zmianie statusu przewozu lub opłaceniu faktury."
+    "emptyDescription": "Zarejestruj webhook, aby CarrierOS powiadamiał inną aplikację o zmianie statusu przewozu lub opłaceniu faktury.",
+    "loadboardTitle": "Giełda ładunków",
+    "loadboardUpgradeRequired": "Publikowanie na giełdzie ładunków wymaga planu Growth lub wyższego."
+  },
+  "loadboard": {
+    "settingsTitle": "Giełda ładunków",
+    "settingsSubtitle": "Podłącz dostawcę giełdy ładunków, aby dyspozytorzy mogli publikować przewozy widoczne dla innych przewoźników.",
+    "datTitle": "Giełda ładunków DAT",
+    "datDescription": "Publikuj przewozy na giełdzie ładunków DAT (tylko publikowanie — wyszukiwanie i rezerwacja nie są częścią tej integracji).",
+    "enabled": "Włączone",
+    "apiKeyLabel": "Klucz API DAT",
+    "apiKeyPlaceholder": "Wprowadź, aby ustawić lub wymienić",
+    "apiKeyConfigured": "Klucz jest skonfigurowany. Pozostaw puste, aby go zachować, lub wprowadź nowy, aby go wymienić.",
+    "apiKeyNotConfigured": "Nie skonfigurowano jeszcze klucza.",
+    "credentialRequired": "Wprowadź poświadczenie, aby skonfigurować to po raz pierwszy.",
+    "save": "Zapisz",
+    "saved": "Zapisano",
+    "title": "Giełda ładunków",
+    "description": "Opublikuj ten przewóz na giełdzie ładunków DAT, aby był widoczny dla innych przewoźników.",
+    "postButton": "Opublikuj na DAT",
+    "posting": "Publikowanie…",
+    "alreadyPosted": "Ten przewóz został opublikowany na DAT."
   },
   "telematics": {
     "title": "Telematyka",
