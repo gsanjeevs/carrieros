@@ -26,7 +26,7 @@ export default function StepProgress({ current, total, label, labelPosition = 'r
         aria-valuenow={current}
         aria-valuemin={0}
         aria-valuemax={total}
-        className="h-1 w-full rounded-full bg-white/10 overflow-hidden"
+        className="h-1 w-full rounded-full bg-border-ui overflow-hidden"
       >
         <div className="h-full rounded-full bg-brand-orange transition-[width]" style={{ width: `${pct}%` }} />
       </div>

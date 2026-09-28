@@ -56,40 +56,44 @@ export default async function SettingsPage() {
     // background), not actually theme them. Converting those pages is
     // real, separate follow-up work — see V3/V6 in decisions.md.
     <div className="min-h-full bg-surface-page">
-      <div className="max-w-2xl mx-auto px-6 py-10">
+      <div className="max-w-7xl mx-auto px-6 py-10">
         <h1 className="text-text-pri text-xl font-semibold mb-1">{t('title')}</h1>
         <p className="text-text-sec text-sm mb-8">{t('subtitle')}</p>
 
-        <Card className="mb-6">
-          <CardBody>
-            <ThemeSwitcher current={themePreference} />
-          </CardBody>
-        </Card>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+          <div className="space-y-6">
+            <Card>
+              <CardBody>
+                <ThemeSwitcher current={themePreference} />
+              </CardBody>
+            </Card>
 
-        <ProfilePhotoForm currentUrl={avatarUrl} />
+            <ProfilePhotoForm currentUrl={avatarUrl} />
 
-        {profile && roleHasCapability(profile.role, 'driver_profile_edit_own') && (
-          <Card className="mb-6">
+            {profile && roleHasCapability(profile.role, 'driver_profile_edit_own') && (
+              <Card>
+                <CardBody>
+                  <DriverProfileForm />
+                </CardBody>
+              </Card>
+            )}
+          </div>
+
+          <Card>
             <CardBody>
-              <DriverProfileForm />
+              <ProfileSettingsForm
+                userId={user.id}
+                current={{
+                  preferred_language: profile?.preferred_language ?? 'en',
+                  uom_system: (profile?.uom_system as 'imperial' | 'metric' | null) ?? null,
+                  date_format: profile?.date_format ?? 'MM/DD/YYYY',
+                  time_format: profile?.time_format ?? '12h',
+                }}
+                orgDefaultUom={orgDefaultUom}
+              />
             </CardBody>
           </Card>
-        )}
-
-        <Card>
-          <CardBody>
-            <ProfileSettingsForm
-              userId={user.id}
-              current={{
-                preferred_language: profile?.preferred_language ?? 'en',
-                uom_system: (profile?.uom_system as 'imperial' | 'metric' | null) ?? null,
-                date_format: profile?.date_format ?? 'MM/DD/YYYY',
-                time_format: profile?.time_format ?? '12h',
-              }}
-              orgDefaultUom={orgDefaultUom}
-            />
-          </CardBody>
-        </Card>
+        </div>
       </div>
     </div>
   )

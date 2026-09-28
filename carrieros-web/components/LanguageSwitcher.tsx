@@ -19,12 +19,15 @@ import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client' // reads the language list only; the write goes through the API
 import { apiClient } from '@/lib/api-client'
+import { SUPPORTED_LOCALES } from '@/i18n/locales'
 
 interface Language {
   code: string
   native_name: string
   flag_emoji: string
 }
+
+const SUPPORTED_LOCALE_SET = new Set<string>(SUPPORTED_LOCALES)
 
 export default function LanguageSwitcher({
   userId,
@@ -47,7 +50,7 @@ export default function LanguageSwitcher({
       .select('code, native_name, flag_emoji')
       .order('display_order')
       .then(({ data }) => {
-        if (!cancelled && data) setLanguages(data)
+        if (!cancelled && data) setLanguages(data.filter((language) => SUPPORTED_LOCALE_SET.has(language.code)))
       })
     return () => {
       cancelled = true
@@ -101,13 +104,13 @@ export default function LanguageSwitcher({
               onClick={() => selectLanguage(l.code)}
               className={`relative w-8 h-8 rounded-lg flex items-center justify-center text-base transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
                 selected
-                  ? 'bg-brand-orange/10 border-2 border-brand-orange'
-                  : 'border border-border-ui bg-surface-subtle hover:bg-white/10'
+                  ? 'bg-brand-orange border-2 border-brand-orange text-brand-on-primary'
+                  : 'border border-border-ui bg-surface-subtle text-text-pri hover:bg-surface-hover'
               }`}
             >
               <span aria-hidden>{l.flag_emoji}</span>
               {selected && (
-                <span className="material-symbols-outlined absolute -top-1.5 -right-1.5 text-[13px] leading-none text-brand-orange bg-navy rounded-full">
+                <span className="material-symbols-outlined absolute -top-1.5 -right-1.5 text-[13px] leading-none text-brand-on-primary bg-brand-orange rounded-full">
                   check_circle
                 </span>
               )}
@@ -132,14 +135,14 @@ export default function LanguageSwitcher({
               onClick={() => selectLanguage(l.code)}
               className={`relative flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
                 selected
-                  ? 'border-2 border-brand-orange bg-brand-orange/10'
-                  : 'border border-border-ui bg-surface-subtle hover:bg-white/10'
+                  ? 'border-2 border-brand-orange bg-brand-orange text-brand-on-primary'
+                  : 'border border-border-ui bg-surface-subtle text-text-pri hover:bg-surface-hover'
               }`}
             >
               <span className="text-lg leading-none" aria-hidden>{l.flag_emoji}</span>
-              <span className="text-white text-sm font-medium truncate">{l.native_name}</span>
+              <span className="text-sm font-medium truncate">{l.native_name}</span>
               {selected && (
-                <span className="material-symbols-outlined absolute top-1.5 right-1.5 text-[16px] leading-none text-brand-orange">
+                <span className="material-symbols-outlined absolute top-1.5 right-1.5 text-[16px] leading-none text-brand-on-primary">
                   check_circle
                 </span>
               )}
@@ -147,7 +150,7 @@ export default function LanguageSwitcher({
           )
         })}
       </div>
-      <p className="mt-2.5 text-xs text-slate-500">{t('appliesEverywhere')}</p>
+      <p className="mt-2.5 text-xs text-text-mut">{t('appliesEverywhere')}</p>
     </div>
   )
 }

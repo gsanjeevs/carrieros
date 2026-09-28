@@ -24,6 +24,23 @@
 // (no auth session) while still funneling through this same function.
 const HEX_PATTERN = /^#[0-9A-Fa-f]{6}$/
 
+function linearize(channel: number): number {
+  const value = channel / 255
+  return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
+}
+
+/** Return the higher-contrast black/white text color for a brand surface. */
+export function brandForegroundColor(hex: string): '#000000' | '#ffffff' {
+  if (!HEX_PATTERN.test(hex)) return '#000000'
+  const red = linearize(Number.parseInt(hex.slice(1, 3), 16))
+  const green = linearize(Number.parseInt(hex.slice(3, 5), 16))
+  const blue = linearize(Number.parseInt(hex.slice(5, 7), 16))
+  const luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue
+  const whiteContrast = 1.05 / (luminance + 0.05)
+  const blackContrast = (luminance + 0.05) / 0.05
+  return whiteContrast > blackContrast ? '#ffffff' : '#000000'
+}
+
 export interface BrandingTokens {
   primaryColor: string | null
   accentColor: string | null
@@ -33,9 +50,13 @@ export function brandingCssVars(tokens: BrandingTokens): Record<string, string> 
   const vars: Record<string, string> = {}
   if (tokens.primaryColor && HEX_PATTERN.test(tokens.primaryColor)) {
     vars['--color-brand-orange'] = tokens.primaryColor
+    // Override the Tailwind theme property directly on the tenant wrapper:
+    // the `--color-*` utility value is already computed/inherited at :root.
+    vars['--color-brand-on-primary'] = brandForegroundColor(tokens.primaryColor)
   }
   if (tokens.accentColor && HEX_PATTERN.test(tokens.accentColor)) {
     vars['--color-teal'] = tokens.accentColor
+    vars['--color-brand-on-accent'] = brandForegroundColor(tokens.accentColor)
   }
   return vars
 }

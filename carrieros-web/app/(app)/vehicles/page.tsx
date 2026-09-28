@@ -180,11 +180,11 @@ export default async function VehiclesPage({
                       // eslint-disable-next-line @next/next/no-img-element -- signed URL, not a static/optimizable asset
                       <img src={photoUrl} alt={vehicle.nickname ?? vehicle.vehicle_number ?? ''} className="w-full h-full object-cover" />
                     ) : (
-                      Icon && <Icon className="w-32 h-auto text-white/40" />
+                      Icon && <Icon className="w-32 h-auto text-on-image/40" />
                     )}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-3 py-2">
-                      <p className="text-white text-[11px] font-bold tracking-wide">{vehicle.vehicle_number ?? '—'}</p>
-                      {vt && <p className="text-white/75 text-[10px]">{t(`type_${vt.code}` as never)}</p>}
+                    <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-image-scrim to-transparent px-3 py-2">
+                      <p className="text-on-image text-[11px] font-bold tracking-wide">{vehicle.vehicle_number ?? '—'}</p>
+                      {vt && <p className="text-on-image/75 text-[10px]">{t(`type_${vt.code}` as never)}</p>}
                     </div>
                   </div>
 

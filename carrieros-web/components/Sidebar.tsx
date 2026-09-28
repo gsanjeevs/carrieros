@@ -89,11 +89,11 @@ const NAV_SECTIONS: NavSection[] = [
 // role_token color -> badge classes. Literal strings (not template-built)
 // so Tailwind's v4 content scanner picks them up at build time.
 const ROLE_BADGE_CLASSES: Record<string, string> = {
-  'brand-orange': 'bg-brand-orange/10 text-brand-orange',
-  success: 'bg-success/10 text-success',
-  info: 'bg-info/10 text-info',
-  purple: 'bg-purple/10 text-purple',
-  'navy-muted': 'bg-navy-muted/10 text-navy-muted',
+  'brand-orange': 'bg-navigation-hover text-navigation-primary',
+  success: 'bg-status-success-surface text-status-success',
+  info: 'bg-status-info-surface text-status-info',
+  purple: 'bg-status-purple-surface text-status-purple',
+  'navy-muted': 'bg-status-neutral-surface text-status-neutral',
 }
 
 interface Props {
@@ -139,30 +139,23 @@ export default function Sidebar({ role, userName, userId, preferredLanguage, rol
     .slice(0, 2)
 
   return (
-    // Every class in this file is a literal palette token (bg-navy,
-    // text-white, border-navy-light, ...), never a semantic `--color-
-    // surface-*`/`--color-text-*` token — decisions.md V3 requires the
-    // sidebar to stay fixed dark navy in both Light and Dark content mode,
-    // so it must render identically regardless of whether an ancestor
-    // carries the `dark` class app/layout.tsx now toggles. `border-divider-
-    // ui`/`hover:bg-surface-subtle` used to appear here (both semantic-
-    // token classes) before the theme toggle existed to expose the risk —
-    // swapped for the literal border-navy-light equivalent everywhere below.
-    <aside className="w-64 flex-shrink-0 flex flex-col bg-navy border-r border-navy-light">
+    // Dedicated navigation tokens keep the rail deliberately dark in both
+    // user appearance themes while letting content surfaces switch themes.
+    <aside className="w-64 flex-shrink-0 flex flex-col bg-navigation-surface border-r border-navigation-border">
 
       {/* Logo — Enterprise branding customization (decisions.md PR1 amendment) swaps the mark for the
           org's own uploaded logo when one is set; every other tier keeps the default "C" mark. The
           "CarrierOS" wordmark always stays (PR1 is explicitly NOT hiding the CarrierOS name). */}
-      <div className="flex items-center gap-2.5 px-5 py-5 border-b border-navy-light">
+      <div className="flex items-center gap-2.5 px-5 py-5 border-b border-navigation-border">
         {logoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- signed URL, not a static asset
           <img src={logoUrl} alt="" className="w-7 h-7 rounded-md object-cover flex-shrink-0" />
         ) : (
           <div className="w-7 h-7 rounded-md bg-brand-orange flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-bold text-xs">C</span>
+            <span className="text-brand-on-primary font-bold text-xs">C</span>
           </div>
         )}
-        <span className="text-white font-extrabold text-xl tracking-tight">CarrierOS</span>
+        <span className="text-navigation-primary font-extrabold text-xl tracking-tight">CarrierOS</span>
       </div>
 
       {/* Nav */}
@@ -181,8 +174,8 @@ export default function Sidebar({ role, userName, userId, preferredLanguage, rol
                     href={item.href}
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-brand-orange/50 ${
                       active
-                        ? 'bg-brand-orange/10 text-brand-orange'
-                        : 'text-slate-400 hover:text-white hover:bg-navy-light'
+                        ? 'bg-brand-orange/10 text-navigation-primary'
+                        : 'text-navigation-secondary hover:text-navigation-primary hover:bg-navigation-hover'
                     }`}
                   >
                     <span className="material-symbols-outlined text-[18px] leading-none">{item.icon}</span>
@@ -196,13 +189,13 @@ export default function Sidebar({ role, userName, userId, preferredLanguage, rol
       </nav>
 
       {/* User + Language + Sign out */}
-      <div className="px-3 py-4 border-t border-navy-light">
+      <div className="px-3 py-4 border-t border-navigation-border">
         <div className="flex items-center gap-3 px-3 py-2 mb-1">
           <div className="w-7 h-7 rounded-full bg-navy-light flex items-center justify-center flex-shrink-0">
             <span className="text-avatar-text text-xs font-semibold">{initials}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white text-xs font-medium truncate">{userName}</p>
+            <p className="text-navigation-primary text-xs font-medium truncate">{userName}</p>
             <div className="flex items-center gap-1.5 mt-0.5">
               {roleAbbreviation && (
                 <span
@@ -213,7 +206,7 @@ export default function Sidebar({ role, userName, userId, preferredLanguage, rol
                   {roleAbbreviation}
                 </span>
               )}
-              <p className="text-slate-500 text-xs truncate">{roleLabel(role)}</p>
+              <p className="text-navigation-secondary text-xs truncate">{roleLabel(role)}</p>
             </div>
           </div>
         </div>
@@ -223,7 +216,7 @@ export default function Sidebar({ role, userName, userId, preferredLanguage, rol
         <form action={signOut}>
           <button
             type="submit"
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-navy-light transition-colors focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-navigation-secondary hover:text-navigation-primary hover:bg-navigation-hover transition-colors focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
           >
             <span className="material-symbols-outlined text-[18px] leading-none">logout</span>
             {tCommon('signOut')}

@@ -19,7 +19,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { Card, KpiTile, StatusBadge, Button, EmptyState } from '@/components/ui'
+import { Card, KpiTile, StatusBadge, Button, ButtonLink, EmptyState } from '@/components/ui'
 
 interface Org {
   org_id: number
@@ -168,12 +168,13 @@ export default function TriageQueuePage() {
                       {t('replyNow')}
                     </Link>
                   )}
-                  <Link
+                  <ButtonLink
+                    variant="primary"
+                    size="sm"
                     href={`/admin/orgs/${o.org_id}`}
-                    className="inline-flex items-center justify-center rounded-md font-semibold transition-colors px-2 py-1 text-[11px] bg-brand-orange text-white hover:bg-brand-orange/90"
                   >
                     {t('view')}
-                  </Link>
+                  </ButtonLink>
                 </div>
               </Card>
             )

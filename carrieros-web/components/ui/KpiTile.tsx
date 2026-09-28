@@ -20,9 +20,9 @@ export interface KpiTileProps {
 }
 
 const DELTA_CLASSES: Record<DeltaTone, string> = {
-  success: 'bg-success/20 text-success-dark',
-  danger: 'bg-danger/20 text-danger',
-  warning: 'bg-warning/20 text-warning',
+  success: 'bg-status-success-surface text-status-success',
+  danger: 'bg-status-danger-surface text-status-danger',
+  warning: 'bg-status-warning-surface text-status-warning',
 }
 
 export default function KpiTile({ label, value, delta, helperText, loading = false, className }: KpiTileProps) {

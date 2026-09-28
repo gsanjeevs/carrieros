@@ -32,7 +32,7 @@ export default function Tooltip({ content, children, className }: TooltipProps) 
         id={id}
         className={cn(
           'pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 z-[1500]',
-          'whitespace-nowrap rounded-md bg-navy text-white text-[11px] font-medium px-2 py-1',
+          'whitespace-nowrap rounded-md bg-surface-card border border-border-ui text-text-pri text-[11px] font-medium px-2 py-1 shadow-card',
           'transition-opacity duration-150',
           visible ? 'opacity-100' : 'opacity-0'
         )}

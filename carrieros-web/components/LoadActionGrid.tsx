@@ -65,40 +65,40 @@ export default function LoadActionGrid({
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  const btnCls = 'flex flex-col items-center justify-center gap-1.5 py-3.5 bg-surface-subtle hover:bg-white/10 border border-border-ui rounded-xl transition text-center focus:outline-none focus:ring-2 focus:ring-brand-orange/50 disabled:opacity-40 disabled:hover:bg-surface-subtle disabled:cursor-not-allowed'
-  const iconCls = 'material-symbols-outlined text-[20px] text-slate-300'
-  const labelCls = 'text-white text-xs font-medium'
+  const btnCls = 'flex flex-col items-center justify-center gap-1.5 py-3.5 bg-surface-subtle hover:bg-surface-hover border border-border-ui rounded-xl transition text-center focus:outline-none focus:ring-2 focus:ring-brand-orange/50 disabled:opacity-40 disabled:hover:bg-surface-subtle disabled:cursor-not-allowed'
+  const iconCls = 'material-symbols-outlined text-[20px] text-text-mut'
+  const labelCls = 'text-text-pri text-xs font-medium'
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 relative">
       <div className="relative">
         <button type="button" onClick={shareTracking} disabled={!trackingToken} className={`${btnCls} w-full`}>
-          <span className={`material-symbols-outlined text-[20px] ${copied ? 'text-teal' : 'text-slate-300'}`}>
+          <span className={`material-symbols-outlined text-[20px] ${copied ? 'text-success' : 'text-text-mut'}`}>
             {copied ? 'check' : 'ios_share'}
           </span>
           <span className={labelCls}>{copied ? t('actionCopied') : t('actionShareTracking')}</span>
         </button>
 
         {menuOpen && trackingToken && (
-          <div className="absolute z-10 top-full mt-1 left-0 right-0 bg-navy border border-border-ui rounded-xl overflow-hidden shadow-lg">
-            <button type="button" onClick={copyLink} className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-white hover:bg-white/10 transition">
-              <span className="material-symbols-outlined text-[16px] text-slate-300">content_copy</span>
+          <div className="absolute z-10 top-full mt-1 left-0 right-0 bg-surface-card border border-border-ui rounded-xl overflow-hidden shadow-lg">
+            <button type="button" onClick={copyLink} className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-text-pri hover:bg-surface-hover transition">
+              <span className="material-symbols-outlined text-[16px] text-text-sec">content_copy</span>
               {t('shareCopyLink')}
             </button>
             <a
               href={`sms:?body=${encodeURIComponent(t('shareMessage', { loadNumber }) + ' ' + trackingUrl())}`}
               onClick={() => setMenuOpen(false)}
-              className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-white hover:bg-white/10 transition"
+              className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-text-pri hover:bg-surface-hover transition"
             >
-              <span className="material-symbols-outlined text-[16px] text-slate-300">sms</span>
+              <span className="material-symbols-outlined text-[16px] text-text-sec">sms</span>
               {t('shareViaSms')}
             </a>
             <a
               href={`mailto:?subject=${encodeURIComponent(t('shareEmailSubject', { loadNumber }))}&body=${encodeURIComponent(t('shareMessage', { loadNumber }) + ' ' + trackingUrl())}`}
               onClick={() => setMenuOpen(false)}
-              className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-white hover:bg-white/10 transition"
+              className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-text-pri hover:bg-surface-hover transition"
             >
-              <span className="material-symbols-outlined text-[16px] text-slate-300">mail</span>
+              <span className="material-symbols-outlined text-[16px] text-text-sec">mail</span>
               {t('shareViaEmail')}
             </a>
           </div>
@@ -122,8 +122,8 @@ export default function LoadActionGrid({
         className={btnCls}
         title={!canCancel ? t('actionCancelUnavailable') : undefined}
       >
-        <span className="material-symbols-outlined text-[20px] text-red-400">cancel</span>
-        <span className="text-red-400 text-xs font-medium">{t('actionCancelLoad')}</span>
+        <span className="material-symbols-outlined text-[20px] text-danger">cancel</span>
+        <span className="text-danger text-xs font-medium">{t('actionCancelLoad')}</span>
       </button>
     </div>
   )

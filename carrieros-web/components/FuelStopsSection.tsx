@@ -137,23 +137,23 @@ export default function FuelStopsSection({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-divider-ui">
-              <th className="text-left px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('date')}</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('fuelState')}</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('fuelStation')}</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('fuelDriver')}</th>
-              <th className="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('fuelGallons')}</th>
-              <th className="text-right px-5 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">{t('fuelCost')}</th>
+              <th className="text-left px-5 py-3 text-xs font-medium text-text-mut uppercase tracking-wide">{t('date')}</th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-text-mut uppercase tracking-wide">{t('fuelState')}</th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-text-mut uppercase tracking-wide">{t('fuelStation')}</th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-text-mut uppercase tracking-wide">{t('fuelDriver')}</th>
+              <th className="text-right px-4 py-3 text-xs font-medium text-text-mut uppercase tracking-wide">{t('fuelGallons')}</th>
+              <th className="text-right px-5 py-3 text-xs font-medium text-text-mut uppercase tracking-wide">{t('fuelCost')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-divider-ui">
             {fuelStops.map((f) => (
               <tr key={f.id} className="hover:bg-surface-subtle transition-colors duration-150">
-                <td className="px-5 py-3 text-slate-300">{new Date(f.stopDate).toLocaleDateString(locale)}</td>
-                <td className="px-4 py-3 text-white font-medium">{f.state}</td>
-                <td className="px-4 py-3 text-slate-400">{f.station ?? '—'}</td>
-                <td className="px-4 py-3 text-slate-400">{f.driverName ?? '—'}</td>
-                <td className="px-4 py-3 text-right text-slate-300">{f.gallons.toLocaleString()}</td>
-                <td className="px-5 py-3 text-right text-white font-medium">{formatMoney(f.totalCost, currency, locale)}</td>
+                <td className="px-5 py-3 text-text-sec">{new Date(f.stopDate).toLocaleDateString(locale)}</td>
+                <td className="px-4 py-3 text-text-pri font-medium">{f.state}</td>
+                <td className="px-4 py-3 text-text-sec">{f.station ?? '—'}</td>
+                <td className="px-4 py-3 text-text-sec">{f.driverName ?? '—'}</td>
+                <td className="px-4 py-3 text-right text-text-sec">{f.gallons.toLocaleString()}</td>
+                <td className="px-5 py-3 text-right text-text-pri font-medium">{formatMoney(f.totalCost, currency, locale)}</td>
               </tr>
             ))}
           </tbody>
@@ -162,11 +162,11 @@ export default function FuelStopsSection({
     </Card>
 
     {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
-          <div className="w-full max-w-md bg-navy border border-border-ui rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay-scrim p-6">
+          <div className="w-full max-w-md bg-surface-card border border-border-ui rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-white font-semibold text-lg">{t('logFuelStop')}</h2>
-              <button onClick={close} className="text-slate-500 hover:text-white transition rounded">
+              <h2 className="text-text-pri font-semibold text-lg">{t('logFuelStop')}</h2>
+              <button onClick={close} className="text-text-sec hover:text-text-pri transition rounded">
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
@@ -210,18 +210,18 @@ export default function FuelStopsSection({
               </Field>
 
               {computedTotal != null && (
-                <p className="text-slate-400 text-xs">{t('fuelComputedTotal', { amount: formatMoney(computedTotal, currency, locale) })}</p>
+                <p className="text-text-sec text-xs">{t('fuelComputedTotal', { amount: formatMoney(computedTotal, currency, locale) })}</p>
               )}
 
-              {error && <p className="text-red-400 text-xs">{error}</p>}
+              {error && <p className="text-danger text-xs">{error}</p>}
 
               <div className="flex gap-3 mt-2">
-                <button onClick={close} disabled={saving} className="flex-1 py-2.5 bg-surface-subtle hover:bg-white/10 disabled:opacity-40 text-white font-medium rounded-lg transition text-sm">
+                <Button variant="ghost" size="lg" onClick={close} disabled={saving} className="flex-1">
                   {t('fuelCancel')}
-                </button>
-                <button onClick={submit} disabled={saving} className="flex-2 flex-grow py-2.5 bg-brand-orange hover:bg-brand-orange-hover disabled:opacity-40 text-white font-semibold rounded-lg transition text-sm">
+                </Button>
+                <Button variant="primary" size="lg" onClick={submit} disabled={saving} className="flex-2 flex-grow">
                   {saving ? t('fuelSaving') : t('fuelSave')}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

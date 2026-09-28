@@ -9,7 +9,7 @@ import { formatDate } from '@/lib/format-datetime'
 import { formatMoney, resolveCurrency } from '@/lib/format-money'
 import { INVOICE_ROLES } from '@/lib/roles-policy'
 import { invoiceStatusVariant, type InvoiceStatus } from '@/lib/domain/invoice-status'
-import { Card, EmptyState, StatusBadge, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
+import { ButtonLink, Card, EmptyState, StatusBadge, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { logError } from '@/lib/observability'
 
@@ -114,13 +114,10 @@ export default async function InvoicesPage({
             description={t('createFromLoadHint')}
           />
           <div className="flex justify-center pb-8 -mt-2">
-            <Link
-              href="/loads"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-brand-orange hover:bg-brand-orange-hover text-white text-sm font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
-            >
+            <ButtonLink href="/loads" size="lg">
               <span className="material-symbols-outlined text-[16px]">local_shipping</span>
               {t('goToLoads')}
-            </Link>
+            </ButtonLink>
           </div>
         </Card>
       ) : (

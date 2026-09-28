@@ -85,7 +85,7 @@ export function TableHeaderCell({
 
 export function TableRow({ className, children, ...rest }: HTMLAttributes<HTMLTableRowElement>) {
   return (
-    <tr className={cn('hover:bg-white/[0.025] transition-colors', className)} {...rest}>
+    <tr className={cn('hover:bg-surface-hover transition-colors', className)} {...rest}>
       {children}
     </tr>
   )

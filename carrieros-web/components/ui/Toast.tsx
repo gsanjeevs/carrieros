@@ -29,10 +29,10 @@ export interface ToastProps {
 }
 
 const VARIANT_CLASSES: Record<ToastVariant, string> = {
-  success: 'bg-success/15 border-success/30 text-success-dark',
-  warning: 'bg-warning/15 border-warning/30 text-warning',
-  danger: 'bg-danger/15 border-danger/30 text-danger',
-  info: 'bg-info/15 border-info/30 text-info',
+  success: 'bg-status-success-surface border-status-success/30 text-status-success',
+  warning: 'bg-status-warning-surface border-status-warning/30 text-status-warning',
+  danger: 'bg-status-danger-surface border-status-danger/30 text-status-danger',
+  info: 'bg-status-info-surface border-status-info/30 text-status-info',
 }
 
 const VARIANT_ICON: Record<ToastVariant, string> = {

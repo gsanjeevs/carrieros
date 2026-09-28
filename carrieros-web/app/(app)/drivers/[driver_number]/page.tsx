@@ -137,8 +137,8 @@ export default async function DriverDetailPage({
   const glow = cdlGlowStatus(driver.cdl_expiry)
   const glowDotClass =
     glow === 'success' ? 'bg-success shadow-glow-success' :
-    glow === 'warning' ? 'bg-amber-500 shadow-glow-warning' :
-    'bg-rose-500 shadow-glow-danger'
+    glow === 'warning' ? 'bg-status-warning shadow-glow-warning' :
+    'bg-status-danger shadow-glow-danger'
   const inviteStatus = (driver.invite_status ?? 'pending') as InviteStatus
 
   const vehicleLabel = driver.vehicles
@@ -211,7 +211,7 @@ export default async function DriverDetailPage({
           <CardBody>
           <div className="inline-flex flex-col gap-1.5 rounded-lg border border-border-ui bg-surface-subtle px-3 py-2 w-full">
             <div className="flex items-center justify-between gap-2">
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-400 text-2xs font-semibold tracking-wide">
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-status-info-surface text-status-info text-2xs font-semibold tracking-wide">
                 {driver.cdl_class ? t('cdlClass', { class: driver.cdl_class }) : t('cdlClassUnknown')}
               </span>
               <span
@@ -234,7 +234,7 @@ export default async function DriverDetailPage({
                 {driver.endorsements.map((code: string) => (
                   <span
                     key={code}
-                    className="inline-flex items-center px-1.5 py-0.5 rounded border border-amber-500/40 bg-amber-500/5 text-amber-400 text-2xs font-medium"
+                    className="inline-flex items-center px-1.5 py-0.5 rounded border border-status-warning/40 bg-status-warning-surface/35 text-status-warning text-2xs font-medium"
                   >
                     {t.has(`endorsement_${code}`) ? t(`endorsement_${code}` as never) : code}
                   </span>
@@ -344,12 +344,12 @@ export default async function DriverDetailPage({
                 <div className="flex items-center justify-between gap-4 flex-wrap">
                   <div className="flex items-center gap-3">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                      d.type === 'pre_trip' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'
+                      d.type === 'pre_trip' ? 'bg-status-info-surface text-status-info' : 'bg-status-purple-surface text-status-purple'
                     }`}>
                       {t(d.type === 'pre_trip' ? 'dvirPreTrip' : 'dvirPostTrip')}
                     </span>
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                      hasDefects ? 'bg-warning/20 text-warning' : 'bg-success/20 text-success'
+                      hasDefects ? 'bg-status-warning-surface text-status-warning' : 'bg-status-success-surface text-status-success'
                     }`}>
                       {hasDefects ? t('dvirDefectsNoted') : t('dvirSatisfactory')}
                     </span>

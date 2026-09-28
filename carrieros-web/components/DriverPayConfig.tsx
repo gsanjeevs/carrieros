@@ -80,11 +80,11 @@ export default function DriverPayConfig({
           </button>
         </div>
         {settlementType && settlementRate != null ? (
-          <p className="text-slate-300 text-sm">
+          <p className="text-text-sec text-sm">
             {t(`settlementType_${settlementType}`)} — {t(RATE_LABEL_KEY[settlementType], { rate: settlementRate })}
           </p>
         ) : (
-          <p className="text-slate-500 text-sm">{t('noPayConfig')}</p>
+          <p className="text-text-mut text-sm">{t('noPayConfig')}</p>
         )}
         </CardBody>
       </Card>
@@ -96,8 +96,9 @@ export default function DriverPayConfig({
       <CardBody className="space-y-3">
       <h2 className="text-text-pri font-medium text-sm">{t('payConfig')}</h2>
       <Field label={t('settlementType')}>
-        <select
-          className="w-full bg-surface-input border border-border-ui rounded-lg px-3 py-2.5 text-[13px] text-text-pri cursor-pointer focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        <Input
+          as="select"
+          size="lg"
           value={type}
           onChange={(e) => setType(e.target.value as SettlementType)}
           disabled={saving}
@@ -105,7 +106,7 @@ export default function DriverPayConfig({
           <option value="percent_of_rate">{t('settlementType_percent_of_rate')}</option>
           <option value="per_mile">{t('settlementType_per_mile')}</option>
           <option value="flat_per_load">{t('settlementType_flat_per_load')}</option>
-        </select>
+        </Input>
       </Field>
       <Field label={t(RATE_INPUT_LABEL_KEY[type] as never)}>
         <Input
@@ -118,7 +119,7 @@ export default function DriverPayConfig({
           disabled={saving}
         />
       </Field>
-      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {error && <p className="text-danger text-xs">{error}</p>}
       <div className="flex gap-2">
         <Button
           variant="secondary"

@@ -230,17 +230,16 @@ export default function InvoiceActions({
                 />
               </div>
 
-              {/* Teal factoring accent has no components/ui/Button variant —
-                  kept hand-rolled per the design system's factoring recipe,
-                  not one of the banned ad hoc card/badge patterns. */}
-              <button
+              <Button
+                variant="accent"
+                size="lg"
+                className="w-full py-2.5"
                 onClick={sendToFactoring}
                 disabled={busy || !company.trim()}
-                className="w-full flex items-center justify-center gap-2 py-2.5 bg-teal hover:bg-teal-hover disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50"
               >
                 <span className="material-symbols-outlined text-[18px]">account_balance</span>
                 {factorLoading ? t('sendingToFactoring') : t('sendToFactoring')}
-              </button>
+              </Button>
             </div>
 
             {/* Honest about the stub: no factoring partner is connected yet. */}

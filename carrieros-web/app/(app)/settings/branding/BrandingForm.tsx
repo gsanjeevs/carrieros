@@ -8,11 +8,11 @@
 // server-write-only (migration 0019) and this keeps the logo + color writes
 // in one request instead of splitting client-direct-write and API-route
 // calls across two code paths.
-import { useRef, useState } from 'react'
+import { useRef, useState, type CSSProperties } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Button, Callout, Input } from '@/components/ui'
-import { isValidBrandColor } from '@/lib/domain/branding'
+import { Button, buttonClasses, Callout, Card, CardBody, Field, Input } from '@/components/ui'
+import { brandForegroundColor, isValidBrandColor } from '@/lib/domain/branding'
 
 const ACCEPT = 'image/jpeg,image/png,image/webp'
 const MAX_BYTES = 5 * 1024 * 1024
@@ -39,6 +39,13 @@ export default function BrandingForm({ current }: Props) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
+
+  const previewStyle: CSSProperties = isValidBrandColor(primaryColor)
+    ? ({
+        '--color-brand-orange': primaryColor,
+        '--color-brand-on-primary': brandForegroundColor(primaryColor),
+      } as CSSProperties)
+    : {}
 
   function friendly(code?: string) {
     try {
@@ -132,38 +139,76 @@ export default function BrandingForm({ current }: Props) {
         </div>
       </div>
 
-      <div>
-        <label className="block text-xs font-medium text-text-sec mb-1.5">{t('primaryColorLabel')}</label>
+      <Field label={t('primaryColorLabel')} htmlFor="branding-primary-color">
         <div className="flex items-center gap-2">
           <span
-            className="w-8 h-8 rounded-md border border-border-ui shrink-0"
+            className="w-9 h-9 rounded-lg border border-border-ui shrink-0"
             style={{ backgroundColor: isValidBrandColor(primaryColor) ? primaryColor : 'transparent' }}
+            aria-hidden="true"
           />
           <Input
+            id="branding-primary-color"
             value={primaryColor}
             onChange={handleColorChange(setPrimaryColor)}
             placeholder="#f47920"
             className="font-mono"
           />
         </div>
-      </div>
+      </Field>
 
-      <div>
-        <label className="block text-xs font-medium text-text-sec mb-1.5">{t('accentColorLabel')}</label>
+      <Field label={t('accentColorLabel')} htmlFor="branding-accent-color">
         <div className="flex items-center gap-2">
           <span
-            className="w-8 h-8 rounded-md border border-border-ui shrink-0"
+            className="w-9 h-9 rounded-lg border border-border-ui shrink-0"
             style={{ backgroundColor: isValidBrandColor(accentColor) ? accentColor : 'transparent' }}
+            aria-hidden="true"
           />
           <Input
+            id="branding-accent-color"
             value={accentColor}
             onChange={handleColorChange(setAccentColor)}
             placeholder="#1abc9c"
             className="font-mono"
           />
         </div>
-      </div>
+      </Field>
       <p className="text-xs text-text-mut">{t('colorHelp')}</p>
+
+      <Card>
+        <CardBody className="space-y-4">
+          <p className="text-2xs font-bold uppercase tracking-[1px] text-text-sec">{t('previewLabel')}</p>
+          <div className="flex items-center gap-3">
+            {logoPreview ? (
+              // eslint-disable-next-line @next/next/no-img-element -- signed URL / object URL, not a static asset
+              <img src={logoPreview} alt="" className="h-10 w-10 rounded-lg object-cover bg-surface-subtle" />
+            ) : (
+              <span className="material-symbols-outlined grid h-10 w-10 place-items-center rounded-lg bg-surface-subtle text-text-mut" aria-hidden="true">
+                business
+              </span>
+            )}
+            <div className="min-w-0">
+              <div className="truncate text-sm font-semibold text-text-pri">{t('trackingPreviewTitle')}</div>
+              <div className="flex items-center gap-2 text-xs text-text-sec">
+                <span
+                  className="h-1.5 w-8 rounded-full bg-teal"
+                  style={isValidBrandColor(accentColor) ? { backgroundColor: accentColor } : undefined}
+                  aria-hidden="true"
+                />
+                {t('subtitle')}
+              </div>
+            </div>
+          </div>
+          <div style={previewStyle}>
+            <span
+              aria-hidden="true"
+              className={buttonClasses('primary', 'md', 'pointer-events-none')}
+              style={{ backgroundColor: 'var(--color-brand-orange)', color: 'var(--color-brand-on-primary)' }}
+            >
+              {t('save')}
+            </span>
+          </div>
+        </CardBody>
+      </Card>
 
       {error && <Callout tone="danger">{error}</Callout>}
       {saved && <Callout tone="success">{t('saved')}</Callout>}

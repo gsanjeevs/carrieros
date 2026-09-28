@@ -14,13 +14,13 @@ export interface ChecklistItemProps {
 }
 
 const MARK_CLASSES: Record<ChecklistItemState, string> = {
-  done: 'bg-success border-success text-white',
-  active: 'bg-brand-orange border-brand-orange text-white',
-  pending: 'border-white/20 text-transparent',
+  done: 'bg-status-success-surface border-status-success text-status-success',
+  active: 'bg-brand-orange border-brand-orange text-brand-on-primary',
+  pending: 'border-border-ui text-transparent',
 }
 
 const ROW_CLASSES: Record<ChecklistItemState, string> = {
-  done: 'border-success/25 bg-success/5',
+  done: 'border-status-success/25 bg-status-success-surface/50',
   active: 'border-brand-orange/30 bg-brand-orange/5',
   pending: 'border-border-ui bg-surface-card opacity-60',
 }

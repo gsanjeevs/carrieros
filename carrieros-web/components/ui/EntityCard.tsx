@@ -36,7 +36,7 @@ export default function EntityCard({
       tabIndex={onClick ? 0 : undefined}
       className={cn(
         'flex items-center gap-3 rounded-card border p-3.5 transition-colors',
-        state === 'confirmed' ? 'border-success/30 bg-success/5' : 'border-border-ui bg-surface-card',
+        state === 'confirmed' ? 'border-status-success/30 bg-status-success-surface/50' : 'border-border-ui bg-surface-card',
         onClick && 'cursor-pointer',
         className
       )}
@@ -52,7 +52,7 @@ export default function EntityCard({
       </div>
       {trailing ??
         (state === 'confirmed' && (
-          <span className="material-symbols-outlined text-success text-lg shrink-0" aria-hidden="true">
+          <span className="material-symbols-outlined text-status-success text-lg shrink-0" aria-hidden="true">
             check_circle
           </span>
         ))}

@@ -24,26 +24,18 @@ export interface StatusBadgeProps {
   children: ReactNode
 }
 
-// Uses the existing palette tokens already registered in globals.css's
-// @theme block (bg-success-light/text-success-dark etc.) rather than the
-// doc's literal one-off hex captures — per Core §1's non-negotiable #1
-// (no raw hex in component code), a named token always wins over a
-// hand-copied hex value, even where they differ by a shade.
+// Status variants use theme-aware semantic foreground/surface pairs so load,
+// billing, health and document states keep readable meaning in both themes.
+// Carrier brand/accent chips use contrast-resolved foregrounds.
 const VARIANT_CLASSES: Record<StatusBadgeVariant, string> = {
-  success: 'bg-success-light text-success-dark',
-  warning: 'bg-warning-light text-warning-dark',
-  danger: 'bg-danger-light text-danger-dark',
-  info: 'bg-info-light text-info',
-  // No dedicated "brand-light" token exists; reuses brand-orange at low
-  // opacity, matching the tier-badge pattern already in §5.2/§6.3.
-  brand: 'bg-brand-orange/15 text-brand-orange',
-  teal: 'bg-teal/15 text-teal',
-  // No dedicated "neutral" semantic token exists yet — bg-surface-subtle
-  // (Core's "recessed/nested surface" role) is the closest available
-  // semantic match for an unassigned/inactive chip, with a border added
-  // for definition against a light-theme page background.
-  neutral: 'bg-surface-subtle border border-border-ui text-text-sec',
-  purple: 'bg-purple-light text-purple',
+  success: 'bg-status-success-surface text-status-success',
+  warning: 'bg-status-warning-surface text-status-warning',
+  danger: 'bg-status-danger-surface text-status-danger',
+  info: 'bg-status-info-surface text-status-info',
+  brand: 'bg-brand-orange text-brand-on-primary',
+  teal: 'bg-teal text-brand-on-accent',
+  neutral: 'bg-status-neutral-surface border border-border-ui text-status-neutral',
+  purple: 'bg-status-purple-surface text-status-purple',
 }
 
 const SIZE_CLASSES: Record<StatusBadgeSize, string> = {

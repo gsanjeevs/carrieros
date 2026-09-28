@@ -9,7 +9,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { Card, Table, TableHeaderCell, TableRow, TableCell, ProgressBar } from '@/components/ui'
+import { Card, Table, TableHeaderCell, TableRow, TableCell, ProgressBar, Button } from '@/components/ui'
 
 interface Org {
   org_id: number
@@ -64,15 +64,15 @@ export default function CustomerHealthPage() {
 
       <div className="flex items-center gap-2 mb-4">
         {TIER_FILTERS.map((tf) => (
-          <button
+          <Button
             key={tf}
             onClick={() => setTierFilter(tf)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
-              tierFilter === tf ? 'bg-brand-orange text-white' : 'bg-surface-subtle text-text-sec hover:bg-surface-subtle/70'
-            }`}
+            variant={tierFilter === tf ? 'primary' : 'ghost'}
+            size="sm"
+            className="rounded-full px-3 py-1.5"
           >
             {tf === 'all' ? t('filterAll') : tf.charAt(0).toUpperCase() + tf.slice(1)}
-          </button>
+          </Button>
         ))}
       </div>
 

@@ -33,8 +33,8 @@ export default function CompletionStep({
     <div className="space-y-5">
       <div className="text-center">
         <span className="material-symbols-outlined text-success text-4xl">check_circle</span>
-        <h2 className="text-white font-semibold text-lg mt-2">{t('allSet')}</h2>
-        <p className="text-slate-400 text-sm mt-1">{t('allSetSubtitle')}</p>
+        <h2 className="text-text-pri font-semibold text-lg mt-2">{t('allSet')}</h2>
+        <p className="text-text-sec text-sm mt-1">{t('allSetSubtitle')}</p>
       </div>
 
       <div className="space-y-2">
@@ -44,7 +44,7 @@ export default function CompletionStep({
       </div>
 
       <Card className="px-4 py-3">
-        <p className="text-slate-400 text-xs">
+        <p className="text-text-sec text-xs">
           <span className="material-symbols-outlined text-[14px] align-middle mr-1">mail</span>
           {t('emailIntakeComingSoon')}
         </p>

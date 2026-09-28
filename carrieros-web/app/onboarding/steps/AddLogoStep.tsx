@@ -65,15 +65,15 @@ export default function AddLogoStep({ orgId, onNext }: { orgId: number; onNext: 
 
   return (
     <div className="space-y-4">
-      <h2 className="text-white font-semibold text-lg mb-1">{t('stepLogoTitle')}</h2>
-      <p className="text-slate-400 text-sm mb-4">{t('stepLogoSubtitle')}</p>
+      <h2 className="text-text-pri font-semibold text-lg mb-1">{t('stepLogoTitle')}</h2>
+      <p className="text-text-sec text-sm mb-4">{t('stepLogoSubtitle')}</p>
 
       <Card className="px-4 py-4 flex items-center gap-4">
         {logoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- signed URL, not a static asset
           <img src={logoUrl} alt="" className="w-14 h-14 rounded-lg object-cover shrink-0" />
         ) : (
-          <span className="material-symbols-outlined text-slate-400 text-4xl shrink-0">business</span>
+          <span className="material-symbols-outlined text-text-sec text-4xl shrink-0">business</span>
         )}
         <button
           type="button"

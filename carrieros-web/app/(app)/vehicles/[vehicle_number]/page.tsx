@@ -273,7 +273,12 @@ export default async function VehicleDetailPage({
             <InfoRow label={t('vin')} value={vehicle.vin} />
             <InfoRow label={t('licensePlate')} value={[vehicle.license_plate, vehicle.license_state].filter(Boolean).join(' / ') || null} />
             <InfoRow label={t('type')} value={vt ? t(`type_${vt.code}` as never) : null} />
-            <InfoRow label={t('cabType')} value={vehicle.cab_type ? t(`cabType_${vehicle.cab_type}` as never) : null} />
+            <InfoRow
+              label={t('cabType')}
+              value={vehicle.cab_type
+                ? t(`cabType${vehicle.cab_type === 'day_cab' ? 'DayCab' : vehicle.cab_type === 'sleeper' ? 'Sleeper' : 'Other'}` as never)
+                : null}
+            />
             <InfoRow label={t('color')} value={vehicle.color} />
             <InfoRow label={t('dimensions')} value={vehicle.dimensions} />
           </CardBody>
@@ -495,12 +500,12 @@ export default async function VehicleDetailPage({
                 <div className="flex items-center justify-between gap-4 flex-wrap">
                   <div className="flex items-center gap-3">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                      d.type === 'pre_trip' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'
+                      d.type === 'pre_trip' ? 'bg-status-info-surface text-status-info' : 'bg-status-purple-surface text-status-purple'
                     }`}>
                       {t(d.type === 'pre_trip' ? 'dvirPreTrip' : 'dvirPostTrip')}
                     </span>
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                      hasDefects ? 'bg-warning/20 text-warning' : 'bg-success/20 text-success'
+                      hasDefects ? 'bg-status-warning-surface text-status-warning' : 'bg-status-success-surface text-status-success'
                     }`}>
                       {hasDefects ? t('dvirDefectsNoted') : t('dvirSatisfactory')}
                     </span>

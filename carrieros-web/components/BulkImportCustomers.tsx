@@ -16,7 +16,7 @@
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Button, Input, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
+import { Button, Callout, Input, Table, TableHeaderCell, TableRow, TableCell } from '@/components/ui'
 
 const MAX_ROWS = 50
 
@@ -223,27 +223,27 @@ export default function BulkImportCustomers({ existingCustomers }: { existingCus
       </Button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
-          <div className="w-full max-w-2xl bg-navy border border-border-ui rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay-scrim p-6">
+          <div className="w-full max-w-2xl bg-surface-card border border-border-ui rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-white font-semibold text-lg">{t('bulkImport')}</h2>
-              <button onClick={close} className="text-slate-500 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 rounded">
+              <h2 className="text-text-pri font-semibold text-lg">{t('bulkImport')}</h2>
+              <button onClick={close} className="text-text-sec hover:text-text-pri transition focus:outline-none focus:ring-2 focus:ring-brand-orange/50 rounded">
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
 
             {results ? (
               <div className="space-y-4">
-                <div className="rounded-lg bg-success/10 border border-success/20 px-4 py-3 text-success text-sm">
+                <Callout tone="success" className="text-sm">
                   {t('importSummary', { created: createdCount, updated: updatedCount, skipped: skippedCount })}
-                </div>
+                </Callout>
                 <Button variant="primary" onClick={close} className="w-full">
                   {tCommon('done')}
                 </Button>
               </div>
             ) : rows.length === 0 ? (
               <div className="space-y-4">
-                <p className="text-slate-400 text-sm">{t('importInstructions', { max: MAX_ROWS })}</p>
+                <p className="text-text-sec text-sm">{t('importInstructions', { max: MAX_ROWS })}</p>
                 <button
                   onClick={downloadTemplate}
                   className="flex items-center gap-1.5 text-brand-orange hover:text-brand-orange-light text-sm font-medium transition"
@@ -263,19 +263,19 @@ export default function BulkImportCustomers({ existingCustomers }: { existingCus
                 />
                 <button
                   onClick={() => fileRef.current?.click()}
-                  className="w-full py-8 border-2 border-dashed border-white/15 hover:border-brand-orange/50 rounded-xl text-slate-400 hover:text-white text-sm transition flex flex-col items-center gap-2"
+                  className="w-full py-8 border-2 border-dashed border-border-ui hover:border-brand-orange/50 rounded-xl text-text-sec hover:text-text-pri text-sm transition flex flex-col items-center gap-2"
                 >
                   <span className="material-symbols-outlined text-[28px]">upload_file</span>
                   {t('chooseCsvFile')}
                 </button>
-                {parseError && <p className="text-red-400 text-xs">{parseError}</p>}
+                {parseError && <p className="text-danger text-xs">{parseError}</p>}
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="text-slate-400 text-xs space-y-1">
+                <div className="text-text-sec text-xs space-y-1">
                   <p>{t('importRowCount', { count: rows.length })}</p>
-                  {missingNameCount > 0 && <p className="text-amber-400">{t('importMissingNameCount', { count: missingNameCount })}</p>}
-                  {truncatedCount > 0 && <p className="text-amber-400">{t('importTruncatedCount', { count: truncatedCount, max: MAX_ROWS })}</p>}
+                  {missingNameCount > 0 && <p className="text-warning">{t('importMissingNameCount', { count: missingNameCount })}</p>}
+                  {truncatedCount > 0 && <p className="text-warning">{t('importTruncatedCount', { count: truncatedCount, max: MAX_ROWS })}</p>}
                 </div>
 
                 <div className="border border-border-ui rounded-lg overflow-hidden">
@@ -305,7 +305,7 @@ export default function BulkImportCustomers({ existingCustomers }: { existingCus
                                 <option value="overwrite">{t('importOverwrite')}</option>
                               </Input>
                             ) : (
-                              <span className="text-emerald-400 text-xs">{t('importNew')}</span>
+                              <span className="text-success text-xs">{t('importNew')}</span>
                             )}
                           </TableCell>
                         </TableRow>
@@ -314,7 +314,7 @@ export default function BulkImportCustomers({ existingCustomers }: { existingCus
                   </Table>
                 </div>
 
-                {parseError && <p className="text-red-400 text-xs">{parseError}</p>}
+                {parseError && <p className="text-danger text-xs">{parseError}</p>}
 
                 <div className="flex gap-3">
                   <Button variant="secondary" onClick={reset} disabled={importing} className="flex-1">

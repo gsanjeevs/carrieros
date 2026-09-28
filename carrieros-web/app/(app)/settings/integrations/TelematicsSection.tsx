@@ -11,7 +11,7 @@
 // component ever receives from the server for an existing row, same "no reveal affordance" posture
 // as /admin/ai-config's LLM provider keys. Leaving the input blank on save keeps the stored value;
 // typing a new one rotates it.
-import { useState } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Button, Card, CardBody, CardHeader, Input } from '@/components/ui'
@@ -21,6 +21,10 @@ export interface TelematicsIntegrationInitial {
   enabled: boolean
   credentialConfigured: boolean
 }
+
+const subscribeToNothing = () => () => {}
+const getBrowserOrigin = () => window.location.origin
+const getServerOrigin = () => ''
 
 function ProviderForm({
   provider,
@@ -152,7 +156,10 @@ export default function TelematicsSection({
   orgId: number
 }) {
   const t = useTranslations('telematics')
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '')
+  // useSyncExternalStore keeps SSR and the hydration snapshot identical, then
+  // resolves the browser origin without a setState-in-effect cascade.
+  const browserOrigin = useSyncExternalStore(subscribeToNothing, getBrowserOrigin, getServerOrigin)
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || browserOrigin
   const motiveWebhookUrl = `${appUrl}/api/webhooks/telematics/motive/${orgId}`
 
   const samsara = integrations.find((i) => i.provider === 'samsara') ?? null
