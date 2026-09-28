@@ -27,13 +27,13 @@ the other session), and mention the commit(s) so the other session can `git log`
 | Session | Task | Files/areas | Started |
 |---|---|---|---|
 | Codex (GPT-6) | Replace raw SX magic-link takeover with audited, time-limited, read-only support access | `/Users/sanjeevgautam/code/carrieros-sx-admin` worktree; admin org/user UI, support-session APIs, migration 0055 | 2026-09-27 |
-| Claude | Wire `PageBackLink` into load/invoice detail pages (the actual product-owner-reported "exceptions -> detail page, no way back" case) | `app/(app)/loads/[load_number]/page.tsx`, `app/(app)/invoices/[invoice_number]/page.tsx`, `messages/{en,es,pa,ur}.json` (new `backToInvoices` key); worktree `../carrieros-detail-breadcrumb` on `feature/detail-page-breadcrumb` | 2026-09-27 |
 | Claude | Wire the existing `LanguagePicker` component into Sidebar/Settings (24-language selector, replacing the current 4-language `LanguageSwitcher`) | `components/Sidebar.tsx`, `components/LanguageSwitcher.tsx`, `app/(app)/settings/page.tsx` or equivalent; worktree `../carrieros-language-picker` on `feature/wire-language-picker` | 2026-09-27 |
 
 ## Recently finished (for context, not a permanent log — prune entries older than a day or two)
 
 | Session | Task | Commits | Finished |
 |---|---|---|---|
+| Claude | Wired `PageBackLink` into `loads/[load_number]` and `invoices/[invoice_number]` (the actual product-owner-reported "exceptions -> detail page, no way back" case) — closes the deferred item from `feature/breadcrumb-nav`; added new `backToInvoices` key translated across all 24 locales | `6ecb0b8`, `17403cb` on branch `feature/detail-page-breadcrumb` (not yet merged) | 2026-09-27 |
 | Claude | Closed the 85-key translation gap across all 20 new locale files (94/94 `tests/locale-messages.test.ts` pass) — **merged to main** | `ad0fa00` + 3 more on branch `feature/i18n-gap-fill` | 2026-09-27 |
 | Claude | Timezone-aware datetime rendering + expanded languages 4→24 with full translations + `LanguagePicker` component (not yet wired in) — **merged to main** | `2312367`,`cbdf82e`,`5d9c02f`,`1e08b43`,`01d1c37`,`b117943` on branch `feature/i18n-timezone` | 2026-09-27 |
 | Claude | Breadcrumb/back-navigation audit + fix (vehicle/driver/customer detail pages + exceptions-inbox CTA plumbing, incl. a follow-up fix for a hardcoded-English `fromLabel`); load/invoice-detail breadcrumb UI itself deferred — **merged to main in this commit** | `89345cc`,`ec09d7b`,`7dd76ba`,`7f81ae5`,`1991bef` on branch `feature/breadcrumb-nav` | 2026-09-27 |
@@ -50,21 +50,13 @@ the other session), and mention the commit(s) so the other session can `git log`
 
 ## Flagged by cross-session review (2026-09-27)
 
-**Deferred breadcrumb work on `loads`/`invoices` (from the `feature/breadcrumb-nav` audit, now
-merged):** the product-owner-reported case ("exceptions inbox links into a detail page with no way
-back") mostly resolves to `/loads/[load_number]` (`pod_missing`) and `/invoices/[invoice_number]`
-(`invoice_overdue`) — both off-limits when that branch was built, per the load-orders/invoice-allocation
-work that has since landed (`8f9d429`). Now that both pages are editable again, this is unblocked.
-`lib/exceptions.ts` already appends `?from=/exceptions&fromLabel=exceptions` to those CTAs (a stable
-KEY, not display text — see `lib/resolve-from-label.ts`, added in `1991bef` after a localization bug
-was caught in review), so dropping in `components/ui/PageBackLink.tsx` (same pattern as
-`vehicles/[vehicle_number]`, `drivers/[driver_number]`, `customers/[customer_number]`) should be close
-to copy-paste — `const { from, fromLabel: fromLabelKey } = await searchParams` then
-`const fromLabel = await resolveFromLabel(fromLabelKey)`, then
-`<PageBackLink from={from} fromLabel={fromLabel} defaultHref="/loads" defaultLabel={t('backToLoads')} />`
-(loads already has a `backToLoads` message key; invoices doesn't have a `backToInvoices` key yet,
-just the unrelated `backToInvoice` singular one, so that'd need adding). Not done in
-`feature/breadcrumb-nav` itself since it would touch the forbidden paths.
+**Deferred breadcrumb work on `loads`/`invoices` — RESOLVED:** the product-owner-reported case
+("exceptions inbox links into a detail page with no way back") is now fixed on
+`feature/detail-page-breadcrumb` (`6ecb0b8`, `17403cb`, not yet merged) — `PageBackLink` is wired into
+both `/loads/[load_number]` (`pod_missing`) and `/invoices/[invoice_number]` (`invoice_overdue`), same
+pattern as `vehicles/[vehicle_number]`/`drivers/[driver_number]`/`customers/[customer_number]`, and the
+new `backToInvoices` message key was added and translated across all 24 locales (kept
+`tests/locale-messages.test.ts` green). See "Recently finished" above.
 
 Claude reviewed the uncommitted `load_orders`/invoice-allocation work as a first test of periodic
 cross-session review. One real bug found, not yet fixed — flagging here rather than editing your
