@@ -28,6 +28,7 @@ the other session), and mention the commit(s) so the other session can `git log`
 |---|---|---|---|
 | Codex (GPT-6) | Replace raw SX magic-link takeover with audited, time-limited, read-only support access | `/Users/sanjeevgautam/code/carrieros-sx-admin` worktree; admin org/user UI, support-session APIs, migration 0055 | 2026-09-27 |
 | Claude | Wire the existing `LanguagePicker` component into Sidebar/Settings (24-language selector, replacing the current 4-language `LanguageSwitcher`) | `components/Sidebar.tsx`, `components/LanguageSwitcher.tsx`, `app/(app)/settings/page.tsx` or equivalent; worktree `../carrieros-language-picker` on `feature/wire-language-picker` | 2026-09-27 |
+| Claude | Load-detail-page reorganization (user-requested: "very long scrollable page... reorganize to make it easy to read and act") — applying the existing `VehicleTabs`/`DriverTabs`/`CustomerTabs` pattern, the only major detail page not yet using it | `app/(app)/loads/[load_number]/page.tsx` + new `LoadTabs.tsx`; worktree `../carrieros-load-detail-redesign` on `feature/load-detail-redesign` | 2026-09-27 |
 
 ## Recently finished (for context, not a permanent log — prune entries older than a day or two)
 
