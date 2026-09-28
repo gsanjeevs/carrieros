@@ -43,6 +43,15 @@ export async function countActiveDriversForOrg(supabase: AnySupabaseClient, orgI
     .eq('is_active', true)
 }
 
+export async function countAcceptedActiveDriversForOrg(supabase: AnySupabaseClient, orgId: number) {
+  return supabase
+    .from('drivers')
+    .select('id', { count: 'exact', head: true })
+    .eq('carrier_org_id', orgId)
+    .eq('is_active', true)
+    .eq('invite_status', 'accepted')
+}
+
 // Bulk cross-org variant — admin org-list/org-detail pages, which want
 // "does this org have any drivers at all" regardless of active status (a
 // deactivated-but-present driver still counts as onboarding progress for

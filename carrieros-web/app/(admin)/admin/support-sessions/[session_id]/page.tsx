@@ -105,7 +105,7 @@ export default function SupportSessionPage({ params }: { params: Promise<{ sessi
   if (!context) {
     return <div className="p-8 max-w-4xl mx-auto">
       <p role="alert" className="text-danger text-sm">{error || t('loading')}</p>
-      <Link href="/admin/health" className="inline-block mt-4 text-sm text-brand-orange">{t('backToHealth')}</Link>
+      <Link href="/admin/analytics" className="inline-block mt-4 text-sm text-brand-orange">{t('backToHealth')}</Link>
     </div>
   }
 

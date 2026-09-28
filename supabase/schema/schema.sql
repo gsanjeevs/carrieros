@@ -5887,3 +5887,320 @@ END $$;
 REVOKE EXECUTE ON FUNCTION create_invoice_command(BIGINT, BIGINT, TEXT, NUMERIC, DATE, TEXT, TEXT, BOOLEAN, TEXT, TEXT) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION create_invoice_command(BIGINT, BIGINT, TEXT, NUMERIC, DATE, TEXT, TEXT, BOOLEAN, TEXT, TEXT) TO authenticated;
 COMMENT ON TABLE invoice_order_allocations IS 'Immutable per-customer order charges captured when carrier invoices are created.';
+
+-- ════════════════════════════════════════════════════════════
+-- Admin portfolio analytics, tenant write audit, and carrier onboarding
+-- (migrations 0056–0058)
+-- ════════════════════════════════════════════════════════════
+-- ShipmentX portfolio analytics: current operational metrics with explicit
+-- 30-day vs previous-30-day load activity and tier/fleet-size cohorts.
+-- This does not pretend to be product event analytics; no event snapshotting
+-- is available yet. Access is restricted to the server's service-role client.
+
+CREATE INDEX idx_loads_created_at_carrier ON loads(created_at, carrier_org_id);
+CREATE INDEX idx_invoices_created_at_carrier ON invoices(created_at, carrier_org_id);
+CREATE INDEX idx_support_tickets_platform_queue ON support_tickets(queue, status, carrier_org_id);
+
+CREATE OR REPLACE FUNCTION admin_carrier_portfolio_analytics(
+  p_search TEXT DEFAULT NULL,
+  p_tier TEXT DEFAULT NULL,
+  p_fleet_band TEXT DEFAULT NULL,
+  p_page INTEGER DEFAULT 0,
+  p_page_size INTEGER DEFAULT 50
+)
+RETURNS TABLE (
+  org_id BIGINT,
+  org_name TEXT,
+  created_at TIMESTAMPTZ,
+  tier TEXT,
+  billing_status TEXT,
+  fleet_band TEXT,
+  active_users BIGINT,
+  active_vehicles BIGINT,
+  active_drivers BIGINT,
+  customer_accounts BIGINT,
+  loads_last_30d BIGINT,
+  loads_previous_30d BIGINT,
+  loads_per_active_vehicle NUMERIC,
+  invoices_last_30d BIGINT,
+  open_support_tickets BIGINT,
+  cohort_carriers BIGINT,
+  cohort_median_loads_per_vehicle NUMERIC,
+  total_carriers BIGINT,
+  active_billing_carriers BIGINT,
+  trialing_carriers BIGINT,
+  past_due_carriers BIGINT
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  WITH carrier_base AS (
+    SELECT o.id, o.name, o.created_at,
+           COALESCE(cd.tier, 'starter') AS tier,
+           COALESCE(cd.billing_status, 'trialing') AS billing_status
+    FROM organizations o
+    LEFT JOIN carrier_details cd ON cd.org_id = o.id
+    WHERE o.type = 'carrier'
+  ),
+  users AS (
+    SELECT p.org_id, count(*)::BIGINT AS active_users
+    FROM profiles p
+    WHERE p.is_active = true
+    GROUP BY p.org_id
+  ),
+  vehicles AS (
+    SELECT v.carrier_org_id AS org_id, count(*)::BIGINT AS active_vehicles
+    FROM vehicles v
+    WHERE v.is_active = true AND v.status = 'active'
+    GROUP BY v.carrier_org_id
+  ),
+  drivers AS (
+    SELECT d.carrier_org_id AS org_id, count(*)::BIGINT AS active_drivers
+    FROM drivers d
+    WHERE d.is_active = true AND d.invite_status = 'accepted'
+    GROUP BY d.carrier_org_id
+  ),
+  customers AS (
+    SELECT cd.carrier_org_id AS org_id, count(*)::BIGINT AS customer_accounts
+    FROM customer_details cd
+    GROUP BY cd.carrier_org_id
+  ),
+  load_activity AS (
+    SELECT l.carrier_org_id AS org_id,
+      count(*) FILTER (WHERE l.created_at >= now() - interval '30 days')::BIGINT AS loads_last_30d,
+      count(*) FILTER (WHERE l.created_at >= now() - interval '60 days'
+                        AND l.created_at < now() - interval '30 days')::BIGINT AS loads_previous_30d
+    FROM loads l
+    WHERE l.created_at >= now() - interval '60 days'
+    GROUP BY l.carrier_org_id
+  ),
+  invoice_activity AS (
+    SELECT i.carrier_org_id AS org_id, count(*)::BIGINT AS invoices_last_30d
+    FROM invoices i
+    WHERE i.created_at >= now() - interval '30 days'
+    GROUP BY i.carrier_org_id
+  ),
+  tickets AS (
+    SELECT st.carrier_org_id AS org_id, count(*)::BIGINT AS open_support_tickets
+    FROM support_tickets st
+    WHERE st.queue = 'carrieros_support' AND st.status = 'open'
+    GROUP BY st.carrier_org_id
+  ),
+  enriched AS (
+    SELECT b.id AS org_id, b.name AS org_name, b.created_at, b.tier, b.billing_status,
+      COALESCE(u.active_users, 0)::BIGINT AS active_users,
+      COALESCE(v.active_vehicles, 0)::BIGINT AS active_vehicles,
+      COALESCE(d.active_drivers, 0)::BIGINT AS active_drivers,
+      COALESCE(c.customer_accounts, 0)::BIGINT AS customer_accounts,
+      COALESCE(l.loads_last_30d, 0)::BIGINT AS loads_last_30d,
+      COALESCE(l.loads_previous_30d, 0)::BIGINT AS loads_previous_30d,
+      COALESCE(i.invoices_last_30d, 0)::BIGINT AS invoices_last_30d,
+      COALESCE(t.open_support_tickets, 0)::BIGINT AS open_support_tickets,
+      CASE
+        WHEN COALESCE(v.active_vehicles, 0) = 0 THEN 'no_active_vehicles'
+        WHEN v.active_vehicles = 1 THEN '1_vehicle'
+        WHEN v.active_vehicles <= 5 THEN '2_5_vehicles'
+        WHEN v.active_vehicles <= 20 THEN '6_20_vehicles'
+        ELSE '21_plus_vehicles'
+      END AS fleet_band,
+      CASE WHEN COALESCE(v.active_vehicles, 0) > 0
+        THEN round(COALESCE(l.loads_last_30d, 0)::NUMERIC / v.active_vehicles, 2)
+        ELSE NULL
+      END AS loads_per_active_vehicle
+    FROM carrier_base b
+    LEFT JOIN users u ON u.org_id = b.id
+    LEFT JOIN vehicles v ON v.org_id = b.id
+    LEFT JOIN drivers d ON d.org_id = b.id
+    LEFT JOIN customers c ON c.org_id = b.id
+    LEFT JOIN load_activity l ON l.org_id = b.id
+    LEFT JOIN invoice_activity i ON i.org_id = b.id
+    LEFT JOIN tickets t ON t.org_id = b.id
+  ),
+  filtered AS (
+    SELECT e.* FROM enriched e
+    WHERE (p_search IS NULL OR e.org_name ILIKE '%' || p_search || '%')
+      AND (p_tier IS NULL OR e.tier = p_tier)
+      AND (p_fleet_band IS NULL OR e.fleet_band = p_fleet_band)
+  ),
+  cohort_filtered AS (
+    SELECT e.* FROM enriched e
+    WHERE (p_tier IS NULL OR e.tier = p_tier)
+      AND (p_fleet_band IS NULL OR e.fleet_band = p_fleet_band)
+  ),
+  cohort AS (
+    SELECT cf.tier, cf.fleet_band, count(*)::BIGINT AS cohort_carriers,
+      percentile_cont(0.5) WITHIN GROUP (ORDER BY cf.loads_per_active_vehicle)::NUMERIC AS cohort_median
+    FROM cohort_filtered cf
+    WHERE cf.loads_per_active_vehicle IS NOT NULL
+    GROUP BY cf.tier, cf.fleet_band
+  ),
+  totals AS (
+    SELECT count(*)::BIGINT AS total_carriers,
+      count(*) FILTER (WHERE billing_status = 'active')::BIGINT AS active_billing_carriers,
+      count(*) FILTER (WHERE billing_status = 'trialing')::BIGINT AS trialing_carriers,
+      count(*) FILTER (WHERE billing_status = 'past_due')::BIGINT AS past_due_carriers
+    FROM filtered
+  )
+  SELECT f.org_id, f.org_name, f.created_at, f.tier, f.billing_status, f.fleet_band,
+    f.active_users, f.active_vehicles, f.active_drivers, f.customer_accounts,
+    f.loads_last_30d, f.loads_previous_30d, f.loads_per_active_vehicle,
+    f.invoices_last_30d, f.open_support_tickets,
+    COALESCE(c.cohort_carriers, 0), c.cohort_median,
+    totals.total_carriers, totals.active_billing_carriers, totals.trialing_carriers, totals.past_due_carriers
+  FROM filtered f
+  LEFT JOIN cohort c ON c.tier = f.tier AND c.fleet_band = f.fleet_band
+  CROSS JOIN totals
+  ORDER BY f.created_at DESC NULLS LAST, f.org_id DESC
+  LIMIT LEAST(GREATEST(COALESCE(p_page_size, 50), 1), 100)
+  OFFSET LEAST(GREATEST(COALESCE(p_page, 0), 0), 10000) * LEAST(GREATEST(COALESCE(p_page_size, 50), 1), 100);
+$$;
+
+REVOKE ALL ON FUNCTION admin_carrier_portfolio_analytics(TEXT, TEXT, TEXT, INTEGER, INTEGER) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION admin_carrier_portfolio_analytics(TEXT, TEXT, TEXT, INTEGER, INTEGER) TO service_role;
+-- Append-only, low-sensitivity write activity for support/security investigation.
+-- Store action + record identity only (never row payloads, message bodies, or secrets).
+CREATE TABLE tenant_activity_events (
+  id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+  org_id BIGINT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  actor_user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  action TEXT NOT NULL,
+  aggregate_type TEXT NOT NULL,
+  aggregate_id TEXT,
+  operation TEXT NOT NULL CHECK (operation IN ('INSERT','UPDATE','DELETE')),
+  occurred_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_tenant_activity_actor_time ON tenant_activity_events(org_id, actor_user_id, occurred_at DESC);
+CREATE INDEX idx_tenant_activity_record_time ON tenant_activity_events(org_id, aggregate_type, aggregate_id, occurred_at DESC);
+ALTER TABLE tenant_activity_events ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON tenant_activity_events FROM PUBLIC, anon, authenticated;
+GRANT SELECT ON tenant_activity_events TO service_role;
+GRANT USAGE, SELECT ON SEQUENCE tenant_activity_events_id_seq TO service_role;
+COMMENT ON TABLE tenant_activity_events IS
+  'Append-only, payload-free audit of writes to selected tenant records. Does not record reads, failed requests, or auth session/IP/device history.';
+
+CREATE OR REPLACE FUNCTION capture_tenant_activity() RETURNS trigger
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_row JSONB := to_jsonb(CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END);
+  v_org BIGINT := NULLIF(v_row ->> TG_ARGV[1], '')::BIGINT;
+  v_id TEXT := NULLIF(v_row ->> 'id', '');
+BEGIN
+  IF v_org IS NOT NULL THEN
+    INSERT INTO tenant_activity_events(org_id, actor_user_id, action, aggregate_type, aggregate_id, operation)
+    VALUES (v_org, auth.uid(), lower(TG_ARGV[0]) || '.' || lower(TG_OP), TG_ARGV[0], v_id, TG_OP);
+  END IF;
+  RETURN NULL;
+END $$;
+
+CREATE OR REPLACE FUNCTION capture_load_event_activity() RETURNS trigger
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_load_id BIGINT := CASE WHEN TG_OP = 'DELETE' THEN OLD.load_id ELSE NEW.load_id END;
+  v_event_id BIGINT := CASE WHEN TG_OP = 'DELETE' THEN OLD.id ELSE NEW.id END;
+  v_org BIGINT;
+BEGIN
+  SELECT carrier_org_id INTO v_org FROM loads WHERE id = v_load_id;
+  IF v_org IS NOT NULL THEN
+    INSERT INTO tenant_activity_events(org_id, actor_user_id, action, aggregate_type, aggregate_id, operation)
+    VALUES (v_org, auth.uid(), 'load_event.' || lower(TG_OP), 'load_event', v_event_id::TEXT, TG_OP);
+  END IF;
+  RETURN NULL;
+END $$;
+
+REVOKE EXECUTE ON FUNCTION capture_tenant_activity() FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION capture_load_event_activity() FROM PUBLIC, anon, authenticated;
+
+CREATE TRIGGER tenant_activity_loads AFTER INSERT OR UPDATE OR DELETE ON loads
+  FOR EACH ROW EXECUTE FUNCTION capture_tenant_activity('load', 'carrier_org_id');
+CREATE TRIGGER tenant_activity_invoices AFTER INSERT OR UPDATE OR DELETE ON invoices
+  FOR EACH ROW EXECUTE FUNCTION capture_tenant_activity('invoice', 'carrier_org_id');
+CREATE TRIGGER tenant_activity_vehicles AFTER INSERT OR UPDATE OR DELETE ON vehicles
+  FOR EACH ROW EXECUTE FUNCTION capture_tenant_activity('vehicle', 'carrier_org_id');
+CREATE TRIGGER tenant_activity_drivers AFTER INSERT OR UPDATE OR DELETE ON drivers
+  FOR EACH ROW EXECUTE FUNCTION capture_tenant_activity('driver', 'carrier_org_id');
+CREATE TRIGGER tenant_activity_profiles AFTER INSERT OR UPDATE OR DELETE ON profiles
+  FOR EACH ROW EXECUTE FUNCTION capture_tenant_activity('profile', 'org_id');
+CREATE TRIGGER tenant_activity_customers AFTER INSERT OR UPDATE OR DELETE ON customer_details
+  FOR EACH ROW EXECUTE FUNCTION capture_tenant_activity('customer_account', 'carrier_org_id');
+CREATE TRIGGER tenant_activity_documents AFTER INSERT OR UPDATE OR DELETE ON documents
+  FOR EACH ROW EXECUTE FUNCTION capture_tenant_activity('document', 'carrier_org_id');
+CREATE TRIGGER tenant_activity_exceptions AFTER INSERT OR UPDATE OR DELETE ON exception_events
+  FOR EACH ROW EXECUTE FUNCTION capture_tenant_activity('exception', 'carrier_org_id');
+CREATE TRIGGER tenant_activity_support_tickets AFTER INSERT OR UPDATE OR DELETE ON support_tickets
+  FOR EACH ROW EXECUTE FUNCTION capture_tenant_activity('support_ticket', 'carrier_org_id');
+CREATE TRIGGER tenant_activity_support_messages AFTER INSERT OR UPDATE OR DELETE ON support_ticket_messages
+  FOR EACH ROW EXECUTE FUNCTION capture_tenant_activity('support_message', 'carrier_org_id');
+CREATE TRIGGER tenant_activity_load_events AFTER INSERT OR UPDATE OR DELETE ON load_events
+  FOR EACH ROW EXECUTE FUNCTION capture_load_event_activity();
+CREATE TABLE admin_carrier_onboarding (
+  org_id BIGINT PRIMARY KEY REFERENCES organizations(id) ON DELETE CASCADE,
+  contact_name TEXT NOT NULL CHECK (char_length(trim(contact_name)) BETWEEN 1 AND 120),
+  contact_email TEXT NOT NULL CHECK (char_length(trim(contact_email)) BETWEEN 3 AND 254),
+  stage TEXT NOT NULL DEFAULT 'intake' CHECK (stage IN ('intake','setup','training','launch_ready','live','blocked')),
+  next_action TEXT,
+  next_follow_up_at TIMESTAMPTZ,
+  blocker_note TEXT,
+  owner_invite_sent_at TIMESTAMPTZ,
+  created_by UUID NOT NULL REFERENCES profiles(id),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_admin_carrier_onboarding_stage_followup ON admin_carrier_onboarding(stage, next_follow_up_at);
+CREATE TRIGGER admin_carrier_onboarding_updated_at
+  BEFORE UPDATE ON admin_carrier_onboarding FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+ALTER TABLE admin_carrier_onboarding ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON admin_carrier_onboarding FROM PUBLIC, anon, authenticated;
+GRANT SELECT, INSERT, UPDATE ON admin_carrier_onboarding TO service_role;
+
+CREATE OR REPLACE FUNCTION admin_create_carrier_onboarding(
+  p_company_name TEXT,
+  p_contact_name TEXT,
+  p_contact_email TEXT,
+  p_tier TEXT,
+  p_country TEXT,
+  p_created_by UUID
+)
+RETURNS BIGINT
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_org_id BIGINT;
+  v_currency TEXT;
+BEGIN
+  IF char_length(trim(p_company_name)) NOT BETWEEN 2 AND 160 THEN
+    RAISE EXCEPTION 'Company name must be between 2 and 160 characters';
+  END IF;
+  IF char_length(trim(p_contact_name)) NOT BETWEEN 1 AND 120 THEN
+    RAISE EXCEPTION 'Contact name must be between 1 and 120 characters';
+  END IF;
+  IF p_contact_email !~* '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$' THEN
+    RAISE EXCEPTION 'A valid contact email is required';
+  END IF;
+  IF p_tier IS NULL OR p_tier NOT IN ('starter','growth','pro','enterprise') THEN
+    RAISE EXCEPTION 'Invalid carrier plan';
+  END IF;
+  IF p_country IS NULL OR p_country NOT IN ('US','CA','MX') THEN
+    RAISE EXCEPTION 'Invalid country';
+  END IF;
+
+  v_currency := CASE p_country WHEN 'CA' THEN 'CAD' WHEN 'MX' THEN 'MXN' ELSE 'USD' END;
+  INSERT INTO organizations(type, name, email, country, currency)
+    VALUES ('carrier', trim(p_company_name), lower(trim(p_contact_email)), p_country, v_currency)
+    RETURNING id INTO v_org_id;
+  INSERT INTO carrier_details(org_id, tier, billing_status)
+    VALUES (v_org_id, p_tier, 'trialing');
+  INSERT INTO admin_carrier_onboarding(org_id, contact_name, contact_email, created_by)
+    VALUES (v_org_id, trim(p_contact_name), lower(trim(p_contact_email)), p_created_by);
+  INSERT INTO admin_events(org_id, admin_id, event_type, metadata)
+    VALUES (v_org_id, p_created_by, 'admin.carrier_onboarding_started', jsonb_build_object('tier', p_tier, 'country', p_country));
+  RETURN v_org_id;
+END $$;
+
+REVOKE ALL ON FUNCTION admin_create_carrier_onboarding(TEXT, TEXT, TEXT, TEXT, TEXT, UUID) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION admin_create_carrier_onboarding(TEXT, TEXT, TEXT, TEXT, TEXT, UUID) TO service_role;

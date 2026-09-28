@@ -20,6 +20,10 @@ export class SupabaseAuthAdminProvider implements AuthAdminProvider {
       id: u.id,
       email: u.email ?? null,
       lastSignInAt: u.last_sign_in_at ?? null,
+      createdAt: u.created_at ?? null,
+      confirmedAt: u.email_confirmed_at ?? u.phone_confirmed_at ?? null,
+      bannedUntil: u.banned_until ?? null,
+      isAnonymous: u.is_anonymous ?? false,
     }))
     return { data: { users }, error: null }
   }
@@ -28,7 +32,15 @@ export class SupabaseAuthAdminProvider implements AuthAdminProvider {
     const { data, error } = await this.admin.auth.admin.getUserById(userId)
     if (error) return { data: null, error: toAuthAdminError(error) }
     const user: AuthAdminUser | null = data?.user
-      ? { id: data.user.id, email: data.user.email ?? null, lastSignInAt: data.user.last_sign_in_at ?? null }
+      ? {
+          id: data.user.id,
+          email: data.user.email ?? null,
+          lastSignInAt: data.user.last_sign_in_at ?? null,
+          createdAt: data.user.created_at ?? null,
+          confirmedAt: data.user.email_confirmed_at ?? data.user.phone_confirmed_at ?? null,
+          bannedUntil: data.user.banned_until ?? null,
+          isAnonymous: data.user.is_anonymous ?? false,
+        }
       : null
     return { data: { user }, error: null }
   }

@@ -17,6 +17,10 @@ export interface AuthAdminUser {
   id: string
   email: string | null
   lastSignInAt: string | null
+  createdAt?: string | null
+  confirmedAt?: string | null
+  bannedUntil?: string | null
+  isAnonymous?: boolean
 }
 
 export interface AuthAdminError {

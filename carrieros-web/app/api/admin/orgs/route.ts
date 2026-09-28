@@ -32,12 +32,7 @@ function loadVelocityScore(loadsLast30Days: number): number {
   return Math.min(loadsLast30Days * 10, 100)
 }
 
-function featureDepthScore(signals: {
-  hasDrivers: boolean
-  hasCustomers: boolean
-  hasInvoices: boolean
-  hasVehicles: boolean
-}): number {
+function featureDepthScore(signals: { hasDrivers: boolean; hasCustomers: boolean; hasInvoices: boolean; hasVehicles: boolean }): number {
   const present = Object.values(signals).filter(Boolean).length
   return Math.round((present / 4) * 100)
 }
@@ -62,13 +57,14 @@ export async function GET(request: NextRequest) {
 
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86_400_000).toISOString()
 
-  const [{ data: profiles }, { data: recentLoads }, { data: drivers }, { data: invoices }, { data: vehicles }, { data: openTickets }] =
+  const [{ data: profiles }, { data: recentLoads }, { data: drivers }, { data: invoices }, { data: vehicles }, { data: customers }, { data: openTickets }] =
     await Promise.all([
       listProfilesForOrgs(admin, orgIds),
       admin.from('loads').select('id, carrier_org_id').in('carrier_org_id', orgIds).gte('created_at', thirtyDaysAgo),
       listDriverIdsForOrgs(admin, orgIds),
       admin.from('invoices').select('id, carrier_org_id').in('carrier_org_id', orgIds),
       admin.from('vehicles').select('id, carrier_org_id').in('carrier_org_id', orgIds),
+      admin.from('customer_details').select('org_id, carrier_org_id').in('carrier_org_id', orgIds),
       // SA5's Triage Queue severity spec named "open support ticket" as a Medium signal before
       // support_tickets existed (decisions.md T16) — surfaced here as a real signal now, in the SAME
       // triage page rather than a second admin screen. Only carrieros_support-queue tickets: this
@@ -101,6 +97,7 @@ export async function GET(request: NextRequest) {
   const driverCount = countByOrg(drivers)
   const invoiceCount = countByOrg(invoices)
   const vehicleCount = countByOrg(vehicles)
+  const customerCount = countByOrg((customers ?? []).map(customer => ({ carrier_org_id: customer.carrier_org_id })))
 
   // Earliest-open ticket id per org (oldest first) — the one the triage card links to when an org
   // has more than one open ticket, same "worst/oldest first" bias the rest of this page already uses.
@@ -118,11 +115,7 @@ export async function GET(request: NextRequest) {
     const velocityScore = loadVelocityScore(loadsThisMonth.get(org.id) ?? 0)
     const depthScore = featureDepthScore({
       hasDrivers: (driverCount.get(org.id) ?? 0) > 0,
-      // customer orgs aren't carrier-scoped (they're their own organizations
-      // rows); attributing "has added a customer" per-carrier needs a
-      // distinct loads.customer_org_id count, deferred for now -- treated
-      // as satisfied so a missing signal doesn't unfairly tank the score.
-      hasCustomers: true,
+      hasCustomers: (customerCount.get(org.id) ?? 0) > 0,
       hasInvoices: (invoiceCount.get(org.id) ?? 0) > 0,
       hasVehicles: (vehicleCount.get(org.id) ?? 0) > 0,
     })
@@ -138,6 +131,7 @@ export async function GET(request: NextRequest) {
       last_active: lastActive,
       loads_this_month: loadsThisMonth.get(org.id) ?? 0,
       health_score: healthScore,
+      health_score_is_provisional: true,
       open_ticket_count: openTicketCountByOrg.get(org.id) ?? 0,
       earliest_open_ticket_id: earliestOpenTicketIdByOrg.get(org.id) ?? null,
     }

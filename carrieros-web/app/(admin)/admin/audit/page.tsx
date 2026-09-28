@@ -32,6 +32,13 @@ export default function AuditPage() {
     'admin.extend_trial': t('eventExtendTrial'),
     'admin.grace_period': t('eventGracePeriod'),
     'admin.flag_edit': t('eventFlagEdit'),
+    'admin.support_ticket_status': t('eventSupportTicketStatus'),
+    'admin.support_ticket_reply': t('eventSupportTicketReply'),
+    'admin.carrier_onboarding_started': t('eventOnboardingStarted'),
+    'admin.carrier_onboarding_updated': t('eventOnboardingUpdated'),
+    'admin.carrier_owner_invited': t('eventOwnerInvited'),
+    'admin.support_access.started': t('eventSupportAccessStarted'),
+    'admin.support_access.ended': t('eventSupportAccessEnded'),
   }
 
   useEffect(() => {

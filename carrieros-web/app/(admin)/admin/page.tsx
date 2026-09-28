@@ -145,7 +145,7 @@ export default function TriageQueuePage() {
                     <StatusBadge variant={style.badgeVariant} size="sm">{style.label}</StatusBadge>
                   </div>
                   <p className="text-text-mut text-xs mt-0.5">
-                    {o.tier ?? '—'} · health {o.health_score} · {o.billing_status ?? '—'}
+                    {o.tier ?? '—'} · {t('provisionalHealth', { score: o.health_score })} · {o.billing_status ?? '—'}
                     {o.billing_status === 'trialing' && trialDays !== null && t('trialEndsIn', { days: trialDays })}
                   </p>
                   {o.open_ticket_count > 0 && (

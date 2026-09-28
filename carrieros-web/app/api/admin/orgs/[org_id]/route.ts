@@ -99,6 +99,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     },
     adoption,
     can_start_support_access: roleHasCapability(role, 'admin_impersonate'),
+    can_view_user_access: roleHasCapability(role, 'admin_support'),
     users,
     recent_loads: (loads ?? []).slice(0, 10),
     notes: notes ?? [],

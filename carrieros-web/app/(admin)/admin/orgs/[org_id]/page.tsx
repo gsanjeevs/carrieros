@@ -25,6 +25,7 @@ interface OrgDetail {
   kpis: { loads_this_month: number; uninvoiced_revenue: number; last_active: string | null }
   adoption: Record<string, boolean>
   can_start_support_access: boolean
+  can_view_user_access: boolean
   users: { id: string; name: string | null; role: string; email: string | null; last_sign_in_at: string | null }[]
   recent_loads: { id: number; status: string | null; rate: number | null; created_at: string }[]
   notes: { id: number; body: string; admin_id: string | null; created_at: string }[]
@@ -123,7 +124,7 @@ export default function OrgDetailPage({ params }: { params: Promise<{ org_id: st
 
   return (
     <div className="p-8 max-w-5xl mx-auto">
-      <Link href="/admin/health" className="text-text-sec text-sm hover:text-text-pri flex items-center gap-1.5 mb-4">
+      <Link href="/admin/analytics" className="text-text-sec text-sm hover:text-text-pri flex items-center gap-1.5 mb-4">
         <span className="material-symbols-outlined text-[16px]">arrow_back</span>
         {t('backToHealth')}
       </Link>
@@ -179,7 +180,7 @@ export default function OrgDetailPage({ params }: { params: Promise<{ org_id: st
               {data.users.map((u) => (
                 <div key={u.id} className="px-5 py-3 flex items-start justify-between gap-4 text-sm">
                   <div className="min-w-0">
-                    <p className="text-text-pri">{u.name ?? u.email ?? u.id}</p>
+                    {data.can_view_user_access ? <Link href={`/admin/orgs/${data.org.id}/users/${u.id}`} className="text-text-pri hover:text-brand-orange">{u.name ?? u.email ?? u.id}</Link> : <p className="text-text-pri">{u.name ?? u.email ?? u.id}</p>}
                     <p className="text-text-mut text-xs">{u.email ?? u.id}</p>
                     <p className="text-text-mut text-xs capitalize">{u.role} · {u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString() : t('never')}</p>
                   </div>

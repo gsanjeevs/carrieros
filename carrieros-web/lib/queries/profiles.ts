@@ -96,6 +96,16 @@ export async function listProfileIdentities(supabase: AnySupabaseClient, profile
     .in('id', profileIds)
 }
 
+// SX support investigation: target profile details, always constrained by both user and carrier id.
+export async function getOrgUserAccessProfile(supabase: AnySupabaseClient, profileId: string, orgId: number) {
+  return supabase
+    .from('profiles')
+    .select('id, role, is_active, first_name, last_name, phone')
+    .eq('id', profileId)
+    .eq('org_id', orgId)
+    .maybeSingle()
+}
+
 // Owners/solos for an org — used by the reminder cron to identify who can
 // act as the carrier's primary account.
 export async function getOrgOwnersAndSolos(supabase: AnySupabaseClient, orgId: number) {

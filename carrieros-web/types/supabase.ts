@@ -73,6 +73,20 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"admin_carrier_onboarding": {
+                  Row: {
+                    "blocker_note": string | null,"contact_email": string,"contact_name": string,"created_at": string,"created_by": string,"next_action": string | null,"next_follow_up_at": string | null,"org_id": number,"owner_invite_sent_at": string | null,"stage": string,"updated_at": string
+                  }
+                  Insert: {
+                    "blocker_note"?: string | null,"contact_email": string,"contact_name": string,"created_at"?: string,"created_by": string,"next_action"?: string | null,"next_follow_up_at"?: string | null,"org_id": number,"owner_invite_sent_at"?: string | null,"stage"?: string,"updated_at"?: string
+                  }
+                  Update: {
+                    "blocker_note"?: string | null,"contact_email"?: string,"contact_name"?: string,"created_at"?: string,"created_by"?: string,"next_action"?: string | null,"next_follow_up_at"?: string | null,"org_id"?: number,"owner_invite_sent_at"?: string | null,"stage"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    { foreignKeyName: "admin_carrier_onboarding_created_by_fkey"; columns: ["created_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+                    { foreignKeyName: "admin_carrier_onboarding_org_id_fkey"; columns: ["org_id"]; isOneToOne: true; referencedRelation: "organizations"; referencedColumns: ["id"] }
+                  ]
                 },"admin_support_access_sessions": {
                   Row: {
                     "admin_id": string,"ended_at": string | null,"ended_by": string | null,"expires_at": string,"id": string,"last_accessed_at": string,"org_id": number,"reason": string,"started_at": string,"target_user_id": string,"ticket_id": number | null
@@ -1371,6 +1385,17 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"tenant_activity_events": {
+                  Row: {
+                    "action": string,"actor_user_id": string | null,"aggregate_id": string | null,"aggregate_type": string,"id": number,"occurred_at": string,"operation": string,"org_id": number
+                  }
+                  Insert: {
+                    "action": string,"actor_user_id"?: string | null,"aggregate_id"?: string | null,"aggregate_type": string,"id"?: number,"occurred_at"?: string,"operation": string,"org_id": number
+                  }
+                  Update: {
+                    "action"?: string,"actor_user_id"?: string | null,"aggregate_id"?: string | null,"aggregate_type"?: string,"id"?: number,"occurred_at"?: string,"operation"?: string,"org_id"?: number
+                  }
+                  Relationships: []
                 },"support_tickets": {
                   Row: {
                     "ai_answer": string | null,"ai_confidence": number | null,"body": string,"carrier_org_id": number,"category": string,"created_at": string,"fallback_queue": string | null,"id": number,"queue": string,"related_load_number": string | null,"resolved_at": string | null,"status": string,"submitted_by": string,"submitter_role": string,"submitter_tier": string | null,"updated_at": string
@@ -1659,6 +1684,14 @@ isOneToOne: false
                 }
           }
           Functions: {
+            "admin_create_carrier_onboarding":
+{ Args: { "p_company_name": string,"p_contact_email": string,"p_contact_name": string,"p_country": string,"p_created_by": string,"p_tier": string }; Returns: number
+                           },
+            "admin_carrier_portfolio_analytics":
+{ Args: { "p_fleet_band"?: string | null,"p_page"?: number,"p_page_size"?: number,"p_search"?: string | null,"p_tier"?: string | null }; Returns: {
+              "active_billing_carriers": number,"active_drivers": number,"active_users": number,"active_vehicles": number,"billing_status": string,"cohort_carriers": number,"cohort_median_loads_per_vehicle": number | null,"created_at": string | null,"customer_accounts": number,"fleet_band": string,"invoices_last_30d": number,"loads_last_30d": number,"loads_per_active_vehicle": number | null,"loads_previous_30d": number,"open_support_tickets": number,"org_id": number,"org_name": string,"past_due_carriers": number,"tier": string,"total_carriers": number,"trialing_carriers": number
+            }[]
+                           },
             "bulk_import_customers":
 { Args: { "p_rows": Json }; Returns: {
               "customer_number": string,"org_id": number,"row_action": string,"row_name": string

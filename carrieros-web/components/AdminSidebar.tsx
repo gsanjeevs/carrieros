@@ -24,8 +24,9 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { labelKey: 'triage',  href: '/admin',         icon: 'inbox',         capability: 'admin' },
+  { labelKey: 'onboarding', href: '/admin/onboarding', icon: 'rocket_launch', capability: 'admin_support' },
   { labelKey: 'support', href: '/admin/support', icon: 'support_agent', capability: 'admin_support' },
-  { labelKey: 'health',  href: '/admin/health',   icon: 'monitor_heart', capability: 'admin' },
+  { labelKey: 'analytics', href: '/admin/analytics', icon: 'query_stats', capability: 'admin' },
   { labelKey: 'billing', href: '/admin/billing',  icon: 'payments',      capability: 'admin_billing' },
   { labelKey: 'pipeline', href: '/admin/pipeline', icon: 'trending_up',  capability: 'admin_billing' },
   { labelKey: 'audit',   href: '/admin/audit',    icon: 'history',       capability: 'admin' },
@@ -88,7 +89,7 @@ export default function AdminSidebar({ role, userName }: { role: string; userNam
               }`}
             >
               <span className="material-symbols-outlined text-[18px] leading-none">{item.icon}</span>
-              {t(item.labelKey as 'triage' | 'support' | 'health' | 'billing' | 'pipeline' | 'audit' | 'errorLog' | 'flags' | 'roles' | 'aiConfig' | 'security')}
+              {t(item.labelKey as 'triage' | 'support' | 'onboarding' | 'analytics' | 'billing' | 'pipeline' | 'audit' | 'errorLog' | 'flags' | 'roles' | 'aiConfig' | 'security')}
             </Link>
           )
         })}
