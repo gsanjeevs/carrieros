@@ -17,6 +17,10 @@ export default defineConfig({
     // the old 20s ceiling turned cold-start latency into false failures.
     testTimeout: 60_000,
     hookTimeout: 60_000,
+    // All files share one local Postgres/Storage stack and a single Next test
+    // server. Unbounded workers overload those shared services and cause
+    // unrelated request timeouts (e.g. signed-upload tests).
+    maxWorkers: 4,
     // Sequential, not parallel — tests share one local Postgres instance and
     // some (entity numbering, admin-role checks) are order-sensitive within
     // their own describe block; cross-file parallelism is still fine.
