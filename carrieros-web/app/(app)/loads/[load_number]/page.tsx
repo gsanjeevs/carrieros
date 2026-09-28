@@ -1,7 +1,6 @@
 // app/(app)/loads/[load_number]/page.tsx
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
-import Link from 'next/link'
 import { getTranslations, getLocale } from 'next-intl/server'
 import DispatchPanel from '@/components/DispatchPanel'
 import LoadActionGrid from '@/components/LoadActionGrid'
@@ -20,11 +19,12 @@ import LoadFuelStops from './LoadFuelStops'
 import LoadOrdersSection from './LoadOrdersSection'
 import CustomerExceptionControls from './CustomerExceptionControls'
 import { loadStatusVariant, type LoadStatus } from '@/lib/domain/load-status'
-import { Card, CardHeader, CardBody, StatusBadge } from '@/components/ui'
+import { Card, CardHeader, CardBody, StatusBadge, PageBackLink } from '@/components/ui'
 import { getProfileForUser } from '@/lib/queries/profiles'
 import { roleHasCapability } from '@/lib/generated/role-capabilities'
 import { buildActorContext } from '@/server/infrastructure/supabase/actor-context'
 import { createLoadboardPostingService } from '@/server/composition'
+import { resolveFromLabel } from '@/lib/resolve-from-label'
 
 const STATUS_FLOW_KEYS = [
   { key: 'draft',      icon: 'draft' },
@@ -53,10 +53,14 @@ function InfoRow({ label, value }: { label: string; value: string | number | nul
 
 export default async function LoadDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ load_number: string }>
+  searchParams: Promise<{ from?: string; fromLabel?: string }>
 }) {
   const { load_number } = await params
+  const { from, fromLabel: fromLabelKey } = await searchParams
+  const fromLabel = await resolveFromLabel(fromLabelKey)
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -267,10 +271,8 @@ export default async function LoadDetailPage({
 
       {/* Header */}
       <div className="mb-6">
+        <PageBackLink from={from} fromLabel={fromLabel} defaultHref="/loads" defaultLabel={t('backToLoads')} className="mb-3" />
         <div className="flex items-center gap-3 mb-3">
-          <Link href="/loads" className="text-text-sec hover:text-text-pri transition rounded focus:outline-none focus:ring-2 focus:ring-brand-orange/50">
-            <span className="material-symbols-outlined text-[20px]">arrow_back</span>
-          </Link>
           <h1 className="text-2xl font-semibold text-text-pri">{load.load_number}</h1>
           <StatusBadge variant={loadStatusVariant((load.status ?? 'draft') as LoadStatus)}>
             {load.status ? t(`status_${load.status}` as never) : t('status_draft' as never)}
