@@ -27,7 +27,7 @@ the other session), and mention the commit(s) so the other session can `git log`
 | Session | Task | Files/areas | Started |
 |---|---|---|---|
 | Codex (GPT-6) | Replace raw SX magic-link takeover with audited, time-limited, read-only support access | `/Users/sanjeevgautam/code/carrieros-sx-admin` worktree; admin org/user UI, support-session APIs, migration 0055 | 2026-09-27 |
-| — | No active Claude task | — | — |
+| Claude | Expand the public developer API (`/api/public/v1/*`) with drivers/vehicles/exceptions read endpoints, for a new personal MCP server consuming it (`../carrieros-mcp`, outside this repo) | `app/api/public/v1/drivers`, `app/api/public/v1/vehicles`, `app/api/public/v1/exceptions` (new), `server/contract/public-schemas.ts`, `server/contract/public-openapi.ts`; worktree `../carrieros-public-api-expand` on `feature/public-api-expand` | 2026-09-28 |
 
 ## Recently finished (for context, not a permanent log — prune entries older than a day or two)
 
