@@ -62,7 +62,7 @@ export function buildPublicOpenApi() {
       title: 'CarrierOS Public API',
       version: '1.0.0',
       description:
-        'GENERATED from server/contract/public-*.ts. Read-only in v1: loads and invoices. ' +
+        'GENERATED from server/contract/public-*.ts. Read-only in v1: loads, invoices, drivers, vehicles, and exceptions. ' +
         'Authenticate with the OAuth 2.0 client-credentials grant (POST /api/public/v1/oauth/token), ' +
         'then send the returned access_token as `Authorization: Bearer <token>` on every other call. ' +
         'Requires a Growth-tier subscription or above.',
@@ -72,6 +72,10 @@ export function buildPublicOpenApi() {
       { name: 'auth', description: 'OAuth 2.0 client-credentials token exchange' },
       { name: 'loads', description: 'Read-only load data' },
       { name: 'invoices', description: 'Read-only invoice data' },
+      { name: 'financial-events', description: 'Read-only ledger event export' },
+      { name: 'drivers', description: 'Read-only driver data' },
+      { name: 'vehicles', description: 'Read-only vehicle data' },
+      { name: 'exceptions', description: 'Read-only exception feed' },
     ],
     components: {
       securitySchemes: {
