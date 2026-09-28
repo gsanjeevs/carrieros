@@ -107,7 +107,6 @@ export default async function globalSetup() {
         // tests/helpers.ts's PROFILE_REFERENCING_TABLES for the single-org version of this same fix.
         { table: 'admin_carrier_onboarding', col: 'created_by' },
         { table: 'ai_feature_overrides', col: 'updated_by' },
-        { table: 'ai_provider_config', col: 'updated_by' },
         { table: 'org_feature_overrides', col: 'set_by' },
         { table: 'support_ticket_messages', col: 'sender_id' },
         { table: 'support_tickets', col: 'submitted_by' },
@@ -116,6 +115,9 @@ export default async function globalSetup() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (admin.from(table as any).delete().in(col, profileIds) as any)
       }
+      // This is a platform singleton, not tenant-owned data. Preserve it and
+      // clear only the optional actor reference before deleting test profiles.
+      await admin.from('ai_provider_config').update({ updated_by: null }).in('updated_by', profileIds)
     }
 
     for (const id of ids) {

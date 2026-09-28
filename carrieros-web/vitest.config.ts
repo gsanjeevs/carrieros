@@ -12,8 +12,11 @@ export default defineConfig({
     environment: 'node',
     setupFiles: ['./tests/setup.ts'],
     globalSetup: ['./tests/global-teardown.ts'],
-    testTimeout: 20_000,
-    hookTimeout: 20_000,
+    // This is an integration suite against a real Next server + local Supabase.
+    // A fresh Next dev process can spend 20–30s compiling its first-hit route;
+    // the old 20s ceiling turned cold-start latency into false failures.
+    testTimeout: 60_000,
+    hookTimeout: 60_000,
     // Sequential, not parallel — tests share one local Postgres instance and
     // some (entity numbering, admin-role checks) are order-sensitive within
     // their own describe block; cross-file parallelism is still fine.

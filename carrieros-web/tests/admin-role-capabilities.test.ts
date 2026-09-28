@@ -121,5 +121,5 @@ describe('role capabilities matrix', () => {
     const again = await regenerate(sxOwner)
     const againJson = await again.json()
     expect(againJson.changed).toBe(false)
-  }, 30_000)
+  }, 60_000)
 })

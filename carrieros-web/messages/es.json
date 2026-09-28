@@ -1292,7 +1292,14 @@
       "blocker": "Bloqueo y contexto",
       "saveWorkflow": "Guardar plan",
       "saveError": "No se pudo guardar el plan",
-      "stage": { "intake": "Ingreso", "setup": "Configuración", "training": "Capacitación", "launch_ready": "Listo para lanzamiento", "live": "Activo", "blocked": "Bloqueado" },
+      "stage": {
+        "intake": "Ingreso",
+        "setup": "Configuración",
+        "training": "Capacitación",
+        "launch_ready": "Listo para lanzamiento",
+        "live": "Activo",
+        "blocked": "Bloqueado"
+      },
       "ownerTitle": "Acceso del propietario",
       "inviteWillEmail": "La invitación enviará al contacto un enlace seguro de acceso y creará su cuenta de propietario.",
       "firstName": "Nombre del propietario",

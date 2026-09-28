@@ -168,7 +168,6 @@ const PROFILE_REFERENCING_TABLES: { table: string; col: string }[] = [
   // from this list entirely, same root cause as the ORG_SCOPED_BLOCKERS gap above.
   { table: 'admin_carrier_onboarding', col: 'created_by' },
   { table: 'ai_feature_overrides', col: 'updated_by' },
-  { table: 'ai_provider_config', col: 'updated_by' },
   { table: 'org_feature_overrides', col: 'set_by' },
   { table: 'support_ticket_messages', col: 'sender_id' },
   { table: 'support_tickets', col: 'submitted_by' },
@@ -218,6 +217,9 @@ export async function cleanupTestOrg(admin: SupabaseClient<Database>, orgId: num
   const { data: remainingProfiles } = await admin.from('profiles').select('id').eq('org_id', orgId)
   const profileIds = (remainingProfiles ?? []).map((p) => p.id)
   if (profileIds.length > 0) {
+    // This is a platform singleton, not tenant-owned data. Clear its optional
+    // actor reference instead of deleting the configuration row with a test user.
+    await admin.from('ai_provider_config').update({ updated_by: null }).in('updated_by', profileIds)
     for (const { table, col } of PROFILE_REFERENCING_TABLES) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (admin.from(table as any).delete().in(col, profileIds) as any)

@@ -6088,7 +6088,10 @@ DECLARE
   v_org BIGINT := NULLIF(v_row ->> TG_ARGV[1], '')::BIGINT;
   v_id TEXT := NULLIF(v_row ->> 'id', '');
 BEGIN
-  IF v_org IS NOT NULL THEN
+  -- Child rows can be deleted as part of an organization cascade. At that
+  -- point the parent is no longer visible, so recording an event would violate
+  -- tenant_activity_events.org_id's FK and abort the parent deletion.
+  IF v_org IS NOT NULL AND EXISTS (SELECT 1 FROM organizations WHERE id = v_org) THEN
     INSERT INTO tenant_activity_events(org_id, actor_user_id, action, aggregate_type, aggregate_id, operation)
     VALUES (v_org, auth.uid(), lower(TG_ARGV[0]) || '.' || lower(TG_OP), TG_ARGV[0], v_id, TG_OP);
   END IF;

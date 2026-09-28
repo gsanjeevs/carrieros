@@ -21,7 +21,7 @@ import { roleHasCapability } from '@/lib/generated/role-capabilities'
 // Deliberately excludes 'driver' (has its own flow on /drivers, which also
 // creates the drivers row) and 'solo' (owner+driver combined — only ever set
 // at onboarding, decision P3).
-export const INVITABLE_ROLES = ['dispatcher', 'finance', 'owner'] as const
+const INVITABLE_ROLES = ['dispatcher', 'finance', 'owner'] as const
 
 // DEMO-MODE SEAM (2026-07-22, same philosophy as lib/stripe.ts's
 // createStripeCustomer() and app/api/settlements/[id]/send-ach/route.ts's
