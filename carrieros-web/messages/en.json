@@ -1391,13 +1391,15 @@
       "no": "No",
       "unknown": "Could not verify",
       "profileCreatedLabel": "Profile created",
+      "recordedActionsTitle": "Recorded user actions",
+      "noRecordedActions": "No audited actions were found for this user.",
       "linkedTicketTitle": "Linked ticket #{id}",
       "openTicket": "Open ticket",
       "aiReply": "AI reply",
       "staffOrUserReply": "Ticket message",
       "recentTicketsTitle": "Recent tickets submitted by this user",
       "noTickets": "No CarrierOS support tickets found for this user.",
-      "activityGap": "A full per-user action timeline is not available yet. This view shows sign-in and CarrierOS support-ticket history only.",
+      "activityGap": "This list includes only changes currently written to the tenant audit log. Page views and some actions are not captured yet, so this is not a complete security audit.",
       "backToHealth": "Back to Customer Health"
     },
     "supportTickets": {

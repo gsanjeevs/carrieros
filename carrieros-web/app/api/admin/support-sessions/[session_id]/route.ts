@@ -59,7 +59,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   const authAdmin = createAuthAdminProvider(admin)
   const { data: authData, error: authError } = await authAdmin.getUserById(target.id)
-  const [ticketResult, recentTicketsResult] = await Promise.all([
+  const [ticketResult, recentTicketsResult, actionResult] = await Promise.all([
     found.ticket_id
       ? admin.from('support_tickets')
           .select('id, category, related_load_number, body, status, created_at, updated_at')
@@ -75,9 +75,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       .eq('queue', 'carrieros_support')
       .order('created_at', { ascending: false })
       .limit(5),
+    admin.from('audit_events')
+      .select('id, action, aggregate_type, aggregate_id, prior_state, new_state, reason, occurred_at')
+      .eq('org_id', found.org_id)
+      .eq('actor_user_id', target.id)
+      .order('occurred_at', { ascending: false })
+      .limit(25),
   ])
-  if (ticketResult.error || recentTicketsResult.error) {
-    logError({ route: 'admin/support-sessions/:id', requestId: request.headers.get('x-request-id') }, ticketResult.error ?? recentTicketsResult.error, { step: 'ticket_context' })
+  if (ticketResult.error || recentTicketsResult.error || actionResult.error) {
+    logError({ route: 'admin/support-sessions/:id', requestId: request.headers.get('x-request-id') }, ticketResult.error ?? recentTicketsResult.error ?? actionResult.error, { step: 'ticket_or_action_context' })
     return apiError('SERVER_ERROR', 'Could not load support history', 500)
   }
 
@@ -119,6 +125,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     linked_ticket: ticketResult.data,
     linked_ticket_messages: messagesResult.data ?? [],
     recent_tickets: recentTicketsResult.data ?? [],
+    recorded_actions: actionResult.data ?? [],
     scope: 'Read-only support context. This does not sign in as the user. Tenant actions and data outside the listed support context are not available in this session.',
   })
 }

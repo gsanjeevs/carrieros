@@ -1391,13 +1391,15 @@
       "no": "No",
       "unknown": "No se pudo verificar",
       "profileCreatedLabel": "Perfil creado",
+      "recordedActionsTitle": "Acciones registradas del usuario",
+      "noRecordedActions": "No se encontraron acciones auditadas para este usuario.",
       "linkedTicketTitle": "Ticket vinculado n.º {id}",
       "openTicket": "Abrir ticket",
       "aiReply": "Respuesta de IA",
       "staffOrUserReply": "Mensaje del ticket",
       "recentTicketsTitle": "Tickets recientes enviados por este usuario",
       "noTickets": "No se encontraron tickets de soporte de CarrierOS para este usuario.",
-      "activityGap": "Aún no hay una cronología completa de acciones por usuario. Esta vista solo muestra inicios de sesión y el historial de tickets de soporte de CarrierOS.",
+      "activityGap": "Esta lista solo incluye cambios guardados actualmente en el registro de auditoría del cliente. Aún no se registran las visitas a páginas y algunas acciones, así que no es una auditoría de seguridad completa.",
       "backToHealth": "Volver a Salud del cliente"
     },
     "supportTickets": {

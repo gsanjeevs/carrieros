@@ -32,6 +32,16 @@ interface SupportContext {
   linked_ticket: TicketSummary | null
   linked_ticket_messages: { id: number; sender_id: string | null; body: string; is_ai_generated: boolean; created_at: string }[]
   recent_tickets: TicketSummary[]
+  recorded_actions: {
+    id: number
+    action: string
+    aggregate_type: string
+    aggregate_id: string
+    prior_state: string | null
+    new_state: string | null
+    reason: string | null
+    occurred_at: string
+  }[]
   scope: string
 }
 
@@ -138,6 +148,24 @@ export default function SupportSessionPage({ params }: { params: Promise<{ sessi
           <Info label={t('accountFoundLabel')} value={context.user.auth_account_found === null ? t('unknown') : context.user.auth_account_found ? t('yes') : t('no')} />
           <Info label={t('profileCreatedLabel')} value={context.user.created_at ? new Date(context.user.created_at).toLocaleString() : '—'} />
         </CardBody>
+      </Card>
+
+      <Card>
+        <CardHeader><h2 className="text-sm font-medium text-text-pri">{t('recordedActionsTitle')}</h2></CardHeader>
+        {context.recorded_actions.length === 0 ? <CardBody><p className="text-sm text-text-mut">{t('noRecordedActions')}</p></CardBody> : (
+          <div className="divide-y divide-divider-ui">
+            {context.recorded_actions.map(action => (
+              <div key={action.id} className="px-5 py-3">
+                <div className="flex flex-wrap justify-between gap-2">
+                  <p className="text-sm font-medium text-text-pri">{action.action} · {action.aggregate_type} #{action.aggregate_id}</p>
+                  <time className="text-xs text-text-mut">{new Date(action.occurred_at).toLocaleString()}</time>
+                </div>
+                {(action.prior_state || action.new_state) && <p className="mt-1 text-xs text-text-sec">{action.prior_state ?? '—'} → {action.new_state ?? '—'}</p>}
+                {action.reason && <p className="mt-1 text-sm text-text-sec">{action.reason}</p>}
+              </div>
+            ))}
+          </div>
+        )}
       </Card>
 
       {context.linked_ticket && (
