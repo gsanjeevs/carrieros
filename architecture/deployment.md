@@ -123,9 +123,20 @@ needs the GitHub App's permission scope extended first, not just a flag flip.
    `carrieros-ecsInfrastructureRole` — the latter needed an extra inline policy beyond AWS's own
    documented managed policy, see the memory file linked above), a new default VPC (the account had
    none), Express service `carrieros-web-staging` in the `default` cluster.
-3. **Secrets**: `SUPABASE_SERVICE_ROLE_KEY` and `DATABASE_URL` live in AWS Secrets Manager
-   (`carrieros-staging/*`), referenced by ARN in the ECS task/GitHub Environment — never passed as
-   literal values through chat or committed anywhere.
+3. **Secrets**: `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, and `PUBLIC_API_JWT_SECRET` live in AWS
+   Secrets Manager (`carrieros-staging/*`), referenced by ARN in the ECS task/GitHub Environment —
+   never passed as literal values through chat or committed anywhere. `carrieros-ecsTaskExecutionRole`
+   has `secretsmanager:GetSecretValue` scoped to the whole `carrieros-staging/*` prefix (not one ARN
+   at a time) specifically so a new secret doesn't need a matching IAM policy edit to actually work —
+   learned the hard way on 2026-09-29 when `PUBLIC_API_JWT_SECRET` was added to the task but the role
+   was still scoped to only the original `SUPABASE_SERVICE_ROLE_KEY` ARN, and the public API silently
+   500'd with "Public API is not configured" until the policy was widened.
+   **`PUBLIC_API_JWT_SECRET` was missing entirely until 2026-09-29** — the public developer API
+   (`/api/public/v1/*`) had been built and documented as working, but staging's ECS task never
+   actually had this env var set, so every real call 500'd. Caught while verifying `carrieros-mcp`'s
+   hosted deployment against real staging data — worth knowing that "the code is built and staging is
+   deployed" didn't mean this specific feature actually worked on staging until it was checked with a
+   real request, not just a passing build.
 4. **GitHub `staging` Environment**: exists, holds `DATABASE_URL` for the migration step.
 5. **Email (SMTP), built 2026-09-29**: real outbound email now works on staging end-to-end (magic-link
    invites via Supabase Auth's `admin.inviteUserByEmail`, e.g. the customer-portal contact-invite flow
