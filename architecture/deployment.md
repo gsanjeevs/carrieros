@@ -16,12 +16,16 @@ the account owner wanted to stay entirely on AWS and avoid hand-wiring IAM/OIDC 
 to a third party. ECS Express Mode was chosen over the (now EOL-for-new-customers, since 2026-04-30)
 App Runner and over Amplify Hosting (doesn't support Next.js 16's managed SSR yet, only up to 15).
 
-## Current state: staging deploy is manual, not automated
+## Current state: staging auto-deploys on push to main (2026-09-29)
 
-There is no CI/CD pipeline actually deploying anything yet — `.github/workflows/deploy.yml` runs
-migrations automatically (safe, no AWS credentials needed) but does **not** deploy the app; that
-step was deliberately never wired to avoid making the account owner set up GitHub OIDC trust roles
-they didn't want to hand-configure. Getting a new build to staging today means, from `carrieros-web/`:
+**AWS CodeBuild + a GitHub connection** now builds and deploys every push to `main` automatically —
+see "Auto-deploy pipeline" below for how it's wired. `.github/workflows/deploy.yml` still separately
+runs migrations only (safe, no AWS credentials needed); it does not touch the app container, and
+that's fine — CodeBuild's `buildspec.yml` doesn't run migrations either, so the two are complementary,
+not overlapping.
+
+The manual sequence below still works and is useful for a one-off out-of-band deploy (e.g. testing a
+local branch that isn't pushed yet), but it's no longer the normal path. From `carrieros-web/`:
 
 ```bash
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <account-id>.dkr.ecr.us-east-1.amazonaws.com
@@ -56,14 +60,43 @@ fixes sat pushed to `main`, CI-green, and completely undeployed without anyone n
 `--platform linux/amd64` is required on Apple Silicon — Fargate is x86_64 and a plain `docker build`
 here produces an arm64 image that fails to pull.
 
-## A real auto-deploy path exists, not yet built
+## Auto-deploy pipeline (built 2026-09-29)
 
-Discussed and agreed with the account owner as the next step when they want it: **AWS CodeBuild +
-a GitHub connection**. This is console-driven, not IAM-role hand-wiring — CodeBuild's "Connect to
-GitHub" flow is a real OAuth-style authorization (install the "AWS Connector for GitHub" app, pick
-the repo), then CodeBuild needs a `buildspec.yml` (not written yet) to build/push the image and a
-webhook to trigger on push. Until this exists, staging only updates when someone runs the manual
-steps above.
+**CodeBuild project:** `carrieros-web-staging-deploy` (us-east-1). Source is a GitHub connection
+(`sx-github`, a CodeConnections/GitHub-App-based connection with access to all repos on the account —
+earlier narrower connections scoped to just `carrieros` repeatedly hit an opaque
+`OAuthProviderException: User is not authorized to access connection` at `CreateProject` time despite
+showing `AVAILABLE` and having confirmed repo access; recreating with broader scope was what actually
+resolved it, so the root cause may have been installation-state related rather than repo-scope
+related — worth knowing if this ever needs rebuilding). Runs `buildspec.yml` (repo root) on every
+push to `main` via an `ACTIVE` GitHub webhook (`EVENT=PUSH`, `HEAD_REF=^refs/heads/main$`).
+
+**What `buildspec.yml` does**: ECR login → `docker build` (native x86_64 in CodeBuild, no
+`--platform`/buildx needed) with the same build-args as the manual flow → push to ECR →
+`aws ecs update-express-gateway-service`. It deliberately does **not** poll the canary rollout to
+completion (see the gotcha above) — verify with `check-staging-drift.mjs` after a build finishes, same
+as after a manual deploy.
+
+**Service role**: `carrieros-codebuild-staging-deploy`, least-privilege. Two non-obvious permissions
+required beyond the obvious ECR/logs ones, both found by an actual failed test build rather than
+guessed up front:
+- `ecs:RegisterTaskDefinition` + `ecs:DescribeTaskDefinition` — `update-express-gateway-service`
+  registers a new task definition revision internally, so `UpdateExpressGatewayService` alone isn't
+  enough.
+- `iam:PassRole` on `carrieros-ecsTaskExecutionRole` and `carrieros-ecsInfrastructureRole` — needed to
+  pass those roles to the new task definition revision.
+- `codeconnections:GetConnection` + `codeconnections:GetConnectionToken` (plus `UseConnection`) — the
+  connection auth needs these on the *service role*, not just the calling IAM principal.
+
+**Config that isn't secret but also isn't hardcoded**: `NEXT_PUBLIC_SUPABASE_ANON_KEY` (publishable)
+comes from SSM Parameter Store (`/carrieros/staging/NEXT_PUBLIC_SUPABASE_ANON_KEY`) via buildspec's
+`parameter-store` env block, so rotating it doesn't need a `buildspec.yml` change.
+
+**One setting that silently breaks `CreateProject`**: `source.reportBuildStatus: true` requires the
+GitHub App to have commit-status write permission. Without it, `CreateProject` itself fails with the
+same generic `OAuthProviderException` as a genuine connection/auth problem — indistinguishable from
+the outside. It's set to `false` here. If commit statuses on PRs/pushes become wanted later, that
+needs the GitHub App's permission scope extended first, not just a flag flip.
 
 ## What runs automatically today
 
@@ -99,7 +132,6 @@ steps above.
 
 - **Production** — no second Supabase project, no second ECS service, no approval-gate environment.
   Deliberately deferred until staging's been used for a while.
-- **Auto-deploy on push** — see "A real auto-deploy path exists" above.
 - **Mobile** — `carrieros-mobile`'s `EXPO_PUBLIC_API_URL` still points at local dev, not staging.
   `eas init` hasn't been run; `carrieros-mobile/eas.json`'s `REPLACE_WITH_*` values are still placeholders.
 - **Email (SMTP)** — deliberately deferred; staging has no SMTP configured, so anything that sends an

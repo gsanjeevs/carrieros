@@ -95,6 +95,21 @@ conflict, it just means staging is immediately behind again and needs
 another deploy cycle. This is expected on an actively-developed repo, not a
 bug in the process.
 
+### Update: this is now automated (2026-09-29)
+
+The manual sequence above is still useful for an out-of-band deploy, but the
+normal path since 2026-09-29 is a CodeBuild project
+(`carrieros-web-staging-deploy`) triggered by a GitHub webhook on every push
+to `main` — see `architecture/deployment.md`'s "Auto-deploy pipeline"
+section for exactly how it's wired, the IAM permissions it needed (a couple
+weren't obvious up front — `ecs:RegisterTaskDefinition` and `iam:PassRole`,
+found by a real failed test build), and a real gotcha worth knowing if this
+ever needs rebuilding: `CreateProject` failed repeatedly with an opaque
+`OAuthProviderException` across several different GitHub connections before
+the actual cause turned out to be `reportBuildStatus: true` requiring a
+GitHub permission the App didn't have — indistinguishable from a genuine
+connection problem without checking that specific setting.
+
 ## One-time setup already done for staging (don't redo this)
 
 1. **Supabase** — project `ddwgnsheafuuzzepqxsf`, all migrations applied,
@@ -126,9 +141,6 @@ bug in the process.
 - **Production** — no second Supabase project, no second ECS service, no
   approval-gate environment. Deliberately deferred until staging's proven
   out further.
-- **Auto-deploy on push** — a real path (AWS CodeBuild + a GitHub
-  connection, console-driven OAuth-style setup, no hand-wired IAM roles) has
-  been discussed and agreed as the next step, not built yet.
 - **Mobile → staging** — `EXPO_PUBLIC_API_URL` still points at local dev;
   `eas.json`'s `REPLACE_WITH_*` values are still placeholders.
 - **Email (SMTP)** — anything that sends email (e.g. customer-portal
