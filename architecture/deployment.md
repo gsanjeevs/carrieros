@@ -180,25 +180,24 @@ needs the GitHub App's permission scope extended first, not just a flag flip.
      "Linked"/"Revoke access", confirming GoTrue's send actually succeeded against real SES). Full
      suite is 5/6 against staging as of this writing; the 6th (`e2e/loads.spec.ts`) fails on an
      unrelated load-creation timeout, not email.
+6. **Mobile — EAS project registered, 2026-09-29**: `carrieros-mobile/eas.json`'s `staging` build
+   profile points `EXPO_PUBLIC_API_URL`/`EXPO_PUBLIC_SUPABASE_URL`/`EXPO_PUBLIC_SUPABASE_ANON_KEY` at
+   the same staging ECS gateway, Supabase project, and publishable key the web app uses — local `.env`
+   defaults are untouched, so `expo start` still targets local dev by default. `npx eas-cli login`
+   (account `gsanjeevs`) then `npx eas-cli init --force` registered a real project —
+   `@gsanjeevs/carrieros-mobile`, project id `7fcc9213-aa9d-4d06-adac-a5e09af5155a` — which wrote
+   `expo.extra.eas.projectId` and `expo.owner` into `app.json`. That same run also materialized
+   `android.permissions` from the already-declared `expo-location` plugin (background/foreground
+   location permissions the app already needed for GPS/IFTA mileage tracking) — expected config
+   resolution, not a new capability being requested. `npx tsc --noEmit` clean after. `staging`/
+   `production` build profiles can now actually be used with `eas build`; `production`'s
+   `REPLACE_WITH_*` env values are still placeholders since no production Supabase project or web URL
+   exists yet (see above).
 
 ## Not set up yet
 
 - **Production** — no second Supabase project, no second ECS service, no approval-gate environment.
   Deliberately deferred until staging's been used for a while.
-- **Mobile — EAS project registration (2026-09-29)**: `carrieros-mobile/eas.json`'s `staging` build
-  profile now points `EXPO_PUBLIC_API_URL` at `https://ca-aa167deb702e4a338c4370ff70576195.ecs.us-east-1.on.aws`
-  (the same staging ECS gateway the web app uses) and `EXPO_PUBLIC_SUPABASE_URL` at
-  `https://ddwgnsheafuuzzepqxsf.supabase.co` (the same staging Supabase project) — the local `.env`
-  default (`http://localhost:3000` / local Supabase) is untouched, so `expo start` still targets local
-  dev by default. `eas init` has **not** been run — `eas whoami` on this machine returned "Not logged
-  in", and `eas login` needs an interactive browser/credential flow no agent session can complete, so
-  no EAS project has been registered and `expo.extra.eas.projectId` doesn't exist yet in `app.json`.
-  Whoever does have EAS credentials should run `eas login` then `eas init` from `carrieros-mobile/`
-  (idempotent — safe to run once) before the `staging`/`production` build profiles can actually be
-  used with `eas build`. `eas.json`'s `staging` profile now also has
-  `EXPO_PUBLIC_SUPABASE_ANON_KEY` set to the staging project's publishable key (safe to commit — not
-  secret, same key `buildspec.yml` uses for the web build). `production`'s `REPLACE_WITH_*` values are left
-  untouched — no production Supabase project or web URL exists yet (see above).
 - **Error tracking (Sentry)** — deliberately deferred; the web SDK is wired but inert with no DSN set.
 - **`POST /api/cron/send-reminders` has no scheduler.** AWS EventBridge Scheduler hitting this route
   (with `Authorization: Bearer $CRON_SECRET`) is the natural fit now that the app runs on ECS, not
