@@ -1392,7 +1392,12 @@
       "disabled": "ਬੰਦ",
       "addOverrideButton": "ਓਵਰਰਾਈਡ ਸ਼ਾਮਲ ਕਰੋ",
       "activeOverrides": "ਸਰਗਰਮ ਓਵਰਰਾਈਡ ({count})",
-      "noOverrides": "ਕੋਈ ਸੰਸਥਾ-ਵਾਰ ਓਵਰਰਾਈਡ ਸੈੱਟ ਨਹੀਂ।"
+      "noOverrides": "ਕੋਈ ਸੰਸਥਾ-ਵਾਰ ਓਵਰਰਾਈਡ ਸੈੱਟ ਨਹੀਂ।",
+      "semantics": "A global disable blocks everyone, even an organization override. An organization enable does not bypass its plan or billing status; it only opts that organization into a globally enabled capability.",
+      "saveError": "Could not save this operational control. Refresh and try again.",
+      "enable": "Enable",
+      "disable": "Disable",
+      "removeOverride": "Remove"
     },
     "aiConfig": {
       "title": "LLM ਪ੍ਰਦਾਤਾ",
@@ -1435,7 +1440,10 @@
         "featureLabel": {
           "translation": "ਅਨੁਵਾਦ"
         }
-      }
+      },
+      "selectModel": "Select a model…",
+      "savedModel": "{model} (currently saved; not in latest catalog)",
+      "refreshModels": "Refresh"
     },
     "health": {
       "title": "ਗਾਹਕ ਸਿਹਤ",

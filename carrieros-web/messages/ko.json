@@ -1268,7 +1268,12 @@
       "disabled": "비활성화됨",
       "addOverrideButton": "재정의 추가",
       "activeOverrides": "활성 재정의({count})",
-      "noOverrides": "설정된 조직별 재정의가 없습니다."
+      "noOverrides": "설정된 조직별 재정의가 없습니다.",
+      "semantics": "A global disable blocks everyone, even an organization override. An organization enable does not bypass its plan or billing status; it only opts that organization into a globally enabled capability.",
+      "saveError": "Could not save this operational control. Refresh and try again.",
+      "enable": "Enable",
+      "disable": "Disable",
+      "removeOverride": "Remove"
     },
     "aiConfig": {
       "title": "LLM 제공업체",
@@ -1311,7 +1316,10 @@
         "featureLabel": {
           "translation": "번역"
         }
-      }
+      },
+      "selectModel": "Select a model…",
+      "savedModel": "{model} (currently saved; not in latest catalog)",
+      "refreshModels": "Refresh"
     },
     "health": {
       "title": "고객 건전성",

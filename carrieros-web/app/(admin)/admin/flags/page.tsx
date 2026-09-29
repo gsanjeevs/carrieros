@@ -45,6 +45,7 @@ export default function FeatureFlagsPage() {
   const [savingOverride, setSavingOverride] = useState(false)
 
   async function load() {
+    setError('')
     try {
       const [flagsRes, orgsRes] = await Promise.all([
         fetch('/api/admin/flags'),
@@ -72,27 +73,56 @@ export default function FeatureFlagsPage() {
 
   async function toggleDefault(flagKey: string, current: boolean) {
     setToggling(flagKey)
-    await fetch('/api/admin/flags', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ flag_key: flagKey, default_enabled: !current }),
-    })
-    setToggling(null)
-    load()
+    setError('')
+    try {
+      const response = await fetch('/api/admin/flags', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ flag_key: flagKey, default_enabled: !current }),
+      })
+      if (!response.ok) throw new Error()
+      await load()
+    } catch {
+      setError(t('saveError'))
+    } finally {
+      setToggling(null)
+    }
   }
 
   async function addOverride() {
     if (!overrideOrgId || !overrideFlagKey) return
     setSavingOverride(true)
-    await fetch('/api/admin/flags/override', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ org_id: Number(overrideOrgId), flag_key: overrideFlagKey, enabled: overrideEnabled }),
-    })
-    setSavingOverride(false)
-    setOverrideOrgId('')
-    setOverrideFlagKey('')
-    load()
+    setError('')
+    try {
+      const response = await fetch('/api/admin/flags/override', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ org_id: Number(overrideOrgId), flag_key: overrideFlagKey, enabled: overrideEnabled }),
+      })
+      if (!response.ok) throw new Error()
+      setOverrideOrgId('')
+      setOverrideFlagKey('')
+      await load()
+    } catch {
+      setError(t('saveError'))
+    } finally {
+      setSavingOverride(false)
+    }
+  }
+
+  async function removeOverride(override: Override) {
+    setError('')
+    try {
+      const response = await fetch('/api/admin/flags/override', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ org_id: override.org_id, flag_key: override.flag_key }),
+      })
+      if (!response.ok) throw new Error()
+      await load()
+    } catch {
+      setError(t('saveError'))
+    }
   }
 
   if (error) return <div className="p-8 text-danger text-sm">{error}</div>
@@ -101,7 +131,8 @@ export default function FeatureFlagsPage() {
   return (
     <div className="p-8 max-w-3xl">
       <h1 className="text-2xl font-semibold text-text-pri mb-1">{t('title')}</h1>
-      <p className="text-text-sec text-sm mb-6">{t('subtitle')}</p>
+      <p className="text-text-sec text-sm mb-3">{t('subtitle')}</p>
+      <p className="text-text-mut text-xs mb-6">{t('semantics')}</p>
 
       <Card className="mb-6">
         {flags.map((f) => (
@@ -110,7 +141,7 @@ export default function FeatureFlagsPage() {
               <p className="text-text-pri text-sm font-medium">{f.flag_key}</p>
               <p className="text-text-mut text-xs mt-0.5">{f.description}</p>
             </div>
-            <button onClick={() => toggleDefault(f.flag_key, f.default_enabled)} disabled={toggling === f.flag_key} className="disabled:opacity-40">
+            <button aria-label={`${f.default_enabled ? t('disable') : t('enable')} ${f.flag_key}`} onClick={() => toggleDefault(f.flag_key, f.default_enabled)} disabled={toggling === f.flag_key} className="disabled:opacity-40">
               <StatusBadge variant={f.default_enabled ? 'success' : 'neutral'}>
                 {f.default_enabled ? t('enabledByDefault') : t('disabledByDefault')}
               </StatusBadge>
@@ -153,6 +184,7 @@ export default function FeatureFlagsPage() {
                 <span className="text-text-pri">{o.org_name ?? o.org_id}</span>
                 <span className="text-text-sec">{o.flag_key}</span>
                 <StatusBadge variant={o.enabled ? 'success' : 'neutral'} size="sm">{o.enabled ? t('enabled') : t('disabled')}</StatusBadge>
+                <Button variant="ghost" size="sm" onClick={() => void removeOverride(o)}>{t('removeOverride')}</Button>
               </div>
             ))}
           </div>

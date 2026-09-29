@@ -1268,7 +1268,12 @@
       "disabled": "Dezactivat",
       "addOverrideButton": "Adaugă Suprascriere",
       "activeOverrides": "Suprascrieri Active ({count})",
-      "noOverrides": "Nicio suprascriere per organizație setată."
+      "noOverrides": "Nicio suprascriere per organizație setată.",
+      "semantics": "A global disable blocks everyone, even an organization override. An organization enable does not bypass its plan or billing status; it only opts that organization into a globally enabled capability.",
+      "saveError": "Could not save this operational control. Refresh and try again.",
+      "enable": "Enable",
+      "disable": "Disable",
+      "removeOverride": "Remove"
     },
     "aiConfig": {
       "title": "Furnizor LLM",
@@ -1311,7 +1316,10 @@
         "featureLabel": {
           "translation": "Traducere"
         }
-      }
+      },
+      "selectModel": "Select a model…",
+      "savedModel": "{model} (currently saved; not in latest catalog)",
+      "refreshModels": "Refresh"
     },
     "health": {
       "title": "Sănătatea Clienților",

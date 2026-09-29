@@ -107,6 +107,8 @@ export interface EntitlementSnapshot {
   readonly limits: readonly UsageLimit[]
   readonly overrides: readonly OrgOverride[]
   readonly platformFlags: readonly PlatformFlag[]
+  /** Per-organization operational rollout flags. An enable never grants above-plan access. */
+  readonly organizationFlags?: readonly PlatformFlag[]
   /**
    * Present only for organizations that are not carriers (customer/shipper
    * orgs, the ShipmentX platform org). They have no carrier_details row, which
@@ -136,13 +138,15 @@ export type DenyReason =
   | 'SUBSCRIPTION_SUSPENDED'
   | 'PAST_DUE_GRACE_EXPIRED'
   | 'DISABLED_BY_PLATFORM_FLAG'
+  | 'DISABLED_BY_ORG_FLAG'
 
 /**
  * The decision. Order matters and is deliberate:
  *
- *   1. Platform kill switch   — operational stop beats every commercial grant.
- *   2. Capability exists      — unknown key denies (fail closed).
- *   3. Org is a carrier       — non-carrier orgs have no subscription at all.
+ *   1. Platform kill switch   — global operational stop beats every org flag and commercial grant.
+ *   2. Org operational flag   — can turn a capability off, but never grant it.
+ *   3. Capability exists      — unknown key denies (fail closed).
+ *   4. Org is a carrier       — non-carrier orgs have no subscription at all.
  *   4. Explicit deny override — an operator's "no" beats the package.
  *   5. Subscription standing  — canceled/suspended/expired stop here...
  *   6. ...unless retained     — billing/export survive delinquency.
@@ -165,6 +169,15 @@ export function decideEntitlement(
       allowed: false,
       reason: 'DISABLED_BY_PLATFORM_FLAG',
       detail: `Capability ${capabilityKey} is disabled platform-wide`,
+    }
+  }
+
+  const organizationFlag = snapshot.organizationFlags?.find((f) => f.key === capabilityKey)
+  if (organizationFlag && !organizationFlag.enabled) {
+    return {
+      allowed: false,
+      reason: 'DISABLED_BY_ORG_FLAG',
+      detail: `Capability ${capabilityKey} is disabled for this organization`,
     }
   }
 

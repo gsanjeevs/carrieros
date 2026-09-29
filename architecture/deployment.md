@@ -79,6 +79,13 @@ steps above.
 
 1. **Supabase**: project `ddwgnsheafuuzzepqxsf` created, all 24 migrations applied, seeded with demo
    data matching local dev (`node carrieros-web/scripts/seed-staging-demo.mjs`).
+   **Passkeys/WebAuthn**: the checked-in `supabase/config.toml` is local-only and sets RP ID/origin to
+   `localhost`. Staging uses the hosted Supabase project, so configure its Auth WebAuthn settings
+   separately: RP ID `ca-aa167deb702e4a338c4370ff70576195.ecs.us-east-1.on.aws` and allowed origin
+   `https://ca-aa167deb702e4a338c4370ff70576195.ecs.us-east-1.on.aws`. A browser origin mismatch is
+   rejected by WebAuthn before app code can complete registration/sign-in. Verify this setting in
+   the Supabase project before claiming passkeys work on staging; production will need its own RP
+   settings when that environment exists.
 2. **AWS**: ECR repo `carrieros-web`, 2 IAM roles (`carrieros-ecsTaskExecutionRole`,
    `carrieros-ecsInfrastructureRole` — the latter needed an extra inline policy beyond AWS's own
    documented managed policy, see the memory file linked above), a new default VPC (the account had

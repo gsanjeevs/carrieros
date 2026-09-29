@@ -1392,7 +1392,12 @@
       "disabled": "Desactivada",
       "addOverrideButton": "Agregar excepción",
       "activeOverrides": "Excepciones activas ({count})",
-      "noOverrides": "No se han definido excepciones por organización."
+      "noOverrides": "No se han definido excepciones por organización.",
+      "semantics": "A global disable blocks everyone, even an organization override. An organization enable does not bypass its plan or billing status; it only opts that organization into a globally enabled capability.",
+      "saveError": "Could not save this operational control. Refresh and try again.",
+      "enable": "Enable",
+      "disable": "Disable",
+      "removeOverride": "Remove"
     },
     "aiConfig": {
       "title": "Proveedor de LLM",
@@ -1435,7 +1440,10 @@
         "featureLabel": {
           "translation": "Traducción"
         }
-      }
+      },
+      "selectModel": "Select a model…",
+      "savedModel": "{model} (currently saved; not in latest catalog)",
+      "refreshModels": "Refresh"
     },
     "health": {
       "title": "Salud del cliente",

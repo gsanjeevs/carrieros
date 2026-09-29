@@ -45,3 +45,31 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ org_id: orgId, flag_key: flagKey, enabled })
 }
+
+export async function DELETE(request: NextRequest) {
+  const ctx = await requireAdminRole(request, 'admin_flags')
+  if (isErrorResponse(ctx)) return ctx
+  const { admin, userId } = ctx
+  const body = await request.json()
+  const orgId = Number(body?.org_id)
+  const flagKey = body?.flag_key
+  if (!Number.isInteger(orgId)) return apiError('VALIDATION_ERROR', 'org_id must be an integer', 400)
+  if (typeof flagKey !== 'string' || !flagKey) return apiError('VALIDATION_ERROR', 'flag_key is required', 400)
+
+  const { data, error } = await admin.from('org_flag_overrides').delete()
+    .eq('org_id', orgId).eq('flag_key', flagKey).select('org_id').maybeSingle()
+  if (error) {
+    logError({ route: 'admin/flags/override DELETE', requestId: request.headers.get('x-request-id') }, error)
+    return apiError('SERVER_ERROR', error.message, 500)
+  }
+  if (!data) return apiError('NOT_FOUND', 'No organization override exists', 404)
+
+  const { error: auditError } = await admin.from('admin_events').insert({
+    org_id: orgId,
+    admin_id: userId,
+    event_type: 'admin.flag_edit',
+    metadata: { flag_key: flagKey, scope: 'organization', override: 'removed' },
+  })
+  if (auditError) logError({ route: 'admin/flags/override DELETE audit', requestId: request.headers.get('x-request-id') }, auditError)
+  return NextResponse.json({ org_id: orgId, flag_key: flagKey, removed: true })
+}

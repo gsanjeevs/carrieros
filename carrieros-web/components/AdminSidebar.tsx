@@ -47,7 +47,7 @@ const NAV_ITEMS: NavItem[] = [
   // don't hold that tenant capability) since all three sx_* roles hold
   // 'admin', same as triage/health/audit above — every platform-staff user
   // manages their own credentials, not just some.
-  { labelKey: 'security', href: '/settings/security', icon: 'passkey',   capability: 'admin' },
+  { labelKey: 'security', href: '/admin/security', icon: 'passkey',   capability: 'admin' },
 ]
 
 export default function AdminSidebar({ role, userName }: { role: string; userName: string }) {

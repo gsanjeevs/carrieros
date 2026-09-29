@@ -1268,7 +1268,12 @@
       "disabled": "已禁用",
       "addOverrideButton": "添加覆盖设置",
       "activeOverrides": "生效的覆盖设置（{count}）",
-      "noOverrides": "未设置任何按组织的覆盖设置。"
+      "noOverrides": "未设置任何按组织的覆盖设置。",
+      "semantics": "A global disable blocks everyone, even an organization override. An organization enable does not bypass its plan or billing status; it only opts that organization into a globally enabled capability.",
+      "saveError": "Could not save this operational control. Refresh and try again.",
+      "enable": "Enable",
+      "disable": "Disable",
+      "removeOverride": "Remove"
     },
     "aiConfig": {
       "title": "LLM 提供商",
@@ -1311,7 +1316,10 @@
         "featureLabel": {
           "translation": "翻译"
         }
-      }
+      },
+      "selectModel": "Select a model…",
+      "savedModel": "{model} (currently saved; not in latest catalog)",
+      "refreshModels": "Refresh"
     },
     "health": {
       "title": "客户健康度",
