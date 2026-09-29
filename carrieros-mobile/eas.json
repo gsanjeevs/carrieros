@@ -16,6 +16,7 @@
       "env": {
         "EXPO_PUBLIC_APP_ENV": "staging",
         "EXPO_PUBLIC_SUPABASE_URL": "https://ddwgnsheafuuzzepqxsf.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_vU6J6CuSSGOSZsTbOqqaVw_Iukbva_8",
         "EXPO_PUBLIC_API_URL": "https://ca-aa167deb702e4a338c4370ff70576195.ecs.us-east-1.on.aws"
       }
     },

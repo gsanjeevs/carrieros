@@ -195,10 +195,9 @@ needs the GitHub App's permission scope extended first, not just a flag flip.
   no EAS project has been registered and `expo.extra.eas.projectId` doesn't exist yet in `app.json`.
   Whoever does have EAS credentials should run `eas login` then `eas init` from `carrieros-mobile/`
   (idempotent — safe to run once) before the `staging`/`production` build profiles can actually be
-  used with `eas build`. Note `eas.json`'s `staging` profile also has no
-  `EXPO_PUBLIC_SUPABASE_ANON_KEY` — it isn't in the file at all yet, not just a placeholder — so that
-  still needs to be supplied via an EAS environment variable (or added to the profile) before a real
-  staging build can authenticate against Supabase. `production`'s `REPLACE_WITH_*` values are left
+  used with `eas build`. `eas.json`'s `staging` profile now also has
+  `EXPO_PUBLIC_SUPABASE_ANON_KEY` set to the staging project's publishable key (safe to commit — not
+  secret, same key `buildspec.yml` uses for the web build). `production`'s `REPLACE_WITH_*` values are left
   untouched — no production Supabase project or web URL exists yet (see above).
 - **Error tracking (Sentry)** — deliberately deferred; the web SDK is wired but inert with no DSN set.
 - **`POST /api/cron/send-reminders` has no scheduler.** AWS EventBridge Scheduler hitting this route
