@@ -7,7 +7,7 @@ for how it was built and the real gotchas hit along the way).
 | | Database | Web | Mobile |
 |---|---|---|---|
 | local | `supabase start` (Docker) | `next dev` | Expo dev server |
-| staging | Supabase project `ddwgnsheafuuzzepqxsf` | AWS ECS Express Mode | not yet pointed at staging |
+| staging | Supabase project `ddwgnsheafuuzzepqxsf` | AWS ECS Express Mode | `eas.json`'s `staging` profile points at staging; no EAS project registered yet |
 | production | not set up | not set up | not set up |
 
 `carrieros-web` runs as a **container** (`Dockerfile`, multi-stage, `output: "standalone"`), not on a
@@ -132,8 +132,21 @@ needs the GitHub App's permission scope extended first, not just a flag flip.
 
 - **Production** — no second Supabase project, no second ECS service, no approval-gate environment.
   Deliberately deferred until staging's been used for a while.
-- **Mobile** — `carrieros-mobile`'s `EXPO_PUBLIC_API_URL` still points at local dev, not staging.
-  `eas init` hasn't been run; `carrieros-mobile/eas.json`'s `REPLACE_WITH_*` values are still placeholders.
+- **Mobile — EAS project registration (2026-09-29)**: `carrieros-mobile/eas.json`'s `staging` build
+  profile now points `EXPO_PUBLIC_API_URL` at `https://ca-aa167deb702e4a338c4370ff70576195.ecs.us-east-1.on.aws`
+  (the same staging ECS gateway the web app uses) and `EXPO_PUBLIC_SUPABASE_URL` at
+  `https://ddwgnsheafuuzzepqxsf.supabase.co` (the same staging Supabase project) — the local `.env`
+  default (`http://localhost:3000` / local Supabase) is untouched, so `expo start` still targets local
+  dev by default. `eas init` has **not** been run — `eas whoami` on this machine returned "Not logged
+  in", and `eas login` needs an interactive browser/credential flow no agent session can complete, so
+  no EAS project has been registered and `expo.extra.eas.projectId` doesn't exist yet in `app.json`.
+  Whoever does have EAS credentials should run `eas login` then `eas init` from `carrieros-mobile/`
+  (idempotent — safe to run once) before the `staging`/`production` build profiles can actually be
+  used with `eas build`. Note `eas.json`'s `staging` profile also has no
+  `EXPO_PUBLIC_SUPABASE_ANON_KEY` — it isn't in the file at all yet, not just a placeholder — so that
+  still needs to be supplied via an EAS environment variable (or added to the profile) before a real
+  staging build can authenticate against Supabase. `production`'s `REPLACE_WITH_*` values are left
+  untouched — no production Supabase project or web URL exists yet (see above).
 - **Email (SMTP)** — deliberately deferred; staging has no SMTP configured, so anything that sends an
   email (e.g. the customer-portal invite flow) will fail at that step. Confirmed via the Playwright
   suite (`PLAYWRIGHT_BASE_URL=<staging url> npx playwright test`) — 5/6 passing, the 6th fails only on

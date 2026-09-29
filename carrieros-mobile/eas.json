@@ -15,8 +15,8 @@
       "channel": "staging",
       "env": {
         "EXPO_PUBLIC_APP_ENV": "staging",
-        "EXPO_PUBLIC_SUPABASE_URL": "REPLACE_WITH_STAGING_SUPABASE_URL",
-        "EXPO_PUBLIC_API_URL": "REPLACE_WITH_STAGING_WEB_URL"
+        "EXPO_PUBLIC_SUPABASE_URL": "https://ddwgnsheafuuzzepqxsf.supabase.co",
+        "EXPO_PUBLIC_API_URL": "https://ca-aa167deb702e4a338c4370ff70576195.ecs.us-east-1.on.aws"
       }
     },
     "production": {
