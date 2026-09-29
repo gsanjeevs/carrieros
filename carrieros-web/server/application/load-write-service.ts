@@ -17,19 +17,23 @@ export class LoadWriteService {
 
   async create(actor: ActorContext, input: CreateLoadInput, idempotencyKey: string): Promise<Result<{ loadNumber: string }>> {
     if (!roleHasCapability(actor.role, 'loads_manage')) return err(forbidden('This role cannot create loads', { role: actor.role }))
+    // pickup_date/delivery_date are real DATE columns - an empty string (what
+    // an unfilled form field sends) is not a valid date and Postgres rejects
+    // it outright ("invalid input syntax for type date"), unlike the other
+    // fields here which are free-text and fine as ''. Coerce blank to null.
     const record: CreateLoadRecord = {
       customer_name_raw: input.customer_name_raw ?? null,
       pickup_address: input.pickup_address ?? null,
       pickup_city: input.pickup_city ?? null,
       pickup_state: input.pickup_state ?? null,
       pickup_zip: input.pickup_zip ?? null,
-      pickup_date: input.pickup_date ?? null,
+      pickup_date: input.pickup_date || null,
       pickup_time: input.pickup_time ?? null,
       delivery_address: input.delivery_address ?? null,
       delivery_city: input.delivery_city ?? null,
       delivery_state: input.delivery_state ?? null,
       delivery_zip: input.delivery_zip ?? null,
-      delivery_date: input.delivery_date ?? null,
+      delivery_date: input.delivery_date || null,
       delivery_time: input.delivery_time ?? null,
       commodity: input.commodity ?? null,
       weight_lbs: input.weight_lbs ?? null,
