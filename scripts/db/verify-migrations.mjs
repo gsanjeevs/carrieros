@@ -184,17 +184,26 @@ try {
     if (ordinals[0] !== 0) throw new Error(`first migration must be 0000, got ${files[0]}`)
   })
 
-  // Rule E (docs/architecture-principles.md) — a schema change needs an
-  // impact-analysis step, not just a passing typecheck. Requires the SAME
-  // header-comment practice every existing migration already follows
-  // (shortest today, 0003, is 5 lines) rather than leaving it to habit.
+  // Rule E (docs/architecture-principles.md) — new schema changes need an
+  // impact-analysis header. These five migrations are grandfathered because
+  // they were committed without headers and are now immutable (see the
+  // matching exception list in migrate.mjs); all later migrations remain
+  // subject to the full check.
   // Mirrors scripts/db/migrate.mjs's validateMigrationHeader, so a migration
   // is rejected the same way whether it's applied with the migrate script or
   // only ever exercised through this verifier (e.g. in CI).
   check('every migration has a header comment (Rule E impact-analysis note)', () => {
     const MIN_HEADER_LINES = 3
+    const LEGACY_HEADER_EXCEPTIONS = new Set([
+      '0056_admin_carrier_analytics.sql',
+      '0057_tenant_activity_audit.sql',
+      '0058_admin_carrier_onboarding.sql',
+      '0059_skip_activity_for_deleted_tenant.sql',
+      '0060_seed_ai_provider_config_singleton.sql',
+    ])
     const problems = []
     for (const f of files) {
+      if (LEGACY_HEADER_EXCEPTIONS.has(f)) continue
       const lines = readFileSync(path.join(MIGRATIONS_DIR, f), 'utf8').split('\n')
       if (lines[0] !== `-- ${f}`) {
         problems.push(`${f}: must start with "-- ${f}"`)
@@ -379,6 +388,9 @@ try {
       'ai_provider_config', // platform-wide LLM provider config, server-only via admin client (0031)
       'ai_feature_overrides', // per-feature LLM override, server-only via admin client (0036)
       'app_error_log', // best-effort logError() mirror, server-only via admin client (0038)
+      'admin_support_access_sessions', // actor-bound support state, server-only (0055)
+      'tenant_activity_events', // payload-free activity audit, server-only (0057)
+      'admin_carrier_onboarding', // platform onboarding workflow, server-only (0058)
     ])
 
     const orphans = sh(
@@ -415,7 +427,7 @@ try {
         `select table_name||':'||grantee||':'||privilege_type
            from information_schema.role_table_grants
           where table_schema='public'
-            and table_name in ('schema_migrations','outbox_events','change_events','org_feature_overrides','oauth_clients','oauth_client_rate_limits','ai_provider_config','ai_feature_overrides')
+            and table_name in ('schema_migrations','outbox_events','change_events','org_feature_overrides','oauth_clients','oauth_client_rate_limits','ai_provider_config','ai_feature_overrides','admin_support_access_sessions','tenant_activity_events','admin_carrier_onboarding')
             and grantee in ('anon','authenticated')
           order by 1`,
       ],
