@@ -1268,7 +1268,12 @@
       "disabled": "Dezaktive",
       "addOverrideButton": "Ajoute Anilman",
       "activeOverrides": "Anilman Aktif ({count})",
-      "noOverrides": "Pa gen anilman pa òganizasyon ki konfigire."
+      "noOverrides": "Pa gen anilman pa òganizasyon ki konfigire.",
+      "semantics": "A global disable blocks everyone, even an organization override. An organization enable does not bypass its plan or billing status; it only opts that organization into a globally enabled capability.",
+      "saveError": "Could not save this operational control. Refresh and try again.",
+      "enable": "Enable",
+      "disable": "Disable",
+      "removeOverride": "Remove"
     },
     "aiConfig": {
       "title": "Founisè LLM",
@@ -1311,7 +1316,10 @@
         "featureLabel": {
           "translation": "Tradiksyon"
         }
-      }
+      },
+      "selectModel": "Select a model…",
+      "savedModel": "{model} (currently saved; not in latest catalog)",
+      "refreshModels": "Refresh"
     },
     "health": {
       "title": "Sante Kliyan",

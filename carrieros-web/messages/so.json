@@ -1268,7 +1268,12 @@
       "disabled": "La xiray",
       "addOverrideButton": "Ku dar Hakinta",
       "activeOverrides": "Hakinnada Firfircoon ({count})",
-      "noOverrides": "Wax hakin ururka gaar ah ah lama dejin."
+      "noOverrides": "Wax hakin ururka gaar ah ah lama dejin.",
+      "semantics": "A global disable blocks everyone, even an organization override. An organization enable does not bypass its plan or billing status; it only opts that organization into a globally enabled capability.",
+      "saveError": "Could not save this operational control. Refresh and try again.",
+      "enable": "Enable",
+      "disable": "Disable",
+      "removeOverride": "Remove"
     },
     "aiConfig": {
       "title": "Bixiyaha LLM",
@@ -1311,7 +1316,10 @@
         "featureLabel": {
           "translation": "Turjumaad"
         }
-      }
+      },
+      "selectModel": "Select a model…",
+      "savedModel": "{model} (currently saved; not in latest catalog)",
+      "refreshModels": "Refresh"
     },
     "health": {
       "title": "Caafimaadka Macmiilka",

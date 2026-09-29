@@ -64,8 +64,8 @@ const scenarios: Scenario[] = [
   { name: 'canceled beats a grant', tier: 'growth', status: 'canceled', override: { effect: 'grant', expiresInDays: null }, expect: { allowed: false, reason: 'SUBSCRIPTION_CANCELED' } },
   { name: 'canceled but retained feature', key: RETAINED, tier: 'growth', status: 'canceled', expect: { allowed: true, reason: 'RETAINED_WHILE_DELINQUENT' } },
   { name: 'platform flag off by default', tier: 'growth', status: 'active', flag: { defaultEnabled: false }, expect: { allowed: false, reason: 'DISABLED_BY_PLATFORM_FLAG' } },
-  { name: 'platform flag off, enabled for this org', tier: 'growth', status: 'active', flag: { defaultEnabled: false, orgEnabled: true }, expect: { allowed: true, reason: 'INCLUDED_IN_TIER' } },
-  { name: 'platform flag on, disabled for this org', tier: 'growth', status: 'active', flag: { defaultEnabled: true, orgEnabled: false }, expect: { allowed: false, reason: 'DISABLED_BY_PLATFORM_FLAG' } },
+  { name: 'platform kill switch off cannot be re-enabled for this org', tier: 'growth', status: 'active', flag: { defaultEnabled: false, orgEnabled: true }, expect: { allowed: false, reason: 'DISABLED_BY_PLATFORM_FLAG' } },
+  { name: 'platform flag on, disabled for this org', tier: 'growth', status: 'active', flag: { defaultEnabled: true, orgEnabled: false }, expect: { allowed: false, reason: 'DISABLED_BY_ORG_FLAG' } },
   { name: 'unknown capability', key: 'zz_parity_missing', tier: 'enterprise', status: 'active', expect: { allowed: false, reason: 'UNKNOWN_CAPABILITY' } },
   { name: 'customer org has no subscription', tier: 'enterprise', org: 'customer', expect: { allowed: false, reason: 'NOT_A_CARRIER_ORG' } },
 ]
@@ -114,7 +114,8 @@ describe.each(scenarios)('$name', (s) => {
       capabilities: [cap, { key: asCapabilityKey(RETAINED), minTier: 'growth', retainedWhenDelinquent: true }],
       limits: [],
       overrides: s.override ? [{ capability: asCapabilityKey(key), effect: s.override.effect, expiresAt: at(s.override.expiresInDays), reason: 'parity test' }] : [],
-      platformFlags: s.flag ? [{ key, enabled: s.flag.orgEnabled ?? s.flag.defaultEnabled }] : [],
+      platformFlags: s.flag ? [{ key, enabled: s.flag.defaultEnabled }] : [],
+      organizationFlags: s.flag?.orgEnabled === false ? [{ key, enabled: false }] : [],
       isCarrierOrg: s.org !== 'customer',
     }
     const ts = decideEntitlement(snapshot, asCapabilityKey(key), new Date(now))

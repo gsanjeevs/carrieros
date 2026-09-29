@@ -1268,7 +1268,12 @@
       "disabled": "Đã tắt",
       "addOverrideButton": "Thêm Ghi đè",
       "activeOverrides": "Ghi đè Đang hoạt động ({count})",
-      "noOverrides": "Không có ghi đè theo tổ chức nào được thiết lập."
+      "noOverrides": "Không có ghi đè theo tổ chức nào được thiết lập.",
+      "semantics": "A global disable blocks everyone, even an organization override. An organization enable does not bypass its plan or billing status; it only opts that organization into a globally enabled capability.",
+      "saveError": "Could not save this operational control. Refresh and try again.",
+      "enable": "Enable",
+      "disable": "Disable",
+      "removeOverride": "Remove"
     },
     "aiConfig": {
       "title": "Nhà cung cấp LLM",
@@ -1311,7 +1316,10 @@
         "featureLabel": {
           "translation": "Dịch thuật"
         }
-      }
+      },
+      "selectModel": "Select a model…",
+      "savedModel": "{model} (currently saved; not in latest catalog)",
+      "refreshModels": "Refresh"
     },
     "health": {
       "title": "Sức khỏe Khách hàng",

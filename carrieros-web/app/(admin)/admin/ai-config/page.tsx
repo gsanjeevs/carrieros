@@ -46,6 +46,27 @@ export default function AiConfigPage() {
   const [provider, setProvider] = useState<Provider>('openai')
   const [model, setModel] = useState('')
   const [baseUrl, setBaseUrl] = useState('')
+  const [models, setModels] = useState<string[]>([])
+  const [modelsLoading, setModelsLoading] = useState(false)
+  const [modelsError, setModelsError] = useState('')
+
+  async function loadModels(targetProvider = provider, targetBaseUrl = baseUrl) {
+    setModelsLoading(true)
+    setModelsError('')
+    try {
+      const query = new URLSearchParams({ provider: targetProvider })
+      if (targetProvider === 'openai_compatible' && targetBaseUrl) query.set('base_url', targetBaseUrl)
+      const res = await fetch(`/api/admin/ai-config/models?${query}`)
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error?.message ?? 'Could not load model catalog')
+      setModels(Array.isArray(json.models) ? json.models : [])
+    } catch (err) {
+      setModels([])
+      setModelsError(err instanceof Error ? err.message : 'Could not load model catalog')
+    } finally {
+      setModelsLoading(false)
+    }
+  }
 
   // Keyed by bodyField ('anthropic_api_key', etc). A non-empty string here means "set/rotate this
   // key on save"; `clear[bodyField] = true` means "remove the stored key on save" — the two are
@@ -63,6 +84,7 @@ export default function AiConfigPage() {
       setProvider(c.provider)
       setModel(c.model)
       setBaseUrl(c.compatible_base_url ?? '')
+      await loadModels(c.provider, c.compatible_base_url ?? '')
     } catch {
       setError(t('error'))
     }
@@ -132,7 +154,11 @@ export default function AiConfigPage() {
 
       <Card className="p-5 flex flex-col gap-4">
         <Field label={t('providerLabel')} required>
-          <Input as="select" value={provider} onChange={(e) => setProvider(e.target.value as Provider)}>
+          <Input as="select" value={provider} onChange={(e) => {
+            const next = e.target.value as Provider
+            setProvider(next)
+            void loadModels(next, baseUrl)
+          }}>
             <option value="openai">{t('providerOpenai')}</option>
             <option value="anthropic">{t('providerAnthropic')}</option>
             <option value="openai_compatible">{t('providerOpenaiCompatible')}</option>
@@ -140,7 +166,17 @@ export default function AiConfigPage() {
         </Field>
 
         <Field label={t('modelLabel')} required hint={t('modelHint')}>
-          <Input value={model} onChange={(e) => setModel(e.target.value)} placeholder="gpt-5-mini" />
+          <div className="flex gap-2">
+            <Input as="select" value={model} onChange={(e) => setModel(e.target.value)} className="flex-1">
+              {!model && <option value="">{t('selectModel')}</option>}
+              {model && !models.includes(model) && <option value={model}>{t('savedModel', { model })}</option>}
+              {models.map((id) => <option key={id} value={id}>{id}</option>)}
+            </Input>
+            <Button type="button" variant="secondary" size="sm" onClick={() => void loadModels()} disabled={modelsLoading} loading={modelsLoading}>
+              {t('refreshModels')}
+            </Button>
+          </div>
+          {modelsError && <p className="text-danger text-xs mt-1">{modelsError}</p>}
         </Field>
 
         {provider === 'openai_compatible' && (

@@ -236,6 +236,27 @@ describe('fail-closed behaviour', () => {
     if (d.allowed) throw new Error('unreachable')
     expect(d.reason).toBe('DISABLED_BY_PLATFORM_FLAG')
   })
+
+  it('a global disable cannot be bypassed by an organization enable', () => {
+    const d = decideEntitlement(snapshot({
+      tier: 'enterprise',
+      platformFlags: [{ key: DRIVER_CHAT, enabled: false }],
+      organizationFlags: [{ key: DRIVER_CHAT, enabled: true }],
+    }), DRIVER_CHAT, NOW)
+    expect(d.allowed).toBe(false)
+    if (d.allowed) throw new Error('unreachable')
+    expect(d.reason).toBe('DISABLED_BY_PLATFORM_FLAG')
+  })
+
+  it('an organization operational enable does not grant a capability above its tier', () => {
+    const d = decideEntitlement(snapshot({
+      tier: 'starter',
+      organizationFlags: [{ key: DRIVER_CHAT, enabled: true }],
+    }), DRIVER_CHAT, NOW)
+    expect(d.allowed).toBe(false)
+    if (d.allowed) throw new Error('unreachable')
+    expect(d.reason).toBe('TIER_TOO_LOW')
+  })
 })
 
 describe('usage limits', () => {

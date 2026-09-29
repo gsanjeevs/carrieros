@@ -1268,7 +1268,12 @@
       "disabled": "Унтраалттай",
       "addOverrideButton": "Давхардал нэмэх",
       "activeOverrides": "Идэвхтэй давхардлууд ({count})",
-      "noOverrides": "Байгууллага тус бүрийн давхардал тохируулагдаагүй байна."
+      "noOverrides": "Байгууллага тус бүрийн давхардал тохируулагдаагүй байна.",
+      "semantics": "A global disable blocks everyone, even an organization override. An organization enable does not bypass its plan or billing status; it only opts that organization into a globally enabled capability.",
+      "saveError": "Could not save this operational control. Refresh and try again.",
+      "enable": "Enable",
+      "disable": "Disable",
+      "removeOverride": "Remove"
     },
     "aiConfig": {
       "title": "LLM үйлчилгээ үзүүлэгч",
@@ -1311,7 +1316,10 @@
         "featureLabel": {
           "translation": "Орчуулга"
         }
-      }
+      },
+      "selectModel": "Select a model…",
+      "savedModel": "{model} (currently saved; not in latest catalog)",
+      "refreshModels": "Refresh"
     },
     "health": {
       "title": "Захиалагчийн эрүүл байдал",

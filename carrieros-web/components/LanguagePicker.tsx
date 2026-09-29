@@ -17,6 +17,7 @@
 // border-ui, text-pri/sec/mut, brand-orange focus ring), a focus trap while
 // open, Escape-to-close, arrow-key navigation, and Enter-to-select.
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { cn } from './ui/cn'
 
 export interface LanguageOption {
@@ -64,9 +65,11 @@ export default function LanguagePicker({
   const [activeIndex, setActiveIndex] = useState(0)
 
   const containerRef = useRef<HTMLDivElement>(null)
+  const popupRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLUListElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
+  const [popupStyle, setPopupStyle] = useState<React.CSSProperties | null>(null)
 
   const selected = useMemo(() => languages.find((l) => l.code === value) ?? null, [languages, value])
   const filtered = useMemo(() => languages.filter((l) => matches(l, query)), [languages, query])
@@ -103,7 +106,7 @@ export default function LanguagePicker({
     if (!open) return
 
     function handlePointerDown(e: MouseEvent) {
-      if (!containerRef.current?.contains(e.target as Node)) {
+      if (!containerRef.current?.contains(e.target as Node) && !popupRef.current?.contains(e.target as Node)) {
         setOpen(false)
       }
     }
@@ -121,6 +124,34 @@ export default function LanguagePicker({
       document.removeEventListener('keydown', handleKeyDown)
     }
   }, [open])
+
+  // The sidebar picker sits at the bottom of a fixed-height app shell. A
+  // regular absolute popup is clipped there, so render it in a body portal
+  // and position it above the trigger when there is not enough room below.
+  useEffect(() => {
+    if (!open) return
+    const updatePosition = () => {
+      const trigger = triggerRef.current
+      const popup = popupRef.current
+      if (!trigger || !popup) return
+      const rect = trigger.getBoundingClientRect()
+      const height = popup.offsetHeight
+      const gap = 6
+      const top = rect.bottom + height + gap <= window.innerHeight
+        ? rect.bottom + gap
+        : Math.max(8, rect.top - height - gap)
+      const left = Math.max(8, Math.min(rect.left, window.innerWidth - popup.offsetWidth - 8))
+      setPopupStyle({ position: 'fixed', top, left })
+    }
+    const frame = requestAnimationFrame(updatePosition)
+    window.addEventListener('resize', updatePosition)
+    window.addEventListener('scroll', updatePosition, true)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('resize', updatePosition)
+      window.removeEventListener('scroll', updatePosition, true)
+    }
+  }, [open, filtered.length])
 
   function handleSearchKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'ArrowDown') {
@@ -174,10 +205,12 @@ export default function LanguagePicker({
         </span>
       </button>
 
-      {open && (
+      {open && typeof document !== 'undefined' && createPortal(
         <div
+          ref={popupRef}
+          style={popupStyle ?? { position: 'fixed', top: 8, left: 8, visibility: 'hidden' }}
           className={cn(
-            'absolute z-[1300] mt-1 w-72 max-w-[90vw] overflow-hidden rounded-xl border border-border-ui',
+            'z-[1300] w-72 max-w-[90vw] overflow-hidden rounded-xl border border-border-ui',
             'bg-surface-card shadow-[var(--shadow-modal)]'
           )}
         >
@@ -238,7 +271,8 @@ export default function LanguagePicker({
               )
             })}
           </ul>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

@@ -34,6 +34,7 @@ beforeAll(async () => {
 })
 afterAll(async () => {
   for (const k of createdFlags) await admin.from('platform_flags').delete().eq('flag_key', k)
+  await admin.from('org_feature_overrides').delete().eq('org_id', carrier.orgId)
   await admin.from('driver_messages').delete().eq('carrier_org_id', carrier.orgId)
   await admin.from('admin_events').delete().eq('org_id', carrier.orgId)
   await cleanupTestOrg(admin, carrier.orgId)
@@ -115,14 +116,28 @@ describe('org_flag_overrides / platform_flags actually change entitlements?', ()
     await admin.from('org_flag_overrides').delete().eq('org_id', carrier.orgId)
   })
   it('a global platform kill switch (default_enabled=false) blocks driver_chat for everyone', async () => {
+    await admin.from('carrier_details').update({ tier: 'growth', billing_status: 'active' }).eq('org_id', carrier.orgId)
     await admin.from('platform_flags').update({ default_enabled: false }).eq('flag_key', 'driver_chat')
-    expect(await hf(), 'kill switch ignored by has_feature').toBe(false)
-  })
-  it('a GRANT override (enabled=true) gives a starter org a growth feature', async () => {
-    await admin.from('carrier_details').update({ tier: 'starter' }).eq('org_id', carrier.orgId)
     await admin.from('org_flag_overrides').upsert({ org_id: carrier.orgId, flag_key: 'driver_chat', enabled: true })
-    expect(await hf(), 'admin has no working way to grant a single feature short of changing tier').toBe(true)
+    expect(await hf(), 'an org enable must not bypass the global kill switch').toBe(false)
+    await admin.from('org_flag_overrides').delete().eq('org_id', carrier.orgId).eq('flag_key', 'driver_chat')
+    await admin.from('platform_flags').update({ default_enabled: true }).eq('flag_key', 'driver_chat')
+  })
+  it('operational enable does not grant a commercial feature above the plan', async () => {
+    await admin.from('carrier_details').update({ tier: 'starter' }).eq('org_id', carrier.orgId)
+    await admin.from('platform_flags').update({ default_enabled: true }).eq('flag_key', 'driver_chat')
+    await admin.from('org_flag_overrides').upsert({ org_id: carrier.orgId, flag_key: 'driver_chat', enabled: true })
+    expect(await hf(), 'an operational rollout override must not bypass the plan').toBe(false)
+    const grant = await admin.from('org_feature_overrides').upsert({
+      org_id: carrier.orgId,
+      feature_key: 'driver_chat',
+      effect: 'grant',
+      reason: 'regression test',
+    })
+    expect(grant.error).toBeNull()
+    expect(await hf(), 'the commercial feature override is the separate mechanism that grants it').toBe(true)
     await admin.from('org_flag_overrides').delete().eq('org_id', carrier.orgId)
+    await admin.from('org_feature_overrides').delete().eq('org_id', carrier.orgId).eq('feature_key', 'driver_chat')
   })
 })
 

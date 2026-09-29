@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   const ctx = await requireAdminRole(request, 'admin_flags')
   if (isErrorResponse(ctx)) return ctx
-  const { admin } = ctx
+  const { admin, userId } = ctx
 
   const body = await request.json()
   const flagKey = body?.flag_key
@@ -50,11 +50,20 @@ export async function PATCH(request: NextRequest) {
   if (typeof defaultEnabled !== 'boolean')
     return apiError('VALIDATION_ERROR', 'default_enabled must be a boolean', 400)
 
-  const { error } = await admin.from('platform_flags').update({ default_enabled: defaultEnabled }).eq('flag_key', flagKey)
+  const { data: flag, error } = await admin.from('platform_flags').update({ default_enabled: defaultEnabled })
+    .eq('flag_key', flagKey).select('flag_key').maybeSingle()
   if (error) {
     logError({ route: 'admin/flags PATCH', requestId: request.headers.get('x-request-id') }, error)
     return apiError('SERVER_ERROR', error.message, 500)
   }
+  if (!flag) return apiError('NOT_FOUND', 'No such operational flag', 404)
+
+  const { error: auditError } = await admin.from('admin_events').insert({
+    admin_id: userId,
+    event_type: 'admin.flag_edit',
+    metadata: { flag_key: flagKey, default_enabled: defaultEnabled, scope: 'global' },
+  })
+  if (auditError) logError({ route: 'admin/flags PATCH audit', requestId: request.headers.get('x-request-id') }, auditError)
 
   return NextResponse.json({ flag_key: flagKey, default_enabled: defaultEnabled })
 }
