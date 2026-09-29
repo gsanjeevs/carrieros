@@ -3,7 +3,7 @@
 > **Generated** by `node scripts/db/gen-erd.mjs` from the live schema. Do not edit by hand:
 > change the database via a migration, then re-run the generator. CI runs it with `--check`.
 
-62 tables, 117 foreign keys, split into 7 domain diagrams (one diagram of every table is unreadable).
+65 tables, 126 foreign keys, split into 6 domain diagrams (one diagram of every table is unreadable).
 A box drawn without columns belongs to another domain; find it in its own section.
 `||` = the FK is required (NOT NULL); `|o` = the FK is optional (nullable). `PK`/`FK` mark keys.
 
@@ -179,7 +179,7 @@ erDiagram
 
 Vehicles, drivers, their documents, and maintenance.
 
-Tables: `vehicles`, `vehicle_types`, `vehicle_classifications`, `vehicle_type_classifications`, `vehicle_documents`, `drivers`, `driver_documents`, `org_documents`, `maintenance_reminders`, `service_logs`
+Tables: `vehicles`, `vehicle_types`, `vehicle_classifications`, `vehicle_type_classifications`, `vehicle_documents`, `drivers`, `driver_documents`, `org_documents`, `maintenance_reminders`, `service_logs`, `telematics_integrations`, `vehicle_locations`
 
 ```mermaid
 erDiagram
@@ -315,6 +315,27 @@ erDiagram
     text shop_name
     bigint vehicle_id FK
   }
+  telematics_integrations {
+    bigint id PK
+    text api_key_encrypted
+    bigint carrier_org_id FK
+    timestamptz created_at
+    boolean enabled
+    text provider
+    timestamptz updated_at
+    uuid updated_by FK
+    text webhook_secret_encrypted
+  }
+  vehicle_locations {
+    bigint id PK
+    bigint carrier_org_id FK
+    timestamptz created_at
+    float8 lat
+    float8 lng
+    timestamptz recorded_at
+    text source
+    bigint vehicle_id FK
+  }
   organizations |o--o{ driver_documents : "carrier_org_id"
   drivers |o--o{ driver_documents : "driver_id"
   profiles |o--o{ driver_documents : "uploaded_by"
@@ -328,9 +349,13 @@ erDiagram
   organizations |o--o{ service_logs : "carrier_org_id"
   profiles |o--o{ service_logs : "logged_by"
   vehicles |o--o{ service_logs : "vehicle_id"
+  organizations ||--o{ telematics_integrations : "carrier_org_id"
+  profiles |o--o{ telematics_integrations : "updated_by"
   organizations |o--o{ vehicle_documents : "carrier_org_id"
   profiles |o--o{ vehicle_documents : "uploaded_by"
   vehicles |o--o{ vehicle_documents : "vehicle_id"
+  organizations ||--o{ vehicle_locations : "carrier_org_id"
+  vehicles ||--o{ vehicle_locations : "vehicle_id"
   vehicle_classifications ||--o{ vehicle_type_classifications : "classification_id"
   vehicle_types ||--o{ vehicle_type_classifications : "vehicle_type_id"
   organizations ||--o{ vehicles : "carrier_org_id"
@@ -341,7 +366,7 @@ erDiagram
 
 The core shipment record, its timeline, expenses, documents (POD etc.), exceptions and driver chat.
 
-Tables: `loads`, `load_events`, `load_expenses`, `documents`, `exception_events`, `driver_messages`, `driver_message_translations`
+Tables: `loads`, `load_events`, `load_expenses`, `documents`, `exception_events`, `driver_messages`, `driver_message_translations`, `load_orders`, `loadboard_integrations`, `loadboard_postings`
 
 ```mermaid
 erDiagram
@@ -444,6 +469,47 @@ erDiagram
     timestamptz translated_at
     text translated_body
   }
+  load_orders {
+    bigint id PK
+    numeric billable_amount
+    bigint carrier_org_id FK
+    text commodity
+    timestamptz created_at
+    bigint customer_org_id FK
+    text customer_reference
+    text delivery_address
+    text delivery_city
+    date delivery_date
+    text delivery_state
+    bigint load_id FK
+    text order_number
+    text pickup_address
+    text pickup_city
+    date pickup_date
+    text pickup_state
+    text status
+    timestamptz updated_at
+    integer weight_lbs
+  }
+  loadboard_integrations {
+    bigint id PK
+    text api_key_encrypted
+    bigint carrier_org_id FK
+    timestamptz created_at
+    boolean enabled
+    text provider
+    timestamptz updated_at
+    uuid updated_by FK
+  }
+  loadboard_postings {
+    bigint id PK
+    bigint carrier_org_id FK
+    text external_posting_id
+    bigint load_id FK
+    timestamptz posted_at
+    uuid posted_by FK
+    text provider
+  }
   organizations |o--o{ documents : "carrier_org_id"
   loads |o--o{ documents : "load_id"
   profiles |o--o{ documents : "uploaded_by"
@@ -457,6 +523,14 @@ erDiagram
   organizations ||--o{ load_expenses : "carrier_org_id"
   loads ||--o{ load_expenses : "load_id"
   profiles |o--o{ load_expenses : "logged_by"
+  organizations ||--o{ load_orders : "carrier_org_id"
+  organizations ||--o{ load_orders : "customer_org_id"
+  loads ||--o{ load_orders : "load_id"
+  organizations ||--o{ loadboard_integrations : "carrier_org_id"
+  profiles |o--o{ loadboard_integrations : "updated_by"
+  organizations ||--o{ loadboard_postings : "carrier_org_id"
+  loads ||--o{ loadboard_postings : "load_id"
+  profiles |o--o{ loadboard_postings : "posted_by"
   organizations ||--o{ loads : "carrier_org_id"
   organizations |o--o{ loads : "customer_org_id"
   drivers |o--o{ loads : "driver_id"
@@ -467,7 +541,7 @@ erDiagram
 
 Customer invoices, driver settlements and their deductions, and subscription billing events.
 
-Tables: `invoices`, `driver_settlements`, `settlement_deductions`, `billing_events`
+Tables: `invoices`, `driver_settlements`, `settlement_deductions`, `billing_events`, `invoice_order_allocations`
 
 ```mermaid
 erDiagram
@@ -530,11 +604,22 @@ erDiagram
     text status
     text stripe_event_id
   }
+  invoice_order_allocations {
+    bigint id PK
+    numeric amount
+    bigint carrier_org_id FK
+    timestamptz created_at
+    bigint invoice_id FK
+    bigint load_order_id FK
+  }
   organizations ||--o{ billing_events : "org_id"
   organizations ||--o{ driver_settlements : "carrier_org_id"
   profiles |o--o{ driver_settlements : "created_by"
   drivers |o--o{ driver_settlements : "driver_id"
   loads |o--o{ driver_settlements : "load_id"
+  organizations ||--o{ invoice_order_allocations : "carrier_org_id"
+  invoices ||--o{ invoice_order_allocations : "invoice_id"
+  load_orders ||--o{ invoice_order_allocations : "load_order_id"
   organizations ||--o{ invoices : "carrier_org_id"
   organizations |o--o{ invoices : "customer_org_id"
   loads |o--o{ invoices : "load_id"
@@ -626,9 +711,9 @@ erDiagram
 
 ## Platform & infrastructure
 
-SuperAdmin activity, the tenant audit trail, transactional outbox, live-update change feed, idempotency keys, the public developer API's OAuth clients/rate limits, in-app support ticketing (decisions.md T16), the platform-wide LLM provider config (decisions.md T17), and migration bookkeeping.
+SuperAdmin activity, support access/onboarding and tenant audit trails, transactional outbox, live-update change feed, idempotency keys, public API credentials, webhooks, platform AI configuration, and migration bookkeeping.
 
-Tables: `admin_events`, `admin_notes`, `audit_events`, `outbox_events`, `change_events`, `idempotency_keys`, `oauth_clients`, `oauth_client_rate_limits`, `support_tickets`, `support_ticket_messages`, `ai_provider_config`, `schema_migrations`
+Tables: `admin_events`, `admin_notes`, `audit_events`, `outbox_events`, `change_events`, `idempotency_keys`, `oauth_clients`, `oauth_client_rate_limits`, `support_tickets`, `support_ticket_messages`, `ai_provider_config`, `schema_migrations`, `admin_carrier_onboarding`, `admin_support_access_sessions`, `tenant_activity_events`, `ai_feature_overrides`, `app_error_log`, `webhooks`, `webhook_deliveries`
 
 ```mermaid
 erDiagram
@@ -765,34 +850,42 @@ erDiagram
     integer duration_ms
     text name
   }
-  profiles |o--o{ admin_events : "admin_id"
-  organizations |o--o{ admin_events : "org_id"
-  profiles |o--o{ admin_notes : "admin_id"
-  organizations ||--o{ admin_notes : "org_id"
-  profiles |o--o{ ai_provider_config : "updated_by"
-  auth_users |o--o{ audit_events : "actor_user_id"
-  organizations ||--o{ audit_events : "org_id"
-  organizations ||--o{ idempotency_keys : "org_id"
-  auth_users ||--o{ idempotency_keys : "user_id"
-  organizations ||--o{ oauth_clients : "org_id"
-  organizations ||--o{ outbox_events : "org_id"
-  auth_users |o--o{ outbox_events : "replayed_by"
-  outbox_events |o--o{ outbox_events : "replayed_from_id"
-  organizations ||--o{ support_ticket_messages : "carrier_org_id"
-  profiles |o--o{ support_ticket_messages : "sender_id"
-  support_tickets ||--o{ support_ticket_messages : "ticket_id"
-  organizations ||--o{ support_tickets : "carrier_org_id"
-  profiles ||--o{ support_tickets : "submitted_by"
-```
-
-## Unassigned
-
-Tables not yet placed in a domain: add them to DOMAINS in scripts/db/gen-erd.mjs.
-
-Tables: `ai_feature_overrides`, `app_error_log`, `invoice_order_allocations`, `load_orders`, `loadboard_integrations`, `loadboard_postings`, `telematics_integrations`, `vehicle_locations`, `webhook_deliveries`, `webhooks`
-
-```mermaid
-erDiagram
+  admin_carrier_onboarding {
+    bigint org_id PK
+    text blocker_note
+    text contact_email
+    text contact_name
+    timestamptz created_at
+    uuid created_by FK
+    text next_action
+    timestamptz next_follow_up_at
+    timestamptz owner_invite_sent_at
+    text stage
+    timestamptz updated_at
+  }
+  admin_support_access_sessions {
+    uuid id PK
+    uuid admin_id FK
+    timestamptz ended_at
+    uuid ended_by FK
+    timestamptz expires_at
+    timestamptz last_accessed_at
+    bigint org_id FK
+    text reason
+    timestamptz started_at
+    uuid target_user_id FK
+    bigint ticket_id FK
+  }
+  tenant_activity_events {
+    bigint id PK
+    text action
+    uuid actor_user_id FK
+    text aggregate_id
+    text aggregate_type
+    timestamptz occurred_at
+    text operation
+    bigint org_id FK
+  }
   ai_feature_overrides {
     text feature PK
     text anthropic_api_key_encrypted
@@ -818,75 +911,15 @@ erDiagram
     text route
     uuid user_id FK
   }
-  invoice_order_allocations {
+  webhooks {
     bigint id PK
-    numeric amount
-    bigint carrier_org_id FK
     timestamptz created_at
-    bigint invoice_id FK
-    bigint load_order_id FK
-  }
-  load_orders {
-    bigint id PK
-    numeric billable_amount
-    bigint carrier_org_id FK
-    text commodity
-    timestamptz created_at
-    bigint customer_org_id FK
-    text customer_reference
-    text delivery_address
-    text delivery_city
-    date delivery_date
-    text delivery_state
-    bigint load_id FK
-    text order_number
-    text pickup_address
-    text pickup_city
-    date pickup_date
-    text pickup_state
-    text status
-    timestamptz updated_at
-    integer weight_lbs
-  }
-  loadboard_integrations {
-    bigint id PK
-    text api_key_encrypted
-    bigint carrier_org_id FK
-    timestamptz created_at
+    uuid created_by FK
     boolean enabled
-    text provider
-    timestamptz updated_at
-    uuid updated_by FK
-  }
-  loadboard_postings {
-    bigint id PK
-    bigint carrier_org_id FK
-    text external_posting_id
-    bigint load_id FK
-    timestamptz posted_at
-    uuid posted_by FK
-    text provider
-  }
-  telematics_integrations {
-    bigint id PK
-    text api_key_encrypted
-    bigint carrier_org_id FK
-    timestamptz created_at
-    boolean enabled
-    text provider
-    timestamptz updated_at
-    uuid updated_by FK
-    text webhook_secret_encrypted
-  }
-  vehicle_locations {
-    bigint id PK
-    bigint carrier_org_id FK
-    timestamptz created_at
-    float8 lat
-    float8 lng
-    timestamptz recorded_at
-    text source
-    bigint vehicle_id FK
+    bigint org_id FK
+    text secret
+    ARRAY subscribed_events
+    text url
   }
   webhook_deliveries {
     bigint id PK
@@ -900,34 +933,36 @@ erDiagram
     text status
     bigint webhook_id FK
   }
-  webhooks {
-    bigint id PK
-    timestamptz created_at
-    uuid created_by FK
-    boolean enabled
-    bigint org_id FK
-    text secret
-    ARRAY subscribed_events
-    text url
-  }
+  profiles ||--o{ admin_carrier_onboarding : "created_by"
+  organizations ||--o{ admin_carrier_onboarding : "org_id"
+  profiles |o--o{ admin_events : "admin_id"
+  organizations |o--o{ admin_events : "org_id"
+  profiles |o--o{ admin_notes : "admin_id"
+  organizations ||--o{ admin_notes : "org_id"
+  profiles ||--o{ admin_support_access_sessions : "admin_id"
+  profiles |o--o{ admin_support_access_sessions : "ended_by"
+  organizations ||--o{ admin_support_access_sessions : "org_id"
+  profiles ||--o{ admin_support_access_sessions : "target_user_id"
+  support_tickets |o--o{ admin_support_access_sessions : "ticket_id"
   profiles |o--o{ ai_feature_overrides : "updated_by"
+  profiles |o--o{ ai_provider_config : "updated_by"
   organizations |o--o{ app_error_log : "org_id"
   profiles |o--o{ app_error_log : "user_id"
-  organizations ||--o{ invoice_order_allocations : "carrier_org_id"
-  invoices ||--o{ invoice_order_allocations : "invoice_id"
-  load_orders ||--o{ invoice_order_allocations : "load_order_id"
-  organizations ||--o{ load_orders : "carrier_org_id"
-  organizations ||--o{ load_orders : "customer_org_id"
-  loads ||--o{ load_orders : "load_id"
-  organizations ||--o{ loadboard_integrations : "carrier_org_id"
-  profiles |o--o{ loadboard_integrations : "updated_by"
-  organizations ||--o{ loadboard_postings : "carrier_org_id"
-  loads ||--o{ loadboard_postings : "load_id"
-  profiles |o--o{ loadboard_postings : "posted_by"
-  organizations ||--o{ telematics_integrations : "carrier_org_id"
-  profiles |o--o{ telematics_integrations : "updated_by"
-  organizations ||--o{ vehicle_locations : "carrier_org_id"
-  vehicles ||--o{ vehicle_locations : "vehicle_id"
+  auth_users |o--o{ audit_events : "actor_user_id"
+  organizations ||--o{ audit_events : "org_id"
+  organizations ||--o{ idempotency_keys : "org_id"
+  auth_users ||--o{ idempotency_keys : "user_id"
+  organizations ||--o{ oauth_clients : "org_id"
+  organizations ||--o{ outbox_events : "org_id"
+  auth_users |o--o{ outbox_events : "replayed_by"
+  outbox_events |o--o{ outbox_events : "replayed_from_id"
+  organizations ||--o{ support_ticket_messages : "carrier_org_id"
+  profiles |o--o{ support_ticket_messages : "sender_id"
+  support_tickets ||--o{ support_ticket_messages : "ticket_id"
+  organizations ||--o{ support_tickets : "carrier_org_id"
+  profiles ||--o{ support_tickets : "submitted_by"
+  auth_users |o--o{ tenant_activity_events : "actor_user_id"
+  organizations ||--o{ tenant_activity_events : "org_id"
   organizations ||--o{ webhook_deliveries : "org_id"
   webhooks ||--o{ webhook_deliveries : "webhook_id"
   profiles |o--o{ webhooks : "created_by"

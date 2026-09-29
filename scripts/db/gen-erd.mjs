@@ -29,15 +29,15 @@ const DOMAINS = [
   ['Tenancy, identity & entitlements', 'Organizations (carrier / customer / platform), their users, roles and the tier/feature model that gates what each org may use.',
     ['organizations', 'carrier_details', 'customer_details', 'customer_contacts', 'profiles', 'roles', 'languages', 'role_capabilities', 'tiers', 'features', 'org_sequences', 'org_flag_overrides', 'org_feature_overrides', 'platform_flags']],
   ['Fleet', 'Vehicles, drivers, their documents, and maintenance.',
-    ['vehicles', 'vehicle_types', 'vehicle_classifications', 'vehicle_type_classifications', 'vehicle_documents', 'drivers', 'driver_documents', 'org_documents', 'maintenance_reminders', 'service_logs']],
+    ['vehicles', 'vehicle_types', 'vehicle_classifications', 'vehicle_type_classifications', 'vehicle_documents', 'drivers', 'driver_documents', 'org_documents', 'maintenance_reminders', 'service_logs', 'telematics_integrations', 'vehicle_locations']],
   ['Loads & dispatch', 'The core shipment record, its timeline, expenses, documents (POD etc.), exceptions and driver chat.',
-    ['loads', 'load_events', 'load_expenses', 'documents', 'exception_events', 'driver_messages', 'driver_message_translations']],
+    ['loads', 'load_events', 'load_expenses', 'documents', 'exception_events', 'driver_messages', 'driver_message_translations', 'load_orders', 'loadboard_integrations', 'loadboard_postings']],
   ['Billing & settlements', 'Customer invoices, driver settlements and their deductions, and subscription billing events.',
-    ['invoices', 'driver_settlements', 'settlement_deductions', 'billing_events']],
+    ['invoices', 'driver_settlements', 'settlement_deductions', 'billing_events', 'invoice_order_allocations']],
   ['Compliance & IFTA', 'Fuel purchases and state crossings for IFTA reporting, and driver vehicle inspection reports (DVIR).',
     ['fuel_stops', 'ifta_state_crossings', 'ifta_tax_rates', 'dvir_inspections', 'dvir_defects']],
-  ['Platform & infrastructure', 'SuperAdmin activity, the tenant audit trail, transactional outbox, live-update change feed, idempotency keys, the public developer API\'s OAuth clients/rate limits, in-app support ticketing (decisions.md T16), the platform-wide LLM provider config (decisions.md T17), and migration bookkeeping.',
-    ['admin_events', 'admin_notes', 'audit_events', 'outbox_events', 'change_events', 'idempotency_keys', 'oauth_clients', 'oauth_client_rate_limits', 'support_tickets', 'support_ticket_messages', 'ai_provider_config', 'schema_migrations']],
+  ['Platform & infrastructure', 'SuperAdmin activity, support access/onboarding and tenant audit trails, transactional outbox, live-update change feed, idempotency keys, public API credentials, webhooks, platform AI configuration, and migration bookkeeping.',
+    ['admin_events', 'admin_notes', 'audit_events', 'outbox_events', 'change_events', 'idempotency_keys', 'oauth_clients', 'oauth_client_rate_limits', 'support_tickets', 'support_ticket_messages', 'ai_provider_config', 'schema_migrations', 'admin_carrier_onboarding', 'admin_support_access_sessions', 'tenant_activity_events', 'ai_feature_overrides', 'app_error_log', 'webhooks', 'webhook_deliveries']],
 ]
 
 function psql(sql) {
