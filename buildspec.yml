@@ -1,0 +1,68 @@
+version: 0.2
+
+# CodeBuild project: carrieros-web-staging-deploy
+# Triggered on push to main via a GitHub webhook (see architecture/deployment.md).
+# Builds carrieros-web's Docker image, pushes to ECR, and rolls the ECS
+# Express Gateway service — the same commands documented as the manual
+# deploy process, now automated. Migrations are NOT run here; they're
+# already handled separately by .github/workflows/deploy.yml on push.
+#
+# Does not poll the canary rollout to completion (that's a multi-minute wait
+# with an unrelated failure mode — see architecture/deployment.md's "real
+# gotcha" note about update-express-gateway-service returning success before
+# the new code is actually live). Verify with
+# `node carrieros-web/scripts/check-staging-drift.mjs` after a build finishes,
+# or watch the rollout directly:
+# `aws ecs describe-service-deployments --service-deployment-arns <arn>`.
+
+env:
+  variables:
+    AWS_REGION: "us-east-1"
+    AWS_ACCOUNT_ID: "308855860393"
+    ECR_REPO: "carrieros-web"
+    ECS_SERVICE_ARN: "arn:aws:ecs:us-east-1:308855860393:service/default/carrieros-web-staging"
+    NEXT_PUBLIC_SUPABASE_URL: "https://ddwgnsheafuuzzepqxsf.supabase.co"
+    NEXT_PUBLIC_APP_URL: "https://ca-aa167deb702e4a338c4370ff70576195.ecs.us-east-1.on.aws"
+  parameter-store:
+    # Publishable (not secret) but kept out of this file so rotating it
+    # doesn't require a code change. See architecture/deployment.md for
+    # where the current value comes from (`supabase projects api-keys`).
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: "/carrieros/staging/NEXT_PUBLIC_SUPABASE_ANON_KEY"
+
+phases:
+  pre_build:
+    commands:
+      - echo "Logging in to ECR..."
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+      - IMAGE_URI="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest"
+      - BUILD_SHA="$CODEBUILD_RESOLVED_SOURCE_VERSION"
+      - BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+  build:
+    commands:
+      - echo "Building carrieros-web ($BUILD_SHA)..."
+      - cd carrieros-web
+      - >
+        docker build
+        --build-arg NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+        --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+        --build-arg NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+        --build-arg BUILD_SHA=$BUILD_SHA
+        --build-arg BUILD_TIME=$BUILD_TIME
+        -t $IMAGE_URI .
+      - echo "Pushing $IMAGE_URI..."
+      - docker push $IMAGE_URI
+  post_build:
+    commands:
+      - echo "Rolling carrieros-web-staging to the new image..."
+      - >
+        aws ecs update-express-gateway-service
+        --service-arn $ECS_SERVICE_ARN
+        --primary-container "{\"image\":\"$IMAGE_URI\",\"containerPort\":3000}"
+        --region $AWS_REGION
+      - echo "Deploy triggered. Canary rollout takes ~5-9 minutes; verify with
+        'node carrieros-web/scripts/check-staging-drift.mjs' once it settles
+        rather than assuming this build passing means the new code is live."
+
+cache:
+  paths:
+    - "/root/.cache/**/*"
