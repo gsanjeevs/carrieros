@@ -8,7 +8,12 @@ export async function login(page: Page, email: string, password: string) {
   await page.goto('/login')
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Password').fill(password)
-  await page.getByRole('button', { name: 'Sign in' }).click()
+  // exact: true -- staging's login page also renders a "Sign in with a
+  // passkey" button (WebAuthn is configured there, see
+  // architecture/deployment.md's "One-time setup already done for staging"),
+  // whose accessible name contains "Sign in" as a substring and otherwise
+  // makes this locator ambiguous (strict-mode violation).
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click()
 
   // signInWithEmail always redirects to /dashboard, but proxy.ts's
   // ROLE_ROUTES then bounces roles without the `dashboard` capability

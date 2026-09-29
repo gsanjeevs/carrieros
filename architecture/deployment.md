@@ -127,6 +127,48 @@ needs the GitHub App's permission scope extended first, not just a flag flip.
    (`carrieros-staging/*`), referenced by ARN in the ECS task/GitHub Environment — never passed as
    literal values through chat or committed anywhere.
 4. **GitHub `staging` Environment**: exists, holds `DATABASE_URL` for the migration step.
+5. **Email (SMTP), built 2026-09-29**: real outbound email now works on staging end-to-end (magic-link
+   invites via Supabase Auth's `admin.inviteUserByEmail`, e.g. the customer-portal contact-invite flow
+   — plus anything the app itself sends through `lib/send-email.ts`). No Route53 hosted zone or
+   registered domain existed on the AWS account (`aws route53 list-hosted-zones` / `list-domains` both
+   empty), so this uses SES's no-domain-needed path — a single verified sender identity — rather than
+   full domain verification:
+   - **SES** (`us-east-1`, account `308855860393`): verified sender identity `sanjeev@shipmentx.com`
+     (`aws sesv2 create-email-identity --email-identity sanjeev@shipmentx.com`; AWS emails a
+     verification link to that address — someone has to click it, there's no CLI/API way around that
+     one step). Also requested production access off the sandbox
+     (`aws sesv2 put-account-details --mail-type TRANSACTIONAL --production-access-enabled ...`) —
+     this matters even with a verified sender: SES sandbox mode restricts the *recipient* too (only
+     verified addresses or the mailbox simulator), which would have blocked the invite flow's
+     `e2e-contact-<timestamp>@example.com`-style recipients regardless of sender verification. The
+     request went through review and came back `ProductionAccessEnabled: true`
+     (`aws sesv2 get-account --region us-east-1`) — no fixed SLA on that from AWS, so don't assume
+     it's instant if this ever needs redoing.
+   - **IAM**: a dedicated user `carrieros-ses-smtp-staging` (least-privilege inline policy: only
+     `ses:SendRawEmail`, condition-scoped to `ses:FromAddress = sanjeev@shipmentx.com`) with an access
+     key converted to SES SMTP credentials via AWS's documented HMAC-SHA256 signing algorithm (SMTP
+     username = access key ID, SMTP password derived from the secret key — not the secret key itself).
+     Stored in AWS Secrets Manager as `carrieros-staging/SMTP_CREDENTIALS`, same pattern as the other
+     `carrieros-staging/*` secrets — never passed as literal values through chat or committed anywhere.
+   - **Supabase Auth config**: pushed via `supabase config push --project-ref ddwgnsheafuuzzepqxsf`
+     from a *scratch* `supabase/config.toml` (declaring only `[auth.email.smtp]` and
+     `[auth.rate_limit] email_sent`, nothing else) rather than editing the checked-in
+     `supabase/config.toml` — that file is local-only (see the Passkeys/WebAuthn note above) and is
+     shared with local dev's Mailpit-based email flow, so committing real SES creds into it would have
+     pointed local dev at real SES too. `config push` only touches properties a given file actually
+     declares (confirmed with `supabase config diff` first), so a minimal one-off file is enough:
+     `host = "email-smtp.us-east-1.amazonaws.com"`, `port = 587`, `user`/`pass` from
+     `env(...)`-referenced shell vars (never written to disk), `admin_email = "sanjeev@shipmentx.com"`.
+     Also had to raise `auth.rate_limit.email_sent` from the local default of `2`/hour (fine for a dev
+     stack nobody actually emails) to `30`/hour (matching this config's other `/hour` rate limits) —
+     GoTrue enforces that limit the moment SMTP is enabled, and the first real test run tripped it with
+     a `"email rate limit exceeded"` 500 from the invite route.
+   - **Verified against the actual target, not just config that looks right**: re-ran the previously
+     failing spec — `PLAYWRIGHT_BASE_URL=https://ca-aa167deb702e4a338c4370ff70576195.ecs.us-east-1.on.aws
+     npx playwright test e2e/customer-contacts.spec.ts` — now passes (invite click resolves to
+     "Linked"/"Revoke access", confirming GoTrue's send actually succeeded against real SES). Full
+     suite is 5/6 against staging as of this writing; the 6th (`e2e/loads.spec.ts`) fails on an
+     unrelated load-creation timeout, not email.
 
 ## Not set up yet
 
@@ -147,10 +189,6 @@ needs the GitHub App's permission scope extended first, not just a flag flip.
   still needs to be supplied via an EAS environment variable (or added to the profile) before a real
   staging build can authenticate against Supabase. `production`'s `REPLACE_WITH_*` values are left
   untouched — no production Supabase project or web URL exists yet (see above).
-- **Email (SMTP)** — deliberately deferred; staging has no SMTP configured, so anything that sends an
-  email (e.g. the customer-portal invite flow) will fail at that step. Confirmed via the Playwright
-  suite (`PLAYWRIGHT_BASE_URL=<staging url> npx playwright test`) — 5/6 passing, the 6th fails only on
-  this gap.
 - **Error tracking (Sentry)** — deliberately deferred; the web SDK is wired but inert with no DSN set.
 - **`POST /api/cron/send-reminders` has no scheduler.** AWS EventBridge Scheduler hitting this route
   (with `Authorization: Bearer $CRON_SECRET`) is the natural fit now that the app runs on ECS, not
