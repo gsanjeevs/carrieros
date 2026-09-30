@@ -40,8 +40,9 @@ test('owner adds a customer contact and invites them to portal access', async ({
   // (PLAYWRIGHT_BASE_URL, e.g. staging) has no local Mailpit to check, and
   // the UI assertions above already confirm the invite succeeded end-to-end.
   if (!process.env.PLAYWRIGHT_BASE_URL) {
+    const mailpitUrl = process.env.MAILPIT_URL ?? 'http://127.0.0.1:54324'
     const search = await page.request.get(
-      `http://127.0.0.1:54324/api/v1/search?query=${encodeURIComponent(`to:${contactEmail}`)}`
+      `${mailpitUrl}/api/v1/search?query=${encodeURIComponent(`to:${contactEmail}`)}`
     )
     expect(search.ok()).toBeTruthy()
     const { messages } = await search.json()
