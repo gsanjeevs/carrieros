@@ -483,6 +483,17 @@ minutes later. A green build is not evidence that new code is live — check
    the old URLs can never be restored.
 7. Re-run the e2e suite against the new hostname as the sole staging environment.
 
+**A decision that falls out of step 6, and is easy to miss:** while both
+environments exist, "staging" is still reachable because the *old* service is
+serving. The CDK service rests at `minTaskCount: 0` and cannot self-wake, so once
+the old service is deleted, **staging will return 503 by default** until someone
+runs `staging-resume.sh`. That is fine for an environment only used in deliberate
+bursts, and wrong for one that CI, a drift checker, a mobile build or a teammate
+expects to answer at any time. So step 6 should be paired with an explicit choice:
+either keep `minTaskCount: 0` and accept resume-on-demand, or set staging's
+`minTaskCount` to 1 in `infra/config/staging.ts` and accept one always-running task.
+Right now the 0 is safe only *because* the old environment is still up.
+
 ### The trap this ordering exists to avoid
 
 It is *not* enough that CodeBuild pushes to the `carrieros-web:latest` tag both old
