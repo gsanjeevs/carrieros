@@ -35,8 +35,12 @@ npm install
 CDK needs a one-time bootstrap per account/region before the first deploy:
 
 ```bash
-npx cdk bootstrap aws://308855860393/us-east-1
+npx cdk bootstrap aws://308855860393/us-east-1 --context env=staging
 ```
+
+`--context env=` is required even for `bootstrap`, because bootstrap synthesizes
+the app first and `bin/deploy.ts` refuses to run without an environment selected.
+Bootstrap itself is environment-independent, so either value works.
 
 ## Commands
 

@@ -70,15 +70,19 @@ declare -a endpoint_paths=()
 for service in "${SERVICES[@]}"; do
   arn="arn:aws:ecs:${REGION}:${ACCOUNT_ID}:service/${CLUSTER}/${service}"
 
-  if ! config_json="$(aws ecs describe-express-gateway-service \
+  # See the long comment in staging-pause.sh: `activeConfigurations` has one entry
+  # per overlapping service revision and is NOT ordered by age, so indexing [0] is
+  # unsafe. Select the newest by `createdAt`.
+  if ! configs="$(aws ecs describe-express-gateway-service \
       --service-arn "$arn" --region "$REGION" \
-      --query 'service.activeConfigurations[0].{scalingTarget:scalingTarget,healthCheckPath:healthCheckPath,ingressPaths:ingressPaths}' \
+      --query 'service.activeConfigurations' \
       --output json 2>/dev/null)"; then
     echo "  ${service}: SKIPPED — service not found (has the CDK stack been deployed?)"
     exit_code=1
     continue
   fi
 
+  config_json="$(echo "$configs" | jq -c 'max_by(.createdAt)')"
   current="$(echo "$config_json" | jq -c '.scalingTarget')"
   current_min="$(echo "$current" | jq -r '.minTaskCount')"
   current_max="$(echo "$current" | jq -r '.maxTaskCount')"

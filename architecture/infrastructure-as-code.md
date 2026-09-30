@@ -22,7 +22,7 @@ Read `infra/README.md` for the command reference and the per-command
 |---|---|---|
 | `CarrierOS-<env>-Network` | task security group, ALB security group (production only) | **Reuses** the existing default VPC `vpc-08e40735030c9aea8`; does not create one |
 | `CarrierOS-<env>-Ecr` | image-retention lifecycle policy on `carrieros-web` and `carrieros-mcp` | **References** the existing repositories; does not create them |
-| `CarrierOS-staging-Services` | `carrieros-web-staging-cdk`, `carrieros-mcp-staging-cdk` + their log groups | `AWS::ECS::ExpressGatewayService` |
+| `CarrierOS-staging-Services` | `carrieros-web-staging-cdk`, `carrieros-mcp-staging-cdk` + their log groups | `AWS::ECS::ExpressGatewayService`. **Deployed and live-verified 2026-09-30.** |
 | `CarrierOS-production-Services` | custom ALB, target groups, listener, 2 Fargate services, WAF, production IAM roles and secret resources | **Written and synth-clean. Never deployed.** |
 
 Explicitly **not** managed by CDK yet: the CodeBuild auto-deploy project, the SES
@@ -167,6 +167,47 @@ later.
 Pausing is a compute-cost lever, not a teardown: the Express-Gateway-managed load
 balancer still exists and still bills while tasks are at zero.
 
+### Pausing is declarative; convergence to zero is slow
+
+Measured on 2026-09-30 — worth knowing before anyone reads a 200 after a pause as a
+bug. `staging-pause.sh` sets the scaling minimum to 0 and registers a new service
+revision. It does **not** stop the running tasks. Observed:
+
+- Task count went 2 -> 1 within ~3 minutes (the previous revision draining), then
+  **held at 1 for the remaining ~7 minutes of polling**.
+- The endpoint returned HTTP 200 throughout.
+
+This is not specific to the CDK environment. The original hand-built services have
+been at `minTaskCount: 0` for days and show the same split: `carrieros-mcp-staging`
+has **0** running tasks, while `carrieros-web-staging` has **1** running task and
+still answers 200. Scale-in to literal zero is autoscaler-driven (CPU target
+tracking, deliberately conservative), and any traffic at all — a health poller, a
+drift check, a browser tab — keeps one task alive.
+
+So `minTaskCount: 0` means "zero is permitted", not "go to zero now". No script can
+force it, which is why `staging-pause.sh` reports the declarative change and points
+at `aws ecs list-tasks` for real progress instead of pretending pause is synchronous.
+
+### `activeConfigurations[0]` is not the current configuration
+
+A real bug found and fixed while live-testing these scripts.
+`describe-express-gateway-service` returns `activeConfigurations` with **one entry
+per overlapping service revision** — every `update-express-gateway-service` call
+registers a new revision, and the old one stays "active" while its tasks drain. The
+entries are **not ordered by age**. Observed on `carrieros-web-staging-cdk`:
+
+| index | createdAt | minTaskCount |
+|---|---|---|
+| 0 | 15:23:07 | 0 |
+| 1 | 15:14:45 | 0 |
+| 2 | 15:19:13 | 1 |
+
+Reading `[0]` was correct in that sample by luck and would silently read a *stale*
+scaling target in another ordering. Both scripts now select `max_by(.createdAt)`,
+validated against `describe-service-deployments`: for the in-progress deployment,
+`targetServiceRevision` matched the newest-by-`createdAt` entry and the two older
+entries appeared as `sourceServiceRevisions`.
+
 ## Verification status — what is actually proven
 
 This repo's standing rule is that nothing counts as working without live proof, not
@@ -197,54 +238,113 @@ a command that merely returned success. Applying that honestly:
   exercised for real (both exit 1 with
   `error: AWS credentials are missing or expired. Run 'aws login' and retry.`).
 
-**NOT yet proven — blocked on expired AWS credentials:**
+### Deployed and live-verified (2026-09-30)
 
-- `cdk deploy` of the staging stack has **not** been run. No CDK-managed AWS
-  resources exist yet.
-- Therefore: no live `curl` of a new web endpoint, no real MCP `tools/call`
-  against a new MCP endpoint, and no live run of `staging-pause.sh` /
-  `staging-resume.sh` against deployed services.
+The staging stack was deployed for real. Live endpoints:
 
-The AWS session expired partway through this work (`aws sts get-caller-identity`
-returns `ExpiredToken`; credentials come from `aws login`, which cannot be
-refreshed non-interactively). Everything above the line was completed after that
-point because none of it needs credentials.
+| Service | URL |
+|---|---|
+| web | `https://ca-4f7c487503aa47609a79a96746866bb8.ecs.us-east-1.on.aws` |
+| mcp | `https://ca-f68d8ab0d62b4f638db9eaec01052b4f.ecs.us-east-1.on.aws` |
 
-When credentials are restored, the remaining sequence is:
+- `cdk diff` before deploying was **entirely `[+]`** — zero `[-]` and zero `[~]`,
+  confirming the deploy could only add resources.
+- All three stacks deployed clean: `CarrierOS-staging-Network` (22s),
+  `-Ecr` (65s), `-Services` (260s).
+- **Zero-never-wakes confirmed:** immediately after deploy, at `minTaskCount: 0`,
+  both endpoints returned **HTTP 503**. DNS resolved immediately — no lag this time,
+  though the gotcha still stands.
+- **ECR retention genuinely applied**, checked by reading it back rather than
+  trusting the stack:
+  `aws ecr get-lifecycle-policy --repository-name carrieros-web` returns
+  `{"rules":[{"rulePriority":1,"description":"Expire all but the 5 most recent images",...,"countNumber":5,...}]}`.
+- **`staging-resume.sh --wait` worked for real:** both services went
+  **503 -> HTTP 200**; web became healthy on the 5th poll (~1 min), mcp on the 1st.
+- **The web service is serving the real application**, not just a health page:
+  `GET /api/version` returns
+  `{"sha":"ed80b7a25387f4fe2b61f68df52936cc1725da42","builtAt":"2026-09-30T22:12:46Z"}`.
+- **`staging-pause.sh` worked and is idempotent:** `minTaskCount 1 -> 0` on both,
+  with `maxTaskCount`, `autoScalingMetric` and `autoScalingTargetValue` preserved
+  (proving it changes only the minimum); a second run reported
+  `already paused (minTaskCount=0)` and made no API call.
+- Two further real bugs were caught by live testing, not inspection: the
+  `activeConfigurations[0]` staleness described above, and the incorrect assumption
+  that pause drains tasks synchronously. Both are fixed and documented.
 
-```bash
-cd infra
-npx cdk bootstrap aws://308855860393/us-east-1     # one-time
-npx cdk deploy --context env=staging --all
-./scripts/staging-resume.sh --wait                 # minTaskCount 0 -> 1; 0 never wakes
+### Partially verified — the MCP tool call
 
-# Web: expect HTTP 200
-curl -sS --max-time 15 "https://<WebUrl>/login" -w '\nHTTP %{http_code}\n'
+The MCP service is deployed, reachable, and demonstrably functioning, but a
+**fully green data-returning tool call was not achieved**, for a reason outside this
+infrastructure:
 
-# MCP: a real tool call. Both Accept media types are required by the
-# StreamableHTTP transport, and the deployment is stateless so no
-# `initialize` handshake is needed first.
-curl -sS --max-time 15 -X POST "https://<McpUrl>/mcp" \
-  -H "Content-Type: application/json" \
-  -H "Accept: application/json, text/event-stream" \
-  -H "x-carrieros-base-url: https://<WebUrl>" \
-  -H "x-carrieros-client-id: $CLIENT_ID" \
-  -H "x-carrieros-client-secret: $CLIENT_SECRET" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"list_vehicles","arguments":{}}}' \
-  -w '\nHTTP %{http_code}\n'
+- `GET /health` returns **HTTP 200**.
+- An unauthenticated `POST /mcp` is correctly rejected: **HTTP 401**
+  `{"error":"missing_tenant_credentials",...}`.
+- A real `tools/call` for `list_vehicles` with header credentials is accepted,
+  routed, and the server makes a genuine upstream call to the
+  `CARRIEROS_BASE_URL` that CDK wired in via CloudFormation `GetAtt` — proven
+  because the response carries a structured CarrierOS API error:
+  `CarrierOS API error (401 invalid_client): Invalid client credentials`.
+  Only the real CarrierOS public API emits that, so the full path
+  (TLS -> gateway -> MCP container -> upstream web service -> auth) is exercised.
 
-./scripts/staging-pause.sh                         # confirm tasks drain to 0
-./scripts/staging-resume.sh --wait                 # confirm a task actually restarts
-```
+**The credentials in `carrieros-mcp/.env` are stale.** The same call against the
+**old** hand-built web service as upstream fails **identically** with
+`401 invalid_client`, so this is not a defect in the CDK environment — the two
+environments behave the same. Per
+`carrieros-web/server/application/public-api-token-service.ts`, `invalid_client`
+collapses three cases deliberately: unknown `client_id`, revoked client, and wrong
+secret.
 
-Two documented gotchas apply to that verification and are not signs of failure:
+Closing this gap needs a **new** `oauth_clients` row, because secrets are bcrypt
+hashed (`client_secret_hash`, cost 12) and cannot be recovered — and the owning org
+must hold the `public_api` entitlement (Growth tier and above). That means creating
+a credential in the shared staging database, which was **not** done here: it is a
+data mutation nobody asked for, and rotating credentials is the account owner's
+call. It is a one-line follow-up whenever a fully green tool call is wanted.
+
+Two documented gotchas remain relevant and are not signs of failure:
 
 - **DNS lag.** A freshly created `*.ecs.*.on.aws` hostname can fail to resolve for
-  several minutes after the AWS API reports success. `curl: (6) Could not resolve
-  host` immediately after a deploy is not proof the service is broken. Confirm with
-  `curl --resolve <host>:443:<ip>` using an IP from `nslookup`.
+  several minutes after the AWS API reports success (it did not on this deploy, but
+  it has before). `curl: (6) Could not resolve host` right after a deploy is not
+  proof the service is broken. Confirm with `curl --resolve <host>:443:<ip>` using
+  an IP from `nslookup`.
 - **Zero never wakes.** A 503 from a service at `minTaskCount: 0` is expected, not
   a fault. Run `staging-resume.sh` first.
+
+### The old environment was not modified by CDK
+
+Verified by fingerprint taken before and after the deploy, not by assertion. Only
+read-only `describe`/`list` calls were ever issued against the hand-built services.
+
+`carrieros-mcp-staging` is **byte-identical** before and after: same `createdAt`,
+`updatedAt`, `serviceRevisionArn` (`…/4813600925268216894`), scaling target and
+endpoint.
+
+`carrieros-web-staging` needs an honest footnote, because one field *did* change and
+it would be easy to misread as collateral damage. Its service-level `createdAt`
+(2026-09-20T19:51:41), `updatedAt`, scaling target and endpoint are all unchanged,
+but its active service revision moved from `…/3028890110795027471` to
+`…/1854486714769918456`. That was **not** this work. It was the existing CodeBuild
+push-to-main auto-deploy:
+
+| Evidence | Value |
+|---|---|
+| CodeBuild run | `carrieros-web-staging-deploy:e1091517-…` |
+| Window | 15:12:04 -> **15:16:03** |
+| Triggering commit | `ed80b7a25387f4fe2b61f68df52936cc1725da42` (pushed to `main` by another session) |
+| New revision created | **15:16:02** |
+
+The revision timestamp matches the build's completion to within a second, and the
+build was triggered by a git push, which nothing in `infra/` can do. Corroborating
+detail: that same SHA is what the new CDK web service reports at `/api/version`,
+because both services pull the `carrieros-web:latest` tag CodeBuild had just pushed.
+
+This is itself a useful demonstration of the ordering caveat already documented in
+`architecture/deployment.md`: staging's auto-deploy fires on any push to `main`,
+independent of anything else happening in the account. Expect the hand-built web
+service's revision to keep moving on its own while that pipeline is live.
 
 ## Still manual / deferred
 
@@ -277,6 +377,10 @@ Two documented gotchas apply to that verification and are not signs of failure:
   subnets with NAT. Deferred deliberately rather than silently assumed.
 - **CodeDeploy blue/green.** A deployment circuit breaker with automatic rollback
   is wired; genuine traffic-shifting needs a release-process decision first.
+- **A fully green MCP tool call.** Blocked on stale credentials in
+  `carrieros-mcp/.env`, not on infrastructure — see "Partially verified" above.
+  Needs a new `oauth_clients` row (secrets are bcrypt-hashed and unrecoverable) on
+  an org holding the `public_api` entitlement. Deliberately not created here.
 - **Decommissioning the original hand-built staging resources** — see below.
 
 ## The one open decision

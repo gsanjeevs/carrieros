@@ -9,6 +9,14 @@
 # Idempotent: re-running when already at zero is a no-op that reports "already
 # paused" rather than registering a pointless new service deployment.
 #
+# PAUSING IS NOT IMMEDIATE. Setting minTaskCount=0 registers a new service
+# revision and permits zero tasks; it does not kill the running ones. The
+# previous revision's tasks drain on ECS's schedule, and the endpoint keeps
+# returning 200 until they are gone. Measured on 2026-09-30: still serving 200
+# four minutes after a successful pause, with the deployment reporting
+# IN_PROGRESS and the older revisions still listed under activeConfigurations.
+# Do not treat a 200 shortly after pausing as a failed pause.
+#
 # Paused services cost nothing for compute, but the Express-Gateway-managed load
 # balancer still exists and still bills. Pausing is a compute-cost lever, not a
 # teardown.
@@ -46,15 +54,27 @@ exit_code=0
 for service in "${SERVICES[@]}"; do
   arn="arn:aws:ecs:${REGION}:${ACCOUNT_ID}:service/${CLUSTER}/${service}"
 
-  if ! current="$(aws ecs describe-express-gateway-service \
+  # `activeConfigurations` holds ONE ENTRY PER OVERLAPPING SERVICE REVISION, not
+  # one per service. Every `update-express-gateway-service` call registers a new
+  # revision, so during a rollout the previous revision (carrying the previous
+  # scaling target) is still listed as active while its tasks drain. The entries
+  # are NOT ordered by age — observed live on this service: index 0 was 15:23:07,
+  # index 1 was 15:14:45, index 2 was 15:19:13. So `activeConfigurations[0]` is
+  # not reliably the current configuration. Pick the newest by `createdAt`; that
+  # choice was checked against `describe-service-deployments`'s
+  # `targetServiceRevision` for the in-progress deployment and matched.
+  if ! configs="$(aws ecs describe-express-gateway-service \
       --service-arn "$arn" --region "$REGION" \
-      --query 'service.activeConfigurations[0].scalingTarget' \
+      --query 'service.activeConfigurations' \
       --output json 2>/dev/null)"; then
     echo "  ${service}: SKIPPED — service not found (has the CDK stack been deployed?)"
     exit_code=1
     continue
   fi
 
+  # All timestamps come from a single CLI call against one region, so they share
+  # a UTC offset and compare correctly as strings.
+  current="$(echo "$configs" | jq -c 'max_by(.createdAt) | .scalingTarget')"
   current_min="$(echo "$current" | jq -r '.minTaskCount')"
 
   if [[ "$current_min" == "$TARGET_MIN" ]]; then
@@ -85,11 +105,12 @@ if [[ "$DRY_RUN" == "1" ]]; then
 fi
 
 echo
-echo "Scale-down is asynchronous. Confirm tasks have actually drained with:"
+echo "Scale-down is asynchronous and takes several minutes: the endpoint keeps"
+echo "returning 200 while the previous revision's tasks drain. Check real progress"
+echo "with the task count, not by curling the endpoint:"
 for service in "${SERVICES[@]}"; do
-  echo "  aws ecs describe-express-gateway-service --region ${REGION} \\"
-  echo "    --service-arn arn:aws:ecs:${REGION}:${ACCOUNT_ID}:service/${CLUSTER}/${service} \\"
-  echo "    --query 'service.activeConfigurations[0].scalingTarget'"
+  echo "  aws ecs list-tasks --cluster ${CLUSTER} --region ${REGION} \\"
+  echo "    --service-name ${service} --query 'length(taskArns)'"
 done
 echo
 echo "Re-start them with ./scripts/staging-resume.sh (note: minTaskCount=0 never"
