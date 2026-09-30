@@ -1,0 +1,24 @@
+{
+  "name": "carrieros-infra",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CarrierOS AWS infrastructure as code (CDK v2, TypeScript)",
+  "scripts": {
+    "synth:staging": "cdk synth --context env=staging",
+    "synth:production": "cdk synth --context env=production",
+    "diff:staging": "cdk diff --context env=staging",
+    "diff:production": "cdk diff --context env=production",
+    "deploy:staging": "cdk deploy --context env=staging --all",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "aws-cdk": "^2.1035.0",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.7.2"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.272.0",
+    "constructs": "^10.4.2"
+  }
+}
