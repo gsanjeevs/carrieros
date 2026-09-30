@@ -24,6 +24,13 @@ runs migrations only (safe, no AWS credentials needed); it does not touch the ap
 that's fine — CodeBuild's `buildspec.yml` doesn't run migrations either, so the two are complementary,
 not overlapping.
 
+**Ordering caveat:** the CodeBuild webhook triggers directly on `PUSH` to `main`; it does not wait
+for GitHub CI or the migration workflow. CI and DB migrations are separate workflows, so a schema-
+dependent app release can temporarily run before its migration, or a migration can finish before its
+app build is deployed. Check both workflow/build outcomes and the live `/api/version`/drift status
+when a release couples code to schema changes. If strict CI- or migration-gated deploy ordering is
+needed, the trigger needs to be redesigned rather than inferred from these independent pipelines.
+
 The manual sequence below still works and is useful for a one-off out-of-band deploy (e.g. testing a
 local branch that isn't pushed yet), but it's no longer the normal path. From `carrieros-web/`:
 
@@ -42,7 +49,7 @@ aws ecs update-express-gateway-service \
   --region us-east-1
 
 # Verify it actually took effect -- don't just trust the two commands above returning success.
-node carrieros-web/scripts/check-staging-drift.mjs
+node scripts/check-staging-drift.mjs
 ```
 
 **A real gotcha hit on 2026-09-27**: pushing a new image to the same `:latest` tag does NOT by
@@ -180,6 +187,16 @@ needs the GitHub App's permission scope extended first, not just a flag flip.
      "Linked"/"Revoke access", confirming GoTrue's send actually succeeded against real SES). Full
      suite is 5/6 against staging as of this writing; the 6th (`e2e/loads.spec.ts`) fails on an
      unrelated load-creation timeout, not email.
+   - **Bounce/complaint routing, 2026-09-30**: the e2e invite test sends to a synthetic
+     `e2e-contact-<timestamp>@example.com` address (RFC 2606 reserved, never deliverable) every run —
+     SES's default behavior forwards non-delivery reports to the verified sender's own inbox, so every
+     test run was emailing `sanjeev@shipmentx.com` a bounce notice ~14 hours later. Fixed: created SNS
+     topic `carrieros-staging-ses-notifications`, pointed both `Bounce` and `Complaint` notification
+     types at it (`aws ses set-identity-notification-topic`), and disabled the default forwarding
+     (`aws ses set-identity-feedback-forwarding-enabled --identity sanjeev@shipmentx.com
+     --no-forwarding-enabled`). The topic currently has no subscriber — notifications are captured but
+     not delivered anywhere visible; add a subscription (email/SQS/Lambda) if bounce visibility is ever
+     wanted, but for now this just silences expected test-suite noise.
 6. **Mobile — EAS project registered, 2026-09-29**: `carrieros-mobile/eas.json`'s `staging` build
    profile points `EXPO_PUBLIC_API_URL`/`EXPO_PUBLIC_SUPABASE_URL`/`EXPO_PUBLIC_SUPABASE_ANON_KEY` at
    the same staging ECS gateway, Supabase project, and publishable key the web app uses — local `.env`
