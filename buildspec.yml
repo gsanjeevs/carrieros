@@ -20,9 +20,15 @@ env:
     AWS_REGION: "us-east-1"
     AWS_ACCOUNT_ID: "308855860393"
     ECR_REPO: "carrieros-web"
-    ECS_SERVICE_ARN: "arn:aws:ecs:us-east-1:308855860393:service/default/carrieros-web-staging"
+    # Repointed 2026-09-30 to the CDK-managed staging service (see
+    # architecture/infrastructure-as-code.md). The previous hand-built service
+    # `carrieros-web-staging` is no longer auto-deployed and is pending
+    # decommission; it keeps serving whatever image it last rolled.
+    ECS_SERVICE_ARN: "arn:aws:ecs:us-east-1:308855860393:service/default/carrieros-web-staging-cdk"
     NEXT_PUBLIC_SUPABASE_URL: "https://ddwgnsheafuuzzepqxsf.supabase.co"
-    NEXT_PUBLIC_APP_URL: "https://ca-aa167deb702e4a338c4370ff70576195.ecs.us-east-1.on.aws"
+    # Baked into the image at BUILD time, not read at runtime — so this value
+    # applies to whichever service pulls the resulting :latest image.
+    NEXT_PUBLIC_APP_URL: "https://ca-4f7c487503aa47609a79a96746866bb8.ecs.us-east-1.on.aws"
   parameter-store:
     # Publishable (not secret) but kept out of this file so rotating it
     # doesn't require a code change. See architecture/deployment.md for
@@ -53,7 +59,7 @@ phases:
       - docker push $IMAGE_URI
   post_build:
     commands:
-      - echo "Rolling carrieros-web-staging to the new image..."
+      - echo "Rolling $ECS_SERVICE_ARN to the new image..."
       - >
         aws ecs update-express-gateway-service
         --service-arn $ECS_SERVICE_ARN

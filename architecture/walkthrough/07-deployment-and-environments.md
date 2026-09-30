@@ -38,7 +38,7 @@ aws ecr get-login-password --region us-east-1 | docker login --username AWS \
 docker buildx build --platform linux/amd64 \
   --build-arg NEXT_PUBLIC_SUPABASE_URL=https://ddwgnsheafuuzzepqxsf.supabase.co \
   --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=<publishable key, not secret> \
-  --build-arg NEXT_PUBLIC_APP_URL=https://ca-aa167deb702e4a338c4370ff70576195.ecs.us-east-1.on.aws \
+  --build-arg NEXT_PUBLIC_APP_URL=https://ca-4f7c487503aa47609a79a96746866bb8.ecs.us-east-1.on.aws \
   --build-arg BUILD_SHA=$(git rev-parse HEAD) \
   --build-arg BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
   -t <account-id>.dkr.ecr.us-east-1.amazonaws.com/carrieros-web:latest --push .

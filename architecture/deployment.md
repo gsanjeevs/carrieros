@@ -16,6 +16,14 @@ the account owner wanted to stay entirely on AWS and avoid hand-wiring IAM/OIDC 
 to a third party. ECS Express Mode was chosen over the (now EOL-for-new-customers, since 2026-04-30)
 App Runner and over Amplify Hosting (doesn't support Next.js 16's managed SSR yet, only up to 15).
 
+> **Infrastructure is now codified.** Since 2026-09-30 staging's AWS resources are managed by AWS CDK
+> in `infra/`, and auto-deploy targets the CDK-managed service `carrieros-web-staging-cdk`
+> (`https://ca-4f7c487503aa47609a79a96746866bb8.ecs.us-east-1.on.aws`), with MCP at
+> `https://ca-f68d8ab0d62b4f638db9eaec01052b4f.ecs.us-east-1.on.aws`. The original hand-built
+> `carrieros-web-staging` / `carrieros-mcp-staging` still exist, are no longer auto-deployed, and are
+> pending an explicit decommission decision. Read `architecture/infrastructure-as-code.md` first for
+> what CDK manages, the cutover checklist, and what is still manual.
+
 ## Current state: staging auto-deploys on push to main (2026-09-29)
 
 **AWS CodeBuild + a GitHub connection** now builds and deploys every push to `main` automatically —
@@ -39,12 +47,12 @@ aws ecr get-login-password --region us-east-1 | docker login --username AWS --pa
 docker buildx build --platform linux/amd64 \
   --build-arg NEXT_PUBLIC_SUPABASE_URL=https://ddwgnsheafuuzzepqxsf.supabase.co \
   --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=<publishable key, not secret> \
-  --build-arg NEXT_PUBLIC_APP_URL=https://ca-aa167deb702e4a338c4370ff70576195.ecs.us-east-1.on.aws \
+  --build-arg NEXT_PUBLIC_APP_URL=https://ca-4f7c487503aa47609a79a96746866bb8.ecs.us-east-1.on.aws \
   --build-arg BUILD_SHA=$(git rev-parse HEAD) \
   --build-arg BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
   -t <account-id>.dkr.ecr.us-east-1.amazonaws.com/carrieros-web:latest --push .
 aws ecs update-express-gateway-service \
-  --service-arn arn:aws:ecs:us-east-1:<account-id>:service/default/carrieros-web-staging \
+  --service-arn arn:aws:ecs:us-east-1:<account-id>:service/default/carrieros-web-staging-cdk \
   --primary-container '{"image":"<account-id>.dkr.ecr.us-east-1.amazonaws.com/carrieros-web:latest","containerPort":3000}' \
   --region us-east-1
 
@@ -126,10 +134,20 @@ needs the GitHub App's permission scope extended first, not just a flag flip.
    rejected by WebAuthn before app code can complete registration/sign-in. Verify this setting in
    the Supabase project before claiming passkeys work on staging; production will need its own RP
    settings when that environment exists.
+
+   > **PENDING CUTOVER (2026-09-30).** The RP ID/origin above is still the **old** hand-built
+   > hostname, and is deliberately unchanged. Auto-deploy and the mobile/staging configs have already
+   > been repointed to the CDK-managed service
+   > (`ca-4f7c487503aa47609a79a96746866bb8.ecs.us-east-1.on.aws`), but WebAuthn accepts exactly one
+   > origin, so switching it is a one-way cutover that needs its own explicit go-ahead. Until it is
+   > switched, **passkey sign-in works only against the old hostname**; password sign-in is unaffected
+   > on both. See `architecture/infrastructure-as-code.md` for the cutover checklist.
 2. **AWS**: ECR repo `carrieros-web`, 2 IAM roles (`carrieros-ecsTaskExecutionRole`,
    `carrieros-ecsInfrastructureRole` — the latter needed an extra inline policy beyond AWS's own
    documented managed policy, see the memory file linked above), a new default VPC (the account had
-   none), Express service `carrieros-web-staging` in the `default` cluster.
+   none), Express service `carrieros-web-staging` in the `default` cluster. **As of 2026-09-30 this
+   hand-built service is superseded by the CDK-managed `carrieros-web-staging-cdk` and is pending
+   decommission** — see `architecture/infrastructure-as-code.md`.
 3. **Secrets**: `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, and `PUBLIC_API_JWT_SECRET` live in AWS
    Secrets Manager (`carrieros-staging/*`), referenced by ARN in the ECS task/GitHub Environment —
    never passed as literal values through chat or committed anywhere. `carrieros-ecsTaskExecutionRole`

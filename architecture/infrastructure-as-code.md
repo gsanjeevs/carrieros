@@ -407,48 +407,77 @@ account owner** and is deliberately not part of this work. Nothing in `infra/` o
 in the pause/resume scripts touches the original resources, so the decision can be
 made later without time pressure. Points worth knowing when making it:
 
-- The CodeBuild auto-deploy project currently updates the **hand-built** web
-  service, not the CDK one. Decommissioning the old service without repointing
-  CodeBuild would break auto-deploy.
-- The Supabase project's WebAuthn RP ID and allowed origin are pinned to the
-  hand-built web service's hostname
-  (`ca-aa167deb702e4a338c4370ff70576195.ecs.us-east-1.on.aws`). Passkeys will not
-  work against the CDK service's different hostname until that setting is updated,
-  and it can only point at one origin at a time.
-- `carrieros-mobile/eas.json`'s `staging` profile and
-  `scripts/check-staging-drift.mjs` also reference the hand-built hostname.
+The decommission itself is **reserved for the account owner**. Nothing in `infra/`
+or in the pause/resume scripts touches the original services.
 
-In short: the hand-built environment is still the one integrated with everything
-else. The CDK environment proves the IaC works; making it *the* staging
-environment is a separate cutover with its own checklist.
+## Cutover status
 
-### Cutover checklist, and one trap in it
+The cutover is deliberately split: the **reversible half is done**, the
+**irreversible half is not**.
 
-If and when the decision is to cut over, this is the required order. Deleting the
-old services first would break staging auto-deploy.
+### Done (2026-09-30) — reversible, all in git
 
-1. **Repoint `buildspec.yml`.** It currently hardcodes both the old service and the
-   old hostname:
-   `ECS_SERVICE_ARN: arn:aws:ecs:…:service/default/carrieros-web-staging` and
-   `NEXT_PUBLIC_APP_URL: https://ca-aa167deb702e4a338c4370ff70576195…`.
-2. **Repoint the other references**: `carrieros-mobile/eas.json`'s `staging`
-   profile, `carrieros-web/scripts/check-staging-drift.mjs`, and the
-   `carrieros-mcp` docs.
-3. **Cut Supabase Auth's WebAuthn RP ID and allowed origin** (project
-   `ddwgnsheafuuzzepqxsf`) to the new web hostname. This is one-way at any instant —
-   WebAuthn accepts a single origin — so passkeys break on whichever host is not
-   selected. Re-run the passkey-touching e2e coverage after.
-4. **Only then** delete `carrieros-web-staging` and `carrieros-mcp-staging`. Keep
-   the ECR repos, the IAM roles and the secrets — the new services use all of them.
-5. Re-run the e2e suite against the new hostname.
+1. **`buildspec.yml` repointed.** `ECS_SERVICE_ARN` now targets
+   `carrieros-web-staging-cdk`, and `NEXT_PUBLIC_APP_URL` the new hostname.
+   Auto-deploy on push to `main` now rolls the CDK service; the hand-built service
+   is no longer auto-deployed.
+2. **`carrieros-mobile/eas.json`** — both staging-channel profiles (`staging` and
+   `simulator`) repointed.
+3. **`carrieros-web/scripts/check-staging-drift.mjs`** default `STAGING_URL`
+   repointed.
+4. **Docs** repointed: `architecture/deployment.md` (manual deploy commands + a new
+   banner), `architecture/walkthrough/07-deployment-and-environments.md`, and
+   `carrieros-mcp`'s `README.md` / `architecture/deployment.md`.
+5. **The CodeBuild service role's IAM policy was widened** — necessary, and easy to
+   miss. `carrieros-codebuild-staging-deploy`'s statement granting
+   `ecs:UpdateExpressGatewayService` / `DescribeExpressGatewayService` /
+   `DescribeServiceDeployments` was scoped to a single resource, the **old** service
+   ARN. Repointing `buildspec.yml` alone would have produced an `AccessDenied` at
+   `post_build`, because `…/carrieros-web-staging` does not match
+   `…/carrieros-web-staging-cdk` (no wildcard). The policy now lists **both** ARNs,
+   deliberately keeping the old one so reverting `buildspec.yml` still works.
 
-**The trap**, because it is the opposite of the intuitive reading: it is *not* enough
-that CodeBuild pushes to the `carrieros-web:latest` tag both old and new services
-pull. Per the gotcha documented in `architecture/deployment.md`, pushing a new image
-to an unchanged tag does **not** roll an ECS service — `update-express-gateway-service`
-has to be called explicitly, and `buildspec.yml` calls it against the **old service
-ARN only**. So after a naive decommission, CodeBuild would push images that the new
-service never picks up, and its deploy step would fail against a deleted service.
-Worse, `NEXT_PUBLIC_APP_URL` is baked into the image **at build time**, so until
-step 1 is done the new service serves an app whose client-side URL points at a host
-that no longer exists. Step 1 is a hard prerequisite for step 4, not a tidy-up.
+   This role is **not** managed by CDK (the CodeBuild project is explicitly out of
+   scope — see "Still manual / deferred"), so that was a hand-edit via
+   `aws iam put-role-policy` and is not captured in any template. It is a concrete
+   argument for bringing the pipeline into CDK.
+
+Historical entries in `CURRENT_WORK.md` and the record of past test runs in
+`deployment.md` still name the old hostname **on purpose** — they describe what was
+true at the time and should not be rewritten.
+
+### Not done — needs its own explicit go-ahead
+
+5. **Supabase Auth WebAuthn RP ID / allowed origin** (project
+   `ddwgnsheafuuzzepqxsf`) is still the **old** hostname. WebAuthn accepts exactly
+   one origin, so this is a one-way switch. **Consequence right now: passkey
+   sign-in works only against the old hostname.** Password sign-in is unaffected on
+   both. Re-run the passkey-touching e2e coverage immediately after switching.
+6. **Deleting `carrieros-web-staging` and `carrieros-mcp-staging`.** When it
+   happens, keep the ECR repos, the IAM roles and the secrets — the CDK services
+   use all of them. Note this is genuinely irreversible: Express Gateway hostnames
+   are not deterministic, so a recreated service gets a *new* random hostname and
+   the old URLs can never be restored.
+7. Re-run the e2e suite against the new hostname as the sole staging environment.
+
+### The trap this ordering exists to avoid
+
+It is *not* enough that CodeBuild pushes to the `carrieros-web:latest` tag both old
+and new services pull. Per the gotcha documented in `architecture/deployment.md`,
+pushing a new image to an unchanged tag does **not** roll an ECS service —
+`update-express-gateway-service` must be called explicitly, and before this cutover
+`buildspec.yml` called it against the **old service ARN only**. Deleting the old
+services first would therefore have left CodeBuild pushing images the new service
+never picked up, with its deploy step failing against a deleted service. And because
+`NEXT_PUBLIC_APP_URL` is baked in **at build time**, the new service would have been
+serving an app whose client-side URL pointed at a host that no longer existed. Step 1
+was a hard prerequisite for step 6, not a tidy-up.
+
+### One intermediate-state wrinkle, while both environments exist
+
+`NEXT_PUBLIC_APP_URL` is now baked into `:latest` as the **new** hostname, and both
+services pull that tag. The old service will not be rolled by CodeBuild any more, so
+it keeps serving its current image — but if one of its tasks restarts for any reason
+it will pull `:latest` and then serve an app whose client-side URL points at the new
+host. Nothing breaks catastrophically (the new host is live), but it is a mixed
+state, and it is a reason not to leave the cutover half-finished indefinitely.

@@ -19,7 +19,7 @@
 //   STAGING_URL=https://your-other-env node scripts/check-staging-drift.mjs
 import { execSync } from 'node:child_process'
 
-const STAGING_URL = process.env.STAGING_URL || 'https://ca-aa167deb702e4a338c4370ff70576195.ecs.us-east-1.on.aws'
+const STAGING_URL = process.env.STAGING_URL || 'https://ca-4f7c487503aa47609a79a96746866bb8.ecs.us-east-1.on.aws'
 
 function git(cmd) {
   return execSync(cmd, { encoding: 'utf8' }).trim()
