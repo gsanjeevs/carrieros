@@ -446,6 +446,29 @@ Historical entries in `CURRENT_WORK.md` and the record of past test runs in
 `deployment.md` still name the old hostname **on purpose** — they describe what was
 true at the time and should not be rewritten.
 
+#### Auto-deploy proven against the new service, with a real build
+
+Not inferred from the config change — a real push was made and followed all the way
+to serving traffic:
+
+| Step | Evidence |
+|---|---|
+| Push to `main` | commit `405afe8` at **23:43:21Z** |
+| CodeBuild triggered automatically | build `1f496467-…`, `sourceVersion 405afe8`, started **23:43:21Z** |
+| Build result | **SUCCEEDED** at 23:47:23Z — no `AccessDenied`, confirming the IAM widening was the missing piece |
+| What it rolled | build log: `Rolling arn:aws:ecs:…:service/default/carrieros-web-staging-cdk to the new image...` |
+| New service got a revision | new active configuration at **16:47:10** local (23:47:10Z) |
+| Old service | still only its **15:16:02** revision — **not** rolled |
+| New code actually live | `/api/version` on the CDK service returned `sha 405afe8…`, `builtAt 2026-09-30T23:44:00Z` at **23:53:41Z** |
+| Old service still on old code | `/api/version` returns `sha ed80b7a…` — proof the pipeline no longer touches it |
+| Drift checker agrees | `UP TO DATE: staging is running origin/main's HEAD (405afe8bec87)` |
+| MCP regression | a real `tools/call` against the freshly rolled image still returns 10 vehicles, `isError: false` |
+
+Note the rollout lag, which is the already-documented gotcha and not a fault: the
+build succeeded at 23:47:23Z but the new code only served at **23:53:41Z**, about six
+minutes later. A green build is not evidence that new code is live — check
+`/api/version` or `check-staging-drift.mjs`.
+
 ### Not done — needs its own explicit go-ahead
 
 5. **Supabase Auth WebAuthn RP ID / allowed origin** (project
