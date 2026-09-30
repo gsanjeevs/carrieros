@@ -271,37 +271,49 @@ The staging stack was deployed for real. Live endpoints:
   `activeConfigurations[0]` staleness described above, and the incorrect assumption
   that pause drains tasks synchronously. Both are fixed and documented.
 
-### Partially verified — the MCP tool call
-
-The MCP service is deployed, reachable, and demonstrably functioning, but a
-**fully green data-returning tool call was not achieved**, for a reason outside this
-infrastructure:
+### The MCP tool call — fully verified end to end
 
 - `GET /health` returns **HTTP 200**.
 - An unauthenticated `POST /mcp` is correctly rejected: **HTTP 401**
   `{"error":"missing_tenant_credentials",...}`.
-- A real `tools/call` for `list_vehicles` with header credentials is accepted,
-  routed, and the server makes a genuine upstream call to the
-  `CARRIEROS_BASE_URL` that CDK wired in via CloudFormation `GetAtt` — proven
-  because the response carries a structured CarrierOS API error:
-  `CarrierOS API error (401 invalid_client): Invalid client credentials`.
-  Only the real CarrierOS public API emits that, so the full path
-  (TLS -> gateway -> MCP container -> upstream web service -> auth) is exercised.
+- **`CARRIEROS_BASE_URL` was checked rather than assumed.** The newest service
+  revision's container environment reads
+  `CARRIEROS_BASE_URL=https://ca-4f7c487503aa47609a79a96746866bb8...` — the **new
+  CDK web service**, not the old hand-built one. The CloudFormation `GetAtt`
+  wiring between the two sibling services works.
+- A real `tools/call` for `list_vehicles` returns **real tenant data** for
+  Sierra Freight Co: `T-1` (Freightliner Cascadia), `T-2` (Peterbilt 579), `T-3`
+  (Kenworth T680), `T-10` (International MV), with signed Supabase storage URLs.
+  That exercises the whole path: TLS -> gateway -> MCP container -> new CDK web
+  service -> public API auth -> staging Supabase -> back out as MCP content.
 
-**The credentials in `carrieros-mcp/.env` are stale.** The same call against the
-**old** hand-built web service as upstream fails **identically** with
-`401 invalid_client`, so this is not a defect in the CDK environment — the two
-environments behave the same. Per
+Getting there required a diagnosis worth recording. The first attempt returned
+`CarrierOS API error (401 invalid_client)`. That was **not** an infrastructure
+fault: the same call with the *old* web service as upstream failed identically, and
+`oauth_clients` showed the live row was `pub_client_bd3aed26…` while
+`carrieros-mcp/.env` carried a different, stale `pub_client_9f5…`. Per
 `carrieros-web/server/application/public-api-token-service.ts`, `invalid_client`
-collapses three cases deliberately: unknown `client_id`, revoked client, and wrong
-secret.
+deliberately collapses three cases — unknown `client_id`, revoked client, and wrong
+secret — so the error alone could not distinguish them.
 
-Closing this gap needs a **new** `oauth_clients` row, because secrets are bcrypt
-hashed (`client_secret_hash`, cost 12) and cannot be recovered — and the owning org
-must hold the `public_api` entitlement (Growth tier and above). That means creating
-a credential in the shared staging database, which was **not** done here: it is a
-data mutation nobody asked for, and rotating credentials is the account owner's
-call. It is a one-line follow-up whenever a fully green tool call is wanted.
+Secrets are bcrypt-hashed (`client_secret_hash`, cost 12) and unrecoverable, so a
+fresh client was minted for the verification, using the same id/secret formats as
+`server/infrastructure/crypto/oauth-credentials.ts`:
+
+| Field | Value |
+|---|---|
+| row | `oauth_clients` id **2** |
+| org | **3** (Sierra Freight Co on staging) |
+| name | `mcp-cdk-staging-verification` |
+| client_id | `pub_client_e46c0cac…` |
+
+Note the org numbering trap: Sierra Freight Co is **org 3 on staging**, whereas
+`CLAUDE.md` documents org 12 for local dev — staging's org 12 is Cascade
+Freightways. Check the table, don't port the number across environments.
+
+This client is **live and unrevoked**. Revoke it with a `revoked_at` timestamp when
+it is no longer wanted; there is no secret-rotation path, so rotation means
+create-new plus revoke-old.
 
 Two documented gotchas remain relevant and are not signs of failure:
 
@@ -409,3 +421,34 @@ made later without time pressure. Points worth knowing when making it:
 In short: the hand-built environment is still the one integrated with everything
 else. The CDK environment proves the IaC works; making it *the* staging
 environment is a separate cutover with its own checklist.
+
+### Cutover checklist, and one trap in it
+
+If and when the decision is to cut over, this is the required order. Deleting the
+old services first would break staging auto-deploy.
+
+1. **Repoint `buildspec.yml`.** It currently hardcodes both the old service and the
+   old hostname:
+   `ECS_SERVICE_ARN: arn:aws:ecs:…:service/default/carrieros-web-staging` and
+   `NEXT_PUBLIC_APP_URL: https://ca-aa167deb702e4a338c4370ff70576195…`.
+2. **Repoint the other references**: `carrieros-mobile/eas.json`'s `staging`
+   profile, `carrieros-web/scripts/check-staging-drift.mjs`, and the
+   `carrieros-mcp` docs.
+3. **Cut Supabase Auth's WebAuthn RP ID and allowed origin** (project
+   `ddwgnsheafuuzzepqxsf`) to the new web hostname. This is one-way at any instant —
+   WebAuthn accepts a single origin — so passkeys break on whichever host is not
+   selected. Re-run the passkey-touching e2e coverage after.
+4. **Only then** delete `carrieros-web-staging` and `carrieros-mcp-staging`. Keep
+   the ECR repos, the IAM roles and the secrets — the new services use all of them.
+5. Re-run the e2e suite against the new hostname.
+
+**The trap**, because it is the opposite of the intuitive reading: it is *not* enough
+that CodeBuild pushes to the `carrieros-web:latest` tag both old and new services
+pull. Per the gotcha documented in `architecture/deployment.md`, pushing a new image
+to an unchanged tag does **not** roll an ECS service — `update-express-gateway-service`
+has to be called explicitly, and `buildspec.yml` calls it against the **old service
+ARN only**. So after a naive decommission, CodeBuild would push images that the new
+service never picks up, and its deploy step would fail against a deleted service.
+Worse, `NEXT_PUBLIC_APP_URL` is baked into the image **at build time**, so until
+step 1 is done the new service serves an app whose client-side URL points at a host
+that no longer exists. Step 1 is a hard prerequisite for step 4, not a tidy-up.
