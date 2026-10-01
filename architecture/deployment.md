@@ -128,34 +128,29 @@ needs the GitHub App's permission scope extended first, not just a flag flip.
 1. **Supabase**: project `ddwgnsheafuuzzepqxsf` created, all 24 migrations applied, seeded with demo
    data matching local dev (`node carrieros-web/scripts/seed-staging-demo.mjs`).
    **Passkeys/WebAuthn**: the checked-in `supabase/config.toml` is local-only and sets RP ID/origin to
-   `localhost`. Staging uses the hosted Supabase project, so configure its Auth WebAuthn settings
-   separately: RP ID `ca-aa167deb702e4a338c4370ff70576195.ecs.us-east-1.on.aws` and allowed origin
-   `https://ca-aa167deb702e4a338c4370ff70576195.ecs.us-east-1.on.aws`. A browser origin mismatch is
-   rejected by WebAuthn before app code can complete registration/sign-in. Verify this setting in
-   the Supabase project before claiming passkeys work on staging; production will need its own RP
-   settings when that environment exists.
-
-   > **PENDING CUTOVER — BLOCKED ON CREDENTIALS (2026-09-30).** The RP ID/origin above is still the
-   > **old** hand-built hostname. Everything else is already cut over to the CDK-managed service
-   > (`ca-4f7c487503aa47609a79a96746866bb8.ecs.us-east-1.on.aws`): auto-deploy, the mobile staging
-   > profiles, and the drift checker. WebAuthn accepts exactly one origin, so **passkey sign-in
-   > currently works only against the old hostname — which is no longer the environment anything else
-   > points at.** Password sign-in is unaffected on both.
-   >
-   > The change was attempted and could not be completed: the Supabase CLI has no stored access token
-   > on this machine (`~/.supabase/access-token` absent, `SUPABASE_ACCESS_TOKEN` unset), the Management
-   > API returns `401` without one, and `supabase login` is interactive.
-   > `architecture/infrastructure-as-code.md` carries the exact copy-pasteable scratch-config +
-   > `config push` + read-back sequence to finish it once a token exists.
-   >
-   > **Do not delete the old ECS services before this lands** — the RP ID would then name a host with
-   > no service behind it while still not matching the live host, so passkeys would fail everywhere.
+   `localhost` — that only governs the local `supabase start` stack, not the hosted staging project.
+   The hosted project's actual WebAuthn settings are **not** manageable via `supabase config push`/
+   `diff` — the CLI's config.toml → remote-config mapping doesn't cover `webauthn_*` fields at all (no
+   error, they're just silently absent from every diff, which looks like "already matches" but isn't).
+   They're real fields on the Management API (`GET/PATCH /v1/projects/{ref}/config/auth`):
+   `webauthn_rp_id`, `webauthn_rp_origins`, `webauthn_rp_display_name`, `passkey_enabled`. Current
+   staging value, cut over 2026-09-30: RP ID `ca-4f7c487503aa47609a79a96746866bb8.ecs.us-east-1.on.aws`,
+   origin `https://ca-4f7c487503aa47609a79a96746866bb8.ecs.us-east-1.on.aws` — the CDK-managed web
+   service, matching everything else (auto-deploy, mobile staging profiles, drift checker). Verified
+   by an independent re-`GET` after the `PATCH`, not just the `PATCH` response. A browser origin
+   mismatch is rejected by WebAuthn before app code can complete registration/sign-in — re-verify this
+   setting (same two API calls) if the hostname ever changes again. Production will need its own RP
+   settings when that environment exists, via the same Management API fields, not `config.toml`.
 2. **AWS**: ECR repo `carrieros-web`, 2 IAM roles (`carrieros-ecsTaskExecutionRole`,
    `carrieros-ecsInfrastructureRole` — the latter needed an extra inline policy beyond AWS's own
    documented managed policy, see the memory file linked above), a new default VPC (the account had
-   none), Express service `carrieros-web-staging` in the `default` cluster. **As of 2026-09-30 this
-   hand-built service is superseded by the CDK-managed `carrieros-web-staging-cdk` and is pending
-   decommission** — see `architecture/infrastructure-as-code.md`.
+   none). **Staging is now sole-sourced from CDK** (`infra/`, see
+   `architecture/infrastructure-as-code.md`) — the original hand-built `carrieros-web-staging` and
+   `carrieros-mcp-staging` Express Gateway services were deleted 2026-09-30 after the WebAuthn cutover
+   above and a full auto-deploy verification confirmed the CDK-managed pair
+   (`carrieros-web-staging-cdk`, `carrieros-mcp-staging-cdk`) was the complete replacement. Deletion
+   confirmed `INACTIVE` via polling, with the CDK web service continuously serving `200` throughout —
+   zero observed downtime during the cutover.
 3. **Secrets**: `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, and `PUBLIC_API_JWT_SECRET` live in AWS
    Secrets Manager (`carrieros-staging/*`), referenced by ARN in the ECS task/GitHub Environment —
    never passed as literal values through chat or committed anywhere. `carrieros-ecsTaskExecutionRole`

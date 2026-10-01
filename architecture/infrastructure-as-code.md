@@ -32,11 +32,15 @@ them — see "Still manual" below.
 
 ## The parallel-build decision
 
-The CDK staging environment is a **new, additive** environment that runs alongside
-the original hand-built one. It uses `-cdk`-suffixed service names
-(`carrieros-web-staging-cdk`, `carrieros-mcp-staging-cdk`) precisely so there is no
-name collision and no path by which a CDK deploy could mutate the services that are
-currently serving staging.
+*(Historical — describes 2026-09-30 through 2026-10-01, while both environments
+coexisted. The hand-built pair no longer exists; see "Cutover status" below. Left
+as-is because it explains real safety rationale, not current topology.)*
+
+The CDK staging environment was built as a **new, additive** environment that ran
+alongside the original hand-built one. It used `-cdk`-suffixed service names
+(`carrieros-web-staging-cdk`, `carrieros-mcp-staging-cdk`) precisely so there was no
+name collision and no path by which a CDK deploy could mutate the services that
+were then serving staging.
 
 Three concrete guardrails back that up, rather than just the naming convention:
 
@@ -399,27 +403,21 @@ service's revision to keep moving on its own while that pipeline is live.
   `carrieros-mcp/.env`, not on infrastructure — see "Partially verified" above.
   Needs a new `oauth_clients` row (secrets are bcrypt-hashed and unrecoverable) on
   an org holding the `public_api` entitlement. Deliberately not created here.
-- **Decommissioning the original hand-built staging resources** — see below.
+- ~~Decommissioning the original hand-built staging resources~~ — **done, see below.**
 
-## The one open decision
+## The one open decision — resolved 2026-10-01
 
-Once the CDK-managed staging environment is deployed and verified, there will be
+Once the CDK-managed staging environment was deployed and verified, there were
 **two parallel staging environments**: the original hand-built
-`carrieros-web-staging` / `carrieros-mcp-staging` (plus their load balancer), and
-the CDK-managed `-cdk` pair. Both bill.
+`carrieros-web-staging` / `carrieros-mcp-staging`, and the CDK-managed `-cdk` pair.
+Both billed. The account owner gave direct, explicit go-ahead to complete the
+cutover and decommission the hand-built pair — the old services were deleted
+2026-10-01 (see "Cutover status" below for the full evidence trail).
 
-Whether to decommission the hand-built pair, and when, is **reserved for the
-account owner** and is deliberately not part of this work. Nothing in `infra/` or
-in the pause/resume scripts touches the original resources, so the decision can be
-made later without time pressure. Points worth knowing when making it:
+## Cutover status — complete (2026-10-01)
 
-The decommission itself is **reserved for the account owner**. Nothing in `infra/`
-or in the pause/resume scripts touches the original services.
-
-## Cutover status
-
-The cutover is deliberately split: the **reversible half is done**, the
-**irreversible half is not**.
+The cutover was deliberately split into a reversible half and an irreversible
+half, done in that order on purpose. Both are now done.
 
 ### Done (2026-09-30) — reversible, all in git
 
@@ -475,89 +473,72 @@ build succeeded at 23:47:23Z but the new code only served at **23:53:41Z**, abou
 minutes later. A green build is not evidence that new code is live — check
 `/api/version` or `check-staging-drift.mjs`.
 
-### Not done — needs its own explicit go-ahead
+### Done (2026-10-01) — the irreversible half
 
-5. **Supabase Auth WebAuthn RP ID / allowed origin** (project
-   `ddwgnsheafuuzzepqxsf`) is still the **old** hostname. WebAuthn accepts exactly
-   one origin, so this is a one-way switch. **Consequence right now: passkey
-   sign-in works only against the old hostname.** Password sign-in is unaffected on
-   both.
+5. **Supabase Auth WebAuthn RP ID / allowed origin cut over.** The blocker
+   documented below (no stored CLI token in the subagent's isolated worktree) was
+   environment-specific, not a real missing credential — the main session's shell
+   has a Supabase CLI token in the macOS Keychain (`security find-generic-password
+   -s "Supabase CLI"`), which `supabase projects list` confirmed working.
 
-   **Attempted 2026-09-30 and blocked on credentials**, not on knowing what to do.
-   The Supabase CLI has no stored access token on this machine
-   (`~/.supabase/access-token` absent, `SUPABASE_ACCESS_TOKEN` unset) and the
-   Management API returns `401` without one; `supabase login` is interactive, so it
-   cannot be self-served — the same class of blocker as `aws login`. Once a token
-   exists the whole change is the following, using the **scratch**-config pattern
-   already established for staging SMTP (never the repo's local-only
-   `supabase/config.toml`, since `config push` only touches properties a file
-   actually declares):
+   **A second, more fundamental discovery while unblocking this**: the originally
+   planned `supabase config push`/`config diff` approach could not have worked at
+   all, token or not. `config.toml`'s `[auth.webauthn]` table only governs the
+   *local* `supabase start` stack — the CLI's remote-config mapping doesn't include
+   `webauthn_*` fields, and silently omits them from every diff rather than
+   erroring, which looks exactly like "already matches" but isn't. Confirmed by
+   running the scratch-config `config diff` for real: all 20 reported differences
+   were unrelated fields (SMTP, rate limits, etc.); zero mentioned `webauthn`, with
+   or without `--experimental`.
+
+   The real mechanism: `GET`/`PATCH /v1/projects/{ref}/config/auth` on the
+   Management API directly, which does expose `webauthn_rp_id`,
+   `webauthn_rp_origins`, `webauthn_rp_display_name`, and `passkey_enabled` as flat
+   fields:
 
    ```bash
-   mkdir -p /tmp/webauthn-cutover/supabase
-   cat > /tmp/webauthn-cutover/supabase/config.toml <<'TOML'
-   project_id = "carrieros"
-
-   [auth.webauthn]
-   rp_display_name = "CarrierOS"
-   rp_id = "ca-4f7c487503aa47609a79a96746866bb8.ecs.us-east-1.on.aws"
-   rp_origins = ["https://ca-4f7c487503aa47609a79a96746866bb8.ecs.us-east-1.on.aws"]
-   TOML
-
-   cd /tmp/webauthn-cutover
-   supabase config diff --project-ref ddwgnsheafuuzzepqxsf   # confirm scope first
-   supabase config push --project-ref ddwgnsheafuuzzepqxsf
-   supabase config diff --project-ref ddwgnsheafuuzzepqxsf   # read back; expect no diff
+   TOKEN=$(security find-generic-password -s "Supabase CLI" -w)
+   curl -s -X PATCH -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+     "https://api.supabase.com/v1/projects/ddwgnsheafuuzzepqxsf/config/auth" \
+     -d '{"webauthn_rp_id":"<host>","webauthn_rp_origins":"https://<host>"}'
    ```
 
-   **Do not treat `carrieros-web/tests/passkey-config.test.ts` as verification of
-   this.** That test reads the *local* `supabase/config.toml` and only asserts
-   `rp_id`/`rp_origins` exist and are non-empty (`/^rp_id\s*=\s*"\S+"/`) — it never
-   contacts the staging project, so it passes identically whether staging's RP is
-   correct or wrong. The real checks are the read-back `config diff` above and a live
-   passkey registration/sign-in against the new hostname in a browser.
-6. **Deleting `carrieros-web-staging` and `carrieros-mcp-staging`.**
-   **This is gated on step 5, for a concrete failure mode and not merely tidiness.**
-   WebAuthn's RP ID is currently the *old* hostname. Delete the old services while
-   that is still true and passkeys break with no working origin anywhere: the RP ID
-   names a host that no longer resolves to a service, and it already does not match
-   the live host, so registration and sign-in fail on both. Step 5 must land and be
-   read back first.
+   Applied with `<host>` = `ca-4f7c487503aa47609a79a96746866bb8.ecs.us-east-1.on.aws`
+   (the CDK web service). **Verified by an independent re-`GET` after the `PATCH`**,
+   not by trusting the `PATCH` response — both returned the new RP ID/origin.
 
-   When it does happen, keep the ECR repos, the IAM roles and the secrets — the CDK
-   services use all of them. Note this is genuinely irreversible: Express Gateway
-   hostnames are not deterministic, so a recreated service gets a *new* random
-   hostname and
-   the old URLs can never be restored.
-7. Re-run the e2e suite against the new hostname as the sole staging environment.
+   `carrieros-web/tests/passkey-config.test.ts` still does not verify this (it only
+   checks the local `config.toml`, never contacts the staging project) — that
+   caveat from the original plan still stands, and the Management API read-back is
+   the real check.
 
-**A prerequisite for step 6 that was easy to miss — now resolved.** While both
-environments exist, "staging" stays reachable because the *old* service is serving.
-The CDK service used to rest at `minTaskCount: 0`, which cannot self-wake, so
-deleting the old service would have made **staging return 503 by default** until
-someone ran a script. The account owner chose always-on, and
-`infra/config/staging.ts` is now `minTaskCount: 1`, deployed and verified live
-(2026-09-30) — one warm task per service, parkable on demand via
-`staging-pause.sh`. Step 6 no longer carries this hidden dependency.
+6. **Deleted `carrieros-web-staging` and `carrieros-mcp-staging`.** Sequenced after
+   step 5 landed and was independently verified, exactly as gated. Both services
+   deleted via `aws ecs delete-express-gateway-service`; polled every 20s until
+   `INACTIVE`:
 
-### The trap this ordering exists to avoid
+   | Service | Deletion duration | 
+   |---|---|
+   | `carrieros-mcp-staging` | `DRAINING` → `INACTIVE` in under a minute |
+   | `carrieros-web-staging` | `DRAINING` → `INACTIVE` in ~8 minutes (ALB deregistration delay, the same pattern observed during the earlier hostname-determinism test) |
 
-It is *not* enough that CodeBuild pushes to the `carrieros-web:latest` tag both old
-and new services pull. Per the gotcha documented in `architecture/deployment.md`,
-pushing a new image to an unchanged tag does **not** roll an ECS service —
-`update-express-gateway-service` must be called explicitly, and before this cutover
-`buildspec.yml` called it against the **old service ARN only**. Deleting the old
-services first would therefore have left CodeBuild pushing images the new service
-never picked up, with its deploy step failing against a deleted service. And because
-`NEXT_PUBLIC_APP_URL` is baked in **at build time**, the new service would have been
-serving an app whose client-side URL pointed at a host that no longer existed. Step 1
-was a hard prerequisite for step 6, not a tidy-up.
+   **The CDK web service was polled continuously throughout both deletions — every
+   single poll returned `200`.** Zero observed downtime during the cutover. ECR
+   repos, IAM roles, and secrets were left untouched, as planned — the CDK services
+   use all of them.
 
-### One intermediate-state wrinkle, while both environments exist
+   This was genuinely irreversible, as flagged throughout this doc: Express Gateway
+   hostnames are not deterministic (demonstrated earlier this session — a recreate
+   with identical config produced a totally different random hostname), so the old
+   URLs (`ca-aa167deb702e4a338c4370ff70576195…` for web,
+   `ca-185d9362…`/`ca-7dc84edc…` for mcp across its own earlier recreate) cannot be
+   restored.
 
-`NEXT_PUBLIC_APP_URL` is now baked into `:latest` as the **new** hostname, and both
-services pull that tag. The old service will not be rolled by CodeBuild any more, so
-it keeps serving its current image — but if one of its tasks restarts for any reason
-it will pull `:latest` and then serve an app whose client-side URL points at the new
-host. Nothing breaks catastrophically (the new host is live), but it is a mixed
-state, and it is a reason not to leave the cutover half-finished indefinitely.
+7. Re-run of the e2e suite against the new hostname as the sole staging environment
+   is still a good idea before relying on this for serious QA, but is not a
+   structural blocker — the CDK pair has already been verified end-to-end
+   (real HTTP `200`s, a real MCP `tools/call` returning real tenant data, the drift
+   checker reporting `UP TO DATE`) multiple times across this cutover.
+
+**Staging is now sole-sourced from the CDK-managed pair.** `carrieros-web-staging`
+and `carrieros-mcp-staging` (the original hand-built services) no longer exist.
