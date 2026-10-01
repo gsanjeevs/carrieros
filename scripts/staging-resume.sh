@@ -2,27 +2,21 @@
 #
 # staging-resume.sh — bring the CDK-managed staging services back up.
 #
-# =============================================================================
-# WHY THIS SETS minTaskCount=1 AND NOT THE CONFIGURED VALUE OF 0
-# =============================================================================
-# `infra/config/staging.ts` declares `minTaskCount: 0`, because staging should
-# cost nothing at rest. A naive "resume" that restored the configured value
-# would set the minimum back to 0 — and the service would stay dead.
+# Sets `minTaskCount=1`, which since 2026-09-30 is also the value declared in
+# `infra/config/staging.ts` — so this restores the configured state rather than
+# diverging from it, and `cdk deploy` and this script now agree.
 #
-# ECS Express Gateway autoscaling here is CPU-based (`AVERAGE_CPU`). CPU cannot
-# be measured across zero running tasks, and there is no request-triggered cold
-# start the way some serverless platforms provide. So a service sitting at
-# `minTaskCount: 0` with no traffic has nothing that can ever scale it up: it
-# stays at zero indefinitely and the gateway returns 503 forever. This was hit
-# for real during the original hand-built staging deploy — see
-# `architecture/deployment.md` and the carrieros-mcp README's deployment notes.
-#
-# Therefore "resume" means: set minTaskCount=1 so a task actually starts, and
-# LEAVE IT AT 1. This is a deliberate, documented divergence from the config
-# file's 0, not a bug and not drift to be "corrected" back. The config's 0 is the
-# at-rest/paused state; 1 is the serving state. `cdk deploy` will reset the
-# minimum to the configured 0, so re-run this script after any deploy you expect
-# to actually serve traffic.
+# (History, because the previous behavior was deliberately surprising: staging
+# used to be configured at `minTaskCount: 0` to cost nothing at rest, and this
+# script had to override that to 1 — a documented divergence — because ECS
+# Express Gateway autoscaling is CPU-based (`AVERAGE_CPU`), CPU cannot be
+# measured across zero running tasks, and there is no request-triggered cold
+# start. A service at 0 with no traffic has nothing that can ever scale it up:
+# it stays at zero and the gateway returns 503 forever. That bit the original
+# hand-built staging deploy for real — see `architecture/deployment.md` and the
+# carrieros-mcp README. The account owner chose always-on instead, so the
+# override is gone and 0 is now only ever set deliberately, by
+# staging-pause.sh.)
 #
 # Targets ONLY the CDK-managed services. The original hand-built
 # `carrieros-web-staging` / `carrieros-mcp-staging` are not touched.
@@ -40,7 +34,7 @@ REGION="${AWS_REGION:-us-east-1}"
 CLUSTER="${ECS_CLUSTER:-default}"
 SERVICES=("carrieros-web-staging-cdk" "carrieros-mcp-staging-cdk")
 
-# See the comment block above: 1, deliberately, not the configured 0.
+# Matches `minTaskCount` in infra/config/staging.ts. Keep the two in step.
 TARGET_MIN=1
 
 DRY_RUN=0
@@ -150,7 +144,9 @@ if [[ "$WAIT" == "1" && ${#endpoints[@]} -gt 0 ]]; then
 fi
 
 echo
-echo "NOTE: these services are now at minTaskCount=1 and will stay there,"
-echo "billing for a running task. Run ./scripts/staging-pause.sh when done."
+echo "NOTE: these services are at minTaskCount=1 (the configured default) and"
+echo "will stay there, billing for a running task. Park them with"
+echo "./scripts/staging-pause.sh if staging is not needed for a while — but note"
+echo "the next 'cdk deploy' restores the configured 1."
 
 exit "$exit_code"

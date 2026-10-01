@@ -84,7 +84,7 @@ Every row here is a value in `infra/config/staging.ts` or
 | Constraint | staging | production |
 |---|---|---|
 | ALB strategy | Express Gateway (auto) | custom ALB + FargateService |
-| `minTaskCount` | 0 | 2 |
+| `minTaskCount` | 1 (always-on; see below) | 2 |
 | `maxTaskCount` | 1 | 4 (configurable; no real load data yet) |
 | ALB availability zones | 2 (the AWS minimum) | all AZs with a subnet in the VPC |
 | WAF | disabled | enabled (common rule set, known-bad-inputs, per-IP rate limit) |
@@ -150,19 +150,25 @@ Both are idempotent, both target **only** the `-cdk` services, and both fail fas
 with a clear message when AWS credentials have expired rather than emitting one
 opaque error per service.
 
-**`staging-resume.sh` sets `minTaskCount=1`, not the configured `0`. That is
-deliberate.** Express Gateway's autoscaling here is CPU-based (`AVERAGE_CPU`), and
-CPU cannot be measured across zero running tasks. There is no request-triggered
-cold start. A service at `minTaskCount: 0` with no traffic has nothing that can
-ever scale it up — it stays at zero indefinitely and the gateway returns 503
-forever. This was hit for real on the original hand-built MCP service.
+**Staging is always-on: `minTaskCount: 1`** (account owner's decision,
+2026-09-30). `staging-resume.sh` restores that configured value rather than
+overriding it, so the config file, `cdk deploy` and the script all agree, and
+**pause is now the only thing that ever sets 0**.
 
-So `0` is the at-rest/paused state and `1` is the serving state. Resume sets 1 and
-leaves it there. Note the consequence: **`cdk deploy` resets the minimum to the
-configured `0`**, so re-run `staging-resume.sh` after any deploy that is expected
-to actually serve traffic. That is a real sharp edge of representing the paused
-state as the declared default, and it is called out here rather than discovered
-later.
+The floor is 1 because of a platform constraint, not a cost preference. Express
+Gateway's autoscaling is CPU-based (`AVERAGE_CPU`), CPU cannot be measured across
+zero running tasks, and there is no request-triggered cold start. A service at
+`minTaskCount: 0` with no traffic has nothing that can ever scale it up — it stays
+at zero and the gateway returns 503 indefinitely. That bit the original hand-built
+MCP service for real. So a 0 floor does not mean "cheap, wakes on demand"; it means
+"down until a human runs a script" — the wrong default for an environment that CI,
+`check-staging-drift.mjs`, mobile builds and teammates all expect to answer.
+
+Consequence worth knowing, and the exact inverse of the old sharp edge:
+**`cdk deploy` restores the minimum to 1**, so a deploy will un-pause a parked
+environment. Pause is an on-demand parking brake, not a durable setting — if
+staging should be parked by default, change `infra/config/staging.ts` rather than
+relying on the script having been run.
 
 Pausing is a compute-cost lever, not a teardown: the Express-Gateway-managed load
 balancer still exists and still bills while tasks are at zero.
@@ -483,16 +489,14 @@ minutes later. A green build is not evidence that new code is live — check
    the old URLs can never be restored.
 7. Re-run the e2e suite against the new hostname as the sole staging environment.
 
-**A decision that falls out of step 6, and is easy to miss:** while both
-environments exist, "staging" is still reachable because the *old* service is
-serving. The CDK service rests at `minTaskCount: 0` and cannot self-wake, so once
-the old service is deleted, **staging will return 503 by default** until someone
-runs `staging-resume.sh`. That is fine for an environment only used in deliberate
-bursts, and wrong for one that CI, a drift checker, a mobile build or a teammate
-expects to answer at any time. So step 6 should be paired with an explicit choice:
-either keep `minTaskCount: 0` and accept resume-on-demand, or set staging's
-`minTaskCount` to 1 in `infra/config/staging.ts` and accept one always-running task.
-Right now the 0 is safe only *because* the old environment is still up.
+**A prerequisite for step 6 that was easy to miss — now resolved.** While both
+environments exist, "staging" stays reachable because the *old* service is serving.
+The CDK service used to rest at `minTaskCount: 0`, which cannot self-wake, so
+deleting the old service would have made **staging return 503 by default** until
+someone ran a script. The account owner chose always-on, and
+`infra/config/staging.ts` is now `minTaskCount: 1`, deployed and verified live
+(2026-09-30) — one warm task per service, parkable on demand via
+`staging-pause.sh`. Step 6 no longer carries this hidden dependency.
 
 ### The trap this ordering exists to avoid
 

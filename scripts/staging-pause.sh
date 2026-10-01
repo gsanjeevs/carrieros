@@ -17,6 +17,12 @@
 # IN_PROGRESS and the older revisions still listed under activeConfigurations.
 # Do not treat a 200 shortly after pausing as a failed pause.
 #
+# Pausing is a DEPARTURE from the configured state: since 2026-09-30
+# `infra/config/staging.ts` declares `minTaskCount: 1` (always-on), so the next
+# `cdk deploy` restores 1 and staging starts serving again. Treat pause as an
+# on-demand parking brake, not a durable setting — if staging should be parked by
+# default, change the config rather than relying on this script having been run.
+#
 # Paused services cost nothing for compute, but the Express-Gateway-managed load
 # balancer still exists and still bills. Pausing is a compute-cost lever, not a
 # teardown.

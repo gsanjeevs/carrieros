@@ -117,10 +117,14 @@ export interface EnvironmentConfig {
    *
    * A real, load-bearing gotcha for `express-gateway`: its autoscaling is
    * CPU-based (`AVERAGE_CPU`), and CPU cannot be measured on zero tasks, so
-   * there is no request-triggered cold start. `minTaskCount: 0` means the
-   * service stays at zero forever and the gateway returns 503 indefinitely.
-   * Staging deliberately runs at 0 to cost nothing at rest; use
-   * `scripts/staging-resume.sh` to actually make it serve traffic.
+   * there is no request-triggered cold start. A service left at
+   * `minTaskCount: 0` with no traffic stays at zero and the gateway returns 503
+   * indefinitely — nothing can scale it back up on its own.
+   *
+   * That is exactly why staging runs at 1 rather than 0: zero would have meant
+   * "staging is down until a human runs a script". `scripts/staging-pause.sh`
+   * sets 0 on demand to park it; `scripts/staging-resume.sh` restores this
+   * configured value.
    */
   readonly minTaskCount: number;
   readonly maxTaskCount: number;

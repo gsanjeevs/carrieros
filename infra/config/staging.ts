@@ -71,9 +71,14 @@ export const stagingConfig: EnvironmentConfig = {
   // Staging keeps the low-IaC-surface Express Gateway pattern already in use.
   albStrategy: 'express-gateway',
 
-  // Costs nothing at rest. See the `minTaskCount` note in types.ts: 0 means the
-  // service will NOT wake on its own — scripts/staging-resume.sh exists for that.
-  minTaskCount: 0,
+  // Always-on (account owner's decision, 2026-09-30). Staging is expected to
+  // answer at any time — CI, check-staging-drift.mjs, mobile builds and teammates
+  // all assume it is reachable — and Express Gateway's CPU-based autoscaling
+  // cannot wake a service from zero tasks (see the `minTaskCount` note in
+  // types.ts), so a 0 here would mean "503 until a human runs a script". The cost
+  // of one warm task is accepted in exchange. It can still be parked on demand
+  // with scripts/staging-pause.sh and brought back with staging-resume.sh.
+  minTaskCount: 1,
   maxTaskCount: 1,
   autoScalingTargetCpuPercent: 60,
 
