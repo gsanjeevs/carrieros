@@ -135,13 +135,21 @@ needs the GitHub App's permission scope extended first, not just a flag flip.
    the Supabase project before claiming passkeys work on staging; production will need its own RP
    settings when that environment exists.
 
-   > **PENDING CUTOVER (2026-09-30).** The RP ID/origin above is still the **old** hand-built
-   > hostname, and is deliberately unchanged. Auto-deploy and the mobile/staging configs have already
-   > been repointed to the CDK-managed service
-   > (`ca-4f7c487503aa47609a79a96746866bb8.ecs.us-east-1.on.aws`), but WebAuthn accepts exactly one
-   > origin, so switching it is a one-way cutover that needs its own explicit go-ahead. Until it is
-   > switched, **passkey sign-in works only against the old hostname**; password sign-in is unaffected
-   > on both. See `architecture/infrastructure-as-code.md` for the cutover checklist.
+   > **PENDING CUTOVER — BLOCKED ON CREDENTIALS (2026-09-30).** The RP ID/origin above is still the
+   > **old** hand-built hostname. Everything else is already cut over to the CDK-managed service
+   > (`ca-4f7c487503aa47609a79a96746866bb8.ecs.us-east-1.on.aws`): auto-deploy, the mobile staging
+   > profiles, and the drift checker. WebAuthn accepts exactly one origin, so **passkey sign-in
+   > currently works only against the old hostname — which is no longer the environment anything else
+   > points at.** Password sign-in is unaffected on both.
+   >
+   > The change was attempted and could not be completed: the Supabase CLI has no stored access token
+   > on this machine (`~/.supabase/access-token` absent, `SUPABASE_ACCESS_TOKEN` unset), the Management
+   > API returns `401` without one, and `supabase login` is interactive.
+   > `architecture/infrastructure-as-code.md` carries the exact copy-pasteable scratch-config +
+   > `config push` + read-back sequence to finish it once a token exists.
+   >
+   > **Do not delete the old ECS services before this lands** — the RP ID would then name a host with
+   > no service behind it while still not matching the live host, so passkeys would fail everywhere.
 2. **AWS**: ECR repo `carrieros-web`, 2 IAM roles (`carrieros-ecsTaskExecutionRole`,
    `carrieros-ecsInfrastructureRole` — the latter needed an extra inline policy beyond AWS's own
    documented managed policy, see the memory file linked above), a new default VPC (the account had

@@ -481,11 +481,53 @@ minutes later. A green build is not evidence that new code is live — check
    `ddwgnsheafuuzzepqxsf`) is still the **old** hostname. WebAuthn accepts exactly
    one origin, so this is a one-way switch. **Consequence right now: passkey
    sign-in works only against the old hostname.** Password sign-in is unaffected on
-   both. Re-run the passkey-touching e2e coverage immediately after switching.
-6. **Deleting `carrieros-web-staging` and `carrieros-mcp-staging`.** When it
-   happens, keep the ECR repos, the IAM roles and the secrets — the CDK services
-   use all of them. Note this is genuinely irreversible: Express Gateway hostnames
-   are not deterministic, so a recreated service gets a *new* random hostname and
+   both.
+
+   **Attempted 2026-09-30 and blocked on credentials**, not on knowing what to do.
+   The Supabase CLI has no stored access token on this machine
+   (`~/.supabase/access-token` absent, `SUPABASE_ACCESS_TOKEN` unset) and the
+   Management API returns `401` without one; `supabase login` is interactive, so it
+   cannot be self-served — the same class of blocker as `aws login`. Once a token
+   exists the whole change is the following, using the **scratch**-config pattern
+   already established for staging SMTP (never the repo's local-only
+   `supabase/config.toml`, since `config push` only touches properties a file
+   actually declares):
+
+   ```bash
+   mkdir -p /tmp/webauthn-cutover/supabase
+   cat > /tmp/webauthn-cutover/supabase/config.toml <<'TOML'
+   project_id = "carrieros"
+
+   [auth.webauthn]
+   rp_display_name = "CarrierOS"
+   rp_id = "ca-4f7c487503aa47609a79a96746866bb8.ecs.us-east-1.on.aws"
+   rp_origins = ["https://ca-4f7c487503aa47609a79a96746866bb8.ecs.us-east-1.on.aws"]
+   TOML
+
+   cd /tmp/webauthn-cutover
+   supabase config diff --project-ref ddwgnsheafuuzzepqxsf   # confirm scope first
+   supabase config push --project-ref ddwgnsheafuuzzepqxsf
+   supabase config diff --project-ref ddwgnsheafuuzzepqxsf   # read back; expect no diff
+   ```
+
+   **Do not treat `carrieros-web/tests/passkey-config.test.ts` as verification of
+   this.** That test reads the *local* `supabase/config.toml` and only asserts
+   `rp_id`/`rp_origins` exist and are non-empty (`/^rp_id\s*=\s*"\S+"/`) — it never
+   contacts the staging project, so it passes identically whether staging's RP is
+   correct or wrong. The real checks are the read-back `config diff` above and a live
+   passkey registration/sign-in against the new hostname in a browser.
+6. **Deleting `carrieros-web-staging` and `carrieros-mcp-staging`.**
+   **This is gated on step 5, for a concrete failure mode and not merely tidiness.**
+   WebAuthn's RP ID is currently the *old* hostname. Delete the old services while
+   that is still true and passkeys break with no working origin anywhere: the RP ID
+   names a host that no longer resolves to a service, and it already does not match
+   the live host, so registration and sign-in fail on both. Step 5 must land and be
+   read back first.
+
+   When it does happen, keep the ECR repos, the IAM roles and the secrets — the CDK
+   services use all of them. Note this is genuinely irreversible: Express Gateway
+   hostnames are not deterministic, so a recreated service gets a *new* random
+   hostname and
    the old URLs can never be restored.
 7. Re-run the e2e suite against the new hostname as the sole staging environment.
 
