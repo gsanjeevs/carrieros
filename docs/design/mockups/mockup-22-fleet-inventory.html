@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CarrierOS — Mockup 22: Truck Fleet Inventory</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<style>
+:root {
+  --navy:#0f1923; --navy-light:#1e3a5f; --navy-muted:#4b5a6e;
+  --orange:#f97316; --orange-bg:#fff0e6; --orange-text:#c05a00;
+  --green:#16a34a; --green-bg:#e8f9f1; --green-text:#1a9e5c;
+  --amber:#d97706; --amber-bg:#fff7ed; --amber-text:#b37d00;
+  --red:#dc2626; --red-bg:#fdecea; --red-text:#c0392b;
+  --teal:#1abc9c; --blue:#1a5eb8; --blue-bg:#e8f0fe;
+  --bg:#f4f6f9; --card:#fff; --border:#e5e8ef; --divider:#f1f3f8;
+  --text:#0f1923; --text2:#8898aa; --text3:#6b7a8f; --muted:#aaa;
+  --sidebar:256px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:13px;}
+.ms{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;font-size:18px;line-height:1;display:inline-block;white-space:nowrap;direction:ltr;-webkit-font-smoothing:antialiased;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);background:var(--navy);min-height:100vh;display:flex;flex-direction:column;flex-shrink:0;}
+.sidebar-brand{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sidebar-logo{font-size:18px;font-weight:900;color:#fff;letter-spacing:-.5px;}
+.sidebar-tier{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--orange);text-transform:uppercase;margin-top:2px;}
+.sidebar-user{padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;}
+.sidebar-avatar-photo{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(255,255,255,.2);}
+.sidebar-name{font-size:13px;font-weight:600;color:#fff;}
+.sidebar-role{font-size:11px;color:var(--text2);}
+.sidebar-section{padding:16px 12px 4px;font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--navy-muted);text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;margin:1px 8px;border-radius:6px;color:#8898aa;font-size:13px;font-weight:500;cursor:pointer;}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff;}
+.nav-item.active{background:rgba(249,115,22,.12);color:var(--orange);}
+.nav-item .ms{font-size:18px;}
+.nav-badge{margin-left:auto;background:var(--orange);color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:1px 6px;}
+
+/* DESKTOP SHELL */
+.desktop{display:flex;min-height:100vh;}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{height:56px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;flex-shrink:0;}
+.topbar-title{font-size:15px;font-weight:700;}
+.topbar-sub{font-size:12px;color:var(--text2);margin-left:2px;}
+.topbar-actions{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.btn-primary{background:var(--navy);color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;}
+.btn-outline{background:#fff;color:var(--navy);border:1.5px solid var(--border);border-radius:6px;padding:6px 12px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;}
+.btn-orange{background:var(--orange);color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;}
+.page-content{flex:1;padding:24px;overflow:auto;}
+
+/* STATUS BADGES */
+.status-badge{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:3px 9px;font-size:11px;font-weight:700;}
+.status-badge.active{background:var(--green-bg);color:var(--green-text);}
+.status-badge.shop{background:var(--amber-bg);color:var(--amber-text);}
+.status-badge.oos{background:var(--red-bg);color:var(--red-text);}
+.status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.sd-green{background:var(--green);}
+.sd-amber{background:var(--amber);}
+.sd-red{background:var(--red);}
+
+/* FILTER TABS */
+.filter-tabs{display:flex;gap:2px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:3px;width:fit-content;margin-bottom:20px;}
+.ftab{padding:5px 14px;border-radius:6px;font-size:12px;font-weight:500;color:var(--text3);cursor:pointer;}
+.ftab.on{background:var(--navy);color:#fff;font-weight:600;}
+.ftab .n{font-size:10px;margin-left:3px;opacity:.65;}
+
+/* KPI ROW */
+.kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.kpi-mini{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.kpi-label{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;}
+.kpi-val{font-size:24px;font-weight:800;color:var(--text);}
+.kpi-sub{font-size:11px;color:var(--text3);margin-top:3px;}
+
+/* ALERT BANNER */
+.alert-banner{background:var(--amber-bg);border:1px solid #fed7aa;border-radius:8px;padding:10px 16px;display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.alert-banner .ms{font-size:20px;color:var(--orange);}
+.alert-text{flex:1;font-size:12px;color:#9a3412;}
+.alert-cta{font-size:11px;font-weight:700;color:var(--orange);cursor:pointer;white-space:nowrap;}
+
+/* ── TRUCK CARDS (DESKTOP) ── */
+.truck-list{display:flex;flex-direction:column;gap:14px;}
+.truck-card{background:var(--card);border:1px solid var(--border);border-radius:14px;display:flex;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05);transition:box-shadow .15s;}
+.truck-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.1);}
+.truck-accent{width:4px;flex-shrink:0;}
+.ta-green{background:var(--green);}
+.ta-amber{background:var(--amber);}
+.ta-red{background:var(--red);}
+
+/* TRUCK PHOTO */
+.truck-photo-col{width:200px;flex-shrink:0;overflow:hidden;position:relative;}
+.truck-photo-col img{width:100%;height:100%;object-fit:cover;display:block;}
+.truck-photo-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.6));padding:8px 10px;}
+.truck-photo-unit{font-size:11px;font-weight:700;color:#fff;letter-spacing:.05em;}
+.truck-photo-type{font-size:10px;color:rgba(255,255,255,.75);}
+
+/* TRUCK INFO */
+.truck-info{flex:1;padding:18px 20px;display:flex;flex-direction:column;gap:8px;min-width:0;}
+.truck-name-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.truck-name{font-size:16px;font-weight:800;color:var(--text);}
+.truck-unit-tag{font-size:11px;font-weight:600;color:var(--text2);background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;}
+.truck-model{font-size:12px;color:var(--text3);}
+.truck-meta-row{display:flex;gap:18px;flex-wrap:wrap;}
+.truck-meta{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2);}
+.truck-meta .ms{font-size:14px;}
+.truck-meta.warn{color:var(--amber-text);}
+.truck-meta.warn .ms{color:var(--amber);}
+
+/* DRIVER COLUMN */
+.truck-driver-col{border-left:1px solid var(--divider);padding:18px 20px;display:flex;flex-direction:column;justify-content:space-between;min-width:200px;flex-shrink:0;}
+.driver-photo-row{display:flex;align-items:center;gap:10px;}
+.driver-photo{width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--border);}
+.driver-photo-initials{width:40px;height:40px;border-radius:50%;background:var(--teal);color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.driver-name{font-size:13px;font-weight:700;color:var(--text);}
+.driver-status{font-size:11px;color:var(--text3);}
+.load-chip{background:var(--blue-bg);color:var(--blue);border-radius:7px;padding:4px 10px;font-size:11px;font-weight:600;display:flex;align-items:center;gap:4px;margin-top:10px;}
+.load-chip .ms{font-size:13px;}
+.no-driver{color:var(--text3);font-size:12px;display:flex;align-items:center;gap:6px;}
+.truck-actions-row{display:flex;gap:6px;margin-top:10px;}
+.action-chip{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:500;color:var(--text3);cursor:pointer;display:flex;align-items:center;gap:3px;}
+.action-chip .ms{font-size:13px;}
+
+/* ── TRUCK DETAIL SCREEN ── */
+.truck-hero{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;display:flex;flex-direction:column;}
+.truck-hero-photo{width:100%;height:220px;object-fit:cover;object-position:center 60%;display:block;position:relative;}
+.truck-hero-photo-wrap{position:relative;}
+.truck-hero-photo-wrap::after{content:'';position:absolute;bottom:0;left:0;right:0;height:100px;background:linear-gradient(transparent,rgba(15,25,35,.85));}
+.truck-hero-overlay{position:absolute;bottom:0;left:0;right:0;padding:20px 24px;z-index:1;}
+.truck-hero-name{font-size:26px;font-weight:900;color:#fff;letter-spacing:-.5px;}
+.truck-hero-model{font-size:14px;color:rgba(255,255,255,.75);margin-top:2px;}
+.truck-hero-chips{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.hero-chip{border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:4px;}
+.hc-green{background:var(--green);color:#fff;}
+.hc-amber{background:var(--amber);color:#fff;}
+.hc-dark{background:rgba(255,255,255,.15);color:#fff;backdrop-filter:blur(4px);}
+.truck-hero-actions{position:absolute;top:16px;right:16px;z-index:1;display:flex;gap:8px;}
+.photo-edit-btn{background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;}
+.photo-edit-btn .ms{font-size:15px;}
+
+/* DETAIL GRID */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.d-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.d-card-head{padding:12px 16px;border-bottom:1px solid var(--divider);display:flex;align-items:center;justify-content:space-between;}
+.d-card-title{font-size:13px;font-weight:700;color:var(--text);}
+.d-card-link{font-size:11px;font-weight:600;color:var(--orange);cursor:pointer;}
+.d-card-body{padding:16px;}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--divider);}
+.info-row:last-child{border-bottom:none;}
+.info-label{font-size:11px;color:var(--text2);}
+.info-value{font-size:12px;font-weight:600;color:var(--text);text-align:right;}
+.svc-item{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--divider);}
+.svc-item:last-child{border-bottom:none;}
+.svc-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.svc-name{font-size:12px;font-weight:600;color:var(--text);}
+.svc-due{font-size:11px;color:var(--text3);margin-top:1px;}
+.svc-badge{margin-left:auto;font-size:10px;font-weight:700;border-radius:20px;padding:2px 8px;white-space:nowrap;}
+.doc-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--divider);}
+.doc-row:last-child{border-bottom:none;}
+.doc-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.doc-name{font-size:12px;font-weight:600;color:var(--text);}
+.doc-sub{font-size:11px;color:var(--text3);}
+.doc-btn{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:3px 8px;font-size:10px;font-weight:600;color:var(--text3);cursor:pointer;white-space:nowrap;}
+
+/* ASSIGNMENT CARD */
+.assign-card{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;}
+.assign-head{padding:12px 16px;border-bottom:1px solid var(--divider);display:flex;justify-content:space-between;align-items:center;}
+.assign-body{padding:16px;display:flex;gap:14px;}
+.assign-driver-box{flex:1;background:var(--bg);border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px;border:1px solid var(--border);}
+.assign-driver-photo{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--border);}
+.assign-load-box{flex:1;background:var(--blue-bg);border-radius:10px;padding:14px;border:1px solid #c5d8f8;}
+.assign-load-id{font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+.assign-load-route{font-size:14px;font-weight:700;color:var(--text);}
+.assign-load-sub{font-size:11px;color:var(--text3);margin-top:3px;}
+.assign-load-rate{font-size:13px;font-weight:800;color:var(--blue);margin-top:8px;}
+
+/* ── MOBILE SHELL ── */
+.mobile-wrap{display:flex;flex-direction:column;width:390px;background:var(--bg);border-radius:40px;border:8px solid #1a1a2e;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;margin:0 auto;}
+.m-statusbar{height:44px;background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;}
+.m-time{font-size:15px;font-weight:700;color:#fff;}
+.m-icons{display:flex;gap:4px;align-items:center;}
+.m-icons .ms{font-size:14px;color:#fff;}
+.m-topbar{background:var(--navy);display:flex;align-items:center;padding:12px 16px 16px;gap:10px;flex-shrink:0;}
+.m-back .ms{font-size:22px;color:#fff;}
+.m-title{font-size:17px;font-weight:700;color:#fff;flex:1;}
+.m-add .ms{font-size:22px;color:rgba(255,255,255,.7);}
+.m-content{flex:1;overflow-y:auto;padding:16px;}
+.m-tabbar{height:64px;background:var(--card);border-top:1px solid var(--border);display:flex;flex-shrink:0;}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;}
+.tab-item .ms{font-size:22px;color:var(--text2);}
+.tab-item.on .ms{color:var(--orange);}
+.tab-item span{font-size:10px;font-weight:600;color:var(--text2);}
+.tab-item.on span{color:var(--orange);}
+
+/* MOBILE TRUCK CARD */
+.m-truck-card{background:var(--card);border-radius:16px;margin-bottom:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+.m-truck-photo{width:100%;height:140px;object-fit:cover;object-position:center 50%;display:block;}
+.m-truck-photo-wrap{position:relative;}
+.m-truck-photo-wrap::after{content:'';position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(transparent,rgba(15,25,35,.75));}
+.m-truck-photo-label{position:absolute;bottom:10px;left:14px;z-index:1;}
+.m-truck-photo-name{font-size:15px;font-weight:800;color:#fff;}
+.m-truck-photo-model{font-size:11px;color:rgba(255,255,255,.75);}
+.m-truck-photo-badge{position:absolute;top:10px;right:10px;z-index:1;}
+.m-truck-body{padding:12px 14px;}
+.m-driver-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.m-driver-photo{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid var(--border);}
+.m-driver-name{font-size:12px;font-weight:600;color:var(--text);}
+.m-driver-status{font-size:11px;color:var(--text3);}
+.m-truck-meta-row{display:flex;gap:12px;border-top:1px solid var(--divider);padding-top:10px;margin-top:4px;}
+.m-meta{display:flex;align-items:center;gap:3px;font-size:11px;color:var(--text2);}
+.m-meta .ms{font-size:13px;}
+.m-meta.warn{color:var(--amber-text);}
+.m-meta.warn .ms{color:var(--amber);}
+.m-meta.ok{color:var(--green-text);}
+
+/* ADD TRUCK MOBILE */
+.step-bar{display:flex;gap:4px;margin-bottom:8px;}
+.step-seg{flex:1;height:3px;border-radius:2px;}
+.ss-done{background:var(--orange);}
+.ss-now{background:var(--orange);opacity:.5;}
+.ss-todo{background:var(--divider);}
+.step-hint{font-size:11px;color:var(--text2);margin-bottom:18px;}
+.type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.type-opt{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;}
+.type-opt.sel{border-color:var(--orange);background:#fff8f4;}
+.type-opt-img{width:64px;height:38px;object-fit:cover;border-radius:6px;}
+.type-opt-label{font-size:10px;font-weight:600;color:var(--text3);text-align:center;}
+.type-opt.sel .type-opt-label{color:var(--orange);}
+.type-preview{background:var(--card);border-radius:14px;overflow:hidden;margin-bottom:16px;position:relative;}
+.type-preview img{width:100%;height:160px;object-fit:cover;display:block;}
+.type-preview-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(15,25,35,.8));padding:14px 16px;}
+.type-preview-title{font-size:14px;font-weight:700;color:#fff;}
+.type-preview-sub{font-size:11px;color:rgba(255,255,255,.7);}
+.form-field{background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;}
+.ff-label{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text2);margin-bottom:4px;}
+.ff-val{font-size:14px;font-weight:500;color:var(--text);}
+.ff-placeholder{font-size:14px;color:var(--muted);}
+.field-row{display:flex;gap:8px;}
+.field-row .form-field{flex:1;}
+.color-row{display:flex;gap:8px;padding:6px 0 2px;}
+.swatch{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
+.swatch.sel{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--orange);}
+.section-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;margin-top:4px;}
+.btn-full-orange{background:var(--orange);color:#fff;border:none;border-radius:12px;width:100%;padding:14px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:8px;}
+.btn-full-outline{background:var(--card);color:var(--text);border:1.5px solid var(--border);border-radius:12px;width:100%;padding:12px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+
+.screen-divider{height:48px;background:var(--bg);}
+.screen-label{background:var(--navy);color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:9px 20px;display:flex;align-items:center;gap:8px;}
+.screen-label em{background:var(--orange);color:#fff;border-radius:4px;padding:2px 8px;font-size:10px;font-style:normal;}
+</style>
+</head>
+<body>
+
+<!-- TITLE -->
+<div style="background:var(--navy);color:#fff;padding:24px 32px;">
+  <div style="font-size:22px;font-weight:900;letter-spacing:-.5px;">CarrierOS — Mockup 22</div>
+  <div style="font-size:13px;color:#8898aa;margin-top:4px;">Truck Fleet Inventory · 4 screens · Owner role · All tiers</div>
+  <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+    <span style="background:rgba(255,255,255,.1);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:600;">1 — Fleet Overview (Desktop)</span>
+    <span style="background:rgba(255,255,255,.1);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:600;">2 — Truck Detail (Desktop)</span>
+    <span style="background:rgba(255,255,255,.1);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:600;">3 — Add Truck (Mobile)</span>
+    <span style="background:rgba(255,255,255,.1);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:600;">4 — Fleet List (Mobile)</span>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 1 — FLEET OVERVIEW DESKTOP ═══ -->
+<div class="screen-label">Screen 1 — Fleet Overview <em>Desktop · Owner</em></div>
+<div class="desktop">
+  <div class="sidebar">
+    <div class="sidebar-brand"><div class="sidebar-logo">CarrierOS</div><div class="sidebar-tier">Growth Plan · 3 trucks</div></div>
+    <div class="sidebar-user">
+      <img class="sidebar-avatar-photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7V1sXOQtAXyR7oXYN_-7umstQpvS2nLFyFlc2NXzSmUYSyepsSElsEaJuWbWvX3UdiFRRfPZ75SgweHw4YHFhcDBdlQZfrdyxUl9JYiYDb0tFrWwwl4CJNbzkKIa8fYePpgF3jZE8xbsd-uoPEVqZkbgrLT1Vq2tyaYmQCXFQdL-MeEb_i_GVNDRb2TcokdnvmqePeurcJxGNmZKVqFrhwS3oumfu4-TOpNxeQctRCBB1zKqATBvW58wv3VOzbHXEnm3r7aixm3I" alt="Ravi Singh">
+      <div><div class="sidebar-name">Ravi Singh</div><div class="sidebar-role">Owner</div></div>
+    </div>
+    <div class="sidebar-section">Overview</div>
+    <div class="nav-item"><span class="ms">dashboard</span>Dashboard</div>
+    <div class="nav-item"><span class="ms">package_2</span>Loads<span class="nav-badge">2</span></div>
+    <div class="sidebar-section">Fleet</div>
+    <div class="nav-item active"><span class="ms">local_shipping</span>Trucks</div>
+    <div class="nav-item"><span class="ms">badge</span>Drivers</div>
+    <div class="nav-item"><span class="ms">calendar_month</span>Calendar</div>
+    <div class="sidebar-section">Finance</div>
+    <div class="nav-item"><span class="ms">local_gas_station</span>Fuel Log</div>
+    <div class="nav-item"><span class="ms">route</span>IFTA</div>
+    <div class="nav-item"><span class="ms">payments</span>Settlements</div>
+    <div class="sidebar-section">Reports</div>
+    <div class="nav-item"><span class="ms">analytics</span>Analytics</div>
+    <div class="nav-item" style="margin-top:auto;"><span class="ms">settings</span>Settings</div>
+  </div>
+  <div class="main">
+    <div class="topbar">
+      <div><span class="topbar-title">Trucks</span><span class="topbar-sub"> · 3 vehicles</span></div>
+      <div class="topbar-actions">
+        <button class="btn-outline"><span class="ms" style="font-size:14px;">filter_list</span>Filter</button>
+        <button class="btn-orange"><span class="ms" style="font-size:14px;">add</span>Add Truck</button>
+      </div>
+    </div>
+    <div class="page-content">
+
+      <div class="alert-banner">
+        <span class="ms">warning</span>
+        <span class="alert-text"><strong>DOT Annual Inspection</strong> on Big Blue expires in 28 days — Jul 31, 2026. Schedule now to avoid OOS risk.</span>
+        <span class="alert-cta">Schedule Now →</span>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi-mini"><div class="kpi-label">Active</div><div class="kpi-val">2</div><div class="kpi-sub">of 3 trucks on road</div></div>
+        <div class="kpi-mini"><div class="kpi-label">In Shop</div><div class="kpi-val" style="color:var(--amber);">1</div><div class="kpi-sub">Est. return Jul 8</div></div>
+        <div class="kpi-mini"><div class="kpi-label">Service Due</div><div class="kpi-val" style="color:var(--orange);">2</div><div class="kpi-sub">Next 30 days</div></div>
+      </div>
+
+      <div class="filter-tabs">
+        <div class="ftab on">All <span class="n">3</span></div>
+        <div class="ftab">Active <span class="n">2</span></div>
+        <div class="ftab">In Shop <span class="n">1</span></div>
+        <div class="ftab">Out of Service <span class="n">0</span></div>
+      </div>
+
+      <div class="truck-list">
+
+        <!-- TRUCK 1 — Big Blue (T-01) -->
+        <div class="truck-card">
+          <div class="truck-accent ta-green"></div>
+          <div class="truck-photo-col">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnXnVrRc27L3aHApsHOKdsfyeSYyvi11VKPHL-8CC1EVayK643nW7sbYLgw_IERbTHn8jHDoZkRFMuJQ2lC9Jhdc7T3gF0FbZODI2ft3YZtxW5-C327snVTkwKYSJNPFkZR4PxCjBkbbcVyo4yrlvshEFymkU3-4DTSjB9mn_SPzfDLcnTJCpMiIPoWiLsAX4pNOWkK8HHrrk2YyYo1qashVrtgfhJzLn8yvcvExsT5WyOGA7yOfS93sQQkKAvEkI-gMPbeprI21c" alt="Blue Kenworth T680">
+            <div class="truck-photo-overlay">
+              <div class="truck-photo-unit">T-01</div>
+              <div class="truck-photo-type">Semi · Class 8</div>
+            </div>
+          </div>
+          <div class="truck-info">
+            <div class="truck-name-row">
+              <span class="truck-name">Big Blue</span>
+              <span class="truck-unit-tag">T-01</span>
+              <span class="status-badge active"><span class="status-dot sd-green"></span>Active</span>
+            </div>
+            <div class="truck-model">2021 Kenworth T680 · Class 8 Sleeper · Blue · Plate: CA-TRK001</div>
+            <div class="truck-meta-row">
+              <div class="truck-meta"><span class="ms">speed</span>142,450 mi</div>
+              <div class="truck-meta warn"><span class="ms">build</span>Oil Change in 550 mi</div>
+              <div class="truck-meta"><span class="ms">pin_drop</span>Fresno, CA</div>
+              <div class="truck-meta warn"><span class="ms">assignment_late</span>DOT Insp. due Jul 31</div>
+            </div>
+          </div>
+          <div class="truck-driver-col">
+            <div>
+              <div class="driver-photo-row">
+                <img class="driver-photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0w8Jhki8Y_EIsrZgtQq_RJggrrBpzpZrnDc2GhXNJW7b6xKix0AfqDSCVDPPkIbz6oA94r35GA0rR10wvBx4aS3EGBDT3_RXKidrH9y0LDkOkMt0ev_DwGbXDegrGoL7853Pbnfnc56lPzCo0UQYcVJ0d94QqUl80E4V2pzVD_-KoXcD0LATtuSSbrpMWYEUPsqJKGwRlfAhJick2zVvI5XTAv637JIaIiLk0KL9jFqnkWpUSFIcnXYzZuMtyh0sSHJPf6zbjvyI" alt="Mike Rodriguez">
+                <div>
+                  <div class="driver-name">Mike Rodriguez</div>
+                  <div class="driver-status">Driver · On Duty · In Transit</div>
+                </div>
+              </div>
+              <div class="load-chip"><span class="ms">package_2</span>L-0091 · Fresno → Phoenix</div>
+            </div>
+            <div class="truck-actions-row">
+              <div class="action-chip"><span class="ms">edit</span>Edit</div>
+              <div class="action-chip"><span class="ms">build</span>Service</div>
+              <div class="action-chip"><span class="ms">description</span>Docs</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRUCK 2 — Silver Fox (T-02) -->
+        <div class="truck-card">
+          <div class="truck-accent ta-green"></div>
+          <div class="truck-photo-col">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYqBZRjIzV4dcVsCBIkVZuviJswOa5DHFJhP6H9-IhyRV1h8Tsyd4LTpsZoJEuXgNqZ9xvjQ2BT1AEyZHee_wiT2_nXtdCC9oAzxRBq5MqHL7_FsXZRJJL3W43UEHETXlb-TXT6tHqmd5RF3AqJQ_M-LPn8A5SyiVE8UC950zXtds6XSWt4Yy6M-2rQy4IRHGAduBh-LRI76okJlwRkYZq5_BxQosmCWeuhsr7v57Anc3UCPF3Andv919SzHA3t_bsab2dg1TxnBA" alt="Silver Volvo VNL">
+            <div class="truck-photo-overlay">
+              <div class="truck-photo-unit">T-02</div>
+              <div class="truck-photo-type">Reefer · Class 8</div>
+            </div>
+          </div>
+          <div class="truck-info">
+            <div class="truck-name-row">
+              <span class="truck-name">Silver Fox</span>
+              <span class="truck-unit-tag">T-02</span>
+              <span class="status-badge active"><span class="status-dot sd-green"></span>Active</span>
+            </div>
+            <div class="truck-model">2019 Freightliner Cascadia · Reefer · Silver · Day Cab · Plate: CA-TRK002</div>
+            <div class="truck-meta-row">
+              <div class="truck-meta"><span class="ms">speed</span>88,210 mi</div>
+              <div class="truck-meta" style="color:var(--green-text);"><span class="ms" style="color:var(--green);">check_circle</span>All services current</div>
+              <div class="truck-meta"><span class="ms">pin_drop</span>Stockton, CA</div>
+              <div class="truck-meta" style="color:var(--green-text);"><span class="ms" style="color:var(--green);">verified</span>Docs valid</div>
+            </div>
+          </div>
+          <div class="truck-driver-col">
+            <div>
+              <div class="driver-photo-row">
+                <img class="driver-photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC11W5eL6hdmfkin7dfg_xGQwWZGd1JnzA3lazTJAvBkiVQHeL8ATi_JiClWXv7UaEbYjd7Uo3Aodhs7lTYPjr2bpHv1fF7qacOx3Sjm0LccF8goKjUbePGYTGM0mBfLRblgTTAc3Uf6fFtOLdQYko_HvafeGJHnkcLNsloC5P03JIDriDnm2tYF46TmAecl7BhhJ3TM7GKSHeFcDf7o0rbzL2XZtdOHPhvfpiaSA89VD3yqDDSVi72zPCB4sP3rQBh5uAufyWVy5A" alt="Priya Singh">
+                <div>
+                  <div class="driver-name">Priya Singh</div>
+                  <div class="driver-status">Driver · On Duty · At Pickup</div>
+                </div>
+              </div>
+              <div class="load-chip"><span class="ms">package_2</span>L-0092 · Stockton → LA</div>
+            </div>
+            <div class="truck-actions-row">
+              <div class="action-chip"><span class="ms">edit</span>Edit</div>
+              <div class="action-chip"><span class="ms">build</span>Service</div>
+              <div class="action-chip"><span class="ms">description</span>Docs</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRUCK 3 — Red Runner (T-03) In Shop -->
+        <div class="truck-card" style="opacity:.9;">
+          <div class="truck-accent ta-amber"></div>
+          <div class="truck-photo-col" style="position:relative;">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIB4hH_gIAC2rYgc-4yvFRY7Dx3hwsOHBTElGOkaWcp3vbgB6OXs7k-gl-CQAfTu8hPRdIUvjd7maCEZDaVQnEBwYupKxiFLpVO4FVeJlnwEf4fl_y28rXW1eUZwLclBOfZNRkyoRm4dDrty7ShkSolMrwgDGQ26YqnsWS7aQpZ9McevMHCJJxI8A63_gMghkoMhFIrOXK8XmVDY8uZVB5Ox9PRDf7kDZ5kGOufcDqTdm0_xK5a8jTBTyokuZ0nL2w_5YjefDUsOg" alt="Red Runner truck" style="filter:brightness(.85);">
+            <div class="truck-photo-overlay">
+              <div class="truck-photo-unit">T-03</div>
+              <div class="truck-photo-type">Semi · Class 8</div>
+            </div>
+            <div style="position:absolute;top:10px;left:10px;background:var(--amber);color:#fff;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;display:flex;align-items:center;gap:3px;"><span class="ms" style="font-size:12px;">build</span>In Shop</div>
+          </div>
+          <div class="truck-info">
+            <div class="truck-name-row">
+              <span class="truck-name">Red Runner</span>
+              <span class="truck-unit-tag">T-03</span>
+              <span class="status-badge shop"><span class="status-dot sd-amber"></span>In Shop</span>
+            </div>
+            <div class="truck-model">2020 Peterbilt 579 · Class 8 · Red · Sleeper · Plate: CA-TRK003</div>
+            <div class="truck-meta-row">
+              <div class="truck-meta"><span class="ms">speed</span>62,880 mi</div>
+              <div class="truck-meta warn"><span class="ms">build</span>Brake Inspection — Est. return Jul 8</div>
+              <div class="truck-meta"><span class="ms">pin_drop</span>Fresno Auto Shop, CA</div>
+            </div>
+          </div>
+          <div class="truck-driver-col">
+            <div>
+              <div class="no-driver"><span class="ms" style="font-size:20px;">person_off</span><div><div style="font-size:12px;font-weight:600;color:var(--text3);">No Driver Assigned</div><div style="font-size:11px;color:var(--muted);">Vehicle in shop</div></div></div>
+              <div style="margin-top:10px;background:var(--amber-bg);border-radius:8px;padding:6px 10px;font-size:11px;color:var(--amber-text);font-weight:600;display:flex;align-items:center;gap:5px;">
+                <span class="ms" style="font-size:14px;color:var(--amber);">schedule</span>Est. return Jul 8, 2026
+              </div>
+            </div>
+            <div class="truck-actions-row">
+              <div class="action-chip"><span class="ms">edit</span>Edit</div>
+              <div class="action-chip"><span class="ms">build</span>Service</div>
+              <div class="action-chip"><span class="ms">description</span>Docs</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /truck-list -->
+    </div>
+  </div>
+</div>
+
+<div class="screen-divider"></div>
+
+<!-- ═══ SCREEN 2 — TRUCK DETAIL DESKTOP ═══ -->
+<div class="screen-label">Screen 2 — Truck Detail / Profile <em>Desktop · Owner · Big Blue (T-01)</em></div>
+<div class="desktop">
+  <div class="sidebar">
+    <div class="sidebar-brand"><div class="sidebar-logo">CarrierOS</div><div class="sidebar-tier">Growth Plan · 3 trucks</div></div>
+    <div class="sidebar-user">
+      <img class="sidebar-avatar-photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7V1sXOQtAXyR7oXYN_-7umstQpvS2nLFyFlc2NXzSmUYSyepsSElsEaJuWbWvX3UdiFRRfPZ75SgweHw4YHFhcDBdlQZfrdyxUl9JYiYDb0tFrWwwl4CJNbzkKIa8fYePpgF3jZE8xbsd-uoPEVqZkbgrLT1Vq2tyaYmQCXFQdL-MeEb_i_GVNDRb2TcokdnvmqePeurcJxGNmZKVqFrhwS3oumfu4-TOpNxeQctRCBB1zKqATBvW58wv3VOzbHXEnm3r7aixm3I" alt="Ravi Singh">
+      <div><div class="sidebar-name">Ravi Singh</div><div class="sidebar-role">Owner</div></div>
+    </div>
+    <div class="sidebar-section">Fleet</div>
+    <div class="nav-item active"><span class="ms">local_shipping</span>Trucks</div>
+    <div class="nav-item"><span class="ms">badge</span>Drivers</div>
+    <div class="nav-item"><span class="ms">calendar_month</span>Calendar</div>
+    <div class="sidebar-section">Finance</div>
+    <div class="nav-item"><span class="ms">payments</span>Settlements</div>
+    <div class="nav-item"><span class="ms">analytics</span>Analytics</div>
+    <div class="nav-item"><span class="ms">settings</span>Settings</div>
+  </div>
+  <div class="main">
+    <div class="topbar">
+      <span class="ms" style="font-size:20px;color:var(--text3);cursor:pointer;margin-right:2px;">arrow_back</span>
+      <span class="topbar-title">Big Blue</span>
+      <span class="topbar-sub"> · T-01 · 2021 Kenworth T680</span>
+      <div class="topbar-actions">
+        <button class="btn-outline"><span class="ms" style="font-size:14px;">edit</span>Edit Truck</button>
+        <button class="btn-primary"><span class="ms" style="font-size:14px;">build</span>Log Service</button>
+      </div>
+    </div>
+    <div class="page-content">
+
+      <!-- Hero photo -->
+      <div class="truck-hero">
+        <div class="truck-hero-photo-wrap" style="position:relative;">
+          <img class="truck-hero-photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnXnVrRc27L3aHApsHOKdsfyeSYyvi11VKPHL-8CC1EVayK643nW7sbYLgw_IERbTHn8jHDoZkRFMuJQ2lC9Jhdc7T3gF0FbZODI2ft3YZtxW5-C327snVTkwKYSJNPFkZR4PxCjBkbbcVyo4yrlvshEFymkU3-4DTSjB9mn_SPzfDLcnTJCpMiIPoWiLsAX4pNOWkK8HHrrk2YyYo1qashVrtgfhJzLn8yvcvExsT5WyOGA7yOfS93sQQkKAvEkI-gMPbeprI21c" alt="Big Blue — Kenworth T680" style="width:100%;height:240px;object-fit:cover;object-position:center 40%;display:block;">
+          <div style="position:absolute;bottom:0;left:0;right:0;height:150px;background:linear-gradient(transparent,rgba(15,25,35,.9));z-index:0;"></div>
+          <div style="position:absolute;bottom:0;left:0;right:0;padding:22px 28px;z-index:1;">
+            <div style="font-size:28px;font-weight:900;color:#fff;letter-spacing:-.5px;">Big Blue</div>
+            <div style="font-size:14px;color:rgba(255,255,255,.75);margin-top:2px;">2021 Kenworth T680 · Class 8 · Sleeper Cab · Blue</div>
+            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+              <span class="hero-chip hc-green"><span class="ms" style="font-size:14px;">check_circle</span>Active</span>
+              <span class="hero-chip hc-dark"><span class="ms" style="font-size:14px;">speed</span>142,450 mi</span>
+              <span class="hero-chip hc-dark"><span class="ms" style="font-size:14px;">pin_drop</span>Fresno, CA</span>
+              <span class="hero-chip hc-dark"><span class="ms" style="font-size:14px;">badge</span>CA · TRK-001</span>
+              <span class="hero-chip" style="background:var(--amber);color:#fff;"><span class="ms" style="font-size:14px;">warning</span>DOT Insp. due Jul 31</span>
+            </div>
+          </div>
+          <div style="position:absolute;top:16px;right:16px;z-index:1;display:flex;gap:8px;">
+            <button class="photo-edit-btn"><span class="ms">add_a_photo</span>Change Photo</button>
+            <button class="photo-edit-btn" style="color:var(--red-bg);"><span class="ms">do_not_disturb</span>Mark OOS</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Assignment -->
+      <div class="assign-card">
+        <div class="assign-head">
+          <div style="font-size:13px;font-weight:700;">Current Assignment</div>
+          <span style="font-size:11px;font-weight:600;color:var(--orange);cursor:pointer;">View Load →</span>
+        </div>
+        <div class="assign-body">
+          <div class="assign-driver-box">
+            <img class="assign-driver-photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0w8Jhki8Y_EIsrZgtQq_RJggrrBpzpZrnDc2GhXNJW7b6xKix0AfqDSCVDPPkIbz6oA94r35GA0rR10wvBx4aS3EGBDT3_RXKidrH9y0LDkOkMt0ev_DwGbXDegrGoL7853Pbnfnc56lPzCo0UQYcVJ0d94QqUl80E4V2pzVD_-KoXcD0LATtuSSbrpMWYEUPsqJKGwRlfAhJick2zVvI5XTAv637JIaIiLk0KL9jFqnkWpUSFIcnXYzZuMtyh0sSHJPf6zbjvyI" alt="Mike Rodriguez">
+            <div>
+              <div style="font-size:14px;font-weight:700;color:var(--text);">Mike Rodriguez</div>
+              <div style="font-size:11px;color:var(--text3);">Driver · CDL Class A · Valid to Aug 2028</div>
+              <div style="display:flex;gap:6px;margin-top:6px;">
+                <span class="status-badge active" style="font-size:10px;padding:2px 7px;"><span class="status-dot sd-green"></span>On Duty</span>
+                <span style="background:var(--blue-bg);color:var(--blue);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;">In Transit</span>
+              </div>
+            </div>
+          </div>
+          <div class="assign-load-box">
+            <div class="assign-load-id">Load L-0091</div>
+            <div class="assign-load-route">Fresno, CA → Phoenix, AZ</div>
+            <div class="assign-load-sub">Sysco Foods · Refrigerated · 22,000 lbs · ETA 2:30 PM today</div>
+            <div class="assign-load-rate">$1,240.00</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <!-- Vehicle Info -->
+        <div class="d-card">
+          <div class="d-card-head"><span class="d-card-title">Vehicle Information</span><span class="d-card-link">Edit →</span></div>
+          <div class="d-card-body">
+            <div class="info-row"><span class="info-label">Nickname</span><span class="info-value">Big Blue</span></div>
+            <div class="info-row"><span class="info-label">Unit Number</span><span class="info-value">T-01</span></div>
+            <div class="info-row"><span class="info-label">Make / Model</span><span class="info-value">Kenworth T680</span></div>
+            <div class="info-row"><span class="info-label">Year</span><span class="info-value">2021</span></div>
+            <div class="info-row"><span class="info-label">Color</span><span class="info-value" style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:14px;border-radius:50%;background:#2563eb;border:1.5px solid var(--border);display:inline-block;flex-shrink:0;"></span>Blue</span></div>
+            <div class="info-row"><span class="info-label">Type / Cab</span><span class="info-value">Semi Class 8 · Sleeper</span></div>
+            <div class="info-row"><span class="info-label">VIN</span><span class="info-value" style="font-family:monospace;font-size:11px;">1XKYD49X1MJ123456</span></div>
+            <div class="info-row"><span class="info-label">License Plate</span><span class="info-value">CA · TRK-001</span></div>
+            <div class="info-row"><span class="info-label">Odometer</span><span class="info-value">142,450 mi</span></div>
+          </div>
+        </div>
+
+        <!-- Upcoming Service -->
+        <div class="d-card">
+          <div class="d-card-head"><span class="d-card-title">Upcoming Service</span><span class="d-card-link">Full Log →</span></div>
+          <div class="d-card-body">
+            <div class="svc-item">
+              <div class="svc-icon" style="background:var(--orange-bg);"><span class="ms" style="color:var(--orange);">oil_barrel</span></div>
+              <div style="flex:1;"><div class="svc-name">Oil Change</div><div class="svc-due">Due in 550 mi · Next: 143,000 mi</div></div>
+              <span class="svc-badge" style="background:var(--amber-bg);color:var(--amber-text);">Soon</span>
+            </div>
+            <div class="svc-item">
+              <div class="svc-icon" style="background:var(--red-bg);"><span class="ms" style="color:var(--red);">assignment_late</span></div>
+              <div style="flex:1;"><div class="svc-name">DOT Annual Inspection</div><div class="svc-due">Expires Jul 31, 2026 · 28 days left</div></div>
+              <span class="svc-badge" style="background:var(--red-bg);color:var(--red-text);">⚠ Due</span>
+            </div>
+            <div class="svc-item">
+              <div class="svc-icon" style="background:var(--green-bg);"><span class="ms" style="color:var(--green);">tire_repair</span></div>
+              <div style="flex:1;"><div class="svc-name">Tire Rotation</div><div class="svc-due">Next: 163,900 mi · 21,450 mi away</div></div>
+              <span class="svc-badge" style="background:var(--green-bg);color:var(--green-text);">OK</span>
+            </div>
+            <div class="svc-item">
+              <div class="svc-icon" style="background:var(--bg);"><span class="ms" style="color:var(--text3);">description</span></div>
+              <div style="flex:1;"><div class="svc-name">Registration Renewal</div><div class="svc-due">Expires Dec 15, 2026 · 165 days</div></div>
+              <span class="svc-badge" style="background:var(--green-bg);color:var(--green-text);">OK</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Documents -->
+        <div class="d-card">
+          <div class="d-card-head"><span class="d-card-title">Truck Documents</span><span class="d-card-link">+ Add</span></div>
+          <div class="d-card-body">
+            <div class="doc-row">
+              <div class="doc-icon" style="background:var(--green-bg);"><span class="ms" style="color:var(--green);">description</span></div>
+              <div style="flex:1;"><div class="doc-name">Vehicle Registration</div><div class="doc-sub">Expires Dec 15, 2026 · 165 days</div></div>
+              <span class="status-badge active" style="font-size:10px;padding:2px 7px;">Valid</span>
+              <div class="doc-btn">View</div>
+            </div>
+            <div class="doc-row">
+              <div class="doc-icon" style="background:var(--green-bg);"><span class="ms" style="color:var(--green);">shield</span></div>
+              <div style="flex:1;"><div class="doc-name">Insurance Certificate</div><div class="doc-sub">Expires Nov 1, 2026 · 121 days</div></div>
+              <span class="status-badge active" style="font-size:10px;padding:2px 7px;">Valid</span>
+              <div class="doc-btn">View</div>
+            </div>
+            <div class="doc-row">
+              <div class="doc-icon" style="background:var(--amber-bg);"><span class="ms" style="color:var(--amber);">assignment_late</span></div>
+              <div style="flex:1;"><div class="doc-name">DOT Annual Inspection</div><div class="doc-sub">Expires Jul 31, 2026 · 28 days</div></div>
+              <span class="status-badge shop" style="font-size:10px;padding:2px 7px;">Due Soon</span>
+              <div class="doc-btn" style="color:var(--orange);border-color:var(--orange);">Renew</div>
+            </div>
+            <div class="doc-row">
+              <div class="doc-icon" style="background:var(--green-bg);"><span class="ms" style="color:var(--green);">verified</span></div>
+              <div style="flex:1;"><div class="doc-name">DOT Operating Authority</div><div class="doc-sub">MC-448291 · Permanent</div></div>
+              <span class="status-badge active" style="font-size:10px;padding:2px 7px;">Perm.</span>
+              <div class="doc-btn">View</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance -->
+        <div class="d-card">
+          <div class="d-card-head"><span class="d-card-title">Performance — July 2026</span><span class="d-card-link">Analytics →</span></div>
+          <div class="d-card-body">
+            <div class="info-row"><span class="info-label">Loads This Month</span><span class="info-value">6</span></div>
+            <div class="info-row"><span class="info-label">Miles This Month</span><span class="info-value">4,280 mi</span></div>
+            <div class="info-row"><span class="info-label">Revenue This Month</span><span class="info-value" style="color:var(--green);">$6,840</span></div>
+            <div class="info-row"><span class="info-label">Revenue / Mile</span><span class="info-value">$1.60 / mi</span></div>
+            <div class="info-row"><span class="info-label">Fuel This Month</span><span class="info-value">$1,240</span></div>
+            <div class="info-row"><span class="info-label">Days Active</span><span class="info-value">5 of 6 days</span></div>
+            <div class="info-row"><span class="info-label">DVIR Pass Rate</span><span class="info-value" style="color:var(--green);">100%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="screen-divider"></div>
+
+<!-- ═══ SCREEN 3 — ADD TRUCK MOBILE ═══ -->
+<div class="screen-label">Screen 3 — Add Truck <em>Mobile · 3 steps</em></div>
+<div style="background:var(--bg);padding:40px;display:flex;gap:32px;justify-content:center;flex-wrap:wrap;align-items:flex-start;">
+
+  <!-- Step 1: Choose type -->
+  <div>
+    <div style="text-align:center;margin-bottom:14px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;">Step 1 — Choose Type</div>
+    <div class="mobile-wrap" style="min-height:auto;">
+      <div class="m-statusbar"><span class="m-time">9:41</span><div class="m-icons"><span class="ms">signal_cellular_alt</span><span class="ms">wifi</span><span class="ms">battery_full</span></div></div>
+      <div class="m-topbar"><div class="m-back"><span class="ms">arrow_back</span></div><div class="m-title">Add Truck</div></div>
+      <div class="m-content">
+        <div class="step-bar"><div class="step-seg ss-done"></div><div class="step-seg ss-now"></div><div class="step-seg ss-todo"></div></div>
+        <div class="step-hint">Step 1 of 3 · Choose your truck type</div>
+        <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px;">What type of truck?</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:18px;">We'll set a default icon and IFTA vehicle class for you.</div>
+
+        <!-- Type grid using real truck photos -->
+        <div class="type-grid">
+          <div class="type-opt sel">
+            <img class="type-opt-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnXnVrRc27L3aHApsHOKdsfyeSYyvi11VKPHL-8CC1EVayK643nW7sbYLgw_IERbTHn8jHDoZkRFMuJQ2lC9Jhdc7T3gF0FbZODI2ft3YZtxW5-C327snVTkwKYSJNPFkZR4PxCjBkbbcVyo4yrlvshEFymkU3-4DTSjB9mn_SPzfDLcnTJCpMiIPoWiLsAX4pNOWkK8HHrrk2YyYo1qashVrtgfhJzLn8yvcvExsT5WyOGA7yOfS93sQQkKAvEkI-gMPbeprI21c" alt="Semi">
+            <div class="type-opt-label">Semi (Class 8)</div>
+          </div>
+          <div class="type-opt">
+            <img class="type-opt-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIhqsfCx4m3CWsGdNNpFjyk0L3OERdR6UUqXhazE7dftayrqQP8LSbI9lJjwrkHqGoTyuhfgsVO-SoXJz572NecdSyR3-1p3qoXhHJ5KQna1UX1opnflL91BxCRAHFNTRtmt3x4bnZVHSevw3MVxOYKIvcAnfkg-_if3iQKevXaywj5c1z48J0633rCQVoMPptUZ6p48vVvvftBkGHeHgphxJ0EM-yvXG1pyAZ1OGP6EjXr-WHqegv-2mlnEh7ZvrVkTSB2mvGI3g" alt="Box Truck">
+            <div class="type-opt-label">Box Truck</div>
+          </div>
+          <div class="type-opt">
+            <img class="type-opt-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYqBZRjIzV4dcVsCBIkVZuviJswOa5DHFJhP6H9-IhyRV1h8Tsyd4LTpsZoJEuXgNqZ9xvjQ2BT1AEyZHee_wiT2_nXtdCC9oAzxRBq5MqHL7_FsXZRJJL3W43UEHETXlb-TXT6tHqmd5RF3AqJQ_M-LPn8A5SyiVE8UC950zXtds6XSWt4Yy6M-2rQy4IRHGAduBh-LRI76okJlwRkYZq5_BxQosmCWeuhsr7v57Anc3UCPF3Andv919SzHA3t_bsab2dg1TxnBA" alt="Reefer">
+            <div class="type-opt-label">Reefer</div>
+          </div>
+          <div class="type-opt">
+            <img class="type-opt-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIB4hH_gIAC2rYgc-4yvFRY7Dx3hwsOHBTElGOkaWcp3vbgB6OXs7k-gl-CQAfTu8hPRdIUvjd7maCEZDaVQnEBwYupKxiFLpVO4FVeJlnwEf4fl_y28rXW1eUZwLclBOfZNRkyoRm4dDrty7ShkSolMrwgDGQ26YqnsWS7aQpZ9McevMHCJJxI8A63_gMghkoMhFIrOXK8XmVDY8uZVB5Ox9PRDf7kDZ5kGOufcDqTdm0_xK5a8jTBTyokuZ0nL2w_5YjefDUsOg" alt="Flatbed">
+            <div class="type-opt-label">Flatbed</div>
+          </div>
+          <div class="type-opt">
+            <img class="type-opt-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXjYVG--bnb4AfHwUhxkoXWPI0_QXJTkz5pW8npxwLuRbPcr8cPfm-PPg5bz3Hduh-Osa5L5muz7R3ILiPAu7pvFcLpxoJXmxN9y8qtzO_rdq_TPAD9GekBp53dkvAKgvZUfJQGr7DOVtJe1ofeJvm9Lf_2TqXUWkDs35KZmta5405asCidBfy3kN-UyP-HyXNLvFPTOAYUEflhUtgCwDpDpPuKyRY8e5TipUbxFDBLCg8QYJ7tgF86w4I8AN6qTG_Z2vNze6dwRA" alt="Step Deck">
+            <div class="type-opt-label">Step Deck</div>
+          </div>
+          <div class="type-opt">
+            <img class="type-opt-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnXnVrRc27L3aHApsHOKdsfyeSYyvi11VKPHL-8CC1EVayK643nW7sbYLgw_IERbTHn8jHDoZkRFMuJQ2lC9Jhdc7T3gF0FbZODI2ft3YZtxW5-C327snVTkwKYSJNPFkZR4PxCjBkbbcVyo4yrlvshEFymkU3-4DTSjB9mn_SPzfDLcnTJCpMiIPoWiLsAX4pNOWkK8HHrrk2YyYo1qashVrtgfhJzLn8yvcvExsT5WyOGA7yOfS93sQQkKAvEkI-gMPbeprI21c" alt="Tanker">
+            <div class="type-opt-label">Tanker</div>
+          </div>
+        </div>
+
+        <!-- Preview of selected type -->
+        <div class="type-preview">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXjYVG--bnb4AfHwUhxkoXWPI0_QXJTkz5pW8npxwLuRbPcr8cPfm-PPg5bz3Hduh-Osa5L5muz7R3ILiPAu7pvFcLpxoJXmxN9y8qtzO_rdq_TPAD9GekBp53dkvAKgvZUfJQGr7DOVtJe1ofeJvm9Lf_2TqXUWkDs35KZmta5405asCidBfy3kN-UyP-HyXNLvFPTOAYUEflhUtgCwDpDpPuKyRY8e5TipUbxFDBLCg8QYJ7tgF86w4I8AN6qTG_Z2vNze6dwRA" alt="Semi truck preview">
+          <div class="type-preview-overlay">
+            <div class="type-preview-title">Semi (Class 8) selected</div>
+            <div class="type-preview-sub">Default display image · IFTA Class 8 reporting · You can upload your own photo next</div>
+          </div>
+        </div>
+        <button class="btn-full-orange"><span class="ms">arrow_forward</span>Continue — Add Details</button>
+        <div style="text-align:center;font-size:11px;color:var(--text2);">Or <span style="color:var(--orange);font-weight:600;cursor:pointer;">skip and upload your own photo</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Details form -->
+  <div>
+    <div style="text-align:center;margin-bottom:14px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;">Step 2 — Truck Details</div>
+    <div class="mobile-wrap" style="min-height:auto;">
+      <div class="m-statusbar"><span class="m-time">9:41</span><div class="m-icons"><span class="ms">signal_cellular_alt</span><span class="ms">wifi</span><span class="ms">battery_full</span></div></div>
+      <div class="m-topbar"><div class="m-back"><span class="ms">arrow_back</span></div><div class="m-title">Add Truck</div></div>
+      <div class="m-content">
+        <div class="step-bar"><div class="step-seg ss-done"></div><div class="step-seg ss-done"></div><div class="step-seg ss-now"></div></div>
+        <div class="step-hint">Step 2 of 3 · Truck details</div>
+
+        <!-- Truck photo preview with upload overlay -->
+        <div style="position:relative;margin-bottom:16px;border-radius:14px;overflow:hidden;">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnXnVrRc27L3aHApsHOKdsfyeSYyvi11VKPHL-8CC1EVayK643nW7sbYLgw_IERbTHn8jHDoZkRFMuJQ2lC9Jhdc7T3gF0FbZODI2ft3YZtxW5-C327snVTkwKYSJNPFkZR4PxCjBkbbcVyo4yrlvshEFymkU3-4DTSjB9mn_SPzfDLcnTJCpMiIPoWiLsAX4pNOWkK8HHrrk2YyYo1qashVrtgfhJzLn8yvcvExsT5WyOGA7yOfS93sQQkKAvEkI-gMPbeprI21c" alt="Selected truck" style="width:100%;height:130px;object-fit:cover;display:block;">
+          <div style="position:absolute;inset:0;background:rgba(15,25,35,.45);display:flex;align-items:center;justify-content:center;">
+            <button style="background:rgba(255,255,255,.15);backdrop-filter:blur(6px);border:1.5px solid rgba(255,255,255,.4);color:#fff;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:Inter,sans-serif;"><span class="ms" style="font-size:16px;">add_a_photo</span>Upload Your Truck Photo</button>
+          </div>
+          <div style="position:absolute;bottom:10px;right:10px;background:rgba(255,255,255,.2);border-radius:6px;padding:3px 8px;font-size:10px;color:#fff;font-weight:600;">Default image · Semi Class 8</div>
+        </div>
+
+        <div class="section-label">Identity</div>
+        <div class="field-row">
+          <div class="form-field" style="flex:1.3;"><div class="ff-label">Nickname</div><div class="ff-val">Big Blue</div></div>
+          <div class="form-field" style="flex:.7;"><div class="ff-label">Unit #</div><div class="ff-val">T-01</div></div>
+        </div>
+        <div class="field-row">
+          <div class="form-field"><div class="ff-label">Make</div><div class="ff-val">Kenworth</div></div>
+          <div class="form-field"><div class="ff-label">Model</div><div class="ff-val">T680</div></div>
+        </div>
+        <div class="field-row">
+          <div class="form-field" style="flex:.6;"><div class="ff-label">Year</div><div class="ff-val">2021</div></div>
+          <div class="form-field" style="flex:.6;"><div class="ff-label">Cab Type</div><div class="ff-val">Sleeper</div></div>
+          <div class="form-field" style="flex:.8;"><div class="ff-label">Color</div><div class="color-row"><div class="swatch sel" style="background:#2563eb;"></div><div class="swatch" style="background:#dc2626;"></div><div class="swatch" style="background:#6b7280;"></div><div class="swatch" style="background:#fff;border:1.5px solid var(--border);"></div></div></div>
+        </div>
+
+        <div class="section-label" style="margin-top:12px;">Registration</div>
+        <div class="form-field"><div class="ff-label">License Plate</div><div class="ff-val">CA · TRK-001</div></div>
+        <div class="field-row">
+          <div class="form-field"><div class="ff-label">VIN (optional)</div><div class="ff-placeholder">Enter VIN</div></div>
+          <div class="form-field"><div class="ff-label">Odometer (mi)</div><div class="ff-val">142,450</div></div>
+        </div>
+
+        <button class="btn-full-orange" style="margin-top:8px;"><span class="ms">check_circle</span>Add Truck</button>
+        <div style="text-align:center;font-size:11px;color:var(--muted);">Docs & service reminders can be added after saving</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Confirmation -->
+  <div>
+    <div style="text-align:center;margin-bottom:14px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;">Step 3 — Confirmed</div>
+    <div class="mobile-wrap" style="min-height:auto;">
+      <div class="m-statusbar" style="background:var(--green);"><span class="m-time">9:41</span><div class="m-icons"><span class="ms">signal_cellular_alt</span><span class="ms">wifi</span><span class="ms">battery_full</span></div></div>
+      <div class="m-topbar" style="background:var(--green);padding-top:16px;padding-bottom:20px;flex-direction:column;align-items:center;gap:4px;">
+        <span class="ms" style="font-size:40px;color:#fff;">check_circle</span>
+        <div class="m-title" style="text-align:center;">Truck Added!</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.8);">Big Blue is ready for dispatch</div>
+      </div>
+      <div class="m-content">
+        <div style="border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,.1);">
+          <div style="position:relative;">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnXnVrRc27L3aHApsHOKdsfyeSYyvi11VKPHL-8CC1EVayK643nW7sbYLgw_IERbTHn8jHDoZkRFMuJQ2lC9Jhdc7T3gF0FbZODI2ft3YZtxW5-C327snVTkwKYSJNPFkZR4PxCjBkbbcVyo4yrlvshEFymkU3-4DTSjB9mn_SPzfDLcnTJCpMiIPoWiLsAX4pNOWkK8HHrrk2YyYo1qashVrtgfhJzLn8yvcvExsT5WyOGA7yOfS93sQQkKAvEkI-gMPbeprI21c" alt="Big Blue" style="width:100%;height:130px;object-fit:cover;object-position:center 40%;display:block;">
+            <div style="position:absolute;bottom:0;left:0;right:0;height:70px;background:linear-gradient(transparent,rgba(15,25,35,.85));"></div>
+            <div style="position:absolute;bottom:10px;left:14px;">
+              <div style="font-size:16px;font-weight:800;color:#fff;">Big Blue · T-01</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.75);">2021 Kenworth T680 · Sleeper</div>
+            </div>
+            <div style="position:absolute;top:10px;right:10px;"><span class="status-badge active" style="font-size:10px;"><span class="status-dot sd-green"></span>Active</span></div>
+          </div>
+          <div style="background:var(--card);padding:14px 16px;">
+            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px;">Complete your setup</div>
+            <div style="display:flex;align-items:center;gap:8px;color:var(--text3);font-size:12px;margin-bottom:8px;"><span class="ms" style="font-size:16px;color:var(--orange);">add_a_photo</span>Upload your actual truck photo</div>
+            <div style="display:flex;align-items:center;gap:8px;color:var(--text3);font-size:12px;margin-bottom:8px;"><span class="ms" style="font-size:16px;color:var(--orange);">description</span>Add registration & insurance docs</div>
+            <div style="display:flex;align-items:center;gap:8px;color:var(--text3);font-size:12px;"><span class="ms" style="font-size:16px;color:var(--orange);">alarm</span>Set maintenance reminders</div>
+          </div>
+        </div>
+        <button class="btn-full-orange">Go to Big Blue Profile →</button>
+        <button class="btn-full-outline">Add Another Truck</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="screen-divider"></div>
+
+<!-- ═══ SCREEN 4 — FLEET LIST MOBILE ═══ -->
+<div class="screen-label">Screen 4 — Fleet List <em>Mobile · Owner / Dispatcher</em></div>
+<div style="background:var(--bg);padding:40px;display:flex;justify-content:center;">
+  <div class="mobile-wrap">
+    <div class="m-statusbar"><span class="m-time">9:41</span><div class="m-icons"><span class="ms">signal_cellular_alt</span><span class="ms">wifi</span><span class="ms">battery_full</span></div></div>
+    <div class="m-topbar">
+      <div class="m-title">Fleet</div>
+      <div class="m-add"><span class="ms">add_circle</span></div>
+    </div>
+
+    <!-- Inline filter strip -->
+    <div style="background:var(--navy);padding:0 16px 14px;display:flex;gap:6px;">
+      <div style="flex:1;background:rgba(255,255,255,.14);border-radius:8px;padding:6px;text-align:center;font-size:12px;font-weight:700;color:#fff;">All 3</div>
+      <div style="flex:1;background:rgba(255,255,255,.06);border-radius:8px;padding:6px;text-align:center;font-size:12px;font-weight:500;color:rgba(255,255,255,.55);">Active 2</div>
+      <div style="flex:1;background:rgba(255,255,255,.06);border-radius:8px;padding:6px;text-align:center;font-size:12px;font-weight:500;color:rgba(255,255,255,.55);">In Shop 1</div>
+    </div>
+
+    <div class="m-content">
+      <div style="background:var(--amber-bg);border:1px solid #fed7aa;border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+        <span class="ms" style="color:var(--orange);font-size:18px;">warning</span>
+        <div style="flex:1;font-size:11px;color:#9a3412;"><strong>Big Blue</strong> — DOT Inspection expires in 28 days</div>
+        <span style="font-size:11px;font-weight:700;color:var(--orange);white-space:nowrap;">Fix →</span>
+      </div>
+
+      <!-- TRUCK 1 card — Big Blue -->
+      <div class="m-truck-card">
+        <div class="m-truck-photo-wrap">
+          <img class="m-truck-photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnXnVrRc27L3aHApsHOKdsfyeSYyvi11VKPHL-8CC1EVayK643nW7sbYLgw_IERbTHn8jHDoZkRFMuJQ2lC9Jhdc7T3gF0FbZODI2ft3YZtxW5-C327snVTkwKYSJNPFkZR4PxCjBkbbcVyo4yrlvshEFymkU3-4DTSjB9mn_SPzfDLcnTJCpMiIPoWiLsAX4pNOWkK8HHrrk2YyYo1qashVrtgfhJzLn8yvcvExsT5WyOGA7yOfS93sQQkKAvEkI-gMPbeprI21c" alt="Big Blue">
+          <div class="m-truck-photo-label"><div class="m-truck-photo-name">Big Blue</div><div class="m-truck-photo-model">2021 Kenworth T680 · T-01</div></div>
+          <div class="m-truck-photo-badge"><span class="status-badge active" style="font-size:10px;padding:3px 8px;"><span class="status-dot sd-green"></span>Active</span></div>
+        </div>
+        <div class="m-truck-body">
+          <div class="m-driver-row">
+            <img class="m-driver-photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0w8Jhki8Y_EIsrZgtQq_RJggrrBpzpZrnDc2GhXNJW7b6xKix0AfqDSCVDPPkIbz6oA94r35GA0rR10wvBx4aS3EGBDT3_RXKidrH9y0LDkOkMt0ev_DwGbXDegrGoL7853Pbnfnc56lPzCo0UQYcVJ0d94QqUl80E4V2pzVD_-KoXcD0LATtuSSbrpMWYEUPsqJKGwRlfAhJick2zVvI5XTAv637JIaIiLk0KL9jFqnkWpUSFIcnXYzZuMtyh0sSHJPf6zbjvyI" alt="Mike Rodriguez">
+            <div><div class="m-driver-name">Mike Rodriguez</div><div class="m-driver-status">In Transit · L-0091 Fresno → Phoenix</div></div>
+          </div>
+          <div class="m-truck-meta-row">
+            <div class="m-meta"><span class="ms">speed</span>142,450 mi</div>
+            <div class="m-meta warn"><span class="ms">warning</span>DOT insp. 28d</div>
+            <div class="m-meta warn"><span class="ms">build</span>Oil 550 mi</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRUCK 2 card — Silver Fox -->
+      <div class="m-truck-card">
+        <div class="m-truck-photo-wrap">
+          <img class="m-truck-photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYqBZRjIzV4dcVsCBIkVZuviJswOa5DHFJhP6H9-IhyRV1h8Tsyd4LTpsZoJEuXgNqZ9xvjQ2BT1AEyZHee_wiT2_nXtdCC9oAzxRBq5MqHL7_FsXZRJJL3W43UEHETXlb-TXT6tHqmd5RF3AqJQ_M-LPn8A5SyiVE8UC950zXtds6XSWt4Yy6M-2rQy4IRHGAduBh-LRI76okJlwRkYZq5_BxQosmCWeuhsr7v57Anc3UCPF3Andv919SzHA3t_bsab2dg1TxnBA" alt="Silver Fox">
+          <div class="m-truck-photo-label"><div class="m-truck-photo-name">Silver Fox</div><div class="m-truck-photo-model">2019 Freightliner Cascadia · T-02</div></div>
+          <div class="m-truck-photo-badge"><span class="status-badge active" style="font-size:10px;padding:3px 8px;"><span class="status-dot sd-green"></span>Active</span></div>
+        </div>
+        <div class="m-truck-body">
+          <div class="m-driver-row">
+            <img class="m-driver-photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC11W5eL6hdmfkin7dfg_xGQwWZGd1JnzA3lazTJAvBkiVQHeL8ATi_JiClWXv7UaEbYjd7Uo3Aodhs7lTYPjr2bpHv1fF7qacOx3Sjm0LccF8goKjUbePGYTGM0mBfLRblgTTAc3Uf6fFtOLdQYko_HvafeGJHnkcLNsloC5P03JIDriDnm2tYF46TmAecl7BhhJ3TM7GKSHeFcDf7o0rbzL2XZtdOHPhvfpiaSA89VD3yqDDSVi72zPCB4sP3rQBh5uAufyWVy5A" alt="Priya Singh">
+            <div><div class="m-driver-name">Priya Singh</div><div class="m-driver-status">At Pickup · L-0092 Stockton → LA</div></div>
+          </div>
+          <div class="m-truck-meta-row">
+            <div class="m-meta"><span class="ms">speed</span>88,210 mi</div>
+            <div class="m-meta ok"><span class="ms">check_circle</span>Docs valid</div>
+            <div class="m-meta ok"><span class="ms">build</span>Services OK</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRUCK 3 card — Red Runner (In Shop) -->
+      <div class="m-truck-card">
+        <div class="m-truck-photo-wrap">
+          <img class="m-truck-photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIB4hH_gIAC2rYgc-4yvFRY7Dx3hwsOHBTElGOkaWcp3vbgB6OXs7k-gl-CQAfTu8hPRdIUvjd7maCEZDaVQnEBwYupKxiFLpVO4FVeJlnwEf4fl_y28rXW1eUZwLclBOfZNRkyoRm4dDrty7ShkSolMrwgDGQ26YqnsWS7aQpZ9McevMHCJJxI8A63_gMghkoMhFIrOXK8XmVDY8uZVB5Ox9PRDf7kDZ5kGOufcDqTdm0_xK5a8jTBTyokuZ0nL2w_5YjefDUsOg" alt="Red Runner" style="filter:brightness(.75) saturate(.8);">
+          <div class="m-truck-photo-label"><div class="m-truck-photo-name">Red Runner</div><div class="m-truck-photo-model">2020 Peterbilt 579 · T-03</div></div>
+          <div class="m-truck-photo-badge"><span class="status-badge shop" style="font-size:10px;padding:3px 8px;"><span class="status-dot sd-amber"></span>In Shop</span></div>
+        </div>
+        <div class="m-truck-body" style="background:var(--amber-bg);">
+          <div class="m-driver-row">
+            <div style="width:30px;height:30px;border-radius:50%;background:#e5e8ef;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="ms" style="font-size:16px;color:var(--muted);">person_off</span></div>
+            <div><div class="m-driver-name" style="color:var(--text3);">No driver assigned</div><div class="m-driver-status" style="color:var(--amber-text);font-weight:600;">Brake Inspection · Est. return Jul 8</div></div>
+          </div>
+          <div class="m-truck-meta-row" style="border-top:1px solid #fed7aa;">
+            <div class="m-meta"><span class="ms">speed</span>62,880 mi</div>
+            <div class="m-meta warn"><span class="ms">build</span>Brake system</div>
+            <div class="m-meta" style="color:var(--text3);"><span class="ms">schedule</span>Jul 8 return</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-full-orange"><span class="ms">add</span>Add New Truck</button>
+    </div>
+
+    <div class="m-tabbar">
+      <div class="tab-item"><span class="ms">home</span><span>Home</span></div>
+      <div class="tab-item"><span class="ms">package_2</span><span>Loads</span></div>
+      <div class="tab-item on"><span class="ms">local_shipping</span><span>Fleet</span></div>
+      <div class="tab-item"><span class="ms">warning</span><span>Alerts</span></div>
+      <div class="tab-item"><span class="ms">more_horiz</span><span>More</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Dev footer -->
+<div style="background:var(--navy);color:#8898aa;padding:24px 32px;font-size:12px;line-height:1.9;">
+  <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:8px;">Developer Notes — Mockup 22</div>
+  <div><strong style="color:#fff;">Truck photos:</strong> Stored in Supabase Storage <code style="background:rgba(255,255,255,.1);padding:1px 6px;border-radius:3px;">truck-photos/{company_id}/{truck_id}.jpg</code>. Fallback: type-based SVG icon (7 types from design system). Driver photos in <code style="background:rgba(255,255,255,.1);padding:1px 6px;border-radius:3px;">driver-photos/{company_id}/{driver_id}.jpg</code>.</div>
+  <div><strong style="color:#fff;">Schema additions (trucks table):</strong> <code style="background:rgba(255,255,255,.1);padding:1px 6px;border-radius:3px;">make TEXT, model TEXT, year INT, color TEXT, cab_type TEXT CHECK IN ('sleeper','day_cab','other'), vin TEXT, photo_url TEXT</code> — all nullable.</div>
+  <div><strong style="color:#fff;">Truck type enum:</strong> semi | box_truck | flatbed | reefer | step_deck | tanker | dump</div>
+  <div><strong style="color:#fff;">Platform:</strong> Screens 1–2 = carrieros-web/ (Next.js desktop). Screens 3–4 = carrieros-mobile/ (Expo RN).</div>
+</div>
+</body>
+</html>

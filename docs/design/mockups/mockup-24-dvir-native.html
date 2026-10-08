@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarrierOS — Mockup 24: DVIR (Phone-Frame, Native)</title>
+<style>
+  :root {
+    --navy:       #0f1e35;
+    --navy-mid:   #182c46;
+    --navy-light: #1f3a58;
+    --navy-card:  #162033;
+    --orange:     #f47920;
+    --orange-lt:  #f9a55a;
+    --green:      #2ecc71;
+    --green-dark: #27ae60;
+    --teal:       #1abc9c;
+    --amber:      #f0a500;
+    --red:        #e74c3c;
+    --blue:       #3b82f6;
+    --bg:         #f4f6f9;
+    --card:       #ffffff;
+    --text:       #1a1a2e;
+    --muted:      #8fa3b8;
+    --border:     #e5e7eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #1a1a2e; display: flex; flex-direction: column; align-items: center; padding: 24px 16px 60px; min-height: 100vh; }
+  h1 { color: #fff; font-size: 22px; margin-bottom: 4px; }
+  .subtitle { color: rgba(255,255,255,0.55); font-size: 13px; margin-bottom: 8px; max-width: 900px; text-align: center; }
+  .platform-key { display: flex; gap: 18px; margin-bottom: 28px; }
+  .platform-key span { font-size: 11px; color: rgba(255,255,255,.55); display: flex; align-items: center; gap: 6px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; }
+  .dot.ios { background: #3b82f6; }
+  .dot.android { background: #2ecc71; }
+
+  .screen-grid { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; max-width: 1700px; }
+  .phone { width: 390px; flex-shrink: 0; }
+  .phone-label { color: rgba(255,255,255,0.55); font-size: 12px; font-weight: 700; margin-bottom: 4px; text-align: center; }
+  .phone-note { color: rgba(255,255,255,0.35); font-size: 10.5px; margin-bottom: 8px; text-align: center; line-height: 1.4; padding: 0 8px; }
+  .phone-screen { background: var(--bg); border-radius: 40px; overflow: hidden; height: 844px; display: flex; flex-direction: column; box-shadow: 0 24px 64px rgba(0,0,0,0.5); border: 8px solid #0a0a0f; position: relative; }
+  .notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 26px; background: #0a0a0f; border-radius: 0 0 16px 16px; z-index: 20; }
+
+  .status-bar { background: var(--navy); color: rgba(255,255,255,0.85); display: flex; justify-content: space-between; align-items: center; padding: 16px 24px 8px; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+
+  .topbar { background: var(--navy); color: white; display: flex; align-items: center; padding: 4px 16px 14px; gap: 10px; flex-shrink: 0; }
+  .topbar .back { color: var(--orange); font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 2px; min-width: 56px; }
+  .topbar .back .chev { font-size: 18px; }
+  .topbar .title { flex: 1; text-align: center; font-size: 16px; font-weight: 700; }
+  .topbar .action { color: var(--orange); font-size: 13px; font-weight: 600; min-width: 56px; text-align: right; }
+
+  .content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .content::-webkit-scrollbar { width: 0; }
+
+  .hero { background: var(--navy); color: white; padding: 20px 20px 18px; }
+  .hero .eyebrow { font-size: 10.5px; color: rgba(255,255,255,0.5); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .hero h2 { font-size: 21px; font-weight: 800; margin-top: 6px; }
+  .hero p { font-size: 12.5px; color: rgba(255,255,255,0.65); margin-top: 5px; }
+
+  .pad { padding: 16px; }
+  .card { background: var(--card); border-radius: 14px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--border); }
+  .card-title { font-size: 11.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+
+  .pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+  .pill-green { background: #e8f5e9; color: #2e7d32; }
+  .pill-red { background: #ffebee; color: #c62828; }
+  .pill-amber { background: #fff8e1; color: #b37d00; }
+  .pill-gray { background: #f1f3f5; color: #64748b; }
+
+  .row-between { display: flex; align-items: center; justify-content: space-between; }
+
+  .btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; text-align: center; }
+  .btn-primary { background: var(--orange); color: #fff; }
+  .btn-secondary { background: var(--navy); color: #fff; }
+  .btn-outline { background: transparent; border: 2px solid var(--navy); color: var(--navy); }
+  .btn-red { background: var(--red); color: #fff; }
+  .mb-8 { margin-bottom: 8px; }
+  .mb-12 { margin-bottom: 12px; }
+
+  /* Progress header */
+  .progress-header { background: var(--navy-light); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .progress-header .count { font-size: 13px; font-weight: 700; color: white; }
+  .progress-header .bar { flex: 1; height: 6px; background: rgba(255,255,255,0.15); border-radius: 3px; margin: 0 12px; overflow: hidden; }
+  .progress-header .bar-fill { height: 100%; background: var(--green); border-radius: 3px; }
+
+  /* DVIR checklist item, per-item swipe hint */
+  .dvir-item { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid #f0f2f5; gap: 12px; background: white; position: relative; }
+  .dvir-item:last-child { border-bottom: none; }
+  .dvir-item .item-icon { font-size: 20px; flex-shrink: 0; width: 30px; text-align: center; }
+  .dvir-item .item-name { flex: 1; font-size: 13.5px; font-weight: 600; color: var(--navy); }
+  .toggle-btn { border: none; border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 700; }
+  .toggle-ok { background: #e8f5e9; color: #2e7d32; }
+  .toggle-ok.active { background: var(--green); color: white; }
+  .toggle-fail { background: #fafafa; color: var(--muted); border: 1px solid var(--border); }
+  .toggle-fail.active { background: var(--red); color: white; border-color: var(--red); }
+  .swipe-hint { position: absolute; right: -70px; top: 0; bottom: 0; width: 70px; background: var(--green); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+  /* Camera action sheet — iOS style */
+  .ios-sheet-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.35); display: flex; flex-direction: column; justify-content: flex-end; z-index: 30; }
+  .ios-sheet { background: rgba(245,245,247,0.96); backdrop-filter: blur(10px); border-radius: 14px; margin: 0 8px 8px; overflow: hidden; }
+  .ios-sheet-item { padding: 16px; text-align: center; font-size: 17px; color: #3b82f6; border-bottom: 0.5px solid rgba(0,0,0,0.15); font-weight: 400; }
+  .ios-sheet-item.destructive { color: var(--red); }
+  .ios-sheet-cancel { background: rgba(245,245,247,0.96); border-radius: 14px; margin: 8px 8px 0; padding: 16px; text-align: center; font-size: 17px; font-weight: 700; color: #3b82f6; }
+
+  /* Android bottom sheet style */
+  .android-sheet-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; flex-direction: column; justify-content: flex-end; z-index: 30; }
+  .android-sheet { background: #fff; border-radius: 24px 24px 0 0; padding: 8px 0 20px; box-shadow: 0 -4px 24px rgba(0,0,0,0.2); }
+  .android-sheet-handle { width: 32px; height: 4px; background: #d0d0d0; border-radius: 2px; margin: 8px auto 12px; }
+  .android-sheet-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 20px 8px; }
+  .android-sheet-item { display: flex; align-items: center; gap: 18px; padding: 14px 20px; font-size: 15px; color: var(--navy); font-weight: 500; }
+  .android-sheet-item .ripple-icon { font-size: 22px; width: 24px; }
+  .android-sheet-item:active { background: rgba(0,0,0,0.06); }
+
+  .field { margin-bottom: 14px; }
+  .label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 5px; display: block; }
+  .input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 15px; background: white; color: var(--text); }
+  textarea.input { resize: none; min-height: 70px; }
+
+  .photo-thumb-wrap { position: relative; border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
+  .photo-thumb { width: 100%; height: 140px; background: linear-gradient(135deg,#243a52,#1a2c41); display: flex; align-items: center; justify-content: center; font-size: 34px; color: rgba(255,255,255,.5); }
+  .photo-thumb-badge { position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.55); color: #fff; font-size: 10.5px; font-weight: 700; padding: 4px 8px; border-radius: 6px; }
+  .photo-remove { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border-radius: 50%; background: rgba(0,0,0,0.55); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+
+  .upload-zone { border: 2px dashed var(--border); border-radius: 14px; padding: 22px 16px; text-align: center; background: #fafbfc; display: flex; gap: 10px; }
+  .upload-zone .uz-btn { flex: 1; border: 1.5px solid var(--orange); border-radius: 10px; padding: 12px 6px; font-size: 12.5px; font-weight: 700; color: var(--orange); text-align: center; }
+
+  .sig-pad { background: white; border: 2px dashed var(--border); border-radius: 12px; height: 130px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; position: relative; overflow: hidden; }
+  .sig-pad.signed { border: 2px solid var(--green); border-style: solid; }
+  .sig-pad .sig-prompt { font-size: 14px; color: var(--muted); text-align: center; }
+  .sig-pad .sig-prompt .icon { font-size: 26px; display: block; margin-bottom: 6px; }
+  .sig-name { font-size: 30px; font-family: 'Georgia', serif; font-style: italic; color: var(--navy); }
+
+  .summary-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .summary-item:last-child { border-bottom: none; }
+  .summary-icon { font-size: 17px; width: 26px; text-align: center; flex-shrink: 0; }
+  .summary-name { flex: 1; font-size: 12.5px; color: var(--text); font-weight: 500; }
+
+  .stat-row { display: flex; gap: 10px; margin-bottom: 12px; }
+  .stat-box { flex: 1; background: white; border-radius: 12px; padding: 14px; border: 1px solid var(--border); text-align: center; }
+  .stat-box .val { font-size: 25px; font-weight: 900; color: var(--navy); }
+  .stat-box .val.green { color: var(--green); }
+  .stat-box .val.red { color: var(--red); }
+  .stat-box .lbl { font-size: 10.5px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; margin-top: 2px; }
+
+  .success-hero { text-align: center; padding: 36px 24px 20px; }
+  .success-icon-wrap { width: 72px; height: 72px; border-radius: 50%; background: #e8f5e9; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 36px; }
+  .success-title { font-size: 21px; font-weight: 800; color: var(--navy); }
+  .success-sub { font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+
+  .haptic-tag { display: inline-flex; align-items: center; gap: 4px; background: rgba(244,121,32,0.12); color: var(--orange); font-size: 9.5px; font-weight: 800; padding: 2px 7px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 6px; }
+
+  .history-card { background: white; border-radius: 16px; padding: 14px 16px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .signature-thumb { width: 70px; height: 28px; background: #fff; border: 1px solid var(--border); border-radius: 4px; }
+
+  .home-indicator { position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); width: 134px; height: 5px; background: rgba(0,0,0,0.25); border-radius: 3px; z-index: 20; }
+
+  .tab-bar { background: var(--navy); display: flex; justify-content: space-around; padding: 10px 0 16px; flex-shrink: 0; }
+  .tab-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; color: rgba(255,255,255,0.4); position: relative; min-width: 52px; }
+  .tab-item.active { color: var(--orange); }
+  .tab-item .ti { font-size: 20px; }
+</style>
+</head>
+<body>
+
+<h1>CarrierOS — Mockup 24: DVIR Inspection (Phone-Frame, Native)</h1>
+<p class="subtitle">Fills the confirmed mockup-10 gap: DVIR had a full flow but never a real phone-frame (status bar / notch / tab bar) treatment matching mockup-03/15's convention. Reflects the actual screens in <code>dvir-start.tsx</code>, <code>dvir/[loadId].tsx</code>, and <code>dvir-history/index.tsx</code> — 8-area checklist, photo-per-defect, signature pad, best-effort attachment upload with non-fatal warnings.</p>
+<div class="platform-key"><span><span class="dot ios"></span>iOS pattern shown</span><span><span class="dot android"></span>Android pattern shown</span></div>
+
+<div class="screen-grid">
+
+  <!-- SCREEN 1: DVIR TAB LANDING -->
+  <div class="phone">
+    <div class="phone-label">1 — DVIR Tab (dvir-start.tsx)</div>
+    <div class="phone-note">Driver's tab 2. Routes to the active load's pre/post-trip flow, or explains why not.</div>
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:41</span><span>●●●●  🔋</span></div>
+      <div class="content">
+        <div class="hero">
+          <div class="eyebrow">Truck #101 · 2021 Kenworth T680</div>
+          <h2>Inspections</h2>
+          <p>FMCSA-compliant pre/post-trip records — 49 CFR 396.11</p>
+        </div>
+        <div class="pad">
+          <div class="card" style="border-left:4px solid var(--amber);">
+            <div class="card-title">Today — Thu, Jul 3</div>
+            <div class="row-between mb-8">
+              <span style="font-size:14px;font-weight:600;color:var(--text);">Pre-Trip</span>
+              <span class="pill pill-amber">Not Started</span>
+            </div>
+            <div class="row-between">
+              <span style="font-size:14px;font-weight:600;color:var(--text);">Post-Trip</span>
+              <span class="pill pill-gray">Pending</span>
+            </div>
+          </div>
+          <button class="btn btn-primary mb-8">Start Pre-Trip Inspection</button>
+          <button class="btn btn-outline mb-12">Start Post-Trip Inspection</button>
+          <div style="text-align:center;">
+            <span style="font-size:13px;color:var(--orange);font-weight:600;">View Inspection History →</span>
+          </div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="ti">🏠</div>My Load</div>
+        <div class="tab-item active"><div class="ti">📋</div>DVIR</div>
+        <div class="tab-item"><div class="ti">🕐</div>History</div>
+        <div class="tab-item"><div class="ti">👤</div>Profile</div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: PRE-TRIP CHECKLIST -->
+  <div class="phone">
+    <div class="phone-label">2 — Pre-Trip Checklist</div>
+    <div class="phone-note">Swipe-right-to-OK gesture shown mid-swipe on item 3 (iOS/Android both support list-row swipe actions natively). Tap toggles remain the primary path for one-handed/gloved use.</div>
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:42</span><span>●●●●  🔋</span></div>
+      <div class="topbar"><div class="back"><span class="chev">‹</span>Back</div><div class="title">Pre-Trip Inspection</div><div class="action"></div></div>
+      <div class="progress-header">
+        <span class="count">5 / 8 checked</span>
+        <div class="bar"><div class="bar-fill" style="width:62%"></div></div>
+        <span style="font-size:11px;color:rgba(255,255,255,0.5);">Pre-Trip</span>
+      </div>
+      <div class="content">
+        <div style="padding:12px 16px 16px;">
+          <div style="background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:12px;">
+            <div class="dvir-item"><div class="item-icon">🛑</div><div class="item-name">Brakes &amp; connections</div><div class="toggle-btn toggle-ok active">OK</div></div>
+            <div class="dvir-item"><div class="item-icon">💡</div><div class="item-name">Lights &amp; reflectors</div><div class="toggle-btn toggle-ok active">OK</div></div>
+            <div class="dvir-item" style="background:#fafcff;overflow:hidden;">
+              <div style="position:absolute;left:0;top:0;bottom:0;width:60%;background:#fff;transform:translateX(0);display:flex;align-items:center;padding:0 16px;gap:12px;z-index:2;">
+                <div class="item-icon">⭕</div><div class="item-name">Tires &amp; wheels</div>
+              </div>
+              <div class="swipe-hint" style="right:auto;left:60%;">✓ OK</div>
+            </div>
+            <div class="dvir-item"><div class="item-icon">🎡</div><div class="item-name">Steering mechanism</div>
+              <div style="display:flex;gap:6px;"><div class="toggle-btn toggle-ok">OK</div><div class="toggle-btn toggle-fail">Defect</div></div>
+            </div>
+            <div class="dvir-item"><div class="item-icon">📢</div><div class="item-name">Horn</div>
+              <div style="display:flex;gap:6px;"><div class="toggle-btn toggle-ok">OK</div><div class="toggle-btn toggle-fail">Defect</div></div>
+            </div>
+            <div class="dvir-item"><div class="item-icon">🪞</div><div class="item-name">Mirrors</div>
+              <div style="display:flex;gap:6px;"><div class="toggle-btn toggle-ok">OK</div><div class="toggle-btn toggle-fail">Defect</div></div>
+            </div>
+            <div class="dvir-item"><div class="item-icon">🔗</div><div class="item-name">Coupling devices</div>
+              <div style="display:flex;gap:6px;"><div class="toggle-btn toggle-ok">OK</div><div class="toggle-btn toggle-fail">Defect</div></div>
+            </div>
+            <div class="dvir-item"><div class="item-icon">🦺</div><div class="item-name">Emergency equipment</div>
+              <div style="display:flex;gap:6px;"><div class="toggle-btn toggle-ok">OK</div><div class="toggle-btn toggle-fail">Defect</div></div>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="opacity:0.45;">Review &amp; Sign →</button>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: DEFECT FLAG WITH NATIVE CAMERA SHEET (iOS) -->
+  <div class="phone">
+    <div class="phone-label">3 — Defect Flag · Camera Sheet <span class="dot ios" style="display:inline-block;vertical-align:middle;"></span> iOS</div>
+    <div class="phone-note">Tapping "Defect" auto-navigates here (haptic: notificationWarning). "Add Photo" opens a native iOS action sheet, not an in-app modal.</div>
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:43</span><span>●●●●  🔋</span></div>
+      <div class="topbar"><div class="back"><span class="chev">‹</span>Checklist</div><div class="title">Tires &amp; wheels</div><div class="action"></div></div>
+      <div class="content">
+        <div style="background:#fdeceb;padding:18px 20px;text-align:center;">
+          <div style="font-size:30px;">⚠️</div>
+          <div style="font-size:16px;font-weight:800;color:#c62828;margin-top:6px;">Defect Flagged</div>
+          <div style="font-size:12px;color:#c62828;margin-top:3px;">The owner is notified the moment you save this</div>
+        </div>
+        <div class="pad">
+          <div class="card">
+            <div class="card-title">Defect Details</div>
+            <div class="field">
+              <label class="label">Severity</label>
+              <div style="display:flex;gap:8px;">
+                <div class="toggle-btn toggle-fail active" style="flex:1;text-align:center;">Major</div>
+                <div class="toggle-btn toggle-ok" style="flex:1;text-align:center;background:#fafafa;color:var(--muted);border:1px solid var(--border);">Minor</div>
+              </div>
+            </div>
+            <div class="field">
+              <label class="label">Description (required)</label>
+              <textarea class="input">Right rear tire showing low pressure, approx 65 PSI</textarea>
+            </div>
+          </div>
+
+          <div class="photo-thumb-wrap">
+            <div class="photo-thumb">📷</div>
+            <div class="photo-thumb-badge">Photo attached</div>
+            <div class="photo-remove">✕</div>
+          </div>
+
+          <div style="background:#ffebee;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:12.5px;color:#c62828;line-height:1.4;">
+            Photo upload is best-effort — if it fails, your defect report still saves; you'll see a warning on the confirmation screen, never a lost inspection.
+          </div>
+
+          <button class="btn btn-red mb-8">Save Defect &amp; Continue</button>
+          <button class="btn btn-outline">Cancel — Mark OK Instead</button>
+        </div>
+      </div>
+
+      <!-- iOS action sheet overlay -->
+      <div class="ios-sheet-backdrop">
+        <div style="padding:0 8px 8px;">
+          <div style="text-align:center;font-size:12px;color:#8a8a8e;padding:10px 0;background:rgba(245,245,247,0.96);border-radius:14px 14px 0 0;">Add Defect Photo</div>
+        </div>
+        <div class="ios-sheet" style="margin-top:-8px;">
+          <div class="ios-sheet-item">Take Photo</div>
+          <div class="ios-sheet-item">Choose from Library</div>
+        </div>
+        <div class="ios-sheet-cancel">Cancel</div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: DEFECT FLAG - ANDROID BOTTOM SHEET VARIANT -->
+  <div class="phone">
+    <div class="phone-label">4 — Defect Flag · Camera Sheet <span class="dot android" style="display:inline-block;vertical-align:middle;"></span> Android</div>
+    <div class="phone-note">Same screen, Material 3 bottom sheet: rounded-top sheet with drag handle, leading icons, ripple feedback — not a copy of the iOS sheet.</div>
+    <div class="phone-screen">
+      <div class="notch" style="display:none;"></div>
+      <div class="status-bar" style="padding-top:10px;"><span>9:43</span><span>▲ ● ■</span></div>
+      <div class="topbar"><div class="back"><span class="chev">←</span></div><div class="title" style="text-align:left;">Tires &amp; wheels</div><div class="action"></div></div>
+      <div class="content">
+        <div style="background:#fdeceb;padding:18px 20px;text-align:center;">
+          <div style="font-size:30px;">⚠️</div>
+          <div style="font-size:16px;font-weight:800;color:#c62828;margin-top:6px;">Defect Flagged</div>
+          <div style="font-size:12px;color:#c62828;margin-top:3px;">The owner is notified the moment you save this</div>
+        </div>
+        <div class="pad">
+          <div class="card">
+            <div class="card-title">Defect Details</div>
+            <div class="field">
+              <label class="label">Description (required)</label>
+              <textarea class="input">Right rear tire showing low pressure, approx 65 PSI</textarea>
+            </div>
+          </div>
+          <div class="upload-zone mb-12">
+            <div class="uz-btn">📷 Camera</div>
+            <div class="uz-btn">🖼️ Gallery</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Android bottom sheet overlay -->
+      <div class="android-sheet-backdrop">
+        <div class="android-sheet">
+          <div class="android-sheet-handle"></div>
+          <div class="android-sheet-title">Add defect photo</div>
+          <div class="android-sheet-item"><span class="ripple-icon">📷</span>Take photo</div>
+          <div class="android-sheet-item"><span class="ripple-icon">🖼️</span>Choose from gallery</div>
+          <div class="android-sheet-item" style="color:var(--muted);"><span class="ripple-icon">✕</span>Cancel</div>
+        </div>
+      </div>
+      <div class="home-indicator" style="background:transparent;"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 5: REVIEW & SIGN -->
+  <div class="phone">
+    <div class="phone-label">5 — Review &amp; Sign</div>
+    <div class="phone-note">Signature pad uses react-native-svg capture (existing SignaturePad component). Native date/time pickers not needed here — timestamp is server-assigned on submit.</div>
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:47</span><span>●●●●  🔋</span></div>
+      <div class="topbar"><div class="back"><span class="chev">‹</span>Checklist</div><div class="title">Review &amp; Sign</div><div class="action"></div></div>
+      <div class="content">
+        <div class="pad">
+          <div class="card">
+            <div class="card-title">Inspection Summary</div>
+            <div class="stat-row">
+              <div class="stat-box"><div class="val green">7</div><div class="lbl">Passed</div></div>
+              <div class="stat-box"><div class="val red">1</div><div class="lbl">Defect</div></div>
+            </div>
+            <div class="summary-item"><div class="summary-icon">🛑</div><div class="summary-name">Brakes &amp; connections</div><span class="pill pill-green">✓ OK</span></div>
+            <div class="summary-item" style="background:#fff8f8;margin:0 -16px;padding:10px 16px;"><div class="summary-icon">⭕</div><div class="summary-name">Tires &amp; wheels</div><span class="pill pill-red">⚠ Major</span></div>
+            <div class="summary-item"><div class="summary-icon">🎡</div><div class="summary-name">Steering mechanism</div><span class="pill pill-green">✓ OK</span></div>
+            <div class="summary-item"><div class="summary-icon">🦺</div><div class="summary-name">Emergency equipment</div><span class="pill pill-green">✓ OK</span></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Odometer</div>
+            <input class="input" value="184,220 mi" readonly>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Driver Signature</div>
+            <div style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5;">
+              By signing, I certify this vehicle has been inspected and any defects found have been reported.
+            </div>
+            <div class="sig-pad signed">
+              <div class="sig-name">Mike Davidson</div>
+            </div>
+            <div class="haptic-tag">⚡ Haptic on capture</div>
+          </div>
+
+          <button class="btn btn-primary">Submit Inspection →</button>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 6: SUBMITTED / WARNINGS -->
+  <div class="phone">
+    <div class="phone-label">6 — Submitted (with non-fatal warnings)</div>
+    <div class="phone-note">Mirrors the real submit() flow: the inspection is the compliance artifact and always saves first; photo/signature upload failures surface here as warnings, never as a lost report.</div>
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:48</span><span>●●●●  🔋</span></div>
+      <div class="content">
+        <div class="success-hero">
+          <div class="success-icon-wrap">📋</div>
+          <div class="success-title">Inspection Submitted</div>
+          <div class="success-sub">Pre-Trip · Truck #101 · Jul 3, 2026 · 6:58 AM</div>
+          <div class="haptic-tag">⚡ Success haptic (notificationSuccess)</div>
+        </div>
+        <div class="pad" style="padding-top:0;">
+          <div style="background:#fff8e1;border-radius:10px;padding:12px 14px;margin-bottom:10px;font-size:12.5px;color:#92400e;font-weight:600;">
+            ⚠️ 1 photo failed to upload — the defect report itself was saved. Retry from DVIR History.
+          </div>
+          <div class="card">
+            <div class="card-title">Defect Reported</div>
+            <div style="font-size:13.5px;color:var(--text);line-height:1.6;">
+              Tires &amp; wheels — Low tire pressure (major). Owner notified by push. Load cannot dispatch until acknowledged.
+            </div>
+          </div>
+          <button class="btn btn-primary">← Back to Inspections</button>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 7: DVIR HISTORY -->
+  <div class="phone">
+    <div class="phone-label">7 — DVIR History (dvir-history/index.tsx)</div>
+    <div class="phone-note">Pull-to-refresh (native RefreshControl) at top of list — spinner shown mid-gesture. Owner/finance see the whole fleet; driver sees only their own, scoped server-side.</div>
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:50</span><span>●●●●  🔋</span></div>
+      <div class="topbar"><div class="back"><span class="chev">‹</span>Back</div><div class="title">Inspection History</div><div class="action"></div></div>
+      <div class="content">
+        <div style="display:flex;justify-content:center;padding:10px 0 2px;">
+          <div style="width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--orange);border-radius:50%;"></div>
+        </div>
+        <div class="pad" style="padding-top:6px;">
+          <div class="history-card">
+            <div class="history-header">
+              <div style="display:flex;gap:6px;">
+                <span class="pill pill-gray">Pre-Trip</span>
+                <span class="pill pill-red">Defects Noted</span>
+              </div>
+              <span style="font-size:11px;color:var(--muted);">Jul 3, 6:58 AM</span>
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Mike Davidson · Truck #101 · 184,220 mi</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">• Tires &amp; wheels — low pressure, approx 65 PSI</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="signature-thumb"></div>
+              <span style="font-size:11px;color:var(--muted);">Signed</span>
+            </div>
+          </div>
+          <div class="history-card">
+            <div class="history-header">
+              <div style="display:flex;gap:6px;">
+                <span class="pill pill-gray">Post-Trip</span>
+                <span class="pill pill-green">Satisfactory</span>
+              </div>
+              <span style="font-size:11px;color:var(--muted);">Jul 2, 5:48 PM</span>
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Mike Davidson · Truck #101 · 183,915 mi</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="signature-thumb"></div>
+              <span style="font-size:11px;color:var(--muted);">Signed</span>
+            </div>
+          </div>
+          <div class="history-card">
+            <div class="history-header">
+              <div style="display:flex;gap:6px;">
+                <span class="pill pill-gray">Pre-Trip</span>
+                <span class="pill pill-green">Satisfactory</span>
+              </div>
+              <span style="font-size:11px;color:var(--muted);">Jul 2, 6:55 AM</span>
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Mike Davidson · Truck #101 · 183,610 mi</div>
+            <div style="font-size:11px;color:var(--muted);">Not signed</div>
+          </div>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:40px;color:rgba(255,255,255,0.3);font-size:11px;text-align:center;">
+  CarrierOS — Mockup 24: DVIR (Phone-Frame, Native) · Companion spec: mobile-native-interaction-spec.md §DVIR
+</div>
+
+</body>
+</html>

@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CarrierOS — DVIR Inspection Flow</title>
+<style>
+:root {
+  --navy: #0f1e35;
+  --navy-light: #1a2e4a;
+  --orange: #f47920;
+  --green: #2ecc71;
+  --green-dark: #27ae60;
+  --red: #e74c3c;
+  --amber: #f0a500;
+  --bg: #f4f6f9;
+  --text: #1a1a2e;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #1a1a2e;
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center;
+}
+.outer {
+  width: 100%; max-width: 430px; min-height: 100vh;
+  background: var(--bg); display: flex; flex-direction: column;
+}
+.topbar {
+  background: var(--navy); color: white;
+  display: flex; align-items: center;
+  padding: 14px 16px; gap: 12px; min-height: 56px;
+  position: sticky; top: 0; z-index: 100;
+}
+.topbar .back-btn { background: none; border: none; color: white; font-size: 20px; cursor: pointer; padding: 4px; display: none; }
+.topbar .back-btn.visible { display: block; }
+.topbar .logo { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; flex: 1; }
+.topbar .logo span { color: var(--orange); }
+.topbar .subtitle { font-size: 12px; color: rgba(255,255,255,0.6); }
+
+.content { flex: 1; overflow-y: auto; }
+.screen { display: none; }
+.screen.active { display: block; }
+
+.btn { display: block; width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; text-align: center; transition: opacity 0.15s; }
+.btn:active { opacity: 0.85; }
+.btn-primary { background: var(--orange); color: white; }
+.btn-secondary { background: var(--navy); color: white; }
+.btn-outline { background: transparent; border: 2px solid var(--navy); color: var(--navy); }
+.btn-green { background: var(--green); color: white; }
+.btn-red { background: var(--red); color: white; }
+.mb-8 { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.mb-16 { margin-bottom: 16px; }
+
+.card { background: white; border-radius: 14px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--border); }
+.card-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+
+.field { margin-bottom: 14px; }
+.label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 5px; display: block; }
+.input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 15px; background: white; color: var(--text); }
+.input:focus { outline: none; border-color: var(--navy); }
+textarea.input { resize: none; min-height: 80px; }
+
+.pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+.pill-green { background: #e8f5e9; color: #2e7d32; }
+.pill-red { background: #ffebee; color: #c62828; }
+.pill-amber { background: #fff8e1; color: #f57f17; }
+.pill-blue { background: #e3f2fd; color: #1565c0; }
+.pill-gray { background: #f5f5f5; color: #616161; }
+
+.row-between { display: flex; align-items: center; justify-content: space-between; }
+
+.hero {
+  background: var(--navy); color: white;
+  padding: 24px 20px 20px; text-align: center;
+}
+.hero h2 { font-size: 20px; font-weight: 800; margin-top: 8px; }
+.hero p { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 6px; }
+
+.notif { border-radius: 12px; padding: 12px 16px; margin-bottom: 12px; font-size: 14px; font-weight: 600; }
+.notif-green { background: #e8f5e9; color: #2e7d32; }
+.notif-red { background: #ffebee; color: #c62828; }
+.notif-amber { background: #fff8e1; color: #f57f17; }
+
+/* DVIR checklist items */
+.dvir-item {
+  display: flex; align-items: center;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  background: white;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.dvir-item:last-child { border-bottom: none; }
+.dvir-item:active { background: #f9fafb; }
+.dvir-item .item-icon { font-size: 22px; flex-shrink: 0; width: 32px; text-align: center; }
+.dvir-item .item-name { flex: 1; font-size: 14px; font-weight: 600; color: var(--text); }
+.dvir-item .item-status { display: flex; gap: 6px; }
+
+.toggle-btn {
+  border: none; border-radius: 8px; padding: 6px 12px;
+  font-size: 12px; font-weight: 700; cursor: pointer;
+  transition: all 0.15s;
+}
+.toggle-ok { background: #e8f5e9; color: #2e7d32; }
+.toggle-ok.active { background: var(--green); color: white; }
+.toggle-fail { background: #fafafa; color: var(--muted); border: 1px solid var(--border); }
+.toggle-fail.active { background: var(--red); color: white; border-color: var(--red); }
+
+/* Progress header */
+.progress-header {
+  background: var(--navy-light);
+  padding: 10px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.progress-header .count { font-size: 13px; font-weight: 700; color: white; }
+.progress-header .bar { flex: 1; height: 6px; background: rgba(255,255,255,0.15); border-radius: 3px; margin: 0 12px; }
+.progress-header .bar-fill { height: 100%; background: var(--green); border-radius: 3px; transition: width 0.3s; }
+
+/* Summary items */
+.summary-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.summary-item:last-child { border-bottom: none; }
+.summary-icon { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
+.summary-name { flex: 1; font-size: 13px; color: var(--text); font-weight: 500; }
+
+/* Signature pad */
+.sig-pad {
+  background: white; border: 2px dashed var(--border);
+  border-radius: 12px; height: 120px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; margin-bottom: 12px;
+  transition: border-color 0.15s;
+  position: relative; overflow: hidden;
+}
+.sig-pad:hover { border-color: var(--orange); }
+.sig-pad.signed { border: 2px solid var(--green); border-style: solid; }
+.sig-pad .sig-prompt { font-size: 14px; color: var(--muted); text-align: center; }
+.sig-pad .sig-prompt .icon { font-size: 28px; display: block; margin-bottom: 6px; }
+.sig-name { font-size: 28px; font-family: 'Georgia', serif; font-style: italic; color: var(--navy); opacity: 0; transition: opacity 0.3s; }
+.sig-name.show { opacity: 1; }
+
+/* Timeline */
+.timeline { padding: 0; }
+.timeline-item { display: flex; gap: 14px; padding-bottom: 18px; position: relative; }
+.timeline-item:last-child { padding-bottom: 0; }
+.tl-left { display: flex; flex-direction: column; align-items: center; width: 28px; flex-shrink: 0; }
+.tl-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--green); flex-shrink: 0; margin-top: 2px; }
+.tl-dot.red { background: var(--red); }
+.tl-dot.pending { background: var(--border); }
+.tl-line { flex: 1; width: 2px; background: var(--border); margin-top: 4px; }
+.tl-right { flex: 1; }
+.tl-label { font-size: 13px; font-weight: 700; color: var(--navy); }
+.tl-sub { font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+
+/* Owner alert */
+.alert-banner {
+  background: var(--red); color: white;
+  padding: 14px 16px; text-align: center;
+  font-size: 14px; font-weight: 700;
+}
+
+.success-hero { text-align: center; padding: 40px 24px 24px; }
+.success-icon { font-size: 60px; margin-bottom: 14px; }
+.success-title { font-size: 22px; font-weight: 800; color: var(--navy); }
+.success-sub { font-size: 14px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+
+/* stat row */
+.stat-row { display: flex; gap: 10px; margin-bottom: 12px; }
+.stat-box { flex: 1; background: white; border-radius: 12px; padding: 14px; border: 1px solid var(--border); text-align: center; }
+.stat-box .val { font-size: 26px; font-weight: 900; color: var(--navy); }
+.stat-box .val.green { color: var(--green); }
+.stat-box .val.red { color: var(--red); }
+.stat-box .lbl { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; margin-top: 2px; }
+
+.upload-zone { border: 2px dashed var(--border); border-radius: 14px; padding: 24px 20px; text-align: center; background: #fafbfc; cursor: pointer; transition: border-color 0.15s; }
+.upload-zone:hover { border-color: var(--orange); }
+</style>
+</head>
+<body>
+<div class="outer">
+
+  <div class="topbar" id="topbar">
+    <button class="back-btn" id="backBtn" onclick="goBack()">←</button>
+    <div class="logo" id="topLogo">Carrier<span>OS</span></div>
+    <div class="subtitle" id="topSubtitle">DVIR Inspection</div>
+  </div>
+
+  <div class="content">
+
+    <!-- ===== HOME: DVIR HUB ===== -->
+    <div class="screen active" id="screen-home">
+      <div class="hero">
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);font-weight:700;letter-spacing:1px;text-transform:uppercase;">Truck #101 · 2021 Kenworth T680</div>
+        <h2>Inspections</h2>
+        <p>FMCSA-compliant pre/post-trip inspection records</p>
+      </div>
+      <div style="padding:16px;">
+
+        <!-- Today's status -->
+        <div class="card" style="border-left:4px solid var(--amber);">
+          <div class="card-title">Today — Jul 3, 2026</div>
+          <div class="row-between mb-8">
+            <span style="font-size:14px;font-weight:600;color:var(--text);">Pre-Trip</span>
+            <span class="pill pill-amber">Not Started</span>
+          </div>
+          <div class="row-between">
+            <span style="font-size:14px;font-weight:600;color:var(--text);">Post-Trip</span>
+            <span class="pill pill-gray">Pending</span>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:10px;">
+            <button class="btn btn-primary" style="flex:1;padding:11px;" onclick="goto('screen-pretrip-1')">Start Pre-Trip</button>
+            <button class="btn btn-outline" style="flex:1;padding:11px;" onclick="goto('screen-posttrip-1')">Start Post-Trip</button>
+          </div>
+        </div>
+
+        <!-- Recent inspections -->
+        <div class="card-title" style="padding:4px 0 10px;">Recent Inspections</div>
+
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div onclick="goto('screen-history-1')" style="padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:14px;font-weight:700;color:var(--navy);">Jul 2 — Pre-Trip</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px;">Mike Davidson · 7:02 AM · All Clear</div>
+            </div>
+            <span class="pill pill-green">✓ Passed</span>
+          </div>
+          <div onclick="goto('screen-history-1')" style="padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:14px;font-weight:700;color:var(--navy);">Jul 2 — Post-Trip</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px;">Mike Davidson · 5:48 PM · 1 defect flagged</div>
+            </div>
+            <span class="pill pill-red">⚠ Defect</span>
+          </div>
+          <div onclick="goto('screen-history-1')" style="padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:14px;font-weight:700;color:var(--navy);">Jul 1 — Pre-Trip</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px;">Mike Davidson · 6:55 AM · All Clear</div>
+            </div>
+            <span class="pill pill-green">✓ Passed</span>
+          </div>
+        </div>
+
+        <div style="text-align:center;margin-top:4px;">
+          <span style="font-size:12px;color:var(--muted);">Records retained for 3 months per FMCSA 49 CFR 396.11</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PRE-TRIP STEP 1: INTRO ===== -->
+    <div class="screen" id="screen-pretrip-1">
+      <div class="hero">
+        <div style="font-size:40px;margin-bottom:8px;">🔍</div>
+        <h2>Pre-Trip Inspection</h2>
+        <p>FMCSA-compliant · Truck #101 · Jul 3, 2026</p>
+      </div>
+      <div style="padding:16px;">
+        <div class="card">
+          <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:10px;">Before you start:</div>
+          <div style="font-size:14px;line-height:2;color:var(--text);">
+            ✅ Walk around the truck<br>
+            ✅ Check each item on the list<br>
+            ✅ Flag any defects with a note<br>
+            ✅ Sign to confirm the inspection
+          </div>
+        </div>
+        <div class="card" style="background:#fff8e1;border-color:#fcd34d;">
+          <div style="font-size:13px;color:#92400e;line-height:1.5;">
+            ⚠️ <strong>Reminder:</strong> A defect from your Jul 2 post-trip was flagged — <strong>Right rear tire: low pressure.</strong> Verify this has been corrected before starting.
+          </div>
+        </div>
+        <button class="btn btn-primary mb-8" onclick="goto('screen-pretrip-2')">Start Inspection →</button>
+        <button class="btn btn-outline" onclick="goto('screen-home')">← Back</button>
+      </div>
+    </div>
+
+    <!-- ===== PRE-TRIP STEP 2: CHECKLIST ===== -->
+    <div class="screen" id="screen-pretrip-2">
+      <div class="progress-header">
+        <span class="count" id="passCount">0 / 8 checked</span>
+        <div class="bar"><div class="bar-fill" id="progressBar" style="width:0%"></div></div>
+        <span style="font-size:12px;color:rgba(255,255,255,0.5);">Pre-Trip</span>
+      </div>
+
+      <div style="padding:0 16px 16px;margin-top:12px;">
+        <div style="background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:12px;" id="checklistContainer">
+
+          <div class="dvir-item" id="item-brakes">
+            <div class="item-icon">🛑</div>
+            <div class="item-name">Brakes &amp; connections</div>
+            <div class="item-status">
+              <button class="toggle-btn toggle-ok" onclick="setItem('brakes','ok')">OK</button>
+              <button class="toggle-btn toggle-fail" onclick="setItem('brakes','fail')">Defect</button>
+            </div>
+          </div>
+
+          <div class="dvir-item" id="item-lights">
+            <div class="item-icon">💡</div>
+            <div class="item-name">Lights &amp; reflectors</div>
+            <div class="item-status">
+              <button class="toggle-btn toggle-ok" onclick="setItem('lights','ok')">OK</button>
+              <button class="toggle-btn toggle-fail" onclick="setItem('lights','fail')">Defect</button>
+            </div>
+          </div>
+
+          <div class="dvir-item" id="item-tires">
+            <div class="item-icon">⭕</div>
+            <div class="item-name">Tires &amp; wheels</div>
+            <div class="item-status">
+              <button class="toggle-btn toggle-ok" onclick="setItem('tires','ok')">OK</button>
+              <button class="toggle-btn toggle-fail" onclick="setItem('tires','fail')">Defect</button>
+            </div>
+          </div>
+
+          <div class="dvir-item" id="item-steering">
+            <div class="item-icon">🎡</div>
+            <div class="item-name">Steering mechanism</div>
+            <div class="item-status">
+              <button class="toggle-btn toggle-ok" onclick="setItem('steering','ok')">OK</button>
+              <button class="toggle-btn toggle-fail" onclick="setItem('steering','fail')">Defect</button>
+            </div>
+          </div>
+
+          <div class="dvir-item" id="item-horn">
+            <div class="item-icon">📢</div>
+            <div class="item-name">Horn</div>
+            <div class="item-status">
+              <button class="toggle-btn toggle-ok" onclick="setItem('horn','ok')">OK</button>
+              <button class="toggle-btn toggle-fail" onclick="setItem('horn','fail')">Defect</button>
+            </div>
+          </div>
+
+          <div class="dvir-item" id="item-mirrors">
+            <div class="item-icon">🪞</div>
+            <div class="item-name">Mirrors</div>
+            <div class="item-status">
+              <button class="toggle-btn toggle-ok" onclick="setItem('mirrors','ok')">OK</button>
+              <button class="toggle-btn toggle-fail" onclick="setItem('mirrors','fail')">Defect</button>
+            </div>
+          </div>
+
+          <div class="dvir-item" id="item-coupling">
+            <div class="item-icon">🔗</div>
+            <div class="item-name">Coupling devices</div>
+            <div class="item-status">
+              <button class="toggle-btn toggle-ok" onclick="setItem('coupling','ok')">OK</button>
+              <button class="toggle-btn toggle-fail" onclick="setItem('coupling','fail')">Defect</button>
+            </div>
+          </div>
+
+          <div class="dvir-item" id="item-emergency">
+            <div class="item-icon">🦺</div>
+            <div class="item-name">Emergency equipment</div>
+            <div class="item-status">
+              <button class="toggle-btn toggle-ok" onclick="setItem('emergency','ok')">OK</button>
+              <button class="toggle-btn toggle-fail" onclick="setItem('emergency','fail')">Defect</button>
+            </div>
+          </div>
+
+        </div>
+
+        <button class="btn btn-primary mb-8" id="continueBtn" onclick="goto('screen-pretrip-3')" style="opacity:0.4;pointer-events:none;" disabled>Review &amp; Sign →</button>
+        <button class="btn btn-outline" onclick="goto('screen-pretrip-1')">← Back</button>
+      </div>
+    </div>
+
+    <!-- ===== PRE-TRIP STEP 3: DEFECT DETAIL ===== -->
+    <div class="screen" id="screen-defect">
+      <div class="hero" style="background:#c62828;">
+        <div style="font-size:36px;margin-bottom:6px;">⚠️</div>
+        <h2>Defect Flagged</h2>
+        <p>Describe the issue so your owner is notified immediately</p>
+      </div>
+      <div style="padding:16px;">
+        <div class="card">
+          <div class="card-title">Defect Details</div>
+          <div class="field">
+            <label class="label">Item</label>
+            <input class="input" value="Tires &amp; wheels" readonly style="background:#f8fafc;">
+          </div>
+          <div class="field">
+            <label class="label">Description of defect</label>
+            <textarea class="input" placeholder="e.g. Right rear tire showing low pressure, approximately 65 PSI">Right rear tire showing low pressure, approx 65 PSI</textarea>
+          </div>
+        </div>
+
+        <div class="upload-zone mb-12" onclick="goto('screen-defect')">
+          <div style="font-size:32px;margin-bottom:8px;">📸</div>
+          <div style="font-size:14px;font-weight:600;color:var(--navy);">Add Photo (optional)</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">Take a photo of the defect</div>
+        </div>
+
+        <div style="background:#ffebee;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#c62828;">
+          📲 <strong>Your owner will be notified immediately</strong> with your description and photo. The load cannot be dispatched until the defect is acknowledged.
+        </div>
+
+        <button class="btn btn-red mb-8" onclick="goto('screen-pretrip-2')">Save Defect &amp; Continue Inspection</button>
+        <button class="btn btn-outline" onclick="goto('screen-pretrip-2')">Cancel — Mark as OK Instead</button>
+      </div>
+    </div>
+
+    <!-- ===== PRE-TRIP STEP 3: REVIEW & SIGN ===== -->
+    <div class="screen" id="screen-pretrip-3">
+      <div class="hero">
+        <h2>Review &amp; Sign</h2>
+        <p>Confirm your inspection is accurate</p>
+      </div>
+      <div style="padding:16px;">
+        <div class="card">
+          <div class="card-title">Inspection Summary</div>
+          <div class="stat-row">
+            <div class="stat-box"><div class="val green">7</div><div class="lbl">Passed</div></div>
+            <div class="stat-box"><div class="val red">1</div><div class="lbl">Defect</div></div>
+          </div>
+          <div class="timeline">
+            <div class="summary-item"><div class="summary-icon">🛑</div><div class="summary-name">Brakes &amp; connections</div><span class="pill pill-green">✓ OK</span></div>
+            <div class="summary-item"><div class="summary-icon">💡</div><div class="summary-name">Lights &amp; reflectors</div><span class="pill pill-green">✓ OK</span></div>
+            <div class="summary-item" style="background:#fff8f8;margin:0 -16px;padding:10px 16px;"><div class="summary-icon">⭕</div><div class="summary-name">Tires &amp; wheels</div><span class="pill pill-red">⚠ Defect</span></div>
+            <div class="summary-item"><div class="summary-icon">🎡</div><div class="summary-name">Steering mechanism</div><span class="pill pill-green">✓ OK</span></div>
+            <div class="summary-item"><div class="summary-icon">📢</div><div class="summary-name">Horn</div><span class="pill pill-green">✓ OK</span></div>
+            <div class="summary-item"><div class="summary-icon">🪞</div><div class="summary-name">Mirrors</div><span class="pill pill-green">✓ OK</span></div>
+            <div class="summary-item"><div class="summary-icon">🔗</div><div class="summary-name">Coupling devices</div><span class="pill pill-green">✓ OK</span></div>
+            <div class="summary-item"><div class="summary-icon">🦺</div><div class="summary-name">Emergency equipment</div><span class="pill pill-green">✓ OK</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Driver Signature</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.5;">
+            By signing, I certify that this vehicle has been inspected and that any defects found have been reported.
+          </div>
+          <div class="sig-pad" id="sigPad" onclick="signInspection()">
+            <div class="sig-prompt" id="sigPrompt">
+              <span class="icon">✍️</span>
+              Tap to sign
+            </div>
+            <div class="sig-name" id="sigName">Mike Davidson</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);">
+            <span>Mike Davidson</span>
+            <span>Jul 3, 2026 · 6:58 AM</span>
+          </div>
+        </div>
+
+        <button class="btn btn-primary mb-8" onclick="goto('screen-pretrip-4')">Submit Inspection →</button>
+        <button class="btn btn-outline" onclick="goto('screen-pretrip-2')">← Edit Checklist</button>
+      </div>
+    </div>
+
+    <!-- ===== PRE-TRIP STEP 4: SUBMITTED ===== -->
+    <div class="screen" id="screen-pretrip-4">
+      <div class="success-hero">
+        <div class="success-icon">📋</div>
+        <div class="success-title">Inspection Submitted</div>
+        <div class="success-sub">Pre-Trip · Truck #101 · Jul 3, 2026 · 6:58 AM</div>
+      </div>
+      <div style="padding:0 16px;">
+        <div class="notif notif-red">
+          ⚠️ Defect reported: Tires &amp; wheels — Low tire pressure. Sam Johnson has been notified.
+        </div>
+        <div class="card">
+          <div class="card-title">What happens next</div>
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="tl-left"><div class="tl-dot red"></div><div class="tl-line"></div></div>
+              <div class="tl-right"><div class="tl-label">Defect logged</div><div class="tl-sub">Owner received push notification</div></div>
+            </div>
+            <div class="timeline-item">
+              <div class="tl-left"><div class="tl-dot pending"></div><div class="tl-line"></div></div>
+              <div class="tl-right"><div class="tl-label" style="color:var(--muted);">Owner acknowledges</div><div class="tl-sub">Owner reviews defect and clears or schedules repair</div></div>
+            </div>
+            <div class="timeline-item">
+              <div class="tl-left"><div class="tl-dot pending"></div></div>
+              <div class="tl-right"><div class="tl-label" style="color:var(--muted);">Load can proceed</div><div class="tl-sub">Defect must be acknowledged before dispatch</div></div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary mb-8" onclick="goto('screen-home')">← Back to Inspections</button>
+        <button class="btn btn-outline" onclick="goto('screen-owner-alert')">See Owner's View →</button>
+      </div>
+    </div>
+
+    <!-- ===== POST-TRIP ===== -->
+    <div class="screen" id="screen-posttrip-1">
+      <div class="hero" style="background:#1a3a5c;">
+        <div style="font-size:40px;margin-bottom:8px;">🌙</div>
+        <h2>Post-Trip Inspection</h2>
+        <p>Truck #101 · End of day · Jul 3, 2026</p>
+      </div>
+      <div style="padding:16px;">
+        <div class="card">
+          <div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:8px;">Today's run:</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.8;">
+            Load #L-0042 · Chicago → Columbus<br>
+            Miles driven: ~305 mi<br>
+            Driver: Mike Davidson
+          </div>
+        </div>
+        <div class="card" style="background:#e8f5e9;border-color:#a5d6a7;">
+          <div style="font-size:13px;color:#1b5e20;line-height:1.5;">
+            ✅ <strong>Pre-trip defect resolved:</strong> Tire pressure corrected before departure. Service entry has been logged.
+          </div>
+        </div>
+        <button class="btn btn-secondary mb-8" onclick="goto('screen-pretrip-2')">Start Post-Trip Checklist →</button>
+        <button class="btn btn-outline" onclick="goto('screen-home')">← Back</button>
+      </div>
+    </div>
+
+    <!-- ===== OWNER DEFECT ALERT ===== -->
+    <div class="screen" id="screen-owner-alert">
+      <div class="alert-banner">🚨 Defect Alert — Truck #101</div>
+      <div style="padding:16px;">
+        <div class="card" style="border-left:4px solid var(--red);">
+          <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Defect Reported</div>
+          <div style="font-size:16px;font-weight:800;color:var(--navy);margin-bottom:4px;">Tires &amp; wheels</div>
+          <div style="font-size:14px;color:var(--text);line-height:1.5;margin-bottom:12px;">
+            Right rear tire showing low pressure, approx 65 PSI
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted);">
+            <span>🚛 Truck #101</span>
+            <span>👤 Mike Davidson</span>
+            <span>🕐 Jul 3, 6:58 AM</span>
+            <span>Pre-Trip</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom:12px;">
+          <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:8px;">How do you want to handle this?</div>
+          <div style="background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;">
+            <div onclick="goto('screen-owner-resolve')" style="padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:12px;">
+              <span style="font-size:24px;">🔧</span>
+              <div>
+                <div style="font-weight:700;color:var(--navy);font-size:14px;">Schedule Repair</div>
+                <div style="font-size:12px;color:var(--muted);margin-top:2px;">Create a service reminder and hold dispatch</div>
+              </div>
+              <span style="color:var(--muted);margin-left:auto;">›</span>
+            </div>
+            <div onclick="goto('screen-owner-resolve')" style="padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;">
+              <span style="font-size:24px;">✅</span>
+              <div>
+                <div style="font-weight:700;color:var(--navy);font-size:14px;">Mark Resolved</div>
+                <div style="font-size:12px;color:var(--muted);margin-top:2px;">Defect has been fixed — clear to dispatch</div>
+              </div>
+              <span style="color:var(--muted);margin-left:auto;">›</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inspection history preview -->
+        <div class="card">
+          <div class="card-title">Full Inspection Record</div>
+          <div class="summary-item"><div class="summary-icon">🛑</div><div class="summary-name">Brakes &amp; connections</div><span class="pill pill-green">✓ OK</span></div>
+          <div class="summary-item" style="background:#fff8f8;margin:0 -16px;padding:10px 16px;"><div class="summary-icon">⭕</div><div class="summary-name">Tires &amp; wheels</div><span class="pill pill-red">⚠ Defect</span></div>
+          <div class="summary-item"><div class="summary-icon">💡</div><div class="summary-name">Lights &amp; reflectors</div><span class="pill pill-green">✓ OK</span></div>
+          <div class="summary-item"><div class="summary-icon">🎡</div><div class="summary-name">Steering mechanism</div><span class="pill pill-green">✓ OK</span></div>
+        </div>
+
+        <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:4px;">Signed by Mike Davidson · Jul 3, 2026 · 6:58 AM</div>
+        <div style="height:16px;"></div>
+        <button class="btn btn-outline" onclick="goto('screen-home')">← Back to Inspections</button>
+      </div>
+    </div>
+
+    <!-- ===== OWNER RESOLVE ===== -->
+    <div class="screen" id="screen-owner-resolve">
+      <div class="success-hero">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Defect Resolved</div>
+        <div class="success-sub">Tire pressure corrected. Truck #101 is cleared for dispatch.</div>
+      </div>
+      <div style="padding:0 16px;">
+        <div class="notif notif-green">📲 Mike Davidson has been notified. Load dispatch is unblocked.</div>
+        <div class="card">
+          <div class="card-title">Action Taken</div>
+          <div style="font-size:14px;color:var(--text);line-height:1.6;">
+            Tires inflated to correct pressure (110 PSI).<br>
+            Service log entry created automatically.
+          </div>
+        </div>
+        <button class="btn btn-primary mb-8" onclick="goto('screen-home')">← Back to Inspections</button>
+      </div>
+    </div>
+
+    <!-- ===== INSPECTION HISTORY ===== -->
+    <div class="screen" id="screen-history-1">
+      <div style="padding:16px;">
+        <div class="card-title" style="padding:4px 0 12px;">Inspection · Jul 2 · Post-Trip</div>
+        <div class="card">
+          <div class="row-between mb-8">
+            <span style="font-size:15px;font-weight:800;color:var(--navy);">Truck #101</span>
+            <span class="pill pill-red">1 Defect</span>
+          </div>
+          <div style="font-size:12px;color:var(--muted);">Mike Davidson · Jul 2, 2026 · 5:48 PM</div>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div class="summary-item" style="padding:12px 16px;border-bottom:1px solid var(--border);"><div class="summary-icon">🛑</div><div class="summary-name">Brakes</div><span class="pill pill-green">✓ OK</span></div>
+          <div class="summary-item" style="padding:12px 16px;border-bottom:1px solid var(--border);background:#fff8f8;"><div class="summary-icon">⭕</div><div class="summary-name">Tires &amp; wheels</div><span class="pill pill-red">⚠ Defect</span></div>
+          <div class="summary-item" style="padding:12px 16px;border-bottom:1px solid var(--border);"><div class="summary-icon">💡</div><div class="summary-name">Lights &amp; reflectors</div><span class="pill pill-green">✓ OK</span></div>
+          <div class="summary-item" style="padding:12px 16px;border-bottom:1px solid var(--border);"><div class="summary-icon">🎡</div><div class="summary-name">Steering mechanism</div><span class="pill pill-green">✓ OK</span></div>
+          <div class="summary-item" style="padding:12px 16px;border-bottom:1px solid var(--border);"><div class="summary-icon">📢</div><div class="summary-name">Horn</div><span class="pill pill-green">✓ OK</span></div>
+          <div class="summary-item" style="padding:12px 16px;border-bottom:1px solid var(--border);"><div class="summary-icon">🪞</div><div class="summary-name">Mirrors</div><span class="pill pill-green">✓ OK</span></div>
+          <div class="summary-item" style="padding:12px 16px;border-bottom:1px solid var(--border);"><div class="summary-icon">🔗</div><div class="summary-name">Coupling devices</div><span class="pill pill-green">✓ OK</span></div>
+          <div class="summary-item" style="padding:12px 16px;"><div class="summary-icon">🦺</div><div class="summary-name">Emergency equipment</div><span class="pill pill-green">✓ OK</span></div>
+        </div>
+        <div style="background:#ffebee;border-radius:10px;padding:14px;margin-bottom:12px;">
+          <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:4px;">⚠ Defect: Tires &amp; wheels</div>
+          <div style="font-size:13px;color:var(--text);">Right rear tire low pressure (~65 PSI). Resolved by owner Jul 3, 6:55 AM.</div>
+        </div>
+        <div style="text-align:center;font-size:11px;color:var(--muted);margin-bottom:16px;">Signed: Mike Davidson · 5:48 PM · Stored 90 days per FMCSA</div>
+        <button class="btn btn-outline" onclick="goto('screen-home')">← Back</button>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /outer -->
+
+<script>
+const navHistory = ['screen-home'];
+const itemStates = {};
+let checkedCount = 0;
+
+function goto(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  navHistory.push(id);
+  document.getElementById('backBtn').classList.toggle('visible', navHistory.length > 1);
+  window.scrollTo(0,0);
+}
+
+function goBack() {
+  if (navHistory.length > 1) {
+    navHistory.pop();
+    const prev = navHistory[navHistory.length-1];
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(prev).classList.add('active');
+    window.scrollTo(0,0);
+  }
+}
+
+function setItem(item, state) {
+  const row = document.getElementById('item-' + item);
+  const okBtn = row.querySelector('.toggle-ok');
+  const failBtn = row.querySelector('.toggle-fail');
+
+  const wasSet = itemStates[item] !== undefined;
+  const prevState = itemStates[item];
+  itemStates[item] = state;
+
+  okBtn.classList.toggle('active', state === 'ok');
+  failBtn.classList.toggle('active', state === 'fail');
+
+  if (!wasSet) checkedCount++;
+  updateProgress();
+
+  if (state === 'fail') {
+    setTimeout(() => goto('screen-defect'), 200);
+  }
+}
+
+function updateProgress() {
+  const total = 8;
+  document.getElementById('passCount').textContent = checkedCount + ' / ' + total + ' checked';
+  document.getElementById('progressBar').style.width = (checkedCount / total * 100) + '%';
+  const btn = document.getElementById('continueBtn');
+  if (checkedCount === total) {
+    btn.style.opacity = '1';
+    btn.style.pointerEvents = 'auto';
+    btn.removeAttribute('disabled');
+  }
+}
+
+let signed = false;
+function signInspection() {
+  if (!signed) {
+    signed = true;
+    document.getElementById('sigPad').classList.add('signed');
+    document.getElementById('sigPrompt').style.display = 'none';
+    document.getElementById('sigName').classList.add('show');
+  }
+}
+</script>
+</body>
+</html>

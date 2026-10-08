@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CarrierOS — Asset Manifest</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f1923;
+  --navy-light:#1e3a5f;
+  --orange:#f97316;
+  --orange-lt:#fdba74;
+  --green:#16a34a;
+  --green-lt:#86efac;
+  --amber:#d97706;
+  --amber-lt:#fcd34d;
+  --red:#dc2626;
+  --teal:#1abc9c;
+  --purple:#6c3abf;
+  --bg:#0b1420;
+  --surface:rgba(255,255,255,0.04);
+  --border:rgba(255,255,255,0.09);
+  --gray:#8898aa;
+  --text:#e2e8f0;
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:14px;line-height:1.6;min-height:100vh;}
+a{color:var(--orange);text-decoration:none;}
+a:hover{text-decoration:underline;}
+
+/* ── HEADER ── */
+.page-header{background:linear-gradient(135deg,#0f1923 0%,#1a2e4a 100%);border-bottom:1px solid var(--border);padding:36px 48px 32px;}
+.page-header h1{font-size:26px;font-weight:800;letter-spacing:-0.02em;color:#fff;margin-bottom:4px;}
+.page-header p{font-size:13px;color:var(--gray);max-width:680px;}
+.header-meta{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;}
+.meta-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--gray);}
+.meta-chip span{color:var(--orange-lt);}
+
+/* ── LAYOUT ── */
+.page-body{max-width:1200px;margin:0 auto;padding:40px 48px;}
+
+/* ── NOTICE BOX ── */
+.notice{background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.25);border-radius:10px;padding:14px 18px;font-size:12px;color:#fdba74;margin-bottom:36px;display:flex;align-items:flex-start;gap:10px;}
+.notice-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+
+/* ── SECTION ── */
+.section{margin-bottom:48px;}
+.section-header{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.section-icon{font-size:20px;}
+.section-title{font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--orange);}
+.section-count{margin-left:auto;font-size:11px;color:var(--gray);background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:20px;padding:3px 10px;}
+
+/* ── ASSET TABLE ── */
+.asset-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.asset-table thead th{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);padding:12px 16px;text-align:left;background:rgba(255,255,255,0.03);border-bottom:1px solid var(--border);}
+.asset-table tbody tr{border-bottom:1px solid rgba(255,255,255,0.05);transition:background .1s;}
+.asset-table tbody tr:last-child{border-bottom:none;}
+.asset-table tbody tr:hover{background:rgba(255,255,255,0.03);}
+.asset-table td{padding:14px 16px;vertical-align:top;}
+
+.asset-name{font-size:13px;font-weight:700;color:#fff;margin-bottom:3px;}
+.asset-desc{font-size:11px;color:var(--gray);line-height:1.5;}
+.asset-spec{font-size:11px;font-family:'JetBrains Mono',monospace;color:#93c5fd;background:rgba(147,197,253,0.08);padding:2px 7px;border-radius:4px;display:inline-block;margin-top:4px;}
+.asset-multi{display:flex;flex-direction:column;gap:4px;}
+
+/* ── PRIORITY BADGE ── */
+.priority{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:0.04em;white-space:nowrap;}
+.p0{background:rgba(220,38,38,0.12);color:#fca5a5;border:1px solid rgba(220,38,38,0.25);}
+.p1{background:rgba(217,119,6,0.12);color:#fcd34d;border:1px solid rgba(217,119,6,0.25);}
+.p2{background:rgba(100,116,139,0.12);color:#94a3b8;border:1px solid rgba(100,116,139,0.25);}
+
+/* ── STATUS BADGE ── */
+.status{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.status-needed{background:rgba(220,38,38,0.1);color:#fca5a5;}
+.status-free{background:rgba(22,163,74,0.1);color:#86efac;}
+.status-paid{background:rgba(109,40,217,0.1);color:#c4b5fd;}
+.status-builtin{background:rgba(14,165,233,0.1);color:#7dd3fc;}
+
+/* ── SOURCE LINKS ── */
+.source-list{display:flex;flex-direction:column;gap:6px;}
+.source-item{display:flex;align-items:flex-start;gap:8px;}
+.source-tag{font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:1px 6px;border-radius:3px;flex-shrink:0;margin-top:2px;}
+.tag-free{background:rgba(22,163,74,0.15);color:#86efac;}
+.tag-paid{background:rgba(109,40,217,0.15);color:#c4b5fd;}
+.tag-rec{background:rgba(249,115,22,0.15);color:#fdba74;}
+.source-link{font-size:12px;}
+.source-note{font-size:11px;color:var(--gray);margin-top:1px;}
+
+/* ── FORMAT TAGS ── */
+.fmt{display:inline-block;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:4px;padding:1px 7px;font-size:10px;font-weight:600;color:#cbd5e1;margin-right:4px;}
+
+/* ── TRUCK ICON GRID ── */
+.truck-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
+.truck-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;}
+.truck-emoji{font-size:36px;margin-bottom:8px;display:block;}
+.truck-label{font-size:12px;font-weight:700;color:#fff;margin-bottom:2px;}
+.truck-sub{font-size:10px;color:var(--gray);}
+.truck-filename{font-size:10px;font-family:monospace;color:#93c5fd;margin-top:6px;background:rgba(147,197,253,0.08);padding:2px 6px;border-radius:3px;display:inline-block;}
+
+/* ── ICON SIZE GRID ── */
+.size-grid{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;}
+.size-box{background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:8px 10px;text-align:center;}
+.size-preview{background:var(--orange);border-radius:4px;margin:0 auto 6px;}
+.size-label{font-size:10px;color:var(--gray);}
+.size-dim{font-size:11px;font-weight:700;color:#fff;}
+
+/* ── DEMO DATA BOX ── */
+.demo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+.demo-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;}
+.demo-card h4{font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--orange);margin-bottom:12px;}
+.demo-row{font-size:12px;color:var(--text);padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;justify-content:space-between;align-items:center;}
+.demo-row:last-child{border-bottom:none;}
+.demo-val{color:#94a3b8;font-size:11px;text-align:right;max-width:180px;}
+
+/* ── CHECKLIST ── */
+.checklist{display:flex;flex-direction:column;gap:6px;}
+.check-item{display:flex;align-items:center;gap:10px;font-size:13px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;}
+.check-box{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;flex-shrink:0;}
+.check-label{flex:1;}
+.check-pri{margin-left:auto;}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ── PAGE HEADER ── -->
+<div class="page-header">
+  <h1>🖼️ CarrierOS — Visual Asset Manifest</h1>
+  <p>Complete inventory of all visual assets required for the CarrierOS app — truck icons, app icons, maps, illustrations, demo data, and photo sources. P0 assets must be in place before first TestFlight / preview build.</p>
+  <div class="header-meta">
+    <div class="meta-chip">Version <span>1.0</span></div>
+    <div class="meta-chip">Assets <span>34 items</span></div>
+    <div class="meta-chip">P0 Required <span>12</span></div>
+    <div class="meta-chip">Free Sources <span>22</span></div>
+    <div class="meta-chip">Updated <span>Jul 2026</span></div>
+  </div>
+</div>
+
+<div class="page-body">
+
+  <div class="notice">
+    <div class="notice-icon">⚠️</div>
+    <div>Current mockups use emoji as placeholder icons and CSS-drawn maps. All P0 assets must be replaced before handing to pilot carriers. P1 assets can ship in a subsequent update. P2 assets are nice-to-have post-MVP.<br><br>
+    <strong>Folder convention:</strong> Save all assets to <code style="background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:3px;">carrieros-mobile/assets/</code> and <code style="background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:3px;">carrieros-web/public/assets/</code>. Truck SVGs go in <code style="background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:3px;">assets/trucks/</code>.</div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       1. TRUCK TYPE ICONS
+  ═══════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🚛</span>
+      <span class="section-title">Truck Type Icons</span>
+      <span class="section-count">7 types · P0 · SVG</span>
+    </div>
+
+    <p style="font-size:12px;color:var(--gray);margin-bottom:20px;">Used on: load cards, dispatch board, truck list, DVIR form, maintenance log, driver app home. Needs to be a cohesive icon set — all same stroke weight and visual style. SVG preferred (scales to any size; can be recolored with CSS/fill).</p>
+
+    <div class="truck-grid" style="margin-bottom:24px;">
+      <div class="truck-card">
+        <span class="truck-emoji">🚛</span>
+        <div class="truck-label">Semi / 18-Wheeler</div>
+        <div class="truck-sub">Most common type</div>
+        <div class="truck-filename">truck-semi.svg</div>
+      </div>
+      <div class="truck-card">
+        <span class="truck-emoji">📦</span>
+        <div class="truck-label">Box Truck</div>
+        <div class="truck-sub">Medium delivery</div>
+        <div class="truck-filename">truck-box.svg</div>
+      </div>
+      <div class="truck-card">
+        <span class="truck-emoji">🏗️</span>
+        <div class="truck-label">Flatbed</div>
+        <div class="truck-sub">Open deck loads</div>
+        <div class="truck-filename">truck-flatbed.svg</div>
+      </div>
+      <div class="truck-card">
+        <span class="truck-emoji">❄️</span>
+        <div class="truck-label">Refrigerated (Reefer)</div>
+        <div class="truck-sub">Temperature controlled</div>
+        <div class="truck-filename">truck-reefer.svg</div>
+      </div>
+      <div class="truck-card">
+        <span class="truck-emoji">🛢️</span>
+        <div class="truck-label">Tanker</div>
+        <div class="truck-sub">Liquid / bulk</div>
+        <div class="truck-filename">truck-tanker.svg</div>
+      </div>
+      <div class="truck-card">
+        <span class="truck-emoji">🏚️</span>
+        <div class="truck-label">Dump Truck</div>
+        <div class="truck-sub">Construction / aggregate</div>
+        <div class="truck-filename">truck-dump.svg</div>
+      </div>
+      <div class="truck-card">
+        <span class="truck-emoji">📐</span>
+        <div class="truck-label">Step Deck</div>
+        <div class="truck-sub">Lowboy / oversized</div>
+        <div class="truck-filename">truck-stepdeck.svg</div>
+      </div>
+    </div>
+
+    <div class="source-list">
+      <div class="source-item">
+        <span class="source-tag tag-rec">★ REC</span>
+        <div>
+          <a class="source-link" href="https://www.svgrepo.com/vectors/truck/" target="_blank">SVGRepo — Truck Vectors →</a>
+          <div class="source-note">Free, no attribution needed on many. Search "semi truck", "box truck", "flatbed trailer". Download individual SVGs, clean up paths in Figma/Inkscape for consistency.</div>
+        </div>
+      </div>
+      <div class="source-item">
+        <span class="source-tag tag-free">FREE</span>
+        <div>
+          <a class="source-link" href="https://thenounproject.com/search/icons/?q=truck" target="_blank">Noun Project — Truck Icons →</a>
+          <div class="source-note">Free with attribution (or $2.99/icon without). Good for finding a cohesive style — filter by designer to get matching set.</div>
+        </div>
+      </div>
+      <div class="source-item">
+        <span class="source-tag tag-paid">PAID</span>
+        <div>
+          <a class="source-link" href="https://www.fiverr.com/search/gigs?query=truck+icon+set+svg" target="_blank">Fiverr — Custom Truck Icon Set →</a>
+          <div class="source-note">~$50–100 for a cohesive 7-icon set matching CarrierOS navy/orange palette. Best option if brand consistency matters. Search "truck icon set SVG".</div>
+        </div>
+      </div>
+      <div class="source-item">
+        <span class="source-tag tag-free">FREE</span>
+        <div>
+          <a class="source-link" href="https://iconduck.com/search?q=truck" target="_blank">IconDuck — Open Source Icons →</a>
+          <div class="source-note">MIT-licensed SVG icons. Free forever, no attribution.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       2. APP ICON & SPLASH
+  ═══════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">📱</span>
+      <span class="section-title">App Icon &amp; Splash Screen</span>
+      <span class="section-count">P0 · PNG</span>
+    </div>
+
+    <p style="font-size:12px;color:var(--gray);margin-bottom:20px;">EAS Build generates all required sizes from the master files listed below. Design the master in Figma/Canva, export as PNG, drop into <code style="background:rgba(255,255,255,0.08);padding:1px 6px;border-radius:3px;">carrieros-mobile/assets/</code> and reference in <code style="background:rgba(255,255,255,0.08);padding:1px 6px;border-radius:3px;">app.json</code>.</p>
+
+    <table class="asset-table" style="margin-bottom:20px;">
+      <thead>
+        <tr>
+          <th>Asset</th>
+          <th>Master Size</th>
+          <th>Format</th>
+          <th>app.json key</th>
+          <th>Notes</th>
+          <th>Priority</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="asset-name">App Icon</div><div class="asset-desc">Home screen icon — iOS &amp; Android</div></td>
+          <td><span class="asset-spec">1024 × 1024px</span></td>
+          <td><span class="fmt">PNG</span></td>
+          <td><span class="asset-spec">expo.icon</span></td>
+          <td style="font-size:11px;color:var(--gray);">No transparency. EAS resizes to all platform sizes automatically. Navy bg + orange CarrierOS mark.</td>
+          <td><span class="priority p0">P0</span></td>
+        </tr>
+        <tr>
+          <td><div class="asset-name">iOS Icon (no alpha)</div><div class="asset-desc">Apple requires no transparency</div></td>
+          <td><span class="asset-spec">1024 × 1024px</span></td>
+          <td><span class="fmt">PNG</span></td>
+          <td><span class="asset-spec">expo.ios.icon</span></td>
+          <td style="font-size:11px;color:var(--gray);">Same as main icon — set separately to ensure no alpha channel.</td>
+          <td><span class="priority p0">P0</span></td>
+        </tr>
+        <tr>
+          <td><div class="asset-name">Android Adaptive Icon — Foreground</div><div class="asset-desc">Logo mark only, transparent bg</div></td>
+          <td><span class="asset-spec">1024 × 1024px</span></td>
+          <td><span class="fmt">PNG</span></td>
+          <td><span class="asset-spec">expo.android.adaptiveIcon.foregroundImage</span></td>
+          <td style="font-size:11px;color:var(--gray);">Logo/mark centered in safe zone (66% of canvas). Transparent background.</td>
+          <td><span class="priority p0">P0</span></td>
+        </tr>
+        <tr>
+          <td><div class="asset-name">Android Adaptive Icon — Background</div><div class="asset-desc">Solid navy background color</div></td>
+          <td>Color only</td>
+          <td><span class="fmt">HEX</span></td>
+          <td><span class="asset-spec">expo.android.adaptiveIcon.backgroundColor</span></td>
+          <td style="font-size:11px;color:var(--gray);">Set to <code style="font-family:monospace;color:#93c5fd;">#0f1923</code> — no image needed.</td>
+          <td><span class="priority p0">P0</span></td>
+        </tr>
+        <tr>
+          <td><div class="asset-name">Splash Screen</div><div class="asset-desc">Launch screen while app loads</div></td>
+          <td><span class="asset-spec">1284 × 2778px</span></td>
+          <td><span class="fmt">PNG</span></td>
+          <td><span class="asset-spec">expo.splash.image</span></td>
+          <td style="font-size:11px;color:var(--gray);">Navy background (#0f1923), CarrierOS wordmark centered. Set <code style="font-family:monospace;color:#93c5fd;">resizeMode: "contain"</code> and <code style="font-family:monospace;color:#93c5fd;">backgroundColor: "#0f1923"</code>.</td>
+          <td><span class="priority p0">P0</span></td>
+        </tr>
+        <tr>
+          <td><div class="asset-name">Notification Icon (Android)</div><div class="asset-desc">Small icon in status bar</div></td>
+          <td><span class="asset-spec">96 × 96px</span></td>
+          <td><span class="fmt">PNG</span></td>
+          <td><span class="asset-spec">expo.notification.icon</span></td>
+          <td style="font-size:11px;color:var(--gray);">White silhouette only on transparent bg. Android requirement.</td>
+          <td><span class="priority p0">P0</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="source-list">
+      <div class="source-item">
+        <span class="source-tag tag-rec">★ REC</span>
+        <div>
+          <a class="source-link" href="https://www.figma.com/community/file/1244987992950688519" target="_blank">Figma — Expo App Icon Template →</a>
+          <div class="source-note">Community template with correct safe zones for iOS and Android adaptive icon. Free Figma account required.</div>
+        </div>
+      </div>
+      <div class="source-item">
+        <span class="source-tag tag-free">FREE</span>
+        <div>
+          <a class="source-link" href="https://www.canva.com/create/app-icons/" target="_blank">Canva — App Icon Maker →</a>
+          <div class="source-note">Fastest option if no Figma access. Export at 1024×1024 PNG.</div>
+        </div>
+      </div>
+      <div class="source-item">
+        <span class="source-tag tag-free">FREE</span>
+        <div>
+          <a class="source-link" href="https://docs.expo.dev/develop/user-interface/splash-screen-and-app-icon/" target="_blank">Expo Docs — App Icon &amp; Splash Guide →</a>
+          <div class="source-note">Official guide with exact specs, safe zones, and app.json configuration.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       3. WEB FAVICON & OG IMAGE
+  ═══════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🌐</span>
+      <span class="section-title">Web Favicon &amp; OG Image</span>
+      <span class="section-count">P1 · carrieros-web/</span>
+    </div>
+
+    <table class="asset-table">
+      <thead>
+        <tr><th>Asset</th><th>Size</th><th>Format</th><th>Path</th><th>Usage</th><th>Priority</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="asset-name">Favicon</div></td>
+          <td><span class="asset-spec">32 × 32px</span></td>
+          <td><span class="fmt">ICO</span><span class="fmt">PNG</span></td>
+          <td><span class="asset-spec">public/favicon.ico</span></td>
+          <td style="font-size:11px;color:var(--gray);">Browser tab icon. Also provide 180×180 apple-touch-icon.png.</td>
+          <td><span class="priority p1">P1</span></td>
+        </tr>
+        <tr>
+          <td><div class="asset-name">OG / Social Share Image</div></td>
+          <td><span class="asset-spec">1200 × 630px</span></td>
+          <td><span class="fmt">PNG</span></td>
+          <td><span class="asset-spec">public/og-image.png</span></td>
+          <td style="font-size:11px;color:var(--gray);">Shown when sharing tracking links or marketing site on WhatsApp, iMessage, LinkedIn. Navy bg, logo, tagline.</td>
+          <td><span class="priority p1">P1</span></td>
+        </tr>
+        <tr>
+          <td><div class="asset-name">Logo (wordmark, light)</div></td>
+          <td><span class="asset-spec">400 × 80px</span></td>
+          <td><span class="fmt">SVG</span><span class="fmt">PNG</span></td>
+          <td><span class="asset-spec">public/logo-light.svg</span></td>
+          <td style="font-size:11px;color:var(--gray);">White wordmark for dark backgrounds (sidebar, footer, splash). Also provide dark version for light headers.</td>
+          <td><span class="priority p0">P0</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       4. MAP INTEGRATION
+  ═══════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🗺️</span>
+      <span class="section-title">Map Integration (Growth Tier)</span>
+      <span class="section-count">P0 for Growth · SDK — not a static asset</span>
+    </div>
+
+    <p style="font-size:12px;color:var(--gray);margin-bottom:20px;">The live fleet map in the desktop command center (mockup-21) and driver GPS screen (mockup-20) requires a real map SDK — not static images. Choose one provider for both web and mobile.</p>
+
+    <table class="asset-table" style="margin-bottom:20px;">
+      <thead>
+        <tr><th>Provider</th><th>Web SDK</th><th>Mobile SDK</th><th>Free Tier</th><th>Cost above free</th><th>Recommendation</th></tr>
+      </thead>
+      <tbody>
+        <tr style="background:rgba(249,115,22,0.04);">
+          <td><div class="asset-name">Mapbox</div></td>
+          <td><span class="asset-spec">mapbox-gl-js</span></td>
+          <td><span class="asset-spec">react-native-maps + Mapbox</span></td>
+          <td style="font-size:12px;color:var(--gray);">50,000 map loads/mo</td>
+          <td style="font-size:12px;color:var(--gray);">$0.50 per 1K loads</td>
+          <td><span class="priority p0" style="background:rgba(249,115,22,0.15);color:#fdba74;border-color:rgba(249,115,22,0.3);">★ Recommended</span></td>
+        </tr>
+        <tr>
+          <td><div class="asset-name">Google Maps</div></td>
+          <td><span class="asset-spec">@react-google-maps/api</span></td>
+          <td><span class="asset-spec">react-native-maps (default)</span></td>
+          <td style="font-size:12px;color:var(--gray);">$200 credit/mo (~28K loads)</td>
+          <td style="font-size:12px;color:var(--gray);">$7 per 1K loads</td>
+          <td><span class="priority p1">Fallback</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="source-list">
+      <div class="source-item">
+        <span class="source-tag tag-rec">★ REC</span>
+        <div>
+          <a class="source-link" href="https://account.mapbox.com/auth/signup/" target="_blank">Mapbox — Create Free Account →</a>
+          <div class="source-note">Get your public access token. 50K map loads/month free — more than enough for 10 pilot carriers. Supports truck-optimized routing styles.</div>
+        </div>
+      </div>
+      <div class="source-item">
+        <span class="source-tag tag-free">DOCS</span>
+        <div>
+          <a class="source-link" href="https://docs.mapbox.com/mapbox-gl-js/guides/" target="_blank">Mapbox GL JS — Web Guide →</a>
+          <div class="source-note">For the Next.js desktop command center map panel.</div>
+        </div>
+      </div>
+      <div class="source-item">
+        <span class="source-tag tag-free">DOCS</span>
+        <div>
+          <a class="source-link" href="https://github.com/rnmapbox/maps" target="_blank">rnmapbox/maps — React Native SDK →</a>
+          <div class="source-note">Official Mapbox SDK for React Native / Expo. Works with Expo bare workflow (required — not compatible with Expo Go).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       5. EMPTY STATE ILLUSTRATIONS
+  ═══════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🖼️</span>
+      <span class="section-title">Empty State Illustrations</span>
+      <span class="section-count">P1 · SVG · 8 states</span>
+    </div>
+
+    <p style="font-size:12px;color:var(--gray);margin-bottom:20px;">Shown when a screen has no data yet — new accounts, empty load list, no exceptions, etc. SVG preferred so color can be overridden to match navy/orange palette. Use <a href="https://undraw.co/illustrations" target="_blank">unDraw</a> — free, customizable color, MIT license.</p>
+
+    <table class="asset-table">
+      <thead>
+        <tr><th>State</th><th>Screen</th><th>Suggested unDraw illustration</th><th>Filename</th><th>Priority</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="asset-name">No loads yet</div></td>
+          <td style="font-size:12px;color:var(--gray);">Load list (all roles)</td>
+          <td><a href="https://undraw.co/search#delivery" target="_blank" style="font-size:12px;">undraw_delivery_truck →</a></td>
+          <td><span class="asset-spec">empty-loads.svg</span></td>
+          <td><span class="priority p1">P1</span></td>
+        </tr>
+        <tr>
+          <td><div class="asset-name">All caught up</div></td>
+          <td style="font-size:12px;color:var(--gray);">Exceptions inbox (zero state)</td>
+          <td><a href="https://undraw.co/search#well_done" target="_blank" style="font-size:12px;">undraw_well_done →</a></td>
+          <td><span class="asset-spec">empty-exceptions.svg</span></td>
+          <td><span class="priority p1">P1</span></td>
+        </tr>
+        <tr>
+          <td><div class="asset-name">No customers yet</div></td>
+          <td style="font-size:12px;color:var(--gray);">Customer directory</td>
+          <td><a href="https://undraw.co/search#people" target="_blank" style="font-size:12px;">undraw_people →</a></td>
+          <td><span class="asset-spec">empty-customers.svg</span></td>
+          <td><span class="priority p1">P1</span></td>
+        </tr>
+        <tr>
+          <td><div class="asset-name">No invoices</div></td>
+          <td style="font-size:12px;color:var(--gray);">Invoice list</td>
+          <td><a href="https://undraw.co/search#invoice" target="_blank" style="font-size:12px;">undraw_invoice →</a></td>
+          <td><span class="asset-spec">empty-invoices.svg</span></td>
+          <td><span class="priority p1">P1</span></td>
+        </tr>
+        <tr>
+          <td><div class="asset-name">No trucks added</div></td>
+          <td style="font-size:12px;color:var(--gray);">Truck list (new account)</td>
+          <td><a href="https://undraw.co/search#map" target="_blank" style="font-size:12px;">undraw_on_the_way →</a></td>
+          <td><span class="asset-spec">empty-trucks.svg</span></td>
+          <td><span class="priority p1">P1</span></td>
+        </tr>
+        <tr>
+          <td><div class="asset-name">No messages</div></td>
+          <td style="font-size:12px;color:var(--gray);">Chat thread (no messages yet)</td>
+          <td><a href="https://undraw.co/search#chat" target="_blank" style="font-size:12px;">undraw_messaging →</a></td>
+          <td><span class="asset-spec">empty-chat.svg</span></td>
+          <td><span class="priority p2">P2</span></td>
+        </tr>
+        <tr>
+          <td><div class="asset-name">No maintenance records</div></td>
+          <td style="font-size:12px;color:var(--gray);">Maintenance log</td>
+          <td><a href="https://undraw.co/search#maintenance" target="_blank" style="font-size:12px;">undraw_fixing_bugs →</a></td>
+          <td><span class="asset-spec">empty-maintenance.svg</span></td>
+          <td><span class="priority p2">P2</span></td>
+        </tr>
+        <tr>
+          <td><div class="asset-name">Onboarding welcome</div></td>
+          <td style="font-size:12px;color:var(--gray);">Onboarding step 1</td>
+          <td><a href="https://undraw.co/search#welcome" target="_blank" style="font-size:12px;">undraw_welcome →</a></td>
+          <td><span class="asset-spec">onboarding-welcome.svg</span></td>
+          <td><span class="priority p1">P1</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:16px;" class="source-list">
+      <div class="source-item">
+        <span class="source-tag tag-rec">★ REC</span>
+        <div>
+          <a class="source-link" href="https://undraw.co/illustrations" target="_blank">unDraw — Free SVG Illustrations →</a>
+          <div class="source-note">Set the color picker to <code style="font-family:monospace;font-size:11px;">#f97316</code> (CarrierOS orange) before downloading — illustrations will auto-match the palette. Free, MIT license, no attribution needed.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       6. STOCK PHOTOS
+  ═══════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">📸</span>
+      <span class="section-title">Stock Photos (Marketing &amp; Demo)</span>
+      <span class="section-count">P1 · Web only</span>
+    </div>
+
+    <p style="font-size:12px;color:var(--gray);margin-bottom:20px;">Used on the sales website hero, pilot deck, and onboarding screens. The app itself uses no stock photos — driver/truck photos come from real user uploads. Download from Unsplash (free, no attribution needed for most photos).</p>
+
+    <table class="asset-table">
+      <thead>
+        <tr><th>Asset</th><th>Used on</th><th>Search term</th><th>Source</th><th>Dimensions</th><th>Priority</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="asset-name">Hero — Semi truck on highway</div></td>
+          <td style="font-size:12px;color:var(--gray);">Sales website hero section</td>
+          <td style="font-size:12px;color:#93c5fd;">"semi truck highway california"</td>
+          <td><a href="https://unsplash.com/s/photos/semi-truck" target="_blank" style="font-size:12px;">Unsplash →</a></td>
+          <td><span class="asset-spec">1920 × 1080</span></td>
+          <td><span class="priority p1">P1</span></td>
+        </tr>
+        <tr>
+          <td><div class="asset-name">Truck driver with phone</div></td>
+          <td style="font-size:12px;color:var(--gray);">Sales website / pilot deck</td>
+          <td style="font-size:12px;color:#93c5fd;">"truck driver smartphone cab"</td>
+          <td><a href="https://unsplash.com/s/photos/truck-driver" target="_blank" style="font-size:12px;">Unsplash →</a></td>
+          <td><span class="asset-spec">800 × 1000</span></td>
+          <td><span class="priority p1">P1</span></td>
+        </tr>
+        <tr>
+          <td><div class="asset-name">Fleet in yard / depot</div></td>
+          <td style="font-size:12px;color:var(--gray);">Pilot deck, about section</td>
+          <td style="font-size:12px;color:#93c5fd;">"truck fleet yard logistics"</td>
+          <td><a href="https://unsplash.com/s/photos/truck-fleet" target="_blank" style="font-size:12px;">Unsplash →</a></td>
+          <td><span class="asset-spec">1600 × 900</span></td>
+          <td><span class="priority p1">P1</span></td>
+        </tr>
+        <tr>
+          <td><div class="asset-name">Loading dock / warehouse</div></td>
+          <td style="font-size:12px;color:var(--gray);">Feature section, blog</td>
+          <td style="font-size:12px;color:#93c5fd;">"loading dock warehouse"</td>
+          <td><a href="https://unsplash.com/s/photos/loading-dock" target="_blank" style="font-size:12px;">Unsplash →</a></td>
+          <td><span class="asset-spec">1600 × 900</span></td>
+          <td><span class="priority p2">P2</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       7. DEMO DATA — SAMPLE TRUCKS
+  ═══════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🚚</span>
+      <span class="section-title">Demo / Seed Data — Sample Trucks</span>
+      <span class="section-count">For CA Pilot Demo · SQL seed file</span>
+    </div>
+
+    <p style="font-size:12px;color:var(--gray);margin-bottom:20px;">Pre-populate the pilot demo account with realistic California carrier data. These values are used in mockups 17, 21, and the sales website. Create a <code style="background:rgba(255,255,255,0.08);padding:1px 6px;border-radius:3px;">supabase/seed.sql</code> file with this data for the demo company.</p>
+
+    <div class="demo-grid">
+      <div class="demo-card">
+        <h4>🚛 Sample Trucks (3)</h4>
+        <div class="demo-row"><span>Big Blue</span><div class="demo-val">2020 Kenworth T680 · Semi · Navy</div></div>
+        <div class="demo-row"><span>Red Express</span><div class="demo-val">2019 Freightliner M2 · Box Truck · Red</div></div>
+        <div class="demo-row"><span>Silver Streak</span><div class="demo-val">2022 Peterbilt 567 · Flatbed · Silver</div></div>
+      </div>
+      <div class="demo-card">
+        <h4>👷 Sample Drivers (3)</h4>
+        <div class="demo-row"><span>Mike Rodriguez</span><div class="demo-val">CDL-A · CA · Initials: MR · Orange dot</div></div>
+        <div class="demo-row"><span>Priya Singh</span><div class="demo-val">CDL-A · CA · Initials: PS · Teal dot</div></div>
+        <div class="demo-row"><span>David Sandhu</span><div class="demo-val">CDL-B · CA · Initials: DS · Green dot</div></div>
+      </div>
+      <div class="demo-card">
+        <h4>📦 Sample Customers (4)</h4>
+        <div class="demo-row"><span>FreshPak Inc.</span><div class="demo-val">Fresno · Produce distributor</div></div>
+        <div class="demo-row"><span>Cal Valley Foods</span><div class="demo-val">Bakersfield · Food processor</div></div>
+        <div class="demo-row"><span>Pacific Trade Co.</span><div class="demo-val">Oakland · Import/export</div></div>
+        <div class="demo-row"><span>Desert Logistics</span><div class="demo-val">Phoenix AZ · 3PL</div></div>
+      </div>
+      <div class="demo-card">
+        <h4>🗺️ Sample Lanes (5)</h4>
+        <div class="demo-row"><span>Fresno → LA</span><div class="demo-val">214 mi · $1,240</div></div>
+        <div class="demo-row"><span>Sacramento → Reno</span><div class="demo-val">134 mi · $750</div></div>
+        <div class="demo-row"><span>Stockton → Portland</span><div class="demo-val">620 mi · $3,200</div></div>
+        <div class="demo-row"><span>Bakersfield → Phoenix</span><div class="demo-val">380 mi · $1,800</div></div>
+        <div class="demo-row"><span>Oakland → LA</span><div class="demo-val">380 mi · $2,100</div></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       8. ICON LIBRARY (UI ICONS)
+  ═══════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">✦</span>
+      <span class="section-title">UI Icon Library</span>
+      <span class="section-count">P0 · Material Symbols Outlined</span>
+    </div>
+
+    <p style="font-size:12px;color:var(--gray);margin-bottom:20px;">All mockups (especially mockups 17, 21) already use <strong style="color:#fff;">Material Symbols Outlined</strong>. This must be adopted in the actual build — replacing the emoji placeholders in earlier mockups.</p>
+
+    <table class="asset-table" style="margin-bottom:20px;">
+      <thead>
+        <tr><th>Platform</th><th>Package</th><th>Import</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="asset-name">Web (Next.js)</div></td>
+          <td><span class="asset-spec">Google Fonts CDN</span></td>
+          <td style="font-size:11px;color:#93c5fd;font-family:monospace;">family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0</td>
+          <td style="font-size:11px;color:var(--gray);">Add to Next.js layout.tsx &lt;head&gt;. Variable font — weight and fill are adjustable via font-variation-settings.</td>
+        </tr>
+        <tr>
+          <td><div class="asset-name">Mobile (Expo)</div></td>
+          <td><span class="asset-spec">@expo/vector-icons</span></td>
+          <td style="font-size:11px;color:#93c5fd;font-family:monospace;">import { MaterialIcons } from '@expo/vector-icons'</td>
+          <td style="font-size:11px;color:var(--gray);">MaterialIcons is closest to Material Symbols. Pre-bundled in Expo — no extra install needed. Alternatively: react-native-vector-icons/MaterialCommunityIcons for more coverage.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:16px 18px;font-size:12px;color:var(--gray);">
+      <strong style="color:#fff;">Key icons used across mockups</strong> (verify exact name at <a href="https://fonts.google.com/icons" target="_blank">fonts.google.com/icons →</a>):<br><br>
+      <code style="color:#93c5fd;">local_shipping</code> (loads) · <code style="color:#93c5fd;">directions_car</code> (trucks) · <code style="color:#93c5fd;">person</code> (driver) · <code style="color:#93c5fd;">receipt_long</code> (invoice) · <code style="color:#93c5fd;">map</code> (dispatch) · <code style="color:#93c5fd;">warning</code> (exceptions) · <code style="color:#93c5fd;">settings</code> · <code style="color:#93c5fd;">chat</code> (messages) · <code style="color:#93c5fd;">local_gas_station</code> (fuel) · <code style="color:#93c5fd;">build</code> (maintenance) · <code style="color:#93c5fd;">verified_user</code> (compliance) · <code style="color:#93c5fd;">payments</code> (finance) · <code style="color:#93c5fd;">account_balance</code> (ACH) · <code style="color:#93c5fd;">arrow_upward</code> / <code style="color:#93c5fd;">arrow_downward</code> (deltas) · <code style="color:#93c5fd;">schedule</code> (time) · <code style="color:#93c5fd;">check_circle</code> (success) · <code style="color:#93c5fd;">pending_actions</code> (pending) · <code style="color:#93c5fd;">lightbulb</code> (insight) · <code style="color:#93c5fd;">info</code>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       9. MASTER CHECKLIST
+  ═══════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">✅</span>
+      <span class="section-title">Master Checklist — Before First Pilot Build</span>
+      <span class="section-count">12 P0 items</span>
+    </div>
+
+    <div class="checklist">
+      <div class="check-item"><div class="check-box"></div><div class="check-label">CarrierOS logo / wordmark SVG (light + dark versions)</div><span class="check-pri"><span class="priority p0">P0</span></span></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-label">App icon 1024×1024 PNG (navy bg + orange mark)</div><span class="check-pri"><span class="priority p0">P0</span></span></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-label">iOS icon (no alpha) — same as app icon</div><span class="check-pri"><span class="priority p0">P0</span></span></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-label">Android adaptive icon — foreground PNG + backgroundColor #0f1923</div><span class="check-pri"><span class="priority p0">P0</span></span></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-label">Splash screen 1284×2778 PNG (navy bg, centered wordmark)</div><span class="check-pri"><span class="priority p0">P0</span></span></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-label">Notification icon 96×96 (white silhouette, transparent bg)</div><span class="check-pri"><span class="priority p0">P0</span></span></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-label">7 truck type SVG icons (semi, box, flatbed, reefer, tanker, dump, step deck)</div><span class="check-pri"><span class="priority p0">P0</span></span></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-label">Mapbox account created + public access token added to .env</div><span class="check-pri"><span class="priority p0">P0</span></span></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-label">Material Symbols Outlined added to Next.js layout.tsx + Expo via @expo/vector-icons</div><span class="check-pri"><span class="priority p0">P0</span></span></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-label">Inter font imported in Next.js (next/font/google) and app.json (Expo)</div><span class="check-pri"><span class="priority p0">P0</span></span></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-label">Demo seed data SQL file created (3 trucks, 3 drivers, 4 customers, 5 lanes)</div><span class="check-pri"><span class="priority p0">P0</span></span></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-label">Emoji placeholders replaced with Material Symbols in all screens</div><span class="check-pri"><span class="priority p0">P0</span></span></div>
+      <div class="check-item" style="opacity:0.6;"><div class="check-box"></div><div class="check-label">Favicon + apple-touch-icon for web app</div><span class="check-pri"><span class="priority p1">P1</span></span></div>
+      <div class="check-item" style="opacity:0.6;"><div class="check-box"></div><div class="check-label">OG image 1200×630 for tracking link sharing</div><span class="check-pri"><span class="priority p1">P1</span></span></div>
+      <div class="check-item" style="opacity:0.6;"><div class="check-box"></div><div class="check-label">8 empty state SVG illustrations from unDraw (recolored to #f97316)</div><span class="check-pri"><span class="priority p1">P1</span></span></div>
+      <div class="check-item" style="opacity:0.6;"><div class="check-box"></div><div class="check-label">3 stock photos for sales website (Unsplash)</div><span class="check-pri"><span class="priority p1">P1</span></span></div>
+    </div>
+  </div>
+
+</div>
+
+<footer style="text-align:center;padding:24px;font-size:11px;color:var(--gray);border-top:1px solid var(--border);margin-top:24px;">
+  CarrierOS Asset Manifest v1.0 · Jul 2026 · See also: <a href="carrieros-prototype-index.html">Prototype Index</a> · <a href="design-tokens.md">Design Tokens</a>
+</footer>
+
+</body>
+</html>

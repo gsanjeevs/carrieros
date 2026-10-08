@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarrierOS — Dispatch Flow</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f1e35;--navy-mid:#182c46;--navy-light:#1f3a58;--navy-card:#162033;
+  --orange:#f47920;--orange-lt:#f9a55a;--orange-dim:rgba(244,121,32,.15);
+  --white:#fff;--gray:#8fa3b8;--gray-lt:#d6e0ea;--gray-dim:rgba(214,224,234,.08);
+  --green:#2ecc71;--green-dim:rgba(46,204,113,.13);
+  --amber:#f0a500;--amber-dim:rgba(240,165,0,.15);
+  --red:#e55353;--teal:#1abc9c;--teal-dim:rgba(26,188,156,.12);
+  --radius:14px;--radius-sm:8px;
+}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;
+  background:var(--navy);color:var(--white);
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  padding:32px 16px 60px;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:radial-gradient(rgba(255,255,255,.018) 1px,transparent 1px);
+  background-size:28px 28px;pointer-events:none;z-index:0;
+}
+.page-header{text-align:center;margin-bottom:40px;z-index:1;}
+.page-header .logo{font-size:13px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--orange);margin-bottom:6px;}
+.page-header h1{font-size:22px;font-weight:700;}
+.page-header p{font-size:13px;color:var(--gray);margin-top:4px;}
+
+.screens{display:flex;gap:24px;align-items:flex-start;z-index:1;flex-wrap:wrap;justify-content:center;width:100%;max-width:1280px;}
+
+.phone{display:flex;flex-direction:column;width:360px;flex-shrink:0;}
+.screen-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:10px;text-align:center;}
+.phone-frame{
+  background:var(--navy-card);border-radius:24px;
+  border:1.5px solid rgba(255,255,255,.08);
+  overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.45);
+  min-height:620px;display:flex;flex-direction:column;
+}
+.phone-bar{
+  background:var(--navy-mid);padding:14px 20px 10px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+.phone-bar .back{color:var(--orange);font-size:13px;font-weight:600;}
+.phone-bar .title{font-size:15px;font-weight:700;}
+.phone-bar .action{color:var(--orange);font-size:13px;font-weight:600;}
+.phone-content{padding:20px 16px;flex:1;display:flex;flex-direction:column;gap:14px;}
+
+/* Load summary strip */
+.load-strip{
+  background:rgba(244,121,32,.08);border:1.5px solid rgba(244,121,32,.25);
+  border-radius:var(--radius-sm);padding:12px 14px;
+  display:flex;flex-direction:column;gap:6px;
+}
+.load-strip-header{display:flex;align-items:center;justify-content:space-between;}
+.load-id{font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--gray);}
+.status-chip{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;}
+.chip-sched{background:rgba(240,165,0,.15);color:var(--amber);}
+.chip-transit{background:rgba(26,188,156,.15);color:var(--teal);}
+.chip-delivered{background:rgba(46,204,113,.15);color:var(--green);}
+.chip-dispatched{background:rgba(244,121,32,.2);color:var(--orange);}
+.route-mini{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;}
+.route-mini .dot{width:8px;height:8px;border-radius:50%;}
+.dot-o{background:var(--orange);}
+.dot-t{background:var(--teal);}
+.route-mini .arrow{color:var(--gray);font-size:11px;}
+.load-rate{font-size:16px;font-weight:800;color:var(--orange-lt);}
+
+/* Section titles */
+.section-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--orange);}
+.divider{height:1px;background:rgba(255,255,255,.06);}
+
+/* Driver cards */
+.driver-card{
+  background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);
+  border-radius:var(--radius);padding:14px;
+  display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .2s;
+}
+.driver-card.selected{border-color:rgba(244,121,32,.5);background:rgba(244,121,32,.07);}
+.driver-card.unavailable{opacity:.45;}
+.driver-avatar{
+  width:44px;height:44px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:800;flex-shrink:0;
+  background:var(--navy-light);
+}
+.driver-avatar.selected{background:rgba(244,121,32,.25);}
+.driver-info{flex:1;}
+.driver-name{font-size:14px;font-weight:700;}
+.driver-sub{font-size:11px;color:var(--gray);margin-top:2px;}
+.driver-status{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;margin-top:4px;}
+.dot-avail{width:7px;height:7px;border-radius:50%;background:var(--green);}
+.dot-busy{width:7px;height:7px;border-radius:50%;background:var(--amber);}
+.dot-off{width:7px;height:7px;border-radius:50%;background:var(--gray);}
+.select-radio{
+  width:22px;height:22px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.2);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.select-radio.on{background:var(--orange);border-color:var(--orange);}
+
+/* Truck card */
+.truck-card{
+  background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);
+  border-radius:var(--radius-sm);padding:12px 14px;
+  display:flex;align-items:center;justify-content:space-between;cursor:pointer;
+}
+.truck-card.selected{border-color:rgba(244,121,32,.4);}
+.truck-info .truck-name{font-size:13px;font-weight:700;}
+.truck-info .truck-sub{font-size:11px;color:var(--gray);margin-top:2px;}
+
+/* Notification preview */
+.notif-preview{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;padding:12px 14px;
+  display:flex;align-items:flex-start;gap:10px;
+}
+.notif-icon{
+  width:36px;height:36px;border-radius:8px;background:var(--orange-dim);
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
+}
+.notif-text{flex:1;}
+.notif-app{font-size:10px;color:var(--gray);font-weight:600;margin-bottom:2px;letter-spacing:.5px;}
+.notif-title{font-size:13px;font-weight:700;}
+.notif-body{font-size:12px;color:var(--gray-lt);margin-top:2px;line-height:1.4;}
+
+/* Buttons */
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--orange);color:#fff;
+  font-size:14px;font-weight:700;border-radius:var(--radius-sm);
+  padding:13px;cursor:pointer;border:none;width:100%;
+}
+.btn.secondary{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);color:var(--gray-lt);}
+.btn.green{background:var(--green);}
+.btn.ghost{background:transparent;border:1.5px solid rgba(244,121,32,.4);color:var(--orange);}
+
+/* Callout */
+.callout{background:rgba(244,121,32,.1);border:1px solid rgba(244,121,32,.25);border-radius:8px;padding:8px 11px;font-size:11px;color:var(--orange-lt);}
+.callout::before{content:'★ ';font-size:9px;color:var(--orange);}
+
+/* Success */
+.success-banner{
+  background:var(--green-dim);border:1.5px solid rgba(46,204,113,.35);
+  border-radius:var(--radius-sm);padding:14px;text-align:center;
+}
+.success-banner .big{font-size:28px;}
+.success-banner .title{font-size:16px;font-weight:800;margin-top:8px;}
+.success-banner .sub{font-size:12px;color:var(--gray);margin-top:3px;}
+
+/* Load list preview (screen 1) */
+.load-list-item{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+  border-radius:var(--radius-sm);padding:12px 14px;
+  display:flex;align-items:center;gap:12px;
+}
+.load-list-item.highlight{border-color:rgba(244,121,32,.4);background:rgba(244,121,32,.06);}
+.lli-left{flex:1;}
+.lli-id{font-size:10px;color:var(--gray);font-weight:700;letter-spacing:1px;}
+.lli-route{font-size:13px;font-weight:600;margin-top:2px;}
+.lli-sub{font-size:11px;color:var(--gray);margin-top:2px;}
+.lli-right{text-align:right;}
+.lli-rate{font-size:14px;font-weight:800;color:var(--orange-lt);}
+.lli-action{
+  font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;margin-top:4px;
+  background:var(--orange-dim);color:var(--orange);cursor:pointer;
+}
+
+/* Timeline item for confirmation */
+.timeline{display:flex;flex-direction:column;gap:0;}
+.tl-item{display:flex;gap:12px;position:relative;}
+.tl-dot{
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:13px;
+  background:var(--green-dim);border:1.5px solid var(--green);margin-top:2px;
+}
+.tl-line{position:absolute;left:13px;top:30px;bottom:-14px;width:2px;background:rgba(255,255,255,.07);}
+.tl-content{flex:1;padding-bottom:14px;}
+.tl-title{font-size:13px;font-weight:700;}
+.tl-sub{font-size:11px;color:var(--gray);margin-top:2px;}
+
+/* Flow arrows */
+.flow-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:80px;color:var(--gray);gap:6px;flex-shrink:0;}
+.flow-arrow .arrow-label{font-size:10px;color:var(--gray);text-align:center;max-width:60px;}
+
+.page-footer{margin-top:48px;text-align:center;z-index:1;font-size:11px;color:rgba(143,163,184,.4);display:flex;gap:24px;justify-content:center;flex-wrap:wrap;}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="logo">CarrierOS</div>
+  <h1>Dispatch Flow</h1>
+  <p>Mockup 02 — Assign driver · One tap · Driver notified</p>
+</div>
+
+<div class="screens">
+
+  <!-- ── SCREEN 1: Load List (ready to dispatch) ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 1 — Load List</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span></span>
+        <span class="title">My Loads</span>
+        <span class="action">+ Add</span>
+      </div>
+      <div class="phone-content">
+
+        <!-- Filter chips -->
+        <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;">
+          <span style="background:var(--orange);color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;white-space:nowrap;">All Loads</span>
+          <span style="background:var(--gray-dim);color:var(--gray);font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;white-space:nowrap;">Scheduled</span>
+          <span style="background:var(--gray-dim);color:var(--gray);font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;white-space:nowrap;">In Transit</span>
+          <span style="background:var(--gray-dim);color:var(--gray);font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;white-space:nowrap;">Invoiced</span>
+        </div>
+
+        <!-- Needs dispatch badge -->
+        <div style="font-size:11px;font-weight:700;color:var(--orange);letter-spacing:.5px;">📋 NEEDS DISPATCH (1)</div>
+
+        <!-- Load needing dispatch - highlighted -->
+        <div class="load-list-item highlight">
+          <div class="lli-left">
+            <div class="lli-id">LOAD #FF-29381</div>
+            <div class="lli-route">Chicago → Memphis</div>
+            <div class="lli-sub">Jun 17 · Fast Freight LLC</div>
+          </div>
+          <div class="lli-right">
+            <div class="lli-rate">$1,850</div>
+            <div class="lli-action">Dispatch →</div>
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <div style="font-size:11px;font-weight:700;color:var(--gray);letter-spacing:.5px;">IN TRANSIT (1)</div>
+
+        <div class="load-list-item">
+          <div class="lli-left">
+            <div class="lli-id">LOAD #FF-28901</div>
+            <div class="lli-route">Detroit → Nashville</div>
+            <div class="lli-sub">Jun 15 · Marcus W.</div>
+          </div>
+          <div class="lli-right">
+            <div class="lli-rate">$2,100</div>
+            <div style="display:flex;align-items:center;gap:4px;justify-content:flex-end;margin-top:4px;">
+              <span style="width:7px;height:7px;border-radius:50%;background:var(--teal);display:inline-block;"></span>
+              <span style="font-size:10px;color:var(--teal);font-weight:600;">In Transit</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout">Tap "Dispatch →" on a load to assign it to a driver and truck.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">Tap Dispatch</div>
+  </div>
+
+  <!-- ── SCREEN 2: Assign Driver ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 2 — Assign Driver &amp; Truck</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span class="back">‹ Loads</span>
+        <span class="title">Dispatch Load</span>
+        <span></span>
+      </div>
+      <div class="phone-content" style="overflow-y:auto;max-height:600px;">
+
+        <!-- Load summary -->
+        <div class="load-strip">
+          <div class="load-strip-header">
+            <span class="load-id">LOAD #FF-29381</span>
+            <span class="status-chip chip-sched">Scheduled</span>
+          </div>
+          <div class="route-mini">
+            <span class="dot dot-o"></span>
+            <span>Chicago, IL</span>
+            <span class="arrow">→</span>
+            <span class="dot dot-t"></span>
+            <span>Memphis, TN</span>
+          </div>
+          <div style="font-size:11px;color:var(--gray);">Jun 17 pickup · <span style="color:var(--orange-lt);font-weight:700;">$1,850</span></div>
+        </div>
+
+        <!-- Select Driver -->
+        <div class="section-title">Select Driver</div>
+
+        <!-- Driver 1 - selected -->
+        <div class="driver-card selected">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0w8Jhki8Y_EIsrZgtQq_RJggrrBpzpZrnDc2GhXNJW7b6xKix0AfqDSCVDPPkIbz6oA94r35GA0rR10wvBx4aS3EGBDT3_RXKidrH9y0LDkOkMt0ev_DwGbXDegrGoL7853Pbnfnc56lPzCo0UQYcVJ0d94QqUl80E4V2pzVD_-KoXcD0LATtuSSbrpMWYEUPsqJKGwRlfAhJick2zVvI5XTAv637JIaIiLk0KL9jFqnkWpUSFIcnXYzZuMtyh0sSHJPf6zbjvyI" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="Mike Rodriguez">
+          <div class="driver-info">
+            <div class="driver-name">James Rivera</div>
+            <div class="driver-sub">Truck: Peterbilt 389 · IL plate 4B2918</div>
+            <div class="driver-status">
+              <span class="dot-avail"></span>
+              <span style="color:var(--green);">Available · No active loads</span>
+            </div>
+          </div>
+          <div class="select-radio on">✓</div>
+        </div>
+
+        <!-- Driver 2 - busy -->
+        <div class="driver-card unavailable">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC11W5eL6hdmfkin7dfg_xGQwWZGd1JnzA3lazTJAvBkiVQHeL8ATi_JiClWXv7UaEbYjd7Uo3Aodhs7lTYPjr2bpHv1fF7qacOx3Sjm0LccF8goKjUbePGYTGM0mBfLRblgTTAc3Uf6fFtOLdQYko_HvafeGJHnkcLNsloC5P03JIDriDnm2tYF46TmAecl7BhhJ3TM7GKSHeFcDf7o0rbzL2XZtdOHPhvfpiaSA89VD3yqDDSVi72zPCB4sP3rQBh5uAufyWVy5A" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="Priya Singh">
+          <div class="driver-info">
+            <div class="driver-name">Marcus Williams</div>
+            <div class="driver-sub">Truck: Kenworth T680 · IL plate 7K5501</div>
+            <div class="driver-status">
+              <span class="dot-busy"></span>
+              <span style="color:var(--amber);">On load — Detroit to Nashville</span>
+            </div>
+          </div>
+          <div class="select-radio"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Select Truck (auto-filled) -->
+        <div class="section-title">Truck</div>
+        <div class="truck-card selected">
+          <div class="truck-info">
+            <div class="truck-name">🚛 Peterbilt 389</div>
+            <div class="truck-sub">IL · 4B2918 · DOT 8834422 · Auto-filled from driver</div>
+          </div>
+          <span style="color:var(--orange);font-size:13px;">✓</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Notification preview -->
+        <div class="section-title">Driver Will Be Notified</div>
+        <div class="notif-preview">
+          <div class="notif-icon">📱</div>
+          <div class="notif-text">
+            <div class="notif-app">CARRIEROS</div>
+            <div class="notif-title">New Load Assigned</div>
+            <div class="notif-body">Chicago → Memphis · Jun 17 pickup · Tap to view details</div>
+          </div>
+        </div>
+
+        <button class="btn" style="margin-top:4px;">🚛 Dispatch to James Rivera</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">Dispatched</div>
+  </div>
+
+  <!-- ── SCREEN 3: Dispatch Confirmed ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 3 — Dispatched ✓</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span></span>
+        <span class="title">Dispatched</span>
+        <span></span>
+      </div>
+      <div class="phone-content">
+
+        <!-- Success banner -->
+        <div class="success-banner">
+          <div class="big">🚛</div>
+          <div class="title">James is on it!</div>
+          <div class="sub">Push notification sent · Load #FF-29381</div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="section-title">What Happens Next</div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--green-dim);border-color:var(--green);">✓</div>
+            <div class="tl-line"></div>
+            <div class="tl-content">
+              <div class="tl-title">Driver Notified</div>
+              <div class="tl-sub">James received a push notification just now</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--orange-dim);border-color:var(--orange);color:var(--orange);">2</div>
+            <div class="tl-line"></div>
+            <div class="tl-content">
+              <div class="tl-title">James Views Load Details</div>
+              <div class="tl-sub">Pickup address, delivery, broker contact — all in his app</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--gray-dim);border-color:rgba(255,255,255,.1);color:var(--gray);">3</div>
+            <div class="tl-line"></div>
+            <div class="tl-content">
+              <div class="tl-title">Jun 17 — Pickup</div>
+              <div class="tl-sub">James taps "In Transit" — you get notified</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--gray-dim);border-color:rgba(255,255,255,.1);color:var(--gray);">4</div>
+            <div class="tl-content">
+              <div class="tl-title">Delivery + POD photo</div>
+              <div class="tl-sub">James marks delivered, uploads BOL — invoice ready</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+          <button class="btn ghost">📍 Share Tracking Link</button>
+          <button class="btn secondary">‹ Back to Loads</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">Driver's phone</div>
+  </div>
+
+  <!-- ── SCREEN 4: Driver's Push Notification ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 4 — Driver Receives Notification</div>
+    <div class="phone-frame" style="background:#1a1a1a;">
+
+      <!-- Lock screen simulation -->
+      <div style="background:linear-gradient(160deg,#1f2d40,#101820);flex:1;display:flex;flex-direction:column;padding:24px 16px;gap:16px;">
+
+        <div style="text-align:center;padding:20px 0 10px;">
+          <div style="font-size:36px;font-weight:200;color:#fff;">9:41</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.5);">Tuesday, June 17</div>
+        </div>
+
+        <!-- Push notification -->
+        <div style="background:rgba(255,255,255,.12);backdrop-filter:blur(20px);border-radius:14px;padding:14px;border:1px solid rgba(255,255,255,.1);">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <div style="width:26px;height:26px;border-radius:6px;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:13px;">🚛</div>
+            <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.7);letter-spacing:.5px;">CARRIEROS</div>
+            <div style="margin-left:auto;font-size:10px;color:rgba(255,255,255,.4);">now</div>
+          </div>
+          <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:3px;">New Load Assigned 🎯</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.75);line-height:1.5;">
+            Chicago, IL → Memphis, TN<br>
+            Pickup Jun 17 at 07:00 · Tap to view details
+          </div>
+        </div>
+
+        <!-- Driver app (below fold) -->
+        <div style="margin-top:8px;background:var(--navy-card);border-radius:16px;border:1px solid rgba(255,255,255,.08);overflow:hidden;">
+          <div style="background:var(--orange);padding:10px 14px;font-size:12px;font-weight:700;text-align:center;">
+            📲 James opens CarrierOS
+          </div>
+          <div style="padding:14px;display:flex;flex-direction:column;gap:10px;">
+            <div style="font-size:14px;font-weight:800;">Load #FF-29381</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;gap:8px;align-items:flex-start;">
+                <span style="width:8px;height:8px;border-radius:50%;background:var(--orange);flex-shrink:0;margin-top:4px;"></span>
+                <div>
+                  <div style="font-size:13px;font-weight:600;">123 W Adams St, Chicago IL</div>
+                  <div style="font-size:11px;color:var(--gray);">Pickup · Jun 17 · 07:00–10:00</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:flex-start;">
+                <span style="width:8px;height:8px;border-radius:50%;background:var(--teal);flex-shrink:0;margin-top:4px;"></span>
+                <div>
+                  <div style="font-size:13px;font-weight:600;">901 E Brooks Rd, Memphis TN</div>
+                  <div style="font-size:11px;color:var(--gray);">Delivery · Jun 18 · 08:00–14:00</div>
+                </div>
+              </div>
+            </div>
+            <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 10px;font-size:11px;color:var(--gray);">
+              📦 Dry Goods &nbsp;·&nbsp; 🏢 Fast Freight LLC &nbsp;·&nbsp; 📞 (312) 555-0190
+            </div>
+            <div style="background:var(--orange);border-radius:8px;padding:10px;font-size:13px;font-weight:700;text-align:center;color:#fff;">
+              ✓ Acknowledge &amp; Start Load
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="page-footer">
+  <span>🟠 Orange = owner actions</span>
+  <span>🟢 Green = completed / available</span>
+  <span>🟡 Amber = busy / needs attention</span>
+  <span style="color:rgba(143,163,184,.3);">CarrierOS Mockup 02 · June 2026</span>
+</div>
+
+</body>
+</html>

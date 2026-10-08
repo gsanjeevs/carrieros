@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarrierOS — Mockup 26: Settlements (Phone-Frame, Native)</title>
+<style>
+  :root {
+    --navy:#0f1e35; --navy-mid:#182c46; --navy-light:#1f3a58;
+    --orange:#f47920; --green:#2ecc71; --amber:#f0a500; --red:#e74c3c; --teal:#1abc9c;
+    --bg:#f4f6f9; --card:#ffffff; --text:#1a1a2e; --muted:#8fa3b8; --border:#e5e7eb;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#1a1a2e; display:flex; flex-direction:column; align-items:center; padding:24px 16px 60px; min-height:100vh; }
+  h1 { color:#fff; font-size:22px; margin-bottom:4px; }
+  .subtitle { color:rgba(255,255,255,0.55); font-size:13px; margin-bottom:28px; max-width:920px; text-align:center; }
+  .screen-grid { display:flex; flex-wrap:wrap; gap:32px; justify-content:center; max-width:1700px; }
+  .phone { width:390px; flex-shrink:0; }
+  .phone-label { color:rgba(255,255,255,0.55); font-size:12px; font-weight:700; margin-bottom:4px; text-align:center; }
+  .phone-note { color:rgba(255,255,255,0.35); font-size:10.5px; margin-bottom:8px; text-align:center; line-height:1.4; padding:0 8px; }
+  .phone-screen { background:var(--bg); border-radius:40px; overflow:hidden; height:844px; display:flex; flex-direction:column; box-shadow:0 24px 64px rgba(0,0,0,0.5); border:8px solid #0a0a0f; position:relative; }
+  .notch { position:absolute; top:0; left:50%; transform:translateX(-50%); width:120px; height:26px; background:#0a0a0f; border-radius:0 0 16px 16px; z-index:20; }
+  .status-bar { background:var(--navy); color:rgba(255,255,255,0.85); display:flex; justify-content:space-between; align-items:center; padding:16px 24px 8px; font-size:12px; font-weight:600; flex-shrink:0; }
+  .topbar { background:var(--navy); color:white; display:flex; align-items:center; padding:4px 16px 14px; gap:10px; flex-shrink:0; }
+  .topbar .back { color:var(--orange); font-size:14px; font-weight:600; min-width:56px; }
+  .topbar .title { flex:1; text-align:center; font-size:16px; font-weight:700; }
+  .topbar .action { color:var(--orange); font-size:13px; font-weight:600; min-width:56px; text-align:right; }
+  .content { flex:1; overflow-y:auto; }
+  .content::-webkit-scrollbar { width:0; }
+  .pad { padding:16px; }
+  .card { background:var(--card); border-radius:14px; padding:16px; margin-bottom:12px; border:1px solid var(--border); }
+  .card-title { font-size:11.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:10px; }
+  .pill { display:inline-block; font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px; }
+  .pill-green { background:#e8f5e9; color:#2e7d32; }
+  .pill-amber { background:#fff8e1; color:#b37d00; }
+  .pill-gray { background:#f1f3f5; color:#64748b; }
+  .btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:15px; border:none; border-radius:12px; font-size:15px; font-weight:700; text-align:center; }
+  .btn-primary { background:var(--orange); color:#fff; }
+  .btn-outline { background:transparent; border:2px solid var(--navy); color:var(--navy); }
+  .mb-8 { margin-bottom:8px; } .mb-12 { margin-bottom:12px; }
+
+  .segmented { display:flex; background:#eef1f5; border-radius:10px; padding:3px; margin-bottom:14px; }
+  .seg-item { flex:1; text-align:center; padding:8px 4px; font-size:12.5px; font-weight:700; color:var(--muted); border-radius:8px; }
+  .seg-item.active { background:#fff; color:var(--navy); box-shadow:0 1px 3px rgba(0,0,0,0.1); }
+
+  .settlement-card { background:#fff; border-radius:14px; padding:14px 16px; margin-bottom:10px; border:1px solid var(--border); box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+  .settlement-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+  .settlement-name { font-size:14px; font-weight:700; color:var(--navy); }
+  .settlement-period { font-size:12px; color:var(--muted); margin-bottom:8px; }
+  .settlement-net { font-size:19px; font-weight:800; color:var(--navy); font-variant-numeric:tabular-nums; }
+
+  .breakdown-row { display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--border); }
+  .breakdown-row:last-child { border-bottom:none; }
+  .breakdown-label { font-size:13px; color:var(--text); }
+  .breakdown-value { font-size:13px; font-weight:700; color:var(--text); font-variant-numeric:tabular-nums; }
+  .breakdown-value.deduct { color:var(--red); }
+  .breakdown-value.total { color:var(--green); font-size:15px; }
+
+  .hero-amount-card { background:var(--navy); border-radius:16px; padding:20px; margin-bottom:14px; text-align:center; }
+  .hero-amount-card .lbl { font-size:11px; color:rgba(255,255,255,0.55); text-transform:uppercase; letter-spacing:0.06em; }
+  .hero-amount-card .amt { font-size:36px; font-weight:900; color:#fff; margin-top:6px; font-variant-numeric:tabular-nums; }
+  .hero-amount-card .sub { font-size:12px; color:rgba(255,255,255,0.5); margin-top:4px; }
+
+  .fab { position:absolute; right:20px; bottom:96px; width:56px; height:56px; border-radius:28px; background:var(--orange); display:flex; align-items:center; justify-content:center; font-size:26px; color:#fff; box-shadow:0 6px 16px rgba(244,121,32,0.4); z-index:15; }
+
+  .web-only-banner { background:#eef2f7; border:1px solid #dbe3ec; border-radius:12px; padding:12px 14px; display:flex; gap:10px; align-items:flex-start; margin-bottom:14px; }
+  .web-only-banner .icon { font-size:18px; }
+  .web-only-banner .txt { font-size:12px; color:#4a5a6e; line-height:1.5; }
+  .web-only-banner .txt b { color:var(--navy); }
+
+  .avatar { width:32px; height:32px; border-radius:50%; background:#dbeafe; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#1e40af; flex-shrink:0; }
+
+  .swipe-approve { display:flex; align-items:center; justify-content:center; width:80px; background:var(--green); color:#fff; font-size:11px; font-weight:700; }
+
+  .home-indicator { position:absolute; bottom:6px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(0,0,0,0.25); border-radius:3px; z-index:20; }
+  .tab-bar { background:var(--navy); display:flex; justify-content:space-around; padding:10px 0 16px; flex-shrink:0; }
+  .tab-item { display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10px; color:rgba(255,255,255,0.4); min-width:52px; }
+  .tab-item.active { color:var(--orange); }
+  .tab-item .ti { font-size:20px; }
+</style>
+</head>
+<body>
+
+<h1>CarrierOS — Mockup 26: Settlements (Phone-Frame, Native)</h1>
+<p class="subtitle">Fills a real mobile gap: <code>settlements/index.tsx</code> lists rows but has no phone-frame treatment and no per-settlement drill-down. "Run Settlement" deliberately stays web-only per the code's own comment (an infrequent, higher-stakes compute action) — respected here, not contradicted; mobile's owner-facing addition is a review/approve action on an already-computed settlement, not a re-run of the compute.</p>
+
+<div class="screen-grid">
+
+  <!-- SCREEN 1: DRIVER SETTLEMENTS LIST -->
+  <div class="phone">
+    <div class="phone-label">1 — Driver: My Settlements</div>
+    <div class="phone-note">driver_own_settlements_select scoping — driver sees only their own rows, matching the real API.</div>
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:41</span><span>●●●●  🔋</span></div>
+      <div class="topbar"><div class="back">‹ Back</div><div class="title">My Settlements</div><div class="action"></div></div>
+      <div class="content">
+        <div class="pad">
+          <div class="settlement-card">
+            <div class="settlement-head">
+              <div class="settlement-name">Jun 24 – Jun 30</div>
+              <span class="pill pill-green">Paid</span>
+            </div>
+            <div class="settlement-period">Direct Deposit · Paid Jul 2</div>
+            <div class="settlement-net">$2,140.80</div>
+          </div>
+          <div class="settlement-card">
+            <div class="settlement-head">
+              <div class="settlement-name">Jun 17 – Jun 23</div>
+              <span class="pill pill-green">Paid</span>
+            </div>
+            <div class="settlement-period">Direct Deposit · Paid Jun 25</div>
+            <div class="settlement-net">$1,985.20</div>
+          </div>
+          <div class="settlement-card" style="border-left:4px solid var(--amber);">
+            <div class="settlement-head">
+              <div class="settlement-name">Jul 1 – Jul 7 (current)</div>
+              <span class="pill pill-amber">Pending</span>
+            </div>
+            <div class="settlement-period">Runs after period close</div>
+            <div class="settlement-net" style="color:var(--muted);">— calculating —</div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="ti">🏠</div>My Load</div>
+        <div class="tab-item"><div class="ti">📋</div>DVIR</div>
+        <div class="tab-item active"><div class="ti">💵</div>Pay</div>
+        <div class="tab-item"><div class="ti">👤</div>Profile</div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: DRIVER SETTLEMENT DETAIL BREAKDOWN -->
+  <div class="phone">
+    <div class="phone-label">2 — Driver: Settlement Detail</div>
+    <div class="phone-note">New drill-down (index.tsx has none today): gross → deductions → net, tabular-nums throughout. Long-press amount to copy (native context menu).</div>
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:42</span><span>●●●●  🔋</span></div>
+      <div class="topbar"><div class="back">‹ Settlements</div><div class="title">Jun 24 – Jun 30</div><div class="action">⋯</div></div>
+      <div class="content">
+        <div class="pad">
+          <div class="hero-amount-card">
+            <div class="lbl">Net Pay</div>
+            <div class="amt">$2,140.80</div>
+            <div class="sub">Direct Deposit · Paid Jul 2, 2026</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Earnings</div>
+            <div class="breakdown-row"><span class="breakdown-label">Gross revenue (3 loads)</span><span class="breakdown-value">$2,940.00</span></div>
+            <div class="breakdown-row"><span class="breakdown-label">Detention pay</span><span class="breakdown-value">$150.00</span></div>
+            <div class="breakdown-row"><span class="breakdown-label">Fuel surcharge</span><span class="breakdown-value">$180.00</span></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Deductions</div>
+            <div class="breakdown-row"><span class="breakdown-label">Fuel advance</span><span class="breakdown-value deduct">-$620.00</span></div>
+            <div class="breakdown-row"><span class="breakdown-label">Cargo insurance</span><span class="breakdown-value deduct">-$85.00</span></div>
+            <div class="breakdown-row"><span class="breakdown-label">Equipment lease</span><span class="breakdown-value deduct">-$424.20</span></div>
+            <div class="breakdown-row"><span class="breakdown-label" style="font-weight:700;">Net Pay</span><span class="breakdown-value total">$2,140.80</span></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Loads This Period</div>
+            <div style="display:flex;align-items:center;gap:10px;padding:6px 0;">
+              <div class="avatar" style="background:#fef3cd;color:#92400e;">L</div>
+              <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--text);">L-0042 · Sysco Foods</div><div style="font-size:11px;color:var(--muted);">LA → Fresno · $980.00</div></div>
+            </div>
+          </div>
+
+          <button class="btn btn-outline">Download Statement (PDF)</button>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: OWNER/FINANCE SETTLEMENTS LIST -->
+  <div class="phone">
+    <div class="phone-label">3 — Owner/Finance: All Settlements</div>
+    <div class="phone-note">settlements_manage capability view — swipe left on a pending row for a quick "Approve" action (haptic: impactMedium on release).</div>
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:44</span><span>●●●●  🔋</span></div>
+      <div class="topbar"><div class="back">‹ Back</div><div class="title">Settlements</div><div class="action"></div></div>
+      <div class="content">
+        <div class="pad">
+          <div class="segmented">
+            <div class="seg-item active">All</div>
+            <div class="seg-item">Pending Review</div>
+            <div class="seg-item">Paid</div>
+          </div>
+
+          <div style="display:flex;">
+            <div class="settlement-card" style="flex:1;border-left:4px solid var(--amber);">
+              <div class="settlement-head">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="avatar">MJ</div>
+                  <div class="settlement-name">Marcus Johnson</div>
+                </div>
+                <span class="pill pill-amber">Review</span>
+              </div>
+              <div class="settlement-period">Jun 24 – Jun 30</div>
+              <div class="settlement-net">$2,140.80</div>
+            </div>
+            <div class="swipe-approve">✓ Approve</div>
+          </div>
+
+          <div class="settlement-card">
+            <div class="settlement-head">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div class="avatar" style="background:#e0f2f1;color:#00695c;">MR</div>
+                <div class="settlement-name">Maria Rodriguez</div>
+              </div>
+              <span class="pill pill-green">Paid</span>
+            </div>
+            <div class="settlement-period">Jun 24 – Jun 30</div>
+            <div class="settlement-net">$1,875.40</div>
+          </div>
+
+          <div class="settlement-card">
+            <div class="settlement-head">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div class="avatar" style="background:#fce4ec;color:#ad1457;">DK</div>
+                <div class="settlement-name">David Kim</div>
+              </div>
+              <span class="pill pill-green">Paid</span>
+            </div>
+            <div class="settlement-period">Jun 24 – Jun 30</div>
+            <div class="settlement-net">$2,290.10</div>
+          </div>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: OWNER SETTLEMENT REVIEW/APPROVE -->
+  <div class="phone">
+    <div class="phone-label">4 — Owner: Review &amp; Approve (not "Run")</div>
+    <div class="phone-note">Owner reviews an already-computed settlement and approves for pay — "Run Settlement" (the compute step) stays web-only by deliberate design decision, called out here rather than silently added to mobile.</div>
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:45</span><span>●●●●  🔋</span></div>
+      <div class="topbar"><div class="back">‹ Settlements</div><div class="title">Marcus Johnson</div><div class="action"></div></div>
+      <div class="content">
+        <div class="pad">
+          <div class="web-only-banner">
+            <div class="icon">💻</div>
+            <div class="txt"><b>Running new settlements stays on web</b> — a deliberate, infrequent, higher-stakes compute step done with full context. This screen reviews and approves an already-calculated period.</div>
+          </div>
+
+          <div class="hero-amount-card">
+            <div class="lbl">Net Pay — Pending Approval</div>
+            <div class="amt">$2,140.80</div>
+            <div class="sub">Jun 24 – Jun 30 · Direct Deposit on file</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Summary</div>
+            <div class="breakdown-row"><span class="breakdown-label">Gross revenue</span><span class="breakdown-value">$3,270.00</span></div>
+            <div class="breakdown-row"><span class="breakdown-label">Total deductions</span><span class="breakdown-value deduct">-$1,129.20</span></div>
+            <div class="breakdown-row"><span class="breakdown-label" style="font-weight:700;">Net Pay</span><span class="breakdown-value total">$2,140.80</span></div>
+          </div>
+
+          <button class="btn btn-primary mb-8">Approve for Payment</button>
+          <button class="btn btn-outline">Flag for Correction</button>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:40px;color:rgba(255,255,255,0.3);font-size:11px;text-align:center;">
+  CarrierOS — Mockup 26: Settlements (Phone-Frame, Native) · Companion spec: mobile-native-interaction-spec.md §Settlements
+</div>
+
+</body>
+</html>

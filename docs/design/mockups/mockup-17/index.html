@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CarrierOS — Mockup 17: Pro Desktop Finance & IFTA Hub</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    font-family: 'Material Symbols Outlined';
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+    display: inline-block;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+    vertical-align: middle;
+  }
+  .fill-icon { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+  * { box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #f1f3f8; color: #0f1923; }
+
+  /* Sidebar */
+  .sidebar { width: 256px; min-height: 100vh; background: #0f1923; display: flex; flex-direction: column; }
+  .sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .sidebar-logo .brand { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
+  .sidebar-logo .tier-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: #f97316; text-transform: uppercase; margin-top: 2px; }
+  .sidebar-user { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 10px; }
+  .sidebar-user .avatar { width: 32px; height: 32px; border-radius: 50%; background: #1e3a5f; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #93c5fd; flex-shrink: 0; }
+  .sidebar-user .user-name { font-size: 13px; font-weight: 600; color: #fff; }
+  .sidebar-user .user-role { font-size: 11px; color: #6b7a8f; }
+  nav { flex: 1; padding: 12px 0; }
+  .nav-section { padding: 4px 12px 2px; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: #4b5a6e; text-transform: uppercase; margin-top: 8px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; margin: 1px 8px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; color: #8898aa; transition: all 0.15s; }
+  .nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+  .nav-item.active { background: rgba(249,115,22,0.15); color: #f97316; }
+  .nav-item .material-symbols-outlined { font-size: 18px; }
+  .nav-bottom { padding: 12px 8px; border-top: 1px solid rgba(255,255,255,0.08); }
+
+  /* Main canvas */
+  .main { flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .topbar { height: 56px; background: #fff; border-bottom: 1px solid #e5e8ef; display: flex; align-items: center; justify-between; padding: 0 24px; position: sticky; top: 0; z-index: 20; flex-shrink: 0; }
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .topbar-title { font-size: 15px; font-weight: 700; color: #0f1923; }
+  .topbar-sub { font-size: 12px; color: #8898aa; }
+  .topbar-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+  .period-select { border: 1px solid #e5e8ef; border-radius: 8px; padding: 6px 12px; font-size: 13px; font-family: 'Inter', sans-serif; color: #0f1923; background: #fff; cursor: pointer; }
+  .btn-primary { background: #0f1923; color: #fff; border: none; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .btn-outline { background: #fff; color: #0f1923; border: 1px solid #e5e8ef; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+
+  .canvas { padding: 24px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; }
+
+  /* KPI strip */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .kpi-card { background: #fff; border-radius: 12px; padding: 18px 20px; border: 1px solid #e5e8ef; }
+  .kpi-label { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #8898aa; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .kpi-value { font-size: 26px; font-weight: 800; color: #0f1923; letter-spacing: -0.02em; line-height: 1; }
+  .kpi-sub { font-size: 12px; color: #8898aa; margin-top: 4px; }
+  .kpi-delta { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 600; padding: 2px 6px; border-radius: 4px; margin-top: 6px; }
+  .delta-up { background: #dcfce7; color: #16a34a; }
+  .delta-down { background: #fee2e2; color: #dc2626; }
+  .delta-warn { background: #fef3c7; color: #d97706; }
+  .kpi-accent { border-left: 3px solid #f97316; }
+  .kpi-alert { border-left: 3px solid #f59e0b; }
+  .kpi-ok { border-left: 3px solid #22c55e; }
+
+  /* Two-column layout */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .three-col { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 16px; }
+
+  /* Section card */
+  .section-card { background: #fff; border-radius: 12px; border: 1px solid #e5e8ef; overflow: hidden; }
+  .card-header { padding: 16px 20px 12px; border-bottom: 1px solid #f1f3f8; display: flex; align-items: center; justify-content: space-between; }
+  .card-title { font-size: 13px; font-weight: 700; color: #0f1923; }
+  .card-sub { font-size: 11px; color: #8898aa; margin-top: 1px; }
+  .card-action { font-size: 12px; font-weight: 600; color: #f97316; cursor: pointer; }
+  .card-body { padding: 16px 20px; }
+
+  /* IFTA table */
+  .ifta-table { width: 100%; border-collapse: collapse; }
+  .ifta-table th { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #8898aa; padding: 0 0 10px; text-align: left; }
+  .ifta-table th:not(:first-child) { text-align: right; }
+  .ifta-table td { padding: 10px 0; border-top: 1px solid #f1f3f8; font-size: 13px; color: #0f1923; }
+  .ifta-table td:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+  .ifta-table tr:first-child td { border-top: none; }
+  .state-cell { display: flex; align-items: center; gap: 8px; }
+  .state-flag { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .tax-due { color: #dc2626; font-weight: 600; }
+  .tax-credit { color: #16a34a; font-weight: 600; }
+  .total-row td { font-weight: 700; border-top: 2px solid #e5e8ef !important; color: #0f1923; padding-top: 12px; }
+
+  /* IFTA summary strip */
+  .ifta-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+  .ifta-stat { background: #f8fafc; border-radius: 8px; padding: 12px 14px; }
+  .ifta-stat-label { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #8898aa; margin-bottom: 4px; }
+  .ifta-stat-value { font-size: 18px; font-weight: 800; color: #0f1923; letter-spacing: -0.02em; }
+  .ifta-stat-sub { font-size: 11px; color: #8898aa; }
+
+  /* Alert banner */
+  .alert-banner { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+  .alert-banner .material-symbols-outlined { color: #f97316; font-size: 20px; }
+  .alert-text { font-size: 13px; color: #9a3412; }
+  .alert-text strong { font-weight: 700; }
+  .alert-cta { margin-left: auto; font-size: 12px; font-weight: 700; color: #f97316; white-space: nowrap; cursor: pointer; }
+
+  /* Invoice table */
+  .invoice-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f3f8; gap: 12px; }
+  .invoice-row:last-child { border-bottom: none; }
+  .invoice-customer { font-size: 13px; font-weight: 600; color: #0f1923; }
+  .invoice-load { font-size: 11px; color: #8898aa; }
+  .invoice-amount { font-size: 14px; font-weight: 700; color: #0f1923; margin-left: auto; text-align: right; font-variant-numeric: tabular-nums; }
+  .invoice-days { font-size: 11px; color: #8898aa; text-align: right; }
+  .status-chip { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; white-space: nowrap; }
+  .chip-paid { background: #dcfce7; color: #16a34a; }
+  .chip-overdue { background: #fee2e2; color: #dc2626; }
+  .chip-sent { background: #dbeafe; color: #1d4ed8; }
+  .chip-draft { background: #f3f4f6; color: #6b7280; }
+
+  /* Fuel bar chart */
+  .fuel-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; }
+  .fuel-driver { font-size: 12px; font-weight: 600; color: #0f1923; width: 80px; flex-shrink: 0; }
+  .fuel-bar-wrap { flex: 1; height: 8px; background: #f1f3f8; border-radius: 4px; overflow: hidden; }
+  .fuel-bar { height: 100%; border-radius: 4px; background: #1e3a5f; }
+  .fuel-bar.warn { background: #f97316; }
+  .fuel-cpm { font-size: 12px; font-weight: 700; color: #0f1923; width: 52px; text-align: right; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+  .fuel-cpm.warn { color: #f97316; }
+
+  /* Settlement list */
+  .settle-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f3f8; gap: 10px; }
+  .settle-row:last-child { border-bottom: none; }
+  .driver-dot { width: 28px; height: 28px; border-radius: 50%; background: #e8edf5; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #1e3a5f; flex-shrink: 0; }
+  .settle-name { font-size: 13px; font-weight: 600; color: #0f1923; }
+  .settle-loads { font-size: 11px; color: #8898aa; }
+  .settle-amount { font-size: 14px; font-weight: 700; color: #0f1923; margin-left: auto; text-align: right; font-variant-numeric: tabular-nums; }
+  .settle-sub { font-size: 11px; color: #8898aa; text-align: right; }
+
+  /* Dev notes */
+  .dev-notes { background: #1e2d3d; border-radius: 12px; padding: 20px 24px; color: #94a3b8; font-size: 13px; line-height: 1.7; }
+  .dev-notes h3 { color: #f97316; font-weight: 700; font-size: 14px; margin-bottom: 12px; letter-spacing: 0.02em; }
+  .dev-notes h4 { color: #e2e8f0; font-weight: 600; font-size: 12px; margin: 14px 0 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .dev-notes code { background: rgba(255,255,255,0.1); color: #93c5fd; padding: 1px 5px; border-radius: 3px; font-family: monospace; font-size: 12px; }
+  .dev-notes ul { margin: 0; padding-left: 16px; }
+  .dev-notes li { margin-bottom: 3px; }
+</style>
+<script>
+  tailwind.config = { corePlugins: { preflight: false } }
+</script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════ HEADER ══════════════════ -->
+<div style="background:#0f1923;padding:20px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.08)">
+  <div>
+    <div style="font-size:20px;font-weight:800;color:#fff;letter-spacing:-0.02em">CarrierOS — Mockup 17</div>
+    <div style="font-size:13px;color:#6b7a8f;margin-top:3px">Pro Desktop: Finance & IFTA Command Center · Role: Finance / Owner · Tier: Pro</div>
+  </div>
+  <div style="display:flex;gap:24px;font-size:12px;color:#6b7a8f">
+    <span><strong style="color:#f97316">Tier:</strong> Pro ($199/mo)</span>
+    <span><strong style="color:#f97316">Roles:</strong> Finance, Owner</span>
+    <span><strong style="color:#f97316">Platform:</strong> Desktop Web</span>
+    <span><strong style="color:#f97316">Status:</strong> Post-MVP</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ APP FRAME ═══════════════ -->
+<div style="display:flex;height:calc(100vh - 73px);overflow:hidden">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="brand">CarrierOS</div>
+      <div class="tier-badge">● Pro — 8 trucks</div>
+    </div>
+    <div class="sidebar-user">
+      <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBomCX3VYKKOEdFXaf-43JZ3nY5N9Ey71BpDbi6TjtgRwft-bznwR95652Nk4_dLYuUQZEwL91oj07QmwDnVpGYXSABtq3SlWz2dtOMFwqeBWuqn4TjSYkZOyWyEasI24scCh5FJqbR8F0nUqrPfyfN7lhbdx5abT6__SMG5LeQ6M5R8rkpXVcSCqsd2skDqtW6nIiHVV9EkZvrgWTW9EL87UQE7g6_RO58Wt9mBH41xCZANlUhVCLoo1jQV1WdBzHcaC43W92c3sk" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="Maria P.">
+      <div>
+        <div class="user-name">Maria P.</div>
+        <div class="user-role">Finance · North Valley Trucking</div>
+      </div>
+    </div>
+
+    <nav>
+      <div class="nav-section">Operations</div>
+      <div class="nav-item">
+        <span class="material-symbols-outlined">dashboard</span> Dashboard
+      </div>
+      <div class="nav-item">
+        <span class="material-symbols-outlined">local_shipping</span> Loads
+      </div>
+      <div class="nav-item">
+        <span class="material-symbols-outlined">map</span> Live Map
+      </div>
+
+      <div class="nav-section">Finance</div>
+      <div class="nav-item active">
+        <span class="material-symbols-outlined fill-icon">payments</span> Finance Hub
+      </div>
+      <div class="nav-item">
+        <span class="material-symbols-outlined">receipt_long</span> Invoices
+      </div>
+      <div class="nav-item">
+        <span class="material-symbols-outlined">account_balance</span> Settlements
+      </div>
+      <div class="nav-item">
+        <span class="material-symbols-outlined">local_gas_station</span> Fuel Analytics
+      </div>
+      <div class="nav-item">
+        <span class="material-symbols-outlined">route</span> IFTA
+      </div>
+
+      <div class="nav-section">Customers</div>
+      <div class="nav-item">
+        <span class="material-symbols-outlined">groups</span> Customers
+      </div>
+      <div class="nav-item">
+        <span class="material-symbols-outlined">storefront</span> Portal
+      </div>
+
+      <div class="nav-section">Reports</div>
+      <div class="nav-item">
+        <span class="material-symbols-outlined">analytics</span> Revenue Analytics
+      </div>
+      <div class="nav-item">
+        <span class="material-symbols-outlined">bar_chart</span> Driver Performance
+      </div>
+    </nav>
+
+    <div class="nav-bottom">
+      <div class="nav-item">
+        <span class="material-symbols-outlined">settings</span> Settings
+      </div>
+      <div class="nav-item">
+        <span class="material-symbols-outlined">help_outline</span> Support
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CANVAS -->
+  <div class="main" style="overflow-y:auto">
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div>
+          <div class="topbar-title">Finance Hub</div>
+          <div class="topbar-sub">Q2 2026 · Apr 1 – Jun 30</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <select class="period-select">
+          <option>Q2 2026</option>
+          <option>Q1 2026</option>
+          <option>Last 12 months</option>
+          <option>Custom range</option>
+        </select>
+        <button class="btn-outline">
+          <span class="material-symbols-outlined" style="font-size:16px">download</span>
+          Export Q2
+        </button>
+        <button class="btn-primary">
+          <span class="material-symbols-outlined" style="font-size:16px">description</span>
+          IFTA Report
+        </button>
+      </div>
+    </div>
+
+    <!-- CANVAS BODY -->
+    <div class="canvas">
+
+      <!-- IFTA DEADLINE ALERT -->
+      <div class="alert-banner">
+        <span class="material-symbols-outlined fill-icon">warning</span>
+        <div class="alert-text">
+          <strong>IFTA Q2 filing due in 14 days</strong> — July 31, 2026. Your state-mile data is complete. Generate your filing report now.
+        </div>
+        <div class="alert-cta">Generate Filing →</div>
+      </div>
+
+      <!-- KPI STRIP -->
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-ok">
+          <div class="kpi-label">
+            <span class="material-symbols-outlined" style="font-size:14px">payments</span>
+            Total Revenue
+          </div>
+          <div class="kpi-value">$184,320</div>
+          <div class="kpi-sub">Q2 2026 · 8 trucks</div>
+          <div class="kpi-delta delta-up">
+            <span class="material-symbols-outlined" style="font-size:12px">arrow_upward</span>
+            +12% vs Q1
+          </div>
+        </div>
+        <div class="kpi-card kpi-accent">
+          <div class="kpi-label">
+            <span class="material-symbols-outlined" style="font-size:14px">pending_actions</span>
+            Outstanding
+          </div>
+          <div class="kpi-value">$28,450</div>
+          <div class="kpi-sub">6 invoices unpaid</div>
+          <div class="kpi-delta delta-warn">
+            <span class="material-symbols-outlined" style="font-size:12px">schedule</span>
+            $8,200 overdue
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">
+            <span class="material-symbols-outlined" style="font-size:14px">route</span>
+            Revenue / Mile
+          </div>
+          <div class="kpi-value">$3.42</div>
+          <div class="kpi-sub">53,895 total miles</div>
+          <div class="kpi-delta delta-up">
+            <span class="material-symbols-outlined" style="font-size:12px">arrow_upward</span>
+            +$0.18 vs Q1
+          </div>
+        </div>
+        <div class="kpi-card kpi-alert">
+          <div class="kpi-label">
+            <span class="material-symbols-outlined" style="font-size:14px">local_gas_station</span>
+            IFTA Tax Due
+          </div>
+          <div class="kpi-value">$3,840</div>
+          <div class="kpi-sub">Net — 5 states</div>
+          <div class="kpi-delta delta-warn">
+            <span class="material-symbols-outlined" style="font-size:12px">schedule</span>
+            Due Jul 31
+          </div>
+        </div>
+      </div>
+
+      <!-- IFTA + INVOICES ROW -->
+      <div class="three-col">
+
+        <!-- IFTA STATE BREAKDOWN -->
+        <div class="section-card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">IFTA — Q2 2026 State Breakdown</div>
+              <div class="card-sub">Auto-computed from GPS mileage log · 8 trucks</div>
+            </div>
+            <div class="card-action">Full Filing →</div>
+          </div>
+          <div class="card-body">
+            <div class="ifta-summary">
+              <div class="ifta-stat">
+                <div class="ifta-stat-label">Total Miles</div>
+                <div class="ifta-stat-value">53,895</div>
+                <div class="ifta-stat-sub">All states</div>
+              </div>
+              <div class="ifta-stat">
+                <div class="ifta-stat-label">Fuel Purchased</div>
+                <div class="ifta-stat-value">7,842 gal</div>
+                <div class="ifta-stat-sub">$3.89 avg/gal</div>
+              </div>
+              <div class="ifta-stat">
+                <div class="ifta-stat-label">Net Tax Due</div>
+                <div class="ifta-stat-value" style="color:#dc2626">$3,840</div>
+                <div class="ifta-stat-sub">After credits</div>
+              </div>
+            </div>
+
+            <table class="ifta-table">
+              <thead>
+                <tr>
+                  <th>State</th>
+                  <th>Miles</th>
+                  <th>Fuel (gal)</th>
+                  <th>Tax Rate</th>
+                  <th>Net Due</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <div class="state-cell">
+                      <div class="state-flag" style="background:#3b82f6"></div>
+                      California
+                    </div>
+                  </td>
+                  <td>22,440</td>
+                  <td>3,240</td>
+                  <td>$0.741</td>
+                  <td class="tax-due">+$1,920</td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="state-cell">
+                      <div class="state-flag" style="background:#8b5cf6"></div>
+                      Nevada
+                    </div>
+                  </td>
+                  <td>8,210</td>
+                  <td>1,480</td>
+                  <td>$0.270</td>
+                  <td class="tax-due">+$640</td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="state-cell">
+                      <div class="state-flag" style="background:#f97316"></div>
+                      Arizona
+                    </div>
+                  </td>
+                  <td>7,100</td>
+                  <td>980</td>
+                  <td>$0.260</td>
+                  <td class="tax-due">+$580</td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="state-cell">
+                      <div class="state-flag" style="background:#22c55e"></div>
+                      Oregon
+                    </div>
+                  </td>
+                  <td>11,845</td>
+                  <td>1,840</td>
+                  <td>$0.360</td>
+                  <td class="tax-credit">−$820</td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="state-cell">
+                      <div class="state-flag" style="background:#06b6d4"></div>
+                      Washington
+                    </div>
+                  </td>
+                  <td>4,300</td>
+                  <td>302</td>
+                  <td>$0.494</td>
+                  <td class="tax-due">+$480</td>
+                </tr>
+                <tr class="total-row">
+                  <td>Total</td>
+                  <td>53,895</td>
+                  <td>7,842</td>
+                  <td>—</td>
+                  <td class="tax-due">$3,840</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div style="margin-top:14px;padding:10px 14px;background:#fff7ed;border-radius:8px;border:1px solid #fed7aa;font-size:12px;color:#9a3412;display:flex;align-items:center;gap:8px">
+              <span class="material-symbols-outlined" style="font-size:16px;color:#f97316">info</span>
+              GPS mileage used for all state calculations. Oregon credit reflects fuel purchased in-state.
+            </div>
+          </div>
+        </div>
+
+        <!-- INVOICES PIPELINE -->
+        <div class="section-card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Invoice Pipeline</div>
+              <div class="card-sub">6 open · $28,450 outstanding</div>
+            </div>
+            <div class="card-action">All Invoices →</div>
+          </div>
+          <div class="card-body">
+            <div class="invoice-row">
+              <div>
+                <div class="invoice-customer">Blue Ribbon Logistics</div>
+                <div class="invoice-load">Load #BRL-4492 · 3 days ago</div>
+              </div>
+              <span class="status-chip chip-overdue">Overdue</span>
+              <div>
+                <div class="invoice-amount">$4,800</div>
+                <div class="invoice-days">14 days past due</div>
+              </div>
+            </div>
+            <div class="invoice-row">
+              <div>
+                <div class="invoice-customer">Pacific Freight Co.</div>
+                <div class="invoice-load">Load #PFC-2201 · 1 day ago</div>
+              </div>
+              <span class="status-chip chip-overdue">Overdue</span>
+              <div>
+                <div class="invoice-amount">$3,400</div>
+                <div class="invoice-days">7 days past due</div>
+              </div>
+            </div>
+            <div class="invoice-row">
+              <div>
+                <div class="invoice-customer">Central Valley Produce</div>
+                <div class="invoice-load">Load #CVP-8810 · Today</div>
+              </div>
+              <span class="status-chip chip-sent">Sent</span>
+              <div>
+                <div class="invoice-amount">$6,200</div>
+                <div class="invoice-days">Due in 21 days</div>
+              </div>
+            </div>
+            <div class="invoice-row">
+              <div>
+                <div class="invoice-customer">Fresno Cold Storage</div>
+                <div class="invoice-load">Load #FCS-3301 · Yesterday</div>
+              </div>
+              <span class="status-chip chip-sent">Sent</span>
+              <div>
+                <div class="invoice-amount">$5,100</div>
+                <div class="invoice-days">Due in 18 days</div>
+              </div>
+            </div>
+            <div class="invoice-row">
+              <div>
+                <div class="invoice-customer">AgriTrans West</div>
+                <div class="invoice-load">Load #ATW-0092 · 2 days ago</div>
+              </div>
+              <span class="status-chip chip-sent">Sent</span>
+              <div>
+                <div class="invoice-amount">$4,950</div>
+                <div class="invoice-days">Due in 14 days</div>
+              </div>
+            </div>
+            <div class="invoice-row">
+              <div>
+                <div class="invoice-customer">Bakersfield Haulers</div>
+                <div class="invoice-load">Load #BKH-5541 · Today</div>
+              </div>
+              <span class="status-chip chip-draft">Draft</span>
+              <div>
+                <div class="invoice-amount">$4,000</div>
+                <div class="invoice-days">Not sent yet</div>
+              </div>
+            </div>
+
+            <div style="margin-top:14px;padding:10px 14px;background:#f8fafc;border-radius:8px;display:flex;align-items:center;justify-content:space-between">
+              <div style="font-size:12px;color:#6b7a8f">2 auto-reminders scheduled</div>
+              <div style="font-size:12px;font-weight:700;color:#f97316;cursor:pointer">Send all overdue reminders</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DRIVER SETTLEMENTS -->
+        <div class="section-card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Driver Settlements</div>
+              <div class="card-sub">Q2 2026 · 5 drivers</div>
+            </div>
+            <div class="card-action">Run Settlements →</div>
+          </div>
+          <div class="card-body">
+            <div class="settle-row">
+              <div class="driver-dot">RG</div>
+              <div>
+                <div class="settle-name">Roberto G.</div>
+                <div class="settle-loads">14 loads · 30% of rate</div>
+              </div>
+              <div>
+                <div class="settle-amount">$7,240</div>
+                <div class="settle-sub">Pending ACH</div>
+              </div>
+            </div>
+            <div class="settle-row">
+              <div class="driver-dot">PS</div>
+              <div>
+                <div class="settle-name">Preet S.</div>
+                <div class="settle-loads">12 loads · 28% of rate</div>
+              </div>
+              <div>
+                <div class="settle-amount">$5,880</div>
+                <div class="settle-sub">Pending ACH</div>
+              </div>
+            </div>
+            <div class="settle-row">
+              <div class="driver-dot">AK</div>
+              <div>
+                <div class="settle-name">Ahmad K.</div>
+                <div class="settle-loads">11 loads · 30% of rate</div>
+              </div>
+              <div>
+                <div class="settle-amount">$5,420</div>
+                <div class="settle-sub">Pending ACH</div>
+              </div>
+            </div>
+            <div class="settle-row">
+              <div class="driver-dot">JS</div>
+              <div>
+                <div class="settle-name">Juan S.</div>
+                <div class="settle-loads">9 loads · $0.55/mi</div>
+              </div>
+              <div>
+                <div class="settle-amount">$3,960</div>
+                <div class="settle-sub">Sent Jun 30</div>
+              </div>
+            </div>
+            <div class="settle-row">
+              <div class="driver-dot">MT</div>
+              <div>
+                <div class="settle-name">Mike T.</div>
+                <div class="settle-loads">8 loads · $0.55/mi</div>
+              </div>
+              <div>
+                <div class="settle-amount">$3,640</div>
+                <div class="settle-sub">Sent Jun 30</div>
+              </div>
+            </div>
+
+            <div style="margin-top:14px;padding:10px 14px;background:#f8fafc;border-radius:8px;display:flex;align-items:center;justify-content:space-between">
+              <div>
+                <div style="font-size:12px;color:#6b7a8f">3 pending ACH settlements</div>
+                <div style="font-size:12px;font-weight:700;color:#0f1923">Total: $18,540</div>
+              </div>
+              <button class="btn-primary" style="font-size:12px;padding:7px 12px">
+                <span class="material-symbols-outlined" style="font-size:14px">account_balance</span>
+                Send ACH
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FUEL ANALYTICS + REVENUE ROW -->
+      <div class="two-col">
+
+        <!-- FUEL COST PER MILE -->
+        <div class="section-card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Fuel Cost per Mile — by Driver</div>
+              <div class="card-sub">Q2 2026 · Fleet avg: $0.48/mi</div>
+            </div>
+            <div class="card-action">Full Analytics →</div>
+          </div>
+          <div class="card-body">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+              <div style="font-size:11px;color:#8898aa;font-weight:700;text-transform:uppercase;letter-spacing:0.06em">Driver</div>
+              <div style="font-size:11px;color:#8898aa;font-weight:700;text-transform:uppercase;letter-spacing:0.06em">Cost/Mile</div>
+            </div>
+            <div class="fuel-row">
+              <div class="fuel-driver">Roberto G.</div>
+              <div class="fuel-bar-wrap"><div class="fuel-bar" style="width:48%"></div></div>
+              <div class="fuel-cpm">$0.44</div>
+            </div>
+            <div class="fuel-row">
+              <div class="fuel-driver">Preet S.</div>
+              <div class="fuel-bar-wrap"><div class="fuel-bar" style="width:51%"></div></div>
+              <div class="fuel-cpm">$0.46</div>
+            </div>
+            <div class="fuel-row">
+              <div class="fuel-driver">Ahmad K.</div>
+              <div class="fuel-bar-wrap"><div class="fuel-bar" style="width:56%"></div></div>
+              <div class="fuel-cpm">$0.50</div>
+            </div>
+            <div class="fuel-row">
+              <div class="fuel-driver">Juan S.</div>
+              <div class="fuel-bar-wrap"><div class="fuel-bar warn" style="width:68%"></div></div>
+              <div class="fuel-cpm warn">$0.61</div>
+            </div>
+            <div class="fuel-row">
+              <div class="fuel-driver">Mike T.</div>
+              <div class="fuel-bar-wrap"><div class="fuel-bar warn" style="width:72%"></div></div>
+              <div class="fuel-cpm warn">$0.65</div>
+            </div>
+            <div style="margin-top:14px;padding:10px 14px;background:#fff7ed;border-radius:8px;border:1px solid #fed7aa;font-size:12px;color:#9a3412;display:flex;align-items:center;gap:8px">
+              <span class="material-symbols-outlined" style="font-size:16px;color:#f97316">local_gas_station</span>
+              Juan S. and Mike T. are 27–35% above fleet average. Review routes for unnecessary idling or detours.
+            </div>
+          </div>
+        </div>
+
+        <!-- REVENUE BY LANE -->
+        <div class="section-card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Revenue per Mile — Top Lanes</div>
+              <div class="card-sub">Q2 2026 · Fleet avg: $3.42/mi</div>
+            </div>
+            <div class="card-action">Lane Analytics →</div>
+          </div>
+          <div class="card-body">
+            <!-- Lane rows -->
+            <table style="width:100%;border-collapse:collapse">
+              <thead>
+                <tr>
+                  <th style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#8898aa;padding:0 0 10px;text-align:left">Lane</th>
+                  <th style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#8898aa;padding:0 0 10px;text-align:right">Loads</th>
+                  <th style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#8898aa;padding:0 0 10px;text-align:right">$/Mile</th>
+                  <th style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#8898aa;padding:0 0 10px;text-align:right">Margin</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-top:1px solid #f1f3f8">
+                  <td style="padding:10px 0">
+                    <div style="font-size:13px;font-weight:600;color:#0f1923">Fresno → LA</div>
+                    <div style="font-size:11px;color:#8898aa">214 mi · avg 2.1 days</div>
+                  </td>
+                  <td style="text-align:right;font-size:13px;color:#0f1923;font-variant-numeric:tabular-nums;padding:10px 0">18</td>
+                  <td style="text-align:right;font-size:14px;font-weight:700;color:#16a34a;font-variant-numeric:tabular-nums;padding:10px 0">$4.80</td>
+                  <td style="text-align:right;padding:10px 0"><span class="kpi-delta delta-up" style="font-size:11px">42%</span></td>
+                </tr>
+                <tr style="border-top:1px solid #f1f3f8">
+                  <td style="padding:10px 0">
+                    <div style="font-size:13px;font-weight:600;color:#0f1923">Bakersfield → Phoenix</div>
+                    <div style="font-size:11px;color:#8898aa">380 mi · avg 1.5 days</div>
+                  </td>
+                  <td style="text-align:right;font-size:13px;color:#0f1923;font-variant-numeric:tabular-nums;padding:10px 0">12</td>
+                  <td style="text-align:right;font-size:14px;font-weight:700;color:#16a34a;font-variant-numeric:tabular-nums;padding:10px 0">$4.10</td>
+                  <td style="text-align:right;padding:10px 0"><span class="kpi-delta delta-up" style="font-size:11px">37%</span></td>
+                </tr>
+                <tr style="border-top:1px solid #f1f3f8">
+                  <td style="padding:10px 0">
+                    <div style="font-size:13px;font-weight:600;color:#0f1923">Stockton → Portland</div>
+                    <div style="font-size:11px;color:#8898aa">620 mi · avg 1.8 days</div>
+                  </td>
+                  <td style="text-align:right;font-size:13px;color:#0f1923;font-variant-numeric:tabular-nums;padding:10px 0">9</td>
+                  <td style="text-align:right;font-size:14px;font-weight:700;color:#0f1923;font-variant-numeric:tabular-nums;padding:10px 0">$3.55</td>
+                  <td style="text-align:right;padding:10px 0"><span class="kpi-delta delta-up" style="font-size:11px">18%</span></td>
+                </tr>
+                <tr style="border-top:1px solid #f1f3f8">
+                  <td style="padding:10px 0">
+                    <div style="font-size:13px;font-weight:600;color:#0f1923">LA → Las Vegas</div>
+                    <div style="font-size:11px;color:#8898aa">270 mi · avg 1.1 days</div>
+                  </td>
+                  <td style="text-align:right;font-size:13px;color:#0f1923;font-variant-numeric:tabular-nums;padding:10px 0">15</td>
+                  <td style="text-align:right;font-size:14px;font-weight:700;color:#d97706;font-variant-numeric:tabular-nums;padding:10px 0">$2.90</td>
+                  <td style="text-align:right;padding:10px 0"><span class="kpi-delta delta-warn" style="font-size:11px">9%</span></td>
+                </tr>
+                <tr style="border-top:1px solid #f1f3f8">
+                  <td style="padding:10px 0">
+                    <div style="font-size:13px;font-weight:600;color:#0f1923">Sacramento → Reno</div>
+                    <div style="font-size:11px;color:#8898aa">134 mi · avg 1.0 days</div>
+                  </td>
+                  <td style="text-align:right;font-size:13px;color:#0f1923;font-variant-numeric:tabular-nums;padding:10px 0">8</td>
+                  <td style="text-align:right;font-size:14px;font-weight:700;color:#dc2626;font-variant-numeric:tabular-nums;padding:10px 0">$2.10</td>
+                  <td style="text-align:right;padding:10px 0"><span class="kpi-delta delta-down" style="font-size:11px">−4%</span></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div style="margin-top:14px;padding:10px 14px;background:#f8fafc;border-radius:8px;font-size:12px;color:#6b7a8f;display:flex;align-items:center;gap:8px">
+              <span class="material-symbols-outlined" style="font-size:16px">lightbulb</span>
+              Sacramento → Reno is running at a loss after fuel + driver cost. Consider rate renegotiation or discontinuing.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DEV NOTES -->
+      <div class="dev-notes">
+        <h3>🖥 Mockup 17 — Developer Notes: Pro Desktop Finance & IFTA Hub</h3>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+          <div>
+            <h4>Layout Architecture</h4>
+            <ul>
+              <li>Fixed sidebar: 256px, <code>position:fixed</code>, full viewport height</li>
+              <li>Main canvas: <code>margin-left:256px</code>, scrollable</li>
+              <li>Top bar: <code>position:sticky; top:0; z-index:20</code></li>
+              <li>Mobile (<code>md:</code> breakpoint): sidebar collapses to bottom nav; sidebar items become bottom tab icons</li>
+              <li>Grid: 4-col KPI strip → 3-col content row → 2-col analytics row</li>
+            </ul>
+
+            <h4>IFTA Data Source</h4>
+            <ul>
+              <li>State crossings auto-logged via GPS in <code>ifta_state_crossings</code> table</li>
+              <li>Fields: <code>truck_id, driver_id, state, crossed_at, lat, lng, odometer_est</code></li>
+              <li>Quarterly summary view: <code>ifta_quarterly_summary</code> — miles per state per truck per quarter</li>
+              <li>Fuel purchases from <code>fuel_stops</code> table (manual Growth) or fuel card import (Pro)</li>
+              <li>Tax rate table: <code>ifta_tax_rates</code> — state, quarter, rate_per_gallon; updated quarterly</li>
+              <li>Net formula: <code>(miles_in_state / total_miles × total_fuel_used × state_rate) − fuel_purchased_in_state × state_rate</code></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4>Tier Gating</h4>
+            <ul>
+              <li>This view requires <code>companies.tier IN ('pro','enterprise')</code></li>
+              <li>Growth can access IFTA mileage log page but not the tax computation or filing export</li>
+              <li>Finance desktop sidebar available from Growth+; IFTA and Fuel Analytics nav items visible but locked on Growth with upgrade prompt</li>
+              <li>RLS: Finance role can read all finance tables; cannot access loads with driver rate column</li>
+            </ul>
+
+            <h4>Fuel Analytics</h4>
+            <ul>
+              <li>Source: <code>fuel_stops</code> table — <code>driver_id, truck_id, gallons, cost, state, odometer, logged_at</code></li>
+              <li>Cost/mile: <code>SUM(cost) / SUM(distance_driven)</code> per driver per period</li>
+              <li>Anomaly flag: fill-up &gt; 120% of truck tank capacity, or off-route by &gt;30mi</li>
+              <li>Fleet avg calculated across all active drivers for the period</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4>Invoice Pipeline</h4>
+            <ul>
+              <li>Source: <code>invoices</code> table with <code>status IN ('draft','sent','paid','overdue')</code></li>
+              <li>Overdue computed: <code>due_date &lt; NOW() AND status = 'sent'</code></li>
+              <li>Auto-reminder: scheduled job at due_date + 1 day and due_date + 7 days via Resend</li>
+              <li>Finance role: read/update invoices; cannot delete loads or reassign drivers</li>
+            </ul>
+
+            <h4>Driver Settlements</h4>
+            <ul>
+              <li>Source: <code>driver_settlements</code> table — computed on delivery, pending ACH approval</li>
+              <li>Settlement methods: <code>'percent_of_rate' | 'per_mile' | 'flat_per_load'</code> on <code>drivers.settlement_type</code></li>
+              <li>ACH: Stripe Connect (sub-account per driver) or manual bank transfer with status tracking</li>
+              <li>PDF statement: generated server-side, stored in Supabase Storage, link emailed to driver</li>
+            </ul>
+
+            <h4>Revenue per Mile / Lane</h4>
+            <ul>
+              <li>Lane = <code>(origin_city, destination_city)</code> normalized pair</li>
+              <li>Revenue/mile: <code>load.rate / load.distance_miles</code></li>
+              <li>Margin: <code>(rate − fuel_cost − driver_settlement − tolls) / rate</code></li>
+              <li>Negative margin: flag in UI with red color; trigger insight suggestion</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /canvas -->
+  </div><!-- /main -->
+</div><!-- /app frame -->
+
+</body>
+</html>

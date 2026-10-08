@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarrierOS — Mockup 27: Billing (Phone-Frame, Native)</title>
+<style>
+  :root {
+    --navy:#0f1e35; --navy-mid:#182c46; --navy-light:#1f3a58;
+    --orange:#f47920; --green:#2ecc71; --amber:#f0a500; --red:#e74c3c; --teal:#1abc9c;
+    --bg:#f4f6f9; --card:#ffffff; --text:#1a1a2e; --muted:#8fa3b8; --border:#e5e7eb;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#1a1a2e; display:flex; flex-direction:column; align-items:center; padding:24px 16px 60px; min-height:100vh; }
+  h1 { color:#fff; font-size:22px; margin-bottom:4px; }
+  .subtitle { color:rgba(255,255,255,0.55); font-size:13px; margin-bottom:28px; max-width:920px; text-align:center; }
+  .screen-grid { display:flex; flex-wrap:wrap; gap:32px; justify-content:center; max-width:1700px; }
+  .phone { width:390px; flex-shrink:0; }
+  .phone-label { color:rgba(255,255,255,0.55); font-size:12px; font-weight:700; margin-bottom:4px; text-align:center; }
+  .phone-note { color:rgba(255,255,255,0.35); font-size:10.5px; margin-bottom:8px; text-align:center; line-height:1.4; padding:0 8px; }
+  .phone-screen { background:var(--bg); border-radius:40px; overflow:hidden; height:844px; display:flex; flex-direction:column; box-shadow:0 24px 64px rgba(0,0,0,0.5); border:8px solid #0a0a0f; position:relative; }
+  .notch { position:absolute; top:0; left:50%; transform:translateX(-50%); width:120px; height:26px; background:#0a0a0f; border-radius:0 0 16px 16px; z-index:20; }
+  .status-bar { background:var(--navy); color:rgba(255,255,255,0.85); display:flex; justify-content:space-between; align-items:center; padding:16px 24px 8px; font-size:12px; font-weight:600; flex-shrink:0; }
+  .topbar { background:var(--navy); color:white; display:flex; align-items:center; padding:4px 16px 14px; gap:10px; flex-shrink:0; }
+  .topbar .back { color:var(--orange); font-size:14px; font-weight:600; min-width:56px; }
+  .topbar .title { flex:1; text-align:center; font-size:16px; font-weight:700; }
+  .topbar .action { color:var(--orange); font-size:13px; font-weight:600; min-width:56px; text-align:right; }
+  .content { flex:1; overflow-y:auto; }
+  .content::-webkit-scrollbar { width:0; }
+  .pad { padding:16px; }
+  .card { background:var(--card); border-radius:14px; padding:16px; margin-bottom:12px; border:1px solid var(--border); }
+  .card-title { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:10px; }
+  .pill { display:inline-block; font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px; }
+  .pill-green { background:#e8f5e9; color:#2e7d32; }
+  .pill-amber { background:#fff8e1; color:#b37d00; }
+  .btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:15px; border:none; border-radius:12px; font-size:15px; font-weight:700; text-align:center; }
+  .btn-primary { background:var(--orange); color:#fff; }
+  .btn-outline { background:transparent; border:2px solid var(--navy); color:var(--navy); }
+  .mb-8 { margin-bottom:8px; } .mb-12 { margin-bottom:12px; }
+  .row-between { display:flex; align-items:center; justify-content:space-between; }
+
+  .plan-hero { background:linear-gradient(135deg,var(--navy),var(--navy-light)); border-radius:16px; padding:20px; margin-bottom:14px; }
+  .plan-hero .tier { font-size:11px; color:rgba(255,255,255,0.55); text-transform:uppercase; letter-spacing:0.08em; }
+  .plan-hero .tier-name { font-size:24px; font-weight:900; color:#fff; margin-top:4px; }
+  .plan-hero .price { font-size:13px; color:rgba(255,255,255,0.7); margin-top:4px; }
+  .plan-hero .trial-chip { display:inline-block; margin-top:10px; background:rgba(244,121,32,0.25); color:var(--orange); font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px; }
+
+  .card-brand-row { display:flex; align-items:center; gap:12px; }
+  .card-brand-icon { width:44px; height:30px; border-radius:6px; background:#1a1f71; color:#fff; font-size:10px; font-weight:800; display:flex; align-items:center; justify-content:center; letter-spacing:0.5px; }
+  .card-num { font-size:14px; font-weight:600; color:var(--text); font-variant-numeric:tabular-nums; }
+  .card-sub { font-size:11px; color:var(--muted); margin-top:2px; }
+
+  .usage-track { height:8px; background:#e8ecf0; border-radius:4px; overflow:hidden; margin:10px 0 6px; }
+  .usage-fill { height:100%; background:var(--orange); border-radius:4px; }
+
+  .biometric-sheet { position:absolute; left:0; right:0; bottom:0; top:0; background:rgba(15,30,53,0.92); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; z-index:30; }
+  .biometric-icon { width:74px; height:74px; border-radius:20px; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; font-size:36px; }
+  .biometric-title { color:#fff; font-size:16px; font-weight:700; }
+  .biometric-sub { color:rgba(255,255,255,0.55); font-size:12.5px; text-align:center; padding:0 40px; line-height:1.5; }
+
+  .handoff-card { background:#fff; border-radius:16px; padding:22px 18px; text-align:center; border:1px solid var(--border); }
+  .handoff-icon { font-size:38px; margin-bottom:10px; }
+  .handoff-title { font-size:16px; font-weight:800; color:var(--navy); }
+  .handoff-sub { font-size:12.5px; color:var(--muted); margin-top:6px; line-height:1.5; }
+  .qr-box { width:120px; height:120px; margin:16px auto; background:repeating-conic-gradient(#1a1a2e 0% 25%, #fff 0% 50%) 0 0/16px 16px; border-radius:8px; border:6px solid #fff; box-shadow:0 0 0 1px var(--border); }
+
+  .home-indicator { position:absolute; bottom:6px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(0,0,0,0.25); border-radius:3px; z-index:20; }
+</style>
+</head>
+<body>
+
+<h1>CarrierOS — Mockup 27: Billing (Phone-Frame, Native)</h1>
+<p class="subtitle">Fills a real mobile gap: <code>billing/index.tsx</code> is view-only with no phone-frame treatment. Add-Payment-Method / Change-Tier deliberately stay web-only (Stripe not yet live per the code's own comment) — that constraint is reinforced here with a genuine native-platform reason (App Store/Play Store in-app-purchase rules for subscription changes made inside a native app), not just carried over as a cost-cutting default.</p>
+
+<div class="screen-grid">
+
+  <!-- SCREEN 1: PLAN + PAYMENT + USAGE -->
+  <div class="phone">
+    <div class="phone-label">1 — Plan, Payment Method &amp; Fleet Usage</div>
+    <div class="phone-note">Matches billing/index.tsx exactly: tier, trial countdown, card-on-file, truck-count overage. Read-only, consistent with the code's current scope.</div>
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:41</span><span>●●●●  🔋</span></div>
+      <div class="topbar"><div class="back">‹ Back</div><div class="title">Billing</div><div class="action"></div></div>
+      <div class="content">
+        <div class="pad">
+          <div class="plan-hero">
+            <div class="tier">Current Plan</div>
+            <div class="tier-name">Growth</div>
+            <div class="price">$99/mo</div>
+            <span class="trial-chip">Trial · 9 days left</span>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Payment Method</div>
+            <div class="card-brand-row">
+              <div class="card-brand-icon">VISA</div>
+              <div>
+                <div class="card-num">•••• •••• •••• 4242</div>
+                <div class="card-sub">Expires 08/28</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Fleet Usage</div>
+            <div class="row-between">
+              <span style="font-size:13px;color:var(--text);">3 of 5 trucks included</span>
+              <span style="font-size:13px;font-weight:700;color:var(--navy);">60%</span>
+            </div>
+            <div class="usage-track"><div class="usage-fill" style="width:60%;"></div></div>
+            <div style="font-size:11px;color:var(--muted);">2 trucks remaining before overage ($15/truck/mo)</div>
+          </div>
+
+          <button class="btn btn-outline">Manage Subscription →</button>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: PASSKEY / BIOMETRIC CONFIRM BEFORE WEB HANDOFF -->
+  <div class="phone">
+    <div class="phone-label">2 — Biometric Confirm (Face ID) Before Handoff</div>
+    <div class="phone-note">Tapping "Manage Subscription" on a billing-sensitive action triggers Face ID / fingerprint confirmation first — a genuine native affordance web can't replicate, and reinforces trust for a money action. Passkey itself stays optional per T15; this is a step-up biometric prompt, not a login requirement.</div>
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:42</span><span>●●●●  🔋</span></div>
+      <div class="content" style="position:relative;">
+        <div class="pad">
+          <div class="plan-hero">
+            <div class="tier">Current Plan</div>
+            <div class="tier-name">Growth</div>
+            <div class="price">$99/mo</div>
+          </div>
+          <div class="card"><div class="card-title">Payment Method</div><div class="card-brand-row"><div class="card-brand-icon">VISA</div><div><div class="card-num">•••• •••• •••• 4242</div></div></div></div>
+        </div>
+        <div class="biometric-sheet">
+          <div class="biometric-icon">🔒</div>
+          <div class="biometric-title">Confirm with Face ID</div>
+          <div class="biometric-sub">to continue to subscription management on carrieros.com</div>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: WEB HANDOFF EXPLANATION -->
+  <div class="phone">
+    <div class="phone-label">3 — Manage Subscription: Web Handoff</div>
+    <div class="phone-note">Opens the device's default browser (SFSafariViewController on iOS / Custom Tabs on Android) — not an in-app WebView — so the session and payment form stay in a trusted, updateable browser context.</div>
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:43</span><span>●●●●  🔋</span></div>
+      <div class="topbar"><div class="back">‹ Billing</div><div class="title"></div><div class="action"></div></div>
+      <div class="content">
+        <div class="pad" style="display:flex;flex-direction:column;justify-content:center;height:100%;padding-top:60px;">
+          <div class="handoff-card">
+            <div class="handoff-icon">💳</div>
+            <div class="handoff-title">Continue on Web</div>
+            <div class="handoff-sub">Changing your plan or payment method opens carrieros.com in your browser — the same secure Stripe checkout used on desktop, kept in one place instead of duplicated in-app.</div>
+            <button class="btn btn-primary mb-8" style="margin-top:18px;">Open carrieros.com/billing</button>
+          </div>
+          <div style="text-align:center;margin-top:16px;font-size:11px;color:var(--muted);line-height:1.5;padding:0 20px;">
+            App Store and Play Store guidelines require in-app purchase flows for subscriptions purchased inside a native app — routing plan changes to web sidesteps that entirely, the same approach most SaaS apps with a web-first billing system use.
+          </div>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:40px;color:rgba(255,255,255,0.3);font-size:11px;text-align:center;">
+  CarrierOS — Mockup 27: Billing (Phone-Frame, Native) · Companion spec: mobile-native-interaction-spec.md §Billing
+</div>
+
+</body>
+</html>

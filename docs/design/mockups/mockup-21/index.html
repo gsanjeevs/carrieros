@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarrierOS — Mockup 21: Growth Desktop Command Center</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#0f1e35;--navy-mid:#182c46;--navy-light:#1f3a58;--navy-sidebar:#0c1a2e;
+  --orange:#f47920;--orange-lt:#f9a55a;
+  --white:#fff;--gray:#8fa3b8;--gray-lt:#d6e0ea;
+  --green:#2ecc71;--teal:#1abc9c;--amber:#f0a500;--red:#e74c3c;
+  --bg:#f0f3f7;--card:#fff;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#1a1a2e;
+  min-height:100vh;padding:40px 32px;}
+.page-header{text-align:center;margin-bottom:48px;}
+.page-header .tag{display:inline-block;background:rgba(240,165,0,.12);color:var(--amber);
+  font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  padding:4px 14px;border-radius:20px;margin-bottom:12px;}
+.page-header h1{font-size:28px;font-weight:800;color:var(--white);margin-bottom:6px;}
+.page-header p{font-size:14px;color:var(--gray);max-width:620px;margin:0 auto;}
+
+/* VIEW LABEL */
+.view-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--gray);text-align:center;margin-bottom:16px;}
+.view-section{margin-bottom:56px;}
+
+/* BROWSER CHROME FRAME */
+.browser-chrome{background:#2a2a3e;border-radius:12px 12px 0 0;padding:10px 16px;
+  display:flex;align-items:center;gap:10px;}
+.browser-dots{display:flex;gap:6px;}
+.browser-dot{width:12px;height:12px;border-radius:50%;}
+.browser-url{flex:1;background:rgba(255,255,255,.08);border-radius:6px;padding:5px 12px;
+  font-size:12px;color:var(--gray);max-width:400px;margin:0 auto;}
+
+/* DESKTOP SHELL */
+.desktop{display:flex;height:720px;background:var(--bg);border-radius:0 0 12px 12px;
+  overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.5);}
+
+/* SIDEBAR */
+.sidebar{width:220px;background:var(--navy-sidebar);display:flex;flex-direction:column;flex-shrink:0;}
+.sidebar-logo{padding:20px 20px 14px;border-bottom:1px solid rgba(255,255,255,.06);}
+.logo-mark{font-size:16px;font-weight:800;color:var(--white);}
+.logo-sub{font-size:10px;color:var(--gray);margin-top:1px;letter-spacing:.5px;}
+.sidebar-company{padding:12px 20px;border-bottom:1px solid rgba(255,255,255,.06);}
+.company-name{font-size:12px;font-weight:700;color:var(--white);}
+.company-plan{font-size:10px;color:var(--amber);margin-top:2px;font-weight:600;}
+.sidebar-nav{flex:1;padding:12px 0;}
+.nav-section-label{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:rgba(143,163,184,.5);padding:8px 20px 4px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;
+  font-size:13px;color:var(--gray);transition:background .15s;border-left:3px solid transparent;}
+.nav-item.active{background:rgba(244,121,32,.1);color:var(--orange);border-left-color:var(--orange);}
+.nav-item:hover:not(.active){background:rgba(255,255,255,.04);}
+.nav-ico{width:16px;text-align:center;font-size:14px;}
+.nav-badge{margin-left:auto;background:var(--orange);color:var(--white);font-size:9px;
+  font-weight:700;padding:2px 6px;border-radius:10px;}
+.sidebar-user{padding:12px 16px;border-top:1px solid rgba(255,255,255,.06);
+  display:flex;align-items:center;gap:10px;}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:var(--orange);
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--white);flex-shrink:0;}
+.user-name{font-size:12px;font-weight:600;color:var(--white);}
+.user-role{font-size:10px;color:var(--gray);margin-top:1px;}
+
+/* MAIN CONTENT */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.top-bar{background:var(--white);border-bottom:1px solid rgba(0,0,0,.06);padding:12px 24px;
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.top-bar-title{font-size:16px;font-weight:700;color:var(--navy);}
+.top-bar-actions{display:flex;gap:10px;align-items:center;}
+.btn{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;border:none;cursor:pointer;}
+.btn-primary{background:var(--orange);color:var(--white);}
+.btn-outline{background:var(--white);color:var(--navy);border:1.5px solid var(--gray-lt);}
+.content-area{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px;}
+
+/* KPI STRIP */
+.kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+.kpi-card{background:var(--card);border-radius:12px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.kpi-label{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--gray);margin-bottom:6px;}
+.kpi-value{font-size:22px;font-weight:800;color:var(--navy);}
+.kpi-sub{font-size:11px;color:var(--gray);margin-top:3px;display:flex;align-items:center;gap:4px;}
+.kpi-up{color:var(--green);font-weight:700;}
+.kpi-down{color:var(--red);font-weight:700;}
+
+/* TWO COLUMN LOWER */
+.lower-row{display:grid;grid-template-columns:1fr 360px;gap:16px;flex:1;min-height:0;}
+
+/* LOADS TABLE */
+.panel{background:var(--card);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);
+  display:flex;flex-direction:column;overflow:hidden;}
+.panel-header{padding:14px 16px;border-bottom:1px solid var(--bg);display:flex;
+  align-items:center;justify-content:space-between;flex-shrink:0;}
+.panel-title{font-size:13px;font-weight:700;color:var(--navy);}
+.panel-action{font-size:11px;font-weight:600;color:var(--orange);}
+.table-head{display:grid;gap:0;background:var(--bg);padding:8px 16px;flex-shrink:0;}
+.th{font-size:9px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.8px;}
+.table-body{flex:1;overflow-y:auto;}
+.table-row{display:grid;padding:11px 16px;border-bottom:1px solid var(--bg);align-items:center;gap:0;}
+.table-row:last-child{border-bottom:none;}
+.table-row:hover{background:rgba(0,0,0,.015);}
+.status-chip{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;}
+.chip-transit{background:rgba(26,188,156,.12);color:#0d8a6e;}
+.chip-pickup{background:rgba(240,165,0,.12);color:#7a5200;}
+.chip-delivered{background:rgba(46,204,113,.12);color:#0d6e3f;}
+.chip-booked{background:rgba(143,163,184,.15);color:var(--navy);}
+.driver-cell{display:flex;align-items:center;gap:7px;}
+.driver-dot{width:24px;height:24px;border-radius:50%;font-size:10px;font-weight:700;
+  color:var(--white);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* MAP PANEL */
+.map-panel{background:var(--card);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);
+  display:flex;flex-direction:column;overflow:hidden;}
+.map-area{flex:1;position:relative;background:linear-gradient(145deg,#c8d8e8 0%,#b8ccdc 40%,#c4d4e4 100%);
+  min-height:200px;}
+/* Road grid illusion */
+.map-area::before{content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(255,255,255,.35) 40px),
+             repeating-linear-gradient(90deg,transparent,transparent 59px,rgba(255,255,255,.35) 60px);}
+/* Highways */
+.highway{position:absolute;background:rgba(255,255,255,.6);border-radius:2px;}
+.map-truck{position:absolute;width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+  box-shadow:0 2px 8px rgba(0,0,0,.25);border:2px solid var(--white);cursor:pointer;}
+.truck-label{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);
+  font-size:9px;font-weight:700;white-space:nowrap;background:var(--white);
+  padding:1px 5px;border-radius:4px;color:var(--navy);}
+.map-legend{position:absolute;bottom:10px;left:10px;background:rgba(255,255,255,.9);
+  border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:5px;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--navy);}
+.legend-dot{width:10px;height:10px;border-radius:50%;}
+.exception-strip{padding:10px 14px;border-top:1px solid var(--bg);flex-shrink:0;}
+.exception-title{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:var(--gray);margin-bottom:6px;}
+.exception-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bg);}
+.exception-item:last-child{border-bottom:none;}
+.ex-ico{font-size:12px;}
+.ex-text{font-size:11px;color:var(--navy);flex:1;}
+.ex-time{font-size:10px;color:var(--gray);}
+
+/* ---- DISPATCHER VIEW ---- */
+.disp-main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.disp-content{flex:1;display:grid;grid-template-columns:1fr 320px;gap:0;overflow:hidden;}
+.load-queue{border-right:1px solid var(--bg);display:flex;flex-direction:column;overflow:hidden;}
+.queue-top{padding:12px 16px;border-bottom:1px solid var(--bg);display:flex;align-items:center;
+  justify-content:space-between;flex-shrink:0;}
+.queue-title{font-size:13px;font-weight:700;color:var(--navy);}
+.tabs{display:flex;gap:2px;}
+.tab{font-size:11px;font-weight:600;padding:5px 10px;border-radius:6px;cursor:pointer;color:var(--gray);}
+.tab.active{background:var(--orange);color:var(--white);}
+.load-queue-list{flex:1;overflow-y:auto;}
+.load-queue-item{padding:12px 16px;border-bottom:1px solid var(--bg);cursor:pointer;
+  transition:background .12s;display:flex;gap:12px;align-items:flex-start;}
+.load-queue-item:hover{background:rgba(0,0,0,.015);}
+.load-queue-item.selected{background:rgba(244,121,32,.05);border-left:3px solid var(--orange);}
+.lq-body{flex:1;}
+.lq-id{font-size:11px;font-weight:700;color:var(--gray);}
+.lq-route{font-size:13px;font-weight:700;color:var(--navy);margin-top:2px;}
+.lq-meta{font-size:11px;color:var(--gray);margin-top:3px;}
+.lq-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+.assign-panel{background:var(--bg);display:flex;flex-direction:column;overflow:hidden;}
+.assign-header{background:var(--white);padding:12px 16px;border-bottom:1px solid rgba(0,0,0,.06);flex-shrink:0;}
+.assign-title{font-size:13px;font-weight:700;color:var(--navy);}
+.assign-body{flex:1;overflow-y:auto;padding:14px;}
+.load-detail-card{background:var(--white);border-radius:10px;padding:12px 14px;margin-bottom:12px;
+  box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.detail-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bg);}
+.detail-row:last-child{border-bottom:none;}
+.detail-key{font-size:11px;color:var(--gray);}
+.detail-val{font-size:11px;font-weight:700;color:var(--navy);}
+.assign-drivers-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:var(--gray);margin-bottom:8px;}
+.driver-option{background:var(--white);border-radius:10px;padding:10px 12px;margin-bottom:8px;
+  display:flex;align-items:center;gap:10px;border:1.5px solid transparent;cursor:pointer;
+  box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.driver-option.recommended{border-color:var(--orange);}
+.driver-option-info{flex:1;}
+.driver-option-name{font-size:12px;font-weight:700;color:var(--navy);}
+.driver-option-status{font-size:10px;color:var(--gray);margin-top:1px;}
+.driver-option-tag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;
+  background:rgba(244,121,32,.12);color:var(--orange);}
+.assign-btn{width:100%;background:var(--orange);color:var(--white);font-size:13px;font-weight:700;
+  padding:12px;border-radius:10px;border:none;cursor:pointer;margin-top:4px;}
+
+/* DEV NOTES */
+.dev-notes{background:var(--navy-sidebar);border-radius:16px;padding:28px 32px;margin-top:40px;}
+.dev-notes-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--orange);margin-bottom:20px;}
+.dev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.dev-col h4{font-size:12px;font-weight:700;color:var(--gray-lt);margin-bottom:8px;}
+.dev-col p,.dev-col li{font-size:12px;color:var(--gray);line-height:1.7;}
+.dev-col ul{padding-left:14px;}
+.dev-col code{font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px;
+  color:var(--orange-lt);font-family:'SF Mono',monospace;}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="tag">Mockup 21 · Growth Tier · Desktop</div>
+  <h1>🖥️ Desktop Command Center</h1>
+  <p>Two roles, two views. Owner sees fleet-wide KPIs, live map, and load status at a glance. Dispatcher sees a load queue + assign panel. Fixed sidebar navigation mirrors mockup-17 (Pro Finance hub).</p>
+</div>
+
+<!-- ======= VIEW 1: OWNER ======= -->
+<div class="view-section">
+  <div class="view-label">View 1 — Owner: Fleet overview</div>
+  <div class="browser-chrome">
+    <div class="browser-dots">
+      <div class="browser-dot" style="background:#ff5f57;"></div>
+      <div class="browser-dot" style="background:#febc2e;"></div>
+      <div class="browser-dot" style="background:#28c840;"></div>
+    </div>
+    <div class="browser-url">app.carrierosapp.com/dashboard</div>
+  </div>
+  <div class="desktop">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-mark">CarrierOS</div>
+        <div class="logo-sub">Fleet Management</div>
+      </div>
+      <div class="sidebar-company">
+        <div class="company-name">Sahara Freight LLC</div>
+        <div class="company-plan">Growth Plan · 3 trucks</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Overview</div>
+        <div class="nav-item active"><span class="nav-ico">🏠</span> Dashboard</div>
+        <div class="nav-item"><span class="nav-ico">📦</span> Loads <span class="nav-badge">2</span></div>
+        <div class="nav-section-label">Fleet</div>
+        <div class="nav-item"><span class="nav-ico">🚛</span> Trucks</div>
+        <div class="nav-item"><span class="nav-ico">👥</span> Drivers</div>
+        <div class="nav-item"><span class="nav-ico">🗓️</span> Calendar</div>
+        <div class="nav-section-label">Finance</div>
+        <div class="nav-item"><span class="nav-ico">⛽</span> Fuel Log</div>
+        <div class="nav-item"><span class="nav-ico">🗺️</span> IFTA</div>
+        <div class="nav-item"><span class="nav-ico">💰</span> Settlements</div>
+        <div class="nav-section-label">Reports</div>
+        <div class="nav-item"><span class="nav-ico">📊</span> Analytics</div>
+        <div class="nav-item"><span class="nav-ico">⚙️</span> Settings</div>
+      </nav>
+      <div class="sidebar-user">
+        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7V1sXOQtAXyR7oXYN_-7umstQpvS2nLFyFlc2NXzSmUYSyepsSElsEaJuWbWvX3UdiFRRfPZ75SgweHw4YHFhcDBdlQZfrdyxUl9JYiYDb0tFrWwwl4CJNbzkKIa8fYePpgF3jZE8xbsd-uoPEVqZkbgrLT1Vq2tyaYmQCXFQdL-MeEb_i_GVNDRb2TcokdnvmqePeurcJxGNmZKVqFrhwS3oumfu4-TOpNxeQctRCBB1zKqATBvW58wv3VOzbHXEnm3r7aixm3I" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="Ravi Singh">
+        <div><div class="user-name">Ravi Singh</div><div class="user-role">Owner</div></div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+      <div class="top-bar">
+        <div>
+          <div class="top-bar-title">Dashboard</div>
+          <div style="font-size:11px;color:var(--gray);margin-top:1px;">Saturday, Jul 5 · 10:22 AM PDT</div>
+        </div>
+        <div class="top-bar-actions">
+          <button class="btn btn-outline">+ Add Load</button>
+          <button class="btn btn-primary">Dispatch</button>
+        </div>
+      </div>
+
+      <div class="content-area">
+        <!-- KPI STRIP -->
+        <div class="kpi-strip">
+          <div class="kpi-card">
+            <div class="kpi-label">Active Loads</div>
+            <div class="kpi-value">3</div>
+            <div class="kpi-sub"><span class="kpi-up">▲ 1</span> vs last week</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Revenue MTD</div>
+            <div class="kpi-value">$18,420</div>
+            <div class="kpi-sub"><span class="kpi-up">▲ 12%</span> vs Jun</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Trucks On Road</div>
+            <div class="kpi-value">2 / 3</div>
+            <div class="kpi-sub" style="color:var(--gray);">1 available</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Fuel This Month</div>
+            <div class="kpi-value">$4,210</div>
+            <div class="kpi-sub"><span class="kpi-down">▲ 8%</span> vs Jun</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Unread Messages</div>
+            <div class="kpi-value" style="color:var(--orange);">4</div>
+            <div class="kpi-sub" style="color:var(--gray);">from 2 drivers</div>
+          </div>
+        </div>
+
+        <!-- LOWER ROW: loads table + map -->
+        <div class="lower-row">
+          <!-- Loads table -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">Active Loads</div>
+              <div class="panel-action">View all →</div>
+            </div>
+            <!-- Table -->
+            <div style="display:grid;grid-template-columns:80px 1fr 100px 90px 80px 100px;gap:0;">
+              <div class="table-head" style="grid-column:1/-1;display:grid;grid-template-columns:80px 1fr 100px 90px 80px 100px;padding:8px 16px;">
+                <div class="th">Load ID</div>
+                <div class="th">Route</div>
+                <div class="th">Driver</div>
+                <div class="th">Status</div>
+                <div class="th">ETA</div>
+                <div class="th">Rate</div>
+              </div>
+              <div class="table-body" style="grid-column:1/-1;overflow-y:auto;">
+                <div class="table-row" style="grid-template-columns:80px 1fr 100px 90px 80px 100px;">
+                  <div style="font-size:12px;font-weight:700;color:var(--navy);">L-0091</div>
+                  <div style="font-size:12px;color:var(--navy);">Fresno → Phoenix</div>
+                  <div class="driver-cell">
+                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC11W5eL6hdmfkin7dfg_xGQwWZGd1JnzA3lazTJAvBkiVQHeL8ATi_JiClWXv7UaEbYjd7Uo3Aodhs7lTYPjr2bpHv1fF7qacOx3Sjm0LccF8goKjUbePGYTGM0mBfLRblgTTAc3Uf6fFtOLdQYko_HvafeGJHnkcLNsloC5P03JIDriDnm2tYF46TmAecl7BhhJ3TM7GKSHeFcDf7o0rbzL2XZtdOHPhvfpiaSA89VD3yqDDSVi72zPCB4sP3rQBh5uAufyWVy5A" style="width:24px;height:24px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="Priya S.">
+                    <span style="font-size:11px;color:var(--navy);">Priya S.</span>
+                  </div>
+                  <div><span class="status-chip chip-transit">In Transit</span></div>
+                  <div style="font-size:12px;color:var(--navy);">2:40 PM</div>
+                  <div style="font-size:12px;font-weight:700;color:var(--navy);">$1,240</div>
+                </div>
+                <div class="table-row" style="grid-template-columns:80px 1fr 100px 90px 80px 100px;">
+                  <div style="font-size:12px;font-weight:700;color:var(--navy);">L-0092</div>
+                  <div style="font-size:12px;color:var(--navy);">Stockton → LA</div>
+                  <div class="driver-cell">
+                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0w8Jhki8Y_EIsrZgtQq_RJggrrBpzpZrnDc2GhXNJW7b6xKix0AfqDSCVDPPkIbz6oA94r35GA0rR10wvBx4aS3EGBDT3_RXKidrH9y0LDkOkMt0ev_DwGbXDegrGoL7853Pbnfnc56lPzCo0UQYcVJ0d94QqUl80E4V2pzVD_-KoXcD0LATtuSSbrpMWYEUPsqJKGwRlfAhJick2zVvI5XTAv637JIaIiLk0KL9jFqnkWpUSFIcnXYzZuMtyh0sSHJPf6zbjvyI" style="width:24px;height:24px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="Mike R.">
+                    <span style="font-size:11px;color:var(--navy);">Mike R.</span>
+                  </div>
+                  <div><span class="status-chip chip-pickup">At Pickup</span></div>
+                  <div style="font-size:12px;color:var(--navy);">5:15 PM</div>
+                  <div style="font-size:12px;font-weight:700;color:var(--navy);">$980</div>
+                </div>
+                <div class="table-row" style="grid-template-columns:80px 1fr 100px 90px 80px 100px;">
+                  <div style="font-size:12px;font-weight:700;color:var(--navy);">L-0093</div>
+                  <div style="font-size:12px;color:var(--navy);">Oakland → Reno</div>
+                  <div class="driver-cell">
+                    <div class="driver-dot" style="background:var(--gray);">—</div>
+                    <span style="font-size:11px;color:var(--amber);">Unassigned</span>
+                  </div>
+                  <div><span class="status-chip chip-booked">Booked</span></div>
+                  <div style="font-size:12px;color:var(--gray);">Tomorrow</div>
+                  <div style="font-size:12px;font-weight:700;color:var(--navy);">$750</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Map + exceptions -->
+          <div class="map-panel">
+            <div class="panel-header" style="flex-shrink:0;">
+              <div class="panel-title">Live Fleet Map</div>
+              <div style="font-size:10px;font-weight:600;background:rgba(46,204,113,.12);
+                color:var(--green);padding:3px 8px;border-radius:20px;">● 2 Live</div>
+            </div>
+            <div class="map-area" style="height:260px;">
+              <!-- Highway lines -->
+              <div class="highway" style="width:3px;height:200px;top:30px;left:55%;background:rgba(255,255,255,.5);"></div>
+              <div class="highway" style="width:160px;height:3px;top:45%;left:30%;background:rgba(255,255,255,.5);"></div>
+              <div class="highway" style="width:130px;height:3px;top:65%;left:10%;background:rgba(255,255,255,.4);transform:rotate(-8deg);"></div>
+              <!-- Trucks -->
+              <div class="map-truck" style="background:var(--teal);top:38%;left:62%;">
+                🚛<div class="truck-label">T-03 · L-0091</div>
+              </div>
+              <div class="map-truck" style="background:var(--orange);top:60%;left:22%;">
+                🚛<div class="truck-label">T-01 · L-0092</div>
+              </div>
+              <!-- City dots -->
+              <div style="position:absolute;top:20%;left:25%;font-size:9px;color:var(--navy);font-weight:700;">Fresno</div>
+              <div style="position:absolute;top:40%;left:78%;font-size:9px;color:var(--navy);font-weight:700;">Phoenix</div>
+              <div style="position:absolute;top:65%;left:8%;font-size:9px;color:var(--navy);font-weight:700;">Stockton</div>
+              <div style="position:absolute;top:80%;left:55%;font-size:9px;color:var(--navy);font-weight:700;">Los Angeles</div>
+              <!-- Legend -->
+              <div class="map-legend">
+                <div class="legend-item"><div class="legend-dot" style="background:var(--teal);"></div> In Transit</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--orange);"></div> At Pickup</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--gray);"></div> Available</div>
+              </div>
+            </div>
+            <!-- Exception strip -->
+            <div class="exception-strip">
+              <div class="exception-title">Exceptions</div>
+              <div class="exception-item">
+                <div class="ex-ico">⚠️</div>
+                <div class="ex-text">L-0093 unassigned — pickup tomorrow 8 AM</div>
+                <div class="ex-time">Now</div>
+              </div>
+              <div class="exception-item">
+                <div class="ex-ico">💬</div>
+                <div class="ex-text">Priya S. sent 3 messages on L-0091</div>
+                <div class="ex-time">12 min</div>
+              </div>
+              <div class="exception-item">
+                <div class="ex-ico">⛽</div>
+                <div class="ex-text">T-01 fuel logged — $268.40 in Stockton</div>
+                <div class="ex-time">47 min</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======= VIEW 2: DISPATCHER ======= -->
+<div class="view-section">
+  <div class="view-label">View 2 — Dispatcher: Load queue + assign panel</div>
+  <div class="browser-chrome">
+    <div class="browser-dots">
+      <div class="browser-dot" style="background:#ff5f57;"></div>
+      <div class="browser-dot" style="background:#febc2e;"></div>
+      <div class="browser-dot" style="background:#28c840;"></div>
+    </div>
+    <div class="browser-url">app.carrierosapp.com/dispatch</div>
+  </div>
+  <div class="desktop">
+    <!-- SIDEBAR (Dispatcher) -->
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-mark">CarrierOS</div>
+        <div class="logo-sub">Fleet Management</div>
+      </div>
+      <div class="sidebar-company">
+        <div class="company-name">Sahara Freight LLC</div>
+        <div class="company-plan">Growth Plan · 3 trucks</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Overview</div>
+        <div class="nav-item"><span class="nav-ico">🏠</span> Dashboard</div>
+        <div class="nav-item"><span class="nav-ico">📦</span> Loads <span class="nav-badge">1</span></div>
+        <div class="nav-section-label">Dispatch</div>
+        <div class="nav-item active"><span class="nav-ico">📋</span> Dispatch Queue</div>
+        <div class="nav-item"><span class="nav-ico">💬</span> Messages <span class="nav-badge">4</span></div>
+        <div class="nav-section-label">Fleet</div>
+        <div class="nav-item"><span class="nav-ico">🚛</span> Trucks</div>
+        <div class="nav-item"><span class="nav-ico">👥</span> Drivers</div>
+        <div class="nav-item"><span class="nav-ico">🗓️</span> Calendar</div>
+      </nav>
+      <div class="sidebar-user">
+        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0w8Jhki8Y_EIsrZgtQq_RJggrrBpzpZrnDc2GhXNJW7b6xKix0AfqDSCVDPPkIbz6oA94r35GA0rR10wvBx4aS3EGBDT3_RXKidrH9y0LDkOkMt0ev_DwGbXDegrGoL7853Pbnfnc56lPzCo0UQYcVJ0d94QqUl80E4V2pzVD_-KoXcD0LATtuSSbrpMWYEUPsqJKGwRlfAhJick2zVvI5XTAv637JIaIiLk0KL9jFqnkWpUSFIcnXYzZuMtyh0sSHJPf6zbjvyI" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="Dispatcher">
+        <div><div class="user-name">James M.</div><div class="user-role">Dispatcher</div></div>
+      </div>
+    </div>
+
+    <!-- DISPATCHER MAIN -->
+    <div class="disp-main">
+      <div class="top-bar">
+        <div>
+          <div class="top-bar-title">Dispatch Queue</div>
+          <div style="font-size:11px;color:var(--gray);margin-top:1px;">3 loads · 1 needs assignment</div>
+        </div>
+        <div class="top-bar-actions">
+          <button class="btn btn-outline">Filter</button>
+          <button class="btn btn-primary">+ New Load</button>
+        </div>
+      </div>
+
+      <div class="disp-content">
+        <!-- Load queue -->
+        <div class="load-queue">
+          <div class="queue-top">
+            <div class="queue-title">All Loads</div>
+            <div class="tabs">
+              <div class="tab active">Active</div>
+              <div class="tab">Today</div>
+              <div class="tab">All</div>
+            </div>
+          </div>
+          <div class="load-queue-list">
+            <div class="load-queue-item">
+              <div style="padding-top:2px;">
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC11W5eL6hdmfkin7dfg_xGQwWZGd1JnzA3lazTJAvBkiVQHeL8ATi_JiClWXv7UaEbYjd7Uo3Aodhs7lTYPjr2bpHv1fF7qacOx3Sjm0LccF8goKjUbePGYTGM0mBfLRblgTTAc3Uf6fFtOLdQYko_HvafeGJHnkcLNsloC5P03JIDriDnm2tYF46TmAecl7BhhJ3TM7GKSHeFcDf7o0rbzL2XZtdOHPhvfpiaSA89VD3yqDDSVi72zPCB4sP3rQBh5uAufyWVy5A" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="Priya S.">
+              </div>
+              <div class="lq-body">
+                <div class="lq-id">L-0091 · T-03</div>
+                <div class="lq-route">Fresno → Phoenix</div>
+                <div class="lq-meta">Priya Singh · ETA 2:40 PM · $1,240</div>
+              </div>
+              <div class="lq-right">
+                <span class="status-chip chip-transit">In Transit</span>
+                <span style="font-size:10px;color:var(--orange);font-weight:600;">3 msgs</span>
+              </div>
+            </div>
+            <div class="load-queue-item">
+              <div style="padding-top:2px;">
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0w8Jhki8Y_EIsrZgtQq_RJggrrBpzpZrnDc2GhXNJW7b6xKix0AfqDSCVDPPkIbz6oA94r35GA0rR10wvBx4aS3EGBDT3_RXKidrH9y0LDkOkMt0ev_DwGbXDegrGoL7853Pbnfnc56lPzCo0UQYcVJ0d94QqUl80E4V2pzVD_-KoXcD0LATtuSSbrpMWYEUPsqJKGwRlfAhJick2zVvI5XTAv637JIaIiLk0KL9jFqnkWpUSFIcnXYzZuMtyh0sSHJPf6zbjvyI" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="Mike R.">
+              </div>
+              <div class="lq-body">
+                <div class="lq-id">L-0092 · T-01</div>
+                <div class="lq-route">Stockton → Los Angeles</div>
+                <div class="lq-meta">Mike Rodriguez · ETA 5:15 PM · $980</div>
+              </div>
+              <div class="lq-right">
+                <span class="status-chip chip-pickup">At Pickup</span>
+              </div>
+            </div>
+            <div class="load-queue-item selected">
+              <div style="padding-top:2px;">
+                <div class="driver-dot" style="background:rgba(240,165,0,.3);width:28px;height:28px;font-size:11px;color:var(--amber);">?</div>
+              </div>
+              <div class="lq-body">
+                <div class="lq-id">L-0093 · Unassigned ⚠️</div>
+                <div class="lq-route">Oakland → Reno</div>
+                <div class="lq-meta">Pickup tomorrow 8:00 AM · $750</div>
+              </div>
+              <div class="lq-right">
+                <span class="status-chip chip-booked">Booked</span>
+                <span style="font-size:10px;color:var(--red);font-weight:600;">Assign now</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Assign panel -->
+        <div class="assign-panel">
+          <div class="assign-header">
+            <div class="assign-title">L-0093 — Assign Driver</div>
+            <div style="font-size:11px;color:var(--gray);margin-top:2px;">Oakland → Reno · pickup tomorrow 8 AM</div>
+          </div>
+          <div class="assign-body">
+            <div class="load-detail-card">
+              <div class="detail-row"><span class="detail-key">Origin</span><span class="detail-val">Oakland, CA</span></div>
+              <div class="detail-row"><span class="detail-key">Destination</span><span class="detail-val">Reno, NV</span></div>
+              <div class="detail-row"><span class="detail-key">Pickup</span><span class="detail-val">Jul 6 · 8:00 AM</span></div>
+              <div class="detail-row"><span class="detail-key">Delivery</span><span class="detail-val">Jul 6 · 3:00 PM</span></div>
+              <div class="detail-row"><span class="detail-key">Est. miles</span><span class="detail-val">215 mi · I-80</span></div>
+              <div class="detail-row"><span class="detail-key">Rate</span><span class="detail-val">$750 ($3.49/mi)</span></div>
+            </div>
+
+            <div class="assign-drivers-label">Available Drivers</div>
+
+            <div class="driver-option recommended">
+              <div class="driver-dot" style="background:var(--green);width:36px;height:36px;font-size:13px;">DS</div>
+              <div class="driver-option-info">
+                <div class="driver-option-name">David Sutton</div>
+                <div class="driver-option-status">✅ Available · T-02 · Oakland area</div>
+              </div>
+              <div class="driver-option-tag">Best match</div>
+            </div>
+
+            <div class="driver-option">
+              <div class="driver-dot" style="background:var(--gray);width:36px;height:36px;font-size:13px;">MR</div>
+              <div class="driver-option-info">
+                <div class="driver-option-name">Mike Rodriguez</div>
+                <div class="driver-option-status">🔄 Delivers tonight · T-01 · LA→back</div>
+              </div>
+            </div>
+
+            <button class="assign-btn">Assign David Sutton → L-0093</button>
+
+            <div style="margin-top:10px;text-align:center;">
+              <span style="font-size:11px;color:var(--gray);">Driver gets push notification immediately</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DEV NOTES -->
+<div class="dev-notes">
+  <div class="dev-notes-title">Developer Notes — Mockup 21</div>
+  <div class="dev-grid">
+    <div class="dev-col">
+      <h4>Desktop Shell — Shared Pattern</h4>
+      <p>Fixed sidebar with <code>role</code>-based nav items. Same sidebar component as mockup-17 (Pro Finance Hub). Nav items rendered from a config array filtered by role: Owner sees Finance section (Fuel Log, IFTA, Settlements); Dispatcher sees Dispatch section (Queue, Messages) but NOT Finance.</p>
+      <br>
+      <p>Supabase RLS enforces what data each role can fetch — sidebar filtering is just UX. Desktop route: <code>/dashboard</code> (Owner), <code>/dispatch</code> (Dispatcher). Both roles: Growth tier only — redirect to upgrade page on Starter.</p>
+    </div>
+    <div class="dev-col">
+      <h4>KPI Cards &amp; Live Map</h4>
+      <p>KPI strip: server-side aggregations via Supabase views. <code>active_loads_count</code>, <code>revenue_mtd</code>, <code>trucks_on_road</code>, <code>fuel_cost_mtd</code>, <code>unread_messages_count</code>. Subscribe to <code>loads</code> and <code>driver_messages</code> channels via Supabase Realtime for live badge updates.</p>
+      <br>
+      <p>Live map: poll truck GPS positions from <code>ifta_state_crossings</code> latest row per truck every 2 min (not real-time — positions are estimated, not exact). For MVP accuracy, display last known location with timestamp tooltip.</p>
+    </div>
+    <div class="dev-col">
+      <h4>Assign Panel Logic</h4>
+      <p>Driver availability: query <code>loads</code> for each driver's last delivery ETA. A driver is "available" if no active load with ETA after load pickup time. "Best match" tag: driver home base (from <code>drivers.home_base</code>) within 50 miles of pickup city.</p>
+      <br>
+      <p>Assign action: PATCH <code>loads.driver_id</code> + <code>loads.truck_id</code> → triggers push notification via Supabase Edge Function calling Expo Push API. Driver sees load appear in their mobile app immediately via Realtime subscription on <code>loads</code> table filtered by <code>driver_id</code>.</p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

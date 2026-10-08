@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarrierOS — Mockup 25: Maintenance (Phone-Frame, Native)</title>
+<style>
+  :root {
+    --navy: #0f1e35; --navy-mid:#182c46; --navy-light:#1f3a58;
+    --orange:#f47920; --green:#2ecc71; --amber:#f0a500; --red:#e74c3c; --teal:#1abc9c;
+    --bg:#f4f6f9; --card:#ffffff; --text:#1a1a2e; --muted:#8fa3b8; --border:#e5e7eb;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#1a1a2e; display:flex; flex-direction:column; align-items:center; padding:24px 16px 60px; min-height:100vh; }
+  h1 { color:#fff; font-size:22px; margin-bottom:4px; }
+  .subtitle { color:rgba(255,255,255,0.55); font-size:13px; margin-bottom:28px; max-width:900px; text-align:center; }
+  .screen-grid { display:flex; flex-wrap:wrap; gap:32px; justify-content:center; max-width:1700px; }
+  .phone { width:390px; flex-shrink:0; }
+  .phone-label { color:rgba(255,255,255,0.55); font-size:12px; font-weight:700; margin-bottom:4px; text-align:center; }
+  .phone-note { color:rgba(255,255,255,0.35); font-size:10.5px; margin-bottom:8px; text-align:center; line-height:1.4; padding:0 8px; }
+  .phone-screen { background:var(--bg); border-radius:40px; overflow:hidden; height:844px; display:flex; flex-direction:column; box-shadow:0 24px 64px rgba(0,0,0,0.5); border:8px solid #0a0a0f; position:relative; }
+  .notch { position:absolute; top:0; left:50%; transform:translateX(-50%); width:120px; height:26px; background:#0a0a0f; border-radius:0 0 16px 16px; z-index:20; }
+  .status-bar { background:var(--navy); color:rgba(255,255,255,0.85); display:flex; justify-content:space-between; align-items:center; padding:16px 24px 8px; font-size:12px; font-weight:600; flex-shrink:0; }
+  .topbar { background:var(--navy); color:white; display:flex; align-items:center; padding:4px 16px 14px; gap:10px; flex-shrink:0; }
+  .topbar .back { color:var(--orange); font-size:14px; font-weight:600; display:flex; align-items:center; gap:2px; min-width:56px; }
+  .topbar .title { flex:1; text-align:center; font-size:16px; font-weight:700; }
+  .topbar .action { color:var(--orange); font-size:13px; font-weight:600; min-width:56px; text-align:right; }
+  .content { flex:1; overflow-y:auto; }
+  .content::-webkit-scrollbar { width:0; }
+  .pad { padding:16px; }
+  .card { background:var(--card); border-radius:14px; padding:16px; margin-bottom:12px; border:1px solid var(--border); }
+  .card-title { font-size:11.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:10px; }
+  .pill { display:inline-block; font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px; }
+  .pill-green { background:#e8f5e9; color:#2e7d32; }
+  .pill-red { background:#ffebee; color:#c62828; }
+  .pill-amber { background:#fff8e1; color:#b37d00; }
+  .pill-gray { background:#f1f3f5; color:#64748b; }
+  .btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:15px; border:none; border-radius:12px; font-size:15px; font-weight:700; text-align:center; }
+  .btn-primary { background:var(--orange); color:#fff; }
+  .btn-outline { background:transparent; border:2px solid var(--navy); color:var(--navy); }
+  .mb-8 { margin-bottom:8px; } .mb-12 { margin-bottom:12px; }
+
+  .segmented { display:flex; background:#eef1f5; border-radius:10px; padding:3px; margin-bottom:14px; }
+  .seg-item { flex:1; text-align:center; padding:8px 4px; font-size:12.5px; font-weight:700; color:var(--muted); border-radius:8px; }
+  .seg-item.active { background:#fff; color:var(--navy); box-shadow:0 1px 3px rgba(0,0,0,0.1); }
+
+  .reminder-card { background:#fff; border-radius:12px; padding:14px; margin-bottom:10px; border:1px solid var(--border); box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+  .reminder-card.overdue { border-left:4px solid var(--red); }
+  .reminder-card.due-soon { border-left:4px solid var(--amber); }
+  .reminder-card.ok { border-left:4px solid var(--green); }
+  .reminder-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .reminder-title { font-size:14px; font-weight:700; color:var(--navy); }
+  .reminder-vehicle { font-size:12px; color:var(--muted); margin-bottom:4px; }
+  .reminder-due { font-size:12px; color:var(--muted); }
+  .reminder-track { height:6px; background:#e8ecf0; border-radius:3px; margin-top:8px; overflow:hidden; }
+  .reminder-fill { height:100%; border-radius:3px; }
+
+  .swipe-action { display:flex; align-items:center; justify-content:center; width:76px; background:var(--teal); color:#fff; font-size:11px; font-weight:700; border-radius:0 12px 12px 0; }
+
+  .section-label { font-size:11px; font-weight:700; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:0.07em; margin:6px 0 8px; }
+  .section-label.dark { color:var(--muted); }
+
+  .doc-item { display:flex; align-items:center; gap:12px; background:#fff; border-radius:12px; padding:12px 14px; margin-bottom:8px; border:1px solid var(--border); }
+  .doc-icon { width:38px; height:38px; border-radius:9px; background:#eef2f7; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+  .doc-body { flex:1; }
+  .doc-title { font-size:13px; font-weight:700; color:var(--navy); }
+  .doc-sub { font-size:11px; color:var(--muted); margin-top:1px; }
+  .doc-chevron { color:var(--muted); font-size:16px; }
+
+  .field { margin-bottom:14px; }
+  .label { font-size:12px; font-weight:600; color:var(--muted); margin-bottom:5px; display:block; }
+  .input { width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px; font-size:15px; background:white; color:var(--text); }
+  .picker-field { width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px; font-size:15px; background:white; color:var(--text); display:flex; justify-content:space-between; align-items:center; }
+
+  /* iOS native wheel date picker */
+  .ios-picker-sheet { position:absolute; left:0; right:0; bottom:0; background:#fff; border-radius:14px 14px 0 0; box-shadow:0 -4px 24px rgba(0,0,0,0.2); z-index:30; }
+  .ios-picker-toolbar { display:flex; justify-content:space-between; padding:12px 16px; border-bottom:0.5px solid var(--border); }
+  .ios-picker-toolbar span { font-size:15px; font-weight:600; color:#3b82f6; }
+  .ios-wheel { display:flex; justify-content:center; padding:18px 0; gap:24px; position:relative; }
+  .ios-wheel::before { content:''; position:absolute; top:50%; left:16px; right:16px; height:34px; transform:translateY(-50%); background:rgba(0,0,0,0.05); border-radius:8px; }
+  .wheel-col { display:flex; flex-direction:column; align-items:center; gap:6px; z-index:1; }
+  .wheel-col .dim { color:#c0c0c5; font-size:16px; }
+  .wheel-col .sel { color:var(--navy); font-size:19px; font-weight:600; }
+
+  /* Android date picker (Material) */
+  .android-picker-sheet { position:absolute; left:24px; right:24px; top:170px; background:#fff; border-radius:28px; box-shadow:0 8px 32px rgba(0,0,0,0.3); z-index:30; overflow:hidden; }
+  .android-picker-header { background:var(--navy); padding:20px; }
+  .android-picker-header .yr { font-size:13px; color:rgba(255,255,255,0.6); }
+  .android-picker-header .dt { font-size:26px; font-weight:700; color:#fff; margin-top:4px; }
+  .android-picker-cal { padding:12px 16px; }
+  .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-top:8px; }
+  .cal-cell { text-align:center; font-size:12px; color:var(--text); padding:6px 0; border-radius:50%; }
+  .cal-cell.dim { color:#c0c0c5; }
+  .cal-cell.sel { background:var(--orange); color:#fff; font-weight:700; }
+  .android-picker-actions { display:flex; justify-content:flex-end; gap:16px; padding:8px 16px 16px; }
+  .android-picker-actions span { font-size:14px; font-weight:700; color:var(--orange); text-transform:uppercase; }
+
+  .home-indicator { position:absolute; bottom:6px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(0,0,0,0.25); border-radius:3px; z-index:20; }
+  .tab-bar { background:var(--navy); display:flex; justify-content:space-around; padding:10px 0 16px; flex-shrink:0; }
+  .tab-item { display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10px; color:rgba(255,255,255,0.4); min-width:52px; }
+  .tab-item.active { color:var(--orange); }
+  .tab-item .ti { font-size:20px; }
+</style>
+</head>
+<body>
+
+<h1>CarrierOS — Mockup 25: Maintenance (Phone-Frame, Native)</h1>
+<p class="subtitle">Fills a real mobile gap: <code>maintenance/index.tsx</code> is a fleet-wide, read-only reminders overview with no phone-frame treatment. Extends it with the per-vehicle service-log entry and document view that <code>vehicle/[id].tsx</code> already supports on mobile, shown here in native form for the first time.</p>
+
+<div class="screen-grid">
+
+  <!-- SCREEN 1: FLEET MAINTENANCE OVERVIEW -->
+  <div class="phone">
+    <div class="phone-label">1 — Fleet Maintenance Overview</div>
+    <div class="phone-note">Matches maintenance/index.tsx: overdue-first sort, org-wide for owner/dispatcher, tap-through to vehicle. Left swipe on a row reveals quick "Log Service".</div>
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:41</span><span>●●●●  🔋</span></div>
+      <div class="topbar"><div class="back">‹ Back</div><div class="title">Maintenance</div><div class="action"></div></div>
+      <div class="content">
+        <div class="pad">
+          <div class="segmented">
+            <div class="seg-item active">All (6)</div>
+            <div class="seg-item">Overdue (2)</div>
+            <div class="seg-item">Due Soon (1)</div>
+          </div>
+
+          <div style="display:flex;">
+            <div class="reminder-card overdue" style="flex:1;">
+              <div class="reminder-head">
+                <div class="reminder-title">Oil Change</div>
+                <span class="pill pill-red">Overdue</span>
+              </div>
+              <div class="reminder-vehicle">Big Blue · #101</div>
+              <div class="reminder-due">Due 12 days ago · 182,000 mi</div>
+            </div>
+            <div class="swipe-action">🔧 Log</div>
+          </div>
+
+          <div class="reminder-card overdue">
+            <div class="reminder-head">
+              <div class="reminder-title">DOT Annual Inspection</div>
+              <span class="pill pill-red">Overdue</span>
+            </div>
+            <div class="reminder-vehicle">Silver Fox · #104</div>
+            <div class="reminder-due">Due Jun 20 · 4 days ago</div>
+          </div>
+
+          <div class="reminder-card due-soon">
+            <div class="reminder-head">
+              <div class="reminder-title">Brake Inspection</div>
+              <span class="pill pill-amber">Due Soon</span>
+            </div>
+            <div class="reminder-vehicle">Red Runner · #107</div>
+            <div class="reminder-due">Due in 9 days · 191,500 mi</div>
+            <div class="reminder-track"><div class="reminder-fill" style="width:78%;background:var(--amber);"></div></div>
+          </div>
+
+          <div class="reminder-card ok">
+            <div class="reminder-head">
+              <div class="reminder-title">Tire Rotation</div>
+              <span class="pill pill-green">OK</span>
+            </div>
+            <div class="reminder-vehicle">Big Blue · #101</div>
+            <div class="reminder-due">Due in 41 days</div>
+            <div class="reminder-track"><div class="reminder-fill" style="width:30%;background:var(--green);"></div></div>
+          </div>
+
+          <div class="reminder-card ok">
+            <div class="reminder-head">
+              <div class="reminder-title">Registration Renewal</div>
+              <span class="pill pill-green">OK</span>
+            </div>
+            <div class="reminder-vehicle">Silver Fox · #104</div>
+            <div class="reminder-due">Due in 96 days</div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="ti">🏠</div>Home</div>
+        <div class="tab-item"><div class="ti">🚚</div>Loads</div>
+        <div class="tab-item active"><div class="ti">🔧</div>Fleet</div>
+        <div class="tab-item"><div class="ti">⚙️</div>More</div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: VEHICLE DETAIL - LOG SERVICE -->
+  <div class="phone">
+    <div class="phone-label">2 — Vehicle Detail · Log Service Entry</div>
+    <div class="phone-note">Date field opens the OS-native date picker (iOS wheel shown here) rather than a custom in-app calendar — matches HIG for any date input.</div>
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:44</span><span>●●●●  🔋</span></div>
+      <div class="topbar"><div class="back">‹ Truck #101</div><div class="title">Log Service</div><div class="action">Save</div></div>
+      <div class="content">
+        <div class="pad">
+          <div class="card">
+            <div class="field">
+              <label class="label">Service Type</label>
+              <div class="picker-field"><span>Oil Change</span><span style="color:var(--muted);">▾</span></div>
+            </div>
+            <div class="field">
+              <label class="label">Date Completed</label>
+              <div class="picker-field"><span>Jul 3, 2026</span><span style="color:var(--muted);">📅</span></div>
+            </div>
+            <div class="field">
+              <label class="label">Odometer</label>
+              <input class="input" value="184,220 mi" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label class="label">Cost</label>
+              <input class="input" value="$142.50" inputmode="decimal">
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label class="label">Vendor / Shop</label>
+              <input class="input" value="Valley Truck Service">
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Receipt Photo</div>
+            <div style="border:2px dashed var(--border);border-radius:12px;padding:22px;text-align:center;color:var(--muted);font-size:13px;">
+              📷 Tap to photograph receipt
+            </div>
+          </div>
+          <button class="btn btn-primary">Save Service Entry</button>
+        </div>
+      </div>
+
+      <!-- iOS date wheel sheet overlay -->
+      <div class="ios-picker-sheet">
+        <div class="ios-picker-toolbar"><span>Cancel</span><span>Done</span></div>
+        <div class="ios-wheel">
+          <div class="wheel-col"><span class="dim">Jun</span><span class="sel">Jul</span><span class="dim">Aug</span></div>
+          <div class="wheel-col"><span class="dim">2</span><span class="sel">3</span><span class="dim">4</span></div>
+          <div class="wheel-col"><span class="dim">2025</span><span class="sel">2026</span><span class="dim">2027</span></div>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: ANDROID DATE PICKER VARIANT -->
+  <div class="phone">
+    <div class="phone-label">3 — Reminder Authoring · Android Date Picker</div>
+    <div class="phone-note">Same date field, Material 3 calendar dialog (not a wheel) — the platform-correct control, per Android HIG, not an iOS-style wheel ported over.</div>
+    <div class="phone-screen">
+      <div class="notch" style="display:none;"></div>
+      <div class="status-bar" style="padding-top:10px;"><span>9:46</span><span>▲ ● ■</span></div>
+      <div class="topbar"><div class="back">←</div><div class="title" style="text-align:left;">Add Reminder</div><div class="action"></div></div>
+      <div class="content">
+        <div class="pad">
+          <div class="card">
+            <div class="field">
+              <label class="label">Reminder Type</label>
+              <div class="picker-field"><span>Brake Inspection</span><span style="color:var(--muted);">▾</span></div>
+            </div>
+            <div class="field">
+              <label class="label">Trigger</label>
+              <div class="segmented" style="margin-bottom:0;">
+                <div class="seg-item active">By Date</div>
+                <div class="seg-item">By Mileage</div>
+                <div class="seg-item">Both</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="field" style="margin-bottom:0;">
+              <label class="label">Next Due Date</label>
+              <div class="picker-field"><span>Jul 12, 2026</span><span style="color:var(--muted);">📅</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Android calendar dialog overlay -->
+      <div class="android-picker-sheet">
+        <div class="android-picker-header">
+          <div class="yr">2026</div>
+          <div class="dt">Sun, Jul 12</div>
+        </div>
+        <div class="android-picker-cal">
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;color:var(--navy);">
+            <span>‹</span><span>July 2026</span><span>›</span>
+          </div>
+          <div class="cal-grid">
+            <div class="cal-cell dim">S</div><div class="cal-cell dim">M</div><div class="cal-cell dim">T</div><div class="cal-cell dim">W</div><div class="cal-cell dim">T</div><div class="cal-cell dim">F</div><div class="cal-cell dim">S</div>
+            <div class="cal-cell dim">28</div><div class="cal-cell dim">29</div><div class="cal-cell dim">30</div><div class="cal-cell">1</div><div class="cal-cell">2</div><div class="cal-cell">3</div><div class="cal-cell">4</div>
+            <div class="cal-cell">5</div><div class="cal-cell">6</div><div class="cal-cell">7</div><div class="cal-cell">8</div><div class="cal-cell">9</div><div class="cal-cell">10</div><div class="cal-cell">11</div>
+            <div class="cal-cell sel">12</div><div class="cal-cell">13</div><div class="cal-cell">14</div><div class="cal-cell">15</div><div class="cal-cell">16</div><div class="cal-cell">17</div><div class="cal-cell">18</div>
+          </div>
+        </div>
+        <div class="android-picker-actions"><span>Cancel</span><span>OK</span></div>
+      </div>
+      <div class="home-indicator" style="background:transparent;"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: PER-VEHICLE DOCUMENT VIEW -->
+  <div class="phone">
+    <div class="phone-label">4 — Per-Vehicle Document View</div>
+    <div class="phone-note">New: registration, insurance, and last-inspection docs in one place per truck. Long-press an item for a native context menu (Share / Download / Replace).</div>
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:48</span><span>●●●●  🔋</span></div>
+      <div class="topbar"><div class="back">‹ Truck #101</div><div class="title">Documents</div><div class="action">+ Add</div></div>
+      <div class="content">
+        <div class="pad">
+          <div class="section-label dark">Compliance</div>
+          <div class="doc-item">
+            <div class="doc-icon">📄</div>
+            <div class="doc-body">
+              <div class="doc-title">Vehicle Registration</div>
+              <div class="doc-sub">Expires Mar 14, 2027</div>
+            </div>
+            <div class="doc-chevron">›</div>
+          </div>
+          <div class="doc-item">
+            <div class="doc-icon">🛡️</div>
+            <div class="doc-body">
+              <div class="doc-title">Insurance Certificate</div>
+              <div class="doc-sub">Expires Jan 1, 2027</div>
+            </div>
+            <div class="doc-chevron">›</div>
+          </div>
+          <div class="doc-item">
+            <div class="doc-icon" style="background:#fff3e0;">⚠️</div>
+            <div class="doc-body">
+              <div class="doc-title">DOT Annual Inspection</div>
+              <div class="doc-sub" style="color:var(--red);font-weight:700;">Expired 4 days ago</div>
+            </div>
+            <div class="doc-chevron">›</div>
+          </div>
+
+          <div class="section-label dark">Service History</div>
+          <div class="doc-item">
+            <div class="doc-icon">🧾</div>
+            <div class="doc-body">
+              <div class="doc-title">Oil Change Receipt</div>
+              <div class="doc-sub">Jul 3, 2026 · $142.50</div>
+            </div>
+            <div class="doc-chevron">›</div>
+          </div>
+          <div class="doc-item">
+            <div class="doc-icon">🧾</div>
+            <div class="doc-body">
+              <div class="doc-title">Tire Rotation Receipt</div>
+              <div class="doc-sub">May 22, 2026 · $80.00</div>
+            </div>
+            <div class="doc-chevron">›</div>
+          </div>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:40px;color:rgba(255,255,255,0.3);font-size:11px;text-align:center;">
+  CarrierOS — Mockup 25: Maintenance (Phone-Frame, Native) · Companion spec: mobile-native-interaction-spec.md §Maintenance
+</div>
+
+</body>
+</html>

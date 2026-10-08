@@ -399,10 +399,11 @@ service's revision to keep moving on its own while that pipeline is live.
   subnets with NAT. Deferred deliberately rather than silently assumed.
 - **CodeDeploy blue/green.** A deployment circuit breaker with automatic rollback
   is wired; genuine traffic-shifting needs a release-process decision first.
-- **A fully green MCP tool call.** Blocked on stale credentials in
-  `carrieros-mcp/.env`, not on infrastructure — see "Partially verified" above.
-  Needs a new `oauth_clients` row (secrets are bcrypt-hashed and unrecoverable) on
-  an org holding the `public_api` entitlement. Deliberately not created here.
+- ~~A fully green MCP tool call~~ — **done.** Was blocked on stale credentials in
+  `carrieros-mcp/.env`; fixed by minting a fresh `oauth_clients` row
+  (`mcp-cdk-staging-verification`, id=2, org 3) rather than editing the
+  unrecoverable bcrypt-hashed stale one. See "Done (2026-10-01)" below for the
+  real `tools/call` verification against live tenant data.
 - ~~Decommissioning the original hand-built staging resources~~ — **done, see below.**
 
 ## The one open decision — resolved 2026-10-01

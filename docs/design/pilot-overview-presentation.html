@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CarrierOS — Pilot Presentation</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f1923;--navy2:#1a2e4a;--navy3:#1e3a5f;
+  --orange:#f97316;--orange-lt:#fdba74;
+  --green:#16a34a;--green-lt:#86efac;
+  --amber:#d97706;--amber-lt:#fcd34d;
+  --red:#dc2626;--teal:#1abc9c;
+  --gray:#8898aa;--text:#e2e8f0;--border:rgba(255,255,255,0.09);
+}
+html,body{height:100%;background:#000;overflow:hidden;font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;}
+.slide{display:none;width:100%;height:100vh;padding:52px 72px 80px;flex-direction:column;justify-content:center;position:relative;overflow:hidden;}
+.slide.active{display:flex;animation:fadeUp .3s ease forwards;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+#nav{position:fixed;bottom:0;left:0;right:0;height:52px;background:rgba(10,16,25,0.97);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;z-index:100;}
+#counter{font-size:12px;color:var(--gray);font-weight:600;min-width:60px;}
+#progress{flex:1;height:3px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;}
+#pfill{height:100%;background:var(--orange);border-radius:2px;transition:width .3s ease;}
+.nbtn{background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 14px;font-size:12px;cursor:pointer;transition:all .15s;}
+.nbtn:hover{background:rgba(255,255,255,0.1);}
+#ntoggle{background:transparent;border:none;color:var(--gray);font-size:11px;cursor:pointer;padding:4px 8px;border-radius:4px;}
+#notes{position:fixed;bottom:52px;left:0;right:0;background:rgba(5,10,18,0.97);border-top:1px solid var(--border);padding:14px 24px;font-size:12px;color:#94a3b8;line-height:1.7;max-height:160px;overflow-y:auto;display:none;}
+.bg-dark{background:linear-gradient(135deg,#060d16 0%,#0f1923 60%,#1a2e4a 100%);}
+.bg-problem{background:linear-gradient(135deg,#0a0a16 0%,#10101f 60%,#1a1030 100%);}
+.bg-cost{background:linear-gradient(135deg,#100808 0%,#1a0f0f 60%,#200f0f 100%);}
+.bg-shift{background:linear-gradient(135deg,#06101a 0%,#0a1e30 60%,#0f2a3a 100%);}
+.bg-green{background:linear-gradient(135deg,#060f0a 0%,#0a1a10 60%,#0f2018 100%);}
+.bg-orange{background:linear-gradient(135deg,#100a04 0%,#1a1008 60%,#201508 100%);}
+.bg-teal{background:linear-gradient(135deg,#061012 0%,#0a1a1e 60%,#0f2228 100%);}
+.bg-navy{background:linear-gradient(135deg,#060d16 0%,#0f1923 60%,#1a2e4a 100%);}
+.bg-investor{background:linear-gradient(135deg,#080812 0%,#0f0f24 60%,#1a1a38 100%);}
+.r{opacity:0;transform:translateY(14px);transition:opacity .45s ease,transform .45s ease;}
+.r.on{opacity:1;transform:none;}
+.r.d1{transition-delay:.05s}.r.d2{transition-delay:.15s}.r.d3{transition-delay:.28s}
+.r.d4{transition-delay:.42s}.r.d5{transition-delay:.58s}.r.d6{transition-delay:.72s}
+.r.d7{transition-delay:.88s}
+h1{font-size:clamp(30px,4.8vw,60px);font-weight:800;line-height:1.06;letter-spacing:-0.03em;color:#fff;}
+h2{font-size:clamp(24px,3.2vw,42px);font-weight:800;line-height:1.1;letter-spacing:-0.025em;color:#fff;}
+.hero-sub{font-size:clamp(13px,1.4vw,18px);color:#94a3b8;line-height:1.6;max-width:680px;}
+.lbl{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;}
+.orange{color:var(--orange);}
+.hdiv{width:48px;height:4px;border-radius:2px;margin-bottom:18px;}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.04em;}
+.po{background:rgba(249,115,22,0.15);color:var(--orange-lt);border:1px solid rgba(249,115,22,0.3);}
+.pg{background:rgba(22,163,74,0.15);color:#86efac;border:1px solid rgba(22,163,74,0.3);}
+.pr{background:rgba(220,38,38,0.15);color:#fca5a5;border:1px solid rgba(220,38,38,0.3);}
+.pt{background:rgba(26,188,156,0.15);color:#5eead4;border:1px solid rgba(26,188,156,0.3);}
+.px{background:rgba(100,116,139,0.15);color:#94a3b8;border:1px solid rgba(100,116,139,0.25);}
+.pp{background:rgba(99,102,241,0.15);color:#c4b5fd;border:1px solid rgba(99,102,241,0.3);}
+/* tool chips */
+.tchaos{display:flex;flex-wrap:wrap;gap:10px;max-width:680px;}
+.tchip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;color:var(--text);}
+.tchip.x{border-color:rgba(220,38,38,0.3);background:rgba(220,38,38,0.06);color:#94a3b8;text-decoration:line-through;text-decoration-color:rgba(220,38,38,0.5);}
+/* cost cards */
+.cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:860px;}
+.ccard{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:22px 20px;}
+.cval{font-size:clamp(20px,2.4vw,30px);font-weight:800;letter-spacing:-0.02em;margin-bottom:4px;}
+.clbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;opacity:0.6;}
+.cdesc{font-size:12px;color:var(--gray);line-height:1.5;}
+/* ba grid */
+.bagrid{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:start;max-width:900px;}
+.bacol{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px;padding:18px;}
+.batitle{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;}
+.barow{font-size:11px;color:#94a3b8;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:flex-start;gap:8px;line-height:1.4;}
+.barow:last-child{border-bottom:none;}
+.badot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+/* feat rows */
+.flist{display:flex;flex-direction:column;gap:10px;max-width:780px;}
+.frow{display:flex;align-items:flex-start;gap:14px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
+.ficon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.ftitle{font-size:14px;font-weight:700;color:#fff;margin-bottom:2px;}
+.fdesc{font-size:11px;color:var(--gray);line-height:1.5;}
+.fval{margin-left:auto;text-align:right;flex-shrink:0;font-size:11px;font-weight:700;color:#4ade80;white-space:nowrap;}
+/* roi */
+.roig{display:grid;grid-template-columns:1fr auto auto;gap:0;max-width:700px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.roih{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);padding:10px 16px;background:rgba(255,255,255,0.03);border-bottom:1px solid var(--border);}
+.roic{padding:11px 16px;border-bottom:1px solid rgba(255,255,255,0.05);font-size:12px;}
+.roil{color:var(--text);}
+.roip{color:var(--gray);font-size:11px;text-align:right;}
+.roiv{color:#4ade80;font-weight:700;text-align:right;}
+.roitl{padding:14px 16px;font-size:14px;font-weight:700;color:#fff;border-bottom:none;}
+.roitp{padding:14px 16px;font-size:11px;color:var(--gray);border-bottom:none;}
+.roitv{padding:14px 16px;font-size:18px;font-weight:800;color:#4ade80;text-align:right;border-bottom:none;letter-spacing:-0.02em;}
+/* tiers */
+.trow{display:flex;gap:12px;max-width:960px;}
+.tcard{flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:14px;padding:18px 16px;position:relative;}
+.tcard.feat{border-color:rgba(249,115,22,0.4);background:rgba(249,115,22,0.05);}
+.tbadge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--orange);color:#fff;font-size:9px;font-weight:700;letter-spacing:0.08em;padding:3px 10px;border-radius:20px;white-space:nowrap;text-transform:uppercase;}
+.tname{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);margin-bottom:5px;}
+.tprice{font-size:26px;font-weight:800;letter-spacing:-0.02em;color:#fff;line-height:1;}
+.tprice span{font-size:12px;font-weight:500;color:var(--gray);}
+.ttrucks{font-size:10px;color:var(--gray);margin-top:3px;margin-bottom:12px;}
+.tf{font-size:10px;color:#94a3b8;padding:4px 0;display:flex;align-items:flex-start;gap:6px;line-height:1.4;}
+.tf::before{content:"✓";color:var(--orange);font-weight:700;flex-shrink:0;margin-top:1px;}
+.tdiv{height:1px;background:var(--border);margin:8px 0;}
+/* enterprise */
+.entg{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:860px;}
+.entc{background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.2);border-radius:12px;padding:14px;}
+.enticon{font-size:20px;margin-bottom:6px;}
+.enttitle{font-size:12px;font-weight:700;color:#c4b5fd;margin-bottom:4px;}
+.entdesc{font-size:11px;color:#94a3b8;line-height:1.5;}
+/* timeline */
+.tline{display:flex;gap:0;max-width:780px;}
+.tli{flex:1;position:relative;}
+.tli:not(:last-child)::after{content:'';position:absolute;top:17px;left:calc(50% + 18px);right:calc(-50% + 18px);height:2px;background:rgba(249,115,22,0.3);}
+.tldot{width:34px;height:34px;border-radius:50%;background:rgba(249,115,22,0.15);border:2px solid rgba(249,115,22,0.4);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--orange);margin:0 auto 10px;}
+.tlm{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--orange);text-align:center;margin-bottom:5px;}
+.tld{font-size:11px;color:var(--gray);text-align:center;line-height:1.5;}
+/* investor */
+.invg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:780px;}
+.invs{background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.2);border-radius:14px;padding:18px;}
+.invv{font-size:clamp(22px,2.8vw,34px);font-weight:800;letter-spacing:-0.02em;color:#c4b5fd;line-height:1;margin-bottom:4px;}
+.invl{font-size:11px;color:#94a3b8;line-height:1.4;}
+/* flywheel */
+.fw{display:flex;align-items:center;gap:8px;flex-wrap:wrap;max-width:800px;}
+.fws{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:9px 13px;font-size:11px;font-weight:600;color:var(--text);text-align:center;min-width:110px;}
+.fwa{color:rgba(249,115,22,0.5);font-size:16px;}
+/* cover deco */
+.covergrid{position:absolute;right:-40px;top:-40px;bottom:-40px;width:44%;opacity:0.05;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,0.8) 0,rgba(255,255,255,0.8) 1px,transparent 1px,transparent 40px),repeating-linear-gradient(90deg,rgba(255,255,255,0.8) 0,rgba(255,255,255,0.8) 1px,transparent 1px,transparent 40px);}
+.coveracc{position:absolute;right:10%;top:50%;transform:translateY(-50%);width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(249,115,22,0.22) 0%,transparent 70%);}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- SLIDE 1 — COVER -->
+<div class="slide bg-dark active" data-notes="Open with this line and let it sit 3 seconds. The insight: carriers already have all the data — in their phone, email, GPS, fuel receipts. The problem isn't collecting data. It's that the data doesn't talk to each other. Every piece gets re-entered manually. CarrierOS closes that loop. That's the whole pitch.">
+  <div class="covergrid"></div><div class="coveracc"></div>
+  <div class="r d1" style="margin-bottom:16px;"><span class="pill po">CarrierOS — CA Pilot 2026</span></div>
+  <h1 class="r d2" style="max-width:720px;margin-bottom:20px;">Your trucks generate the data.<br><span class="orange">We make it work for you.</span></h1>
+  <p class="hero-sub r d3" style="margin-bottom:32px;">The operating platform for modern carriers — so you spend your time running the business, not the paperwork.</p>
+  <div class="r d4" style="display:flex;gap:12px;flex-wrap:wrap;">
+    <span class="pill px">Starter · $49/mo</span><span class="pill px">Growth · $99/mo</span><span class="pill px">Pro · $199/mo</span><span class="pill px">Enterprise · $349/mo</span>
+  </div>
+  <div style="position:absolute;bottom:90px;left:72px;" class="r d5"><div style="font-size:11px;color:var(--gray);">info@shipmentx.com &nbsp;·&nbsp; carrieros.com</div></div>
+</div>
+
+<!-- SLIDE 2 — THE DAILY REALITY -->
+<div class="slide bg-problem" data-notes="Ask: 'How many of you use more than 3 different apps just to manage one load?' They're already digital — but fragmented. Every app is a silo. The owner is the human integration layer, manually moving data between tools all day. The word 'already' is key: they didn't fail to go digital. The problem is the tools don't connect.">
+  <div class="lbl r d1 orange">The Problem</div>
+  <h2 class="r d2" style="margin-bottom:8px;">You're already digital.<br><span class="orange">Your tools just aren't talking.</span></h2>
+  <p class="hero-sub r d3" style="font-size:14px;margin-bottom:26px;">One load. Seven places the data lives. Zero integration. You're the human copy-paste in the middle.</p>
+  <div class="r d4" style="display:flex;gap:32px;align-items:flex-start;">
+    <div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);margin-bottom:12px;">Today — 7 separate tools</div>
+      <div class="tchaos">
+        <div class="tchip x"><span>📧</span> Email (load details)</div>
+        <div class="tchip x"><span>💬</span> WhatsApp (driver comms)</div>
+        <div class="tchip x"><span>📊</span> Excel (loads &amp; IFTA tallying)</div>
+        <div class="tchip x"><span>📒</span> QuickBooks (invoicing)</div>
+        <div class="tchip x"><span>📄</span> Paper DVIRs</div>
+        <div class="tchip x"><span>🧾</span> Fuel receipts folder</div>
+        <div class="tchip x"><span>👨‍💼</span> IFTA consultant (quarterly)</div>
+      </div>
+    </div>
+    <div style="padding-top:28px;color:rgba(249,115,22,0.4);font-size:32px;">→</div>
+    <div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4ade80;margin-bottom:12px;">CarrierOS — one platform</div>
+      <div style="background:rgba(22,163,74,0.08);border:1px solid rgba(22,163,74,0.25);border-radius:16px;padding:20px 22px;max-width:220px;">
+        <div style="font-size:32px;margin-bottom:8px;">🚛</div>
+        <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:5px;">CarrierOS</div>
+        <div style="font-size:11px;color:#94a3b8;line-height:1.6;">Loads · Dispatch · DVIR<br>Invoicing · IFTA · Chat<br>Compliance · Analytics</div>
+        <div style="margin-top:12px;font-size:11px;font-weight:700;color:#4ade80;">All in one. Zero re-entry.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3 — THE REAL COST -->
+<div class="slide bg-cost" data-notes="The cost is hiding in plain sight. They don't have a 'software budget' line — they have a consultant invoice and hours-lost that never gets counted. Walk each card: Time first. 12-15 hrs/week is conservative. At $75/hr that's $900-1,125/week — not cash out the door, but an hour not spent booking loads is the same thing. Tools: they probably don't know they're paying $150-250/month across 5 apps. Risk: one missed DVIR or expired CDL = $1,000-$16,000 fine. That alone covers years of CarrierOS.">
+  <div class="lbl r d1" style="color:#fca5a5;">The Real Cost</div>
+  <h2 class="r d2" style="margin-bottom:8px;">What the fragmentation<br>is actually <span style="color:#fca5a5;">costing you.</span></h2>
+  <p class="hero-sub r d3" style="font-size:14px;margin-bottom:24px;">None of this shows up on one invoice. But it's real — and it compounds every week.</p>
+  <div class="cgrid r d4">
+    <div class="ccard" style="border-color:rgba(220,38,38,0.2);background:rgba(220,38,38,0.05);">
+      <div style="font-size:26px;margin-bottom:8px;">⏱️</div>
+      <div class="cval" style="color:#fca5a5;">12–15 hrs/week</div>
+      <div class="clbl" style="color:#fca5a5;">on admin alone</div>
+      <div class="cdesc">Copying load details, chasing drivers, tallying mileage, paper DVIRs, typing invoices. At $75/hr that's <strong style="color:#fca5a5;">$900–$1,125/week</strong> in owner time that can't grow the business.</div>
+    </div>
+    <div class="ccard" style="border-color:rgba(217,119,6,0.2);background:rgba(217,119,6,0.05);">
+      <div style="font-size:26px;margin-bottom:8px;">💸</div>
+      <div class="cval" style="color:var(--amber-lt);">$2,000–3,600/yr</div>
+      <div class="clbl" style="color:var(--amber-lt);">tools &amp; consultants</div>
+      <div class="cdesc">5 separate apps at $30–50/mo each. IFTA consultant at $200–400/quarter. A bookkeeper to reconcile what you could generate automatically. Every single year.</div>
+    </div>
+    <div class="ccard" style="border-color:rgba(220,38,38,0.25);background:rgba(220,38,38,0.05);">
+      <div style="font-size:26px;margin-bottom:8px;">⚠️</div>
+      <div class="cval" style="color:#fca5a5;">$1K–$16K</div>
+      <div class="clbl" style="color:#fca5a5;">per compliance violation</div>
+      <div class="cdesc">One missed DVIR. One expired CDL on record. One missing insurance doc at a DOT stop. The fine alone covers years of software. Downtime is on top of that.</div>
+    </div>
+  </div>
+  <div class="r d5" style="margin-top:18px;display:flex;align-items:center;gap:12px;">
+    <div style="height:1px;flex:1;background:var(--border);"></div>
+    <div style="font-size:12px;color:var(--gray);">Annual exposure for a 3-truck owner:</div>
+    <div style="font-size:17px;font-weight:800;color:#fca5a5;letter-spacing:-0.02em;">$50,000–$80,000+ in lost time &amp; risk</div>
+    <div style="height:1px;flex:1;background:var(--border);"></div>
+  </div>
+</div>
+
+<!-- SLIDE 4 — THE SHIFT -->
+<div class="slide bg-shift" data-notes="The 'a-ha' slide. The data is already flowing — the owner is just manually being the connector. CarrierOS replaces the owner as the integration layer. Pause on 'Zero re-entry.' The data doesn't get typed twice. It flows through and surfaces as an invoice, an IFTA report, a compliance alert — automatically. They didn't need to collect more data. They needed their existing data to do more work.">
+  <div class="lbl r d1" style="color:#7dd3fc;">The Solution</div>
+  <h2 class="r d2" style="margin-bottom:8px;">Your data, already flowing.<br><span style="color:#7dd3fc;">We close the loop.</span></h2>
+  <p class="hero-sub r d3" style="font-size:14px;margin-bottom:22px;">You're not missing data. You're missing a system that connects it. Same work — done once, used everywhere.</p>
+  <div class="bagrid r d4">
+    <div class="bacol" style="border-color:rgba(220,38,38,0.2);">
+      <div class="batitle" style="color:#fca5a5;">Today — Manual Loop</div>
+      <div class="barow"><div class="badot" style="background:#dc2626;"></div>Load email → retyped into spreadsheet</div>
+      <div class="barow"><div class="badot" style="background:#dc2626;"></div>Driver texts update → owner relays to broker</div>
+      <div class="barow"><div class="badot" style="background:#dc2626;"></div>Fuel receipt photo → entered into Excel manually</div>
+      <div class="barow"><div class="badot" style="background:#dc2626;"></div>Miles driven → tallied manually for IFTA</div>
+      <div class="barow"><div class="badot" style="background:#dc2626;"></div>Load delivered → open QuickBooks → type invoice</div>
+      <div class="barow"><div class="badot" style="background:#dc2626;"></div>CDL expiry → check the spreadsheet (maybe)</div>
+      <div class="barow"><div class="badot" style="background:#dc2626;"></div>DVIR on paper → filed in folder → hope it's there</div>
+    </div>
+    <div style="color:rgba(249,115,22,0.5);font-size:28px;align-self:center;text-align:center;" class="r d5">→</div>
+    <div class="bacol" style="border-color:rgba(22,163,74,0.25);background:rgba(22,163,74,0.03);">
+      <div class="batitle" style="color:#4ade80;">CarrierOS — Automatic</div>
+      <div class="barow"><div class="badot" style="background:#16a34a;"></div>Load created → dispatched → driver notified in one tap</div>
+      <div class="barow"><div class="badot" style="background:#16a34a;"></div>Driver taps status → broker gets live tracking link</div>
+      <div class="barow"><div class="badot" style="background:#16a34a;"></div>Fuel stop logged → IFTA &amp; cost/mile updated instantly</div>
+      <div class="barow"><div class="badot" style="background:#16a34a;"></div>GPS logs every state crossing → IFTA report auto-builds</div>
+      <div class="barow"><div class="badot" style="background:#16a34a;"></div>Load delivered → invoice generated &amp; sent automatically</div>
+      <div class="barow"><div class="badot" style="background:#16a34a;"></div>CDL expiring → 60-day alert, no spreadsheet needed</div>
+      <div class="barow"><div class="badot" style="background:#16a34a;"></div>DVIR digital → signed → stored, always retrievable</div>
+    </div>
+  </div>
+  <div class="r d6" style="margin-top:14px;text-align:center;font-size:13px;color:var(--gray);">Same data. <strong style="color:#fff;">Zero re-entry.</strong> Every piece of work you do, done once — then automatically used everywhere it's needed.</div>
+</div>
+
+<!-- SLIDE 5 — COMPLIANCE -->
+<div class="slide bg-green" data-notes="Compliance is underrated. No one likes DVIRs — but every carrier knows the risk. The fine for a missing DVIR can exceed $15,000. FMCSA enforcement is increasing. For carriers without an in-house safety director, one DOT stop can become a major problem. CarrierOS makes compliance passive — it happens as part of the driver's existing workflow, not as extra paperwork. The digital DVIR is the same effort as paper but it's always filed, always searchable, always there.">
+  <div class="lbl r d1" style="color:#4ade80;">Compliance — All Tiers</div>
+  <h2 class="r d2" style="margin-bottom:8px;">Compliance that runs<br><span style="color:#4ade80;">in the background.</span></h2>
+  <div class="hdiv r d3" style="background:#16a34a;"></div>
+  <div class="flist r d4">
+    <div class="frow">
+      <div class="ficon">📋</div>
+      <div>
+        <div class="ftitle">Digital DVIR — Pre &amp; Post Trip</div>
+        <div class="fdesc">Driver completes inspection on their phone in 2 minutes. Signed, timestamped, stored — always retrievable for DOT inspections. No paper binders, no filing, no "where's that form from last Tuesday."</div>
+      </div>
+      <div class="fval">Avoids $1K–$16K<br>per violation</div>
+    </div>
+    <div class="frow">
+      <div class="ficon">🪪</div>
+      <div>
+        <div class="ftitle">CDL &amp; DOT Medical Certificate Tracking</div>
+        <div class="fdesc">Every driver's CDL class, expiry, endorsements, and medical cert tracked automatically. 60-day alerts before anything expires — owner knows before the driver gets pulled over.</div>
+      </div>
+      <div class="fval">Zero surprises<br>at inspections</div>
+    </div>
+    <div class="frow">
+      <div class="ficon">📁</div>
+      <div>
+        <div class="ftitle">Fleet &amp; Company Documents — Always Current</div>
+        <div class="fdesc">Insurance certs, MC authority, COI, annual inspections — uploaded once, expiry-tracked, available in seconds. Finance and owner both see the same picture. 30-day renewal alerts.</div>
+      </div>
+      <div class="fval">30-day renewal<br>alerts</div>
+    </div>
+  </div>
+  <div class="r d5" style="margin-top:14px;display:flex;align-items:center;gap:10px;">
+    <span class="pill pg">All tiers — Starter through Enterprise</span>
+    <span style="font-size:11px;color:var(--gray);">Safety &amp; compliance are never gated. Every carrier gets this.</span>
+  </div>
+</div>
+
+<!-- SLIDE 6 — CASH FLOW -->
+<div class="slide bg-orange" data-notes="Cash flow is the #1 cause of small carrier failure — not load volume, not rates. They have the freight. They just can't collect fast enough. Average small carrier invoices 3-5 days after delivery because invoicing is annoying. Some forget on smaller loads. CarrierOS invoices the moment the driver marks delivered — no delay, no memory required. The $/mile by lane insight is powerful: 'Your Fresno-Phoenix lane is $3.80/mile but Stockton-Portland is $5.20/mile — that's where your growth is.' Most small carriers have no idea which lanes are actually profitable.">
+  <div class="lbl r d1" style="color:var(--orange-lt);">Cash Flow — Starter+</div>
+  <h2 class="r d2" style="margin-bottom:8px;">Get paid faster.<br><span class="orange">Know your margins exactly.</span></h2>
+  <div class="hdiv r d3" style="background:var(--orange);"></div>
+  <div class="flist r d4">
+    <div class="frow" style="border-color:rgba(249,115,22,0.2);background:rgba(249,115,22,0.04);">
+      <div class="ficon">⚡</div>
+      <div>
+        <div class="ftitle">Invoice at Delivery — Zero Delay</div>
+        <div class="fdesc">Driver marks delivered → invoice generated and sent automatically. No QuickBooks. No copy-paste. No "I'll do it tonight." Average carriers delay 3–5 days. CarrierOS makes it instant.</div>
+      </div>
+      <div class="fval" style="color:var(--orange-lt);">+$800–1,200/mo<br>cash cycle gain</div>
+    </div>
+    <div class="frow">
+      <div class="ficon">🔔</div>
+      <div>
+        <div class="ftitle">Automated Overdue Reminders</div>
+        <div class="fdesc">Net-30 invoice goes overdue? Reminder sends automatically — no awkward call, no chasing. Owner sees every outstanding balance at a glance. Finance role gets the same view.</div>
+      </div>
+      <div class="fval">Reduces AR<br>by 8–12 days</div>
+    </div>
+    <div class="frow">
+      <div class="ficon">📈</div>
+      <div>
+        <div class="ftitle">Revenue/Mile by Lane — Know Where to Grow</div>
+        <div class="fdesc">See exactly which lanes and customers are most profitable. Stop guessing which loads are worth taking. Book more of what makes money, decline what doesn't — with data, not instinct.</div>
+      </div>
+      <div class="fval">Pro &amp; Enterprise</div>
+    </div>
+  </div>
+  <div class="r d5" style="margin-top:14px;font-size:12px;color:var(--gray);">Invoicing from <span class="pill po" style="font-size:10px;">Starter $49/mo</span></div>
+</div>
+
+<!-- SLIDE 7 — IFTA -->
+<div class="slide bg-teal" data-notes="IFTA is the perfect example of the core thesis: carriers already have all the data. Their trucks already move through states. But without GPS integration they manually tally from paper logs or ELD exports — and most pay a consultant $200-400/quarter to do it. CarrierOS GPS logs every state crossing every 15 minutes automatically. At quarter-end, the report is ready. No consultant, no spreadsheet, no Sunday afternoon. The odometer fallback: if GPS is spotty on rural routes, driver sees a simple form at delivery to confirm miles per state — 90 seconds. Either way, IFTA data is accurate.">
+  <div class="lbl r d1" style="color:#5eead4;">IFTA — Growth Tier</div>
+  <h2 class="r d2" style="margin-bottom:8px;">IFTA on autopilot.<br><span style="color:#2dd4bf;">No consultant. No spreadsheet. No Sunday.</span></h2>
+  <div class="hdiv r d3" style="background:#14b8a6;"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:820px;" class="r d4">
+    <div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5eead4;margin-bottom:12px;">Today — Manual</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="background:rgba(220,38,38,0.06);border:1px solid rgba(220,38,38,0.2);border-radius:10px;padding:10px 14px;font-size:11px;color:#94a3b8;">📋 Manually track state crossings per trip</div>
+        <div style="background:rgba(220,38,38,0.06);border:1px solid rgba(220,38,38,0.2);border-radius:10px;padding:10px 14px;font-size:11px;color:#94a3b8;">📊 Export ELD → paste into spreadsheet</div>
+        <div style="background:rgba(220,38,38,0.06);border:1px solid rgba(220,38,38,0.2);border-radius:10px;padding:10px 14px;font-size:11px;color:#94a3b8;">👨‍💼 Send to consultant → wait → pay $200–400</div>
+        <div style="background:rgba(220,38,38,0.06);border:1px solid rgba(220,38,38,0.2);border-radius:10px;padding:10px 14px;font-size:11px;color:#94a3b8;">⏱️ 3–5 hours of your time, every quarter</div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4ade80;margin-bottom:12px;">CarrierOS — Automatic</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="background:rgba(20,184,166,0.08);border:1px solid rgba(20,184,166,0.25);border-radius:10px;padding:10px 14px;font-size:11px;color:#94a3b8;">📍 GPS logs state crossings every 15 minutes</div>
+        <div style="background:rgba(20,184,166,0.08);border:1px solid rgba(20,184,166,0.25);border-radius:10px;padding:10px 14px;font-size:11px;color:#94a3b8;">🗺️ Mileage by state tallied automatically</div>
+        <div style="background:rgba(20,184,166,0.08);border:1px solid rgba(20,184,166,0.25);border-radius:10px;padding:10px 14px;font-size:11px;color:#94a3b8;">📄 Quarterly report ready to submit — no consultant</div>
+        <div style="background:rgba(20,184,166,0.08);border:1px solid rgba(20,184,166,0.25);border-radius:10px;padding:10px 14px;font-size:11px;color:#94a3b8;">✅ Odometer fallback if GPS data is sparse</div>
+      </div>
+    </div>
+  </div>
+  <div class="r d5" style="margin-top:18px;display:flex;gap:14px;">
+    <div style="background:rgba(20,184,166,0.1);border:1px solid rgba(20,184,166,0.3);border-radius:12px;padding:12px 18px;">
+      <div style="font-size:20px;font-weight:800;color:#2dd4bf;letter-spacing:-0.02em;">$800–1,600</div>
+      <div style="font-size:11px;color:#94a3b8;margin-top:2px;">saved/year on IFTA consultant</div>
+    </div>
+    <div style="background:rgba(20,184,166,0.1);border:1px solid rgba(20,184,166,0.3);border-radius:12px;padding:12px 18px;">
+      <div style="font-size:20px;font-weight:800;color:#2dd4bf;letter-spacing:-0.02em;">12–20 hrs</div>
+      <div style="font-size:11px;color:#94a3b8;margin-top:2px;">saved/year on data gathering</div>
+    </div>
+    <div style="background:rgba(20,184,166,0.1);border:1px solid rgba(20,184,166,0.3);border-radius:12px;padding:12px 18px;">
+      <div style="font-size:20px;font-weight:800;color:#2dd4bf;letter-spacing:-0.02em;">Day 1</div>
+      <div style="font-size:11px;color:#94a3b8;margin-top:2px;">GPS tracking starts immediately</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8 — TEAM IN SYNC -->
+<div class="slide bg-navy" data-notes="Right now, owner-driver communication is WhatsApp or phone. No record, no visibility. A dispatcher relays information manually. CarrierOS gives every role the view they need — driver sees their load on their phone, dispatcher sees the fleet on their desktop, owner sees KPIs and exceptions. And critically: it works for Spanish, Punjabi, and Urdu-speaking drivers. That last point matters a lot in California — ask how many of their drivers prefer not to work in English.">
+  <div class="lbl r d1" style="color:#7dd3fc;">Team &amp; Operations — Growth+</div>
+  <h2 class="r d2" style="margin-bottom:8px;">Every role sees exactly<br><span style="color:#93c5fd;">what they need to see.</span></h2>
+  <div class="hdiv r d3" style="background:#3b82f6;"></div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:900px;" class="r d4">
+    <div style="background:rgba(249,115,22,0.06);border:1px solid rgba(249,115,22,0.2);border-radius:14px;padding:16px;">
+      <div style="font-size:20px;margin-bottom:6px;">👤</div>
+      <div style="font-size:11px;font-weight:700;color:var(--orange-lt);margin-bottom:6px;">Owner / Solo</div>
+      <div style="font-size:10px;color:#94a3b8;line-height:1.6;">KPI dashboard · Fleet map · Exception alerts · Revenue/mile · Full access</div>
+    </div>
+    <div style="background:rgba(26,188,156,0.06);border:1px solid rgba(26,188,156,0.2);border-radius:14px;padding:16px;">
+      <div style="font-size:20px;margin-bottom:6px;">🚛</div>
+      <div style="font-size:11px;font-weight:700;color:#5eead4;margin-bottom:6px;">Driver (Mobile)</div>
+      <div style="font-size:10px;color:#94a3b8;line-height:1.6;">My loads · DVIR · Status · POD photo · Fuel stop · Chat · 4 languages</div>
+    </div>
+    <div style="background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.2);border-radius:14px;padding:16px;">
+      <div style="font-size:20px;margin-bottom:6px;">📡</div>
+      <div style="font-size:11px;font-weight:700;color:#c4b5fd;margin-bottom:6px;">Dispatcher (Desktop)</div>
+      <div style="font-size:10px;color:#94a3b8;line-height:1.6;">Load queue · Assign drivers · Live map · Exception alerts · Chat</div>
+    </div>
+    <div style="background:rgba(22,163,74,0.06);border:1px solid rgba(22,163,74,0.2);border-radius:14px;padding:16px;">
+      <div style="font-size:20px;margin-bottom:6px;">💼</div>
+      <div style="font-size:11px;font-weight:700;color:#86efac;margin-bottom:6px;">Finance (Desktop)</div>
+      <div style="font-size:10px;color:#94a3b8;line-height:1.6;">Invoice pipeline · Revenue reports · Fuel analytics · Customers</div>
+    </div>
+  </div>
+  <div class="r d5" style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <div style="font-size:11px;color:var(--gray);">Driver app in:</div>
+    <span class="pill px">🇺🇸 English</span><span class="pill px">🇲🇽 Español</span><span class="pill px">🇮🇳 ਪੰਜਾਬੀ</span><span class="pill px">🇵🇰 اردو</span>
+    <span style="font-size:11px;color:var(--gray);">— all roles, never gated</span>
+  </div>
+</div>
+
+<!-- SLIDE 9 — ROI -->
+<div class="slide bg-dark" data-notes="Let the numbers speak. Every dollar spent on CarrierOS returns $20-45 in recovered value. This is based on conservative estimates of real costs they already have. Walk line by line. The owner's time is worth money even if they never write themselves a check. The IFTA consultant is a real check every quarter. App consolidation is real subscriptions. Compliance risk is a published number. Then show the cost of CarrierOS: 'You're spending $99/month to recover $1,500-4,500/month. That's not a software purchase. That's the best hire you've ever made.'">
+  <div class="lbl r d1 orange">Return on Investment</div>
+  <h2 class="r d2" style="margin-bottom:6px;">Every dollar spent returns<br><span class="orange">$20–45 in recovered value.</span></h2>
+  <p style="font-size:12px;color:var(--gray);margin-bottom:20px;" class="r d3">Based on a 3-truck owner-operator, conservative estimates.</p>
+  <div class="roig r d4">
+    <div class="roih">What You Recover</div><div class="roih" style="text-align:right;">How</div><div class="roih" style="text-align:right;">Per Month</div>
+    <div class="roic roil">Owner admin time (10 hrs/week @ $75/hr)</div><div class="roic roip">40 hrs × $75</div><div class="roic roiv">$3,000</div>
+    <div class="roic roil">IFTA consultant eliminated</div><div class="roic roip">$300/qtr avg</div><div class="roic roiv">$100</div>
+    <div class="roic roil">App consolidation (5 tools → 1)</div><div class="roic roip">$40/mo × 5</div><div class="roic roiv">$200</div>
+    <div class="roic roil">Faster invoicing (3–5 day cycle improvement)</div><div class="roic roip">cash flow gain</div><div class="roic roiv">$1,000</div>
+    <div class="roic roil">Compliance risk avoided (DVIR, CDL, docs)</div><div class="roic roip">avg annualized</div><div class="roic roiv">$200</div>
+    <div class="roitl">Total recovered value</div><div class="roitp"></div><div class="roitv">$4,500/mo</div>
+    <div class="roic roil" style="color:var(--orange);font-weight:600;">CarrierOS Growth (3 trucks)</div><div class="roic roip"></div><div class="roic" style="text-align:right;font-size:13px;font-weight:700;color:var(--orange);">$99/mo</div>
+  </div>
+  <div class="r d5" style="margin-top:14px;display:flex;align-items:center;gap:16px;">
+    <div style="background:rgba(22,163,74,0.1);border:1px solid rgba(22,163,74,0.3);border-radius:12px;padding:12px 20px;text-align:center;">
+      <div style="font-size:30px;font-weight:800;color:#4ade80;letter-spacing:-0.02em;">45×</div>
+      <div style="font-size:11px;color:#94a3b8;">return on cost</div>
+    </div>
+    <div style="font-size:12px;color:#94a3b8;max-width:480px;line-height:1.6;">"You're not buying software. You're buying back 10 hours a week — and putting your data to work so you can focus on the loads that actually grow your business."</div>
+  </div>
+</div>
+
+<!-- SLIDE 10 — PRICING -->
+<div class="slide bg-dark" data-notes="Position tiers as growth stages, not price points. Solo owner starts at Starter. First driver hired → Growth, and suddenly they have team features, GPS IFTA, dispatcher role. Want financial intelligence and load board → Pro. This isn't upselling — it's 'we grow as you grow.' The upgrade trigger is not 'you hit your truck limit.' It's 'you're ready for what comes next.' Core value — compliance, DVIR, invoicing, languages — never moves. Only operational intelligence unlocks as you grow.">
+  <div class="lbl r d1 orange">Pricing</div>
+  <h2 class="r d2" style="margin-bottom:20px;">Starts simple. <span class="orange">Grows with your fleet.</span></h2>
+  <div class="trow r d3">
+    <div class="tcard">
+      <div class="tname">Starter</div>
+      <div class="tprice">$49<span>/mo</span></div>
+      <div class="ttrucks">1 truck · +$15/additional</div>
+      <div class="tdiv"></div>
+      <div class="tf">Load management + dispatch</div>
+      <div class="tf">Digital DVIR + compliance alerts</div>
+      <div class="tf">Invoice generation &amp; sending</div>
+      <div class="tf">Customer tracking link</div>
+      <div class="tf">Fuel stop logging</div>
+      <div class="tf">4 languages (EN/ES/PA/UR)</div>
+      <div class="tf">90-day load history</div>
+    </div>
+    <div class="tcard feat">
+      <div class="tbadge">Most Popular</div>
+      <div class="tname">Growth</div>
+      <div class="tprice">$99<span>/mo</span></div>
+      <div class="ttrucks">Up to 3 trucks · +$20/additional</div>
+      <div class="tdiv"></div>
+      <div class="tf">Everything in Starter</div>
+      <div class="tf">GPS IFTA mileage log (auto)</div>
+      <div class="tf">Driver in-app chat</div>
+      <div class="tf">Live fleet map + dispatcher desktop</div>
+      <div class="tf">Dispatcher + Finance roles</div>
+      <div class="tf">Full load history + export</div>
+      <div class="tf">Exception management inbox</div>
+    </div>
+    <div class="tcard">
+      <div class="tname">Pro</div>
+      <div class="tprice">$199<span>/mo</span></div>
+      <div class="ttrucks">Up to 6 trucks · Post-MVP</div>
+      <div class="tdiv"></div>
+      <div class="tf">Everything in Growth</div>
+      <div class="tf">Full IFTA tax hub (quarterly filing)</div>
+      <div class="tf">Revenue/mile by lane</div>
+      <div class="tf">Fuel card analytics</div>
+      <div class="tf">Driver performance dashboard</div>
+      <div class="tf">Load board posting (DAT/Truckstop)</div>
+      <div class="tf">Customer portal + rate agreements</div>
+    </div>
+    <div class="tcard">
+      <div class="tname">Enterprise</div>
+      <div class="tprice">$349<span>/mo</span></div>
+      <div class="ttrucks">Up to 12 trucks · Post-MVP</div>
+      <div class="tdiv"></div>
+      <div class="tf">Everything in Pro</div>
+      <div class="tf">AI smart dispatch</div>
+      <div class="tf">HOS safety alerts (ELD)</div>
+      <div class="tf">DOT audit readiness</div>
+      <div class="tf">Custom permissions</div>
+      <div class="tf">Full API + webhooks</div>
+      <div class="tf">Driver training tracking</div>
+    </div>
+  </div>
+  <div class="r d4" style="margin-top:14px;font-size:11px;color:var(--gray);">Safety, compliance, and all 4 languages at <strong style="color:#fff;">every tier</strong>. These are never gated — they're the foundation.</div>
+</div>
+
+<!-- SLIDE 11 — MID-SIZE & ENTERPRISE -->
+<div class="slide bg-investor" data-notes="For carriers with 5-20 trucks, or investors understanding the upmarket path. Value prop shifts at this scale: less about saving owner's personal time, more about operational leverage — more loads per dispatcher, less driver idle time, catching HOS violations before accidents, DOT-audit-ready without hiring a safety director. AI smart dispatch is the headline: right driver + right truck + right load, automatically scored and suggested. For a 10-truck fleet, one suboptimal dispatch per day costs $150-300. AI dispatch recovers that. For investors: this is the platform's natural expansion path — data compounds, intelligence gets smarter.">
+  <div class="lbl r d1" style="color:#c4b5fd;">Mid-Size &amp; Enterprise — Pro / Enterprise Tiers</div>
+  <h2 class="r d2" style="margin-bottom:8px;">When your fleet grows,<br><span style="color:#c4b5fd;">your ops complexity doesn't have to.</span></h2>
+  <div class="hdiv r d3" style="background:#6366f1;"></div>
+  <div class="entg r d4">
+    <div class="entc">
+      <div class="enticon">🗺️</div>
+      <div class="enttitle">Fleet Command Center</div>
+      <div class="entdesc">Live map of every truck. Dispatcher queue with assign panel. KPI strip with real-time revenue, fuel spend, active loads. Exception inbox — everything that needs attention, nothing that doesn't.</div>
+    </div>
+    <div class="entc">
+      <div class="enticon">🤖</div>
+      <div class="enttitle">AI Smart Dispatch</div>
+      <div class="entdesc">Scores every driver against every open load — availability, CDL class, proximity, HOS hours remaining, lane history. Best match surfaced instantly. One click to assign. Push notification to driver.</div>
+    </div>
+    <div class="entc">
+      <div class="enticon">⏱️</div>
+      <div class="enttitle">HOS Safety Alerts</div>
+      <div class="entdesc">Real-time alerts when a driver approaches their hours limit. No HOS violations, no out-of-service orders. Safety director capability — without the salary.</div>
+    </div>
+    <div class="entc">
+      <div class="enticon">📊</div>
+      <div class="enttitle">DOT Audit Readiness</div>
+      <div class="entdesc">Every DVIR, CDL, medical cert, insurance doc, service log — organized and retrievable. Audit prep that took days takes 10 minutes. Know you're ready before the auditor arrives.</div>
+    </div>
+    <div class="entc">
+      <div class="enticon">🔗</div>
+      <div class="enttitle">Full API + Webhooks</div>
+      <div class="entdesc">Connect to your 3PL's TMS, broker portal, or ERP. Load data flows in automatically. Status updates flow back out. No re-entry at integration points.</div>
+    </div>
+    <div class="entc">
+      <div class="enticon">💰</div>
+      <div class="enttitle">Revenue Intelligence</div>
+      <div class="entdesc">$/mile by lane, by driver, by customer. Fuel cost anomaly detection. Driver performance scoring. Know which lanes to grow, which customers to renegotiate, which drivers are most efficient.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 12 — CA PILOT -->
+<div class="slide bg-dark" data-notes="Close with the offer. Make it easy to say yes. The 90-day free Growth access is the hook — full mid-tier product, not a limited trial. White-glove onboarding means we set it up with them — trucks, drivers, first load together. They run real loads, not demos. Feedback loop is genuine: their input shapes the build. Locked-in pricing is the closer — early adopters get launch pricing locked for 12 months. We're not asking them to evaluate software. We're asking them to be part of building it.">
+  <div class="lbl r d1 orange">CA Pilot — 2026</div>
+  <h2 class="r d2" style="margin-bottom:8px;">10 carriers. 90 days.<br><span class="orange">Free Growth access.</span></h2>
+  <p class="hero-sub r d3" style="font-size:14px;margin-bottom:26px;">Not a demo. Real loads, real data, real feedback — and your input shapes what gets built next.</p>
+  <div class="tline r d4">
+    <div class="tli">
+      <div class="tldot">1</div>
+      <div class="tlm">Month 1</div>
+      <div class="tld">Onboarded in &lt;60 min. Trucks, drivers, first load set up together. Running real loads from week 1.</div>
+    </div>
+    <div class="tli">
+      <div class="tldot">2</div>
+      <div class="tlm">Month 2</div>
+      <div class="tld">30-min check-in. What's working, what's broken, what's missing. Feedback goes directly to build queue.</div>
+    </div>
+    <div class="tli">
+      <div class="tldot">3</div>
+      <div class="tlm">Month 3</div>
+      <div class="tld">Review 90 days of your own data together. Decide on a paid plan. Launch pricing locked for 12 months.</div>
+    </div>
+  </div>
+  <div class="r d5" style="margin-top:26px;display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:680px;">
+    <div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);margin-bottom:10px;">What you get</div>
+      <div style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#94a3b8;">
+        <div>✅ Full Growth tier free for 90 days</div>
+        <div>✅ White-glove onboarding (we set it up with you)</div>
+        <div>✅ Direct line to product team — not a helpdesk</div>
+        <div>✅ Launch pricing locked for 12 months</div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);margin-bottom:10px;">What we ask</div>
+      <div style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#94a3b8;">
+        <div>🤝 Run real loads for 90 days</div>
+        <div>🤝 Two or three 30-min feedback calls</div>
+        <div>🤝 Tell us what's broken — bluntly</div>
+        <div>🤝 Introduce us to 1–2 carriers if you see value</div>
+      </div>
+    </div>
+  </div>
+  <div class="r d6" style="margin-top:20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
+    <span class="pill po" style="font-size:12px;padding:8px 18px;">info@shipmentx.com</span>
+    <span style="font-size:11px;color:var(--gray);">carrieros.com · California-based carriers only · First 10 spots</span>
+  </div>
+</div>
+
+<!-- SLIDE 13 — INVESTOR -->
+<div class="slide bg-investor" data-notes="For investors or advisors in the room. Lead with the market size insight: 500K+ US carriers, 85% still on spreadsheets. The product doesn't need to convince carriers to go digital — they already are. It needs to replace the 7 tools they're patching together. At 1,000 carriers (a fraction of the market) that's $2-5M ARR. Platform flywheel is the real value: every load creates data. Data creates intelligence. Intelligence creates lock-in. The more a carrier uses CarrierOS, the more valuable the lane analytics, driver scores, customer intelligence become. Harder to leave. That's the moat.">
+  <div class="lbl r d1" style="color:#c4b5fd;">The Opportunity</div>
+  <h2 class="r d2" style="margin-bottom:8px;">A $30B market that's<br><span style="color:#c4b5fd;">still running on spreadsheets.</span></h2>
+  <div class="hdiv r d3" style="background:#6366f1;"></div>
+  <div class="invg r d4">
+    <div class="invs">
+      <div class="invv">500K+</div>
+      <div class="invl">US carriers with &lt;10 trucks — the addressable base. Less than 15% have any TMS software today.</div>
+    </div>
+    <div class="invs">
+      <div class="invv">85%</div>
+      <div class="invl">still on spreadsheets, email, and paper. Large market, almost entirely unserved at this price point.</div>
+    </div>
+    <div class="invs">
+      <div class="invv">$49–349</div>
+      <div class="invl">/month ARPU. Ops-critical = low churn. At 1,000 carriers: $2–5M ARR. CA alone: 85K carriers.</div>
+    </div>
+  </div>
+  <div class="r d5" style="margin-top:22px;">
+    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#6366f1;margin-bottom:12px;">Platform Flywheel — Data Compounds Over Time</div>
+    <div class="fw">
+      <div class="fws">Load &amp; route data</div><div class="fwa">→</div>
+      <div class="fws">Lane intelligence</div><div class="fwa">→</div>
+      <div class="fws">Smart dispatch</div><div class="fwa">→</div>
+      <div class="fws">Driver performance</div><div class="fwa">→</div>
+      <div class="fws">Load board integration</div><div class="fwa">→</div>
+      <div class="fws" style="border-color:rgba(99,102,241,0.4);background:rgba(99,102,241,0.08);color:#c4b5fd;">Banking &amp; ACH</div>
+    </div>
+    <div style="font-size:11px;color:#94a3b8;margin-top:10px;">Every carrier using CarrierOS generates data that makes the platform smarter — and harder to leave. This is the moat.</div>
+  </div>
+  <div class="r d6" style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+    <span class="pill pp">ELD mandate → digital-first carriers</span>
+    <span class="pill pp">Compliance pressure → safety software demand</span>
+    <span class="pill pp">Driver shortage → efficiency imperative</span>
+    <span class="pill pp">CA beachhead → 85K in-state carriers</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<div id="nav">
+  <div id="counter">1 / 13</div>
+  <div id="progress"><div id="pfill" style="width:7.7%"></div></div>
+  <button class="nbtn" id="prev">← Prev</button>
+  <button class="nbtn" id="next">Next →</button>
+  <button id="ntoggle">speaker notes</button>
+</div>
+<div id="notes"><span id="ntxt"></span></div>
+
+<script>
+const slides=Array.from(document.querySelectorAll('.slide'));
+const total=slides.length;
+let cur=0;
+function revealAll(sl){sl.querySelectorAll('.r').forEach(el=>{el.offsetHeight;el.classList.add('on');});}
+function clearAll(sl){sl.querySelectorAll('.r').forEach(el=>el.classList.remove('on'));}
+function go(dir){
+  clearAll(slides[cur]);slides[cur].classList.remove('active');
+  cur=Math.max(0,Math.min(total-1,cur+dir));
+  slides[cur].classList.add('active');void slides[cur].offsetWidth;
+  revealAll(slides[cur]);
+  document.getElementById('counter').textContent=(cur+1)+' / '+total;
+  document.getElementById('pfill').style.width=((cur+1)/total*100)+'%';
+  document.getElementById('ntxt').textContent=slides[cur].dataset.notes||'';
+}
+document.getElementById('prev').addEventListener('click',()=>go(-1));
+document.getElementById('next').addEventListener('click',()=>go(1));
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+document.addEventListener('click',e=>{if(!e.target.closest('#nav')&&!e.target.closest('#notes'))go(1);});
+const nb=document.getElementById('notes');
+document.getElementById('ntoggle').addEventListener('click',()=>{nb.style.display=nb.style.display==='block'?'none':'block';});
+document.getElementById('ntxt').textContent=slides[0].dataset.notes||'';
+revealAll(slides[0]);
+</script>
+</body>
+</html>

@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CarrierOS — Run Your Trucking Business From Your Phone</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #0a0a0a;
+      --white: #ffffff;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-900: #111827;
+      --orange: #f97316;
+      --orange-dark: #ea6c0a;
+      --orange-light: #fff7ed;
+      --green: #16a34a;
+      --blue: #2563eb;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--gray-900);
+      background: var(--white);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ─── NAV ─── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+
+    .nav-logo {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--black);
+    }
+    .nav-logo span { color: var(--orange); }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+    .nav-links a {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-600);
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--black); }
+
+    .nav-cta {
+      background: var(--orange);
+      color: white !important;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-weight: 600 !important;
+      font-size: 14px !important;
+      transition: background 0.15s !important;
+    }
+    .nav-cta:hover { background: var(--orange-dark) !important; }
+
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      background: var(--black);
+      color: var(--white);
+      padding: 80px 24px 64px;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(249,115,22,0.15);
+      border: 1px solid rgba(249,115,22,0.3);
+      color: var(--orange);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+    }
+
+    .hero h1 {
+      font-size: clamp(32px, 6vw, 60px);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      max-width: 760px;
+      margin: 0 auto 20px;
+    }
+    .hero h1 span { color: var(--orange); }
+
+    .hero-sub {
+      font-size: clamp(16px, 2.5vw, 20px);
+      color: rgba(255,255,255,0.65);
+      max-width: 520px;
+      margin: 0 auto 40px;
+      line-height: 1.5;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 56px;
+    }
+
+    .btn-primary {
+      background: var(--orange);
+      color: white;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      display: inline-block;
+    }
+    .btn-primary:hover { background: var(--orange-dark); transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.08);
+      color: white;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      border: 1px solid rgba(255,255,255,0.15);
+      cursor: pointer;
+      transition: background 0.15s;
+      display: inline-block;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.14); }
+
+    .hero-note {
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+      margin-top: 12px;
+    }
+
+    /* Mockup phone */
+    .phone-mockup {
+      max-width: 280px;
+      margin: 0 auto;
+      background: #1a1a1a;
+      border-radius: 40px;
+      padding: 16px;
+      border: 2px solid #333;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+    }
+    .phone-screen {
+      background: var(--gray-900);
+      border-radius: 28px;
+      overflow: hidden;
+    }
+    .phone-header {
+      background: var(--orange);
+      padding: 16px;
+      color: white;
+    }
+    .phone-header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .phone-header-top .logo { font-weight: 800; font-size: 15px; letter-spacing: -0.3px; }
+    .phone-header-top .status-dot { width: 8px; height: 8px; background: #4ade80; border-radius: 50%; }
+    .phone-header h2 { font-size: 22px; font-weight: 800; }
+    .phone-header p { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+
+    .phone-body { padding: 14px; }
+
+    .phone-load-card {
+      background: #1f2937;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+      border-left: 3px solid var(--orange);
+    }
+    .phone-load-card .load-title { font-size: 13px; font-weight: 700; color: white; }
+    .phone-load-card .load-route { font-size: 11px; color: #9ca3af; margin: 4px 0; }
+    .phone-load-card .load-bottom { display: flex; justify-content: space-between; align-items: center; }
+    .phone-load-card .load-rate { font-size: 15px; font-weight: 800; color: var(--orange); }
+    .phone-status-pill {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 100px;
+      background: rgba(74,222,128,0.15);
+      color: #4ade80;
+    }
+    .phone-status-pill.transit {
+      background: rgba(249,115,22,0.15);
+      color: var(--orange);
+    }
+
+    .phone-action-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .phone-btn {
+      flex: 1;
+      background: var(--orange);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+    }
+    .phone-btn.outline {
+      background: transparent;
+      border: 1px solid #374151;
+      color: #9ca3af;
+    }
+
+    /* ─── SECTION SHARED ─── */
+    section { padding: 80px 24px; }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: clamp(26px, 4vw, 40px);
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+
+    .section-sub {
+      font-size: 17px;
+      color: var(--gray-500);
+      max-width: 560px;
+      line-height: 1.6;
+    }
+
+    /* ─── SOCIAL PROOF ─── */
+    .social-proof {
+      background: var(--gray-50);
+      border-top: 1px solid var(--gray-200);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 36px 24px;
+    }
+
+    .proof-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+
+    .proof-stat {
+      text-align: center;
+    }
+    .proof-stat .number {
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--black);
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+    .proof-stat .label {
+      font-size: 13px;
+      color: var(--gray-500);
+      margin-top: 4px;
+    }
+
+    .proof-divider {
+      width: 1px;
+      height: 40px;
+      background: var(--gray-200);
+    }
+
+    @media (max-width: 480px) {
+      .proof-divider { display: none; }
+    }
+
+    /* ─── PAIN → SOLUTION ─── */
+    .pain-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-top: 48px;
+    }
+
+    .pain-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 16px;
+      padding: 28px;
+      transition: box-shadow 0.2s;
+    }
+    .pain-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.07); }
+
+    .pain-card .before {
+      background: #fef2f2;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+    .pain-card .before-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #dc2626;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .pain-card .before p {
+      font-size: 14px;
+      color: var(--gray-700);
+      line-height: 1.5;
+    }
+
+    .pain-card .arrow {
+      text-align: center;
+      font-size: 20px;
+      margin-bottom: 16px;
+      color: var(--gray-400);
+    }
+
+    .pain-card .after {
+      background: var(--orange-light);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .pain-card .after-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--orange-dark);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .pain-card .after p {
+      font-size: 14px;
+      color: var(--gray-700);
+      line-height: 1.5;
+    }
+
+    /* ─── FEATURES ─── */
+    .features { background: var(--gray-50); }
+
+    .feature-block {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+      padding: 56px 0;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .feature-block:last-child { border-bottom: none; }
+    .feature-block.reverse { direction: rtl; }
+    .feature-block.reverse > * { direction: ltr; }
+
+    @media (max-width: 768px) {
+      .feature-block, .feature-block.reverse {
+        grid-template-columns: 1fr;
+        direction: ltr;
+        gap: 32px;
+      }
+    }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--orange-light);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .feature-text h3 {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+    }
+
+    .feature-text p {
+      font-size: 16px;
+      color: var(--gray-500);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .feature-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--gray-700);
+      line-height: 1.5;
+    }
+
+    .feature-list li::before {
+      content: "✓";
+      color: var(--orange);
+      font-weight: 800;
+      font-size: 14px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Feature visual panels */
+    .feature-visual {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+
+    .fv-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .fv-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .fv-dot.red { background: #ef4444; }
+    .fv-dot.yellow { background: #eab308; }
+    .fv-dot.green { background: #22c55e; }
+
+    .fv-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-400);
+      margin-left: 4px;
+    }
+
+    .fv-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--gray-100);
+      font-size: 14px;
+    }
+    .fv-row:last-child { border-bottom: none; }
+    .fv-row .label { color: var(--gray-500); }
+    .fv-row .value { font-weight: 600; color: var(--gray-900); }
+    .fv-row .value.green { color: var(--green); }
+    .fv-row .value.orange { color: var(--orange); }
+
+    .fv-pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .fv-pill.delivered { background: rgba(22,163,74,0.1); color: var(--green); }
+    .fv-pill.transit { background: rgba(249,115,22,0.1); color: var(--orange); }
+    .fv-pill.scheduled { background: rgba(37,99,235,0.1); color: var(--blue); }
+
+    .fv-invoice {
+      background: var(--gray-50);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .fv-invoice-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .fv-invoice-header .co { font-size: 15px; font-weight: 800; }
+    .fv-invoice-header .inv { font-size: 12px; color: var(--gray-400); }
+    .fv-invoice-total {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--orange);
+      letter-spacing: -1px;
+      margin: 8px 0;
+    }
+    .fv-invoice-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--gray-500);
+      padding: 3px 0;
+    }
+    .fv-send-btn {
+      background: var(--orange);
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-top: 14px;
+      cursor: pointer;
+    }
+
+    .fv-tracking {
+      text-align: center;
+      padding: 20px 0;
+    }
+    .fv-tracking .track-icon { font-size: 40px; margin-bottom: 10px; }
+    .fv-tracking h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .fv-tracking p { font-size: 13px; color: var(--gray-400); }
+    .fv-tracking .track-bar {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin: 20px 0 10px;
+    }
+    .track-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+    }
+    .track-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--gray-200);
+      margin-bottom: 6px;
+      position: relative;
+      z-index: 1;
+    }
+    .track-dot.done { background: var(--orange); }
+    .track-dot.active { background: var(--orange); box-shadow: 0 0 0 4px rgba(249,115,22,0.2); }
+    .track-label { font-size: 10px; color: var(--gray-400); font-weight: 500; }
+    .track-line {
+      flex: 1;
+      height: 2px;
+      background: var(--gray-200);
+      margin-top: -17px;
+    }
+    .track-line.done { background: var(--orange); }
+
+    .fv-dvir {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .dvir-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--gray-50);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    .dvir-check {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .dvir-check.ok { background: rgba(22,163,74,0.15); color: var(--green); }
+    .dvir-check.flag { background: rgba(239,68,68,0.15); color: #dc2626; }
+    .dvir-label { flex: 1; color: var(--gray-700); }
+    .dvir-status { font-size: 11px; font-weight: 700; }
+    .dvir-status.ok { color: var(--green); }
+    .dvir-status.flag { color: #dc2626; }
+
+    /* ─── HOW IT WORKS ─── */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2px;
+      background: var(--gray-200);
+      border-radius: 20px;
+      overflow: hidden;
+      margin-top: 48px;
+    }
+
+    .step {
+      background: var(--white);
+      padding: 32px 28px;
+      position: relative;
+    }
+
+    .step-num {
+      font-size: 48px;
+      font-weight: 900;
+      color: var(--gray-100);
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .step h4 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .step p {
+      font-size: 14px;
+      color: var(--gray-500);
+      line-height: 1.6;
+    }
+
+    /* ─── PRICING ─── */
+    .pricing { background: var(--gray-900); color: var(--white); }
+    .pricing .section-label { color: var(--orange); }
+    .pricing .section-title { color: var(--white); }
+    .pricing .section-sub { color: rgba(255,255,255,0.5); }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-top: 48px;
+    }
+
+    .price-card {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 20px;
+      padding: 28px;
+      transition: transform 0.2s;
+      position: relative;
+    }
+    .price-card:hover { transform: translateY(-4px); }
+
+    .price-card.featured {
+      background: var(--orange);
+      border-color: var(--orange);
+    }
+
+    .price-card .featured-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      color: var(--orange);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 14px;
+      border-radius: 100px;
+      letter-spacing: 0.5px;
+    }
+
+    .price-card .tier-name {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 4px;
+    }
+    .price-card.featured .tier-name { color: rgba(255,255,255,0.7); }
+
+    .price-card .price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      margin: 12px 0 4px;
+    }
+    .price-card .amount {
+      font-size: 36px;
+      font-weight: 900;
+      letter-spacing: -1.5px;
+      color: var(--white);
+    }
+    .price-card.featured .amount { color: white; }
+    .price-card .per { font-size: 14px; color: rgba(255,255,255,0.4); }
+    .price-card.featured .per { color: rgba(255,255,255,0.7); }
+
+    .price-card .per-truck {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 4px;
+    }
+    .price-card.featured .per-truck { color: rgba(255,255,255,0.7); }
+
+    .price-card .target {
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .price-card.featured .target { color: rgba(255,255,255,0.75); border-color: rgba(255,255,255,0.2); }
+
+    .price-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .price-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.5;
+    }
+    .price-features li .check {
+      color: var(--orange);
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .price-card.featured .price-features li { color: rgba(255,255,255,0.9); }
+    .price-card.featured .price-features li .check { color: white; }
+
+    .price-card .price-cta {
+      display: block;
+      width: 100%;
+      padding: 13px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(255,255,255,0.08);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: background 0.15s;
+    }
+    .price-card .price-cta:hover { background: rgba(255,255,255,0.14); }
+    .price-card.featured .price-cta {
+      background: white;
+      color: var(--orange);
+      border: none;
+    }
+    .price-card.featured .price-cta:hover { background: var(--orange-light); }
+
+    .price-note {
+      text-align: center;
+      margin-top: 32px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.35);
+    }
+    .price-note strong { color: rgba(255,255,255,0.6); }
+
+    /* ─── COMPETITIVE ─── */
+    .competitive { background: var(--white); }
+
+    .comp-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 40px;
+      font-size: 14px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--gray-200);
+    }
+
+    .comp-table th {
+      background: var(--gray-900);
+      color: white;
+      padding: 14px 16px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .comp-table th:first-child { border-radius: 0; }
+
+    .comp-table th.highlight {
+      background: var(--orange);
+      color: white;
+    }
+
+    .comp-table td {
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--gray-100);
+      color: var(--gray-700);
+      vertical-align: middle;
+    }
+
+    .comp-table td.highlight {
+      background: var(--orange-light);
+      font-weight: 700;
+      color: var(--orange-dark);
+    }
+
+    .comp-table tr:last-child td { border-bottom: none; }
+    .comp-table tr:hover td { background: var(--gray-50); }
+    .comp-table tr:hover td.highlight { background: #fde8d8; }
+
+    .check-yes { color: var(--green); font-weight: 700; }
+    .check-no { color: var(--gray-300); }
+
+    /* ─── TESTIMONIAL ─── */
+    .testimonial-section { background: var(--orange-light); }
+
+    .testimonial-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-top: 48px;
+    }
+
+    .testimonial-card {
+      background: white;
+      border-radius: 16px;
+      padding: 28px;
+      border: 1px solid var(--gray-200);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+
+    .testimonial-card .quote {
+      font-size: 15px;
+      color: var(--gray-700);
+      line-height: 1.7;
+      margin-bottom: 20px;
+      font-style: italic;
+    }
+
+    .testimonial-card .quote::before { content: '"'; }
+    .testimonial-card .quote::after { content: '"'; }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .author-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .author-name {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .author-title {
+      font-size: 12px;
+      color: var(--gray-400);
+    }
+
+    .stars {
+      color: #f59e0b;
+      font-size: 14px;
+      margin-bottom: 14px;
+    }
+
+    /* ─── CTA BOTTOM ─── */
+    .cta-bottom {
+      background: var(--black);
+      color: white;
+      text-align: center;
+      padding: 100px 24px;
+    }
+
+    .cta-bottom h2 {
+      font-size: clamp(28px, 5vw, 52px);
+      font-weight: 900;
+      letter-spacing: -1.5px;
+      margin-bottom: 16px;
+      line-height: 1.1;
+    }
+    .cta-bottom h2 span { color: var(--orange); }
+
+    .cta-bottom p {
+      font-size: 18px;
+      color: rgba(255,255,255,0.5);
+      max-width: 460px;
+      margin: 0 auto 40px;
+    }
+
+    .cta-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .cta-bottom .note {
+      margin-top: 20px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.3);
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: #050505;
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    .footer-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    .footer-logo {
+      font-size: 20px;
+      font-weight: 800;
+      color: white;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+    .footer-logo span { color: var(--orange); }
+
+    .footer-tagline {
+      font-size: 13px;
+      color: rgba(255,255,255,0.3);
+      margin-bottom: 32px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 32px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+    .footer-links a {
+      font-size: 13px;
+      color: rgba(255,255,255,0.35);
+      transition: color 0.15s;
+    }
+    .footer-links a:hover { color: rgba(255,255,255,0.7); }
+
+    .footer-bottom {
+      font-size: 12px;
+      color: rgba(255,255,255,0.2);
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- ─── NAV ─── -->
+<nav>
+  <div class="nav-logo">Carrier<span>OS</span></div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#compliance">Compliance</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#compare">Compare</a>
+    <a href="#pilot" class="nav-cta">Start Free Trial</a>
+  </div>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-badge">🚛 Built for owner-operators</div>
+  <h1>Run your trucking<br>business from <span>your phone.</span></h1>
+  <p class="hero-sub">No spreadsheets. No Quicken. No chasing invoices. CarrierOS handles everything from load intake to getting paid — in one app.</p>
+
+  <div class="hero-actions">
+    <a href="#pilot" class="btn-primary">Start 30-Day Free Trial</a>
+    <a href="#features" class="btn-secondary">See How It Works</a>
+  </div>
+
+  <!-- Phone mockup -->
+  <div class="phone-mockup">
+    <div class="phone-screen">
+      <div class="phone-header">
+        <div class="phone-header-top">
+          <span class="logo">CarrierOS</span>
+          <span class="status-dot"></span>
+        </div>
+        <h2>3 Active Loads</h2>
+        <p>Tuesday, July 3</p>
+      </div>
+      <div class="phone-body">
+        <div class="phone-load-card">
+          <div class="load-title">Chicago → Nashville</div>
+          <div class="load-route">Midwest Brokers LLC · REF #4821</div>
+          <div class="load-bottom">
+            <span class="load-rate">$2,400</span>
+            <span class="phone-status-pill transit">In Transit</span>
+          </div>
+        </div>
+        <div class="phone-load-card" style="border-left-color: #22c55e;">
+          <div class="load-title">Atlanta → Dallas</div>
+          <div class="load-route">FastFreight Co · REF #4819</div>
+          <div class="load-bottom">
+            <span class="load-rate">$3,100</span>
+            <span class="phone-status-pill">Delivered</span>
+          </div>
+        </div>
+        <div class="phone-action-row">
+          <button class="phone-btn">+ New Load</button>
+          <button class="phone-btn outline">Invoice All</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="hero-note">30-day free trial · No credit card required · iOS + Android</p>
+</section>
+
+<!-- ─── SOCIAL PROOF ─── -->
+<div class="social-proof">
+  <div class="proof-inner">
+    <div class="proof-stat">
+      <div class="number">10</div>
+      <div class="label">Pilot carriers onboarded</div>
+    </div>
+    <div class="proof-divider"></div>
+    <div class="proof-stat">
+      <div class="number">&lt;2 min</div>
+      <div class="label">To send an invoice</div>
+    </div>
+    <div class="proof-divider"></div>
+    <div class="proof-stat">
+      <div class="number">60 min</div>
+      <div class="label">Setup to first live load</div>
+    </div>
+    <div class="proof-divider"></div>
+    <div class="proof-stat">
+      <div class="number">$49/mo</div>
+      <div class="label">Starter — less than a tank of fuel</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── PAIN → SOLUTION ─── -->
+<section id="why">
+  <div class="container">
+    <div class="section-label">The Problem</div>
+    <h2 class="section-title">You're running your business on<br>three tools that don't talk to each other.</h2>
+    <p class="section-sub">Every load you run means switching between spreadsheets, email, and your accounting app. CarrierOS fixes that.</p>
+
+    <div class="pain-grid">
+      <div class="pain-card">
+        <div class="before">
+          <div class="before-label">Today</div>
+          <p>Rate confirmation PDF arrives by email. You copy it into a spreadsheet — and hope you didn't miss anything.</p>
+        </div>
+        <div class="arrow">↓</div>
+        <div class="after">
+          <div class="after-label">With CarrierOS</div>
+          <p>Forward the email or upload the PDF. AI reads every field — pickup, delivery, rate, reference numbers — in seconds.</p>
+        </div>
+      </div>
+
+      <div class="pain-card">
+        <div class="before">
+          <div class="before-label">Today</div>
+          <p>Your customer calls asking where their freight is. You have to call the driver, then call them back.</p>
+        </div>
+        <div class="arrow">↓</div>
+        <div class="after">
+          <div class="after-label">With CarrierOS</div>
+          <p>Share a tracking link in one tap. Your customer sees live status — no login, no calls to you.</p>
+        </div>
+      </div>
+
+      <div class="pain-card">
+        <div class="before">
+          <div class="before-label">Today</div>
+          <p>Load is delivered. You open Quicken, re-type everything, format the invoice, attach it to an email, and send. 20 minutes gone.</p>
+        </div>
+        <div class="arrow">↓</div>
+        <div class="after">
+          <div class="after-label">With CarrierOS</div>
+          <p>Tap "Invoice." Everything is already filled in. Review, send. Under 2 minutes — from your truck cab.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FEATURES ─── -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-label">How It Works</div>
+    <h2 class="section-title">Everything you need.<br>Nothing you don't.</h2>
+    <p class="section-sub">Organized around the way a load actually works — from intake to getting paid.</p>
+
+    <!-- 1: Load Intake -->
+    <div class="feature-block">
+      <div class="feature-text">
+        <div class="feature-icon">📥</div>
+        <h3>Get the load in — any way it comes</h3>
+        <p>Rate confirmations arrive by email, PDF, text, and phone. CarrierOS handles all four without making you re-type anything.</p>
+        <ul class="feature-list">
+          <li>Forward broker emails to your dedicated CarrierOS address — load drafts automatically</li>
+          <li>Upload a PDF or image — AI extracts every field in seconds</li>
+          <li>Paste any text from SMS, WhatsApp, or a broker portal</li>
+          <li>Manual entry for phone-received loads — under 2 minutes</li>
+          <li>Review screen highlights every extracted field; tap any field to correct it</li>
+          <li>Confidence indicators flag anything the AI wasn't sure about</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="fv-header">
+          <div class="fv-dot red"></div>
+          <div class="fv-dot yellow"></div>
+          <div class="fv-dot green"></div>
+          <span class="fv-title">AI Extraction Review</span>
+        </div>
+        <div class="fv-row">
+          <span class="label">Pickup</span>
+          <span class="value">Chicago, IL 60601</span>
+        </div>
+        <div class="fv-row">
+          <span class="label">Delivery</span>
+          <span class="value">Nashville, TN 37201</span>
+        </div>
+        <div class="fv-row">
+          <span class="label">Rate</span>
+          <span class="value orange">$2,400.00</span>
+        </div>
+        <div class="fv-row">
+          <span class="label">Pickup window</span>
+          <span class="value">Jul 5, 8am–12pm</span>
+        </div>
+        <div class="fv-row">
+          <span class="label">Broker</span>
+          <span class="value">Midwest Brokers LLC</span>
+        </div>
+        <div class="fv-row">
+          <span class="label">Reference #</span>
+          <span class="value">REF-4821</span>
+        </div>
+        <div style="margin-top:16px; display:flex; gap:8px;">
+          <button style="flex:1;background:#f97316;color:white;border:none;padding:12px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">✓ Confirm &amp; Save</button>
+          <button style="flex:1;background:#f3f4f6;color:#374151;border:none;padding:12px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;">Edit</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2: Dispatch + Tracking -->
+    <div class="feature-block reverse">
+      <div class="feature-text">
+        <div class="feature-icon">🗺️</div>
+        <h3>Dispatch, track, and keep customers informed</h3>
+        <p>Your customer always knows where their freight is — without you making a single call.</p>
+        <ul class="feature-list">
+          <li>Assign load to truck and driver in one tap; driver gets a push notification</li>
+          <li>Driver updates status from their phone — Scheduled, In Transit, Delivered</li>
+          <li>Share a tracking link with your customer — no login required, works on any phone</li>
+          <li>Customer gets email alerts when status changes — so they stop calling you</li>
+          <li>Driver captures POD/BOL photo on delivery; sends directly to broker from the app</li>
+          <li>Solo mode: if you own one truck and drive it yourself, no role-switching needed</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="fv-header">
+          <div class="fv-dot red"></div>
+          <div class="fv-dot yellow"></div>
+          <div class="fv-dot green"></div>
+          <span class="fv-title">Tracking Link — Public View</span>
+        </div>
+        <div class="fv-tracking">
+          <div class="track-icon">🚛</div>
+          <h4>Chicago → Nashville</h4>
+          <p style="margin-bottom:20px">Midwest Brokers LLC · REF-4821</p>
+
+          <div class="track-bar">
+            <div class="track-step">
+              <div class="track-dot done"></div>
+              <div class="track-label">Picked Up</div>
+            </div>
+            <div class="track-line done"></div>
+            <div class="track-step">
+              <div class="track-dot active"></div>
+              <div class="track-label">In Transit</div>
+            </div>
+            <div class="track-line"></div>
+            <div class="track-step">
+              <div class="track-dot"></div>
+              <div class="track-label">Delivered</div>
+            </div>
+          </div>
+
+          <p style="font-size:12px;color:#9ca3af;margin-top:8px;">Est. delivery: Jul 5, 5:00 PM</p>
+          <p style="font-size:12px;color:#9ca3af;">Last update: 2:14 PM · Memphis, TN</p>
+
+          <div style="margin-top:16px;padding:12px;background:#f3f4f6;border-radius:10px;font-size:12px;color:#6b7280;text-align:left;">
+            <strong style="color:#111;">Carrier contact</strong><br>
+            Sam Johnson · (312) 555-0198
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3: Invoicing -->
+    <div class="feature-block">
+      <div class="feature-text">
+        <div class="feature-icon">💵</div>
+        <h3>Invoice sent in under 2 minutes</h3>
+        <p>The moment a load is delivered, everything is already filled in. You just review and send.</p>
+        <ul class="feature-list">
+          <li>Invoice auto-populates from the load — rate, addresses, dates, reference numbers</li>
+          <li>Review and edit before sending, then send from the app — no switching to email</li>
+          <li>Invoice includes your logo, tax ID, payment terms, and due date</li>
+          <li>Download as PDF for your records</li>
+          <li>Track status: Draft → Sent → Paid → Overdue</li>
+          <li>You get alerted when your customer opens the invoice</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="fv-header">
+          <div class="fv-dot red"></div>
+          <div class="fv-dot yellow"></div>
+          <div class="fv-dot green"></div>
+          <span class="fv-title">Invoice #1042</span>
+        </div>
+        <div class="fv-invoice">
+          <div class="fv-invoice-header">
+            <span class="co">Sam's Trucking LLC</span>
+            <span class="inv">INV-1042</span>
+          </div>
+          <div class="fv-invoice-line">
+            <span>Chicago → Nashville</span>
+            <span></span>
+          </div>
+          <div class="fv-invoice-line">
+            <span>REF-4821 · Jul 5, 2026</span>
+            <span></span>
+          </div>
+          <div class="fv-invoice-total">$2,400.00</div>
+          <div class="fv-invoice-line">
+            <span>Payment terms</span>
+            <span style="color:#374151;font-weight:600;">Net 30</span>
+          </div>
+          <div class="fv-invoice-line">
+            <span>Due date</span>
+            <span style="color:#374151;font-weight:600;">Aug 4, 2026</span>
+          </div>
+          <div class="fv-invoice-line">
+            <span>Bill to</span>
+            <span style="color:#374151;font-weight:600;">Midwest Brokers LLC</span>
+          </div>
+          <button class="fv-send-btn">📧 Send Invoice</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4: Compliance -->
+    <div class="feature-block reverse" id="compliance">
+      <div class="feature-text">
+        <div class="feature-icon">📋</div>
+        <h3>FMCSA compliance — built in, not bolted on</h3>
+        <p>Pre-trip and post-trip inspections are federally required. CarrierOS makes them take 2 minutes on your phone — and keeps the records automatically.</p>
+        <ul class="feature-list">
+          <li>FMCSA-compliant DVIR checklist pre-loaded — no setup required</li>
+          <li>Driver signs inspection digitally; records stored for 3 months minimum</li>
+          <li>Defects flagged immediately — you get a push notification the moment a driver marks an issue</li>
+          <li>Truck service log: record any maintenance with date, mileage, cost, and shop</li>
+          <li>Mileage and time-based reminders (oil changes, DOT inspections, registration renewals)</li>
+          <li>Store registration, insurance certificate, and DOT authority per truck — pull them up instantly at a roadside check</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="fv-header">
+          <div class="fv-dot red"></div>
+          <div class="fv-dot yellow"></div>
+          <div class="fv-dot green"></div>
+          <span class="fv-title">Pre-Trip DVIR — Truck #1</span>
+        </div>
+        <div class="fv-dvir">
+          <div class="dvir-item">
+            <div class="dvir-check ok">✓</div>
+            <span class="dvir-label">Brakes</span>
+            <span class="dvir-status ok">OK</span>
+          </div>
+          <div class="dvir-item">
+            <div class="dvir-check ok">✓</div>
+            <span class="dvir-label">Lights &amp; reflectors</span>
+            <span class="dvir-status ok">OK</span>
+          </div>
+          <div class="dvir-item">
+            <div class="dvir-check flag">!</div>
+            <span class="dvir-label">Tires</span>
+            <span class="dvir-status flag">Defect</span>
+          </div>
+          <div class="dvir-item">
+            <div class="dvir-check ok">✓</div>
+            <span class="dvir-label">Steering</span>
+            <span class="dvir-status ok">OK</span>
+          </div>
+          <div class="dvir-item">
+            <div class="dvir-check ok">✓</div>
+            <span class="dvir-label">Horn</span>
+            <span class="dvir-status ok">OK</span>
+          </div>
+          <div class="dvir-item">
+            <div class="dvir-check ok">✓</div>
+            <span class="dvir-label">Emergency equipment</span>
+            <span class="dvir-status ok">OK</span>
+          </div>
+          <div style="background:#fef2f2;border-radius:8px;padding:12px;font-size:12px;color:#dc2626;margin-top:4px;">
+            ⚠️ Defect reported: Right front tire low pressure. Owner notified.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─── HOW IT WORKS ─── -->
+<section id="how">
+  <div class="container">
+    <div class="section-label">The Workflow</div>
+    <h2 class="section-title">Load in. Invoice out.<br>Everything in between.</h2>
+    <p class="section-sub">The happy path from rate confirmation to payment — without touching a spreadsheet.</p>
+
+    <div class="steps-grid">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h4>Get the load in</h4>
+        <p>Forward the email, upload the PDF, or paste the text. AI extracts every field. You review and confirm.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h4>Accept &amp; dispatch</h4>
+        <p>Accept the load, assign to a truck and driver. Driver gets a push notification with all load details.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h4>Share the tracking link</h4>
+        <p>One tap sends your customer a live tracking link. They see status and ETA — no login needed.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <h4>Driver delivers &amp; captures POD</h4>
+        <p>Driver snaps the POD photo on delivery, uploads it from the app, and marks the load Delivered.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">05</div>
+        <h4>Invoice in 2 minutes</h4>
+        <p>CarrierOS prompts you to invoice. Everything is pre-filled. Review, hit send. Done.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">06</div>
+        <h4>Get paid, close the load</h4>
+        <p>When payment arrives, mark it paid. The load closes. Your records stay clean.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TESTIMONIALS ─── -->
+<section class="testimonial-section">
+  <div class="container">
+    <div class="section-label">Pilot Carriers</div>
+    <h2 class="section-title">What carriers are saying</h2>
+    <p class="section-sub">10 carriers are running their businesses on CarrierOS right now.</p>
+
+    <div class="testimonial-grid">
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <p class="quote">I used to spend 30 minutes every night doing paperwork after a run. Now I send the invoice before I even leave the delivery dock.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">🚛</div>
+          <div>
+            <div class="author-name">Marcus T.</div>
+            <div class="author-title">2 trucks · Chicago, IL</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <p class="quote">My broker stopped calling me for updates. The tracking link handles it. That alone saves me hours a week.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">🏗️</div>
+          <div>
+            <div class="author-name">Diana R.</div>
+            <div class="author-title">4 trucks · Atlanta, GA</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <p class="quote">The DVIR inspection is the first thing my drivers do every morning. No more paper forms that get lost or wet. And I never miss a service reminder anymore.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">🔧</div>
+          <div>
+            <div class="author-name">Andre K.</div>
+            <div class="author-title">3 trucks · Dallas, TX</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PRICING ─── -->
+<section class="pricing" id="pricing">
+  <div class="container">
+    <div class="section-label">Pricing</div>
+    <h2 class="section-title">Less than a tank of fuel.</h2>
+    <p class="section-sub">Includes your first truck. Add more as you grow. DVIR, compliance, and language support included on every plan — always.</p>
+
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="tier-name">Starter</div>
+        <div class="price-row">
+          <span class="amount">$49</span>
+          <span class="per">/mo</span>
+        </div>
+        <div class="per-truck">Includes 1 truck · +$15 per additional truck</div>
+        <div class="target">Solo owner-operator · 1–3 trucks</div>
+        <ul class="price-features">
+          <li><span class="check">✓</span> AI load extraction (PDF, email, paste, manual)</li>
+          <li><span class="check">✓</span> Customer tracking link</li>
+          <li><span class="check">✓</span> Invoicing + PDF + email send</li>
+          <li><span class="check">✓</span> POD/BOL capture + delivery</li>
+          <li><span class="check">✓</span> DVIR inspections (FMCSA-compliant)</li>
+          <li><span class="check">✓</span> Driver compliance (CDL, med cert, endorsements)</li>
+          <li><span class="check">✓</span> Truck + company document storage</li>
+          <li><span class="check">✓</span> Fuel stop logging</li>
+          <li><span class="check">✓</span> English / Español / ਪੰਜਾਬੀ / اردو (RTL)</li>
+          <li><span class="check">✓</span> iOS + Android</li>
+          <li style="color:#9ca3af;">⊘ History: last 90 days · Exceptions: top 3</li>
+        </ul>
+        <a href="#pilot" class="price-cta">Start Free Trial</a>
+      </div>
+
+      <div class="price-card featured">
+        <div class="featured-badge">MOST POPULAR</div>
+        <div class="tier-name">Growth</div>
+        <div class="price-row">
+          <span class="amount">$99</span>
+          <span class="per">/mo</span>
+        </div>
+        <div class="per-truck">Includes 3 trucks · +$20 per additional truck</div>
+        <div class="target">Small fleet with drivers · 3–6 trucks</div>
+        <ul class="price-features">
+          <li><span class="check">✓</span> Everything in Starter</li>
+          <li><span class="check">✓</span> Full Exceptions Inbox (all items, all urgencies)</li>
+          <li><span class="check">✓</span> Unlimited history (loads, drivers, trucks, customers)</li>
+          <li><span class="check">✓</span> Dispatcher + Finance roles</li>
+          <li><span class="check">✓</span> GPS real-time tracking · Fleet map</li>
+          <li><span class="check">✓</span> Driver settlement + expense tracking</li>
+          <li><span class="check">✓</span> Customer health scores + exception timelines</li>
+          <li><span class="check">✓</span> Dashboard + reporting + CSV export</li>
+          <li><span class="check">✓</span> Driver in-app chat (dispatcher ↔ driver)</li>
+          <li><span class="check">✓</span> IFTA mileage log (auto via GPS)</li>
+          <li><span class="check">✓</span> Desktop command center (Owner + Dispatcher + Finance)</li>
+          <li><span class="check">✓</span> Offline driver mode</li>
+          <li><span class="check">✓</span> Invoice auto-reminders</li>
+        </ul>
+        <a href="#pilot" class="price-cta">Start Free Trial</a>
+      </div>
+
+      <div class="price-card">
+        <div class="tier-name">Pro</div>
+        <div class="price-row">
+          <span class="amount">$199</span>
+          <span class="per">/mo</span>
+        </div>
+        <div class="per-truck">Includes 6 trucks · +$25 per additional truck</div>
+        <div class="target">Growing carrier · 6–15 trucks</div>
+        <ul class="price-features">
+          <li><span class="check">✓</span> Everything in Growth</li>
+          <li><span class="check">✓</span> IFTA tax hub (quarterly filing prep, state breakdown, tax due)</li>
+          <li><span class="check">✓</span> Fuel card analytics (cost/mile by driver, anomaly detection)</li>
+          <li><span class="check">✓</span> Driver performance dashboard (on-time %, fuel efficiency, safety)</li>
+          <li><span class="check">✓</span> Revenue analytics (revenue/mile by lane, customer profitability)</li>
+          <li><span class="check">✓</span> Finance desktop hub (IFTA + invoices + settlements on one screen)</li>
+          <li><span class="check">✓</span> Advanced customer portal (login, rate agreements, recurring lanes)</li>
+          <li><span class="check">✓</span> Carrier public profile (MC#, lanes, safety rating)</li>
+          <li><span class="check">✓</span> Load board posting (DAT + Truckstop)</li>
+          <li><span class="check">✓</span> Banking / ACH autopay for driver settlements</li>
+          <li><span class="check">✓</span> QuickBooks direct sync · Factoring integration</li>
+          <li><span class="check">✓</span> Priority support (4-hour response)</li>
+        </ul>
+        <a href="#pilot" class="price-cta">Join Waitlist</a>
+      </div>
+
+      <div class="price-card">
+        <div class="tier-name">Enterprise</div>
+        <div class="price-row">
+          <span class="amount">$349</span>
+          <span class="per">/mo</span>
+        </div>
+        <div class="per-truck">Includes 12 trucks · +$30 per additional truck</div>
+        <div class="target">Established carrier · 16+ trucks</div>
+        <ul class="price-features">
+          <li><span class="check">✓</span> Everything in Pro</li>
+          <li><span class="check">✓</span> AI smart dispatch (match driver + truck to load automatically)</li>
+          <li><span class="check">✓</span> HOS safety alerts (violation risk warnings, rest suggestions)</li>
+          <li><span class="check">✓</span> Enterprise safety risk dashboard + DOT audit readiness</li>
+          <li><span class="check">✓</span> Driver training + certification tracking</li>
+          <li><span class="check">✓</span> ELD integration (Samsara, Motive — auto IFTA + HOS)</li>
+          <li><span class="check">✓</span> Bi-directional load board (DAT, Truckstop, Amazon Relay)</li>
+          <li><span class="check">✓</span> Custom user permissions + admin audit log</li>
+          <li><span class="check">✓</span> Full API access + webhooks</li>
+          <li><span class="check">✓</span> Dedicated account manager + phone support</li>
+        </ul>
+        <a href="#pilot" class="price-cta">Contact Sales</a>
+      </div>
+    </div>
+
+    <p class="price-note">All plans include a <strong>30-day free trial — no credit card required.</strong> Annual billing saves 2 months (17% off). DVIR, driver compliance, and language support (English/Spanish/Punjabi/Urdu) included on every plan.</p>
+  </div>
+</section>
+
+<!-- ─── COMPETITIVE ─── -->
+<section class="competitive" id="compare">
+  <div class="container">
+    <div class="section-label">Compare</div>
+    <h2 class="section-title">CarrierOS vs. the alternatives</h2>
+    <p class="section-sub">The only product that combines TMS, invoicing, compliance, and mobile — built for trucks with 1–5 trucks.</p>
+
+    <div style="overflow-x:auto; margin-top: 40px;">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th class="highlight">CarrierOS Starter ($49)</th>
+            <th>TruckingOffice (~$20)</th>
+            <th>Toro TMS ($19–49)</th>
+            <th>TruckLogics ($40+)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>AI load extraction</td>
+            <td class="highlight"><span class="check-yes">✓ All methods</span></td>
+            <td><span class="check-no">✗</span></td>
+            <td><span class="check-no">✗</span></td>
+            <td><span class="check-no">✗</span></td>
+          </tr>
+          <tr>
+            <td>Native iOS + Android app</td>
+            <td class="highlight"><span class="check-yes">✓</span></td>
+            <td><span class="check-no">✗</span></td>
+            <td><span class="check-no">✗</span></td>
+            <td>Limited</td>
+          </tr>
+          <tr>
+            <td>Customer tracking link</td>
+            <td class="highlight"><span class="check-yes">✓</span></td>
+            <td><span class="check-no">✗</span></td>
+            <td><span class="check-no">✗</span></td>
+            <td><span class="check-no">✗</span></td>
+          </tr>
+          <tr>
+            <td>DVIR compliance (FMCSA)</td>
+            <td class="highlight"><span class="check-yes">✓</span></td>
+            <td><span class="check-no">✗</span></td>
+            <td><span class="check-no">✗</span></td>
+            <td><span class="check-no">✗</span></td>
+          </tr>
+          <tr>
+            <td>Truck service log + reminders</td>
+            <td class="highlight"><span class="check-yes">✓</span></td>
+            <td><span class="check-no">✗</span></td>
+            <td><span class="check-no">✗</span></td>
+            <td><span class="check-no">✗</span></td>
+          </tr>
+          <tr>
+            <td>Invoicing + email send</td>
+            <td class="highlight"><span class="check-yes">✓</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>Driver logins</td>
+            <td class="highlight"><span class="check-yes">✓ Unlimited</span></td>
+            <td><span class="check-no">✗</span></td>
+            <td>Extra cost</td>
+            <td>Extra cost</td>
+          </tr>
+          <tr>
+            <td>POD photo capture from app</td>
+            <td class="highlight"><span class="check-yes">✓</span></td>
+            <td><span class="check-no">✗</span></td>
+            <td>Partial</td>
+            <td>Partial</td>
+          </tr>
+          <tr>
+            <td>Setup time</td>
+            <td class="highlight"><span class="check-yes">&lt; 60 minutes</span></td>
+            <td>Hours</td>
+            <td>Hours</td>
+            <td>Days</td>
+          </tr>
+          <tr>
+            <td>Price (1 truck included)</td>
+            <td class="highlight"><span class="check-yes">$49/mo</span></td>
+            <td>~$20/mo</td>
+            <td>$19–49/mo</td>
+            <td>$40+/mo</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FINAL CTA ─── -->
+<section class="cta-bottom" id="pilot">
+  <div class="container">
+    <h2>Ready to stop running your business on <span>spreadsheets?</span></h2>
+    <p>Join the pilot. 30 days free, no credit card. Be set up in under an hour.</p>
+    <div class="cta-actions">
+      <a href="#" class="btn-primary" style="font-size:17px; padding:16px 36px;">Start Your Free Trial</a>
+      <a href="#" class="btn-secondary" style="font-size:17px; padding:16px 36px;">Book a Demo</a>
+    </div>
+    <p class="note">30-day free trial · No credit card · iOS + Android · Setup in &lt; 60 minutes</p>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">Carrier<span>OS</span></div>
+    <div class="footer-tagline">The trucking business app for owner-operators who have enough to worry about.</div>
+    <div class="footer-links">
+      <a href="#features">Features</a>
+      <a href="#compliance">Compliance</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#compare">Compare</a>
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Contact</a>
+    </div>
+    <div class="footer-bottom">© 2026 ShipmentX Inc. · CarrierOS is a product of ShipmentX.</div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -9,16 +9,6 @@
 supabase/.temp/
 supabase/.branches/
 
-/docs
-
 # Claude Code worktree checkouts (nested copies of this repo)
 **/.claude/worktrees/
 .ci-watch/
-
-# CDK (infra/): dependencies, synthesized templates, and the machine-local
-# context cache. cdk.out is a build artifact — regenerate it with `cdk synth`.
-infra/node_modules/
-infra/cdk.out/
-infra/cdk.context.json
-infra/*.d.ts
-infra/*.js.map

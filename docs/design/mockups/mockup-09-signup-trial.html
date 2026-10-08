@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CarrierOS — Signup & Trial Flow</title>
+<style>
+:root {
+  --navy: #0f1e35;
+  --navy-light: #1a2e4a;
+  --orange: #f47920;
+  --orange-dark: #d96a18;
+  --green: #2ecc71;
+  --red: #e74c3c;
+  --amber: #f0a500;
+  --bg: #f4f6f9;
+  --card: #ffffff;
+  --text: #1a1a2e;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #1a1a2e;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.outer {
+  width: 100%;
+  max-width: 430px;
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+.topbar {
+  background: var(--navy);
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  gap: 12px;
+  min-height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topbar .back-btn {
+  background: none; border: none; color: white;
+  font-size: 20px; cursor: pointer; padding: 4px;
+  display: none; line-height: 1;
+}
+.topbar .back-btn.visible { display: block; }
+.topbar .logo { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; flex: 1; }
+.topbar .logo span { color: var(--orange); }
+.topbar .screen-title { font-size: 16px; font-weight: 600; flex: 1; display: none; }
+.topbar .subtitle { font-size: 12px; color: rgba(255,255,255,0.6); }
+
+.content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* Buttons */
+.btn {
+  display: block; width: 100%; padding: 15px;
+  border: none; border-radius: 12px; font-size: 15px;
+  font-weight: 700; cursor: pointer; text-align: center;
+  transition: opacity 0.15s;
+}
+.btn:active { opacity: 0.85; }
+.btn-primary { background: var(--orange); color: white; }
+.btn-secondary { background: var(--navy); color: white; }
+.btn-outline { background: transparent; border: 2px solid var(--navy); color: var(--navy); }
+.btn-green { background: var(--green); color: white; }
+.btn-ghost { background: transparent; border: 2px solid rgba(255,255,255,0.3); color: white; }
+.mb-8 { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.mb-16 { margin-bottom: 16px; }
+
+/* Form */
+.field { margin-bottom: 14px; }
+.label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 5px; display: block; }
+.input {
+  width: 100%; padding: 12px 14px;
+  border: 1.5px solid var(--border); border-radius: 10px;
+  font-size: 15px; background: white; color: var(--text);
+}
+.input:focus { outline: none; border-color: var(--navy); }
+.input.card-input { letter-spacing: 2px; font-size: 17px; font-weight: 600; }
+.input-row { display: flex; gap: 10px; }
+.input-row .field { flex: 1; }
+
+/* Cards */
+.card {
+  background: white; border-radius: 14px;
+  padding: 16px; margin-bottom: 12px;
+  border: 1px solid var(--border);
+}
+.card-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+
+/* Progress steps */
+.progress-bar { height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; margin-top: 16px; }
+.progress-fill { height: 100%; background: var(--orange); border-radius: 2px; transition: width 0.3s; }
+.step-indicator { font-size: 11px; color: rgba(255,255,255,0.5); text-align: right; margin-top: 4px; }
+
+/* Splash */
+.splash {
+  background: var(--navy);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+}
+.splash-logo { font-size: 36px; font-weight: 900; color: white; letter-spacing: -1px; margin-bottom: 8px; }
+.splash-logo span { color: var(--orange); }
+.splash-tagline { font-size: 16px; color: rgba(255,255,255,0.6); line-height: 1.5; margin-bottom: 48px; max-width: 280px; }
+.splash-icon { font-size: 72px; margin-bottom: 32px; }
+.splash-actions { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+.splash-note { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 20px; }
+
+/* Plan cards */
+.plan-card {
+  background: white; border: 2px solid var(--border);
+  border-radius: 16px; padding: 20px; margin-bottom: 12px;
+  cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s;
+  position: relative;
+}
+.plan-card:active { transform: scale(0.99); }
+.plan-card.selected { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(244,121,32,0.12); }
+.plan-badge {
+  position: absolute; top: -10px; right: 16px;
+  background: var(--orange); color: white;
+  font-size: 10px; font-weight: 800; padding: 3px 10px;
+  border-radius: 20px; letter-spacing: 0.5px;
+}
+.plan-name { font-size: 18px; font-weight: 800; color: var(--navy); }
+.plan-price { font-size: 28px; font-weight: 900; color: var(--orange); margin: 6px 0 2px; letter-spacing: -1px; }
+.plan-price span { font-size: 14px; font-weight: 500; color: var(--muted); }
+.plan-trucks { font-size: 13px; color: var(--muted); margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.plan-features { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+.plan-features li { font-size: 13px; color: var(--text); display: flex; align-items: flex-start; gap: 8px; line-height: 1.4; }
+.plan-features li::before { content: "✓"; color: var(--orange); font-weight: 800; flex-shrink: 0; }
+.plan-select-indicator { text-align: center; margin-top: 14px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.plan-card.selected .plan-select-indicator { color: var(--orange); }
+
+/* Onboard hero */
+.onboard-hero {
+  background: var(--navy); padding: 32px 24px 24px;
+  color: white; text-align: center;
+}
+.onboard-hero h2 { font-size: 22px; font-weight: 800; margin-top: 12px; }
+.onboard-hero p { font-size: 14px; color: rgba(255,255,255,0.7); margin-top: 8px; line-height: 1.5; }
+
+/* CC card */
+.cc-card {
+  background: linear-gradient(135deg, var(--navy) 0%, #1a3a5c 100%);
+  border-radius: 16px; padding: 24px; margin-bottom: 20px;
+  color: white; position: relative; overflow: hidden;
+}
+.cc-card::before {
+  content: '';
+  position: absolute; top: -30px; right: -30px;
+  width: 140px; height: 140px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 50%;
+}
+.cc-card::after {
+  content: '';
+  position: absolute; bottom: -50px; right: 30px;
+  width: 100px; height: 100px;
+  background: rgba(244,121,32,0.15);
+  border-radius: 50%;
+}
+.cc-chip { font-size: 28px; margin-bottom: 16px; }
+.cc-number { font-size: 18px; font-weight: 700; letter-spacing: 3px; color: rgba(255,255,255,0.9); margin-bottom: 16px; font-family: monospace; }
+.cc-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
+.cc-label { font-size: 10px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 2px; }
+.cc-value { font-size: 14px; font-weight: 700; color: white; }
+.cc-logo { font-size: 32px; }
+
+.trial-banner {
+  background: rgba(46,204,113,0.1);
+  border: 1px solid rgba(46,204,113,0.3);
+  border-radius: 12px; padding: 14px 16px;
+  margin-bottom: 20px;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.trial-banner .icon { font-size: 20px; flex-shrink: 0; }
+.trial-banner .text { font-size: 13px; line-height: 1.5; color: var(--text); }
+.trial-banner .text strong { color: var(--green); }
+
+.secure-badges {
+  display: flex; gap: 16px; justify-content: center;
+  flex-wrap: wrap; margin: 16px 0;
+}
+.secure-badge {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--muted); font-weight: 600;
+}
+
+/* Row */
+.row-between { display: flex; align-items: center; justify-content: space-between; }
+
+/* Success */
+.success-screen {
+  background: var(--navy); min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 40px 24px; text-align: center; color: white;
+}
+.success-icon-big { font-size: 80px; margin-bottom: 24px; }
+.success-title { font-size: 28px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 12px; }
+.success-title span { color: var(--orange); }
+.success-sub { font-size: 15px; color: rgba(255,255,255,0.6); line-height: 1.6; margin-bottom: 12px; max-width: 300px; }
+.trial-countdown {
+  background: rgba(244,121,32,0.15); border: 1px solid rgba(244,121,32,0.3);
+  border-radius: 12px; padding: 16px 24px; margin: 24px 0;
+  text-align: center;
+}
+.trial-countdown .days { font-size: 48px; font-weight: 900; color: var(--orange); line-height: 1; }
+.trial-countdown .days-label { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+.trial-dates { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 8px; }
+.success-actions { width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+
+/* Divider */
+.or-divider {
+  text-align: center; position: relative;
+  margin: 16px 0; color: var(--muted); font-size: 13px;
+}
+.or-divider::before, .or-divider::after {
+  content: ''; position: absolute; top: 50%;
+  width: 40%; height: 1px; background: var(--border);
+}
+.or-divider::before { left: 0; }
+.or-divider::after { right: 0; }
+
+.helper-text { font-size: 12px; color: var(--muted); margin-top: 5px; line-height: 1.4; }
+.text-center { text-align: center; }
+.link { color: var(--orange); font-weight: 600; font-size: 13px; cursor: pointer; }
+
+/* Screen nav label */
+.screen-nav {
+  background: var(--bg);
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-align: center;
+}
+
+.pill {
+  display: inline-block; font-size: 11px; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px; letter-spacing: 0.3px;
+}
+.pill-green { background: #e8f5e9; color: #2e7d32; }
+</style>
+</head>
+<body>
+<div class="outer">
+
+  <!-- TOP BAR -->
+  <div class="topbar" id="topbar">
+    <button class="back-btn" id="backBtn" onclick="goBack()">←</button>
+    <div class="logo" id="topLogo">Carrier<span>OS</span></div>
+    <div class="screen-title" id="topTitle"></div>
+    <div class="subtitle" id="topSubtitle">Signup Flow</div>
+  </div>
+
+  <div class="content">
+
+    <!-- ===== SCREEN 1: SPLASH ===== -->
+    <div class="screen active" id="screen-splash" style="background:var(--navy);min-height:calc(100vh - 56px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;">
+      <div style="font-size:64px;margin-bottom:24px;">🚛</div>
+      <div class="splash-logo">Carrier<span>OS</span></div>
+      <p class="splash-tagline">Run your trucking business from your phone. No spreadsheets.</p>
+
+      <div style="width:100%;display:flex;flex-direction:column;gap:12px;max-width:340px;">
+        <button class="btn btn-primary" onclick="goto('screen-plans')">Get Started — It's Free</button>
+        <button class="btn btn-ghost" onclick="goto('screen-signin')">I already have an account</button>
+      </div>
+
+      <div style="margin-top:32px;font-size:12px;color:rgba(255,255,255,0.3);">30-day free trial · No charge until trial ends<br>iOS + Android · Setup in under 60 minutes</div>
+    </div>
+
+    <!-- ===== SCREEN 2: PLAN PICKER ===== -->
+    <div class="screen" id="screen-plans">
+      <div class="onboard-hero" style="padding-bottom:16px;">
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);font-weight:700;letter-spacing:0.5px;text-transform:uppercase;">Step 1 of 6</div>
+        <h2>Choose your plan</h2>
+        <p>You won't be charged for 30 days. Cancel anytime.</p>
+        <div class="progress-bar"><div class="progress-fill" style="width:17%"></div></div>
+      </div>
+      <div style="padding:16px;">
+
+        <div class="plan-card selected" id="plan-starter" onclick="selectPlan('starter')">
+          <div class="plan-name">Starter</div>
+          <div class="plan-price">$49<span>/mo</span></div>
+          <div class="plan-trucks">1 truck · +$15/additional</div>
+          <ul class="plan-features">
+            <li>AI load extraction (PDF, email, paste)</li>
+            <li>Customer tracking link</li>
+            <li>Invoicing — send in under 2 minutes</li>
+            <li>DVIR inspections (FMCSA-compliant)</li>
+            <li>Truck service log + reminders</li>
+            <li>Driver logins (up to 5)</li>
+          </ul>
+          <div class="plan-select-indicator">✓ Selected</div>
+        </div>
+
+        <div class="plan-card" id="plan-growth" onclick="selectPlan('growth')">
+          <div class="plan-badge">MOST POPULAR</div>
+          <div class="plan-name">Growth</div>
+          <div class="plan-price">$99<span>/mo</span></div>
+          <div class="plan-trucks">up to 3 trucks · +$20/additional</div>
+          <ul class="plan-features">
+            <li>Everything in Starter</li>
+            <li>GPS real-time tracking</li>
+            <li>Fleet map + truck calendar</li>
+            <li>Driver settlement statements</li>
+            <li>Per-load expense tracking</li>
+            <li>Revenue per customer + dashboard</li>
+          </ul>
+          <div class="plan-select-indicator">Tap to select</div>
+        </div>
+
+        <p style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:16px;">Both plans include a 30-day free trial. Switch plans anytime.</p>
+        <button class="btn btn-primary" onclick="goto('screen-account')">Continue →</button>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 3: ACCOUNT CREATION ===== -->
+    <div class="screen" id="screen-account">
+      <div class="onboard-hero">
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);font-weight:700;letter-spacing:0.5px;text-transform:uppercase;">Step 2 of 6</div>
+        <h2>Create your account</h2>
+        <p>Your login for the app and web portal</p>
+        <div class="progress-bar"><div class="progress-fill" style="width:33%"></div></div>
+      </div>
+      <div style="padding:16px;">
+        <div class="field">
+          <label class="label">Your Name</label>
+          <input class="input" value="Sam Johnson" placeholder="First and last name">
+        </div>
+        <div class="field">
+          <label class="label">Email Address</label>
+          <input class="input" value="sam@blueridgehauling.com" type="email" placeholder="you@yourcompany.com">
+          <div class="helper-text">This is your login and where invoices send from</div>
+        </div>
+        <div class="field">
+          <label class="label">Password</label>
+          <input class="input" type="password" value="••••••••••" placeholder="Min 8 characters">
+        </div>
+        <div class="field">
+          <label class="label">Confirm Password</label>
+          <input class="input" type="password" value="••••••••••" placeholder="Re-enter password">
+        </div>
+        <div class="or-divider">or</div>
+        <button class="btn btn-secondary mb-8" style="background:#fff;color:var(--text);border:1.5px solid var(--border);">
+          <span style="margin-right:8px;">🍎</span> Continue with Apple
+        </button>
+        <button class="btn mb-16" style="background:#fff;color:var(--text);border:1.5px solid var(--border);">
+          <span style="margin-right:8px;">🔵</span> Continue with Google
+        </button>
+        <button class="btn btn-primary" onclick="goto('screen-company')">Create Account →</button>
+        <p style="text-align:center;margin-top:14px;font-size:12px;color:var(--muted);">By continuing you agree to our <span class="link">Terms</span> and <span class="link">Privacy Policy</span></p>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 4: COMPANY SETUP ===== -->
+    <div class="screen" id="screen-company">
+      <div class="onboard-hero">
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);font-weight:700;letter-spacing:0.5px;text-transform:uppercase;">Step 3 of 6</div>
+        <h2>Your Company</h2>
+        <p>This appears on your invoices and tracking pages</p>
+        <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+      </div>
+      <div style="padding:16px;">
+        <div class="field">
+          <label class="label">Company Name</label>
+          <input class="input" value="Blue Ridge Hauling LLC" placeholder="Your company name">
+        </div>
+        <div class="field">
+          <label class="label">MC Number</label>
+          <input class="input" placeholder="MC-123456">
+          <div class="helper-text">Used on invoices and tracking pages</div>
+        </div>
+        <div class="field">
+          <label class="label">DOT Number</label>
+          <input class="input" placeholder="US DOT 1234567">
+        </div>
+        <div class="field">
+          <label class="label">EIN / Tax ID</label>
+          <input class="input" placeholder="XX-XXXXXXX (or SSN for sole proprietors)">
+          <div class="helper-text">Required for invoicing. Stored securely and never shared.</div>
+        </div>
+        <div class="field">
+          <label class="label">Phone Number</label>
+          <input class="input" value="(614) 555-0192" type="tel">
+        </div>
+        <div class="field">
+          <label class="label">Default Payment Terms</label>
+          <select class="input">
+            <option selected>Net 30</option>
+            <option>Net 15</option>
+            <option>Net 45</option>
+            <option>Due on Receipt</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="goto('screen-truck')">Next →</button>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 5: FIRST TRUCK ===== -->
+    <div class="screen" id="screen-truck">
+      <div class="onboard-hero">
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);font-weight:700;letter-spacing:0.5px;text-transform:uppercase;">Step 4 of 6</div>
+        <h2>Add Your First Truck</h2>
+        <p>You can add more trucks and drivers after setup</p>
+        <div class="progress-bar"><div class="progress-fill" style="width:67%"></div></div>
+      </div>
+      <div style="padding:16px;">
+        <div class="field">
+          <label class="label">Truck Nickname</label>
+          <input class="input" value="Truck #101" placeholder="e.g. Truck #1 or Big Blue">
+        </div>
+        <div class="field">
+          <label class="label">Year / Make / Model</label>
+          <input class="input" value="2021 Kenworth T680">
+        </div>
+        <div class="field">
+          <label class="label">License Plate</label>
+          <input class="input" placeholder="State + plate number">
+        </div>
+        <div class="field">
+          <label class="label">VIN <span style="font-weight:400;color:var(--muted);">(optional)</span></label>
+          <input class="input" placeholder="1XKWD09X...">
+        </div>
+        <div class="field">
+          <label class="label">Current Mileage <span style="font-weight:400;color:var(--muted);">(optional)</span></label>
+          <input class="input" placeholder="e.g. 142,000" type="number">
+          <div class="helper-text">Used to calculate maintenance reminders</div>
+        </div>
+
+        <div style="background:#e3f2fd;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#1565c0;">
+          💡 <strong>Solo owner-operator?</strong> You'll be automatically assigned as the driver for all loads — no extra setup needed.
+        </div>
+
+        <button class="btn btn-primary mb-8" onclick="goto('screen-billing')">Next →</button>
+        <button class="btn btn-outline" onclick="goto('screen-billing')">Skip — I'll add trucks later</button>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 6: BILLING / CC COLLECTION ===== -->
+    <div class="screen" id="screen-billing">
+      <div class="onboard-hero">
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);font-weight:700;letter-spacing:0.5px;text-transform:uppercase;">Step 5 of 6 — Almost there</div>
+        <h2>Start Your Free Trial</h2>
+        <p>Enter your card to activate. You won't be charged for 30 days.</p>
+        <div class="progress-bar"><div class="progress-fill" style="width:83%"></div></div>
+      </div>
+      <div style="padding:16px;">
+
+        <!-- Trial banner -->
+        <div class="trial-banner">
+          <div class="icon">🎁</div>
+          <div class="text">
+            <strong>30 days free</strong> — your trial runs until <strong>August 2, 2026</strong>.<br>
+            Your Starter plan ($49/mo) begins only if you don't cancel before then. Cancel anytime with one tap.
+          </div>
+        </div>
+
+        <!-- Live card preview -->
+        <div class="cc-card" id="ccPreview">
+          <div class="cc-chip">▣</div>
+          <div class="cc-number" id="ccNumber">•••• •••• •••• ••••</div>
+          <div class="cc-bottom">
+            <div>
+              <div class="cc-label">Card Holder</div>
+              <div class="cc-value" id="ccName">Sam Johnson</div>
+            </div>
+            <div>
+              <div class="cc-label">Expires</div>
+              <div class="cc-value" id="ccExpiry">MM / YY</div>
+            </div>
+            <div class="cc-logo">💳</div>
+          </div>
+        </div>
+
+        <!-- Card form -->
+        <div class="card">
+          <div class="card-title">Payment Details</div>
+          <div class="field">
+            <label class="label">Card Number</label>
+            <input class="input card-input" placeholder="1234 5678 9012 3456" maxlength="19"
+              oninput="updateCardNumber(this.value)">
+          </div>
+          <div class="input-row">
+            <div class="field">
+              <label class="label">Expiry</label>
+              <input class="input" placeholder="MM / YY" maxlength="7" oninput="updateExpiry(this.value)">
+            </div>
+            <div class="field">
+              <label class="label">CVV</label>
+              <input class="input" placeholder="123" maxlength="4" type="password">
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label class="label">Name on Card</label>
+            <input class="input" value="Sam Johnson" oninput="updateName(this.value)">
+          </div>
+        </div>
+
+        <!-- Secure badges -->
+        <div class="secure-badges">
+          <div class="secure-badge">🔒 SSL Encrypted</div>
+          <div class="secure-badge">🛡️ PCI Compliant</div>
+          <div class="secure-badge">⚡ Powered by Stripe</div>
+        </div>
+
+        <button class="btn btn-primary mb-8" onclick="goto('screen-success')">Start My Free Trial →</button>
+        <p style="text-align:center;font-size:11px;color:var(--muted);">No charge today · Cancel anytime · Reminder sent 3 days before trial ends</p>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 7: SUCCESS ===== -->
+    <div class="screen" id="screen-success" style="background:var(--navy);min-height:calc(100vh - 56px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;color:white;">
+      <div style="font-size:80px;margin-bottom:24px;">🎉</div>
+      <div style="font-size:28px;font-weight:900;letter-spacing:-0.5px;margin-bottom:8px;">You're in, <span style="color:var(--orange)">Sam!</span></div>
+      <div style="font-size:15px;color:rgba(255,255,255,0.6);line-height:1.6;max-width:300px;margin-bottom:8px;">
+        Blue Ridge Hauling LLC is set up and ready. Your 30-day free trial has started.
+      </div>
+
+      <div class="trial-countdown">
+        <div class="days">30</div>
+        <div class="days-label">days remaining in your free trial</div>
+      </div>
+
+      <div style="font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:32px;">
+        Trial ends Aug 2, 2026 · First charge: $49.00 on Aug 3, 2026<br>
+        We'll remind you 3 days before your trial ends.
+      </div>
+
+      <div style="width:100%;display:flex;flex-direction:column;gap:12px;max-width:340px;">
+        <button class="btn btn-primary" onclick="goto('screen-first-load')">Add My First Load →</button>
+        <button class="btn btn-ghost" onclick="goto('screen-dashboard')">Explore the App First</button>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 8: FIRST LOAD PROMPT ===== -->
+    <div class="screen" id="screen-first-load">
+      <div style="padding:16px;">
+        <div style="background:var(--orange);border-radius:16px;padding:24px;color:white;margin-bottom:16px;text-align:center;">
+          <div style="font-size:40px;margin-bottom:12px;">📥</div>
+          <div style="font-size:18px;font-weight:800;margin-bottom:6px;">Add your first load</div>
+          <div style="font-size:13px;opacity:0.85;">Forward an email, upload a PDF, paste a text, or enter manually</div>
+        </div>
+
+        <div style="background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:12px;">
+          <div onclick="goto('screen-splash')" style="padding:16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:14px;">
+            <div style="font-size:28px;">📧</div>
+            <div style="flex:1;">
+              <div style="font-weight:700;color:var(--navy);font-size:15px;">Forward Email <span style="background:var(--orange);color:white;font-size:10px;padding:2px 7px;border-radius:10px;margin-left:4px;font-weight:700;">Recommended</span></div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px;">Your CarrierOS inbox: blueridge@loads.carrieros.com</div>
+            </div>
+            <div style="color:var(--muted);">›</div>
+          </div>
+          <div onclick="goto('screen-splash')" style="padding:16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:14px;">
+            <div style="font-size:28px;">📄</div>
+            <div style="flex:1;"><div style="font-weight:700;color:var(--navy);font-size:15px;">Upload PDF / Rate Con</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Take a photo or upload a file</div></div>
+            <div style="color:var(--muted);">›</div>
+          </div>
+          <div onclick="goto('screen-splash')" style="padding:16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:14px;">
+            <div style="font-size:28px;">📋</div>
+            <div style="flex:1;"><div style="font-weight:700;color:var(--navy);font-size:15px;">Paste Text</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Paste from SMS, WhatsApp, or a broker portal</div></div>
+            <div style="color:var(--muted);">›</div>
+          </div>
+          <div onclick="goto('screen-splash')" style="padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;">
+            <div style="font-size:28px;">✏️</div>
+            <div style="flex:1;"><div style="font-weight:700;color:var(--navy);font-size:15px;">Enter Manually</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Type in load details for phone-received loads</div></div>
+            <div style="color:var(--muted);">›</div>
+          </div>
+        </div>
+
+        <div style="background:#f8fafc;border-radius:12px;padding:14px 16px;border:1px solid var(--border);">
+          <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;">📬 Your dedicated load email</div>
+          <div style="font-size:14px;font-weight:700;color:var(--orange);">blueridge@loads.carrieros.com</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">Forward any broker email here. CarrierOS reads it automatically.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN: SIGN IN (existing users) ===== -->
+    <div class="screen" id="screen-signin">
+      <div class="onboard-hero">
+        <h2 style="margin-top:0;">Welcome back</h2>
+        <p>Sign in to your CarrierOS account</p>
+      </div>
+      <div style="padding:16px;">
+        <div class="field">
+          <label class="label">Email Address</label>
+          <input class="input" type="email" placeholder="you@yourcompany.com">
+        </div>
+        <div class="field">
+          <label class="label">Password</label>
+          <input class="input" type="password" placeholder="Your password">
+        </div>
+        <div style="text-align:right;margin-bottom:16px;">
+          <span class="link">Forgot password?</span>
+        </div>
+        <button class="btn btn-primary mb-12" onclick="goto('screen-success')">Sign In →</button>
+        <div class="or-divider">or</div>
+        <button class="btn mb-8" style="background:#fff;color:var(--text);border:1.5px solid var(--border);">
+          <span style="margin-right:8px;">🍎</span> Continue with Apple
+        </button>
+        <button class="btn mb-16" style="background:#fff;color:var(--text);border:1.5px solid var(--border);">
+          <span style="margin-right:8px;">🔵</span> Continue with Google
+        </button>
+        <p style="text-align:center;font-size:13px;color:var(--muted);">Don't have an account? <span class="link" onclick="goto('screen-plans')">Sign up free</span></p>
+      </div>
+    </div>
+
+    <!-- Placeholder screens -->
+    <div class="screen" id="screen-dashboard">
+      <div style="padding:40px 24px;text-align:center;">
+        <div style="font-size:48px;margin-bottom:16px;">🏠</div>
+        <div style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:8px;">Dashboard</div>
+        <div style="font-size:14px;color:var(--muted);">Full app loads here →<br>See other mockups for feature flows</div>
+        <button class="btn btn-outline" style="margin-top:24px;" onclick="goto('screen-splash')">← Back to Start</button>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /outer -->
+
+<script>
+const history = ['screen-splash'];
+
+function goto(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(id);
+  if (target) {
+    target.classList.add('active');
+    history.push(id);
+    updateTopbar(id);
+    window.scrollTo(0,0);
+  }
+}
+
+function goBack() {
+  if (history.length > 1) {
+    history.pop();
+    const prev = history[history.length - 1];
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(prev).classList.add('active');
+    updateTopbar(prev);
+    window.scrollTo(0,0);
+  }
+}
+
+const screenTitles = {
+  'screen-splash': ['CarrierOS', 'Signup Flow', false],
+  'screen-plans': ['CarrierOS', 'Choose Plan', true],
+  'screen-account': ['CarrierOS', 'Create Account', true],
+  'screen-company': ['CarrierOS', 'Company Setup', true],
+  'screen-truck': ['CarrierOS', 'Add Truck', true],
+  'screen-billing': ['CarrierOS', 'Start Trial', true],
+  'screen-success': ['CarrierOS', "You're In!", false],
+  'screen-first-load': ['CarrierOS', 'Add First Load', true],
+  'screen-signin': ['CarrierOS', 'Sign In', true],
+  'screen-dashboard': ['CarrierOS', 'Dashboard', true],
+};
+
+function updateTopbar(id) {
+  const info = screenTitles[id] || ['CarrierOS', '', true];
+  document.getElementById('topLogo').style.display = 'block';
+  document.getElementById('topTitle').style.display = 'none';
+  document.getElementById('topSubtitle').textContent = info[1];
+  document.getElementById('backBtn').classList.toggle('visible', info[2]);
+}
+
+function selectPlan(plan) {
+  document.getElementById('plan-starter').classList.toggle('selected', plan === 'starter');
+  document.getElementById('plan-growth').classList.toggle('selected', plan === 'growth');
+  document.getElementById('plan-starter').querySelector('.plan-select-indicator').textContent = plan === 'starter' ? '✓ Selected' : 'Tap to select';
+  document.getElementById('plan-growth').querySelector('.plan-select-indicator').textContent = plan === 'growth' ? '✓ Selected' : 'Tap to select';
+}
+
+function updateCardNumber(val) {
+  const cleaned = val.replace(/\D/g,'').substring(0,16);
+  const groups = cleaned.match(/.{1,4}/g) || [];
+  const display = groups.join(' ').padEnd(19, '•').replace(/•/g, '•');
+  const parts = [];
+  for (let i=0;i<4;i++) parts.push((groups[i] || '••••'));
+  document.getElementById('ccNumber').textContent = parts.join(' ');
+}
+
+function updateExpiry(val) {
+  document.getElementById('ccExpiry').textContent = val || 'MM / YY';
+}
+
+function updateName(val) {
+  document.getElementById('ccName').textContent = val || 'YOUR NAME';
+}
+</script>
+</body>
+</html>

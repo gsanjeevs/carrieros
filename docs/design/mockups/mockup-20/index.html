@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarrierOS — Mockup 20: IFTA Mileage Log</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f1e35;--navy-mid:#182c46;--navy-light:#1f3a58;
+  --orange:#f47920;--orange-lt:#f9a55a;
+  --white:#fff;--gray:#8fa3b8;--gray-lt:#d6e0ea;
+  --green:#2ecc71;--teal:#1abc9c;--amber:#f0a500;--bg:#f4f6f9;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);min-height:100vh;padding:40px 24px;}
+.page-header{text-align:center;margin-bottom:40px;}
+.page-header .tag{display:inline-block;background:rgba(240,165,0,.12);color:var(--amber);
+  font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  padding:4px 14px;border-radius:20px;margin-bottom:12px;}
+.page-header h1{font-size:28px;font-weight:800;color:var(--navy);margin-bottom:6px;}
+.page-header p{font-size:14px;color:var(--gray);max-width:580px;margin:0 auto;}
+.screens{display:flex;gap:32px;justify-content:center;flex-wrap:wrap;align-items:flex-start;}
+.screen-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;}
+.screen-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);text-align:center;}
+.phone{width:320px;background:#0a0a0a;border-radius:44px;padding:12px;
+  box-shadow:0 24px 60px rgba(0,0,0,.22),0 0 0 1px rgba(255,255,255,.06);}
+.phone-inner{background:var(--white);border-radius:34px;overflow:hidden;min-height:620px;display:flex;flex-direction:column;}
+.status-bar{background:var(--navy);display:flex;justify-content:space-between;align-items:center;padding:12px 20px 8px;flex-shrink:0;}
+.status-time{font-size:12px;font-weight:700;color:var(--white);}
+.status-icons{font-size:11px;color:var(--white);}
+.nav-bar{background:var(--navy);padding:0 16px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.nav-back{color:var(--orange-lt);font-size:13px;font-weight:600;}
+.nav-title{flex:1;font-size:16px;font-weight:700;color:var(--white);text-align:center;}
+.nav-sub{font-size:11px;color:var(--gray);text-align:center;margin-top:2px;}
+.content{flex:1;overflow-y:auto;background:var(--bg);}
+
+/* GPS active banner */
+.gps-banner{background:linear-gradient(90deg,rgba(46,204,113,.15),rgba(26,188,156,.1));
+  border-bottom:1px solid rgba(46,204,113,.2);padding:10px 16px;
+  display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.gps-pulse{width:10px;height:10px;border-radius:50%;background:var(--green);flex-shrink:0;
+  animation:pulse 1.4s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(46,204,113,.4);}
+  50%{opacity:.85;box-shadow:0 0 0 6px rgba(46,204,113,0);}}
+.gps-text{font-size:12px;color:#0d6e3f;font-weight:600;}
+.gps-detail{font-size:10px;color:#3a8a5e;margin-left:auto;}
+
+/* Quarter selector */
+.quarter-bar{background:var(--white);border-bottom:1px solid rgba(0,0,0,.06);
+  padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.quarter-label{font-size:13px;font-weight:700;color:var(--navy);}
+.quarter-nav{display:flex;align-items:center;gap:10px;}
+.quarter-arrow{font-size:16px;color:var(--gray);cursor:pointer;padding:2px 6px;}
+.quarter-val{font-size:13px;font-weight:600;color:var(--orange);}
+
+/* Summary strip */
+.summary-strip{background:var(--navy);padding:14px 16px;display:grid;
+  grid-template-columns:1fr 1fr 1fr;gap:0;flex-shrink:0;}
+.strip-cell{text-align:center;padding:4px 0;}
+.strip-cell+.strip-cell{border-left:1px solid rgba(255,255,255,.1);}
+.strip-num{font-size:18px;font-weight:800;color:var(--white);}
+.strip-lbl{font-size:9px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+
+/* State table */
+.state-table{background:var(--white);margin:12px;border-radius:14px;overflow:hidden;
+  box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.state-table-head{display:grid;grid-template-columns:50px 1fr 60px 60px;gap:0;
+  background:var(--bg);padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.06);}
+.th{font-size:9px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.8px;}
+.th:not(:first-child){text-align:right;}
+.state-row{display:grid;grid-template-columns:50px 1fr 60px 60px;gap:0;
+  padding:11px 12px;border-bottom:1px solid var(--bg);align-items:center;}
+.state-row:last-child{border-bottom:none;}
+.state-code{font-size:14px;font-weight:800;color:var(--navy);}
+.state-name{font-size:11px;color:var(--gray);margin-top:1px;}
+.state-bar-wrap{flex:1;padding:0 8px;}
+.state-bar-bg{height:5px;background:rgba(0,0,0,.06);border-radius:4px;overflow:hidden;}
+.state-bar-fill{height:100%;border-radius:4px;background:var(--orange);}
+.state-miles{font-size:12px;font-weight:700;color:var(--navy);text-align:right;}
+.state-pct{font-size:10px;color:var(--gray);text-align:right;margin-top:1px;}
+
+/* Filing reminder */
+.filing-card{margin:0 12px 12px;background:rgba(240,165,0,.08);border:1px solid rgba(240,165,0,.25);
+  border-radius:12px;padding:12px 14px;}
+.filing-title{font-size:12px;font-weight:700;color:#7a5200;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.filing-detail{font-size:11px;color:#7a5200;line-height:1.5;}
+
+/* Crossing list (trip view) */
+.crossing-list{display:flex;flex-direction:column;gap:0;}
+.crossing-item{background:var(--white);margin:0 12px;border-bottom:1px solid var(--bg);
+  padding:11px 14px;display:flex;align-items:center;gap:10px;}
+.crossing-item:first-child{border-radius:14px 14px 0 0;}
+.crossing-item:last-child{border-radius:0 0 14px 14px;border-bottom:none;margin-bottom:0;}
+.crossing-ico{width:32px;height:32px;border-radius:8px;background:rgba(240,165,0,.1);
+  display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.crossing-info{flex:1;}
+.crossing-state{font-size:13px;font-weight:700;color:var(--navy);}
+.crossing-detail{font-size:10px;color:var(--gray);margin-top:1px;}
+.crossing-miles{text-align:right;}
+.crossing-mi{font-size:13px;font-weight:700;color:var(--navy);}
+.crossing-time{font-size:10px;color:var(--gray);margin-top:1px;}
+
+.load-header{background:var(--navy);padding:12px 16px;flex-shrink:0;}
+.load-id{font-size:11px;color:var(--gray);font-weight:600;letter-spacing:1px;margin-bottom:2px;}
+.load-route{font-size:14px;font-weight:700;color:var(--white);}
+.load-meta{font-size:11px;color:var(--gray);margin-top:2px;}
+
+.tab-bar{background:var(--white);border-top:1px solid rgba(0,0,0,.08);
+  display:grid;grid-template-columns:repeat(5,1fr);padding:6px 0 10px;flex-shrink:0;}
+.tab-item{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.tab-ico{font-size:18px;}
+.tab-lbl{font-size:8px;font-weight:600;color:var(--gray);letter-spacing:.5px;text-transform:uppercase;}
+
+.owner-tab-bar{background:var(--white);border-top:1px solid rgba(0,0,0,.08);
+  display:grid;grid-template-columns:repeat(4,1fr);padding:6px 0 10px;flex-shrink:0;}
+
+.dev-notes{background:var(--navy);border-radius:20px;padding:28px 32px;margin-top:40px;
+  max-width:960px;margin-left:auto;margin-right:auto;}
+.dev-notes-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:20px;}
+.dev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.dev-col h4{font-size:12px;font-weight:700;color:var(--gray-lt);margin-bottom:8px;}
+.dev-col p,.dev-col li{font-size:12px;color:var(--gray);line-height:1.7;}
+.dev-col ul{padding-left:14px;}
+.dev-col code{font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px;color:var(--orange-lt);font-family:'SF Mono',monospace;}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="tag">Mockup 20 · Growth Tier</div>
+  <h1>🗺️ IFTA Mileage Log</h1>
+  <p>GPS auto-logs state boundary crossings. Driver sees per-trip state mileage. Owner sees quarterly IFTA summary by state with filing reminder. Full tax computation is Pro tier (mockup-17).</p>
+</div>
+
+<div class="screens">
+
+  <!-- SCREEN 1: DRIVER VIEW — GPS ACTIVE + TRIP STATE CROSSINGS -->
+  <div class="screen-wrap">
+    <div class="screen-label">Screen 1 — Driver: GPS active + trip crossings</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="status-bar">
+          <span class="status-time">10:22 AM</span>
+          <span class="status-icons">●●● 5G ■</span>
+        </div>
+        <div class="nav-bar">
+          <span class="nav-back">← Load</span>
+          <span class="nav-title">Mileage Log</span>
+          <span class="nav-action"></span>
+        </div>
+        <div class="load-header">
+          <div class="load-id">L-0091 · IN TRANSIT</div>
+          <div class="load-route">Fresno, CA → Phoenix, AZ</div>
+          <div class="load-meta">Priya Singh · Truck #T-03</div>
+        </div>
+
+        <div class="gps-banner">
+          <div class="gps-pulse"></div>
+          <div class="gps-text">GPS tracking active — state miles logging</div>
+          <div class="gps-detail">Every 15 min</div>
+        </div>
+
+        <div class="content" style="padding-top:12px;">
+          <!-- Trip summary -->
+          <div class="summary-strip" style="border-radius:14px;margin:0 12px 12px;background:var(--navy-mid);">
+            <div class="strip-cell">
+              <div class="strip-num">287</div>
+              <div class="strip-lbl">Miles so far</div>
+            </div>
+            <div class="strip-cell">
+              <div class="strip-num">2</div>
+              <div class="strip-lbl">States</div>
+            </div>
+            <div class="strip-cell">
+              <div class="strip-num">~103</div>
+              <div class="strip-lbl">Miles left</div>
+            </div>
+          </div>
+
+          <!-- State crossings this trip -->
+          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);padding:0 16px 8px;">This trip</div>
+          <div class="crossing-list">
+            <div class="crossing-item" style="border-radius:14px 14px 0 0;">
+              <div class="crossing-ico">🟠</div>
+              <div class="crossing-info">
+                <div class="crossing-state">California (CA)</div>
+                <div class="crossing-detail">Entered: Start · Exited: 10:04 AM at Blythe</div>
+              </div>
+              <div class="crossing-miles">
+                <div class="crossing-mi">198 mi</div>
+                <div class="crossing-time">Completed</div>
+              </div>
+            </div>
+            <div class="crossing-item" style="border-radius:0 0 14px 14px;border-bottom:none;margin-bottom:0;background:rgba(46,204,113,.04);border:1px solid rgba(46,204,113,.15);">
+              <div class="crossing-ico" style="background:rgba(46,204,113,.15);">🟢</div>
+              <div class="crossing-info">
+                <div class="crossing-state" style="color:var(--green);">Arizona (AZ) · Current</div>
+                <div class="crossing-detail">Entered: 10:04 AM at Blythe border</div>
+              </div>
+              <div class="crossing-miles">
+                <div class="crossing-mi" style="color:var(--green);">89 mi</div>
+                <div class="crossing-time" style="color:var(--green);">● Live</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin:12px;background:rgba(240,165,0,.07);border:1px solid rgba(240,165,0,.2);
+            border-radius:10px;padding:10px 12px;font-size:11px;color:#7a5200;line-height:1.5;">
+            📊 <strong>Growth tier:</strong> State mileage is logged automatically — no action needed. Data flows into IFTA quarterly summary for your owner/dispatcher.
+          </div>
+        </div>
+
+        <div class="tab-bar">
+          <div class="tab-item"><div class="tab-ico">📦</div><div class="tab-lbl">My Load</div></div>
+          <div class="tab-item"><div class="tab-ico">⛽</div><div class="tab-lbl">Fuel</div></div>
+          <div class="tab-item"><div class="tab-ico" style="color:var(--amber);">🗺️</div><div class="tab-lbl" style="color:var(--amber);">Mileage</div></div>
+          <div class="tab-item"><div class="tab-ico">📋</div><div class="tab-lbl">DVIR</div></div>
+          <div class="tab-item"><div class="tab-ico">👤</div><div class="tab-lbl">Profile</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: OWNER VIEW — QUARTERLY IFTA STATE SUMMARY -->
+  <div class="screen-wrap">
+    <div class="screen-label">Screen 2 — Owner: quarterly IFTA mileage summary</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="status-bar">
+          <span class="status-time">10:22 AM</span>
+          <span class="status-icons">●●● 5G ■</span>
+        </div>
+        <div class="nav-bar" style="flex-direction:column;align-items:flex-start;gap:2px;padding-bottom:12px;">
+          <div style="display:flex;align-items:center;width:100%;">
+            <span class="nav-back">← Reports</span>
+            <span class="nav-title" style="text-align:center;">IFTA Mileage</span>
+            <span style="width:40px;"></span>
+          </div>
+        </div>
+
+        <div class="quarter-bar">
+          <span class="quarter-arrow">‹</span>
+          <span class="quarter-label">Quarter</span>
+          <span class="quarter-val">Q2 2026</span>
+          <span class="quarter-arrow">›</span>
+        </div>
+
+        <div class="summary-strip">
+          <div class="strip-cell">
+            <div class="strip-num">53,895</div>
+            <div class="strip-lbl">Total miles</div>
+          </div>
+          <div class="strip-cell">
+            <div class="strip-num">5</div>
+            <div class="strip-lbl">States</div>
+          </div>
+          <div class="strip-cell">
+            <div class="strip-num">3 trucks</div>
+            <div class="strip-lbl">Fleet</div>
+          </div>
+        </div>
+
+        <div class="content" style="padding-top:12px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);padding:0 16px 8px;">Miles by state — Q2 2026</div>
+
+          <div class="state-table">
+            <div class="state-table-head">
+              <div class="th">State</div>
+              <div class="th" style="text-align:left;padding-left:8px;">Share</div>
+              <div class="th">Miles</div>
+              <div class="th">%</div>
+            </div>
+            <div class="state-row">
+              <div><div class="state-code">CA</div><div class="state-name">California</div></div>
+              <div class="state-bar-wrap"><div class="state-bar-bg"><div class="state-bar-fill" style="width:72%;"></div></div></div>
+              <div class="state-miles">38,804</div>
+              <div class="state-pct">72%</div>
+            </div>
+            <div class="state-row">
+              <div><div class="state-code">AZ</div><div class="state-name">Arizona</div></div>
+              <div class="state-bar-wrap"><div class="state-bar-bg"><div class="state-bar-fill" style="width:14%;background:var(--teal);"></div></div></div>
+              <div class="state-miles">7,545</div>
+              <div class="state-pct">14%</div>
+            </div>
+            <div class="state-row">
+              <div><div class="state-code">NV</div><div class="state-name">Nevada</div></div>
+              <div class="state-bar-wrap"><div class="state-bar-bg"><div class="state-bar-fill" style="width:8%;background:var(--teal);"></div></div></div>
+              <div class="state-miles">4,312</div>
+              <div class="state-pct">8%</div>
+            </div>
+            <div class="state-row">
+              <div><div class="state-code">OR</div><div class="state-name">Oregon</div></div>
+              <div class="state-bar-wrap"><div class="state-bar-bg"><div class="state-bar-fill" style="width:4%;background:var(--gray);"></div></div></div>
+              <div class="state-miles">2,156</div>
+              <div class="state-pct">4%</div>
+            </div>
+            <div class="state-row">
+              <div><div class="state-code">WA</div><div class="state-name">Washington</div></div>
+              <div class="state-bar-wrap"><div class="state-bar-bg"><div class="state-bar-fill" style="width:2%;background:var(--gray);"></div></div></div>
+              <div class="state-miles">1,078</div>
+              <div class="state-pct">2%</div>
+            </div>
+          </div>
+
+          <!-- Filing reminder -->
+          <div class="filing-card">
+            <div class="filing-title">⏰ IFTA Q2 filing due Jul 31</div>
+            <div class="filing-detail">Mileage data is ready. Upgrade to Pro to get full tax calculation, fuel reconciliation, and estimated amount due per state.</div>
+          </div>
+
+          <!-- Pro upsell -->
+          <div style="margin:0 12px 12px;background:var(--navy);border-radius:12px;padding:14px 16px;
+            display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--white);">Full IFTA tax hub</div>
+              <div style="font-size:11px;color:var(--gray);margin-top:2px;">Tax due per state · fuel reconciliation</div>
+            </div>
+            <div style="background:var(--orange);color:var(--white);font-size:11px;font-weight:700;
+              padding:7px 14px;border-radius:10px;white-space:nowrap;">Pro →</div>
+          </div>
+        </div>
+
+        <div class="owner-tab-bar">
+          <div class="tab-item"><div class="tab-ico">🏠</div><div class="tab-lbl" style="font-size:9px;">Home</div></div>
+          <div class="tab-item"><div class="tab-ico">📦</div><div class="tab-lbl" style="font-size:9px;">Loads</div></div>
+          <div class="tab-item"><div class="tab-ico" style="color:var(--amber);">📊</div><div class="tab-lbl" style="color:var(--amber);font-size:9px;">Reports</div></div>
+          <div class="tab-item"><div class="tab-ico">⚙️</div><div class="tab-lbl" style="font-size:9px;">Settings</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: PER-TRIP CROSSING DETAIL (OWNER) -->
+  <div class="screen-wrap">
+    <div class="screen-label">Screen 3 — Owner: per-trip state breakdown</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="status-bar">
+          <span class="status-time">10:22 AM</span>
+          <span class="status-icons">●●● 5G ■</span>
+        </div>
+        <div class="nav-bar">
+          <span class="nav-back">← IFTA Summary</span>
+          <span class="nav-title">Trip Detail</span>
+          <span class="nav-action"></span>
+        </div>
+        <div class="load-header">
+          <div class="load-id">L-0091 · DELIVERED · Jun 18</div>
+          <div class="load-route">Fresno, CA → Phoenix, AZ</div>
+          <div class="load-meta">Priya Singh · Truck #T-03 · 390 total miles</div>
+        </div>
+
+        <div class="content" style="padding-top:12px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);padding:0 16px 8px;">State mileage — GPS logged</div>
+
+          <div class="crossing-list">
+            <div class="crossing-item" style="border-radius:14px 14px 0 0;">
+              <div class="crossing-ico">🟠</div>
+              <div class="crossing-info">
+                <div class="crossing-state">California (CA)</div>
+                <div class="crossing-detail">Fresno → Blythe border · 8:04 AM–10:04 AM</div>
+              </div>
+              <div class="crossing-miles">
+                <div class="crossing-mi">198 mi</div>
+                <div class="crossing-time">51%</div>
+              </div>
+            </div>
+            <div class="crossing-item" style="border-radius:0 0 14px 14px;border-bottom:none;margin-bottom:0;">
+              <div class="crossing-ico">🟡</div>
+              <div class="crossing-info">
+                <div class="crossing-state">Arizona (AZ)</div>
+                <div class="crossing-detail">Blythe border → Phoenix · 10:04 AM–1:22 PM</div>
+              </div>
+              <div class="crossing-miles">
+                <div class="crossing-mi">192 mi</div>
+                <div class="crossing-time">49%</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fuel on this trip -->
+          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);padding:16px 16px 8px;">Fuel stops on this trip</div>
+          <div style="background:var(--white);margin:0 12px;border-radius:14px;padding:12px 14px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--bg);">
+              <span style="font-size:12px;color:var(--navy);font-weight:600;">CA — Flying J, Blythe</span>
+              <span style="font-size:12px;color:var(--navy);font-weight:700;">62.4 gal</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;">
+              <span style="font-size:12px;color:var(--navy);font-weight:600;">AZ — Pilot, Goodyear</span>
+              <span style="font-size:12px;color:var(--navy);font-weight:700;">41.8 gal</span>
+            </div>
+          </div>
+
+          <div style="margin:10px 12px 12px;background:rgba(240,165,0,.07);border:1px solid rgba(240,165,0,.2);
+            border-radius:10px;padding:10px 12px;font-size:11px;color:#7a5200;line-height:1.5;">
+            📊 <strong>Pro tier IFTA calculation:</strong> CA miles (198) ÷ total (390) × total fuel (104.2 gal) × CA rate − CA fuel purchased (62.4 gal) × CA rate = CA net tax due
+          </div>
+        </div>
+
+        <div class="owner-tab-bar">
+          <div class="tab-item"><div class="tab-ico">🏠</div><div class="tab-lbl" style="font-size:9px;">Home</div></div>
+          <div class="tab-item"><div class="tab-ico">📦</div><div class="tab-lbl" style="font-size:9px;">Loads</div></div>
+          <div class="tab-item"><div class="tab-ico" style="color:var(--amber);">📊</div><div class="tab-lbl" style="color:var(--amber);font-size:9px;">Reports</div></div>
+          <div class="tab-item"><div class="tab-ico">⚙️</div><div class="tab-lbl" style="font-size:9px;">Settings</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+  <!-- SCREEN 4: ODOMETER FALLBACK (triggered at delivery if GPS sparse) -->
+  <div class="screen-wrap">
+    <div class="screen-label">Screen 4 — Odometer fallback (GPS incomplete)</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="status-bar">
+          <span class="status-time">2:41 PM</span>
+          <span class="status-icons">●●● 5G ■</span>
+        </div>
+        <div class="nav-bar">
+          <span class="nav-back">← Deliver</span>
+          <span class="nav-title">State Mileage</span>
+          <span style="width:40px;"></span>
+        </div>
+
+        <!-- Warning banner -->
+        <div style="background:rgba(240,165,0,.12);border-bottom:2px solid rgba(240,165,0,.3);
+          padding:12px 16px;flex-shrink:0;">
+          <div style="font-size:13px;font-weight:700;color:#7a5200;margin-bottom:3px;">⚠️ GPS data looks incomplete</div>
+          <div style="font-size:11px;color:#7a5200;line-height:1.5;">We only captured 1 state crossing for this 390-mile trip. Enter your odometer readings so IFTA mileage is accurate.</div>
+        </div>
+
+        <div class="content" style="padding:12px;">
+          <!-- Trip context -->
+          <div style="background:var(--white);border-radius:12px;padding:12px 14px;margin-bottom:12px;
+            box-shadow:0 1px 3px rgba(0,0,0,.06);">
+            <div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:4px;">L-0091 · Fresno, CA → Phoenix, AZ</div>
+            <div style="font-size:11px;color:var(--gray);">Trip total: 390 miles · GPS captured: ~89 mi (AZ only)</div>
+          </div>
+
+          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+            color:var(--gray);margin-bottom:8px;">Enter miles per state</div>
+
+          <!-- State odometer inputs -->
+          <div style="background:var(--white);border-radius:12px;overflow:hidden;
+            box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:12px;">
+            <!-- CA row -->
+            <div style="padding:13px 14px;border-bottom:1px solid var(--bg);display:flex;align-items:center;gap:10px;">
+              <div style="width:36px;height:36px;border-radius:9px;background:rgba(240,165,0,.1);
+                display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;
+                color:var(--navy);flex-shrink:0;">CA</div>
+              <div style="flex:1;">
+                <div style="font-size:12px;font-weight:700;color:var(--navy);">California</div>
+                <div style="font-size:10px;color:var(--gray);">State where trip started</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <input type="number" value="198" style="width:72px;background:var(--bg);border:1.5px solid var(--orange);
+                  border-radius:8px;padding:7px 10px;font-size:14px;font-weight:700;
+                  color:var(--navy);text-align:right;font-family:inherit;"/>
+                <span style="font-size:11px;color:var(--gray);">mi</span>
+              </div>
+            </div>
+            <!-- AZ row -->
+            <div style="padding:13px 14px;display:flex;align-items:center;gap:10px;">
+              <div style="width:36px;height:36px;border-radius:9px;background:rgba(26,188,156,.1);
+                display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;
+                color:var(--navy);flex-shrink:0;">AZ</div>
+              <div style="flex:1;">
+                <div style="font-size:12px;font-weight:700;color:var(--navy);">Arizona</div>
+                <div style="font-size:10px;color:var(--teal);">GPS logged ~89 mi (pre-filled)</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <input type="number" value="192" style="width:72px;background:var(--bg);border:1.5px solid var(--gray-lt);
+                  border-radius:8px;padding:7px 10px;font-size:14px;font-weight:700;
+                  color:var(--navy);text-align:right;font-family:inherit;"/>
+                <span style="font-size:11px;color:var(--gray);">mi</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Running total -->
+          <div style="background:var(--navy);border-radius:10px;padding:10px 14px;
+            display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <span style="font-size:12px;color:var(--gray);">Total entered</span>
+            <span style="font-size:15px;font-weight:800;color:var(--white);">390 mi ✓</span>
+          </div>
+
+          <!-- Tip -->
+          <div style="background:rgba(143,163,184,.08);border-radius:10px;padding:10px 12px;
+            font-size:11px;color:var(--gray);line-height:1.5;margin-bottom:12px;">
+            💡 Find state miles on your GPS unit, ELD device, or count from your route map. GPS will automatically capture future trips if location access is enabled.
+          </div>
+
+          <!-- CTA -->
+          <button style="width:100%;background:var(--orange);color:var(--white);font-size:14px;
+            font-weight:700;padding:14px;border-radius:12px;border:none;">Save &amp; Mark Delivered</button>
+          <div style="text-align:center;margin-top:10px;">
+            <span style="font-size:11px;color:var(--gray);">Skip — use GPS data only (may be incomplete)</span>
+          </div>
+        </div>
+
+        <div class="tab-bar">
+          <div class="tab-item"><div class="tab-ico">📦</div><div class="tab-lbl">My Load</div></div>
+          <div class="tab-item"><div class="tab-ico">⛽</div><div class="tab-lbl">Fuel</div></div>
+          <div class="tab-item"><div class="tab-ico" style="color:var(--amber);">🗺️</div><div class="tab-lbl" style="color:var(--amber);">Mileage</div></div>
+          <div class="tab-item"><div class="tab-ico">📋</div><div class="tab-lbl">DVIR</div></div>
+          <div class="tab-item"><div class="tab-ico">👤</div><div class="tab-lbl">Profile</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- DEV NOTES -->
+<div class="dev-notes">
+  <div class="dev-notes-title">Developer Notes — Mockup 20</div>
+  <div class="dev-grid">
+    <div class="dev-col">
+      <h4>GPS Logging Architecture</h4>
+      <p>Table: <code>ifta_state_crossings</code> (tech-spec.md §15). Columns: <code>truck_id</code>, <code>driver_id</code>, <code>load_id</code>, <code>state</code>, <code>crossed_at</code>, <code>lat</code>, <code>lng</code>, <code>odometer_est</code>, <code>source</code> (enum: <code>'gps'</code> | <code>'manual'</code>).</p>
+      <br>
+      <p>GPS polling: <code>@capacitor/geolocation watchPosition()</code> every 15 min (Growth only). On state boundary detection (reverse geocode lat/lng to state), INSERT a new crossing row. Stop polling when load status = delivered. Battery impact: low — 15-min interval, no continuous tracking.</p>
+      <br>
+      <p><strong>iOS note:</strong> Background location requires <code>NSLocationAlwaysUsageDescription</code> + user must select "Always Allow" in Settings. Default "While Using" permission → GPS stops when app backgrounds. Show a one-time prompt at Growth activation explaining why Always Allow is needed for IFTA accuracy.</p>
+    </div>
+    <div class="dev-col">
+      <h4>GPS Completeness Check + Fallback Trigger</h4>
+      <p>On load delivery, run a completeness check before marking delivered:</p>
+      <ul style="padding-left:14px;margin-top:4px;">
+        <li style="font-size:12px;color:var(--gray);line-height:1.7;">Fetch all <code>ifta_state_crossings</code> for this load</li>
+        <li style="font-size:12px;color:var(--gray);line-height:1.7;">Sum <code>odometer_est</code> across rows</li>
+        <li style="font-size:12px;color:var(--gray);line-height:1.7;">Compare to load's <code>total_miles</code> field</li>
+        <li style="font-size:12px;color:var(--gray);line-height:1.7;">If sum &lt; 60% of total_miles → show Screen 4 (odometer fallback)</li>
+        <li style="font-size:12px;color:var(--gray);line-height:1.7;">If sum ≥ 60% → GPS acceptable → proceed to delivery</li>
+      </ul>
+      <br>
+      <p>Manual entries: INSERT rows with <code>source = 'manual'</code>, no <code>lat/lng</code>. If manual rows saved for a load, DELETE all <code>source = 'gps'</code> rows for that load — manual overrides GPS entirely, no mixing. Pre-fill GPS-logged state values so driver only corrects what's wrong.</p>
+    </div>
+    <div class="dev-col">
+      <h4>IFTA Summary View &amp; Tiers</h4>
+      <p><strong>Growth:</strong> Show miles by state (aggregate of <code>ifta_state_crossings</code>). No tax calculation. Query: <code>GROUP BY state SUM(odometer_est)</code> per quarter window. Flag loads where <code>source = 'manual'</code> with a ✎ indicator so owner knows GPS didn't capture it.</p>
+      <br>
+      <p><strong>Pro:</strong> Full IFTA tax hub (mockup-17). Join fuel_stops on state + quarter. Apply formula: <code>(miles_state / total_miles × total_fuel × state_rate) − fuel_purchased_state × state_rate</code>. Tax rates table: <code>ifta_tax_rates(state, quarter, rate_per_gallon)</code> — seed from IFTA published rates quarterly.</p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

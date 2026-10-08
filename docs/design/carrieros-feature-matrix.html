@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarrierOS — Feature Matrix</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#0f1e35;--navy-mid:#182c46;--navy-light:#1f3a58;
+  --orange:#f47920;--orange-lt:#f9a55a;--orange-dim:rgba(244,121,32,.1);
+  --white:#fff;--gray:#8fa3b8;--gray-lt:#d6e0ea;--bg:#f0f3f7;
+  --green:#2ecc71;--teal:#1abc9c;--amber:#f0a500;--purple:#9b59b6;--red:#e74c3c;
+  --border:rgba(255,255,255,.07);
+  --s-color:#3b82f6;--g-color:#f47920;--p-color:#9b59b6;--e-color:#e74c3c;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--navy);color:var(--white);min-height:100vh;padding-bottom:80px;}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(rgba(255,255,255,.015) 1px,transparent 1px);background-size:28px 28px;pointer-events:none;z-index:0;}
+
+/* HEADER */
+header{background:rgba(15,30,53,.98);border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);}
+.logo{font-size:20px;font-weight:900;letter-spacing:-.5px;}
+.logo span{color:var(--orange);}
+.header-meta{display:flex;align-items:center;gap:16px;font-size:12px;color:var(--gray);}
+.badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:.3px;}
+.badge-ver{background:var(--orange-dim);border:1px solid rgba(244,121,32,.3);color:var(--orange);}
+
+/* HERO */
+.hero{text-align:center;padding:52px 40px 40px;position:relative;z-index:1;max-width:800px;margin:0 auto;}
+.hero-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:12px;}
+.hero h1{font-size:clamp(26px,4vw,40px);font-weight:900;letter-spacing:-1px;margin-bottom:10px;}
+.hero p{font-size:15px;color:var(--gray);line-height:1.6;max-width:580px;margin:0 auto 28px;}
+.hero-stats{display:flex;gap:32px;justify-content:center;flex-wrap:wrap;}
+.stat .num{font-size:26px;font-weight:900;color:var(--orange);}
+.stat .lbl{font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:.8px;margin-top:2px;}
+
+/* FILTERS */
+.filters{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:0 40px 32px;position:relative;z-index:1;}
+.filter-btn{border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--gray);padding:7px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.3px;}
+.filter-btn:hover{border-color:rgba(255,255,255,.2);color:var(--white);}
+.filter-btn.active{background:var(--orange-dim);border-color:rgba(244,121,32,.3);color:var(--orange);}
+.filter-btn.f-starter.active{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.3);color:#60a5fa;}
+.filter-btn.f-growth.active{background:var(--orange-dim);border-color:rgba(244,121,32,.3);color:var(--orange);}
+.filter-btn.f-pro.active{background:rgba(155,89,182,.12);border-color:rgba(155,89,182,.3);color:#c084fc;}
+.filter-btn.f-enterprise.active{background:rgba(231,76,60,.12);border-color:rgba(231,76,60,.3);color:#f87171;}
+
+/* TABLE WRAPPER */
+.table-wrap{position:relative;z-index:1;padding:0 40px;max-width:1400px;margin:0 auto;}
+@media(max-width:640px){.table-wrap{padding:0 16px;}.filters{padding:0 16px 24px;} header{padding:0 16px;}}
+
+/* SECTION HEADER */
+.section-head{display:flex;align-items:center;gap:12px;padding:20px 0 10px;border-bottom:1px solid var(--border);margin-bottom:2px;}
+.section-ico{font-size:20px;}
+.section-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--orange);}
+.section-count{font-size:11px;color:var(--gray);margin-left:auto;}
+
+/* FEATURE TABLE */
+table{width:100%;border-collapse:collapse;table-layout:fixed;}
+colgroup col.col-feat{width:22%;}
+colgroup col.col-desc{width:30%;}
+colgroup col.col-val{width:18%;}
+colgroup col.col-tier{width:7.5%;}
+
+thead th{background:rgba(255,255,255,.04);padding:10px 12px;font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--gray);border-bottom:1px solid var(--border);text-align:left;position:sticky;top:64px;z-index:10;}
+thead th.tier-col{text-align:center;}
+thead .th-starter{color:#60a5fa;}
+thead .th-growth{color:var(--orange-lt);}
+thead .th-pro{color:#c084fc;}
+thead .th-enterprise{color:#f87171;}
+
+tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .12s;}
+tbody tr:hover{background:rgba(255,255,255,.025);}
+tbody tr.hidden{display:none;}
+
+td{padding:13px 12px;vertical-align:top;}
+td.feat-name{font-size:13px;font-weight:700;color:var(--white);line-height:1.3;}
+td.feat-name .sub{font-size:11px;font-weight:400;color:var(--gray);margin-top:3px;}
+td.feat-desc{font-size:12px;color:var(--gray);line-height:1.6;}
+td.feat-desc strong{color:var(--gray-lt);}
+td.feat-val{vertical-align:top;}
+.val-est{font-size:11px;font-weight:700;color:var(--green);line-height:1.5;}
+.val-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:3px 7px;border-radius:10px;margin-top:4px;}
+.val-h{background:rgba(46,204,113,.15);color:var(--green);}
+.val-m{background:rgba(240,165,0,.12);color:var(--amber);}
+.val-l{background:rgba(143,163,184,.12);color:var(--gray);}
+.val-compliance{background:rgba(231,76,60,.1);color:#f87171;font-size:9px;font-weight:700;padding:3px 7px;border-radius:10px;display:inline-block;margin-top:4px;}
+
+td.tier-col{text-align:center;padding:13px 6px;vertical-align:middle;}
+.dot-yes{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:11px;font-weight:700;}
+.dot-no{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;color:rgba(143,163,184,.25);font-size:14px;}
+.dot-starter{background:rgba(59,130,246,.2);color:#60a5fa;}
+.dot-growth{background:rgba(244,121,32,.2);color:var(--orange);}
+.dot-pro{background:rgba(155,89,182,.2);color:#c084fc;}
+.dot-enterprise{background:rgba(231,76,60,.2);color:#f87171;}
+
+/* POST-MVP BADGE */
+.post-mvp{display:inline-block;font-size:8px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;background:rgba(155,89,182,.12);border:1px solid rgba(155,89,182,.25);color:#c084fc;padding:2px 6px;border-radius:6px;margin-left:6px;vertical-align:middle;}
+
+/* LEGEND */
+.legend{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;padding:32px 40px 0;position:relative;z-index:1;}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--gray);}
+
+/* FOOTER */
+footer{text-align:center;padding:32px 40px 0;font-size:11px;color:var(--gray);position:relative;z-index:1;line-height:1.9;}
+footer code{background:rgba(255,255,255,.06);padding:1px 6px;border-radius:4px;font-size:10px;color:var(--orange-lt);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Carrier<span>OS</span></div>
+  <div class="header-meta">
+    <span>Feature Matrix</span>
+    <span class="badge badge-ver">v1.0 · Jul 2026</span>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-tag">Product</div>
+  <h1>Full Feature Matrix</h1>
+  <p>Every CarrierOS feature by tier — with descriptions, user benefit, and estimated time or dollar value. Based on a 1–3 truck carrier running ~15 loads/month. Owner time valued at $75/hr.</p>
+  <div class="hero-stats">
+    <div class="stat"><div class="num">45</div><div class="lbl">Features</div></div>
+    <div class="stat"><div class="num">4</div><div class="lbl">Tiers</div></div>
+    <div class="stat"><div class="num">9</div><div class="lbl">Categories</div></div>
+  </div>
+</div>
+
+<div class="filters">
+  <button class="filter-btn active" onclick="filterRows('all',this)">All Features</button>
+  <button class="filter-btn f-starter" onclick="filterRows('starter',this)">Starter</button>
+  <button class="filter-btn f-growth" onclick="filterRows('growth',this)">Growth+</button>
+  <button class="filter-btn f-pro" onclick="filterRows('pro',this)">Pro+</button>
+  <button class="filter-btn f-enterprise" onclick="filterRows('enterprise',this)">Enterprise</button>
+  <button class="filter-btn" onclick="filterRows('postmvp',this)">Post-MVP only</button>
+  <button class="filter-btn" onclick="filterRows('highvalue',this)">High value</button>
+</div>
+
+<div class="table-wrap">
+
+<!-- ── 1. LOAD MANAGEMENT ── -->
+<div class="section-head"><span class="section-ico">📦</span><span class="section-title">Load Management</span><span class="section-count">6 features</span></div>
+<table>
+<colgroup><col class="col-feat"><col class="col-desc"><col class="col-val"><col class="col-tier"><col class="col-tier"><col class="col-tier"><col class="col-tier"></colgroup>
+<thead><tr>
+  <th>Feature</th><th>Description &amp; Benefit</th><th>Value to User</th>
+  <th class="tier-col th-starter">Starter</th>
+  <th class="tier-col th-growth">Growth</th>
+  <th class="tier-col th-pro">Pro</th>
+  <th class="tier-col th-enterprise">Ent.</th>
+</tr></thead>
+<tbody>
+
+<tr data-tiers="starter growth pro enterprise" data-val="high">
+  <td class="feat-name">AI Load Intake<div class="sub">Email, PDF, photo → load</div></td>
+  <td class="feat-desc"><strong>Forward a rate confirmation or snap a photo</strong> — Claude extracts origin, destination, rate, pickup time, and shipper automatically. No re-keying. Handles broker emails, PDF rate cons, and handwritten BOLs.</td>
+  <td class="feat-val"><div class="val-est">~2.5 hrs/mo saved<br>≈ $190/mo</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-yes dot-starter">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="starter growth pro enterprise" data-val="high">
+  <td class="feat-name">Load List &amp; Status Board<div class="sub">All loads in one view</div></td>
+  <td class="feat-desc"><strong>Real-time status across all active loads</strong> — filter by status, driver, or date. Color-coded pipeline (Booked → Picked Up → In Transit → Delivered). Replaces the whiteboard or spreadsheet most micro-carriers use today.</td>
+  <td class="feat-val"><div class="val-est">Eliminates daily check-in calls<br>saves ~1 hr/day</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-yes dot-starter">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="starter growth pro enterprise" data-val="high">
+  <td class="feat-name">Invoice Generation &amp; Email<div class="sub">Auto-built from load data</div></td>
+  <td class="feat-desc"><strong>One tap generates a professional PDF invoice</strong> from load data — rate, shipper, BOL number, dates — and emails it directly to the customer. Tracks paid/unpaid status. Eliminates QuickBooks or manual Word doc invoicing.</td>
+  <td class="feat-val"><div class="val-est">~5 hrs/mo saved<br>≈ $375/mo</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-yes dot-starter">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="starter growth pro enterprise" data-val="medium">
+  <td class="feat-name">Public Tracking Link<div class="sub">Shareable, no login required</div></td>
+  <td class="feat-desc"><strong>Send shippers a live tracking URL</strong> — shows current status, driver ETA, and delivery confirmation. Eliminates "where's my load?" calls. Auto-expires after delivery.</td>
+  <td class="feat-val"><div class="val-est">Eliminates 3–5 status calls/load<br>≈ 2 hrs/mo saved</div><span class="val-badge val-m">Medium</span></td>
+  <td class="tier-col"><div class="dot-yes dot-starter">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="starter growth pro enterprise" data-val="medium">
+  <td class="feat-name">POD Capture<div class="sub">In-app photo, timestamped</div></td>
+  <td class="feat-desc"><strong>Driver photos the signed BOL at delivery</strong> — uploaded to Supabase Storage, attached to the load, accessible to owner and shipper instantly. Ends the "where's the POD?" argument with brokers.</td>
+  <td class="feat-val"><div class="val-est">Faster invoice payment<br>avoids disputed charges</div><span class="val-badge val-m">Medium</span></td>
+  <td class="tier-col"><div class="dot-yes dot-starter">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="starter growth pro enterprise" data-val="medium">
+  <td class="feat-name">Customer Directory<div class="sub">Shippers &amp; brokers, load history</div></td>
+  <td class="feat-desc"><strong>Centralized contact book for all shippers and brokers</strong> with load history, rate trends, and notes. Import via CSV. Replaces a contacts spreadsheet. Surfaces repeat customer patterns.</td>
+  <td class="feat-val"><div class="val-est">Faster re-booking with repeat shippers</div><span class="val-badge val-m">Medium</span></td>
+  <td class="tier-col"><div class="dot-yes dot-starter">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+</tbody>
+</table>
+
+<!-- ── 2. DRIVER OPERATIONS ── -->
+<div class="section-head"><span class="section-ico">🚛</span><span class="section-title">Driver Operations</span><span class="section-count">6 features</span></div>
+<table>
+<colgroup><col class="col-feat"><col class="col-desc"><col class="col-val"><col class="col-tier"><col class="col-tier"><col class="col-tier"><col class="col-tier"></colgroup>
+<thead><tr>
+  <th>Feature</th><th>Description &amp; Benefit</th><th>Value to User</th>
+  <th class="tier-col th-starter">Starter</th>
+  <th class="tier-col th-growth">Growth</th>
+  <th class="tier-col th-pro">Pro</th>
+  <th class="tier-col th-enterprise">Ent.</th>
+</tr></thead>
+<tbody>
+
+<tr data-tiers="starter growth pro enterprise" data-val="high">
+  <td class="feat-name">Driver Mobile App<div class="sub">iOS &amp; Android, works offline</div></td>
+  <td class="feat-desc"><strong>Native app (Capacitor) wrapping the web app</strong> — driver sees their assigned load, can update status, capture POD, run DVIR, and log fuel, all from their phone. Works in areas with poor connectivity via offline caching.</td>
+  <td class="feat-val"><div class="val-est">Replaces phone calls &amp; paper forms</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-yes dot-starter">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="starter growth pro enterprise" data-val="high">
+  <td class="feat-name">DVIR — Pre/Post-Trip Inspection<div class="sub">FMCSA Part 396.11 compliant</div></td>
+  <td class="feat-desc"><strong>Driver taps through a 19-zone inspection checklist</strong> before and after each trip. Defects flagged, signed electronically, stored with timestamp. Replaces paper DVIR books that get lost or falsified.</td>
+  <td class="feat-val"><div class="val-compliance">Avoids $1K–$16K FMCSA fine</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-yes dot-starter">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="starter growth pro enterprise" data-val="medium">
+  <td class="feat-name">Live Status Updates<div class="sub">Driver taps, owner sees instantly</div></td>
+  <td class="feat-desc"><strong>Driver taps At Pickup → In Transit → Delivered</strong> from the app — owner's load board updates in real time. No phone call needed. Status change timestamps logged for each load event.</td>
+  <td class="feat-val"><div class="val-est">Saves 3–5 calls/load<br>≈ 1 hr/day for owner</div><span class="val-badge val-m">Medium</span></td>
+  <td class="tier-col"><div class="dot-yes dot-starter">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="starter growth pro enterprise" data-val="medium">
+  <td class="feat-name">Driver Compliance Tracker<div class="sub">CDL, med cert, endorsements</div></td>
+  <td class="feat-desc"><strong>Fleet compliance dashboard</strong> — tracks CDL expiry, DOT medical certificate expiry, endorsements (HazMat, Tanker), and emergency contacts for every driver. Alerts owner 60 days before any document expires. Driver enters their own data at onboarding.</td>
+  <td class="feat-val"><div class="val-compliance">Avoids out-of-service violations</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-yes dot-starter">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="starter growth pro enterprise" data-val="medium">
+  <td class="feat-name">Multi-Language UI<div class="sub">EN / ES / PA / UR</div></td>
+  <td class="feat-desc"><strong>Every driver-facing screen available in English, Spanish, Punjabi, and Urdu</strong> — including DVIR, status updates, POD, and fuel logging. Driver picks language on first login. Urdu renders full RTL layout. No other TMS at this price point offers all four.</td>
+  <td class="feat-val"><div class="val-est">Expands hireable driver pool<br>reduces errors from language barriers</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-yes dot-starter">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="growth pro enterprise" data-val="high">
+  <td class="feat-name">Driver In-App Chat<div class="sub">Per-load thread, push notifications</div></td>
+  <td class="feat-desc"><strong>Dispatcher and driver message within the load thread</strong> — no need to exchange personal phone numbers. System messages auto-post on status changes ("Load marked In Transit"). Unread badges on both sides. Supabase Realtime — no polling delay.</td>
+  <td class="feat-val"><div class="val-est">Saves 30+ min/day of phone tag<br>≈ $1,100+/mo for dispatcher</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+</tbody>
+</table>
+
+<!-- ── 3. FLEET & COMPLIANCE ── -->
+<div class="section-head"><span class="section-ico">🔧</span><span class="section-title">Fleet &amp; Compliance</span><span class="section-count">4 features</span></div>
+<table>
+<colgroup><col class="col-feat"><col class="col-desc"><col class="col-val"><col class="col-tier"><col class="col-tier"><col class="col-tier"><col class="col-tier"></colgroup>
+<thead><tr>
+  <th>Feature</th><th>Description &amp; Benefit</th><th>Value to User</th>
+  <th class="tier-col th-starter">Starter</th>
+  <th class="tier-col th-growth">Growth</th>
+  <th class="tier-col th-pro">Pro</th>
+  <th class="tier-col th-enterprise">Ent.</th>
+</tr></thead>
+<tbody>
+
+<tr data-tiers="starter growth pro enterprise" data-val="high">
+  <td class="feat-name">Maintenance Log &amp; Reminders<div class="sub">Mileage-based service alerts</div></td>
+  <td class="feat-desc"><strong>Log every service event (oil change, tires, brakes) per truck</strong> — set mileage-based reminders so nothing is missed. Alerts owner before the interval is hit. Reduces unexpected breakdowns that cost $500–$3,000 in repairs plus lost load revenue.</td>
+  <td class="feat-val"><div class="val-est">Prevents 1–2 breakdowns/yr<br>≈ $2,000–$6,000/yr avoided</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-yes dot-starter">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="starter growth pro enterprise" data-val="medium">
+  <td class="feat-name">Truck Document Vault<div class="sub">Per-truck: registration, insurance, DOT authority</div></td>
+  <td class="feat-desc"><strong>Upload and store registration, insurance cert, DOT authority, and annual inspection per truck.</strong> Expiry alerts 30 days before renewal. Owner and Finance role can access instantly — no more hunting for paper docs at roadside inspections.</td>
+  <td class="feat-val"><div class="val-compliance">Roadside inspection ready<br>avoids out-of-service orders</div><span class="val-badge val-m">Medium</span></td>
+  <td class="tier-col"><div class="dot-yes dot-starter">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="starter growth pro enterprise" data-val="medium">
+  <td class="feat-name">Company Document Vault<div class="sub">COI, MC authority, W-9, UCR</div></td>
+  <td class="feat-desc"><strong>Fleet-wide compliance docs in one place</strong> — cargo insurance (COI), general liability, MC authority letter, DOT operating certificate, UCR, W-9. Finance role gets read-only access. Expiry alerts 30 days out. Brokers often request these on short notice.</td>
+  <td class="feat-val"><div class="val-est">Instant response to broker doc requests<br>saves 1–2 hrs/request</div><span class="val-badge val-m">Medium</span></td>
+  <td class="tier-col"><div class="dot-yes dot-starter">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="enterprise" data-val="high">
+  <td class="feat-name">HOS Safety Alerts<span class="post-mvp">Post-MVP</span><div class="sub">Hours-of-service monitoring (ELD required)</div></td>
+  <td class="feat-desc"><strong>Integrates with ELD data to flag drivers approaching HOS limits</strong> before a violation occurs. Dispatcher gets an alert to reroute or reassign. Requires a connected ELD device — CarrierOS surfaces the alert, the ELD provides the data.</td>
+  <td class="feat-val"><div class="val-compliance">HOS violation = $1K–$16K fine<br>+ CSA score impact</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+</tbody>
+</table>
+
+<!-- ── 4. TEAM & DISPATCH ── -->
+<div class="section-head"><span class="section-ico">👥</span><span class="section-title">Team &amp; Dispatch</span><span class="section-count">6 features</span></div>
+<table>
+<colgroup><col class="col-feat"><col class="col-desc"><col class="col-val"><col class="col-tier"><col class="col-tier"><col class="col-tier"><col class="col-tier"></colgroup>
+<thead><tr>
+  <th>Feature</th><th>Description &amp; Benefit</th><th>Value to User</th>
+  <th class="tier-col th-starter">Starter</th>
+  <th class="tier-col th-growth">Growth</th>
+  <th class="tier-col th-pro">Pro</th>
+  <th class="tier-col th-enterprise">Ent.</th>
+</tr></thead>
+<tbody>
+
+<tr data-tiers="starter growth pro enterprise" data-val="medium">
+  <td class="feat-name">Role-Based Access<div class="sub">Owner, Solo, Driver</div></td>
+  <td class="feat-desc"><strong>Rates and invoice amounts are never visible to drivers</strong> — enforced at the database level via RLS, not just hidden in the UI. Driver sees only their assigned load, DVIR, and fuel. Owner sees everything. Solo mode combines owner + driver into one account.</td>
+  <td class="feat-val"><div class="val-est">Protects rate confidentiality<br>professional team structure</div><span class="val-badge val-m">Medium</span></td>
+  <td class="tier-col"><div class="dot-yes dot-starter">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="starter growth pro enterprise" data-val="medium">
+  <td class="feat-name">Driver Invite Flow<div class="sub">SMS/email invite link</div></td>
+  <td class="feat-desc"><strong>Owner sends a link — driver downloads the app and joins the fleet.</strong> Driver sets up their own profile (CDL, language preference, emergency contact). No IT required. Accounts are subordinate to the owner subscription.</td>
+  <td class="feat-val"><div class="val-est">Fleet onboarding in minutes vs. days</div><span class="val-badge val-l">Low</span></td>
+  <td class="tier-col"><div class="dot-yes dot-starter">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="growth pro enterprise" data-val="high">
+  <td class="feat-name">Dispatcher Role<div class="sub">Ops delegation, no financials</div></td>
+  <td class="feat-desc"><strong>Owner can delegate all dispatch operations to a trusted employee</strong> — Dispatcher assigns loads, manages the load queue, communicates with drivers, and monitors the fleet. Cannot see rates, invoices, or billing. Gives owners their time back.</td>
+  <td class="feat-val"><div class="val-est">Owner reclaims 5–10 hrs/wk<br>≈ $1,500–3,000/mo in owner time</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="growth pro enterprise" data-val="medium">
+  <td class="feat-name">Finance Role<div class="sub">Invoices &amp; reports, no operations</div></td>
+  <td class="feat-desc"><strong>Bookkeeper or accountant gets read access to invoices, customer accounts, and financial reports</strong> — without seeing driver details, dispatch, or maintenance. Cleanly separates financial oversight from day-to-day fleet operations.</td>
+  <td class="feat-val"><div class="val-est">Accountant can self-serve<br>saves 1–2 hrs/mo of owner time</div><span class="val-badge val-m">Medium</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="growth pro enterprise" data-val="high">
+  <td class="feat-name">Desktop Command Center<div class="sub">Owner fleet overview + Dispatcher queue</div></td>
+  <td class="feat-desc"><strong>Full desktop web UI designed for dispatchers and owners managing multiple trucks simultaneously.</strong> Owner view: KPI strip (revenue MTD, active loads, fuel spend), live fleet map, exception strip. Dispatcher view: load queue with unread chat badges, driver assign panel with availability scoring.</td>
+  <td class="feat-val"><div class="val-est">Makes managing 3+ trucks feasible<br>without a separate TMS</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="growth pro enterprise" data-val="medium">
+  <td class="feat-name">Fleet Calendar<div class="sub">Multi-truck scheduling view</div></td>
+  <td class="feat-desc"><strong>Visual calendar showing all trucks and their load assignments by day.</strong> Quickly spot availability gaps, schedule conflicts, and maintenance windows across the fleet. Prevents double-booking a truck.</td>
+  <td class="feat-val"><div class="val-est">Prevents scheduling conflicts<br>fills idle truck days</div><span class="val-badge val-m">Medium</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+</tbody>
+</table>
+
+<!-- ── 5. IFTA & FUEL ── -->
+<div class="section-head"><span class="section-ico">⛽</span><span class="section-title">IFTA &amp; Fuel</span><span class="section-count">5 features</span></div>
+<table>
+<colgroup><col class="col-feat"><col class="col-desc"><col class="col-val"><col class="col-tier"><col class="col-tier"><col class="col-tier"><col class="col-tier"></colgroup>
+<thead><tr>
+  <th>Feature</th><th>Description &amp; Benefit</th><th>Value to User</th>
+  <th class="tier-col th-starter">Starter</th>
+  <th class="tier-col th-growth">Growth</th>
+  <th class="tier-col th-pro">Pro</th>
+  <th class="tier-col th-enterprise">Ent.</th>
+</tr></thead>
+<tbody>
+
+<tr data-tiers="starter growth pro enterprise" data-val="medium">
+  <td class="feat-name">Fuel Stop Logging<div class="sub">State, gallons, price, receipt photo</div></td>
+  <td class="feat-desc"><strong>Driver logs each fuel stop mid-trip</strong> — state, station name, gallons, price per gallon (auto-totals cost), and odometer. Receipt photo uploaded to storage. Trip fuel history with per-state totals. Cost per mile calculated automatically. Foundation for IFTA fuel reconciliation.</td>
+  <td class="feat-val"><div class="val-est">Eliminates receipt-hunting at quarter end<br>~2 hrs/quarter saved</div><span class="val-badge val-m">Medium</span></td>
+  <td class="tier-col"><div class="dot-yes dot-starter">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="growth pro enterprise" data-val="high">
+  <td class="feat-name">GPS State Mileage Tracking<div class="sub">Auto-logs state crossings every 15 min</div></td>
+  <td class="feat-desc"><strong>App silently logs which state the truck is in while driving</strong> — no driver action needed. On delivery, shows miles driven per state for that trip. Data aggregates into the quarterly IFTA state summary. Requires "Always Allow" location permission (iOS).</td>
+  <td class="feat-val"><div class="val-est">Eliminates manual state mileage logs<br>~3 hrs/quarter saved</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="growth pro enterprise" data-val="medium">
+  <td class="feat-name">Odometer Fallback<div class="sub">Manual correction when GPS incomplete</div></td>
+  <td class="feat-desc"><strong>If GPS data looks sparse at delivery (less than 60% of trip miles captured)</strong>, driver is prompted to enter odometer miles per state manually. GPS-logged values are pre-filled as a starting point. Manual entries override GPS for that trip — no mixed data.</td>
+  <td class="feat-val"><div class="val-est">Ensures IFTA accuracy even when GPS fails</div><span class="val-badge val-m">Medium</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="growth pro enterprise" data-val="high">
+  <td class="feat-name">Quarterly IFTA State Summary<div class="sub">Miles by state, filing reminder</div></td>
+  <td class="feat-desc"><strong>Owner sees total miles driven per state for the quarter</strong> — bar chart, state breakdown table, filing deadline reminder. Provides the mileage data needed for IFTA filing. Flags trips where mileage was manually entered. Quarter selector for history.</td>
+  <td class="feat-val"><div class="val-est">Mileage data ready for your CPA<br>or for filing yourself</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="pro enterprise" data-val="high">
+  <td class="feat-name">Full IFTA Tax Hub<span class="post-mvp">Post-MVP</span><div class="sub">Tax due per state, fuel reconciliation</div></td>
+  <td class="feat-desc"><strong>Complete quarterly IFTA calculation</strong> — applies the formula (miles in state ÷ total miles × total fuel × state rate − fuel purchased in state × state rate) for every state. Shows net tax due or credit per state. Fuel reconciliation from logged fuel stops. Replaces CPA filing prep entirely.</td>
+  <td class="feat-val"><div class="val-est">Replaces $300–600/quarter CPA fee<br>≈ $1,200–2,400/yr saved</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+</tbody>
+</table>
+
+<!-- ── 6. FINANCE & ANALYTICS ── -->
+<div class="section-head"><span class="section-ico">💰</span><span class="section-title">Finance &amp; Analytics</span><span class="section-count">7 features</span></div>
+<table>
+<colgroup><col class="col-feat"><col class="col-desc"><col class="col-val"><col class="col-tier"><col class="col-tier"><col class="col-tier"><col class="col-tier"></colgroup>
+<thead><tr>
+  <th>Feature</th><th>Description &amp; Benefit</th><th>Value to User</th>
+  <th class="tier-col th-starter">Starter</th>
+  <th class="tier-col th-growth">Growth</th>
+  <th class="tier-col th-pro">Pro</th>
+  <th class="tier-col th-enterprise">Ent.</th>
+</tr></thead>
+<tbody>
+
+<tr data-tiers="starter growth pro enterprise" data-val="medium">
+  <td class="feat-name">Load Revenue Tracking<div class="sub">Rate per load, monthly total</div></td>
+  <td class="feat-desc"><strong>Every load's rate is recorded and rolled up into monthly revenue.</strong> Revenue MTD visible on the owner home screen. Starter tier shows 90-day load history; Growth+ shows unlimited history and richer reporting.</td>
+  <td class="feat-val"><div class="val-est">Basic financial visibility<br>replaces revenue spreadsheet</div><span class="val-badge val-m">Medium</span></td>
+  <td class="tier-col"><div class="dot-yes dot-starter">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="growth pro enterprise" data-val="high">
+  <td class="feat-name">Driver Settlements<div class="sub">Per-mile, % of rate, or flat pay</div></td>
+  <td class="feat-desc"><strong>Calculate driver pay automatically from load data</strong> — supports per-mile rate, percentage of gross revenue, or flat fee. Handles fuel advances and deductions. Generates a settlement statement the driver can see. Integrates with ACH payout at Pro tier.</td>
+  <td class="feat-val"><div class="val-est">~2 hrs/mo saved on manual calculations<br>≈ $150/mo</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="pro enterprise" data-val="high">
+  <td class="feat-name">Revenue/Mile by Lane<span class="post-mvp">Post-MVP</span><div class="sub">Profitability by origin-destination pair</div></td>
+  <td class="feat-desc"><strong>Identifies which lanes are making money and which aren't</strong> — breaks down revenue per mile for each origin-destination pair, factoring in fuel cost. Owner can stop accepting unprofitable loads or negotiate better rates on specific lanes.</td>
+  <td class="feat-val"><div class="val-est">Identifying 1 bad lane &amp; fixing it<br>≈ $500+/mo improvement</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="pro enterprise" data-val="high">
+  <td class="feat-name">Fuel Card Analytics<span class="post-mvp">Post-MVP</span><div class="sub">Cost/mile by driver, anomaly detection</div></td>
+  <td class="feat-desc"><strong>Breaks down fuel cost per mile by driver and truck</strong> — surfaces drivers who are burning significantly more fuel than others. Flags anomalous fills (unusually large or frequent). Helps owners have data-backed conversations about fuel efficiency.</td>
+  <td class="feat-val"><div class="val-est">10% fuel savings = ~$300/mo<br>on $3K/mo fleet fuel spend</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="pro enterprise" data-val="medium">
+  <td class="feat-name">Driver Performance Dashboard<span class="post-mvp">Post-MVP</span><div class="sub">On-time rate, miles, fuel efficiency</div></td>
+  <td class="feat-desc"><strong>Per-driver scorecard</strong> — on-time delivery rate, miles driven, fuel efficiency, DVIR defect rate, and load count. Helps owners make informed decisions about bonuses, driver assignments, or conversations about performance.</td>
+  <td class="feat-val"><div class="val-est">Data-backed driver management<br>vs. gut feel</div><span class="val-badge val-m">Medium</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="pro enterprise" data-val="medium">
+  <td class="feat-name">QuickBooks Sync<span class="post-mvp">Post-MVP</span><div class="sub">Auto-push invoices &amp; expenses</div></td>
+  <td class="feat-desc"><strong>Invoices and fuel expenses sync automatically to QuickBooks Online</strong> — no manual data entry. Keeps books current without a bookkeeper touching CarrierOS. Most micro-carriers already use QuickBooks, so this eliminates double-entry entirely.</td>
+  <td class="feat-val"><div class="val-est">~3 hrs/mo bookkeeping saved<br>≈ $225/mo</div><span class="val-badge val-m">Medium</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="pro enterprise" data-val="medium">
+  <td class="feat-name">Banking / ACH Driver Pay<span class="post-mvp">Post-MVP</span><div class="sub">Direct deposit from the app</div></td>
+  <td class="feat-desc"><strong>Pay drivers directly from CarrierOS</strong> — ACH transfer triggered from an approved settlement. Driver receives funds in 1–2 business days. Eliminates check cutting, cash handling, or Zelle for driver pay. Integrated with factoring at the same tier.</td>
+  <td class="feat-val"><div class="val-est">Eliminates check printing &amp; trips to bank<br>~1 hr/mo saved</div><span class="val-badge val-m">Medium</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+</tbody>
+</table>
+
+<!-- ── 7. GROWTH & LOAD ACQUISITION ── -->
+<div class="section-head"><span class="section-ico">📈</span><span class="section-title">Growth &amp; Load Acquisition</span><span class="section-count">4 features</span></div>
+<table>
+<colgroup><col class="col-feat"><col class="col-desc"><col class="col-val"><col class="col-tier"><col class="col-tier"><col class="col-tier"><col class="col-tier"></colgroup>
+<thead><tr>
+  <th>Feature</th><th>Description &amp; Benefit</th><th>Value to User</th>
+  <th class="tier-col th-starter">Starter</th>
+  <th class="tier-col th-growth">Growth</th>
+  <th class="tier-col th-pro">Pro</th>
+  <th class="tier-col th-enterprise">Ent.</th>
+</tr></thead>
+<tbody>
+
+<tr data-tiers="pro enterprise" data-val="high">
+  <td class="feat-name">Carrier Public Profile<span class="post-mvp">Post-MVP</span><div class="sub">carrieros.app/carrier/[mc-number]</div></td>
+  <td class="feat-desc"><strong>A public-facing page for the carrier</strong> — equipment types, service lanes, insurance amount, MC number, logo. Shareable link for brokers to vet the carrier. Increases legitimacy and discoverability compared to no web presence at all, which is the reality for most micro-carriers.</td>
+  <td class="feat-val"><div class="val-est">Replaces needing a website<br>improves broker approval rate</div><span class="val-badge val-m">Medium</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="pro enterprise" data-val="high">
+  <td class="feat-name">Load Board Posting<span class="post-mvp">Post-MVP</span><div class="sub">DAT &amp; Truckstop integration</div></td>
+  <td class="feat-desc"><strong>Post available trucks directly to DAT and Truckstop from CarrierOS</strong> — without switching apps. Fill empty miles with backhaul loads. Most micro-carriers spend time manually browsing load boards; this surfaces them to brokers looking for capacity on the carrier's lanes.</td>
+  <td class="feat-val"><div class="val-est">1 additional backhaul/mo<br>≈ $600–900 extra revenue</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="enterprise" data-val="high">
+  <td class="feat-name">Amazon Relay Integration<span class="post-mvp">Post-MVP</span><div class="sub">Direct access to Amazon freight</div></td>
+  <td class="feat-desc"><strong>Connects to Amazon Relay's carrier network</strong> — gives access to Amazon's consistent, high-volume freight. Attractive for carriers on CA-AZ and CA-OR corridors where Amazon has major distribution. Requires approval by Amazon separately.</td>
+  <td class="feat-val"><div class="val-est">Access to premium freight network<br>higher lane consistency</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="enterprise" data-val="high">
+  <td class="feat-name">AI Smart Dispatch<span class="post-mvp">Post-MVP</span><div class="sub">Auto-assigns driver + truck to incoming loads</div></td>
+  <td class="feat-desc"><strong>AI analyzes driver availability, truck specs, current location, HOS status, and lane profitability</strong> to recommend the optimal driver-truck pairing for each incoming load. Dispatcher reviews and approves. Reduces the time and cognitive load of manual dispatch decisions.</td>
+  <td class="feat-val"><div class="val-est">15–20% better truck utilization<br>faster dispatch turnaround</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+</tbody>
+</table>
+
+<!-- ── 8. EXCEPTIONS & ALERTS ── -->
+<div class="section-head"><span class="section-ico">🔔</span><span class="section-title">Exceptions &amp; Alerts</span><span class="section-count">3 features</span></div>
+<table>
+<colgroup><col class="col-feat"><col class="col-desc"><col class="col-val"><col class="col-tier"><col class="col-tier"><col class="col-tier"><col class="col-tier"></colgroup>
+<thead><tr>
+  <th>Feature</th><th>Description &amp; Benefit</th><th>Value to User</th>
+  <th class="tier-col th-starter">Starter</th>
+  <th class="tier-col th-growth">Growth</th>
+  <th class="tier-col th-pro">Pro</th>
+  <th class="tier-col th-enterprise">Ent.</th>
+</tr></thead>
+<tbody>
+
+<tr data-tiers="starter growth pro enterprise" data-val="high">
+  <td class="feat-name">Exception Alerts<div class="sub">Late delivery, unassigned load, doc expiry</div></td>
+  <td class="feat-desc"><strong>Owner sees a prioritized exceptions inbox</strong> — loads running late, loads not yet assigned, CDL/med cert/insurance docs expiring soon. Replaces the mental overhead of tracking everything manually. Push notifications for time-sensitive exceptions.</td>
+  <td class="feat-val"><div class="val-est">Catch problems before they become crises<br>reduces firefighting</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-yes dot-starter">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="growth pro enterprise" data-val="medium">
+  <td class="feat-name">Live Dispatch Map<div class="sub">All trucks on a map, real-time</div></td>
+  <td class="feat-desc"><strong>Owner sees all trucks on a live map</strong> — color-coded by status (in transit, at pickup, available). Last known GPS position updated every 2 minutes. Lets the owner or dispatcher quickly see where capacity is without calling drivers.</td>
+  <td class="feat-val"><div class="val-est">Instant fleet visibility<br>faster backhaul decision-making</div><span class="val-badge val-m">Medium</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-growth">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-pro">✓</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="enterprise" data-val="high">
+  <td class="feat-name">Enterprise Safety Risk Dashboard<span class="post-mvp">Post-MVP</span><div class="sub">CSA score, HOS violations, DOT audit readiness</div></td>
+  <td class="feat-desc"><strong>Fleet-level safety scoring</strong> — aggregates DVIR defect rates, HOS alerts, maintenance gaps, and inspection history into a CSA-style risk score. Flags drivers or trucks that are elevating the carrier's risk profile before a DOT audit finds them.</td>
+  <td class="feat-val"><div class="val-compliance">High CSA score = higher insurance premiums + audit risk</div><span class="val-badge val-h">High</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+</tbody>
+</table>
+
+<!-- ── 9. PLATFORM & ENTERPRISE ── -->
+<div class="section-head"><span class="section-ico">⚙️</span><span class="section-title">Platform &amp; Enterprise</span><span class="section-count">4 features</span></div>
+<table>
+<colgroup><col class="col-feat"><col class="col-desc"><col class="col-val"><col class="col-tier"><col class="col-tier"><col class="col-tier"><col class="col-tier"></colgroup>
+<thead><tr>
+  <th>Feature</th><th>Description &amp; Benefit</th><th>Value to User</th>
+  <th class="tier-col th-starter">Starter</th>
+  <th class="tier-col th-growth">Growth</th>
+  <th class="tier-col th-pro">Pro</th>
+  <th class="tier-col th-enterprise">Ent.</th>
+</tr></thead>
+<tbody>
+
+<tr data-tiers="enterprise" data-val="medium">
+  <td class="feat-name">Full API + Webhooks<span class="post-mvp">Post-MVP</span><div class="sub">Programmatic access to all load &amp; fleet data</div></td>
+  <td class="feat-desc"><strong>REST API and webhooks for enterprise customers building custom integrations</strong> — connect CarrierOS to proprietary TMS systems, broker portals, or internal tools. Webhook events for load status changes, DVIR completion, driver assignment, and invoice payment.</td>
+  <td class="feat-val"><div class="val-est">Enables custom workflow automation<br>eliminates manual data export</div><span class="val-badge val-m">Medium</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="enterprise" data-val="medium">
+  <td class="feat-name">Custom User Permissions<span class="post-mvp">Post-MVP</span><div class="sub">Beyond the 5 standard roles</div></td>
+  <td class="feat-desc"><strong>Enterprise accounts can define custom permission sets</strong> — e.g., a "Safety Manager" who sees DVIR and maintenance but not financials or dispatch. Useful for carriers with specialized team structures that don't map cleanly to the standard 5 roles.</td>
+  <td class="feat-val"><div class="val-est">Fits complex org structures<br>without workarounds</div><span class="val-badge val-m">Medium</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="enterprise" data-val="medium">
+  <td class="feat-name">Driver Training &amp; Cert Tracking<span class="post-mvp">Post-MVP</span><div class="sub">HazMat, defensive driving, onboarding</div></td>
+  <td class="feat-desc"><strong>Assign and track required training completions per driver</strong> — HazMat recertification, defensive driving, company onboarding. Reminders before cert expiry. Creates an auditable training record useful for DOT audits and insurance underwriters.</td>
+  <td class="feat-val"><div class="val-est">Reduces liability &amp; insurance risk<br>DOT audit documentation</div><span class="val-badge val-m">Medium</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+<tr data-tiers="enterprise" data-val="low">
+  <td class="feat-name">Dedicated Account Manager<span class="post-mvp">Post-MVP</span><div class="sub">Named contact, onboarding &amp; support</div></td>
+  <td class="feat-desc"><strong>Enterprise accounts get a named CarrierOS account manager</strong> — assists with fleet onboarding, custom configuration, and ongoing support. Quarterly business reviews. Direct line beyond standard support channels.</td>
+  <td class="feat-val"><div class="val-est">Faster resolution, less downtime</div><span class="val-badge val-l">Low</span></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-no">—</div></td>
+  <td class="tier-col"><div class="dot-yes dot-enterprise">✓</div></td>
+</tr>
+
+</tbody>
+</table>
+
+</div><!-- /table-wrap -->
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-item"><div class="dot-yes dot-starter" style="width:18px;height:18px;font-size:9px;">✓</div> Starter ($49/mo)</div>
+  <div class="legend-item"><div class="dot-yes dot-growth" style="width:18px;height:18px;font-size:9px;">✓</div> Growth ($99/mo)</div>
+  <div class="legend-item"><div class="dot-yes dot-pro" style="width:18px;height:18px;font-size:9px;">✓</div> Pro ($199/mo, post-MVP)</div>
+  <div class="legend-item"><div class="dot-yes dot-enterprise" style="width:18px;height:18px;font-size:9px;">✓</div> Enterprise ($349/mo, post-MVP)</div>
+  <div class="legend-item"><span class="post-mvp">Post-MVP</span> Planned, not in initial launch</div>
+  <div class="legend-item"><span class="val-badge val-h">High</span> &nbsp;<span class="val-badge val-m">Medium</span> &nbsp;<span class="val-badge val-l">Low</span> Value rating</div>
+  <div class="legend-item"><span class="val-compliance">Compliance</span> Avoids fines / regulatory risk</div>
+</div>
+
+<footer>
+  <p>CarrierOS · Feature Matrix · v1.0 · July 2026</p>
+  <p>Value estimates based on 1–3 truck carrier, ~15 loads/month, owner time at $75/hr.</p>
+  <p>PRD: <code>prd.md</code> &nbsp;·&nbsp; Pricing: <code>tier-pricing-structure.md</code> &nbsp;·&nbsp; Tech: <code>tech-spec.md</code></p>
+</footer>
+
+<script>
+function filterRows(filter, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  document.querySelectorAll('tbody tr').forEach(row => {
+    const tiers = row.dataset.tiers || '';
+    const val = row.dataset.val || '';
+    const hasPostMvp = row.querySelector('.post-mvp');
+
+    if (filter === 'all') {
+      row.classList.remove('hidden');
+    } else if (filter === 'starter') {
+      row.classList.toggle('hidden', !tiers.includes('starter'));
+    } else if (filter === 'growth') {
+      row.classList.toggle('hidden', !tiers.includes('growth'));
+    } else if (filter === 'pro') {
+      row.classList.toggle('hidden', !tiers.includes('pro'));
+    } else if (filter === 'enterprise') {
+      row.classList.toggle('hidden', !tiers.includes('enterprise'));
+    } else if (filter === 'postmvp') {
+      row.classList.toggle('hidden', !hasPostMvp);
+    } else if (filter === 'highvalue') {
+      row.classList.toggle('hidden', val !== 'high');
+    }
+  });
+}
+</script>
+</body>
+</html>

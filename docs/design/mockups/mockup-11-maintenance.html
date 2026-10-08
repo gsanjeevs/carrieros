@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CarrierOS — Truck Maintenance</title>
+<style>
+:root {
+  --navy: #0f1e35;
+  --navy-light: #1a2e4a;
+  --orange: #f47920;
+  --green: #2ecc71;
+  --green-dark: #27ae60;
+  --red: #e74c3c;
+  --amber: #f0a500;
+  --teal: #1abc9c;
+  --bg: #f4f6f9;
+  --text: #1a1a2e;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #1a1a2e;
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center;
+}
+.outer { width: 100%; max-width: 430px; min-height: 100vh; background: var(--bg); display: flex; flex-direction: column; }
+.topbar { background: var(--navy); color: white; display: flex; align-items: center; padding: 14px 16px; gap: 12px; min-height: 56px; position: sticky; top: 0; z-index: 100; }
+.topbar .back-btn { background: none; border: none; color: white; font-size: 20px; cursor: pointer; padding: 4px; display: none; }
+.topbar .back-btn.visible { display: block; }
+.topbar .logo { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; flex: 1; }
+.topbar .logo span { color: var(--orange); }
+.topbar .subtitle { font-size: 12px; color: rgba(255,255,255,0.6); }
+
+.content { flex: 1; overflow-y: auto; }
+.screen { display: none; }
+.screen.active { display: block; }
+
+.btn { display: block; width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; text-align: center; transition: opacity 0.15s; }
+.btn:active { opacity: 0.85; }
+.btn-primary { background: var(--orange); color: white; }
+.btn-outline { background: transparent; border: 2px solid var(--navy); color: var(--navy); }
+.btn-sm { display: inline-block; padding: 8px 14px; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; }
+.mb-8 { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.mb-16 { margin-bottom: 16px; }
+
+.card { background: white; border-radius: 14px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--border); }
+.card-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+
+.field { margin-bottom: 14px; }
+.label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 5px; display: block; }
+.input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 15px; background: white; color: var(--text); }
+.input:focus { outline: none; border-color: var(--navy); }
+.input-row { display: flex; gap: 10px; }
+.input-row .field { flex: 1; }
+
+.pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+.pill-green { background: #e8f5e9; color: #2e7d32; }
+.pill-red { background: #ffebee; color: #c62828; }
+.pill-amber { background: #fff8e1; color: #f57f17; }
+.pill-blue { background: #e3f2fd; color: #1565c0; }
+.pill-gray { background: #f5f5f5; color: #616161; }
+
+.row-between { display: flex; align-items: center; justify-content: space-between; }
+
+.hero { background: var(--navy); color: white; padding: 20px 20px 16px; }
+.hero h2 { font-size: 20px; font-weight: 800; margin-top: 4px; }
+.hero p { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 4px; }
+
+.notif { border-radius: 12px; padding: 12px 16px; margin-bottom: 12px; font-size: 13px; font-weight: 600; }
+.notif-green { background: #e8f5e9; color: #2e7d32; }
+.notif-amber { background: #fff8e1; color: #92400e; }
+.notif-red { background: #ffebee; color: #c62828; }
+
+/* Truck profile header */
+.truck-hero {
+  background: linear-gradient(135deg, var(--navy) 0%, #1a3a5c 100%);
+  padding: 20px;
+  color: white;
+}
+.truck-icon-row { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.truck-icon-big { font-size: 44px; }
+.truck-name { font-size: 20px; font-weight: 900; letter-spacing: -0.3px; }
+.truck-sub { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+.truck-stats { display: flex; gap: 0; }
+.truck-stat { flex: 1; text-align: center; padding: 10px 0; border-right: 1px solid rgba(255,255,255,0.1); }
+.truck-stat:last-child { border-right: none; }
+.truck-stat .val { font-size: 18px; font-weight: 800; }
+.truck-stat .val.orange { color: var(--orange); }
+.truck-stat .val.green { color: var(--green); }
+.truck-stat .val.amber { color: var(--amber); }
+.truck-stat .lbl { font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.3px; }
+
+/* Tab bar */
+.tab-bar {
+  display: flex;
+  background: white;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 56px;
+  z-index: 99;
+}
+.tab { flex: 1; padding: 12px 8px; text-align: center; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; }
+.tab.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+/* Service log items */
+.service-item {
+  background: white; border-radius: 12px;
+  padding: 14px 16px; margin-bottom: 10px;
+  border: 1px solid var(--border);
+  cursor: pointer; transition: transform 0.1s;
+}
+.service-item:active { transform: scale(0.99); }
+.service-type { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+.service-meta { font-size: 12px; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; }
+.service-meta span { display: flex; align-items: center; gap: 3px; }
+
+/* Reminder cards */
+.reminder-card {
+  background: white; border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden; margin-bottom: 10px;
+}
+.reminder-header {
+  padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+.reminder-header .name { font-size: 14px; font-weight: 700; color: var(--navy); }
+.reminder-body { padding: 12px 16px; }
+.reminder-progress { height: 6px; background: var(--border); border-radius: 3px; margin: 10px 0 6px; overflow: hidden; }
+.reminder-fill { height: 100%; border-radius: 3px; }
+.reminder-fill.green { background: var(--green); }
+.reminder-fill.amber { background: var(--amber); }
+.reminder-fill.red { background: var(--red); }
+.reminder-detail { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+
+/* Document items */
+.doc-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 16px; border-bottom: 1px solid var(--border);
+  cursor: pointer; background: white;
+}
+.doc-item:last-child { border-bottom: none; }
+.doc-item:active { background: #f9fafb; }
+.doc-icon { font-size: 28px; flex-shrink: 0; width: 36px; text-align: center; }
+.doc-name { flex: 1; }
+.doc-name .title { font-size: 14px; font-weight: 700; color: var(--navy); }
+.doc-name .sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.doc-status { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+
+.upload-zone { border: 2px dashed var(--border); border-radius: 12px; padding: 20px; text-align: center; background: #fafbfc; cursor: pointer; margin-bottom: 12px; }
+.upload-zone:hover { border-color: var(--orange); }
+
+.success-hero { text-align: center; padding: 40px 24px 24px; }
+.success-icon { font-size: 60px; margin-bottom: 14px; }
+.success-title { font-size: 22px; font-weight: 800; color: var(--navy); }
+.success-sub { font-size: 14px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+
+/* Mileage vs date toggle */
+.type-toggle {
+  display: flex; gap: 0; background: var(--bg);
+  border-radius: 10px; padding: 3px; margin-bottom: 16px; border: 1px solid var(--border);
+}
+.type-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; background: none; color: var(--muted); transition: all 0.15s; }
+.type-btn.active { background: white; color: var(--navy); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+</style>
+</head>
+<body>
+<div class="outer">
+  <div class="topbar">
+    <button class="back-btn" id="backBtn" onclick="goBack()">←</button>
+    <div class="logo">Carrier<span>OS</span></div>
+    <div class="subtitle" id="topSub">Maintenance</div>
+  </div>
+
+  <div class="content">
+
+    <!-- ===== SCREEN 1: TRUCK PROFILE ===== -->
+    <div class="screen active" id="screen-profile">
+      <div class="truck-hero">
+        <div class="truck-icon-row">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnXnVrRc27L3aHApsHOKdsfyeSYyvi11VKPHL-8CC1EVayK643nW7sbYLgw_IERbTHn8jHDoZkRFMuJQ2lC9Jhdc7T3gF0FbZODI2ft3YZtxW5-C327snVTkwKYSJNPFkZR4PxCjBkbbcVyo4yrlvshEFymkU3-4DTSjB9mn_SPzfDLcnTJCpMiIPoWiLsAX4pNOWkK8HHrrk2YyYo1qashVrtgfhJzLn8yvcvExsT5WyOGA7yOfS93sQQkKAvEkI-gMPbeprI21c" style="width:64px;height:44px;border-radius:8px;object-fit:cover;object-position:center 40%;" alt="Big Blue">
+          <div>
+            <div class="truck-name">Truck #101</div>
+            <div class="truck-sub">2021 Kenworth T680 · Plate: OH-TRK101</div>
+          </div>
+        </div>
+        <div class="truck-stats">
+          <div class="truck-stat">
+            <div class="val orange">142,450</div>
+            <div class="lbl">Miles</div>
+          </div>
+          <div class="truck-stat">
+            <div class="val amber">2</div>
+            <div class="lbl">Due Soon</div>
+          </div>
+          <div class="truck-stat">
+            <div class="val green">✓</div>
+            <div class="lbl">Docs OK</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab active" onclick="showTab('tab-service')">Service Log</div>
+        <div class="tab" onclick="showTab('tab-reminders')">Reminders</div>
+        <div class="tab" onclick="showTab('tab-docs')">Truck Docs</div>
+        <div class="tab" onclick="showTab('tab-company')">Company</div>
+      </div>
+
+      <!-- SERVICE LOG TAB -->
+      <div id="tab-service" style="padding:16px;">
+        <div class="row-between mb-12">
+          <div style="font-size:14px;font-weight:700;color:var(--navy);">Service History</div>
+          <button class="btn-sm btn-primary" onclick="goto('screen-add-service')">+ Log Service</button>
+        </div>
+
+        <div class="service-item" onclick="goto('screen-service-detail')">
+          <div class="row-between mb-8">
+            <div class="service-type">🔧 Oil Change</div>
+            <span class="pill pill-blue">$145</span>
+          </div>
+          <div class="service-meta">
+            <span>📅 Jun 28, 2026</span>
+            <span>🔢 142,200 mi</span>
+            <span>🏪 Loves Travel Stop</span>
+          </div>
+        </div>
+
+        <div class="service-item" onclick="goto('screen-service-detail')">
+          <div class="row-between mb-8">
+            <div class="service-type">⭕ Tire Replacement</div>
+            <span class="pill pill-blue">$380</span>
+          </div>
+          <div class="service-meta">
+            <span>📅 Jun 3, 2026</span>
+            <span>🔢 138,900 mi</span>
+            <span>🏪 TA Truck Service</span>
+          </div>
+        </div>
+
+        <div class="service-item" onclick="goto('screen-service-detail')">
+          <div class="row-between mb-8">
+            <div class="service-type">🛑 Brake Inspection</div>
+            <span class="pill pill-blue">$220</span>
+          </div>
+          <div class="service-meta">
+            <span>📅 May 14, 2026</span>
+            <span>🔢 134,500 mi</span>
+            <span>🏪 Petro Stopping Center</span>
+          </div>
+        </div>
+
+        <div class="service-item" onclick="goto('screen-service-detail')">
+          <div class="row-between mb-8">
+            <div class="service-type">🔧 Oil Change</div>
+            <span class="pill pill-blue">$145</span>
+          </div>
+          <div class="service-meta">
+            <span>📅 Apr 5, 2026</span>
+            <span>🔢 130,100 mi</span>
+            <span>🏪 Pilot Flying J</span>
+          </div>
+        </div>
+
+        <div style="text-align:center;margin-top:4px;">
+          <div style="font-size:13px;color:var(--muted);">Total maintenance spend: <strong style="color:var(--navy);">$2,840</strong></div>
+        </div>
+      </div>
+
+      <!-- REMINDERS TAB -->
+      <div id="tab-reminders" style="padding:16px;display:none;">
+        <div class="row-between mb-12">
+          <div style="font-size:14px;font-weight:700;color:var(--navy);">Maintenance Reminders</div>
+          <button class="btn-sm btn-primary" onclick="goto('screen-add-reminder')">+ Add</button>
+        </div>
+
+        <!-- Due soon -->
+        <div class="notif notif-amber">⚠️ 2 reminders coming up soon</div>
+
+        <div class="reminder-card">
+          <div class="reminder-header">
+            <div class="name">🔧 Oil Change</div>
+            <span class="pill pill-amber">Due in 550 mi</span>
+          </div>
+          <div class="reminder-body">
+            <div class="row-between" style="font-size:13px;color:var(--text);">
+              <span>Every <strong>5,000 miles</strong></span>
+              <span style="color:var(--muted);">Next: 143,000 mi</span>
+            </div>
+            <div class="reminder-progress"><div class="reminder-fill amber" style="width:89%"></div></div>
+            <div class="reminder-detail"><span>Last: 142,200 mi</span><span>Current: 142,450 mi</span></div>
+          </div>
+        </div>
+
+        <div class="reminder-card">
+          <div class="reminder-header">
+            <div class="name">📋 DOT Annual Inspection</div>
+            <span class="pill pill-amber">Due in 28 days</span>
+          </div>
+          <div class="reminder-body">
+            <div class="row-between" style="font-size:13px;color:var(--text);">
+              <span>Every <strong>12 months</strong></span>
+              <span style="color:var(--muted);">Expires: Jul 31, 2026</span>
+            </div>
+            <div class="reminder-progress"><div class="reminder-fill amber" style="width:92%"></div></div>
+            <div class="reminder-detail"><span>Last: Jul 31, 2025</span><span>28 days left</span></div>
+          </div>
+        </div>
+
+        <div class="reminder-card">
+          <div class="reminder-header">
+            <div class="name">⭕ Tire Rotation</div>
+            <span class="pill pill-green">OK</span>
+          </div>
+          <div class="reminder-body">
+            <div class="row-between" style="font-size:13px;color:var(--text);">
+              <span>Every <strong>25,000 miles</strong></span>
+              <span style="color:var(--muted);">Next: 163,900 mi</span>
+            </div>
+            <div class="reminder-progress"><div class="reminder-fill green" style="width:27%"></div></div>
+            <div class="reminder-detail"><span>Last: 138,900 mi</span><span>21,450 mi to go</span></div>
+          </div>
+        </div>
+
+        <div class="reminder-card">
+          <div class="reminder-header">
+            <div class="name">📝 Registration Renewal</div>
+            <span class="pill pill-green">OK</span>
+          </div>
+          <div class="reminder-body">
+            <div class="row-between" style="font-size:13px;color:var(--text);">
+              <span>Every <strong>12 months</strong></span>
+              <span style="color:var(--muted);">Expires: Dec 15, 2026</span>
+            </div>
+            <div class="reminder-progress"><div class="reminder-fill green" style="width:45%"></div></div>
+            <div class="reminder-detail"><span>Renewed: Dec 15, 2025</span><span>165 days left</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DOCUMENTS TAB -->
+      <div id="tab-docs" style="display:none;">
+        <div style="padding:16px 16px 8px;display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:14px;font-weight:700;color:var(--navy);">Truck Documents</div>
+          <button class="btn-sm btn-primary" onclick="goto('screen-upload-doc')">+ Upload</button>
+        </div>
+        <div style="background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;margin:0 16px 12px;">
+          <div class="doc-item" onclick="goto('screen-view-doc')">
+            <div class="doc-icon">📄</div>
+            <div class="doc-name">
+              <div class="title">Vehicle Registration</div>
+              <div class="sub">Expires Dec 15, 2026 · Uploaded Jun 1</div>
+            </div>
+            <div class="doc-status">
+              <span class="pill pill-green">✓ Valid</span>
+              <span style="font-size:11px;color:var(--muted);">165d left</span>
+            </div>
+          </div>
+          <div class="doc-item" onclick="goto('screen-view-doc')">
+            <div class="doc-icon">🛡️</div>
+            <div class="doc-name">
+              <div class="title">Insurance Certificate</div>
+              <div class="sub">Expires Nov 1, 2026 · Uploaded May 2</div>
+            </div>
+            <div class="doc-status">
+              <span class="pill pill-green">✓ Valid</span>
+              <span style="font-size:11px;color:var(--muted);">121d left</span>
+            </div>
+          </div>
+          <div class="doc-item" onclick="goto('screen-view-doc')">
+            <div class="doc-icon">🚔</div>
+            <div class="doc-name">
+              <div class="title">DOT Operating Authority</div>
+              <div class="sub">MC-448291 · No expiry · Uploaded Jan 10</div>
+            </div>
+            <div class="doc-status">
+              <span class="pill pill-blue">Permanent</span>
+            </div>
+          </div>
+          <div class="doc-item" onclick="goto('screen-view-doc')">
+            <div class="doc-icon">📋</div>
+            <div class="doc-name">
+              <div class="title">DOT Annual Inspection</div>
+              <div class="sub">Expires Jul 31, 2026 · Uploaded Aug 1, 2025</div>
+            </div>
+            <div class="doc-status">
+              <span class="pill pill-amber">Due Soon</span>
+              <span style="font-size:11px;color:var(--amber);">28d left</span>
+            </div>
+          </div>
+        </div>
+        <div style="padding:0 16px;">
+          <div style="background:#e3f2fd;border-radius:10px;padding:12px 14px;font-size:13px;color:#1565c0;">
+            💡 Tap any document to view, share, or replace it. All docs are accessible from your truck profile at any roadside inspection.
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPANY DOCS TAB -->
+      <div id="tab-company" style="display:none;padding:16px;">
+        <div style="background:#fff8e1;border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#92400e;border-left:3px solid #f0a500;">
+          ⚠️ <strong>1 document expiring soon</strong> — Cargo Insurance renews Aug 15, 2026.
+        </div>
+        <div style="font-size:12px;font-weight:800;color:#6b7280;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Insurance</div>
+        <div style="background:white;border-radius:14px;border:1px solid #e5e7eb;overflow:hidden;margin-bottom:16px;">
+          <div class="doc-item" onclick="goto('screen-company-doc-view')">
+            <div class="doc-icon">🛡️</div>
+            <div class="doc-name"><div class="title">Cargo Insurance (COI)</div><div class="sub">Policy #INS-884412 · Applied fleet-wide</div></div>
+            <div class="doc-status"><span class="pill pill-amber">Due Soon</span><span style="font-size:11px;color:#6b7280;">Aug 15, 2026</span></div>
+          </div>
+          <div class="doc-item">
+            <div class="doc-icon">⚖️</div>
+            <div class="doc-name"><div class="title">General Liability</div><div class="sub">Policy #GL-229041 · $1M / $2M</div></div>
+            <div class="doc-status"><span class="pill pill-green">Valid</span><span style="font-size:11px;color:#6b7280;">Mar 2027</span></div>
+          </div>
+          <div class="doc-item" style="border-bottom:none;">
+            <div class="doc-icon">🏥</div>
+            <div class="doc-name"><div class="title">Workers' Comp</div><div class="sub">Not uploaded yet</div></div>
+            <div class="doc-status"><span class="pill pill-gray">Missing</span></div>
+          </div>
+        </div>
+        <div style="font-size:12px;font-weight:800;color:#6b7280;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Operating Authority</div>
+        <div style="background:white;border-radius:14px;border:1px solid #e5e7eb;overflow:hidden;margin-bottom:16px;">
+          <div class="doc-item">
+            <div class="doc-icon">🚔</div>
+            <div class="doc-name"><div class="title">MC Authority Letter</div><div class="sub">MC# 1284902 · FMCSA Active</div></div>
+            <div class="doc-status"><span class="pill pill-gray">Permanent</span></div>
+          </div>
+          <div class="doc-item">
+            <div class="doc-icon">🆔</div>
+            <div class="doc-name"><div class="title">DOT Operating Certificate</div><div class="sub">USDOT# 4821033</div></div>
+            <div class="doc-status"><span class="pill pill-gray">Permanent</span></div>
+          </div>
+          <div class="doc-item" style="border-bottom:none;">
+            <div class="doc-icon">📋</div>
+            <div class="doc-name"><div class="title">Unified Carrier Registration</div><div class="sub">UCR Biennia · 2025–2026</div></div>
+            <div class="doc-status"><span class="pill pill-green">Valid</span><span style="font-size:11px;color:#6b7280;">Dec 2026</span></div>
+          </div>
+        </div>
+        <div style="font-size:12px;font-weight:800;color:#6b7280;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Tax & Business</div>
+        <div style="background:white;border-radius:14px;border:1px solid #e5e7eb;overflow:hidden;margin-bottom:16px;">
+          <div class="doc-item">
+            <div class="doc-icon">📑</div>
+            <div class="doc-name"><div class="title">W-9 / EIN Confirmation</div><div class="sub">EIN ending ···4821</div></div>
+            <div class="doc-status"><span class="pill pill-gray">Permanent</span></div>
+          </div>
+          <div class="doc-item" style="border-bottom:none;">
+            <div class="doc-icon">🏢</div>
+            <div class="doc-name"><div class="title">Business License</div><div class="sub">Not uploaded yet</div></div>
+            <div class="doc-status"><span class="pill pill-gray">Optional</span></div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="goto('screen-upload-company-doc')">+ Upload Company Document</button>
+      </div>
+
+    </div><!-- /screen-profile -->
+
+    <!-- ===== SCREEN 2: ADD SERVICE ENTRY ===== -->
+    <div class="screen" id="screen-add-service">
+      <div class="hero">
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Truck #101</div>
+        <h2>Log Service Entry</h2>
+        <p>Record any maintenance or repair</p>
+      </div>
+      <div style="padding:16px;">
+        <div class="card">
+          <div class="card-title">Service Details</div>
+          <div class="field">
+            <label class="label">Service Type</label>
+            <select class="input">
+              <option>Oil Change</option>
+              <option>Tire Replacement / Rotation</option>
+              <option>Brake Service</option>
+              <option>DOT Inspection</option>
+              <option>Engine Repair</option>
+              <option>Transmission</option>
+              <option>Electrical / Lights</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="input-row">
+            <div class="field">
+              <label class="label">Date</label>
+              <input class="input" type="date" value="2026-07-03">
+            </div>
+            <div class="field">
+              <label class="label">Mileage</label>
+              <input class="input" placeholder="142,450" type="number">
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Cost ($)</label>
+            <input class="input" placeholder="0.00" type="number">
+          </div>
+          <div class="field">
+            <label class="label">Shop / Location</label>
+            <input class="input" placeholder="e.g. Loves Travel Stop, Chicago">
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label class="label">Notes <span style="font-weight:400;color:var(--muted);">(optional)</span></label>
+            <input class="input" placeholder="e.g. Changed oil filter as well">
+          </div>
+        </div>
+
+        <div class="upload-zone mb-12" onclick="goto('screen-add-service')">
+          <div style="font-size:28px;margin-bottom:6px;">📎</div>
+          <div style="font-size:13px;font-weight:600;color:var(--navy);">Attach Receipt</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;">Optional — photo or PDF</div>
+        </div>
+
+        <button class="btn btn-primary mb-8" onclick="goto('screen-service-saved')">Save Service Entry →</button>
+        <button class="btn btn-outline" onclick="goBack()">← Cancel</button>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 3: SERVICE SAVED ===== -->
+    <div class="screen" id="screen-service-saved">
+      <div class="success-hero">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Service Logged</div>
+        <div class="success-sub">Oil Change · 142,450 mi · Jul 3, 2026<br>$145 · Loves Travel Stop</div>
+      </div>
+      <div style="padding:0 16px;">
+        <div class="notif notif-green">🔔 Oil change reminder reset — next due at 147,450 miles</div>
+        <div class="card">
+          <div class="card-title">Mileage Update</div>
+          <div style="font-size:14px;color:var(--text);line-height:1.6;">
+            Current mileage updated to <strong>142,450 mi</strong>. Your oil change reminder has been automatically reset to next trigger at <strong>147,450 mi</strong>.
+          </div>
+        </div>
+        <button class="btn btn-primary mb-8" onclick="goto('screen-profile')">← Back to Truck Profile</button>
+        <button class="btn btn-outline" onclick="goto('screen-add-service')">Log Another Service</button>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 4: ADD REMINDER ===== -->
+    <div class="screen" id="screen-add-reminder">
+      <div class="hero">
+        <h2>Add Reminder</h2>
+        <p>Set a mileage or date-based reminder for Truck #101</p>
+      </div>
+      <div style="padding:16px;">
+
+        <div class="type-toggle">
+          <button class="type-btn active" id="typeMile" onclick="toggleType('mile')">📏 By Mileage</button>
+          <button class="type-btn" id="typeDate" onclick="toggleType('date')">📅 By Date</button>
+        </div>
+
+        <!-- Mileage form -->
+        <div id="form-mile">
+          <div class="card">
+            <div class="card-title">Mileage Reminder</div>
+            <div class="field">
+              <label class="label">Reminder Type</label>
+              <select class="input">
+                <option>Oil Change</option>
+                <option>Tire Rotation</option>
+                <option>Brake Inspection</option>
+                <option>Transmission Service</option>
+                <option>Custom…</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="label">Interval (miles)</label>
+              <input class="input" value="5,000" placeholder="e.g. 5000">
+              <div style="font-size:12px;color:var(--muted);margin-top:4px;">Reminder fires every X miles from last service</div>
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label class="label">Next trigger at (miles)</label>
+              <input class="input" value="147,450" placeholder="Auto-calculated">
+              <div style="font-size:12px;color:var(--muted);margin-top:4px;">Auto-calculated from current mileage (142,450)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Date form (hidden by default) -->
+        <div id="form-date" style="display:none;">
+          <div class="card">
+            <div class="card-title">Date Reminder</div>
+            <div class="field">
+              <label class="label">Reminder Type</label>
+              <select class="input">
+                <option>DOT Annual Inspection</option>
+                <option>Vehicle Registration Renewal</option>
+                <option>Insurance Renewal</option>
+                <option>Custom…</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="label">Due Date</label>
+              <input class="input" type="date" value="2026-07-31">
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label class="label">Alert me before</label>
+              <select class="input">
+                <option>30 days before</option>
+                <option>14 days before</option>
+                <option>7 days before</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#e3f2fd;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#1565c0;">
+          📲 You'll get a push notification + email when this reminder is due
+        </div>
+
+        <button class="btn btn-primary mb-8" onclick="goto('screen-reminder-saved')">Save Reminder →</button>
+        <button class="btn btn-outline" onclick="goBack()">← Cancel</button>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 5: REMINDER SAVED ===== -->
+    <div class="screen" id="screen-reminder-saved">
+      <div class="success-hero">
+        <div class="success-icon">🔔</div>
+        <div class="success-title">Reminder Set</div>
+        <div class="success-sub">Oil Change · Every 5,000 miles<br>Next due: 147,450 miles</div>
+      </div>
+      <div style="padding:0 16px;">
+        <div class="notif notif-green">You'll be notified when Truck #101 reaches 147,000 miles (500 mi warning)</div>
+        <button class="btn btn-primary mb-8" onclick="goto('screen-profile')">← Back to Truck Profile</button>
+        <button class="btn btn-outline" onclick="goto('screen-add-reminder')">Add Another Reminder</button>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 6: UPLOAD DOCUMENT ===== -->
+    <div class="screen" id="screen-upload-doc">
+      <div class="hero">
+        <h2>Upload Document</h2>
+        <p>Truck #101 — store registration, insurance, DOT docs</p>
+      </div>
+      <div style="padding:16px;">
+        <div class="card">
+          <div class="card-title">Document Type</div>
+          <div style="background:var(--bg);border-radius:14px;border:1px solid var(--border);overflow:hidden;">
+            <div onclick="" style="padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:12px;">
+              <span style="font-size:24px;">📄</span>
+              <div style="font-weight:700;color:var(--navy);font-size:14px;">Vehicle Registration</div>
+              <span style="color:var(--muted);margin-left:auto;">›</span>
+            </div>
+            <div onclick="" style="padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:12px;">
+              <span style="font-size:24px;">🛡️</span>
+              <div style="font-weight:700;color:var(--navy);font-size:14px;">Insurance Certificate</div>
+              <span style="color:var(--muted);margin-left:auto;">›</span>
+            </div>
+            <div onclick="" style="padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:12px;">
+              <span style="font-size:24px;">🚔</span>
+              <div style="font-weight:700;color:var(--navy);font-size:14px;">DOT Operating Authority</div>
+              <span style="color:var(--muted);margin-left:auto;">›</span>
+            </div>
+            <div onclick="" style="padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;">
+              <span style="font-size:24px;">📁</span>
+              <div style="font-weight:700;color:var(--navy);font-size:14px;">Other Document</div>
+              <span style="color:var(--muted);margin-left:auto;">›</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="upload-zone">
+          <div style="font-size:36px;margin-bottom:10px;">📸</div>
+          <div style="font-size:14px;font-weight:600;color:var(--navy);">Take photo or upload file</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">PDF, JPG, or PNG · Max 10MB</div>
+        </div>
+
+        <div class="field">
+          <label class="label">Expiry Date <span style="font-weight:400;color:var(--muted);">(if applicable)</span></label>
+          <input class="input" type="date" placeholder="Leave blank if no expiry">
+        </div>
+
+        <button class="btn btn-primary mb-8" onclick="goto('screen-doc-saved')">Upload Document →</button>
+        <button class="btn btn-outline" onclick="goBack()">← Cancel</button>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 7: DOC SAVED ===== -->
+    <div class="screen" id="screen-doc-saved">
+      <div class="success-hero">
+        <div class="success-icon">📄</div>
+        <div class="success-title">Document Saved</div>
+        <div class="success-sub">Vehicle Registration · Truck #101<br>Expires Dec 15, 2026</div>
+      </div>
+      <div style="padding:0 16px;">
+        <div class="notif notif-green">🔔 Reminder set — you'll be alerted 30 days before expiry (Nov 15)</div>
+        <div class="card">
+          <div style="font-size:14px;color:var(--text);line-height:1.6;">
+            This document is now stored in your truck profile and available to view instantly — including at roadside inspections.
+          </div>
+        </div>
+        <button class="btn btn-primary mb-8" onclick="goto('screen-profile')">← Back to Truck Profile</button>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN: SERVICE DETAIL ===== -->
+    <div class="screen" id="screen-service-detail">
+      <div style="padding:16px;">
+        <div class="card">
+          <div class="card-title">Service Entry</div>
+          <div style="font-size:18px;font-weight:800;color:var(--navy);margin-bottom:12px;">🔧 Oil Change</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;font-size:14px;">
+              <span style="color:var(--muted);">Date</span><span style="font-weight:600;">Jun 28, 2026</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:14px;">
+              <span style="color:var(--muted);">Mileage</span><span style="font-weight:600;">142,200 miles</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:14px;">
+              <span style="color:var(--muted);">Cost</span><span style="font-weight:600;color:var(--orange);">$145.00</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:14px;">
+              <span style="color:var(--muted);">Shop</span><span style="font-weight:600;">Loves Travel Stop</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:14px;">
+              <span style="color:var(--muted);">Notes</span><span style="font-weight:600;">Synthetic 15W-40, filter changed</span>
+            </div>
+          </div>
+        </div>
+        <div style="background:#f8fafc;border-radius:12px;border:1px solid var(--border);padding:14px;text-align:center;margin-bottom:16px;cursor:pointer;">
+          <div style="font-size:24px;margin-bottom:4px;">🧾</div>
+          <div style="font-size:13px;font-weight:600;color:var(--navy);">Receipt attached</div>
+          <div style="font-size:11px;color:var(--muted);">Tap to view</div>
+        </div>
+        <button class="btn btn-outline" onclick="goBack()">← Back</button>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN: VIEW DOC ===== -->
+    <div class="screen" id="screen-view-doc">
+      <div style="padding:16px;">
+        <div class="card" style="text-align:center;padding:24px;">
+          <div style="font-size:48px;margin-bottom:12px;">📄</div>
+          <div style="font-size:17px;font-weight:800;color:var(--navy);margin-bottom:4px;">Vehicle Registration</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:16px;">Truck #101 · Expires Dec 15, 2026</div>
+          <div style="background:var(--bg);border-radius:10px;padding:16px;margin-bottom:16px;">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Document preview</div>
+            <div style="font-size:28px;">🗒️</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;">Registration_OH_TRK101.pdf</div>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-primary" style="flex:1;padding:11px;font-size:13px;">📤 Share</button>
+            <button class="btn btn-outline" style="flex:1;padding:11px;font-size:13px;border-color:var(--red);color:var(--red);">🔄 Replace</button>
+          </div>
+        </div>
+        <button class="btn btn-outline" onclick="goBack()">← Back</button>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-upload-company-doc">
+      <div class="hero">
+        <h2>Upload Company Document</h2>
+        <p>Rivera Trucking — stored at the company level, applies fleet-wide</p>
+      </div>
+      <div style="padding:16px;">
+        <div class="card">
+          <div class="card-title">Document Type</div>
+          <div style="background:var(--bg);border-radius:14px;border:1px solid var(--border);overflow:hidden;">
+            <div style="padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:12px;" onclick="setCompanyDocType(this,'Cargo Insurance (COI)')">
+              <span style="font-size:22px;">🛡️</span>
+              <div style="font-weight:700;color:var(--navy);font-size:14px;">Cargo Insurance (COI)</div>
+              <span style="color:var(--muted);margin-left:auto;">›</span>
+            </div>
+            <div style="padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:12px;" onclick="setCompanyDocType(this,'General Liability Insurance')">
+              <span style="font-size:22px;">⚖️</span>
+              <div style="font-weight:700;color:var(--navy);font-size:14px;">General Liability Insurance</div>
+              <span style="color:var(--muted);margin-left:auto;">›</span>
+            </div>
+            <div style="padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:12px;" onclick="setCompanyDocType(this,'MC Authority Letter')">
+              <span style="font-size:22px;">🚔</span>
+              <div style="font-weight:700;color:var(--navy);font-size:14px;">MC Authority Letter</div>
+              <span style="color:var(--muted);margin-left:auto;">›</span>
+            </div>
+            <div style="padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:12px;" onclick="setCompanyDocType(this,'W-9 / EIN Confirmation')">
+              <span style="font-size:22px;">📑</span>
+              <div style="font-weight:700;color:var(--navy);font-size:14px;">W-9 / EIN Confirmation</div>
+              <span style="color:var(--muted);margin-left:auto;">›</span>
+            </div>
+            <div style="padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;" onclick="setCompanyDocType(this,'Other')">
+              <span style="font-size:22px;">📁</span>
+              <div style="font-weight:700;color:var(--navy);font-size:14px;">Other</div>
+              <span style="color:var(--muted);margin-left:auto;">›</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="upload-zone" onclick="this.innerHTML='<div style=\'font-size:28px\'>✅</div><div style=\'font-size:13px;font-weight:700;color:#2e7d32;margin-top:6px\'>cargo-insurance-2026.pdf uploaded</div>'">
+          <div style="font-size:36px;margin-bottom:10px;">📸</div>
+          <div style="font-size:14px;font-weight:600;color:var(--navy);">Take photo or upload file</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">PDF, JPG, or PNG · Max 10MB</div>
+        </div>
+
+        <div class="field">
+          <label class="label">Policy / Reference Number (optional)</label>
+          <input class="input" placeholder="e.g. INS-884412">
+        </div>
+
+        <div class="field">
+          <label class="label">Coverage Amount (optional)</label>
+          <input class="input" placeholder="e.g. $100,000 cargo">
+        </div>
+
+        <div class="field">
+          <label class="label">Expiry Date <span style="font-weight:400;color:var(--muted);">(leave blank if permanent)</span></label>
+          <input class="input" type="date" value="2026-08-15">
+        </div>
+
+        <button class="btn btn-primary mb-8" onclick="goto('screen-company-doc-saved')">Upload Document →</button>
+        <button class="btn btn-outline" onclick="goBack()">← Cancel</button>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN: COMPANY DOC SAVED ===== -->
+    <div class="screen" id="screen-company-doc-saved">
+      <div class="success-hero">
+        <div class="success-icon">🛡️</div>
+        <div class="success-title">Document Saved</div>
+        <div class="success-sub">Cargo Insurance (COI)<br>Rivera Trucking · Expires Aug 15, 2026</div>
+      </div>
+      <div style="padding:0 16px;">
+        <div class="notif notif-green">🔔 Reminder set — you'll be alerted 30 days before renewal (Jul 15)</div>
+        <div class="card">
+          <div style="font-size:14px;color:var(--text);line-height:1.6;">
+            This document applies to your entire fleet. All trucks under Rivera Trucking are covered by this COI.
+          </div>
+        </div>
+        <button class="btn btn-primary mb-8" onclick="goto('screen-profile');showTab('tab-company')">← Back to Company Docs</button>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN: VIEW COMPANY DOC ===== -->
+    <div class="screen" id="screen-company-doc-view">
+      <div style="padding:16px;">
+        <div class="card" style="text-align:center;padding:24px;">
+          <div style="font-size:48px;margin-bottom:12px;">🛡️</div>
+          <div style="font-size:17px;font-weight:800;color:var(--navy);margin-bottom:4px;">Cargo Insurance (COI)</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">Rivera Trucking · Policy #INS-884412</div>
+          <span class="pill pill-amber" style="margin-bottom:16px;display:inline-block;">Expires Aug 15, 2026 — 43 days</span>
+          <div style="background:var(--bg);border-radius:10px;padding:16px;margin-bottom:16px;text-align:left;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span style="color:var(--muted);">Coverage</span><span style="font-weight:700;">$100,000 cargo</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span style="color:var(--muted);">Provider</span><span style="font-weight:700;">Great West Casualty</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span style="color:var(--muted);">Applies to</span><span style="font-weight:700;">All trucks (fleet)</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span style="color:var(--muted);">Renewed</span><span style="font-weight:700;">Aug 15, 2025</span></div>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-primary" style="flex:1;padding:11px;font-size:13px;">📤 Share / Email</button>
+            <button class="btn btn-outline" style="flex:1;padding:11px;font-size:13px;border-color:#e74c3c;color:#e74c3c;">🔄 Replace</button>
+          </div>
+        </div>
+        <button class="btn btn-outline" onclick="goBack()">← Back</button>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div>
+
+<script>
+const navHistory = ['screen-profile'];
+
+function goto(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  navHistory.push(id);
+  document.getElementById('backBtn').classList.toggle('visible', navHistory.length > 1);
+  window.scrollTo(0,0);
+}
+
+function goBack() {
+  if (navHistory.length > 1) {
+    navHistory.pop();
+    const prev = navHistory[navHistory.length-1];
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(prev).classList.add('active');
+    window.scrollTo(0,0);
+  }
+}
+
+function showTab(tabId) {
+  ['tab-service','tab-reminders','tab-docs','tab-company'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  document.getElementById(tabId).style.display = 'block';
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['tab-service','tab-reminders','tab-docs','tab-company'][i] === tabId);
+  });
+}
+
+function setCompanyDocType(el, type) {
+  el.closest('.card').querySelectorAll('div[onclick]').forEach(d => d.style.background = '');
+  el.style.background = '#fff9f5';
+}
+
+function toggleType(type) {
+  document.getElementById('typeMile').classList.toggle('active', type === 'mile');
+  document.getElementById('typeDate').classList.toggle('active', type === 'date');
+  document.getElementById('form-mile').style.display = type === 'mile' ? 'block' : 'none';
+  document.getElementById('form-date').style.display = type === 'date' ? 'block' : 'none';
+}
+</script>
+</body>
+</html>

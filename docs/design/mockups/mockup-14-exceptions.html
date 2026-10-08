@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarrierOS — Mockup 14: Exception Management</title>
+<style>
+  :root {
+    --navy: #0f1e35;
+    --navy-light: #1a2e4a;
+    --orange: #f47920;
+    --green: #2ecc71;
+    --teal: #1abc9c;
+    --amber: #f0a500;
+    --red: #e74c3c;
+    --bg: #f4f6f9;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #1e1e2e; display: flex; flex-direction: column; align-items: center; padding: 24px 16px; min-height: 100vh; }
+
+  h1 { color: #fff; font-size: 22px; margin-bottom: 4px; }
+  .subtitle { color: rgba(255,255,255,0.6); font-size: 13px; margin-bottom: 28px; }
+
+  /* Screen grid */
+  .screen-grid { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; max-width: 1400px; }
+
+  /* Phone shell */
+  .phone { width: 390px; flex-shrink: 0; }
+  .phone-label { color: rgba(255,255,255,0.5); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; text-align: center; }
+  .phone-screen { background: var(--bg); border-radius: 28px; overflow: hidden; height: 780px; display: flex; flex-direction: column; box-shadow: 0 24px 64px rgba(0,0,0,0.5); position: relative; }
+
+  /* Status bar */
+  .status-bar { background: var(--navy); color: #fff; display: flex; justify-content: space-between; align-items: center; padding: 14px 20px 10px; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+
+  /* Nav header */
+  .nav-header { background: var(--navy); color: #fff; padding: 12px 16px 14px; flex-shrink: 0; }
+  .nav-header .back { font-size: 13px; color: var(--orange); margin-bottom: 4px; cursor: pointer; }
+  .nav-header h2 { font-size: 20px; font-weight: 700; }
+  .nav-header .sub { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+
+  /* Scrollable content */
+  .scroll-area { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .scroll-area::-webkit-scrollbar { width: 0; }
+
+  /* Section headers */
+  .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); padding: 4px 0 2px; }
+
+  /* Cards */
+  .card { background: var(--card); border-radius: 14px; padding: 13px 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+
+  /* Exception cards */
+  .exc-card { background: var(--card); border-radius: 12px; padding: 12px 13px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); display: flex; align-items: flex-start; gap: 11px; }
+  .exc-card .exc-icon { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .exc-card.urgent .exc-icon { background: #fde8e8; }
+  .exc-card.warning .exc-icon { background: #fef3cd; }
+  .exc-card.info .exc-icon { background: #dbeafe; }
+  .exc-card .exc-body { flex: 1; min-width: 0; }
+  .exc-card .exc-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .exc-card .exc-desc { font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .exc-card .exc-meta { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .exc-card .exc-cta { background: var(--navy); color: #fff; border: none; border-radius: 7px; padding: 5px 10px; font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap; margin-top: 2px; align-self: flex-start; }
+  .exc-card.urgent .exc-cta { background: var(--red); }
+  .exc-card.warning .exc-cta { background: var(--amber); color: var(--text); }
+
+  /* Urgency dot */
+  .urgency-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .dot-red { background: var(--red); }
+  .dot-amber { background: var(--amber); }
+  .dot-blue { background: #60a5fa; }
+
+  /* Section group */
+  .exc-group { display: flex; flex-direction: column; gap: 8px; }
+  .exc-group-header { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+  .exc-group-header .gh-badge { background: var(--red); color: #fff; border-radius: 99px; font-size: 10px; font-weight: 700; padding: 1px 7px; }
+  .exc-group-header .gh-badge.amber { background: var(--amber); color: var(--text); }
+  .exc-group-header .gh-badge.blue { background: #3b82f6; }
+
+  /* All clear state */
+  .all-clear { background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 12px; padding: 14px; display: flex; align-items: center; gap: 10px; }
+  .all-clear .ac-icon { font-size: 22px; }
+  .all-clear .ac-text { font-size: 13px; font-weight: 600; color: #166534; }
+  .all-clear .ac-sub { font-size: 11px; color: #4ade80; margin-top: 2px; }
+
+  /* Bottom tab bar */
+  .tab-bar { background: var(--navy); display: flex; justify-content: space-around; padding: 10px 0 16px; flex-shrink: 0; }
+  .tab-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; color: rgba(255,255,255,0.45); cursor: pointer; position: relative; }
+  .tab-item.active { color: var(--orange); }
+  .tab-item .tab-icon { font-size: 20px; }
+  .tab-badge { position: absolute; top: -4px; right: -8px; background: var(--red); color: #fff; border-radius: 99px; font-size: 9px; font-weight: 700; padding: 1px 5px; min-width: 16px; text-align: center; }
+
+  /* Profile header */
+  .profile-header { background: var(--navy); padding: 14px 16px; flex-shrink: 0; }
+  .profile-header .back { font-size: 13px; color: var(--orange); margin-bottom: 8px; }
+  .profile-meta { display: flex; align-items: center; gap: 12px; }
+  .profile-avatar { width: 52px; height: 52px; border-radius: 50%; background: var(--orange); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .profile-info h2 { font-size: 18px; font-weight: 700; color: #fff; }
+  .profile-info .profile-sub { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+  .status-pill { display: inline-block; padding: 3px 9px; border-radius: 99px; font-size: 11px; font-weight: 600; margin-top: 4px; }
+  .pill-green { background: #d1fae5; color: #065f46; }
+  .pill-amber { background: #fef3cd; color: #92400e; }
+  .pill-red { background: #fee2e2; color: #991b1b; }
+  .pill-blue { background: #dbeafe; color: #1e40af; }
+  .pill-gray { background: #f3f4f6; color: #374151; }
+
+  /* Tabs */
+  .tab-strip { background: var(--navy-light); display: flex; flex-shrink: 0; }
+  .tab-strip button { flex: 1; padding: 10px 4px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.5); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; }
+  .tab-strip button.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+  /* Timeline */
+  .timeline { display: flex; flex-direction: column; }
+  .tl-item { display: flex; gap: 10px; padding-bottom: 14px; position: relative; }
+  .tl-item:not(:last-child)::after { content: ''; position: absolute; left: 14px; top: 28px; bottom: 0; width: 2px; background: var(--border); }
+  .tl-dot { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; z-index: 1; }
+  .tl-dot.green { background: #d1fae5; }
+  .tl-dot.amber { background: #fef3cd; }
+  .tl-dot.red { background: #fee2e2; }
+  .tl-dot.gray { background: #f3f4f6; }
+  .tl-content { flex: 1; }
+  .tl-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .tl-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .tl-date { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* Stats row */
+  .stats-row { display: flex; gap: 8px; margin-bottom: 4px; }
+  .stat-box { flex: 1; background: var(--card); border-radius: 10px; padding: 10px 8px; text-align: center; }
+  .stat-box .sv { font-size: 18px; font-weight: 700; color: var(--navy); }
+  .stat-box .sl { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .stat-box .sv.green { color: var(--green); }
+  .stat-box .sv.amber { color: var(--amber); }
+  .stat-box .sv.orange { color: var(--orange); }
+
+  /* Load history row */
+  .load-row { background: var(--card); border-radius: 10px; padding: 11px 12px; display: flex; align-items: center; gap: 10px; }
+  .load-row .lr-route { flex: 1; }
+  .load-row .lr-id { font-size: 11px; font-weight: 700; color: var(--navy); }
+  .load-row .lr-cust { font-size: 12px; color: var(--text); margin: 1px 0; }
+  .load-row .lr-date { font-size: 11px; color: var(--muted); }
+  .load-row .lr-right { text-align: right; }
+  .load-row .lr-rev { font-size: 14px; font-weight: 700; color: var(--navy); }
+  .load-row .lr-mi { font-size: 11px; color: var(--muted); }
+
+  /* Customer health score */
+  .health-ring { width: 60px; height: 60px; position: relative; }
+  .health-ring svg { transform: rotate(-90deg); }
+  .health-score-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight: 800; }
+
+  /* Inline exception flag */
+  .exc-flag { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; }
+  .exc-flag.red { background: #fee2e2; color: #991b1b; }
+  .exc-flag.amber { background: #fef3cd; color: #92400e; }
+  .exc-flag.green { background: #d1fae5; color: #065f46; }
+
+  /* List card */
+  .list-card { background: var(--card); border-radius: 12px; padding: 12px 13px; display: flex; align-items: center; gap: 11px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .list-card .lc-icon { width: 40px; height: 40px; border-radius: 10px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .list-card .lc-body { flex: 1; }
+  .list-card .lc-title { font-size: 13px; font-weight: 700; color: var(--text); }
+  .list-card .lc-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .list-card .lc-right { text-align: right; }
+
+  /* Divider */
+  .divider { height: 1px; background: var(--border); margin: 2px 0; }
+
+  /* Language picker */
+  .lang-option { background: var(--card); border-radius: 12px; padding: 14px 15px; display: flex; align-items: center; gap: 12px; border: 2px solid transparent; }
+  .lang-option.selected { border-color: var(--orange); }
+  .lang-flag { font-size: 26px; }
+  .lang-name { font-size: 15px; font-weight: 600; color: var(--text); }
+  .lang-native { font-size: 12px; color: var(--muted); }
+  .lang-check { margin-left: auto; font-size: 18px; color: var(--orange); }
+
+  /* Customer health dot */
+  .health-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Freight route strip */
+  .route-strip { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); margin: 3px 0; }
+  .route-arrow { color: var(--orange); font-size: 14px; }
+
+  /* Section divider label */
+  .sdiv { display: flex; align-items: center; gap: 8px; margin: 4px 0 2px; }
+  .sdiv span { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .sdiv::before, .sdiv::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* Payment bar */
+  .pay-bar-track { background: #e5e7eb; border-radius: 99px; height: 6px; flex: 1; overflow: hidden; }
+  .pay-bar-fill { height: 100%; border-radius: 99px; }
+
+  /* Compact customer row */
+  .cust-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .cust-row:last-child { border-bottom: none; }
+
+  /* Alert banner */
+  .alert-banner { border-radius: 10px; padding: 10px 12px; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+  .alert-banner.red { background: #fee2e2; color: #991b1b; }
+  .alert-banner.amber { background: #fef3cd; color: #92400e; }
+</style>
+</head>
+<body>
+
+<h1>CarrierOS — Mockup 14: Exception Management</h1>
+<p class="subtitle">Exceptions inbox · Driver & Truck history · Customer profile · Inline flags · Language preference</p>
+
+<div class="screen-grid">
+
+  <!-- ─── SCREEN 1: EXCEPTIONS INBOX ─── -->
+  <div class="phone">
+    <div class="phone-label">Screen 1 — Exceptions Inbox</div>
+    <div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+
+      <div class="nav-header">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <h2>Needs Attention</h2>
+          <div style="background:var(--red);color:#fff;border-radius:99px;font-size:12px;font-weight:700;padding:3px 10px;">8</div>
+        </div>
+        <div class="sub">Last checked: Today, 9:38 AM</div>
+      </div>
+
+      <div class="scroll-area">
+
+        <!-- TODAY section -->
+        <div class="exc-group">
+          <div class="exc-group-header">
+            <div class="urgency-dot dot-red"></div>
+            <div class="section-label" style="color:var(--red);">Today — Action Required</div>
+            <div class="gh-badge">3</div>
+          </div>
+
+          <div class="exc-card urgent">
+            <div class="exc-icon">🔧</div>
+            <div class="exc-body">
+              <div class="exc-title">Big Blue — Brake inspection overdue</div>
+              <div class="exc-desc">Annual DOT inspection was due Jun 15. Truck is 18 days past due. Operating may violate FMCSA rules.</div>
+              <div class="exc-meta">Truck · Overdue 18 days</div>
+              <button class="exc-cta" style="margin-top:8px;">Schedule Service</button>
+            </div>
+          </div>
+
+          <div class="exc-card urgent">
+            <div class="exc-icon">💰</div>
+            <div class="exc-body">
+              <div class="exc-title">Invoice INV-0035 — 47 days overdue</div>
+              <div class="exc-desc">Atlas Logistics · $3,200.00 · Net 30 terms. No response to 2 prior reminders.</div>
+              <div class="exc-meta">Invoice · Issued May 17</div>
+              <button class="exc-cta" style="margin-top:8px;">Send Escalation</button>
+            </div>
+          </div>
+
+          <div class="exc-card urgent">
+            <div class="exc-icon">📋</div>
+            <div class="exc-body">
+              <div class="exc-title">Physical Damage Insurance — expired</div>
+              <div class="exc-desc">Coverage ended Jul 1. Fleet currently operating without physical damage coverage.</div>
+              <div class="exc-meta">Company Doc · Expired 2 days ago</div>
+              <button class="exc-cta" style="margin-top:8px;">Upload Renewal</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- THIS WEEK section -->
+        <div class="exc-group">
+          <div class="exc-group-header">
+            <div class="urgency-dot dot-amber"></div>
+            <div class="section-label" style="color:var(--amber);">This Week — Due Soon</div>
+            <div class="gh-badge amber">3</div>
+          </div>
+
+          <div class="exc-card warning">
+            <div class="exc-icon">🪪</div>
+            <div class="exc-body">
+              <div class="exc-title">Maria R. — CDL expires Aug 1</div>
+              <div class="exc-desc">29 days remaining. Driver has been notified. No action taken yet.</div>
+              <div class="exc-meta">Driver Compliance · Class A CDL</div>
+              <button class="exc-cta" style="margin-top:8px;">Send Reminder</button>
+            </div>
+          </div>
+
+          <div class="exc-card warning">
+            <div class="exc-icon">🚚</div>
+            <div class="exc-body">
+              <div class="exc-title">Load L-0039 — POD not submitted</div>
+              <div class="exc-desc">Delivered to Sysco Foods 2 days ago. No proof of delivery uploaded. Invoice can't be generated.</div>
+              <div class="exc-meta">Load · Delivered Jul 1</div>
+              <button class="exc-cta" style="margin-top:8px;">Follow Up Driver</button>
+            </div>
+          </div>
+
+          <div class="exc-card warning">
+            <div class="exc-icon">🛡️</div>
+            <div class="exc-body">
+              <div class="exc-title">Cargo COI — renewing Aug 1</div>
+              <div class="exc-desc">29 days to renewal. Upload replacement before expiry to maintain broker coverage requirements.</div>
+              <div class="exc-meta">Company Doc · Cargo Insurance</div>
+              <button class="exc-cta" style="margin-top:8px;">View Doc</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- UPCOMING section -->
+        <div class="exc-group">
+          <div class="exc-group-header">
+            <div class="urgency-dot dot-blue"></div>
+            <div class="section-label" style="color:#3b82f6;">Upcoming — On Your Radar</div>
+            <div class="gh-badge blue">2</div>
+          </div>
+
+          <div class="exc-card info">
+            <div class="exc-icon">📅</div>
+            <div class="exc-body">
+              <div class="exc-title">UCR Registration — expires Dec 31</div>
+              <div class="exc-desc">181 days remaining. Unified Carrier Registration must be renewed annually.</div>
+              <div class="exc-meta">Company Doc · Annual</div>
+              <button class="exc-cta" style="margin-top:8px;">View</button>
+            </div>
+          </div>
+
+          <div class="exc-card info">
+            <div class="exc-icon">🔄</div>
+            <div class="exc-body">
+              <div class="exc-title">Tire rotation due — Big Blue</div>
+              <div class="exc-desc">Due in 5,200 miles. Last service at 87,400 mi. Current odometer: 89,800 mi.</div>
+              <div class="exc-meta">Maintenance · Truck</div>
+              <button class="exc-cta" style="margin-top:8px;">Schedule</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ALL CLEAR -->
+        <div class="all-clear">
+          <div class="ac-icon">✅</div>
+          <div>
+            <div class="ac-text">Everything else is clear</div>
+            <div class="ac-sub" style="color:#4b5563;">4 loads on track · 3 invoices in terms · 2 drivers compliant</div>
+          </div>
+        </div>
+
+        <div style="height:8px;"></div>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon">🏠</div>Home</div>
+        <div class="tab-item"><div class="tab-icon">🚚</div>Loads</div>
+        <div class="tab-item active" style="position:relative;">
+          <div class="tab-icon">⚠️</div>Alerts
+          <div class="tab-badge">8</div>
+        </div>
+        <div class="tab-item"><div class="tab-icon">📋</div>Docs</div>
+        <div class="tab-item"><div class="tab-icon">⚙️</div>More</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SCREEN 2: DRIVER PROFILE — DOCUMENT HISTORY ─── -->
+  <div class="phone">
+    <div class="phone-label">Screen 2 — Driver Profile: Document History</div>
+    <div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+
+      <div class="profile-header">
+        <div class="back">← Drivers</div>
+        <div class="profile-meta">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC11W5eL6hdmfkin7dfg_xGQwWZGd1JnzA3lazTJAvBkiVQHeL8ATi_JiClWXv7UaEbYjd7Uo3Aodhs7lTYPjr2bpHv1fF7qacOx3Sjm0LccF8goKjUbePGYTGM0mBfLRblgTTAc3Uf6fFtOLdQYko_HvafeGJHnkcLNsloC5P03JIDriDnm2tYF46TmAecl7BhhJ3TM7GKSHeFcDf7o0rbzL2XZtdOHPhvfpiaSA89VD3yqDDSVi72zPCB4sP3rQBh5uAufyWVy5A" style="width:52px;height:52px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="Maria Rodriguez">
+          <div class="profile-info">
+            <h2>Maria Rodriguez</h2>
+            <div class="profile-sub">Class A CDL · CA · Joined Mar 2024</div>
+            <span class="status-pill pill-amber">CDL Due Soon (29d)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-strip">
+        <button>Profile</button>
+        <button class="active">Doc History</button>
+        <button>Loads</button>
+        <button>DVIRs</button>
+      </div>
+
+      <div class="scroll-area">
+
+        <!-- Exception alert -->
+        <div class="alert-banner amber">
+          ⚠️ CDL expires Aug 1, 2026 — 29 days remaining. Renewal reminder sent Jun 15.
+        </div>
+
+        <!-- CDL History -->
+        <div class="card">
+          <div class="section-label" style="margin-bottom:10px;">Commercial Driver's License</div>
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-dot amber">🪪</div>
+              <div class="tl-content">
+                <div class="tl-title">Current CDL — Class A</div>
+                <div class="tl-sub">CA · #A1234567 · Issued Aug 2022</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
+                  <div class="pay-bar-track" style="max-width:180px;">
+                    <div class="pay-bar-fill" style="width:88%;background:var(--amber);"></div>
+                  </div>
+                  <span style="font-size:11px;color:var(--amber);font-weight:600;">Expires Aug 1, 2026</span>
+                </div>
+                <div class="tl-sub" style="margin-top:4px;">Endorsements: HazMat ☢️ · Tanker 🛢️</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot gray">🪪</div>
+              <div class="tl-content">
+                <div class="tl-title">Previous CDL — Class A</div>
+                <div class="tl-sub">CA · #A1234567 · Aug 2018 – Aug 2022</div>
+                <div class="tl-sub" style="margin-top:3px;">Endorsements: HazMat ☢️</div>
+                <span class="status-pill pill-gray" style="font-size:10px;margin-top:4px;display:inline-block;">Expired</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DOT Med Cert History -->
+        <div class="card">
+          <div class="section-label" style="margin-bottom:10px;">DOT Medical Certificate</div>
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-dot green">🩺</div>
+              <div class="tl-content">
+                <div class="tl-title">Medical Certificate — Current</div>
+                <div class="tl-sub">Issued Jan 15, 2026 · Dr. James Park, DOT #12345</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
+                  <div class="pay-bar-track" style="max-width:180px;">
+                    <div class="pay-bar-fill" style="width:55%;background:var(--green);"></div>
+                  </div>
+                  <span style="font-size:11px;color:var(--green);font-weight:600;">Expires Jan 15, 2028</span>
+                </div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot gray">🩺</div>
+              <div class="tl-content">
+                <div class="tl-title">Medical Certificate</div>
+                <div class="tl-sub">Jan 2024 – Jan 2026 · Renewal at Concentra, Sacramento</div>
+                <span class="status-pill pill-gray" style="font-size:10px;margin-top:4px;display:inline-block;">Expired</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exception history -->
+        <div class="card">
+          <div class="section-label" style="margin-bottom:10px;">Exception History</div>
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-dot amber">⚠️</div>
+              <div class="tl-content">
+                <div class="tl-title">CDL expiry reminder sent</div>
+                <div class="tl-sub">System auto-sent at 60-day mark</div>
+                <div class="tl-date">Jun 15, 2026</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot red">⏱️</div>
+              <div class="tl-content">
+                <div class="tl-title">Late delivery — Load L-0031</div>
+                <div class="tl-sub">Arrived 3h 20m late · Fresno, CA · Weather delay</div>
+                <div class="tl-date">May 3, 2026</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot red">🔧</div>
+              <div class="tl-content">
+                <div class="tl-title">DVIR defect reported</div>
+                <div class="tl-sub">Left turn signal — resolved same day</div>
+                <div class="tl-date">Mar 12, 2026</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot green">✅</div>
+              <div class="tl-content">
+                <div class="tl-title">No exceptions</div>
+                <div class="tl-sub">Prior 12 months — clean record</div>
+                <div class="tl-date">Mar 2024 – Mar 2026</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:8px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SCREEN 3: TRUCK PROFILE — LOAD HISTORY ─── -->
+  <div class="phone">
+    <div class="phone-label">Screen 3 — Truck Profile: Load History</div>
+    <div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+
+      <div class="profile-header">
+        <div class="back">← Fleet</div>
+        <div class="profile-meta">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnXnVrRc27L3aHApsHOKdsfyeSYyvi11VKPHL-8CC1EVayK643nW7sbYLgw_IERbTHn8jHDoZkRFMuJQ2lC9Jhdc7T3gF0FbZODI2ft3YZtxW5-C327snVTkwKYSJNPFkZR4PxCjBkbbcVyo4yrlvshEFymkU3-4DTSjB9mn_SPzfDLcnTJCpMiIPoWiLsAX4pNOWkK8HHrrk2YyYo1qashVrtgfhJzLn8yvcvExsT5WyOGA7yOfS93sQQkKAvEkI-gMPbeprI21c" style="width:52px;height:52px;border-radius:50%;object-fit:cover;object-position:center 40%;flex-shrink:0;" alt="Big Blue">
+          <div class="profile-info">
+            <h2>Big Blue</h2>
+            <div class="profile-sub">2019 Freightliner Cascadia · CA 4TRK829</div>
+            <span class="status-pill pill-red">Inspection Overdue</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-strip">
+        <button>Details</button>
+        <button class="active">Load History</button>
+        <button>Maintenance</button>
+        <button>DVIRs</button>
+      </div>
+
+      <div class="scroll-area">
+
+        <!-- Overdue alert -->
+        <div class="alert-banner red">
+          🔧 Annual DOT inspection overdue 18 days — schedule immediately.
+        </div>
+
+        <!-- Stats row -->
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="sv orange">47</div>
+            <div class="sl">Total Loads</div>
+          </div>
+          <div class="stat-box">
+            <div class="sv green">$94K</div>
+            <div class="sl">Revenue</div>
+          </div>
+          <div class="stat-box">
+            <div class="sv">43K</div>
+            <div class="sl">Miles</div>
+          </div>
+          <div class="stat-box">
+            <div class="sv">$2.0K</div>
+            <div class="sl">Avg/Load</div>
+          </div>
+        </div>
+
+        <!-- Load list -->
+        <div class="section-label">Recent Loads</div>
+
+        <div class="load-row">
+          <div style="font-size:22px;">🥩</div>
+          <div class="lr-route">
+            <div class="lr-id">L-0042 · Sysco Foods</div>
+            <div class="route-strip">Los Angeles <span class="route-arrow">→</span> Fresno</div>
+            <div class="lr-date">Jul 1, 2026 · Marcus J.</div>
+          </div>
+          <div class="lr-right">
+            <div class="lr-rev">$2,400</div>
+            <span class="status-pill pill-amber" style="font-size:10px;">POD Missing</span>
+          </div>
+        </div>
+
+        <div class="load-row">
+          <div style="font-size:22px;">🧴</div>
+          <div class="lr-route">
+            <div class="lr-id">L-0041 · Target DC</div>
+            <div class="route-strip">Sacramento <span class="route-arrow">→</span> Stockton</div>
+            <div class="lr-date">Jun 27, 2026 · Marcus J.</div>
+          </div>
+          <div class="lr-right">
+            <div class="lr-rev">$1,850</div>
+            <span class="status-pill pill-green" style="font-size:10px;">Invoiced</span>
+          </div>
+        </div>
+
+        <div class="load-row">
+          <div style="font-size:22px;">🚧</div>
+          <div class="lr-route">
+            <div class="lr-id">L-0040 · Atlas Logistics</div>
+            <div class="route-strip">Bakersfield <span class="route-arrow">→</span> San Jose</div>
+            <div class="lr-date">Jun 20, 2026 · Maria R.</div>
+          </div>
+          <div class="lr-right">
+            <div class="lr-rev">$3,100</div>
+            <span class="status-pill pill-red" style="font-size:10px;">Inv. Overdue</span>
+          </div>
+        </div>
+
+        <div class="load-row">
+          <div style="font-size:22px;">🥦</div>
+          <div class="lr-route">
+            <div class="lr-id">L-0038 · Sysco Foods</div>
+            <div class="route-strip">Los Angeles <span class="route-arrow">→</span> Modesto</div>
+            <div class="lr-date">Jun 14, 2026 · Marcus J.</div>
+          </div>
+          <div class="lr-right">
+            <div class="lr-rev">$1,920</div>
+            <span class="status-pill pill-green" style="font-size:10px;">Paid</span>
+          </div>
+        </div>
+
+        <div class="load-row">
+          <div style="font-size:22px;">🍊</div>
+          <div class="lr-route">
+            <div class="lr-id">L-0036 · Fresno Growers</div>
+            <div class="route-strip">Fresno <span class="route-arrow">→</span> Oakland</div>
+            <div class="lr-date">Jun 5, 2026 · Maria R.</div>
+          </div>
+          <div class="lr-right">
+            <div class="lr-rev">$2,200</div>
+            <span class="status-pill pill-green" style="font-size:10px;">Paid</span>
+          </div>
+        </div>
+
+        <div class="load-row">
+          <div style="font-size:22px;">🛒</div>
+          <div class="lr-route">
+            <div class="lr-id">L-0034 · Costco DC</div>
+            <div class="route-strip">Modesto <span class="route-arrow">→</span> Livermore</div>
+            <div class="lr-date">May 28, 2026 · Marcus J.</div>
+          </div>
+          <div class="lr-right">
+            <div class="lr-rev">$1,650</div>
+            <span class="status-pill pill-green" style="font-size:10px;">Paid</span>
+          </div>
+        </div>
+
+        <div style="text-align:center; padding:8px 0;">
+          <button style="background:none;border:1.5px solid var(--border);border-radius:8px;padding:8px 20px;font-size:13px;color:var(--navy);font-weight:600;cursor:pointer;">Load 41 more loads</button>
+        </div>
+
+        <div style="height:8px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SCREEN 4: CUSTOMER PROFILE ─── -->
+  <div class="phone">
+    <div class="phone-label">Screen 4 — Customer Profile + Exception Timeline</div>
+    <div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+
+      <div class="profile-header">
+        <div class="back">← Customers</div>
+        <div class="profile-meta">
+          <div class="profile-avatar" style="background:#2563eb;font-size:14px;">SF</div>
+          <div class="profile-info">
+            <h2>Sysco Foods</h2>
+            <div class="profile-sub">Customer since Jan 2024 · Net 45 terms</div>
+            <span class="status-pill pill-green">Healthy Account ●</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-strip">
+        <button class="active">Overview</button>
+        <button>Loads</button>
+        <button>Exceptions</button>
+        <button>Invoices</button>
+      </div>
+
+      <div class="scroll-area">
+
+        <!-- Health score -->
+        <div class="card" style="display:flex;align-items:center;gap:14px;">
+          <div style="position:relative;width:68px;height:68px;flex-shrink:0;">
+            <svg width="68" height="68" viewBox="0 0 68 68">
+              <circle cx="34" cy="34" r="28" fill="none" stroke="#e5e7eb" stroke-width="8"/>
+              <circle cx="34" cy="34" r="28" fill="none" stroke="#2ecc71" stroke-width="8"
+                stroke-dasharray="175.9" stroke-dashoffset="26.4" stroke-linecap="round"
+                transform="rotate(-90 34 34)"/>
+            </svg>
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;font-weight:800;color:var(--green);">85</div>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:700;color:var(--text);">Customer Health Score</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:3px;">On-time payer · 23 loads · Low exception rate</div>
+            <div style="display:flex;gap:8px;margin-top:6px;">
+              <div class="exc-flag green">✓ Compliant</div>
+              <div class="exc-flag green">✓ Paying</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats row -->
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="sv orange">23</div>
+            <div class="sl">Loads</div>
+          </div>
+          <div class="stat-box">
+            <div class="sv green">$48K</div>
+            <div class="sl">Revenue</div>
+          </div>
+          <div class="stat-box">
+            <div class="sv">34d</div>
+            <div class="sl">Avg Pay</div>
+          </div>
+          <div class="stat-box">
+            <div class="sv green">96%</div>
+            <div class="sl">On-Time</div>
+          </div>
+        </div>
+
+        <!-- Payment behavior bar -->
+        <div class="card">
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px;">Payment Performance</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <div class="pay-bar-track">
+              <div class="pay-bar-fill" style="width:78%;background:var(--green);"></div>
+            </div>
+            <span style="font-size:11px;color:var(--green);font-weight:600;">78% on time</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="pay-bar-track">
+              <div class="pay-bar-fill" style="width:18%;background:var(--amber);"></div>
+            </div>
+            <span style="font-size:11px;color:var(--amber);font-weight:600;">18% 1–15 days late</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px;">Avg payment time: 34 days · Terms: Net 45 · No unpaid invoices</div>
+        </div>
+
+        <!-- Trucks used -->
+        <div class="card">
+          <div class="section-label" style="margin-bottom:8px;">Trucks Used</div>
+          <div class="cust-row">
+            <div style="font-size:18px;">🚛</div>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:600;color:var(--text);">Big Blue</div>
+              <div style="font-size:11px;color:var(--muted);">14 loads · Freightliner Cascadia</div>
+            </div>
+            <span class="status-pill pill-red" style="font-size:10px;">Inspect. Due</span>
+          </div>
+          <div class="cust-row">
+            <div style="font-size:18px;">🚚</div>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:600;color:var(--text);">Silver Fox</div>
+              <div style="font-size:11px;color:var(--muted);">9 loads · Peterbilt 579</div>
+            </div>
+            <span class="status-pill pill-green" style="font-size:10px;">All Clear</span>
+          </div>
+        </div>
+
+        <!-- Exception timeline -->
+        <div class="card">
+          <div class="section-label" style="margin-bottom:8px;">Exception History</div>
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-dot amber">⏱️</div>
+              <div class="tl-content">
+                <div class="tl-title">Invoice INV-0027 — paid late</div>
+                <div class="tl-sub">$2,100 · 11 days late · No dispute raised</div>
+                <div class="tl-date">Apr 12, 2026</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot red">⏱️</div>
+              <div class="tl-content">
+                <div class="tl-title">Delivery late — Load L-0031</div>
+                <div class="tl-sub">3h 20m delay · Driver: Maria R. · Weather-related</div>
+                <div class="tl-date">May 3, 2026</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot green">✅</div>
+              <div class="tl-content">
+                <div class="tl-title">No exceptions — 10 prior loads</div>
+                <div class="tl-sub">Jan 2024 – Mar 2026</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:8px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SCREEN 5: LIST VIEWS WITH INLINE EXCEPTION FLAGS ─── -->
+  <div class="phone">
+    <div class="phone-label">Screen 5 — Inline Exception Flags on Lists</div>
+    <div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+
+      <div class="nav-header">
+        <h2>Fleet &amp; Team</h2>
+        <div class="sub">Exception flags inline on every list</div>
+      </div>
+
+      <div class="scroll-area">
+
+        <!-- TRUCKS -->
+        <div class="section-label">Trucks</div>
+
+        <div class="list-card">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnXnVrRc27L3aHApsHOKdsfyeSYyvi11VKPHL-8CC1EVayK643nW7sbYLgw_IERbTHn8jHDoZkRFMuJQ2lC9Jhdc7T3gF0FbZODI2ft3YZtxW5-C327snVTkwKYSJNPFkZR4PxCjBkbbcVyo4yrlvshEFymkU3-4DTSjB9mn_SPzfDLcnTJCpMiIPoWiLsAX4pNOWkK8HHrrk2YyYo1qashVrtgfhJzLn8yvcvExsT5WyOGA7yOfS93sQQkKAvEkI-gMPbeprI21c" style="width:40px;height:40px;border-radius:10px;object-fit:cover;object-position:center 40%;flex-shrink:0;" alt="Big Blue">
+          <div class="lc-body">
+            <div class="lc-title">Big Blue</div>
+            <div class="lc-sub">2019 Freightliner · CA 4TRK829</div>
+            <div style="margin-top:5px;"><span class="exc-flag red">🔧 Inspection 18d overdue</span></div>
+          </div>
+          <div class="lc-right">
+            <span class="status-pill pill-blue" style="font-size:10px;">Active</span>
+          </div>
+        </div>
+
+        <div class="list-card">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYqBZRjIzV4dcVsCBIkVZuviJswOa5DHFJhP6H9-IhyRV1h8Tsyd4LTpsZoJEuXgNqZ9xvjQ2BT1AEyZHee_wiT2_nXtdCC9oAzxRBq5MqHL7_FsXZRJJL3W43UEHETXlb-TXT6tHqmd5RF3AqJQ_M-LPn8A5SyiVE8UC950zXtds6XSWt4Yy6M-2rQy4IRHGAduBh-LRI76okJlwRkYZq5_BxQosmCWeuhsr7v57Anc3UCPF3Andv919SzHA3t_bsab2dg1TxnBA" style="width:40px;height:40px;border-radius:10px;object-fit:cover;object-position:center 40%;flex-shrink:0;" alt="Silver Fox">
+          <div class="lc-body">
+            <div class="lc-title">Silver Fox</div>
+            <div class="lc-sub">2021 Peterbilt 579 · CA 7KPL442</div>
+            <div style="margin-top:5px;"><span class="exc-flag amber">🔧 Tire rotation due soon</span></div>
+          </div>
+          <div class="lc-right">
+            <span class="status-pill pill-blue" style="font-size:10px;">Active</span>
+          </div>
+        </div>
+
+        <div class="list-card">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIB4hH_gIAC2rYgc-4yvFRY7Dx3hwsOHBTElGOkaWcp3vbgB6OXs7k-gl-CQAfTu8hPRdIUvjd7maCEZDaVQnEBwYupKxiFLpVO4FVeJlnwEf4fl_y28rXW1eUZwLclBOfZNRkyoRm4dDrty7ShkSolMrwgDGQ26YqnsWS7aQpZ9McevMHCJJxI8A63_gMghkoMhFIrOXK8XmVDY8uZVB5Ox9PRDf7kDZ5kGOufcDqTdm0_xK5a8jTBTyokuZ0nL2w_5YjefDUsOg" style="width:40px;height:40px;border-radius:10px;object-fit:cover;object-position:center 40%;flex-shrink:0;" alt="Red Runner">
+          <div class="lc-body">
+            <div class="lc-title">Red Runner</div>
+            <div class="lc-sub">2022 International LT · CA 2MNO391</div>
+            <div style="margin-top:5px;"><span class="exc-flag green">✓ All clear</span></div>
+          </div>
+          <div class="lc-right">
+            <span class="status-pill pill-gray" style="font-size:10px;">Idle</span>
+          </div>
+        </div>
+
+        <!-- DRIVERS -->
+        <div class="section-label">Drivers</div>
+
+        <div class="list-card">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC11W5eL6hdmfkin7dfg_xGQwWZGd1JnzA3lazTJAvBkiVQHeL8ATi_JiClWXv7UaEbYjd7Uo3Aodhs7lTYPjr2bpHv1fF7qacOx3Sjm0LccF8goKjUbePGYTGM0mBfLRblgTTAc3Uf6fFtOLdQYko_HvafeGJHnkcLNsloC5P03JIDriDnm2tYF46TmAecl7BhhJ3TM7GKSHeFcDf7o0rbzL2XZtdOHPhvfpiaSA89VD3yqDDSVi72zPCB4sP3rQBh5uAufyWVy5A" style="width:40px;height:40px;border-radius:10px;object-fit:cover;flex-shrink:0;" alt="Maria Rodriguez">
+          <div class="lc-body">
+            <div class="lc-title">Maria Rodriguez</div>
+            <div class="lc-sub">Class A CDL · HazMat · Tanker</div>
+            <div style="margin-top:5px;"><span class="exc-flag amber">🪪 CDL expires Aug 1</span></div>
+          </div>
+          <div class="lc-right">
+            <span class="status-pill pill-blue" style="font-size:10px;">Active</span>
+          </div>
+        </div>
+
+        <div class="list-card">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0w8Jhki8Y_EIsrZgtQq_RJggrrBpzpZrnDc2GhXNJW7b6xKix0AfqDSCVDPPkIbz6oA94r35GA0rR10wvBx4aS3EGBDT3_RXKidrH9y0LDkOkMt0ev_DwGbXDegrGoL7853Pbnfnc56lPzCo0UQYcVJ0d94QqUl80E4V2pzVD_-KoXcD0LATtuSSbrpMWYEUPsqJKGwRlfAhJick2zVvI5XTAv637JIaIiLk0KL9jFqnkWpUSFIcnXYzZuMtyh0sSHJPf6zbjvyI" style="width:40px;height:40px;border-radius:10px;object-fit:cover;flex-shrink:0;" alt="Marcus Johnson">
+          <div class="lc-body">
+            <div class="lc-title">Marcus Johnson</div>
+            <div class="lc-sub">Class A CDL · Currently on Load L-0042</div>
+            <div style="margin-top:5px;"><span class="exc-flag amber">📋 POD not submitted L-0039</span></div>
+          </div>
+          <div class="lc-right">
+            <span class="status-pill pill-blue" style="font-size:10px;">On Load</span>
+          </div>
+        </div>
+
+        <div class="list-card">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC11W5eL6hdmfkin7dfg_xGQwWZGd1JnzA3lazTJAvBkiVQHeL8ATi_JiClWXv7UaEbYjd7Uo3Aodhs7lTYPjr2bpHv1fF7qacOx3Sjm0LccF8goKjUbePGYTGM0mBfLRblgTTAc3Uf6fFtOLdQYko_HvafeGJHnkcLNsloC5P03JIDriDnm2tYF46TmAecl7BhhJ3TM7GKSHeFcDf7o0rbzL2XZtdOHPhvfpiaSA89VD3yqDDSVi72zPCB4sP3rQBh5uAufyWVy5A" style="width:40px;height:40px;border-radius:10px;object-fit:cover;flex-shrink:0;" alt="David Kim">
+          <div class="lc-body">
+            <div class="lc-title">David Kim</div>
+            <div class="lc-sub">Class B CDL · Owner-Operator</div>
+            <div style="margin-top:5px;"><span class="exc-flag green">✓ All clear</span></div>
+          </div>
+          <div class="lc-right">
+            <span class="status-pill pill-gray" style="font-size:10px;">Available</span>
+          </div>
+        </div>
+
+        <!-- CUSTOMERS -->
+        <div class="section-label">Customers</div>
+
+        <div class="list-card">
+          <div class="lc-icon" style="font-size:14px;background:#dbeafe;color:#1e40af;font-weight:700;">SF</div>
+          <div class="lc-body">
+            <div class="lc-title">Sysco Foods</div>
+            <div class="lc-sub">23 loads · $48K revenue</div>
+            <div style="margin-top:5px;"><span class="exc-flag green">● Healthy</span></div>
+          </div>
+          <div class="lc-right">
+            <div class="health-dot" style="background:var(--green);margin-left:auto;"></div>
+          </div>
+        </div>
+
+        <div class="list-card">
+          <div class="lc-icon" style="font-size:14px;background:#fef3cd;color:#92400e;font-weight:700;">AL</div>
+          <div class="lc-body">
+            <div class="lc-title">Atlas Logistics</div>
+            <div class="lc-sub">11 loads · $28K revenue</div>
+            <div style="margin-top:5px;"><span class="exc-flag red">💰 Invoice 47d overdue</span></div>
+          </div>
+          <div class="lc-right">
+            <div class="health-dot" style="background:var(--red);margin-left:auto;"></div>
+          </div>
+        </div>
+
+        <div class="list-card">
+          <div class="lc-icon" style="font-size:14px;background:#d1fae5;color:#065f46;font-weight:700;">FG</div>
+          <div class="lc-body">
+            <div class="lc-title">Fresno Growers Co-op</div>
+            <div class="lc-sub">8 loads · $16K revenue</div>
+            <div style="margin-top:5px;"><span class="exc-flag amber">⏱️ Slow payer (avg 52d)</span></div>
+          </div>
+          <div class="lc-right">
+            <div class="health-dot" style="background:var(--amber);margin-left:auto;"></div>
+          </div>
+        </div>
+
+        <div style="height:8px;"></div>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon">🏠</div>Home</div>
+        <div class="tab-item"><div class="tab-icon">🚚</div>Loads</div>
+        <div class="tab-item" style="position:relative;">
+          <div class="tab-icon">⚠️</div>Alerts
+          <div class="tab-badge">8</div>
+        </div>
+        <div class="tab-item active"><div class="tab-icon">📋</div>Fleet</div>
+        <div class="tab-item"><div class="tab-icon">⚙️</div>More</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SCREEN 6: LANGUAGE PREFERENCE (ALL USERS) ─── -->
+  <div class="phone">
+    <div class="phone-label">Screen 6 — Language Preference (All Roles)</div>
+    <div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+
+      <div class="nav-header">
+        <div class="back">← Account Settings</div>
+        <h2>Language / Idioma / ਭਾਸ਼ਾ</h2>
+        <div class="sub">Available for all users — owner, driver, dispatcher, finance</div>
+      </div>
+
+      <div class="scroll-area">
+
+        <div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:12px;font-size:12px;color:#075985;margin-bottom:4px;">
+          ℹ️ Your language preference applies to the entire app. Choose the language that works best for you.
+        </div>
+
+        <div class="lang-option selected">
+          <div class="lang-flag">🇺🇸</div>
+          <div>
+            <div class="lang-name">English</div>
+            <div class="lang-native">English</div>
+          </div>
+          <div class="lang-check">✓</div>
+        </div>
+
+        <div class="lang-option">
+          <div class="lang-flag">🇲🇽</div>
+          <div>
+            <div class="lang-name">Spanish</div>
+            <div class="lang-native">Español</div>
+          </div>
+        </div>
+
+        <div class="lang-option">
+          <div class="lang-flag">🇮🇳</div>
+          <div>
+            <div class="lang-name">Punjabi</div>
+            <div class="lang-native" style="font-family:'Noto Sans Gurmukhi',sans-serif;font-size:15px;">ਪੰਜਾਬੀ</div>
+          </div>
+        </div>
+
+        <div class="divider" style="margin:8px 0;"></div>
+
+        <!-- Where language preference lives by role -->
+        <div class="card">
+          <div class="section-label" style="margin-bottom:10px;">Where to find this</div>
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-dot green" style="font-size:11px;font-weight:700;">OW</div>
+              <div class="tl-content">
+                <div class="tl-title">Owner / Solo</div>
+                <div class="tl-sub">Settings → Account → Language</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot amber" style="font-size:11px;font-weight:700;">DR</div>
+              <div class="tl-content">
+                <div class="tl-title">Driver</div>
+                <div class="tl-sub">First step on profile setup after invite + Profile → Language anytime</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot" style="background:#dbeafe;font-size:11px;font-weight:700;color:#1e40af;">DI</div>
+              <div class="tl-content">
+                <div class="tl-title">Dispatcher</div>
+                <div class="tl-sub">Settings → Account → Language</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot" style="background:#fae8ff;font-size:11px;font-weight:700;color:#6b21a8;">FI</div>
+              <div class="tl-content">
+                <div class="tl-title">Finance</div>
+                <div class="tl-sub">Settings → Account → Language</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dev note -->
+        <div style="background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:11px;color:var(--muted);">
+          <div style="font-weight:700;color:var(--navy);margin-bottom:6px;">🛠 Dev Note</div>
+          Stored as <code style="background:#f3f4f6;padding:1px 5px;border-radius:4px;font-size:11px;">profiles.preferred_language</code> — applies to all roles. Value: <code style="background:#f3f4f6;padding:1px 5px;border-radius:4px;font-size:11px;">'en' | 'es' | 'pa'</code>. Layout reads at render time; cached in <code style="background:#f3f4f6;padding:1px 5px;border-radius:4px;font-size:11px;">localStorage</code> for offline (Capacitor). Punjabi loads Noto Sans Gurmukhi via conditional font import.
+        </div>
+
+        <div style="height:8px;"></div>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon">🏠</div>Home</div>
+        <div class="tab-item"><div class="tab-icon">🚚</div>Loads</div>
+        <div class="tab-item" style="position:relative;">
+          <div class="tab-icon">⚠️</div>Alerts
+          <div class="tab-badge">8</div>
+        </div>
+        <div class="tab-item"><div class="tab-icon">📋</div>Fleet</div>
+        <div class="tab-item active"><div class="tab-icon">⚙️</div>More</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end screen-grid -->
+
+<div style="margin-top:40px;color:rgba(255,255,255,0.35);font-size:11px;text-align:center;">
+  CarrierOS — Mockup 14: Exception Management · July 2026 · shipmentx.com
+</div>
+
+</body>
+</html>

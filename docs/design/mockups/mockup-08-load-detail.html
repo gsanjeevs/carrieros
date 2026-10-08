@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarrierOS — Load Detail (Owner View)</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f1e35;--navy-mid:#182c46;--navy-light:#1f3a58;--navy-card:#162033;
+  --orange:#f47920;--orange-lt:#f9a55a;--orange-dim:rgba(244,121,32,.15);
+  --white:#fff;--gray:#8fa3b8;--gray-lt:#d6e0ea;--gray-dim:rgba(214,224,234,.08);
+  --green:#2ecc71;--green-dim:rgba(46,204,113,.13);
+  --amber:#f0a500;--amber-dim:rgba(240,165,0,.13);
+  --red:#e55353;--teal:#1abc9c;--teal-dim:rgba(26,188,156,.12);
+  --radius:14px;--radius-sm:8px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;background:var(--navy);color:var(--white);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 16px 60px;}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(rgba(255,255,255,.018) 1px,transparent 1px);background-size:28px 28px;pointer-events:none;z-index:0;}
+.page-header{text-align:center;margin-bottom:40px;z-index:1;}
+.page-header .logo{font-size:13px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--orange);margin-bottom:6px;}
+.page-header h1{font-size:22px;font-weight:700;}
+.page-header p{font-size:13px;color:var(--gray);margin-top:4px;}
+.screens{display:flex;gap:24px;align-items:flex-start;z-index:1;flex-wrap:wrap;justify-content:center;width:100%;max-width:1280px;}
+.phone{display:flex;flex-direction:column;width:360px;flex-shrink:0;}
+.screen-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:10px;text-align:center;}
+.phone-frame{background:var(--navy-card);border-radius:24px;border:1.5px solid rgba(255,255,255,.08);overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.45);min-height:620px;display:flex;flex-direction:column;}
+.phone-bar{background:var(--navy-mid);padding:14px 20px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.05);}
+.phone-bar .back{color:var(--orange);font-size:13px;font-weight:600;}
+.phone-bar .title{font-size:15px;font-weight:700;}
+.phone-bar .action{color:var(--orange);font-size:13px;font-weight:600;}
+.phone-content{padding:20px 16px;flex:1;display:flex;flex-direction:column;gap:14px;overflow-y:auto;max-height:620px;}
+
+/* Load hero */
+.load-hero{background:linear-gradient(135deg,var(--navy-light),var(--navy-mid));border-radius:var(--radius);padding:16px;}
+.lh-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.lh-id{font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--gray);}
+.status-chip{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;}
+.sc-transit{background:rgba(26,188,156,.15);color:var(--teal);}
+.sc-sched{background:rgba(240,165,0,.15);color:var(--amber);}
+.sc-delivered{background:var(--green-dim);color:var(--green);}
+.sc-invoiced{background:var(--orange-dim);color:var(--orange-lt);}
+.lh-route{display:flex;flex-direction:column;gap:10px;position:relative;padding-left:20px;margin-bottom:12px;}
+.lh-route::before{content:'';position:absolute;left:5px;top:8px;bottom:8px;width:2px;background:linear-gradient(var(--orange),var(--teal));}
+.route-stop-dot{position:absolute;left:0;width:12px;height:12px;border-radius:50%;border:2px solid var(--orange);background:var(--navy-card);}
+.route-stop-dot.end{border-color:var(--teal);}
+.stop-city{font-size:15px;font-weight:800;}
+.stop-time{font-size:11px;color:var(--gray);margin-top:2px;}
+.lh-rate{font-size:28px;font-weight:900;color:var(--orange-lt);margin-top:4px;}
+.lh-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.meta-chip{font-size:11px;color:var(--gray-lt);background:rgba(255,255,255,.06);border-radius:6px;padding:4px 9px;font-weight:500;}
+
+/* Status timeline */
+.timeline{display:flex;flex-direction:column;gap:0;}
+.tl-item{display:flex;gap:12px;position:relative;}
+.tl-dot{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;margin-top:2px;}
+.tl-dot-done{background:var(--green-dim);border:1.5px solid var(--green);color:var(--green);}
+.tl-dot-active{background:var(--orange-dim);border:1.5px solid var(--orange);color:var(--orange);}
+.tl-dot-pending{background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.12);color:var(--gray);}
+.tl-line{position:absolute;left:13px;top:30px;bottom:-14px;width:2px;background:rgba(255,255,255,.07);}
+.tl-line-done{background:rgba(46,204,113,.3);}
+.tl-content{flex:1;padding-bottom:14px;}
+.tl-title{font-size:13px;font-weight:700;}
+.tl-sub{font-size:11px;color:var(--gray);margin-top:2px;}
+.tl-time{font-size:10px;color:var(--gray);margin-top:2px;}
+
+/* Action buttons */
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.action-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:var(--radius-sm);padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;text-align:center;}
+.action-btn .ab-icon{font-size:22px;}
+.action-btn .ab-label{font-size:11px;font-weight:700;}
+.action-btn.primary-action{background:rgba(244,121,32,.1);border-color:rgba(244,121,32,.3);}
+.action-btn.primary-action .ab-label{color:var(--orange);}
+
+/* Detail rows */
+.detail-section{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:14px;display:flex;flex-direction:column;gap:0;}
+.dr{display:flex;align-items:flex-start;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.dr:last-child{border-bottom:none;}
+.dr-label{font-size:11px;color:var(--gray);flex-shrink:0;width:100px;}
+.dr-value{font-size:12px;font-weight:600;text-align:right;flex:1;}
+
+/* Documents */
+.doc-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius-sm);padding:10px 12px;display:flex;align-items:center;gap:10px;}
+.doc-icon{font-size:20px;flex-shrink:0;}
+.doc-info{flex:1;}
+.doc-name{font-size:12px;font-weight:700;}
+.doc-sub{font-size:10px;color:var(--gray);margin-top:1px;}
+.doc-action{color:var(--orange);font-size:12px;font-weight:600;flex-shrink:0;}
+
+/* Driver info */
+.driver-strip{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:center;gap:12px;}
+.driver-ava{width:38px;height:38px;border-radius:50%;background:rgba(244,121,32,.2);border:1.5px solid var(--orange);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0;}
+.driver-strip-info{flex:1;}
+.driver-strip-name{font-size:13px;font-weight:700;}
+.driver-strip-sub{font-size:11px;color:var(--gray);margin-top:1px;}
+.driver-strip-status{display:flex;align-items:center;gap:5px;margin-top:3px;}
+
+/* Section title */
+.section-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--orange);}
+.divider{height:1px;background:rgba(255,255,255,.06);}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--orange);color:#fff;font-size:14px;font-weight:700;border-radius:var(--radius-sm);padding:13px;cursor:pointer;border:none;width:100%;}
+.btn.green{background:var(--green);}
+.btn.ghost{background:transparent;border:1.5px solid rgba(244,121,32,.4);color:var(--orange);}
+.btn.secondary{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);color:var(--gray-lt);}
+
+.flow-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:80px;color:var(--gray);gap:6px;flex-shrink:0;}
+.flow-arrow .arrow-label{font-size:10px;color:var(--gray);text-align:center;max-width:60px;}
+.page-footer{margin-top:48px;text-align:center;z-index:1;font-size:11px;color:rgba(143,163,184,.4);display:flex;gap:24px;justify-content:center;flex-wrap:wrap;}
+
+/* Inline edit hint */
+.edit-hint{font-size:10px;color:var(--gray);display:flex;align-items:center;gap:4px;margin-top:-4px;}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="logo">CarrierOS</div>
+  <h1>Load Detail — Owner View</h1>
+  <p>Mockup 08 — Status timeline · All load data · Docs · Quick actions</p>
+</div>
+
+<div class="screens">
+
+  <!-- ── SCREEN 1: Load Detail — Scheduled (pre-dispatch) ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 1 — Scheduled</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span class="back">‹ Loads</span>
+        <span class="title">Load Detail</span>
+        <span class="action">⋯</span>
+      </div>
+      <div class="phone-content">
+
+        <!-- Hero -->
+        <div class="load-hero">
+          <div class="lh-header">
+            <span class="lh-id">LOAD #FF-29381</span>
+            <span class="status-chip sc-sched">Scheduled</span>
+          </div>
+          <div class="lh-route">
+            <div class="route-stop-dot"></div>
+            <div style="margin-bottom:14px;">
+              <div class="stop-city">Chicago, IL</div>
+              <div class="stop-time">Jun 17 · 07:00 – 10:00</div>
+            </div>
+            <div class="route-stop-dot end"></div>
+            <div>
+              <div class="stop-city">Memphis, TN</div>
+              <div class="stop-time">Jun 18 · 08:00 – 14:00</div>
+            </div>
+          </div>
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEIXBPHGbsdy-_oaTvoMmSm37s6ivPHhy3ioPZWYJKWlRwXd3ERMZ2axg2kxonKmfxkNpkYCkBT-ucnulJVOLWENZB5EMmw1RHUEl2wWtmL_tXI5wosa1gHvOGMxA75iBzitQISryQNWpuT-VozRmASiMDM-0TtHAyHBNSccWZ4Jff0w0WroYFd83kxzG4H5dtxJPG9IENFGYYNdfsmOUF9jEThGpsdVIi29Chcf7nfZHV7rVGXZbOIb8vNdxncbF2i7P_0QHxwkU" style="width:100%;height:72px;object-fit:cover;object-position:center;border-radius:8px;margin:8px 0 4px;" alt="Chicago → Memphis route map">
+          <div class="lh-rate">$1,850.00</div>
+          <div class="lh-meta">
+            <span class="meta-chip">📦 Dry Goods</span>
+            <span class="meta-chip">🏢 Fast Freight LLC</span>
+            <span class="meta-chip">Ref: FF-29381</span>
+          </div>
+        </div>
+
+        <!-- Driver assignment -->
+        <div class="section-title">Assignment</div>
+        <div class="driver-strip">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0w8Jhki8Y_EIsrZgtQq_RJggrrBpzpZrnDc2GhXNJW7b6xKix0AfqDSCVDPPkIbz6oA94r35GA0rR10wvBx4aS3EGBDT3_RXKidrH9y0LDkOkMt0ev_DwGbXDegrGoL7853Pbnfnc56lPzCo0UQYcVJ0d94QqUl80E4V2pzVD_-KoXcD0LATtuSSbrpMWYEUPsqJKGwRlfAhJick2zVvI5XTAv637JIaIiLk0KL9jFqnkWpUSFIcnXYzZuMtyh0sSHJPf6zbjvyI" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1.5px solid var(--orange);" alt="Mike Rodriguez">
+          <div class="driver-strip-info">
+            <div class="driver-strip-name">James Rivera</div>
+            <div class="driver-strip-sub">Peterbilt 389 · IL 4B2918</div>
+            <div class="driver-strip-status">
+              <span style="width:7px;height:7px;border-radius:50%;background:var(--amber);display:inline-block;"></span>
+              <span style="font-size:10px;color:var(--amber);">Dispatched · Not yet started</span>
+            </div>
+          </div>
+          <span style="color:var(--orange);font-size:13px;font-weight:600;">Change</span>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="section-title">Actions</div>
+        <div class="action-grid">
+          <div class="action-btn primary-action">
+            <div class="ab-icon">📍</div>
+            <div class="ab-label">Share Tracking</div>
+          </div>
+          <div class="action-btn">
+            <div class="ab-icon">📄</div>
+            <div class="ab-label">Rate Conf</div>
+          </div>
+          <div class="action-btn">
+            <div class="ab-icon">✏️</div>
+            <div class="ab-label">Edit Load</div>
+          </div>
+          <div class="action-btn">
+            <div class="ab-icon">❌</div>
+            <div class="ab-label">Cancel Load</div>
+          </div>
+        </div>
+
+        <!-- Load details -->
+        <div class="section-title">Load Details</div>
+        <div class="detail-section">
+          <div class="dr"><span class="dr-label">Commodity</span><span class="dr-value">Dry Goods</span></div>
+          <div class="dr"><span class="dr-label">Broker Contact</span><span class="dr-value">Mike Paulson<br>(312) 555-0190</span></div>
+          <div class="dr"><span class="dr-label">Pickup Window</span><span class="dr-value">Jun 17 · 07:00–10:00</span></div>
+          <div class="dr"><span class="dr-label">Delivery Window</span><span class="dr-value">Jun 18 · 08:00–14:00</span></div>
+          <div class="dr"><span class="dr-label">Instructions</span><span class="dr-value" style="color:var(--gray-lt);font-size:11px;">Dock 3. Call 30 min prior.</span></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">Driver picks up</div>
+  </div>
+
+  <!-- ── SCREEN 2: Load Detail — In Transit ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 2 — In Transit</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span class="back">‹ Loads</span>
+        <span class="title">Load Detail</span>
+        <span class="action">⋯</span>
+      </div>
+      <div class="phone-content">
+
+        <!-- Hero — transit -->
+        <div class="load-hero">
+          <div class="lh-header">
+            <span class="lh-id">LOAD #FF-29381</span>
+            <span class="status-chip sc-transit">In Transit</span>
+          </div>
+          <div class="lh-route">
+            <div class="route-stop-dot"></div>
+            <div style="margin-bottom:14px;">
+              <div class="stop-city">Chicago, IL</div>
+              <div class="stop-time" style="color:var(--green);">✓ Picked up Jun 17 · 09:12 AM</div>
+            </div>
+            <div class="route-stop-dot end"></div>
+            <div>
+              <div class="stop-city">Memphis, TN</div>
+              <div class="stop-time">ETA Jun 18 · 08:00–14:00</div>
+            </div>
+          </div>
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEIXBPHGbsdy-_oaTvoMmSm37s6ivPHhy3ioPZWYJKWlRwXd3ERMZ2axg2kxonKmfxkNpkYCkBT-ucnulJVOLWENZB5EMmw1RHUEl2wWtmL_tXI5wosa1gHvOGMxA75iBzitQISryQNWpuT-VozRmASiMDM-0TtHAyHBNSccWZ4Jff0w0WroYFd83kxzG4H5dtxJPG9IENFGYYNdfsmOUF9jEThGpsdVIi29Chcf7nfZHV7rVGXZbOIb8vNdxncbF2i7P_0QHxwkU" style="width:100%;height:72px;object-fit:cover;object-position:center;border-radius:8px;margin:8px 0 4px;" alt="Chicago → Memphis route map">
+          <div class="lh-rate">$1,850.00</div>
+          <div class="lh-meta">
+            <span class="meta-chip">📦 Dry Goods</span>
+            <span class="meta-chip">🚛 James Rivera</span>
+          </div>
+        </div>
+
+        <!-- Driver live -->
+        <div class="driver-strip">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0w8Jhki8Y_EIsrZgtQq_RJggrrBpzpZrnDc2GhXNJW7b6xKix0AfqDSCVDPPkIbz6oA94r35GA0rR10wvBx4aS3EGBDT3_RXKidrH9y0LDkOkMt0ev_DwGbXDegrGoL7853Pbnfnc56lPzCo0UQYcVJ0d94QqUl80E4V2pzVD_-KoXcD0LATtuSSbrpMWYEUPsqJKGwRlfAhJick2zVvI5XTAv637JIaIiLk0KL9jFqnkWpUSFIcnXYzZuMtyh0sSHJPf6zbjvyI" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1.5px solid var(--orange);" alt="Mike Rodriguez">
+          <div class="driver-strip-info">
+            <div class="driver-strip-name">James Rivera</div>
+            <div class="driver-strip-sub">Last update: Bloomington, IL · 2:14 PM</div>
+            <div class="driver-strip-status">
+              <span style="width:7px;height:7px;border-radius:50%;background:var(--teal);display:inline-block;animation:pulse2 2s infinite;"></span>
+              <span style="font-size:10px;color:var(--teal);">In Transit</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <span style="color:var(--orange);font-size:18px;cursor:pointer;">📞</span>
+            <span style="color:var(--orange);font-size:18px;cursor:pointer;">💬</span>
+          </div>
+        </div>
+
+        <!-- Status timeline -->
+        <div class="section-title">Timeline</div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-dot tl-dot-done">✓</div>
+            <div class="tl-line tl-line-done"></div>
+            <div class="tl-content">
+              <div class="tl-title">Load Created</div>
+              <div class="tl-time">Jun 16 · 3:42 PM · Via email forward</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot tl-dot-done">✓</div>
+            <div class="tl-line tl-line-done"></div>
+            <div class="tl-content">
+              <div class="tl-title">Dispatched to James Rivera</div>
+              <div class="tl-time">Jun 16 · 4:00 PM · Push sent</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot tl-dot-done">✓</div>
+            <div class="tl-line tl-line-done"></div>
+            <div class="tl-content">
+              <div class="tl-title">Picked Up · Chicago, IL</div>
+              <div class="tl-time">Jun 17 · 09:12 AM</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot tl-dot-active">🚛</div>
+            <div class="tl-line"></div>
+            <div class="tl-content">
+              <div class="tl-title" style="color:var(--orange);">In Transit</div>
+              <div class="tl-time">Last seen: Bloomington, IL · 2:14 PM</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot tl-dot-pending">4</div>
+            <div class="tl-content">
+              <div class="tl-title" style="color:var(--gray);">Delivered</div>
+              <div class="tl-sub" style="color:var(--gray);">ETA Jun 18 · 08:00–14:00</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="action-grid">
+          <div class="action-btn primary-action">
+            <div class="ab-icon">📍</div>
+            <div class="ab-label">Share Tracking</div>
+          </div>
+          <div class="action-btn">
+            <div class="ab-icon">📋</div>
+            <div class="ab-label">View Docs</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">Delivered + POD</div>
+  </div>
+
+  <!-- ── SCREEN 3: Load Detail — Delivered / Ready to Invoice ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 3 — Delivered, Docs &amp; Invoice CTA</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span class="back">‹ Loads</span>
+        <span class="title">Load Detail</span>
+        <span class="action">⋯</span>
+      </div>
+      <div class="phone-content">
+
+        <!-- Hero — delivered -->
+        <div class="load-hero" style="background:linear-gradient(135deg,#0f2e1f,#1a3528);">
+          <div class="lh-header">
+            <span class="lh-id">LOAD #FF-29381</span>
+            <span class="status-chip sc-delivered">Delivered ✓</span>
+          </div>
+          <div class="lh-route">
+            <div class="route-stop-dot"></div>
+            <div style="margin-bottom:14px;">
+              <div class="stop-city">Chicago, IL</div>
+              <div class="stop-time" style="color:var(--green);">✓ Jun 17 · 09:12 AM</div>
+            </div>
+            <div class="route-stop-dot end"></div>
+            <div>
+              <div class="stop-city">Memphis, TN</div>
+              <div class="stop-time" style="color:var(--green);">✓ Jun 18 · 11:32 AM</div>
+            </div>
+          </div>
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEIXBPHGbsdy-_oaTvoMmSm37s6ivPHhy3ioPZWYJKWlRwXd3ERMZ2axg2kxonKmfxkNpkYCkBT-ucnulJVOLWENZB5EMmw1RHUEl2wWtmL_tXI5wosa1gHvOGMxA75iBzitQISryQNWpuT-VozRmASiMDM-0TtHAyHBNSccWZ4Jff0w0WroYFd83kxzG4H5dtxJPG9IENFGYYNdfsmOUF9jEThGpsdVIi29Chcf7nfZHV7rVGXZbOIb8vNdxncbF2i7P_0QHxwkU" style="width:100%;height:72px;object-fit:cover;object-position:center;border-radius:8px;margin:8px 0 4px;" alt="Chicago → Memphis route map">
+          <div class="lh-rate">$1,850.00</div>
+          <div class="lh-meta">
+            <span class="meta-chip">📦 Dry Goods</span>
+            <span class="meta-chip">🚛 James Rivera</span>
+          </div>
+        </div>
+
+        <!-- Invoice CTA — prominent -->
+        <div style="background:rgba(244,121,32,.12);border:2px solid rgba(244,121,32,.4);border-radius:var(--radius);padding:14px;display:flex;align-items:center;gap:12px;">
+          <span style="font-size:28px;">🧾</span>
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:800;">Ready to Invoice</div>
+            <div style="font-size:11px;color:var(--gray);margin-top:2px;">Auto-filled from this load · 2 taps to send</div>
+          </div>
+          <button style="background:var(--orange);color:#fff;font-size:12px;font-weight:700;border:none;border-radius:8px;padding:9px 14px;cursor:pointer;white-space:nowrap;">Invoice →</button>
+        </div>
+
+        <!-- Complete timeline -->
+        <div class="section-title">Timeline</div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-dot tl-dot-done">✓</div>
+            <div class="tl-line tl-line-done"></div>
+            <div class="tl-content"><div class="tl-title">Created</div><div class="tl-time">Jun 16 · 3:42 PM</div></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot tl-dot-done">✓</div>
+            <div class="tl-line tl-line-done"></div>
+            <div class="tl-content"><div class="tl-title">Picked Up · Chicago, IL</div><div class="tl-time">Jun 17 · 09:12 AM</div></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot tl-dot-done">✓</div>
+            <div class="tl-line tl-line-done"></div>
+            <div class="tl-content"><div class="tl-title">Delivered · Memphis, TN</div><div class="tl-time">Jun 18 · 11:32 AM · On time</div></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot tl-dot-active">→</div>
+            <div class="tl-content"><div class="tl-title" style="color:var(--orange);">Invoice Pending</div><div class="tl-sub">Tap above to generate</div></div>
+          </div>
+        </div>
+
+        <!-- Documents -->
+        <div class="section-title">Documents</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div class="doc-item">
+            <div class="doc-icon">📄</div>
+            <div class="doc-info">
+              <div class="doc-name">Rate Confirmation</div>
+              <div class="doc-sub">RateConf_FF29381.pdf · Jun 16</div>
+            </div>
+            <span class="doc-action">View</span>
+          </div>
+          <div class="doc-item" style="border-color:rgba(46,204,113,.3);background:rgba(46,204,113,.04);">
+            <div class="doc-icon">✅</div>
+            <div class="doc-info">
+              <div class="doc-name">Proof of Delivery (BOL)</div>
+              <div class="doc-sub">BOL_FF29381.jpg · Jun 18 · 2.1 MB</div>
+            </div>
+            <span class="doc-action">Send</span>
+          </div>
+        </div>
+
+        <button class="btn green">🧾 Generate Invoice</button>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="page-footer">
+  <span>Owner sees rate, docs, timeline, driver — full context</span>
+  <span>Invoice CTA surfaces immediately on delivery</span>
+  <span>Timeline auto-fills from driver status taps</span>
+  <span style="color:rgba(143,163,184,.3);">CarrierOS Mockup 08 · June 2026</span>
+</div>
+
+</body>
+</html>

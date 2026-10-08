@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarrierOS — Customer Tracking Link</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f1e35;--navy-mid:#182c46;--navy-light:#1f3a58;--navy-card:#162033;
+  --orange:#f47920;--orange-lt:#f9a55a;--orange-dim:rgba(244,121,32,.15);
+  --white:#fff;--gray:#8fa3b8;--gray-lt:#d6e0ea;--gray-dim:rgba(214,224,234,.08);
+  --green:#2ecc71;--green-dim:rgba(46,204,113,.13);
+  --amber:#f0a500;--teal:#1abc9c;
+  --radius:14px;--radius-sm:8px;
+}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;
+  background:var(--navy);color:var(--white);
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:32px 16px 60px;
+}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(rgba(255,255,255,.018) 1px,transparent 1px);background-size:28px 28px;pointer-events:none;z-index:0;}
+.page-header{text-align:center;margin-bottom:40px;z-index:1;}
+.page-header .logo{font-size:13px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--orange);margin-bottom:6px;}
+.page-header h1{font-size:22px;font-weight:700;}
+.page-header p{font-size:13px;color:var(--gray);margin-top:4px;}
+.screens{display:flex;gap:24px;align-items:flex-start;z-index:1;flex-wrap:wrap;justify-content:center;width:100%;max-width:1280px;}
+.phone{display:flex;flex-direction:column;width:360px;flex-shrink:0;}
+.screen-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:10px;text-align:center;}
+.phone-frame{background:var(--navy-card);border-radius:24px;border:1.5px solid rgba(255,255,255,.08);overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.45);min-height:620px;display:flex;flex-direction:column;}
+
+/* Public page uses a lighter feel */
+.pub-frame{background:#f4f6f9;border-radius:24px;border:1.5px solid rgba(255,255,255,.08);overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.45);min-height:620px;display:flex;flex-direction:column;}
+
+/* Carrier header on public page */
+.pub-carrier-header{
+  background:var(--navy);padding:16px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.pub-carrier-logo{display:flex;align-items:center;gap:10px;}
+.pub-logo-mark{width:36px;height:36px;border-radius:8px;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:18px;}
+.pub-carrier-name{font-size:15px;font-weight:800;color:#fff;}
+.pub-carrier-sub{font-size:10px;color:var(--gray);margin-top:1px;}
+.pub-powered{font-size:9px;color:rgba(255,255,255,.3);font-weight:600;letter-spacing:.5px;}
+
+/* Status hero */
+.status-hero{
+  background:linear-gradient(135deg,var(--navy),var(--navy-light));
+  padding:24px 20px;text-align:center;
+}
+.status-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(26,188,156,.15);border:1.5px solid rgba(26,188,156,.4);
+  border-radius:24px;padding:6px 14px;margin-bottom:12px;
+}
+.status-dot-pulse{
+  width:10px;height:10px;border-radius:50%;background:var(--teal);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(26,188,156,.4)}50%{box-shadow:0 0 0 6px rgba(26,188,156,0)}}
+.status-badge-text{font-size:12px;font-weight:700;color:var(--teal);}
+.status-hero-title{font-size:22px;font-weight:800;color:#fff;margin-bottom:4px;}
+.status-hero-sub{font-size:13px;color:rgba(255,255,255,.6);}
+
+/* Public body */
+.pub-body{flex:1;padding:16px;display:flex;flex-direction:column;gap:14px;background:#f4f6f9;}
+
+/* Cards for public page */
+.pub-card{background:#fff;border-radius:var(--radius);padding:16px;box-shadow:0 1px 6px rgba(0,0,0,.08);}
+.pub-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#888;margin-bottom:10px;}
+.pub-divider{height:1px;background:#e8edf2;margin:10px 0;}
+
+/* Route on public page */
+.pub-route{display:flex;flex-direction:column;gap:14px;position:relative;padding-left:20px;}
+.pub-route::before{content:'';position:absolute;left:6px;top:8px;bottom:8px;width:2px;background:linear-gradient(var(--orange),var(--teal));}
+.pub-stop{display:flex;flex-direction:column;gap:2px;}
+.pub-stop-dot{position:absolute;left:0;width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid var(--orange);}
+.pub-stop-dot.end{border-color:var(--teal);}
+.pub-city{font-size:14px;font-weight:700;color:#1a1a2e;}
+.pub-addr{font-size:11px;color:#666;}
+.pub-time{font-size:11px;font-weight:600;color:#444;margin-top:2px;}
+
+/* ETA */
+.eta-box{background:linear-gradient(135deg,#f0f8ff,#e8f4fd);border:1px solid #cde0f2;border-radius:var(--radius-sm);padding:12px;text-align:center;}
+.eta-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5a8ab0;margin-bottom:4px;}
+.eta-value{font-size:20px;font-weight:900;color:#1a1a2e;}
+.eta-sub{font-size:11px;color:#666;margin-top:2px;}
+
+/* Last known location */
+.location-row{display:flex;align-items:center;gap:10px;}
+.loc-pin{width:32px;height:32px;border-radius:8px;background:#e8f4fd;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.loc-text{}
+.loc-title{font-size:13px;font-weight:700;color:#1a1a2e;}
+.loc-sub{font-size:11px;color:#666;margin-top:1px;}
+.loc-time{font-size:10px;color:#999;margin-top:2px;}
+
+/* Status steps */
+.pub-steps{display:flex;justify-content:space-between;align-items:flex-start;gap:4px;}
+.pub-step{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}
+.pub-step-circle{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+.psc-done{background:#e8f9ef;color:var(--green);border:1.5px solid var(--green);}
+.psc-active{background:var(--teal);color:#fff;border:1.5px solid var(--teal);}
+.psc-pending{background:#f0f0f0;color:#aaa;border:1.5px solid #e0e0e0;}
+.pub-step-label{font-size:9px;color:#888;font-weight:600;text-align:center;}
+.pub-step-label.active{color:var(--teal);}
+.pub-step-label.done{color:var(--green);}
+.pub-step-line{height:2px;flex:1;background:#e0e0e0;margin-top:13px;}
+.pub-step-line.done{background:var(--green);}
+.pub-step-line.active{background:var(--teal);}
+
+/* Carrier contact */
+.contact-card{background:#fff;border-radius:var(--radius);padding:14px;box-shadow:0 1px 6px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;}
+.contact-info .carrier-contact-name{font-size:14px;font-weight:700;color:#1a1a2e;}
+.contact-info .carrier-contact-sub{font-size:11px;color:#666;margin-top:2px;}
+.contact-actions{display:flex;gap:8px;}
+.contact-action-btn{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;}
+.cab-call{background:#e8f9ef;color:var(--green);}
+.cab-msg{background:#e8f4fd;color:#2980b9;}
+
+/* Owner send screen */
+.phone-bar{background:var(--navy-mid);padding:14px 20px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.05);}
+.phone-bar .back{color:var(--orange);font-size:13px;font-weight:600;}
+.phone-bar .title{font-size:15px;font-weight:700;}
+.phone-bar .action{color:var(--orange);font-size:13px;font-weight:600;}
+.phone-content{padding:20px 16px;flex:1;display:flex;flex-direction:column;gap:14px;}
+.section-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--orange);}
+.divider{height:1px;background:rgba(255,255,255,.06);}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--orange);color:#fff;font-size:14px;font-weight:700;border-radius:var(--radius-sm);padding:13px;cursor:pointer;border:none;width:100%;}
+.btn.secondary{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);color:var(--gray-lt);}
+.btn.ghost{background:transparent;border:1.5px solid rgba(244,121,32,.4);color:var(--orange);}
+.callout{background:rgba(244,121,32,.1);border:1px solid rgba(244,121,32,.25);border-radius:8px;padding:8px 11px;font-size:11px;color:var(--orange-lt);}
+.info-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius-sm);padding:12px 14px;}
+.share-method{background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);border-radius:var(--radius);padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;}
+.sm-icon{width:40px;height:40px;border-radius:10px;background:var(--orange-dim);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.sm-title{font-size:14px;font-weight:700;}
+.sm-sub{font-size:11px;color:var(--gray);margin-top:2px;}
+
+.flow-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:80px;color:var(--gray);gap:6px;flex-shrink:0;}
+.flow-arrow .arrow-label{font-size:10px;color:var(--gray);text-align:center;max-width:64px;}
+.page-footer{margin-top:48px;text-align:center;z-index:1;font-size:11px;color:rgba(143,163,184,.4);display:flex;gap:24px;justify-content:center;flex-wrap:wrap;}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="logo">CarrierOS</div>
+  <h1>Customer Tracking Link</h1>
+  <p>Mockup 05 — Owner shares link · Customer views status · No login required</p>
+</div>
+
+<div class="screens">
+
+  <!-- ── SCREEN 1: Owner — Share Link (from load detail) ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 1 — Owner Shares Link</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span class="back">‹ Load</span>
+        <span class="title">Share Tracking</span>
+        <span></span>
+      </div>
+      <div class="phone-content">
+
+        <div style="font-size:13px;color:var(--gray);">Your customer gets real-time status updates — no login needed.</div>
+
+        <!-- Link preview -->
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-sm);padding:10px 12px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--gray);text-transform:uppercase;margin-bottom:4px;">Tracking Link</div>
+          <div style="font-size:12px;color:var(--teal);word-break:break-all;font-family:monospace;">track.carrierosapp.com/FF-29381-a8f2k</div>
+          <div style="font-size:10px;color:var(--gray);margin-top:4px;">Auto-updates when load status changes</div>
+        </div>
+
+        <!-- What customer will see -->
+        <div class="section-title">What They'll See</div>
+        <div class="info-box" style="display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span>✅</span> Load status &amp; ETA</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span>✅</span> Pickup → Delivery route</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span>✅</span> Last known location (at status updates)</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span>✅</span> Your carrier name &amp; contact</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--gray);"><span>🔒</span> Rate hidden — never visible to customer</div>
+        </div>
+
+        <!-- Share methods -->
+        <div class="section-title">Share Via</div>
+        <div class="share-method">
+          <div class="sm-icon">💬</div>
+          <div><div class="sm-title">Text / SMS</div><div class="sm-sub">Opens messages with link pre-filled</div></div>
+          <span style="color:var(--orange);margin-left:auto;font-size:18px;">›</span>
+        </div>
+        <div class="share-method">
+          <div class="sm-icon">📧</div>
+          <div><div class="sm-title">Email</div><div class="sm-sub">Fast Freight LLC · dispatch@fastfreight.com</div></div>
+          <span style="color:var(--orange);margin-left:auto;font-size:18px;">›</span>
+        </div>
+        <div class="share-method">
+          <div class="sm-icon">📋</div>
+          <div><div class="sm-title">Copy Link</div><div class="sm-sub">Paste anywhere</div></div>
+          <span style="color:var(--orange);margin-left:auto;font-size:18px;">›</span>
+        </div>
+
+        <div class="callout">Link stays active until 7 days after delivery. Customer can bookmark it.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">Customer opens link</div>
+  </div>
+
+  <!-- ── SCREEN 2: Public Tracking Page — In Transit ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 2 — Customer View (In Transit)</div>
+    <div class="pub-frame">
+
+      <!-- Carrier-branded header -->
+      <div class="pub-carrier-header">
+        <div class="pub-carrier-logo">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnXnVrRc27L3aHApsHOKdsfyeSYyvi11VKPHL-8CC1EVayK643nW7sbYLgw_IERbTHn8jHDoZkRFMuJQ2lC9Jhdc7T3gF0FbZODI2ft3YZtxW5-C327snVTkwKYSJNPFkZR4PxCjBkbbcVyo4yrlvshEFymkU3-4DTSjB9mn_SPzfDLcnTJCpMiIPoWiLsAX4pNOWkK8HHrrk2YyYo1qashVrtgfhJzLn8yvcvExsT5WyOGA7yOfS93sQQkKAvEkI-gMPbeprI21c" style="width:36px;height:36px;border-radius:8px;object-fit:cover;object-position:center 40%;" alt="Big Blue">
+          <div>
+            <div class="pub-carrier-name">Acme Trucking LLC</div>
+            <div class="pub-carrier-sub">Your carrier · DOT #8834422</div>
+          </div>
+        </div>
+        <div class="pub-powered">Powered by<br>CarrierOS</div>
+      </div>
+
+      <!-- Status hero -->
+      <div class="status-hero">
+        <div class="status-badge">
+          <div class="status-dot-pulse"></div>
+          <span class="status-badge-text">In Transit</span>
+        </div>
+        <div class="status-hero-title">Your Load Is Moving</div>
+        <div class="status-hero-sub">Chicago, IL → Memphis, TN</div>
+      </div>
+
+      <div class="pub-body">
+
+        <!-- Status steps -->
+        <div class="pub-card">
+          <div class="pub-label">Progress</div>
+          <div style="display:flex;align-items:center;gap:0;">
+            <div class="pub-step">
+              <div class="pub-step-circle psc-done">✓</div>
+              <div class="pub-step-label done">Picked Up</div>
+            </div>
+            <div class="pub-step-line done"></div>
+            <div class="pub-step">
+              <div class="pub-step-circle psc-active" style="overflow:hidden;padding:0;"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnXnVrRc27L3aHApsHOKdsfyeSYyvi11VKPHL-8CC1EVayK643nW7sbYLgw_IERbTHn8jHDoZkRFMuJQ2lC9Jhdc7T3gF0FbZODI2ft3YZtxW5-C327snVTkwKYSJNPFkZR4PxCjBkbbcVyo4yrlvshEFymkU3-4DTSjB9mn_SPzfDLcnTJCpMiIPoWiLsAX4pNOWkK8HHrrk2YyYo1qashVrtgfhJzLn8yvcvExsT5WyOGA7yOfS93sQQkKAvEkI-gMPbeprI21c" style="width:100%;height:100%;object-fit:cover;border-radius:50%;opacity:0.9;" alt="truck"></div>
+              <div class="pub-step-label active">In Transit</div>
+            </div>
+            <div class="pub-step-line"></div>
+            <div class="pub-step">
+              <div class="pub-step-circle psc-pending">3</div>
+              <div class="pub-step-label">Delivered</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ETA -->
+        <div class="pub-card">
+          <div class="pub-label">Estimated Delivery</div>
+          <div class="eta-box">
+            <div class="eta-label">ETA</div>
+            <div class="eta-value">Tomorrow, Jun 18</div>
+            <div class="eta-sub">Delivery window: 08:00 – 14:00</div>
+          </div>
+        </div>
+
+        <!-- Last location -->
+        <div class="pub-card">
+          <div class="pub-label">Last Known Location</div>
+          <div class="location-row">
+            <div class="loc-pin">📍</div>
+            <div class="loc-text">
+              <div class="loc-title">Bloomington, IL · I-55 South</div>
+              <div class="loc-sub">Shared at status update</div>
+              <div class="loc-time">Updated Jun 17 · 2:14 PM</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Route -->
+        <div class="pub-card">
+          <div class="pub-label">Route</div>
+          <div class="pub-route">
+            <div class="pub-stop-dot"></div>
+            <div class="pub-stop" style="margin-bottom:16px;">
+              <div class="pub-city">Chicago, IL</div>
+              <div class="pub-addr">123 W Adams St · 60601</div>
+              <div class="pub-time">✓ Picked up Jun 17 · 09:12 AM</div>
+            </div>
+            <div class="pub-stop-dot end"></div>
+            <div class="pub-stop">
+              <div class="pub-city">Memphis, TN</div>
+              <div class="pub-addr">901 E Brooks Rd · 38116</div>
+              <div class="pub-time">ETA Jun 18 · 08:00–14:00</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Carrier contact -->
+        <div class="contact-card">
+          <div class="contact-info">
+            <div class="carrier-contact-name">Acme Trucking LLC</div>
+            <div class="carrier-contact-sub">(312) 555-0180 · Sam Rivera</div>
+          </div>
+          <div class="contact-actions">
+            <div class="contact-action-btn cab-call">📞</div>
+            <div class="contact-action-btn cab-msg">💬</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">After delivery</div>
+  </div>
+
+  <!-- ── SCREEN 3: Public Tracking Page — Delivered ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 3 — Customer View (Delivered)</div>
+    <div class="pub-frame">
+
+      <div class="pub-carrier-header">
+        <div class="pub-carrier-logo">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnXnVrRc27L3aHApsHOKdsfyeSYyvi11VKPHL-8CC1EVayK643nW7sbYLgw_IERbTHn8jHDoZkRFMuJQ2lC9Jhdc7T3gF0FbZODI2ft3YZtxW5-C327snVTkwKYSJNPFkZR4PxCjBkbbcVyo4yrlvshEFymkU3-4DTSjB9mn_SPzfDLcnTJCpMiIPoWiLsAX4pNOWkK8HHrrk2YyYo1qashVrtgfhJzLn8yvcvExsT5WyOGA7yOfS93sQQkKAvEkI-gMPbeprI21c" style="width:36px;height:36px;border-radius:8px;object-fit:cover;object-position:center 40%;" alt="Big Blue">
+          <div>
+            <div class="pub-carrier-name">Acme Trucking LLC</div>
+            <div class="pub-carrier-sub">Your carrier · DOT #8834422</div>
+          </div>
+        </div>
+        <div class="pub-powered">Powered by<br>CarrierOS</div>
+      </div>
+
+      <!-- Delivered hero -->
+      <div class="status-hero" style="background:linear-gradient(135deg,#0f2e1f,#1a3a26);">
+        <div class="status-badge" style="background:rgba(46,204,113,.15);border-color:rgba(46,204,113,.4);">
+          <span style="color:var(--green);">✓</span>
+          <span class="status-badge-text" style="color:var(--green);">Delivered</span>
+        </div>
+        <div class="status-hero-title">Delivery Complete</div>
+        <div class="status-hero-sub">Jun 18 · 11:32 AM · Memphis, TN</div>
+      </div>
+
+      <div class="pub-body">
+
+        <!-- All done steps -->
+        <div class="pub-card">
+          <div class="pub-label">Progress</div>
+          <div style="display:flex;align-items:center;gap:0;">
+            <div class="pub-step">
+              <div class="pub-step-circle psc-done">✓</div>
+              <div class="pub-step-label done">Picked Up</div>
+            </div>
+            <div class="pub-step-line done"></div>
+            <div class="pub-step">
+              <div class="pub-step-circle psc-done">✓</div>
+              <div class="pub-step-label done">In Transit</div>
+            </div>
+            <div class="pub-step-line done"></div>
+            <div class="pub-step">
+              <div class="pub-step-circle psc-done" style="background:var(--green);color:#fff;border-color:var(--green);">✓</div>
+              <div class="pub-step-label done">Delivered</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Delivery summary -->
+        <div class="pub-card">
+          <div class="pub-label">Delivery Summary</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;font-size:12px;">
+              <span style="color:#666;">Delivered</span><span style="font-weight:700;color:#1a1a2e;">Jun 18 · 11:32 AM</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;">
+              <span style="color:#666;">Location</span><span style="font-weight:700;color:#1a1a2e;">Memphis, TN 38116</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;">
+              <span style="color:#666;">Driver</span><span style="font-weight:700;color:#1a1a2e;">James Rivera</span>
+            </div>
+            <div style="height:1px;background:#e8edf2;margin:4px 0;"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:12px;color:#666;">Proof of Delivery</span>
+              <span style="font-size:11px;font-weight:700;color:var(--green);background:#e8f9ef;padding:3px 9px;border-radius:20px;">✓ Available</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Issues? -->
+        <div style="background:#fff8e8;border:1px solid #f0d080;border-radius:var(--radius-sm);padding:12px;text-align:center;">
+          <div style="font-size:12px;font-weight:700;color:#7a5800;margin-bottom:4px;">Issue with this delivery?</div>
+          <div style="font-size:11px;color:#9a7820;">Contact Acme Trucking directly</div>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <div style="flex:1;background:#fff;border:1px solid #e0c060;border-radius:6px;padding:8px;text-align:center;font-size:12px;font-weight:600;color:#7a5800;cursor:pointer;">📞 Call</div>
+            <div style="flex:1;background:#fff;border:1px solid #e0c060;border-radius:6px;padding:8px;text-align:center;font-size:12px;font-weight:600;color:#7a5800;cursor:pointer;">💬 Text</div>
+          </div>
+        </div>
+
+        <!-- Carrier branding footer -->
+        <div style="text-align:center;padding:8px 0;">
+          <div style="font-size:11px;color:#999;">Shipment managed by</div>
+          <div style="font-size:13px;font-weight:800;color:#1a1a2e;margin-top:2px;">Acme Trucking LLC</div>
+          <div style="font-size:10px;color:#999;margin-top:2px;">Tracking powered by CarrierOS</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="page-footer">
+  <span>🚛 Carrier-branded — builds trust with shippers</span>
+  <span>🔒 Rate never shown on tracking page</span>
+  <span>📍 Location updates at status taps only (MVP — no continuous GPS)</span>
+  <span style="color:rgba(143,163,184,.3);">CarrierOS Mockup 05 · June 2026</span>
+</div>
+
+</body>
+</html>

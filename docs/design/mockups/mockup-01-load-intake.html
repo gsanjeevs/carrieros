@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarrierOS — Load Intake Flow</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f1e35;--navy-mid:#182c46;--navy-light:#1f3a58;--navy-card:#162033;
+  --orange:#f47920;--orange-lt:#f9a55a;--orange-dim:rgba(244,121,32,.15);
+  --white:#fff;--gray:#8fa3b8;--gray-lt:#d6e0ea;--gray-dim:rgba(214,224,234,.08);
+  --green:#2ecc71;--green-dim:rgba(46,204,113,.13);
+  --amber:#f0a500;--amber-dim:rgba(240,165,0,.15);
+  --red:#e55353;--teal:#1abc9c;
+  --radius:14px;--radius-sm:8px;
+}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;
+  background:var(--navy);color:var(--white);
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  padding:32px 16px 60px;
+  gap:0;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:radial-gradient(rgba(255,255,255,.018) 1px,transparent 1px);
+  background-size:28px 28px;pointer-events:none;z-index:0;
+}
+
+/* ─── HEADER ─── */
+.page-header{
+  text-align:center;margin-bottom:40px;z-index:1;
+}
+.page-header .logo{
+  font-size:13px;font-weight:800;letter-spacing:3px;text-transform:uppercase;
+  color:var(--orange);margin-bottom:6px;
+}
+.page-header h1{font-size:22px;font-weight:700;color:var(--white);}
+.page-header p{font-size:13px;color:var(--gray);margin-top:4px;}
+
+/* ─── FLOW STEPPER ─── */
+.flow-stepper{
+  display:flex;align-items:center;gap:0;margin-bottom:40px;z-index:1;
+}
+.step-node{
+  display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;
+}
+.step-circle{
+  width:32px;height:32px;border-radius:50%;border:2px solid var(--navy-light);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:var(--gray);
+  transition:all .25s;
+}
+.step-circle.done{background:var(--green);border-color:var(--green);color:#fff;}
+.step-circle.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+.step-label{font-size:10px;color:var(--gray);font-weight:600;letter-spacing:.5px;white-space:nowrap;}
+.step-label.active{color:var(--orange);}
+.step-label.done{color:var(--green);}
+.step-line{width:28px;height:2px;background:var(--navy-light);margin-bottom:16px;flex-shrink:0;}
+.step-line.done{background:var(--green);}
+
+/* ─── SCREENS CONTAINER ─── */
+.screens{
+  display:flex;gap:24px;align-items:flex-start;
+  z-index:1;flex-wrap:wrap;justify-content:center;
+  width:100%;max-width:1280px;
+}
+
+/* ─── PHONE FRAME ─── */
+.phone{
+  display:flex;flex-direction:column;
+  width:360px;flex-shrink:0;
+}
+.screen-label{
+  font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--orange);margin-bottom:10px;text-align:center;
+}
+.phone-frame{
+  background:var(--navy-card);border-radius:24px;
+  border:1.5px solid rgba(255,255,255,.08);
+  overflow:hidden;
+  box-shadow:0 8px 40px rgba(0,0,0,.45);
+  min-height:620px;
+  display:flex;flex-direction:column;
+}
+.phone-bar{
+  background:var(--navy-mid);padding:14px 20px 10px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+.phone-bar .back{color:var(--orange);font-size:13px;font-weight:600;display:flex;align-items:center;gap:4px;}
+.phone-bar .title{font-size:15px;font-weight:700;}
+.phone-bar .action{color:var(--orange);font-size:13px;font-weight:600;}
+.phone-content{padding:20px 16px;flex:1;display:flex;flex-direction:column;gap:14px;}
+
+/* ─── CARDS ─── */
+.card{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+  border-radius:var(--radius);padding:16px;
+}
+.card-sm{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+  border-radius:var(--radius-sm);padding:12px 14px;
+}
+
+/* ─── INTAKE OPTION BUTTONS ─── */
+.intake-option{
+  display:flex;align-items:center;gap:14px;
+  background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);
+  border-radius:var(--radius);padding:16px;cursor:pointer;
+  transition:all .2s;position:relative;
+}
+.intake-option.primary{border-color:rgba(244,121,32,.4);background:rgba(244,121,32,.07);}
+.intake-option .io-icon{
+  width:44px;height:44px;border-radius:10px;background:var(--orange-dim);
+  display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;
+}
+.intake-option.primary .io-icon{background:rgba(244,121,32,.2);}
+.intake-option .io-text{}
+.intake-option .io-title{font-size:14px;font-weight:700;margin-bottom:2px;}
+.intake-option .io-sub{font-size:11px;color:var(--gray);}
+.intake-option .io-badge{
+  position:absolute;top:10px;right:10px;
+  background:var(--orange);color:#fff;font-size:9px;font-weight:700;
+  letter-spacing:.5px;padding:2px 7px;border-radius:20px;text-transform:uppercase;
+}
+.intake-option.dim .io-icon{background:var(--gray-dim);}
+.intake-option.dim .io-title{color:var(--gray-lt);}
+
+/* ─── PROCESSING ANIMATION ─── */
+.processing-box{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  flex:1;gap:16px;padding:20px 0;text-align:center;
+}
+.spinner{
+  width:56px;height:56px;border-radius:50%;
+  border:3px solid rgba(244,121,32,.2);
+  border-top-color:var(--orange);
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.processing-steps{width:100%;display:flex;flex-direction:column;gap:8px;margin-top:8px;}
+.ps{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--gray);}
+.ps.done-ps{color:var(--green);}
+.ps.active-ps{color:var(--white);}
+.ps-dot{
+  width:18px;height:18px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:10px;
+}
+.ps.done-ps .ps-dot{background:var(--green-dim);color:var(--green);}
+.ps.active-ps .ps-dot{background:var(--orange-dim);color:var(--orange);}
+.ps.wait-ps .ps-dot{background:var(--gray-dim);color:var(--gray);}
+
+/* ─── EXTRACTED FIELDS ─── */
+.field-row{
+  display:flex;flex-direction:column;gap:3px;
+}
+.field-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);}
+.field-value{
+  font-size:13px;font-weight:500;color:var(--white);
+  background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.08);
+  border-radius:7px;padding:8px 10px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.field-value.amber{border-color:rgba(240,165,0,.4);background:rgba(240,165,0,.07);}
+.field-value.confirmed{border-color:rgba(46,204,113,.35);background:rgba(46,204,113,.06);}
+.field-value .flag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;}
+.field-value .flag.amber{background:var(--amber-dim);color:var(--amber);border:none;}
+.field-value .flag.ok{background:var(--green-dim);color:var(--green);border:none;}
+.section-title{
+  font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--orange);margin-top:4px;
+}
+.divider{height:1px;background:rgba(255,255,255,.06);margin:2px 0;}
+
+/* ─── CONFIRM REQUIRED ─── */
+.confirm-box{
+  background:rgba(244,121,32,.1);border:1.5px solid rgba(244,121,32,.3);
+  border-radius:var(--radius-sm);padding:10px 12px;
+  font-size:12px;color:var(--orange-lt);
+  display:flex;align-items:flex-start;gap:8px;
+}
+
+/* ─── BUTTONS ─── */
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--orange);color:#fff;
+  font-size:14px;font-weight:700;border-radius:var(--radius-sm);
+  padding:13px;cursor:pointer;border:none;width:100%;
+  letter-spacing:.3px;
+}
+.btn.secondary{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);color:var(--gray-lt);}
+.btn.green{background:var(--green);}
+.btn.ghost{background:transparent;border:1.5px solid rgba(244,121,32,.4);color:var(--orange);}
+
+/* ─── SUCCESS ─── */
+.success-icon{
+  width:64px;height:64px;border-radius:50%;background:var(--green-dim);
+  border:2px solid var(--green);
+  display:flex;align-items:center;justify-content:center;font-size:28px;
+  margin:0 auto;
+}
+.load-card{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+  border-radius:var(--radius);padding:14px;display:flex;flex-direction:column;gap:10px;
+}
+.load-card-header{display:flex;align-items:center;justify-content:space-between;}
+.load-id{font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--gray);}
+.status-chip{
+  font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;
+  background:rgba(240,165,0,.15);color:var(--amber);
+}
+.route-line{display:flex;flex-direction:column;gap:6px;position:relative;padding-left:18px;}
+.route-line::before{
+  content:'';position:absolute;left:5px;top:6px;bottom:6px;
+  width:2px;background:linear-gradient(var(--orange),var(--teal));
+}
+.route-dot{
+  position:absolute;left:0;width:12px;height:12px;border-radius:50%;
+  border:2px solid var(--orange);background:var(--navy-card);
+}
+.route-dot.end{border-color:var(--teal);top:auto;}
+.route-city{font-size:13px;font-weight:600;}
+.route-detail{font-size:11px;color:var(--gray);}
+.load-meta{display:flex;gap:10px;flex-wrap:wrap;}
+.meta-chip{
+  font-size:11px;color:var(--gray-lt);background:rgba(255,255,255,.05);
+  border-radius:6px;padding:4px 9px;font-weight:500;
+}
+
+/* ─── EMAIL PREVIEW ─── */
+.email-preview{
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+  border-radius:var(--radius-sm);padding:12px;font-size:11px;color:var(--gray);
+  font-family:'Courier New',monospace;line-height:1.7;
+}
+.email-preview .em-from{color:var(--gray-lt);font-weight:600;}
+.email-preview .em-highlight{color:var(--orange-lt);background:rgba(244,121,32,.12);padding:0 3px;border-radius:3px;}
+
+/* ─── ARROWS / ANNOTATIONS ─── */
+.flow-arrow{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding-top:80px;color:var(--gray);gap:6px;flex-shrink:0;
+}
+.flow-arrow svg{opacity:.5;}
+.flow-arrow .arrow-label{font-size:10px;color:var(--gray);text-align:center;max-width:60px;}
+
+/* ─── ANNOTATION CALLOUTS ─── */
+.callout{
+  background:rgba(244,121,32,.1);border:1px solid rgba(244,121,32,.25);
+  border-radius:8px;padding:8px 11px;font-size:11px;color:var(--orange-lt);
+  margin-top:8px;position:relative;
+}
+.callout::before{
+  content:'★';font-size:9px;margin-right:5px;color:var(--orange);
+}
+
+/* ─── FOOTER ─── */
+.page-footer{
+  margin-top:48px;text-align:center;z-index:1;
+  font-size:11px;color:rgba(143,163,184,.4);
+  display:flex;gap:24px;justify-content:center;flex-wrap:wrap;
+}
+.page-footer span{display:flex;align-items:center;gap:5px;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="page-header">
+  <div class="logo">CarrierOS</div>
+  <h1>Load Intake Flow</h1>
+  <p>Mockup 01 — Email forward → AI extraction → review → load created</p>
+</div>
+
+<!-- STEPPER -->
+<div class="flow-stepper">
+  <div class="step-node">
+    <div class="step-circle done">✓</div>
+    <div class="step-label done">Receive</div>
+  </div>
+  <div class="step-line done"></div>
+  <div class="step-node">
+    <div class="step-circle done">✓</div>
+    <div class="step-label done">Forward</div>
+  </div>
+  <div class="step-line done"></div>
+  <div class="step-node">
+    <div class="step-circle active">3</div>
+    <div class="step-label active">Extract</div>
+  </div>
+  <div class="step-line"></div>
+  <div class="step-node">
+    <div class="step-circle">4</div>
+    <div class="step-label">Review</div>
+  </div>
+  <div class="step-line"></div>
+  <div class="step-node">
+    <div class="step-circle">5</div>
+    <div class="step-label">Created</div>
+  </div>
+</div>
+
+<!-- SCREENS -->
+<div class="screens">
+
+  <!-- ── SCREEN 1: Intake Method Selection ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 1 — Choose Intake Method</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span class="action"></span>
+        <span class="title">Add Load</span>
+        <span class="action">✕</span>
+      </div>
+      <div class="phone-content">
+        <div style="font-size:13px;color:var(--gray);margin-bottom:2px;">
+          How did you receive this load?
+        </div>
+
+        <!-- Email Forward — Primary -->
+        <div class="intake-option primary">
+          <div class="io-badge">Recommended</div>
+          <div class="io-icon">📧</div>
+          <div class="io-text">
+            <div class="io-title">Forward Email</div>
+            <div class="io-sub">Forward the broker email to<br><span style="color:var(--orange-lt);font-weight:600;">loads@acme.carrierosapp.com</span></div>
+          </div>
+        </div>
+
+        <!-- Upload PDF -->
+        <div class="intake-option">
+          <div class="io-icon">📄</div>
+          <div class="io-text">
+            <div class="io-title">Upload Rate Confirmation</div>
+            <div class="io-sub">PDF or photo — AI reads any format</div>
+          </div>
+        </div>
+
+        <!-- Paste Text -->
+        <div class="intake-option">
+          <div class="io-icon">📋</div>
+          <div class="io-text">
+            <div class="io-title">Paste Text</div>
+            <div class="io-sub">Copy from SMS, WhatsApp, broker portal</div>
+          </div>
+        </div>
+
+        <!-- Manual -->
+        <div class="intake-option dim">
+          <div class="io-icon" style="font-size:18px;">✏️</div>
+          <div class="io-text">
+            <div class="io-title">Enter Manually</div>
+            <div class="io-sub">For loads received by phone call</div>
+          </div>
+        </div>
+
+        <div class="callout">Forward is fastest — your dedicated address is always ready. Works from any email app.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">Email forwarded</div>
+  </div>
+
+  <!-- ── SCREEN 2: AI Processing ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 2 — AI Extracting</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span class="back"></span>
+        <span class="title">Reading Load</span>
+        <span class="action"></span>
+      </div>
+      <div class="phone-content">
+
+        <!-- Email preview -->
+        <div class="section-title">Email Received</div>
+        <div class="email-preview">
+          <div><span class="em-from">From:</span> dispatch@fastfreight.com</div>
+          <div><span class="em-from">Subject:</span> Rate Conf #FF-29381</div>
+          <div style="margin-top:6px;">
+            Load from <span class="em-highlight">Chicago, IL 60601</span> to <span class="em-highlight">Memphis, TN 38103</span><br>
+            Pickup: <span class="em-highlight">Jun 17 @ 07:00</span><br>
+            Rate: <span class="em-highlight">$1,850.00</span> | Commodity: <span class="em-highlight">Dry Goods</span>
+          </div>
+        </div>
+
+        <!-- Processing -->
+        <div class="processing-box">
+          <div class="spinner"></div>
+          <div style="font-size:15px;font-weight:700;">Reading your email…</div>
+          <div style="font-size:12px;color:var(--gray);">Usually takes 5–10 seconds</div>
+
+          <div class="processing-steps">
+            <div class="ps done-ps">
+              <div class="ps-dot">✓</div>
+              Email received and parsed
+            </div>
+            <div class="ps done-ps">
+              <div class="ps-dot">✓</div>
+              Broker identified: Fast Freight LLC
+            </div>
+            <div class="ps active-ps">
+              <div class="ps-dot">⟳</div>
+              Extracting load details…
+            </div>
+            <div class="ps wait-ps">
+              <div class="ps-dot">·</div>
+              Validating addresses
+            </div>
+            <div class="ps wait-ps">
+              <div class="ps-dot">·</div>
+              Creating load draft
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size:11px;color:var(--gray);text-align:center;">
+          We'll notify you when it's ready to review
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">Extraction done</div>
+  </div>
+
+  <!-- ── SCREEN 3: Review Extracted Fields ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 3 — Review &amp; Confirm</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span class="back">‹ Back</span>
+        <span class="title">Review Load</span>
+        <span class="action">Edit</span>
+      </div>
+      <div class="phone-content" style="overflow-y:auto;max-height:600px;">
+
+        <!-- Confirm required banner -->
+        <div class="confirm-box">
+          ⚡ Confirm the rate and addresses before saving. Tap any field to correct it.
+        </div>
+
+        <!-- Broker -->
+        <div class="section-title">Broker</div>
+        <div class="field-row">
+          <div class="field-label">Company</div>
+          <div class="field-value confirmed">Fast Freight LLC <span class="flag ok">✓</span></div>
+        </div>
+        <div class="field-row">
+          <div class="field-label">Reference #</div>
+          <div class="field-value confirmed">FF-29381 <span class="flag ok">✓</span></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Rate — requires confirm -->
+        <div class="section-title">Rate</div>
+        <div class="field-row">
+          <div class="field-label">Agreed Rate ⚡ Confirm</div>
+          <div class="field-value amber" style="font-size:16px;font-weight:800;">
+            $1,850.00 <span class="flag amber">Review</span>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Pickup -->
+        <div class="section-title">Pickup</div>
+        <div class="field-row">
+          <div class="field-label">Address ⚡ Confirm</div>
+          <div class="field-value amber">
+            123 W Adams St, Chicago IL 60601 <span class="flag amber">Review</span>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-label">Window</div>
+          <div class="field-value confirmed">Jun 17 · 07:00 – 10:00 <span class="flag ok">✓</span></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Delivery -->
+        <div class="section-title">Delivery</div>
+        <div class="field-row">
+          <div class="field-label">Address ⚡ Confirm</div>
+          <div class="field-value amber">
+            901 E Brooks Rd, Memphis TN 38116 <span class="flag amber">Review</span>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-label">Window</div>
+          <div class="field-value confirmed">Jun 18 · 08:00 – 14:00 <span class="flag ok">✓</span></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Load details -->
+        <div class="section-title">Load Details</div>
+        <div class="field-row">
+          <div class="field-label">Commodity</div>
+          <div class="field-value confirmed">Dry Goods <span class="flag ok">✓</span></div>
+        </div>
+        <div class="field-row">
+          <div class="field-label">Weight</div>
+          <div class="field-value" style="color:var(--gray);">Not found — add manually</div>
+        </div>
+
+        <div style="margin-top:4px;display:flex;flex-direction:column;gap:10px;">
+          <button class="btn">✓ Confirm &amp; Save Load</button>
+          <button class="btn secondary">Decline Load</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">Confirmed</div>
+  </div>
+
+  <!-- ── SCREEN 4: Load Created ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 4 — Load Created ✓</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span></span>
+        <span class="title">Load Created</span>
+        <span></span>
+      </div>
+      <div class="phone-content">
+
+        <!-- Success -->
+        <div style="text-align:center;padding:10px 0 16px;">
+          <div class="success-icon">✓</div>
+          <div style="font-size:18px;font-weight:800;margin-top:14px;">Load #29381 Created</div>
+          <div style="font-size:12px;color:var(--gray);margin-top:4px;">Accepted · Ready to dispatch</div>
+        </div>
+
+        <!-- Load summary card -->
+        <div class="load-card">
+          <div class="load-card-header">
+            <span class="load-id">LOAD #FF-29381</span>
+            <span class="status-chip">Scheduled</span>
+          </div>
+
+          <!-- Route -->
+          <div class="route-line">
+            <div class="route-dot" style="top:4px;"></div>
+            <div>
+              <div class="route-city">Chicago, IL</div>
+              <div class="route-detail">Jun 17 · 07:00 – 10:00</div>
+            </div>
+            <div style="height:18px;"></div>
+            <div class="route-dot end" style="bottom:4px;position:relative;left:-18px;margin-bottom:-12px;margin-top:-12px;border-color:var(--teal);"></div>
+            <div>
+              <div class="route-city">Memphis, TN</div>
+              <div class="route-detail">Jun 18 · 08:00 – 14:00</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="load-meta">
+            <span class="meta-chip">💰 $1,850</span>
+            <span class="meta-chip">📦 Dry Goods</span>
+            <span class="meta-chip">🏢 Fast Freight LLC</span>
+          </div>
+        </div>
+
+        <!-- Next actions -->
+        <div class="section-title" style="margin-top:4px;">What's next?</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <button class="btn">🚛 Assign Driver &amp; Dispatch</button>
+          <button class="btn ghost">Share Tracking Link</button>
+          <button class="btn secondary">Back to Load List</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER LEGEND -->
+<div class="page-footer">
+  <span>🟠 Orange = requires user action</span>
+  <span>🟡 Amber = low-confidence field, review</span>
+  <span>🟢 Green = AI-extracted, confirmed</span>
+  <span style="color:rgba(143,163,184,.3);">CarrierOS Mockup 01 · June 2026</span>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarrierOS — Mockup 23: Super Admin Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --navy:#0f1923;
+  --navy-light:#1e3a5f;
+  --navy-mid:#162233;
+  --navy-muted:#4b5a6e;
+  --orange:#f97316;
+  --orange-dim:rgba(249,115,22,0.12);
+  --green:#16a34a;
+  --green-bg:#e8f9f1;
+  --green-text:#1a9e5c;
+  --amber:#d97706;
+  --amber-bg:#fff7e0;
+  --amber-text:#b37d00;
+  --red:#dc2626;
+  --red-bg:#fdecea;
+  --red-text:#c0392b;
+  --blue:#1a5eb8;
+  --blue-bg:#e8f0fe;
+  --teal:#1abc9c;
+  --card-bg:rgba(255,255,255,0.05);
+  --card-border:rgba(255,255,255,0.08);
+  --card-hover:rgba(255,255,255,0.07);
+  --divider:rgba(255,255,255,0.07);
+  --text-primary:#ffffff;
+  --text-secondary:#8898aa;
+  --text-muted:#4b5a6e;
+  --sidebar-width:256px;
+}
+
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--navy);
+  color:var(--text-primary);
+  min-height:100vh;
+  display:flex;
+  font-size:13px;
+  line-height:1.5;
+}
+
+/* ── SIDEBAR ─────────────────────────────────────────── */
+.sidebar{
+  width:var(--sidebar-width);
+  min-height:100vh;
+  background:rgba(0,0,0,0.25);
+  border-right:1px solid var(--card-border);
+  display:flex;
+  flex-direction:column;
+  position:fixed;
+  top:0;left:0;bottom:0;
+  z-index:100;
+}
+
+.sidebar-logo{
+  padding:24px 20px 18px;
+  border-bottom:1px solid var(--divider);
+}
+.logo-wordmark{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.logo-carrier{font-size:18px;font-weight:800;color:var(--orange);letter-spacing:-0.5px}
+.logo-os{font-size:18px;font-weight:800;color:white;letter-spacing:-0.5px}
+.logo-admin{font-size:10px;font-weight:700;letter-spacing:0.12em;color:var(--orange);text-transform:uppercase;margin-top:2px}
+
+.sidebar-user{
+  padding:12px 20px;
+  border-bottom:1px solid var(--divider);
+  display:flex;align-items:center;gap:10px;
+}
+.user-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--navy-light);
+  color:#93c5fd;font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.user-name{font-size:13px;font-weight:600;color:white}
+.user-role{font-size:11px;color:var(--text-secondary);margin-top:1px}
+
+.sidebar-nav{flex:1;overflow-y:auto;padding:10px 8px}
+
+.nav-section{
+  font-size:10px;font-weight:700;letter-spacing:0.1em;
+  color:var(--navy-muted);text-transform:uppercase;
+  padding:12px 12px 5px;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 12px;border-radius:6px;
+  cursor:pointer;color:var(--text-secondary);
+  font-size:13px;font-weight:500;
+  transition:all 0.12s;margin-bottom:1px;
+  position:relative;
+}
+.nav-item:hover{background:rgba(255,255,255,0.06);color:white}
+.nav-item.active{background:var(--orange-dim);color:var(--orange)}
+.nav-item .material-symbols-outlined{font-size:18px;opacity:0.8}
+.nav-item.active .material-symbols-outlined{opacity:1}
+.nav-badge{
+  margin-left:auto;
+  background:var(--red);color:white;
+  font-size:10px;font-weight:700;
+  padding:1px 6px;border-radius:10px;min-width:18px;text-align:center;
+}
+.nav-badge.amber{background:var(--amber)}
+.nav-badge.green{background:var(--green)}
+
+.sidebar-footer{
+  padding:14px 20px;border-top:1px solid var(--divider);
+  font-size:11px;color:var(--text-muted);
+}
+.sidebar-footer span{color:var(--teal);font-weight:600}
+
+/* ── MAIN ─────────────────────────────────────────────── */
+.main{
+  margin-left:var(--sidebar-width);
+  flex:1;min-height:100vh;
+  display:flex;flex-direction:column;
+}
+
+.page-header{
+  padding:20px 28px 16px;
+  border-bottom:1px solid var(--divider);
+  display:flex;align-items:center;gap:16px;
+  background:rgba(0,0,0,0.15);
+  position:sticky;top:0;z-index:50;
+}
+.page-title{font-size:18px;font-weight:700;color:white}
+.page-sub{font-size:12px;color:var(--text-secondary);margin-top:2px}
+.header-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+.page-body{flex:1;padding:24px 28px;overflow-y:auto}
+
+/* ── SCREEN VISIBILITY ────────────────────────────────── */
+.screen{display:none}
+.screen.active{display:block}
+
+/* ── KPI ROW ──────────────────────────────────────────── */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.kpi-card{
+  background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:12px;padding:16px 18px;
+}
+.kpi-label{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-secondary);margin-bottom:8px}
+.kpi-value{font-size:26px;font-weight:800;letter-spacing:-0.03em;color:white;font-variant-numeric:tabular-nums}
+.kpi-sub{font-size:11px;color:var(--text-secondary);margin-top:5px;display:flex;align-items:center;gap:5px}
+.delta{font-size:11px;font-weight:600;padding:1px 6px;border-radius:4px;display:inline-flex;align-items:center;gap:2px}
+.delta.up{background:rgba(22,163,74,0.15);color:#4ade80}
+.delta.down{background:rgba(220,38,38,0.15);color:#f87171}
+.delta.flat{background:rgba(217,119,6,0.15);color:#fbbf24}
+
+/* ── CARDS ────────────────────────────────────────────── */
+.card{
+  background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:12px;overflow:hidden;margin-bottom:16px;
+}
+.card-head{
+  padding:14px 18px;border-bottom:1px solid var(--divider);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.card-title{font-size:14px;font-weight:700;color:white}
+.card-sub{font-size:11px;color:var(--text-secondary);margin-top:2px}
+.card-action{font-size:12px;font-weight:600;color:var(--orange);cursor:pointer}
+.card-body{padding:16px 18px}
+
+/* ── BADGES / CHIPS ───────────────────────────────────── */
+.badge{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:3px 9px;border-radius:20px;
+  font-size:11px;font-weight:600;white-space:nowrap;
+}
+.badge-green{background:var(--green-bg);color:var(--green-text)}
+.badge-amber{background:var(--amber-bg);color:var(--amber-text)}
+.badge-red{background:var(--red-bg);color:var(--red-text)}
+.badge-blue{background:var(--blue-bg);color:var(--blue)}
+.badge-orange{background:#fff0e6;color:#c05a00}
+.badge-gray{background:rgba(255,255,255,0.08);color:var(--text-secondary)}
+.badge-purple{background:#f3eeff;color:#6c3abf}
+.badge-teal{background:rgba(26,188,156,0.15);color:var(--teal)}
+
+/* tier badges */
+.tier-starter{background:rgba(255,255,255,0.07);color:#8898aa;border-radius:20px;font-size:10px;font-weight:700;padding:2px 8px;letter-spacing:0.04em}
+.tier-growth{background:rgba(249,115,22,0.15);color:#fb923c;border-radius:20px;font-size:10px;font-weight:700;padding:2px 8px;letter-spacing:0.04em}
+.tier-pro{background:rgba(26,94,184,0.2);color:#60a5fa;border-radius:20px;font-size:10px;font-weight:700;padding:2px 8px;letter-spacing:0.04em}
+
+/* ── BUTTONS ──────────────────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:6px 12px;border-radius:6px;
+  font-size:12px;font-weight:600;cursor:pointer;border:none;
+  transition:all 0.12s;white-space:nowrap;
+}
+.btn-primary{background:var(--orange);color:white}
+.btn-primary:hover{background:#ea6c0a}
+.btn-ghost{background:rgba(255,255,255,0.07);color:var(--text-secondary);border:1px solid var(--card-border)}
+.btn-ghost:hover{background:rgba(255,255,255,0.12);color:white}
+.btn-danger{background:rgba(220,38,38,0.15);color:#f87171;border:1px solid rgba(220,38,38,0.2)}
+.btn-success{background:rgba(22,163,74,0.15);color:#4ade80;border:1px solid rgba(22,163,74,0.2)}
+.btn-sm{padding:4px 9px;font-size:11px}
+
+/* ── TABLE ────────────────────────────────────────────── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;
+  color:var(--text-secondary);padding:0 12px 10px;text-align:left;
+  border-bottom:1px solid var(--divider);
+}
+th.right{text-align:right}
+td{
+  padding:11px 12px;border-bottom:1px solid var(--divider);
+  font-size:13px;color:var(--text-primary);vertical-align:middle;
+}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,0.025)}
+td.right{text-align:right;font-variant-numeric:tabular-nums}
+td.mono{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary)}
+
+/* ── HEALTH SCORE BAR ─────────────────────────────────── */
+.health-bar{width:60px;height:6px;border-radius:3px;background:rgba(255,255,255,0.1);overflow:hidden}
+.health-fill{height:100%;border-radius:3px;transition:width 0.3s}
+.health-high .health-fill{background:var(--green)}
+.health-mid .health-fill{background:var(--amber)}
+.health-low .health-fill{background:var(--red)}
+
+/* ── EXCEPTION CARDS ──────────────────────────────────── */
+.exception-group{margin-bottom:20px}
+.exception-group-header{
+  font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:10px;
+  display:flex;align-items:center;gap:8px;
+}
+.exc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+.exc-card{
+  background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:10px;padding:14px 16px;margin-bottom:8px;
+  display:flex;align-items:flex-start;gap:14px;
+  transition:all 0.12s;cursor:default;
+}
+.exc-card:hover{background:var(--card-hover);border-color:rgba(255,255,255,0.13)}
+.exc-card.critical{border-left:3px solid var(--red)}
+.exc-card.high{border-left:3px solid var(--orange)}
+.exc-card.medium{border-left:3px solid var(--amber)}
+.exc-card.low{border-left:3px solid var(--blue)}
+
+.exc-icon{
+  width:34px;height:34px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;margin-top:1px;
+}
+.exc-icon.red{background:rgba(220,38,38,0.15);color:#f87171}
+.exc-icon.orange{background:var(--orange-dim);color:var(--orange)}
+.exc-icon.amber{background:rgba(217,119,6,0.15);color:#fbbf24}
+.exc-icon.blue{background:rgba(26,94,184,0.15);color:#60a5fa}
+.exc-icon.green{background:rgba(22,163,74,0.15);color:#4ade80}
+
+.exc-body{flex:1;min-width:0}
+.exc-org{font-size:13px;font-weight:700;color:white;display:flex;align-items:center;gap:7px}
+.exc-signal{font-size:12px;color:var(--text-secondary);margin-top:3px;line-height:1.4}
+.exc-meta{font-size:11px;color:var(--text-muted);margin-top:5px}
+.exc-actions{display:flex;gap:6px;flex-shrink:0;align-items:flex-start;margin-top:2px}
+
+/* ── SEARCH / FILTER BAR ─────────────────────────────── */
+.filter-bar{
+  display:flex;align-items:center;gap:10px;margin-bottom:18px;
+  flex-wrap:wrap;
+}
+.search-box{
+  display:flex;align-items:center;gap:8px;
+  background:var(--card-bg);border:1px solid var(--card-border);
+  border-radius:7px;padding:7px 12px;flex:1;min-width:200px;max-width:320px;
+}
+.search-box input{
+  background:none;border:none;outline:none;
+  color:white;font-size:13px;font-family:inherit;width:100%;
+}
+.search-box input::placeholder{color:var(--text-muted)}
+.search-box .material-symbols-outlined{font-size:16px;color:var(--text-muted)}
+.filter-chip{
+  padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;
+  cursor:pointer;border:1px solid var(--card-border);
+  color:var(--text-secondary);background:none;transition:all 0.12s;
+}
+.filter-chip:hover{border-color:rgba(255,255,255,0.2);color:white}
+.filter-chip.active{background:var(--orange-dim);border-color:var(--orange);color:var(--orange)}
+
+/* ── GRID LAYOUTS ─────────────────────────────────────── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.col-2-1{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+
+/* ── ADOPTION CHECKLIST ───────────────────────────────── */
+.adoption-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--divider);
+}
+.adoption-item:last-child{border-bottom:none}
+.adopt-check{
+  width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;flex-shrink:0;
+}
+.adopt-check.done{background:rgba(22,163,74,0.2);color:#4ade80}
+.adopt-check.todo{background:rgba(255,255,255,0.07);color:var(--text-muted)}
+.adopt-label{font-size:13px;flex:1}
+.adopt-label.done{color:var(--text-secondary);text-decoration:line-through}
+.adopt-date{font-size:11px;color:var(--text-muted)}
+
+/* ── TIMELINE ─────────────────────────────────────────── */
+.timeline-item{
+  display:flex;gap:12px;padding:9px 0;
+  border-bottom:1px solid var(--divider);
+}
+.timeline-item:last-child{border-bottom:none}
+.tl-dot{
+  width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;flex-shrink:0;margin-top:1px;
+}
+.tl-body{flex:1;min-width:0}
+.tl-title{font-size:13px;color:white}
+.tl-meta{font-size:11px;color:var(--text-muted);margin-top:2px}
+
+/* ── PIPELINE CARD ────────────────────────────────────── */
+.pipeline-row{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 16px;border-bottom:1px solid var(--divider);
+  transition:all 0.12s;
+}
+.pipeline-row:last-child{border-bottom:none}
+.pipeline-row:hover{background:rgba(255,255,255,0.025)}
+.countdown{
+  font-size:22px;font-weight:800;letter-spacing:-0.03em;
+  font-variant-numeric:tabular-nums;min-width:36px;text-align:right;
+}
+.countdown.urgent{color:var(--red)}
+.countdown.warning{color:var(--amber)}
+.countdown.ok{color:var(--green)}
+
+/* ── ACTIVITY FEED ────────────────────────────────────── */
+.feed-item{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:11px 16px;border-bottom:1px solid var(--divider);
+}
+.feed-item:last-child{border-bottom:none}
+.feed-item:hover{background:rgba(255,255,255,0.02)}
+.feed-icon{
+  width:28px;height:28px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0;
+}
+.feed-body{flex:1;min-width:0}
+.feed-text{font-size:13px;color:var(--text-primary);line-height:1.4}
+.feed-text strong{color:white;font-weight:600}
+.feed-meta{font-size:11px;color:var(--text-muted);margin-top:3px;display:flex;gap:12px}
+.feed-time{margin-left:auto;font-size:11px;color:var(--text-muted);flex-shrink:0;margin-top:2px}
+
+/* ── PROGRESS BAR ─────────────────────────────────────── */
+.progress-bar{height:4px;border-radius:2px;background:rgba(255,255,255,0.08);overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;border-radius:2px;background:var(--orange)}
+
+/* ── STATUS DOT ───────────────────────────────────────── */
+.status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot-green{background:var(--green)}
+.dot-amber{background:var(--amber)}
+.dot-red{background:var(--red)}
+.dot-gray{background:var(--text-muted)}
+
+/* ── ORG AVATAR ───────────────────────────────────────── */
+.org-avatar{
+  width:32px;height:32px;border-radius:8px;
+  background:var(--navy-light);
+  color:#93c5fd;font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+
+/* ── NOTE BOX ─────────────────────────────────────────── */
+.note-box{
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--card-border);border-radius:8px;
+  padding:10px 12px;font-size:12px;color:var(--text-secondary);
+  line-height:1.5;margin-bottom:8px;
+}
+.note-meta{font-size:10px;color:var(--text-muted);margin-top:5px}
+
+/* ── DIVIDER ──────────────────────────────────────────── */
+.divider{height:1px;background:var(--divider);margin:16px 0}
+
+/* ── INFO ROW ─────────────────────────────────────────── */
+.info-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 0;border-bottom:1px solid var(--divider);
+  font-size:13px;
+}
+.info-row:last-child{border-bottom:none}
+.info-label{color:var(--text-secondary)}
+.info-val{color:white;font-weight:500;text-align:right}
+
+/* ── BUILD SPEC PANEL ─────────────────────────────────── */
+.spec-panel{
+  display:none;
+  position:fixed;right:0;top:0;bottom:0;width:380px;
+  background:#0a1118;border-left:1px solid var(--card-border);
+  z-index:200;overflow-y:auto;padding:20px;
+  font-size:12px;
+}
+.spec-panel.open{display:block}
+.spec-close{
+  float:right;cursor:pointer;color:var(--text-secondary);
+  font-size:18px;padding:2px 6px;
+}
+.spec-panel h3{font-size:13px;font-weight:700;color:var(--orange);margin:14px 0 8px;text-transform:uppercase;letter-spacing:0.06em}
+.spec-panel h3:first-of-type{margin-top:0}
+.spec-table{width:100%;border-collapse:collapse;margin-bottom:12px}
+.spec-table th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);padding:4px 8px;border-bottom:1px solid var(--divider)}
+.spec-table td{padding:5px 8px;font-size:11px;color:var(--text-secondary);border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:top}
+.spec-table td:first-child{color:white;font-weight:500;white-space:nowrap}
+.spec-table code{font-family:'JetBrains Mono',monospace;font-size:10px;color:#60a5fa;background:rgba(96,165,250,0.08);padding:1px 4px;border-radius:3px}
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SIDEBAR
+═══════════════════════════════════════════════════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-wordmark">
+      <span class="logo-carrier">Carrier</span><span class="logo-os">OS</span>
+    </div>
+    <div class="logo-admin">Super Admin</div>
+  </div>
+
+  <div class="sidebar-user">
+    <div class="user-avatar">SG</div>
+    <div>
+      <div class="user-name">Sanjeev G.</div>
+      <div class="user-role">Founder · Full Access</div>
+    </div>
+  </div>
+
+  <div class="sidebar-nav">
+    <div class="nav-section">Operations</div>
+    <div class="nav-item active" onclick="showScreen('triage')">
+      <span class="material-symbols-outlined">warning</span>
+      Triage Queue
+      <span class="nav-badge">14</span>
+    </div>
+    <div class="nav-item" onclick="showScreen('health')">
+      <span class="material-symbols-outlined">favorite</span>
+      Customer Health
+    </div>
+
+    <div class="nav-section">Revenue</div>
+    <div class="nav-item" onclick="showScreen('billing')">
+      <span class="material-symbols-outlined">credit_card</span>
+      Billing & Payments
+      <span class="nav-badge">5</span>
+    </div>
+    <div class="nav-item" onclick="showScreen('pipeline')">
+      <span class="material-symbols-outlined">trending_up</span>
+      Sales Pipeline
+    </div>
+
+    <div class="nav-section">System</div>
+    <div class="nav-item" onclick="showScreen('audit')">
+      <span class="material-symbols-outlined">history</span>
+      Audit & Activity
+    </div>
+    <div class="nav-item" onclick="showScreen('flags')">
+      <span class="material-symbols-outlined">flag</span>
+      Feature Flags
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    System <span>● Healthy</span> · v1.0.4
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 1 — TRIAGE QUEUE
+═══════════════════════════════════════════════════════════ -->
+<main class="main">
+
+<div id="screen-triage" class="screen active">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Triage Queue</div>
+      <div class="page-sub">14 items need attention · Updated just now</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost"><span class="material-symbols-outlined" style="font-size:15px">filter_list</span> Filter</button>
+      <button class="btn btn-ghost"><span class="material-symbols-outlined" style="font-size:15px">refresh</span> Refresh</button>
+      <button class="btn btn-primary" onclick="toggleSpec()"><span class="material-symbols-outlined" style="font-size:15px">description</span> Build Spec</button>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <!-- KPI summary -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">Active Orgs</div>
+        <div class="kpi-value">23</div>
+        <div class="kpi-sub"><span class="delta up">↑ 3</span> this month</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">MRR</div>
+        <div class="kpi-value">$1,847</div>
+        <div class="kpi-sub"><span class="delta up">↑ 12%</span> vs last month</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">At-Risk Orgs</div>
+        <div class="kpi-value" style="color:#f87171">7</div>
+        <div class="kpi-sub"><span class="delta down">↑ 2</span> since last week</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Failed Payments</div>
+        <div class="kpi-value" style="color:#f87171">3</div>
+        <div class="kpi-sub">$297 revenue at risk</div>
+      </div>
+    </div>
+
+    <!-- CRITICAL -->
+    <div class="exception-group">
+      <div class="exception-group-header">
+        <div class="exc-dot" style="background:var(--red)"></div>
+        Critical — Act Today (3)
+      </div>
+
+      <div class="exc-card critical">
+        <div class="exc-icon red"><span class="material-symbols-outlined">credit_card_off</span></div>
+        <div class="exc-body">
+          <div class="exc-org">Sunrise Logistics LLC <span class="tier-growth">GROWTH</span></div>
+          <div class="exc-signal">Payment failed · Visa ending 4242 declined 3 days ago. 2nd retry also failed. $99/mo at risk.</div>
+          <div class="exc-meta">Last login: 2 days ago · 6 active loads</div>
+        </div>
+        <div class="exc-actions">
+          <button class="btn btn-ghost btn-sm">Email</button>
+          <button class="btn btn-danger btn-sm">Suspend</button>
+          <button class="btn btn-success btn-sm">Retry</button>
+        </div>
+      </div>
+
+      <div class="exc-card critical">
+        <div class="exc-icon red"><span class="material-symbols-outlined">credit_card_off</span></div>
+        <div class="exc-body">
+          <div class="exc-org">Norte Freight Inc <span class="tier-growth">GROWTH</span></div>
+          <div class="exc-signal">Card expired Dec 2024 · No update in 18 days. $99/mo at risk. 4 open loads not invoiced.</div>
+          <div class="exc-meta">Last login: 5 days ago · Trial converted Nov 2024</div>
+        </div>
+        <div class="exc-actions">
+          <button class="btn btn-ghost btn-sm">Email</button>
+          <button class="btn btn-ghost btn-sm">Call</button>
+          <button class="btn btn-danger btn-sm">Grace →</button>
+        </div>
+      </div>
+
+      <div class="exc-card critical">
+        <div class="exc-icon red"><span class="material-symbols-outlined">person_cancel</span></div>
+        <div class="exc-body">
+          <div class="exc-org">Balwinder Transport <span class="tier-starter">STARTER</span></div>
+          <div class="exc-signal">No login in 22 days after active start. Created 2 loads then went silent. Churn risk.</div>
+          <div class="exc-meta">Signed up: 38 days ago · Last load created: 22 days ago</div>
+        </div>
+        <div class="exc-actions">
+          <button class="btn btn-ghost btn-sm">View Org</button>
+          <button class="btn btn-primary btn-sm">Send Nudge</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HIGH -->
+    <div class="exception-group">
+      <div class="exception-group-header">
+        <div class="exc-dot" style="background:var(--orange)"></div>
+        High Priority — Act This Week (5)
+      </div>
+
+      <div class="exc-card high">
+        <div class="exc-icon orange"><span class="material-symbols-outlined">schedule</span></div>
+        <div class="exc-body">
+          <div class="exc-org">Gill Brothers Carriers <span class="tier-starter">STARTER</span></div>
+          <div class="exc-signal">Trial expires in <strong style="color:var(--orange)">4 days</strong> · Never created an invoice. 8 delivered loads sitting uninvoiced. ~$12K in receivables.</div>
+          <div class="exc-meta">High load volume · Upgrade candidate · Last login: yesterday</div>
+        </div>
+        <div class="exc-actions">
+          <button class="btn btn-ghost btn-sm">View Org</button>
+          <button class="btn btn-primary btn-sm">Offer Growth</button>
+        </div>
+      </div>
+
+      <div class="exc-card high">
+        <div class="exc-icon orange"><span class="material-symbols-outlined">schedule</span></div>
+        <div class="exc-body">
+          <div class="exc-org">Desert Star Trucking <span class="tier-starter">STARTER</span></div>
+          <div class="exc-signal">Trial expires in <strong style="color:var(--orange)">6 days</strong> · Only 1 load created. Onboarding incomplete — no truck or customer added.</div>
+          <div class="exc-meta">Signed up 24 days ago · Last login: 3 days ago</div>
+        </div>
+        <div class="exc-actions">
+          <button class="btn btn-ghost btn-sm">View Org</button>
+          <button class="btn btn-ghost btn-sm">Email</button>
+          <button class="btn btn-success btn-sm">Extend 7d</button>
+        </div>
+      </div>
+
+      <div class="exc-card high">
+        <div class="exc-icon orange"><span class="material-symbols-outlined">trending_down</span></div>
+        <div class="exc-body">
+          <div class="exc-org">Pacific Rim Logistics <span class="tier-growth">GROWTH</span></div>
+          <div class="exc-signal">Load volume dropped 60% this month (3 vs 8 avg). Revenue trend down. Team not using dispatcher feature despite Growth tier.</div>
+          <div class="exc-meta">Paying customer · 8 months · At upgrade risk → downgrade risk</div>
+        </div>
+        <div class="exc-actions">
+          <button class="btn btn-ghost btn-sm">View Org</button>
+          <button class="btn btn-primary btn-sm">Schedule Call</button>
+        </div>
+      </div>
+
+      <div class="exc-card high">
+        <div class="exc-icon orange"><span class="material-symbols-outlined">person_alert</span></div>
+        <div class="exc-body">
+          <div class="exc-org">Jaspal Dhaliwal O/O <span class="tier-starter">STARTER</span></div>
+          <div class="exc-signal">Solo operator. Has 12 loads dispatched, never sent an invoice. Potential invoice feature education needed.</div>
+          <div class="exc-meta">Active user · Daily logins · High engagement, low breadth</div>
+        </div>
+        <div class="exc-actions">
+          <button class="btn btn-ghost btn-sm">View Org</button>
+          <button class="btn btn-ghost btn-sm">Send Tips</button>
+        </div>
+      </div>
+
+      <div class="exc-card high">
+        <div class="exc-icon orange"><span class="material-symbols-outlined">supervisor_account</span></div>
+        <div class="exc-body">
+          <div class="exc-org">Mountain Pass Transport <span class="tier-growth">GROWTH</span></div>
+          <div class="exc-signal">Owner is sole user — dispatcher and finance seats paid for but never invited anyone. Growth features unused.</div>
+          <div class="exc-meta">3 months on Growth · Paying for features they don't use</div>
+        </div>
+        <div class="exc-actions">
+          <button class="btn btn-ghost btn-sm">View Org</button>
+          <button class="btn btn-primary btn-sm">Send Invite Guide</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEDIUM -->
+    <div class="exception-group">
+      <div class="exception-group-header">
+        <div class="exc-dot" style="background:var(--amber)"></div>
+        Medium — This Week (4)
+      </div>
+
+      <div class="exc-card medium">
+        <div class="exc-icon amber"><span class="material-symbols-outlined">new_releases</span></div>
+        <div class="exc-body">
+          <div class="exc-org">Redwood Freight Co <span class="tier-starter">STARTER</span></div>
+          <div class="exc-signal">Signed up 9 days ago. Has not added a truck or created a first load. Stuck in onboarding.</div>
+          <div class="exc-meta">Last login: 2 days ago · Opened app 4 times</div>
+        </div>
+        <div class="exc-actions">
+          <button class="btn btn-ghost btn-sm">View Org</button>
+          <button class="btn btn-ghost btn-sm">Onboard Call</button>
+        </div>
+      </div>
+
+      <div class="exc-card medium">
+        <div class="exc-icon amber"><span class="material-symbols-outlined">new_releases</span></div>
+        <div class="exc-body">
+          <div class="exc-org">Singh & Sons Haulage <span class="tier-starter">STARTER</span></div>
+          <div class="exc-signal">Signed up 12 days ago. Added truck, no loads yet. Support ticket submitted 3 days ago (unanswered).</div>
+          <div class="exc-meta">⚠️ Open support ticket · Unresponded</div>
+        </div>
+        <div class="exc-actions">
+          <button class="btn btn-ghost btn-sm">View Ticket</button>
+          <button class="btn btn-primary btn-sm">Reply Now</button>
+        </div>
+      </div>
+
+      <div class="exc-card medium">
+        <div class="exc-icon amber"><span class="material-symbols-outlined">receipt_long</span></div>
+        <div class="exc-body">
+          <div class="exc-org">Cruz Refrigerated LLC <span class="tier-growth">GROWTH</span></div>
+          <div class="exc-signal">Invoice #INV-0047 ($4,200) overdue 31 days. Customer has not paid. Carrier may need assistance with collections.</div>
+          <div class="exc-meta">High-value invoice · Carrier revenue at risk</div>
+        </div>
+        <div class="exc-actions">
+          <button class="btn btn-ghost btn-sm">View Org</button>
+          <button class="btn btn-ghost btn-sm">Contact Carrier</button>
+        </div>
+      </div>
+
+      <div class="exc-card medium">
+        <div class="exc-icon amber"><span class="material-symbols-outlined">cloud_off</span></div>
+        <div class="exc-body">
+          <div class="exc-org">System · API Error Rate</div>
+          <div class="exc-signal">p95 response time elevated at 1,240ms (normal: ~180ms) on /api/extract-load since 09:00 UTC. Anthropic API latency suspected.</div>
+          <div class="exc-meta">Non-critical · Monitoring · No user reports yet</div>
+        </div>
+        <div class="exc-actions">
+          <button class="btn btn-ghost btn-sm">View Logs</button>
+          <button class="btn btn-ghost btn-sm">Status Page</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOW -->
+    <div class="exception-group">
+      <div class="exception-group-header">
+        <div class="exc-dot" style="background:var(--blue)}"></div>
+        Low — FYI / New Signups (2)
+      </div>
+      <div class="exc-card low">
+        <div class="exc-icon blue"><span class="material-symbols-outlined">celebration</span></div>
+        <div class="exc-body">
+          <div class="exc-org">Eagle Eye Freight <span class="tier-starter">STARTER</span> <span class="badge badge-blue" style="font-size:10px">New · 2 days</span></div>
+          <div class="exc-signal">New signup. Completed onboarding, added 1 truck, 1 customer. First load created yesterday. On track.</div>
+          <div class="exc-meta">Check in at day 7 · Consider proactive welcome call</div>
+        </div>
+        <div class="exc-actions">
+          <button class="btn btn-ghost btn-sm">View Org</button>
+          <button class="btn btn-success btn-sm">Welcome Email</button>
+        </div>
+      </div>
+      <div class="exc-card low">
+        <div class="exc-icon blue"><span class="material-symbols-outlined">celebration</span></div>
+        <div class="exc-body">
+          <div class="exc-org">Varma Express <span class="tier-starter">STARTER</span> <span class="badge badge-blue" style="font-size:10px">New · 1 day</span></div>
+          <div class="exc-signal">New CA pilot carrier. Onboarding complete. Truck and 3 customers added. Highly engaged — 6 sessions in first day.</div>
+          <div class="exc-meta">CA Pilot · Growth free 90 days · High potential</div>
+        </div>
+        <div class="exc-actions">
+          <button class="btn btn-ghost btn-sm">View Org</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 2 — CUSTOMER HEALTH BOARD
+═══════════════════════════════════════════════════════════ -->
+<div id="screen-health" class="screen">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Customer Health Board</div>
+      <div class="page-sub">23 carrier orgs · Sorted by health score</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost"><span class="material-symbols-outlined" style="font-size:15px">download</span> Export</button>
+      <button class="btn btn-primary" onclick="showScreen('orgdetail')"><span class="material-symbols-outlined" style="font-size:15px">add</span> Add Org</button>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <div class="filter-bar">
+      <div class="search-box">
+        <span class="material-symbols-outlined">search</span>
+        <input type="text" placeholder="Search orgs, emails, MC numbers…">
+      </div>
+      <button class="filter-chip active">All (23)</button>
+      <button class="filter-chip">🟢 Healthy (12)</button>
+      <button class="filter-chip">🟡 At-Risk (7)</button>
+      <button class="filter-chip">🔴 Critical (4)</button>
+      <button class="filter-chip">Trial (8)</button>
+      <button class="filter-chip">Starter</button>
+      <button class="filter-chip">Growth</button>
+    </div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Organization</th>
+              <th>Tier</th>
+              <th>Health</th>
+              <th>Last Active</th>
+              <th class="right">Loads / Mo</th>
+              <th class="right">MRR</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="cursor:pointer" onclick="showScreen('orgdetail')">
+              <td><div style="display:flex;align-items:center;gap:10px"><div class="org-avatar">GB</div><div><div style="font-weight:600">Gill Brothers Carriers</div><div style="font-size:11px;color:var(--text-secondary)">gill@gbcarriers.com</div></div></div></td>
+              <td><span class="tier-starter">STARTER</span></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div class="health-bar health-high"><div class="health-fill" style="width:82%"></div></div>
+                  <span style="font-size:12px;color:#4ade80;font-weight:600">82</span>
+                </div>
+              </td>
+              <td><span style="color:var(--green);font-size:12px">Yesterday</span></td>
+              <td class="right"><strong>14</strong></td>
+              <td class="right">$49</td>
+              <td><span class="badge badge-amber">Trial 4d left</span></td>
+              <td><button class="btn btn-ghost btn-sm">View</button></td>
+            </tr>
+            <tr style="cursor:pointer" onclick="showScreen('orgdetail')">
+              <td><div style="display:flex;align-items:center;gap:10px"><div class="org-avatar" style="background:#1a3a2f;color:#4ade80">VE</div><div><div style="font-weight:600">Varma Express</div><div style="font-size:11px;color:var(--text-secondary)">raj.varma@varmaexpress.ca</div></div></div></td>
+              <td><span class="tier-growth">GROWTH</span></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div class="health-bar health-high"><div class="health-fill" style="width:91%"></div></div>
+                  <span style="font-size:12px;color:#4ade80;font-weight:600">91</span>
+                </div>
+              </td>
+              <td><span style="color:var(--green);font-size:12px">Today</span></td>
+              <td class="right"><strong>6</strong></td>
+              <td class="right"><span style="color:var(--text-secondary)">CA Pilot</span></td>
+              <td><span class="badge badge-teal">CA Pilot</span></td>
+              <td><button class="btn btn-ghost btn-sm">View</button></td>
+            </tr>
+            <tr style="cursor:pointer" onclick="showScreen('orgdetail')">
+              <td><div style="display:flex;align-items:center;gap:10px"><div class="org-avatar" style="background:#2a1f3a;color:#c084fc">CR</div><div><div style="font-weight:600">Cruz Refrigerated LLC</div><div style="font-size:11px;color:var(--text-secondary)">mario@cruzrefrig.com</div></div></div></td>
+              <td><span class="tier-growth">GROWTH</span></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div class="health-bar health-mid"><div class="health-fill" style="width:61%"></div></div>
+                  <span style="font-size:12px;color:#fbbf24;font-weight:600">61</span>
+                </div>
+              </td>
+              <td><span style="font-size:12px">3 days ago</span></td>
+              <td class="right">8</td>
+              <td class="right">$99</td>
+              <td><span class="badge badge-amber">Invoice overdue</span></td>
+              <td><button class="btn btn-ghost btn-sm">View</button></td>
+            </tr>
+            <tr style="cursor:pointer" onclick="showScreen('orgdetail')">
+              <td><div style="display:flex;align-items:center;gap:10px"><div class="org-avatar" style="background:#3a1f1f;color:#f87171">SL</div><div><div style="font-weight:600">Sunrise Logistics LLC</div><div style="font-size:11px;color:var(--text-secondary)">ops@sunriselogistics.com</div></div></div></td>
+              <td><span class="tier-growth">GROWTH</span></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div class="health-bar health-low"><div class="health-fill" style="width:28%"></div></div>
+                  <span style="font-size:12px;color:#f87171;font-weight:600">28</span>
+                </div>
+              </td>
+              <td><span style="color:var(--red);font-size:12px">2 days ago</span></td>
+              <td class="right">6</td>
+              <td class="right" style="color:#f87171">$99 ⚠</td>
+              <td><span class="badge badge-red">Payment failed</span></td>
+              <td><button class="btn btn-ghost btn-sm">View</button></td>
+            </tr>
+            <tr style="cursor:pointer" onclick="showScreen('orgdetail')">
+              <td><div style="display:flex;align-items:center;gap:10px"><div class="org-avatar">BT</div><div><div style="font-weight:600">Balwinder Transport</div><div style="font-size:11px;color:var(--text-secondary)">balwinder@btransport.com</div></div></div></td>
+              <td><span class="tier-starter">STARTER</span></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div class="health-bar health-low"><div class="health-fill" style="width:19%"></div></div>
+                  <span style="font-size:12px;color:#f87171;font-weight:600">19</span>
+                </div>
+              </td>
+              <td><span style="color:var(--red);font-size:12px">22 days ago</span></td>
+              <td class="right" style="color:var(--text-muted)">0</td>
+              <td class="right">$49</td>
+              <td><span class="badge badge-red">Churning</span></td>
+              <td><button class="btn btn-ghost btn-sm">View</button></td>
+            </tr>
+            <tr style="cursor:pointer">
+              <td><div style="display:flex;align-items:center;gap:10px"><div class="org-avatar" style="background:#1a2f3a;color:#38bdf8">ML</div><div><div style="font-weight:600">Mountain Pass Transport</div><div style="font-size:11px;color:var(--text-secondary)">dave@mountainpass.com</div></div></div></td>
+              <td><span class="tier-growth">GROWTH</span></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div class="health-bar health-mid"><div class="health-fill" style="width:54%"></div></div>
+                  <span style="font-size:12px;color:#fbbf24;font-weight:600">54</span>
+                </div>
+              </td>
+              <td><span style="font-size:12px">Today</span></td>
+              <td class="right">11</td>
+              <td class="right">$99</td>
+              <td><span class="badge badge-amber">Underutilised</span></td>
+              <td><button class="btn btn-ghost btn-sm">View</button></td>
+            </tr>
+            <tr style="cursor:pointer">
+              <td><div style="display:flex;align-items:center;gap:10px"><div class="org-avatar" style="background:#1a3022;color:#4ade80">EE</div><div><div style="font-weight:600">Eagle Eye Freight</div><div style="font-size:11px;color:var(--text-secondary)">admin@eagleeye.com</div></div></div></td>
+              <td><span class="tier-starter">STARTER</span></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div class="health-bar health-high"><div class="health-fill" style="width:74%"></div></div>
+                  <span style="font-size:12px;color:#4ade80;font-weight:600">74</span>
+                </div>
+              </td>
+              <td><span style="color:var(--green);font-size:12px">Today</span></td>
+              <td class="right">3</td>
+              <td class="right">Trial</td>
+              <td><span class="badge badge-blue">New · Day 2</span></td>
+              <td><button class="btn btn-ghost btn-sm">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 3 — ORG DETAIL
+═══════════════════════════════════════════════════════════ -->
+<div id="screen-orgdetail" class="screen">
+  <div class="page-header">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="btn btn-ghost btn-sm" onclick="showScreen('health')"><span class="material-symbols-outlined" style="font-size:15px">arrow_back</span></button>
+      <div class="org-avatar" style="width:38px;height:38px;font-size:14px">GBC</div>
+      <div>
+        <div class="page-title">Gill Brothers Carriers</div>
+        <div class="page-sub">MC-847293 · Fresno, CA · Owner: Gurpreet Gill · gill@gbcarriers.com</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <span class="tier-starter" style="font-size:11px;padding:4px 10px">STARTER</span>
+      <span class="badge badge-amber">Trial · 4 days left</span>
+      <button class="btn btn-ghost btn-sm"><span class="material-symbols-outlined" style="font-size:15px">manage_accounts</span> Impersonate</button>
+      <button class="btn btn-primary btn-sm">Extend Trial</button>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <!-- KPIs -->
+    <div class="kpi-row" style="grid-template-columns:repeat(5,1fr)">
+      <div class="kpi-card">
+        <div class="kpi-label">Health Score</div>
+        <div class="kpi-value" style="color:#4ade80">82</div>
+        <div class="kpi-sub">High engagement</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Loads This Month</div>
+        <div class="kpi-value">14</div>
+        <div class="kpi-sub"><span class="delta up">↑ 4</span> vs last month</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Uninvoiced Revenue</div>
+        <div class="kpi-value" style="color:#fbbf24">$12,400</div>
+        <div class="kpi-sub">8 delivered loads</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Last Login</div>
+        <div class="kpi-value" style="font-size:18px">Yesterday</div>
+        <div class="kpi-sub">17 sessions total</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Billing</div>
+        <div class="kpi-value" style="font-size:18px">Trial</div>
+        <div class="kpi-sub">Expires Jul 25</div>
+      </div>
+    </div>
+
+    <div class="col-2-1">
+      <div>
+        <!-- Feature Adoption -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Feature Adoption</div>
+              <div class="card-sub">5 of 7 milestones complete</div>
+            </div>
+            <div style="font-size:22px;font-weight:800;color:#4ade80">71%</div>
+          </div>
+          <div class="card-body" style="padding:10px 18px">
+            <div class="adoption-item">
+              <div class="adopt-check done"><span class="material-symbols-outlined" style="font-size:13px">check</span></div>
+              <div class="adopt-label done">Completed onboarding</div>
+              <div class="adopt-date">Jul 1</div>
+            </div>
+            <div class="adoption-item">
+              <div class="adopt-check done"><span class="material-symbols-outlined" style="font-size:13px">check</span></div>
+              <div class="adopt-label done">Added first truck</div>
+              <div class="adopt-date">Jul 1</div>
+            </div>
+            <div class="adoption-item">
+              <div class="adopt-check done"><span class="material-symbols-outlined" style="font-size:13px">check</span></div>
+              <div class="adopt-label done">Added first customer</div>
+              <div class="adopt-date">Jul 2</div>
+            </div>
+            <div class="adoption-item">
+              <div class="adopt-check done"><span class="material-symbols-outlined" style="font-size:13px">check</span></div>
+              <div class="adopt-label done">Created first load</div>
+              <div class="adopt-date">Jul 2</div>
+            </div>
+            <div class="adoption-item">
+              <div class="adopt-check done"><span class="material-symbols-outlined" style="font-size:13px">check</span></div>
+              <div class="adopt-label done">Dispatched load with driver</div>
+              <div class="adopt-date">Jul 3</div>
+            </div>
+            <div class="adoption-item">
+              <div class="adopt-check todo"><span class="material-symbols-outlined" style="font-size:13px">close</span></div>
+              <div class="adopt-label" style="color:var(--amber);font-weight:600">Sent first invoice ← Stuck here</div>
+              <div class="adopt-date" style="color:var(--text-muted)">—</div>
+            </div>
+            <div class="adoption-item">
+              <div class="adopt-check todo"><span class="material-symbols-outlined" style="font-size:13px">close</span></div>
+              <div class="adopt-label">Received first payment</div>
+              <div class="adopt-date" style="color:var(--text-muted)">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Recent Activity</div>
+            <span class="card-action">View All</span>
+          </div>
+          <div style="padding:0 8px">
+            <div class="timeline-item">
+              <div class="tl-dot" style="background:rgba(249,115,22,0.15)"><span class="material-symbols-outlined" style="font-size:13px;color:var(--orange)">local_shipping</span></div>
+              <div class="tl-body"><div class="tl-title">Load LD-0014 dispatched → Mike Gill</div><div class="tl-meta">Yesterday · 2:14 PM</div></div>
+            </div>
+            <div class="timeline-item">
+              <div class="tl-dot" style="background:rgba(22,163,74,0.15)"><span class="material-symbols-outlined" style="font-size:13px;color:#4ade80">check_circle</span></div>
+              <div class="tl-body"><div class="tl-title">Load LD-0013 marked delivered</div><div class="tl-meta">Yesterday · 9:40 AM</div></div>
+            </div>
+            <div class="timeline-item">
+              <div class="tl-dot" style="background:rgba(96,165,250,0.15)"><span class="material-symbols-outlined" style="font-size:13px;color:#60a5fa">login</span></div>
+              <div class="tl-body"><div class="tl-title">Gurpreet Gill logged in · Fresno, CA</div><div class="tl-meta">Yesterday · 8:02 AM · Chrome / Mac</div></div>
+            </div>
+            <div class="timeline-item">
+              <div class="tl-dot" style="background:rgba(249,115,22,0.15)"><span class="material-symbols-outlined" style="font-size:13px;color:var(--orange)">local_shipping</span></div>
+              <div class="tl-body"><div class="tl-title">Load LD-0012 created (AI extracted)</div><div class="tl-meta">Jul 19 · 4:55 PM</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <!-- Org Info -->
+        <div class="card">
+          <div class="card-head"><div class="card-title">Org Info</div><span class="card-action">Edit</span></div>
+          <div class="card-body" style="padding:8px 18px">
+            <div class="info-row"><span class="info-label">MC Number</span><span class="info-val mono">MC-847293</span></div>
+            <div class="info-row"><span class="info-label">DOT Number</span><span class="info-val mono">3847291</span></div>
+            <div class="info-row"><span class="info-label">Location</span><span class="info-val">Fresno, CA · US</span></div>
+            <div class="info-row"><span class="info-label">Timezone</span><span class="info-val">America/Los_Angeles</span></div>
+            <div class="info-row"><span class="info-label">UOM</span><span class="info-val">Imperial</span></div>
+            <div class="info-row"><span class="info-label">Currency</span><span class="info-val">USD</span></div>
+            <div class="info-row"><span class="info-label">Signed Up</span><span class="info-val">Jul 1, 2026</span></div>
+          </div>
+        </div>
+
+        <!-- Users -->
+        <div class="card">
+          <div class="card-head"><div class="card-title">Users (2)</div><span class="card-action">+ Invite</span></div>
+          <div style="padding:4px 0">
+            <div class="pipeline-row" style="padding:10px 16px">
+              <div class="user-avatar" style="width:28px;height:28px;font-size:11px">GG</div>
+              <div style="flex:1"><div style="font-size:13px;font-weight:600">Gurpreet Gill</div><div style="font-size:11px;color:var(--text-secondary)">Owner · gill@gbcarriers.com</div></div>
+              <div class="status-dot dot-green"></div>
+            </div>
+            <div class="pipeline-row" style="padding:10px 16px">
+              <div class="user-avatar" style="width:28px;height:28px;font-size:11px;background:#1e3a5f;color:#93c5fd">MG</div>
+              <div style="flex:1"><div style="font-size:13px;font-weight:600">Mike Gill</div><div style="font-size:11px;color:var(--text-secondary)">Driver · mike@gbcarriers.com</div></div>
+              <div class="status-dot dot-amber"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card">
+          <div class="card-head"><div class="card-title">Admin Actions</div></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:7px">
+            <button class="btn btn-ghost" style="width:100%;justify-content:flex-start"><span class="material-symbols-outlined" style="font-size:16px">manage_accounts</span> Impersonate Owner</button>
+            <button class="btn btn-ghost" style="width:100%;justify-content:flex-start"><span class="material-symbols-outlined" style="font-size:16px">upgrade</span> Change Tier</button>
+            <button class="btn btn-success" style="width:100%;justify-content:flex-start"><span class="material-symbols-outlined" style="font-size:16px">calendar_add_on</span> Extend Trial 7 Days</button>
+            <button class="btn btn-ghost" style="width:100%;justify-content:flex-start"><span class="material-symbols-outlined" style="font-size:16px">email</span> Send Onboarding Email</button>
+            <button class="btn btn-danger" style="width:100%;justify-content:flex-start"><span class="material-symbols-outlined" style="font-size:16px">block</span> Suspend Org</button>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="card">
+          <div class="card-head"><div class="card-title">Notes</div><span class="card-action">+ Add</span></div>
+          <div class="card-body" style="padding:10px 18px">
+            <div class="note-box">Gurpreet called Jul 5 — asking about how to send invoices. Walked him through the flow. Said he'd try it this week. Has $12K uninvoiced. Good candidate for Growth upgrade once he invoices successfully.
+              <div class="note-meta">Sanjeev G. · Jul 5, 2026</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 4 — BILLING & PAYMENTS
+═══════════════════════════════════════════════════════════ -->
+<div id="screen-billing" class="screen">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Billing & Payments</div>
+      <div class="page-sub">5 issues require action · $446 MRR at risk</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost"><span class="material-symbols-outlined" style="font-size:15px">download</span> Export</button>
+      <button class="btn btn-ghost"><span class="material-symbols-outlined" style="font-size:15px">settings</span> Stripe Dashboard ↗</button>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">Total MRR</div>
+        <div class="kpi-value">$1,847</div>
+        <div class="kpi-sub"><span class="delta up">↑ 12%</span> vs last month</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Failed This Month</div>
+        <div class="kpi-value" style="color:#f87171">3</div>
+        <div class="kpi-sub">$297 at risk</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Cards Expiring</div>
+        <div class="kpi-value" style="color:#fbbf24">2</div>
+        <div class="kpi-sub">This month</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Grace Period</div>
+        <div class="kpi-value">1</div>
+        <div class="kpi-sub">Norte Freight · Day 18</div>
+      </div>
+    </div>
+
+    <!-- Issues -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-head">
+        <div><div class="card-title">Payment Issues</div><div class="card-sub">Requires action</div></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Organization</th>
+              <th>Issue</th>
+              <th>Amount</th>
+              <th>Days Overdue</th>
+              <th>Last Attempt</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div style="font-weight:600">Sunrise Logistics LLC</div><div style="font-size:11px;color:var(--text-secondary)">GROWTH</div></td>
+              <td>Card declined · Visa ••4242</td>
+              <td class="right" style="color:#f87171;font-variant-numeric:tabular-nums;font-weight:700">$99</td>
+              <td class="right"><span style="color:#f87171;font-weight:700">3 days</span></td>
+              <td>Jul 18 · 09:12</td>
+              <td><span class="badge badge-red">Failed ×2</span></td>
+              <td>
+                <div style="display:flex;gap:6px">
+                  <button class="btn btn-success btn-sm">Retry</button>
+                  <button class="btn btn-ghost btn-sm">Email</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><div style="font-weight:600">Norte Freight Inc</div><div style="font-size:11px;color:var(--text-secondary)">GROWTH</div></td>
+              <td>Card expired Dec 2024</td>
+              <td class="right" style="color:#f87171;font-variant-numeric:tabular-nums;font-weight:700">$99</td>
+              <td class="right"><span style="color:#f87171;font-weight:700">18 days</span></td>
+              <td>Jul 3 · 00:01</td>
+              <td><span class="badge badge-amber">Grace period</span></td>
+              <td>
+                <div style="display:flex;gap:6px">
+                  <button class="btn btn-danger btn-sm">Suspend</button>
+                  <button class="btn btn-ghost btn-sm">Email</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><div style="font-weight:600">Desert Star Trucking</div><div style="font-size:11px;color:var(--text-secondary)">STARTER</div></td>
+              <td>Card declined · Mastercard ••8811</td>
+              <td class="right" style="color:#f87171;font-variant-numeric:tabular-nums;font-weight:700">$49</td>
+              <td class="right"><span style="color:#fbbf24;font-weight:700">1 day</span></td>
+              <td>Jul 20 · 00:01</td>
+              <td><span class="badge badge-red">Failed ×1</span></td>
+              <td>
+                <div style="display:flex;gap:6px">
+                  <button class="btn btn-success btn-sm">Retry</button>
+                  <button class="btn btn-ghost btn-sm">Email</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Upcoming renewals -->
+    <div class="card">
+      <div class="card-head"><div class="card-title">Upcoming Renewals (7 days)</div></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Organization</th><th>Tier</th><th class="right">Amount</th><th>Renewal Date</th><th>Card</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><div style="font-weight:600">Gill Brothers Carriers</div></td><td><span class="tier-starter">STARTER</span></td><td class="right" style="font-variant-numeric:tabular-nums">$49</td><td>Jul 25</td><td>Visa ••7823 · 08/27</td><td><span class="badge badge-green">Good</span></td></tr>
+            <tr><td><div style="font-weight:600">Cruz Refrigerated LLC</div></td><td><span class="tier-growth">GROWTH</span></td><td class="right" style="font-variant-numeric:tabular-nums">$99</td><td>Jul 26</td><td>Amex ••1005 · 11/26</td><td><span class="badge badge-green">Good</span></td></tr>
+            <tr><td><div style="font-weight:600">Singh & Sons Haulage</div></td><td><span class="tier-starter">STARTER</span></td><td class="right" style="font-variant-numeric:tabular-nums">$49</td><td>Jul 27</td><td>Mastercard ••3341 · <span style="color:var(--amber)">09/25 ⚠</span></td><td><span class="badge badge-amber">Expiring soon</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 5 — SALES PIPELINE
+═══════════════════════════════════════════════════════════ -->
+<div id="screen-pipeline" class="screen">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Sales Pipeline</div>
+      <div class="page-sub">8 active trials · 3 upgrade candidates · $396 potential MRR</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost"><span class="material-symbols-outlined" style="font-size:15px">download</span> Export</button>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">Trials Active</div>
+        <div class="kpi-value">8</div>
+        <div class="kpi-sub">3 expiring this week</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Conversions (30d)</div>
+        <div class="kpi-value" style="color:#4ade80">4</div>
+        <div class="kpi-sub"><span class="delta up">50% trial → paid</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Upgrade Candidates</div>
+        <div class="kpi-value" style="color:var(--orange)">3</div>
+        <div class="kpi-sub">Starter → Growth</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Potential MRR</div>
+        <div class="kpi-value" style="color:#4ade80">+$297</div>
+        <div class="kpi-sub">If all convert/upgrade</div>
+      </div>
+    </div>
+
+    <!-- Trials expiring -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-head">
+        <div><div class="card-title">Trials Expiring Soon</div><div class="card-sub">Sorted by urgency + adoption</div></div>
+      </div>
+      <div>
+        <div class="pipeline-row">
+          <div class="countdown urgent">4</div>
+          <div style="font-size:10px;color:var(--text-muted);margin-right:4px">days</div>
+          <div class="org-avatar" style="width:28px;height:28px;font-size:11px">GB</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600">Gill Brothers Carriers <span class="tier-starter" style="margin-left:4px">STARTER</span></div>
+            <div style="font-size:11px;color:var(--text-secondary)">14 loads · High adoption · $12K uninvoiced · Never invoiced</div>
+            <div class="progress-bar" style="width:180px"><div class="progress-fill" style="width:82%"></div></div>
+          </div>
+          <div style="text-align:right;font-size:11px;color:var(--text-secondary);min-width:90px">Health: <strong style="color:#4ade80">82</strong></div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-sm">Extend</button>
+            <button class="btn btn-primary btn-sm">Offer Growth</button>
+          </div>
+        </div>
+        <div class="pipeline-row">
+          <div class="countdown warning">6</div>
+          <div style="font-size:10px;color:var(--text-muted);margin-right:4px">days</div>
+          <div class="org-avatar" style="width:28px;height:28px;font-size:11px">DS</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600">Desert Star Trucking <span class="tier-starter" style="margin-left:4px">STARTER</span></div>
+            <div style="font-size:11px;color:var(--text-secondary)">1 load · Low adoption · Onboarding incomplete · Card declined</div>
+            <div class="progress-bar" style="width:180px"><div class="progress-fill" style="width:22%;background:var(--red)"></div></div>
+          </div>
+          <div style="text-align:right;font-size:11px;color:var(--text-secondary);min-width:90px">Health: <strong style="color:#f87171">22</strong></div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-success btn-sm">Extend 7d</button>
+            <button class="btn btn-ghost btn-sm">Onboard Call</button>
+          </div>
+        </div>
+        <div class="pipeline-row">
+          <div class="countdown ok">11</div>
+          <div style="font-size:10px;color:var(--text-muted);margin-right:4px">days</div>
+          <div class="org-avatar" style="width:28px;height:28px;font-size:11px">EE</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600">Eagle Eye Freight <span class="tier-starter" style="margin-left:4px">STARTER</span></div>
+            <div style="font-size:11px;color:var(--text-secondary)">3 loads · Good adoption · New user · Day 2</div>
+            <div class="progress-bar" style="width:180px"><div class="progress-fill" style="width:74%"></div></div>
+          </div>
+          <div style="text-align:right;font-size:11px;color:var(--text-secondary);min-width:90px">Health: <strong style="color:#4ade80">74</strong></div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-sm">View</button>
+            <button class="btn btn-ghost btn-sm">Welcome Email</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upgrade candidates -->
+    <div class="card">
+      <div class="card-head">
+        <div><div class="card-title">Upgrade Candidates — Starter → Growth</div><div class="card-sub">High volume, underserved by current tier</div></div>
+      </div>
+      <div>
+        <div class="pipeline-row">
+          <div class="org-avatar">JD</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600">Jaspal Dhaliwal O/O <span class="tier-starter" style="margin-left:4px">STARTER</span></div>
+            <div style="font-size:11px;color:var(--text-secondary)">12 loads this month · Solo operator · Daily user · Never invoiced → needs invoice coaching + Growth value prop</div>
+          </div>
+          <div style="text-align:right;min-width:80px"><div style="font-size:18px;font-weight:800;color:var(--orange);font-variant-numeric:tabular-nums">+$50</div><div style="font-size:10px;color:var(--text-muted)">MRR uplift</div></div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-sm">View</button>
+            <button class="btn btn-primary btn-sm">Offer Growth</button>
+          </div>
+        </div>
+        <div class="pipeline-row">
+          <div class="org-avatar" style="background:#1a2f3a;color:#38bdf8">MP</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600">Mountain Pass Transport <span class="tier-growth" style="margin-left:4px">GROWTH</span></div>
+            <div style="font-size:11px;color:var(--text-secondary)">11 loads · 3-truck fleet · Owner only user on Growth · IFTA + Pro analytics would fit their volume → Pro upsell</div>
+          </div>
+          <div style="text-align:right;min-width:80px"><div style="font-size:18px;font-weight:800;color:var(--orange);font-variant-numeric:tabular-nums">+$100</div><div style="font-size:10px;color:var(--text-muted)">MRR uplift</div></div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-sm">View</button>
+            <button class="btn btn-primary btn-sm">Offer Pro</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 6 — AUDIT & ACTIVITY
+═══════════════════════════════════════════════════════════ -->
+<div id="screen-audit" class="screen">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Audit & Activity</div>
+      <div class="page-sub">All events across all orgs · Real-time</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost"><span class="material-symbols-outlined" style="font-size:15px">download</span> Export</button>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <div class="filter-bar">
+      <div class="search-box">
+        <span class="material-symbols-outlined">search</span>
+        <input type="text" placeholder="Search by org, user, event type, IP…">
+      </div>
+      <button class="filter-chip active">All Events</button>
+      <button class="filter-chip">🔐 Auth</button>
+      <button class="filter-chip">📦 Loads</button>
+      <button class="filter-chip">💳 Billing</button>
+      <button class="filter-chip">⚙️ Admin</button>
+      <button class="filter-chip">⚠️ Errors</button>
+    </div>
+
+    <div class="card">
+      <div>
+        <div class="feed-item">
+          <div class="feed-icon" style="background:rgba(249,115,22,0.12);color:var(--orange)"><span class="material-symbols-outlined" style="font-size:15px">local_shipping</span></div>
+          <div class="feed-body">
+            <div class="feed-text"><strong>Gill Brothers Carriers</strong> · Gurpreet Gill dispatched Load LD-0014 to driver Mike Gill · Truck TR-01</div>
+            <div class="feed-meta"><span>📦 Load event</span><span class="mono" style="font-size:10px">POST /api/loads/14</span></div>
+          </div>
+          <div class="feed-time">2 min ago</div>
+        </div>
+        <div class="feed-item">
+          <div class="feed-icon" style="background:rgba(96,165,250,0.12);color:#60a5fa"><span class="material-symbols-outlined" style="font-size:15px">login</span></div>
+          <div class="feed-body">
+            <div class="feed-text"><strong>Varma Express</strong> · Raj Varma logged in successfully</div>
+            <div class="feed-meta"><span>🔐 Auth</span><span>Fresno, CA · Chrome / iPhone</span><span class="mono" style="font-size:10px">IP 172.16.4.21</span></div>
+          </div>
+          <div class="feed-time">8 min ago</div>
+        </div>
+        <div class="feed-item">
+          <div class="feed-icon" style="background:rgba(220,38,38,0.12);color:#f87171"><span class="material-symbols-outlined" style="font-size:15px">credit_card_off</span></div>
+          <div class="feed-body">
+            <div class="feed-text"><strong>Sunrise Logistics LLC</strong> · Payment retry failed · Stripe charge ch_3abc declined · Visa ••4242</div>
+            <div class="feed-meta"><span>💳 Billing</span><span>Stripe webhook · charge.failed</span></div>
+          </div>
+          <div class="feed-time">14 min ago</div>
+        </div>
+        <div class="feed-item">
+          <div class="feed-icon" style="background:rgba(22,163,74,0.12);color:#4ade80"><span class="material-symbols-outlined" style="font-size:15px">check_circle</span></div>
+          <div class="feed-body">
+            <div class="feed-text"><strong>Cruz Refrigerated LLC</strong> · Load LD-0031 marked delivered by driver</div>
+            <div class="feed-meta"><span>📦 Load event</span><span class="mono" style="font-size:10px">PATCH /api/loads/31 status=delivered</span></div>
+          </div>
+          <div class="feed-time">22 min ago</div>
+        </div>
+        <div class="feed-item">
+          <div class="feed-icon" style="background:rgba(96,165,250,0.12);color:#60a5fa"><span class="material-symbols-outlined" style="font-size:15px">person_add</span></div>
+          <div class="feed-body">
+            <div class="feed-text"><strong>Eagle Eye Freight</strong> · New org onboarded · Owner: James Hawkins · Fresno, CA</div>
+            <div class="feed-meta"><span>⚙️ Admin</span><span class="mono" style="font-size:10px">POST /api/onboarding → org_id=23</span></div>
+          </div>
+          <div class="feed-time">2 hrs ago</div>
+        </div>
+        <div class="feed-item">
+          <div class="feed-icon" style="background:rgba(220,38,38,0.12);color:#f87171"><span class="material-symbols-outlined" style="font-size:15px">lock</span></div>
+          <div class="feed-body">
+            <div class="feed-text"><strong>Unknown</strong> · Failed login attempt · email: admin@carrieros.com (does not exist)</div>
+            <div class="feed-meta"><span>🔐 Auth · ⚠️ Suspicious</span><span class="mono" style="font-size:10px">IP 91.234.11.44 · Vietnam</span></div>
+          </div>
+          <div class="feed-time">3 hrs ago</div>
+        </div>
+        <div class="feed-item">
+          <div class="feed-icon" style="background:rgba(249,115,22,0.12);color:var(--orange)"><span class="material-symbols-outlined" style="font-size:15px">receipt</span></div>
+          <div class="feed-body">
+            <div class="feed-text"><strong>Mountain Pass Transport</strong> · Invoice INV-0018 ($6,400) sent to Acme Brokerage</div>
+            <div class="feed-meta"><span>📦 Invoice event</span><span>Via email · dave@mountainpass.com</span></div>
+          </div>
+          <div class="feed-time">4 hrs ago</div>
+        </div>
+        <div class="feed-item">
+          <div class="feed-icon" style="background:rgba(96,165,250,0.12);color:#60a5fa"><span class="material-symbols-outlined" style="font-size:15px">upgrade</span></div>
+          <div class="feed-body">
+            <div class="feed-text"><strong>Varma Express</strong> · Raj Varma invited dispatcher Priya Sharma via magic link</div>
+            <div class="feed-meta"><span>⚙️ Team</span><span class="mono" style="font-size:10px">admin.auth.inviteUserByEmail</span></div>
+          </div>
+          <div class="feed-time">5 hrs ago</div>
+        </div>
+      </div>
+      <div style="padding:12px 18px;border-top:1px solid var(--divider);text-align:center">
+        <button class="btn btn-ghost">Load More Events</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 7 — FEATURE FLAGS
+═══════════════════════════════════════════════════════════ -->
+<div id="screen-flags" class="screen">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Feature Flags</div>
+      <div class="page-sub">Per-org overrides · Propagate instantly</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary btn-sm"><span class="material-symbols-outlined" style="font-size:15px">add</span> New Flag</button>
+    </div>
+  </div>
+  <div class="page-body">
+    <div class="card">
+      <div class="card-head"><div class="card-title">Global Flags</div><div class="card-sub">Applied to all orgs unless overridden</div></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Flag</th><th>Description</th><th>Default</th><th>Overrides</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="mono">ai_load_extract</td><td style="color:var(--text-secondary)">Claude Haiku load extraction on paste</td><td><span class="badge badge-green">Enabled</span></td><td style="color:var(--text-secondary)">None</td><td><button class="btn btn-ghost btn-sm">Edit</button></td></tr>
+            <tr><td class="mono">invoice_flow</td><td style="color:var(--text-secondary)">Invoice generation and sending</td><td><span class="badge badge-green">Enabled</span></td><td style="color:var(--text-secondary)">None</td><td><button class="btn btn-ghost btn-sm">Edit</button></td></tr>
+            <tr><td class="mono">tracking_link</td><td style="color:var(--text-secondary)">Public /track/[token] page</td><td><span class="badge badge-amber">Beta</span></td><td>2 orgs enabled</td><td><button class="btn btn-ghost btn-sm">Edit</button></td></tr>
+            <tr><td class="mono">team_invite</td><td style="color:var(--text-secondary)">Magic link team invites (dispatcher/finance)</td><td><span class="badge badge-amber">Beta</span></td><td>Growth+ only</td><td><button class="btn btn-ghost btn-sm">Edit</button></td></tr>
+            <tr><td class="mono">ifta_reports</td><td style="color:var(--text-secondary)">IFTA mileage reporting</td><td><span class="badge badge-gray">Disabled</span></td><td>None</td><td><button class="btn btn-ghost btn-sm">Edit</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════
+     BUILD SPEC PANEL
+═══════════════════════════════════════════════════════════ -->
+<div class="spec-panel" id="specPanel">
+  <div>
+    <span class="spec-close" onclick="toggleSpec()">✕</span>
+    <div style="font-size:14px;font-weight:700;color:white;margin-bottom:16px">Build Spec — Super Admin</div>
+  </div>
+
+  <h3>Design Tokens Used</h3>
+  <table class="spec-table">
+    <tr><td>Page bg</td><td><code>#0f1923</code> dark.page</td></tr>
+    <tr><td>Sidebar bg</td><td><code>rgba(0,0,0,0.25)</code> over page</td></tr>
+    <tr><td>Sidebar width</td><td><code>256px</code> fixed</td></tr>
+    <tr><td>Card bg</td><td><code>rgba(255,255,255,0.05)</code></td></tr>
+    <tr><td>Card border</td><td><code>rgba(255,255,255,0.08)</code></td></tr>
+    <tr><td>Card hover</td><td><code>rgba(255,255,255,0.07)</code></td></tr>
+    <tr><td>Orange</td><td><code>#f97316</code> brand.orange</td></tr>
+    <tr><td>Status chips</td><td><code>border-radius:20px</code> rounded-pill</td></tr>
+    <tr><td>Font</td><td>Inter · JetBrains Mono for IDs</td></tr>
+    <tr><td>Icons</td><td>Material Symbols Outlined 18px nav / 16px inline</td></tr>
+    <tr><td>KPI values</td><td>26px / font-extrabold / tracking-tight</td></tr>
+  </table>
+
+  <h3>Screen 1 — Triage Queue</h3>
+  <table class="spec-table">
+    <tr><td>Data source</td><td>Aggregate query across org exceptions (see below)</td></tr>
+    <tr><td>KPI row</td><td>COUNT(orgs), SUM(mrr), COUNT(at_risk), COUNT(failed_payments)</td></tr>
+    <tr><td>Exception groups</td><td>Critical / High / Medium / Low — sorted by urgency_score DESC</td></tr>
+    <tr><td>Exc card border-left</td><td>3px solid: red/orange/amber/blue by group</td></tr>
+    <tr><td>Actions per card</td><td>Inline buttons → email, extend trial, suspend, retry payment</td></tr>
+    <tr><td>Badge count (sidebar)</td><td>COUNT(*) WHERE resolved_at IS NULL</td></tr>
+  </table>
+
+  <h3>Screen 2 — Customer Health Board</h3>
+  <table class="spec-table">
+    <tr><td>Health score</td><td>Computed: (login_recency×30 + load_velocity×35 + feature_depth×35) / 100</td></tr>
+    <tr><td>Health bar</td><td>60px wide, 6px tall, color by score: ≥70 green / ≥40 amber / &lt;40 red</td></tr>
+    <tr><td>Table sort</td><td>Default: health_score ASC (worst first)</td></tr>
+    <tr><td>Filter chips</td><td>Client-side filter on fetched data by tier / health band / trial</td></tr>
+    <tr><td>Row click</td><td>Navigate to /admin/orgs/[id]</td></tr>
+  </table>
+
+  <h3>Screen 3 — Org Detail</h3>
+  <table class="spec-table">
+    <tr><td>Route</td><td>/admin/orgs/[id]</td></tr>
+    <tr><td>KPI: uninvoiced</td><td>SUM(rate) WHERE org_id=? AND status='delivered' AND invoice_id IS NULL</td></tr>
+    <tr><td>Adoption checklist</td><td>7 milestones — check org_sequences, loads, drivers, invoices tables</td></tr>
+    <tr><td>Impersonate</td><td>createAdminClient().auth.admin.generateLink({type:'magiclink', email})</td></tr>
+    <tr><td>Change tier</td><td>PATCH carrier_details SET tier=? WHERE org_id=?</td></tr>
+    <tr><td>Notes</td><td>admin_notes table: org_id, body, created_by (admin profile_id), created_at</td></tr>
+  </table>
+
+  <h3>Screen 4 — Billing & Payments</h3>
+  <table class="spec-table">
+    <tr><td>Data source</td><td>Stripe webhooks → billing_events table (org_id, event_type, amount, status, card_last4, created_at)</td></tr>
+    <tr><td>Failed payment</td><td>billing_events WHERE event_type='charge.failed' AND resolved_at IS NULL</td></tr>
+    <tr><td>Retry</td><td>Stripe API POST /v1/charges → charge.id</td></tr>
+    <tr><td>Grace period</td><td>carrier_details.grace_period_until TIMESTAMPTZ</td></tr>
+    <tr><td>Expiring cards</td><td>Stripe customer.sources WHERE exp_month/year ≤ now+30d</td></tr>
+  </table>
+
+  <h3>Screen 5 — Sales Pipeline</h3>
+  <table class="spec-table">
+    <tr><td>Trial orgs</td><td>carrier_details WHERE tier='trial' ORDER BY trial_ends_at ASC</td></tr>
+    <tr><td>Days remaining</td><td>DATE_DIFF(trial_ends_at, now())</td></tr>
+    <tr><td>Upgrade candidate</td><td>Starter orgs WHERE loads_this_month ≥ 8 OR has_multiple_drivers</td></tr>
+    <tr><td>Extend trial</td><td>PATCH carrier_details SET trial_ends_at = trial_ends_at + interval '7 days'</td></tr>
+    <tr><td>Offer Growth</td><td>Trigger Resend email → upgrade_offer template with promo link</td></tr>
+  </table>
+
+  <h3>Screen 6 — Audit & Activity</h3>
+  <table class="spec-table">
+    <tr><td>Data source</td><td>admin_events table: org_id, user_id, event_type, metadata JSONB, ip, user_agent, created_at</td></tr>
+    <tr><td>Event types</td><td>auth.login / auth.failed / load.created / load.status / billing.* / admin.impersonate</td></tr>
+    <tr><td>Real-time</td><td>Supabase Realtime subscription on admin_events</td></tr>
+    <tr><td>Suspicious auth</td><td>Flag: country not in (US,CA,MX) OR failed_attempts ≥ 3 in 1hr</td></tr>
+    <tr><td>Export</td><td>CSV download with date range filter</td></tr>
+  </table>
+
+  <h3>New DB Tables Required</h3>
+  <table class="spec-table">
+    <tr><td>admin_notes</td><td>org_id, body, admin_user_id, created_at</td></tr>
+    <tr><td>admin_events</td><td>org_id, user_id, event_type, metadata JSONB, ip, created_at</td></tr>
+    <tr><td>billing_events</td><td>org_id, stripe_event_id, event_type, amount, status, card_last4, resolved_at</td></tr>
+    <tr><td>feature_flags</td><td>flag_key, default_enabled, description</td></tr>
+    <tr><td>org_flag_overrides</td><td>org_id, flag_key, enabled, set_by, set_at</td></tr>
+  </table>
+</div>
+
+<script>
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const s = document.getElementById('screen-' + name);
+  if (s) s.classList.add('active');
+  // highlight nav
+  const navMap = {triage:'warning',health:'favorite',orgdetail:'favorite',billing:'credit_card',pipeline:'trending_up',audit:'history',flags:'flag'};
+  if (navMap[name]) {
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if (n.querySelector('.material-symbols-outlined') && n.querySelector('.material-symbols-outlined').textContent.trim() === navMap[name]) {
+        n.classList.add('active');
+      }
+    });
+  }
+}
+
+function toggleSpec() {
+  document.getElementById('specPanel').classList.toggle('open');
+}
+
+// Filter chips
+document.querySelectorAll('.filter-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    const bar = this.closest('.filter-bar');
+    bar.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>

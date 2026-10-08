@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarrierOS — Driver App</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f1e35;--navy-mid:#182c46;--navy-light:#1f3a58;--navy-card:#162033;
+  --orange:#f47920;--orange-lt:#f9a55a;--orange-dim:rgba(244,121,32,.15);
+  --white:#fff;--gray:#8fa3b8;--gray-lt:#d6e0ea;--gray-dim:rgba(214,224,234,.08);
+  --green:#2ecc71;--green-dim:rgba(46,204,113,.13);
+  --amber:#f0a500;--amber-dim:rgba(240,165,0,.15);
+  --red:#e55353;--teal:#1abc9c;
+  --radius:14px;--radius-sm:8px;
+}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;
+  background:var(--navy);color:var(--white);
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  padding:32px 16px 60px;
+}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(rgba(255,255,255,.018) 1px,transparent 1px);background-size:28px 28px;pointer-events:none;z-index:0;}
+.page-header{text-align:center;margin-bottom:40px;z-index:1;}
+.page-header .logo{font-size:13px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--orange);margin-bottom:6px;}
+.page-header h1{font-size:22px;font-weight:700;}
+.page-header p{font-size:13px;color:var(--gray);margin-top:4px;}
+
+.screens{display:flex;gap:24px;align-items:flex-start;z-index:1;flex-wrap:wrap;justify-content:center;width:100%;max-width:1280px;}
+.phone{display:flex;flex-direction:column;width:360px;flex-shrink:0;}
+.screen-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:10px;text-align:center;}
+.phone-frame{background:var(--navy-card);border-radius:24px;border:1.5px solid rgba(255,255,255,.08);overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.45);min-height:620px;display:flex;flex-direction:column;}
+.phone-bar{background:var(--navy-mid);padding:14px 20px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.05);}
+.phone-bar .back{color:var(--orange);font-size:13px;font-weight:600;}
+.phone-bar .title{font-size:15px;font-weight:700;}
+.phone-bar .action{color:var(--orange);font-size:13px;font-weight:600;}
+.phone-content{padding:20px 16px;flex:1;display:flex;flex-direction:column;gap:14px;}
+
+/* Driver header */
+.driver-header{background:linear-gradient(135deg,var(--navy-light),var(--navy-mid));border-radius:var(--radius);padding:16px;display:flex;align-items:center;gap:12px;}
+.driver-avatar-lg{width:48px;height:48px;border-radius:50%;background:var(--orange-dim);border:2px solid var(--orange);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex-shrink:0;}
+.driver-header-info .name{font-size:16px;font-weight:800;}
+.driver-header-info .role{font-size:11px;color:var(--gray);margin-top:2px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;}
+.driver-header-info .status{display:flex;align-items:center;gap:5px;margin-top:6px;}
+.status-dot{width:8px;height:8px;border-radius:50%;}
+
+/* Status progress bar */
+.status-bar{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:14px;}
+.status-bar-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);margin-bottom:12px;}
+.status-steps{display:flex;align-items:center;gap:0;}
+.ss-step{display:flex;flex-direction:column;align-items:center;flex:1;}
+.ss-circle{width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--gray);}
+.ss-circle.done{background:var(--green);border-color:var(--green);color:#fff;}
+.ss-circle.active{background:var(--orange);border-color:var(--orange);color:#fff;box-shadow:0 0 0 4px rgba(244,121,32,.2);}
+.ss-label{font-size:9px;color:var(--gray);margin-top:4px;text-align:center;font-weight:600;}
+.ss-label.active{color:var(--orange);}
+.ss-label.done{color:var(--green);}
+.ss-line{height:2px;flex:1;background:rgba(255,255,255,.07);}
+.ss-line.done{background:var(--green);}
+
+/* Load detail rows */
+.detail-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.detail-row:last-child{border-bottom:none;}
+.detail-icon{font-size:18px;flex-shrink:0;width:24px;text-align:center;margin-top:1px;}
+.detail-content{}
+.detail-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gray);margin-bottom:2px;}
+.detail-value{font-size:13px;font-weight:600;line-height:1.4;}
+.detail-sub{font-size:11px;color:var(--gray);margin-top:2px;}
+
+/* Big status button */
+.big-status-btn{
+  background:var(--orange);border-radius:var(--radius);padding:18px;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  cursor:pointer;border:none;width:100%;
+}
+.big-status-btn .bsb-icon{font-size:24px;}
+.big-status-btn .bsb-text{}
+.big-status-btn .bsb-title{font-size:16px;font-weight:800;color:#fff;text-align:left;}
+.big-status-btn .bsb-sub{font-size:11px;color:rgba(255,255,255,.7);text-align:left;}
+.big-status-btn.green-btn{background:var(--green);}
+.big-status-btn.teal-btn{background:var(--teal);}
+
+/* POD upload */
+.pod-zone{
+  border:2px dashed rgba(255,255,255,.15);border-radius:var(--radius);
+  padding:28px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;
+}
+.pod-zone.has-photo{border-color:rgba(46,204,113,.4);background:var(--green-dim);}
+.pod-photo-thumb{width:100%;height:120px;background:linear-gradient(135deg,#243a52,#1a2c41);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:32px;}
+
+/* Section title */
+.section-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--orange);}
+.divider{height:1px;background:rgba(255,255,255,.06);}
+
+/* Buttons */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--orange);color:#fff;font-size:14px;font-weight:700;border-radius:var(--radius-sm);padding:13px;cursor:pointer;border:none;width:100%;}
+.btn.secondary{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);color:var(--gray-lt);}
+.btn.green{background:var(--green);}
+.btn.ghost{background:transparent;border:1.5px solid rgba(244,121,32,.4);color:var(--orange);}
+.btn.teal{background:var(--teal);}
+
+/* Info boxes */
+.info-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius-sm);padding:12px 14px;}
+.callout{background:rgba(244,121,32,.1);border:1px solid rgba(244,121,32,.25);border-radius:8px;padding:8px 11px;font-size:11px;color:var(--orange-lt);}
+
+/* Success */
+.success-banner{background:var(--green-dim);border:1.5px solid rgba(46,204,113,.35);border-radius:var(--radius-sm);padding:14px;text-align:center;}
+.success-banner .big{font-size:28px;}
+.success-banner .title{font-size:16px;font-weight:800;margin-top:8px;}
+.success-banner .sub{font-size:12px;color:var(--gray);margin-top:3px;}
+
+/* Upload states */
+.upload-state{display:flex;align-items:center;gap:10px;background:var(--green-dim);border:1.5px solid rgba(46,204,113,.3);border-radius:var(--radius-sm);padding:10px 12px;}
+.upload-state .us-icon{font-size:20px;}
+.upload-state .us-text{}
+.upload-state .us-title{font-size:13px;font-weight:700;color:var(--green);}
+.upload-state .us-sub{font-size:11px;color:var(--gray);margin-top:1px;}
+
+/* flow arrow */
+.flow-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:80px;color:var(--gray);gap:6px;flex-shrink:0;}
+.flow-arrow .arrow-label{font-size:10px;color:var(--gray);text-align:center;max-width:60px;}
+
+.page-footer{margin-top:48px;text-align:center;z-index:1;font-size:11px;color:rgba(143,163,184,.4);display:flex;gap:24px;justify-content:center;flex-wrap:wrap;}
+
+/* Driver mode banner */
+.driver-mode-bar{background:var(--orange);padding:6px 16px;text-align:center;font-size:11px;font-weight:700;letter-spacing:1px;}
+
+/* Contact action */
+.contact-row{display:flex;gap:8px;margin-top:4px;}
+.contact-btn{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-sm);padding:10px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="logo">CarrierOS</div>
+  <h1>Driver App</h1>
+  <p>Mockup 03 — Load details · Status tap · POD photo upload</p>
+</div>
+
+<div class="screens">
+
+  <!-- ── SCREEN 1: Driver Home (Load Assigned) ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 1 — Driver Home View</div>
+    <div class="phone-frame">
+      <div class="driver-mode-bar">🚛 DRIVER MODE — James Rivera</div>
+      <div class="phone-bar">
+        <span></span>
+        <span class="title">My Load</span>
+        <span style="font-size:18px;">👤</span>
+      </div>
+      <div class="phone-content">
+
+        <!-- Driver header -->
+        <div class="driver-header">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0w8Jhki8Y_EIsrZgtQq_RJggrrBpzpZrnDc2GhXNJW7b6xKix0AfqDSCVDPPkIbz6oA94r35GA0rR10wvBx4aS3EGBDT3_RXKidrH9y0LDkOkMt0ev_DwGbXDegrGoL7853Pbnfnc56lPzCo0UQYcVJ0d94QqUl80E4V2pzVD_-KoXcD0LATtuSSbrpMWYEUPsqJKGwRlfAhJick2zVvI5XTAv637JIaIiLk0KL9jFqnkWpUSFIcnXYzZuMtyh0sSHJPf6zbjvyI" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="Mike Rodriguez">
+          <div class="driver-header-info">
+            <div class="name">James Rivera</div>
+            <div class="role">Driver</div>
+            <div class="status">
+              <span class="status-dot" style="background:var(--orange);"></span>
+              <span style="font-size:11px;color:var(--orange-lt);font-weight:600;">Load Assigned · Action Required</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status progress -->
+        <div class="status-bar">
+          <div class="status-bar-title">Load Status</div>
+          <div class="status-steps">
+            <div class="ss-step">
+              <div class="ss-circle active">⟳</div>
+              <div class="ss-label active">Assigned</div>
+            </div>
+            <div class="ss-line"></div>
+            <div class="ss-step">
+              <div class="ss-circle">2</div>
+              <div class="ss-label">Pickup</div>
+            </div>
+            <div class="ss-line"></div>
+            <div class="ss-step">
+              <div class="ss-circle">3</div>
+              <div class="ss-label">Transit</div>
+            </div>
+            <div class="ss-line"></div>
+            <div class="ss-step">
+              <div class="ss-circle">4</div>
+              <div class="ss-label">Delivered</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pickup / delivery quick view -->
+        <div style="display:flex;gap:8px;">
+          <div style="flex:1;background:rgba(244,121,32,.07);border:1.5px solid rgba(244,121,32,.25);border-radius:var(--radius-sm);padding:10px;">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--orange);margin-bottom:3px;">PICKUP</div>
+            <div style="font-size:13px;font-weight:700;">Chicago, IL</div>
+            <div style="font-size:11px;color:var(--gray);margin-top:2px;">Jun 17 · 07:00</div>
+          </div>
+          <div style="flex:1;background:rgba(26,188,156,.07);border:1.5px solid rgba(26,188,156,.25);border-radius:var(--radius-sm);padding:10px;">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--teal);margin-bottom:3px;">DELIVERY</div>
+            <div style="font-size:13px;font-weight:700;">Memphis, TN</div>
+            <div style="font-size:11px;color:var(--gray);margin-top:2px;">Jun 18 · 08:00</div>
+          </div>
+        </div>
+
+        <!-- Big action button -->
+        <button class="big-status-btn">
+          <div class="bsb-icon">📍</div>
+          <div class="bsb-text">
+            <div class="bsb-title">Tap When You Arrive at Pickup</div>
+            <div class="bsb-sub">Updates status · Notifies dispatcher</div>
+          </div>
+          <div style="color:rgba(255,255,255,.6);font-size:18px;">›</div>
+        </button>
+
+        <!-- Load details link -->
+        <button class="btn secondary">View Full Load Details</button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">View details</div>
+  </div>
+
+  <!-- ── SCREEN 2: Load Detail View ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 2 — Load Details</div>
+    <div class="phone-frame">
+      <div class="driver-mode-bar">🚛 DRIVER MODE — James Rivera</div>
+      <div class="phone-bar">
+        <span class="back">‹ Home</span>
+        <span class="title">Load #FF-29381</span>
+        <span></span>
+      </div>
+      <div class="phone-content" style="overflow-y:auto;max-height:600px;">
+
+        <!-- Details -->
+        <div class="info-box">
+          <div class="detail-row">
+            <div class="detail-icon">📦</div>
+            <div class="detail-content">
+              <div class="detail-label">Commodity</div>
+              <div class="detail-value">Dry Goods</div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-icon">📍</div>
+            <div class="detail-content">
+              <div class="detail-label">Pickup Address</div>
+              <div class="detail-value">123 W Adams St<br>Chicago, IL 60601</div>
+              <div class="detail-sub">Jun 17 · Window: 07:00 – 10:00</div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-icon">🏁</div>
+            <div class="detail-content">
+              <div class="detail-label">Delivery Address</div>
+              <div class="detail-value">901 E Brooks Rd<br>Memphis, TN 38116</div>
+              <div class="detail-sub">Jun 18 · Window: 08:00 – 14:00</div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-icon">🏢</div>
+            <div class="detail-content">
+              <div class="detail-label">Broker</div>
+              <div class="detail-value">Fast Freight LLC</div>
+              <div class="detail-sub">Ref: FF-29381</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Broker contact -->
+        <div class="section-title">Broker Contact</div>
+        <div class="info-box">
+          <div style="font-size:13px;font-weight:700;">Mike Paulson</div>
+          <div style="font-size:11px;color:var(--gray);margin-top:2px;">(312) 555-0190 · dispatch@fastfreight.com</div>
+          <div class="contact-row">
+            <div class="contact-btn">📞 Call</div>
+            <div class="contact-btn">💬 Text</div>
+          </div>
+        </div>
+
+        <!-- Special instructions -->
+        <div class="section-title">Instructions</div>
+        <div class="info-box" style="font-size:12px;color:var(--gray-lt);line-height:1.6;">
+          Check in at dock 3. Lumper required — billing on BOL. Do not break seal until delivery. Driver to call 30 min before arrival.
+        </div>
+
+        <!-- Rate hidden for driver -->
+        <div style="background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.1);border-radius:var(--radius-sm);padding:10px 12px;font-size:11px;color:var(--gray);text-align:center;">
+          🔒 Rate not shown to drivers
+        </div>
+
+        <!-- Big CTA at bottom -->
+        <button class="big-status-btn">
+          <div class="bsb-icon">📍</div>
+          <div class="bsb-text">
+            <div class="bsb-title">At Pickup — Mark Arrived</div>
+            <div class="bsb-sub">Confirms status to dispatcher</div>
+          </div>
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">Tap status</div>
+  </div>
+
+  <!-- ── SCREEN 3: Status Update Flow ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 3 — Status Update</div>
+    <div class="phone-frame">
+      <div class="driver-mode-bar">🚛 DRIVER MODE — James Rivera</div>
+      <div class="phone-bar">
+        <span class="back">‹ Details</span>
+        <span class="title">Update Status</span>
+        <span></span>
+      </div>
+      <div class="phone-content">
+
+        <div style="font-size:13px;color:var(--gray);margin-bottom:2px;">What's happening right now?</div>
+
+        <!-- Status options -->
+        <div style="display:flex;flex-direction:column;gap:10px;">
+
+          <div style="background:rgba(46,204,113,.08);border:2px solid rgba(46,204,113,.4);border-radius:var(--radius);padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;">
+            <span style="font-size:28px;">📍</span>
+            <div>
+              <div style="font-size:15px;font-weight:800;color:var(--green);">Arrived at Pickup</div>
+              <div style="font-size:11px;color:var(--gray);margin-top:2px;">At the dock, ready to load</div>
+            </div>
+            <span style="margin-left:auto;color:var(--green);font-size:20px;">›</span>
+          </div>
+
+          <div style="background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);border-radius:var(--radius);padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;">
+            <span style="font-size:28px;">🚛</span>
+            <div>
+              <div style="font-size:15px;font-weight:800;">In Transit</div>
+              <div style="font-size:11px;color:var(--gray);margin-top:2px;">Loaded up, heading to delivery</div>
+            </div>
+            <span style="margin-left:auto;color:var(--gray);font-size:20px;">›</span>
+          </div>
+
+          <div style="background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);border-radius:var(--radius);padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;">
+            <span style="font-size:28px;">✅</span>
+            <div>
+              <div style="font-size:15px;font-weight:800;">Delivered</div>
+              <div style="font-size:11px;color:var(--gray);margin-top:2px;">Drop off complete — upload POD</div>
+            </div>
+            <span style="margin-left:auto;color:var(--gray);font-size:20px;">›</span>
+          </div>
+
+          <div style="background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);border-radius:var(--radius);padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;opacity:.6;">
+            <span style="font-size:28px;">⚠️</span>
+            <div>
+              <div style="font-size:15px;font-weight:800;">Problem / Delay</div>
+              <div style="font-size:11px;color:var(--gray);margin-top:2px;">Alert dispatcher</div>
+            </div>
+            <span style="margin-left:auto;color:var(--gray);font-size:20px;">›</span>
+          </div>
+        </div>
+
+        <div class="callout" style="margin-top:4px;">Your dispatcher is notified automatically when you update status — no need to call.</div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">Mark Delivered</div>
+  </div>
+
+  <!-- ── SCREEN 4: POD Photo Upload ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 4 — POD Photo &amp; Confirmation</div>
+    <div class="phone-frame">
+      <div class="driver-mode-bar">🚛 DRIVER MODE — James Rivera</div>
+      <div class="phone-bar">
+        <span class="back">‹ Status</span>
+        <span class="title">Upload POD</span>
+        <span></span>
+      </div>
+      <div class="phone-content">
+
+        <!-- Delivered confirmation -->
+        <div class="success-banner">
+          <div class="big">🏁</div>
+          <div class="title">Load Marked Delivered!</div>
+          <div class="sub">Jun 18 · 11:32 AM · Dispatcher notified</div>
+        </div>
+
+        <!-- Status progress - all done -->
+        <div style="display:flex;align-items:center;gap:0;">
+          <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+            <div class="ss-circle done" style="width:28px;height:28px;border-radius:50%;background:var(--green);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">✓</div>
+            <div style="font-size:9px;color:var(--green);margin-top:4px;font-weight:600;">Pickup</div>
+          </div>
+          <div style="height:2px;flex:1;background:var(--green);"></div>
+          <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+            <div class="ss-circle done" style="width:28px;height:28px;border-radius:50%;background:var(--green);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">✓</div>
+            <div style="font-size:9px;color:var(--green);margin-top:4px;font-weight:600;">Transit</div>
+          </div>
+          <div style="height:2px;flex:1;background:var(--green);"></div>
+          <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+            <div class="ss-circle active" style="width:28px;height:28px;border-radius:50%;background:var(--orange);border:2px solid var(--orange);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">●</div>
+            <div style="font-size:9px;color:var(--orange);margin-top:4px;font-weight:600;">POD</div>
+          </div>
+          <div style="height:2px;flex:1;background:rgba(255,255,255,.07);"></div>
+          <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+            <div style="width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--gray);">4</div>
+            <div style="font-size:9px;color:var(--gray);margin-top:4px;font-weight:600;">Done</div>
+          </div>
+        </div>
+
+        <!-- POD upload zone - with photo already taken -->
+        <div class="section-title">Proof of Delivery (POD / BOL)</div>
+        <div class="pod-zone has-photo">
+          <div class="pod-photo-thumb">📄</div>
+          <div style="font-size:13px;font-weight:700;color:var(--green);">Photo Captured ✓</div>
+          <div style="font-size:11px;color:var(--gray);">BOL_FF29381.jpg · 2.1 MB</div>
+          <button style="background:transparent;border:1px solid rgba(46,204,113,.4);color:var(--green);font-size:11px;font-weight:700;padding:6px 14px;border-radius:6px;cursor:pointer;">Retake Photo</button>
+        </div>
+
+        <!-- Upload success -->
+        <div class="upload-state">
+          <div class="us-icon">✅</div>
+          <div class="us-text">
+            <div class="us-title">Uploaded Successfully</div>
+            <div class="us-sub">Saved to Load #FF-29381 · Dispatcher can see it now</div>
+          </div>
+        </div>
+
+        <!-- Send to broker option -->
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:13px;font-weight:700;">Send to Fast Freight LLC</div>
+            <div style="font-size:11px;color:var(--gray);margin-top:2px;">dispatch@fastfreight.com</div>
+          </div>
+          <div style="width:40px;height:24px;border-radius:12px;background:var(--orange);position:relative;cursor:pointer;">
+            <div style="width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;right:2px;top:2px;"></div>
+          </div>
+        </div>
+
+        <button class="btn green">✓ Done — Load Complete</button>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="page-footer">
+  <span>🔒 Rates &amp; invoices hidden from driver view</span>
+  <span>🟢 Status updates notify dispatcher automatically</span>
+  <span>📷 POD upload triggers invoice prompt for owner</span>
+  <span style="color:rgba(143,163,184,.3);">CarrierOS Mockup 03 · June 2026</span>
+</div>
+
+</body>
+</html>

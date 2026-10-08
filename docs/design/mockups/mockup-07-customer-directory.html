@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarrierOS — Customer Directory</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f1e35;--navy-mid:#182c46;--navy-light:#1f3a58;--navy-card:#162033;
+  --orange:#f47920;--orange-lt:#f9a55a;--orange-dim:rgba(244,121,32,.15);
+  --white:#fff;--gray:#8fa3b8;--gray-lt:#d6e0ea;--gray-dim:rgba(214,224,234,.08);
+  --green:#2ecc71;--green-dim:rgba(46,204,113,.13);
+  --amber:#f0a500;--amber-dim:rgba(240,165,0,.13);
+  --red:#e55353;--teal:#1abc9c;
+  --radius:14px;--radius-sm:8px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;background:var(--navy);color:var(--white);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 16px 60px;}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(rgba(255,255,255,.018) 1px,transparent 1px);background-size:28px 28px;pointer-events:none;z-index:0;}
+.page-header{text-align:center;margin-bottom:40px;z-index:1;}
+.page-header .logo{font-size:13px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--orange);margin-bottom:6px;}
+.page-header h1{font-size:22px;font-weight:700;}
+.page-header p{font-size:13px;color:var(--gray);margin-top:4px;}
+.screens{display:flex;gap:24px;align-items:flex-start;z-index:1;flex-wrap:wrap;justify-content:center;width:100%;max-width:1280px;}
+.phone{display:flex;flex-direction:column;width:360px;flex-shrink:0;}
+.screen-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:10px;text-align:center;}
+.phone-frame{background:var(--navy-card);border-radius:24px;border:1.5px solid rgba(255,255,255,.08);overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.45);min-height:620px;display:flex;flex-direction:column;}
+.phone-bar{background:var(--navy-mid);padding:14px 20px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.05);}
+.phone-bar .back{color:var(--orange);font-size:13px;font-weight:600;}
+.phone-bar .title{font-size:15px;font-weight:700;}
+.phone-bar .action{color:var(--orange);font-size:13px;font-weight:600;}
+.phone-content{padding:20px 16px;flex:1;display:flex;flex-direction:column;gap:14px;}
+
+/* Search bar */
+.search-bar{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-sm);padding:10px 12px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--gray);}
+.search-bar .si{font-size:16px;}
+
+/* Customer list items */
+.customer-item{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+  border-radius:var(--radius-sm);padding:12px 14px;
+  display:flex;align-items:center;gap:12px;cursor:pointer;
+  transition:border-color .2s;
+}
+.customer-item:hover,.customer-item.active{border-color:rgba(244,121,32,.35);}
+.cust-avatar{
+  width:42px;height:42px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;font-weight:800;flex-shrink:0;
+}
+.cust-info{flex:1;}
+.cust-name{font-size:14px;font-weight:700;}
+.cust-meta{font-size:11px;color:var(--gray);margin-top:2px;}
+.cust-right{text-align:right;flex-shrink:0;}
+.cust-revenue{font-size:14px;font-weight:800;color:var(--orange-lt);}
+.cust-loads{font-size:10px;color:var(--gray);margin-top:2px;}
+.tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;display:inline-block;}
+.tag-green{background:rgba(46,204,113,.15);color:var(--green);}
+.tag-orange{background:var(--orange-dim);color:var(--orange-lt);}
+.tag-gray{background:rgba(255,255,255,.07);color:var(--gray);}
+.tag-red{background:rgba(229,83,83,.13);color:var(--red);}
+.tag-amber{background:var(--amber-dim);color:var(--amber);}
+
+/* Profile header */
+.profile-header{
+  background:linear-gradient(135deg,var(--navy-light),var(--navy-mid));
+  border-radius:var(--radius);padding:16px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.profile-top{display:flex;align-items:center;gap:14px;}
+.profile-avatar{width:52px;height:52px;border-radius:50%;background:rgba(244,121,32,.2);border:2px solid var(--orange);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;flex-shrink:0;}
+.profile-name{font-size:18px;font-weight:800;}
+.profile-contact{font-size:11px;color:var(--gray);margin-top:2px;line-height:1.5;}
+.profile-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.contact-row{display:flex;gap:8px;}
+.contact-btn-card{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-sm);padding:10px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;cursor:pointer;}
+
+/* Stats row */
+.stats-row{display:flex;gap:8px;}
+.stat-box{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius-sm);padding:10px;text-align:center;}
+.stat-value{font-size:17px;font-weight:800;color:var(--orange-lt);}
+.stat-label{font-size:9px;color:var(--gray);margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+
+/* Load history */
+.load-history-item{
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
+  border-radius:var(--radius-sm);padding:10px 12px;
+  display:flex;align-items:center;gap:10px;
+}
+.lhi-status{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.lhi-content{flex:1;}
+.lhi-route{font-size:12px;font-weight:700;}
+.lhi-date{font-size:10px;color:var(--gray);margin-top:1px;}
+.lhi-right{text-align:right;}
+.lhi-amount{font-size:13px;font-weight:800;color:var(--orange-lt);}
+.lhi-inv{font-size:10px;margin-top:2px;}
+
+/* Notes */
+.notes-area{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius-sm);padding:12px;font-size:12px;color:var(--gray-lt);line-height:1.6;}
+.notes-area .note-entry{margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.05);}
+.notes-area .note-entry:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.note-date{font-size:10px;color:var(--gray);margin-bottom:2px;}
+
+/* Insights panel */
+.insight-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.insight-row:last-child{border-bottom:none;}
+.ins-label{font-size:12px;color:var(--gray);}
+.ins-value{font-size:12px;font-weight:700;}
+
+/* Section title */
+.section-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--orange);}
+.divider{height:1px;background:rgba(255,255,255,.06);}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--orange);color:#fff;font-size:14px;font-weight:700;border-radius:var(--radius-sm);padding:13px;cursor:pointer;border:none;width:100%;}
+.btn.ghost{background:transparent;border:1.5px solid rgba(244,121,32,.4);color:var(--orange);}
+.info-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius-sm);padding:12px 14px;}
+
+/* Cold relationship alert */
+.cold-alert{background:rgba(240,165,0,.08);border:1.5px solid rgba(240,165,0,.3);border-radius:var(--radius-sm);padding:10px 12px;display:flex;align-items:center;gap:10px;}
+.cold-alert .ca-icon{font-size:18px;}
+.cold-alert .ca-title{font-size:12px;font-weight:700;color:var(--amber);}
+.cold-alert .ca-sub{font-size:11px;color:var(--gray);margin-top:1px;}
+
+.flow-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:80px;color:var(--gray);gap:6px;flex-shrink:0;}
+.flow-arrow .arrow-label{font-size:10px;color:var(--gray);text-align:center;max-width:60px;}
+.page-footer{margin-top:48px;text-align:center;z-index:1;font-size:11px;color:rgba(143,163,184,.4);display:flex;gap:24px;justify-content:center;flex-wrap:wrap;}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="logo">CarrierOS</div>
+  <h1>Customer Directory</h1>
+  <p>Mockup 07 — List · Profile · Load history · Notes &amp; tags · Intelligence</p>
+</div>
+
+<div class="screens">
+
+  <!-- ── SCREEN 1: Customer List ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 1 — Customer List</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span></span>
+        <span class="title">Customers</span>
+        <span class="action">+ Add</span>
+      </div>
+      <div class="phone-content">
+
+        <!-- Search -->
+        <div class="search-bar"><span class="si">🔍</span> Search customers…</div>
+
+        <!-- Sort/filter -->
+        <div style="display:flex;gap:8px;overflow-x:auto;">
+          <span style="background:var(--orange);color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;white-space:nowrap;">Revenue ▾</span>
+          <span style="background:var(--gray-dim);color:var(--gray);font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;white-space:nowrap;">Loads</span>
+          <span style="background:var(--gray-dim);color:var(--gray);font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;white-space:nowrap;">Pay Speed</span>
+          <span style="background:var(--gray-dim);color:var(--gray);font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;white-space:nowrap;">Active</span>
+        </div>
+
+        <!-- Alert — cold relationship -->
+        <div class="cold-alert">
+          <div class="ca-icon">❄️</div>
+          <div>
+            <div class="ca-title">1 Relationship Going Cold</div>
+            <div class="ca-sub">No loads with Midwest Logistics in 42 days</div>
+          </div>
+        </div>
+
+        <!-- Customers -->
+        <div class="customer-item active">
+          <div class="cust-avatar" style="background:rgba(244,121,32,.2);">FF</div>
+          <div class="cust-info">
+            <div class="cust-name">Fast Freight LLC</div>
+            <div class="cust-meta">
+              <span class="tag tag-green">Fast Pay</span>&nbsp;
+              <span class="tag tag-orange">Preferred</span>
+            </div>
+            <div style="font-size:10px;color:var(--gray);margin-top:3px;">Last load: 2 days ago</div>
+          </div>
+          <div class="cust-right">
+            <div class="cust-revenue">$12,400</div>
+            <div class="cust-loads">8 loads</div>
+          </div>
+        </div>
+
+        <div class="customer-item">
+          <div class="cust-avatar" style="background:rgba(26,188,156,.15);">AL</div>
+          <div class="cust-info">
+            <div class="cust-name">Apex Logistics</div>
+            <div class="cust-meta"><span class="tag tag-green">Fast Pay</span></div>
+            <div style="font-size:10px;color:var(--gray);margin-top:3px;">Last load: 8 days ago</div>
+          </div>
+          <div class="cust-right">
+            <div class="cust-revenue">$8,200</div>
+            <div class="cust-loads">5 loads</div>
+          </div>
+        </div>
+
+        <div class="customer-item">
+          <div class="cust-avatar" style="background:rgba(240,165,0,.15);">ML</div>
+          <div class="cust-info">
+            <div class="cust-name">Midwest Logistics</div>
+            <div class="cust-meta"><span class="tag tag-amber">Slow Pay</span></div>
+            <div style="font-size:10px;color:var(--amber);margin-top:3px;">❄️ 42 days since last load</div>
+          </div>
+          <div class="cust-right">
+            <div class="cust-revenue">$6,100</div>
+            <div class="cust-loads">4 loads</div>
+          </div>
+        </div>
+
+        <div class="customer-item">
+          <div class="cust-avatar" style="background:rgba(229,83,83,.12);">SL</div>
+          <div class="cust-info">
+            <div class="cust-name">Swift Logistics</div>
+            <div class="cust-meta"><span class="tag tag-red">Avoid</span></div>
+            <div style="font-size:10px;color:var(--gray);margin-top:3px;">Last load: 21 days ago</div>
+          </div>
+          <div class="cust-right">
+            <div class="cust-revenue">$3,800</div>
+            <div class="cust-loads">3 loads</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">Tap customer</div>
+  </div>
+
+  <!-- ── SCREEN 2: Customer Profile ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 2 — Customer Profile</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span class="back">‹ Customers</span>
+        <span class="title">Fast Freight</span>
+        <span class="action">Edit</span>
+      </div>
+      <div class="phone-content" style="overflow-y:auto;max-height:620px;">
+
+        <!-- Profile header -->
+        <div class="profile-header">
+          <div class="profile-top">
+            <div class="profile-avatar">FF</div>
+            <div>
+              <div class="profile-name">Fast Freight LLC</div>
+              <div class="profile-contact">Mike Paulson<br>dispatch@fastfreight.com<br>(312) 555-0190</div>
+            </div>
+          </div>
+          <div class="profile-tags">
+            <span class="tag tag-green">Fast Pay</span>
+            <span class="tag tag-orange">Preferred</span>
+          </div>
+          <div class="contact-row">
+            <div class="contact-btn-card">📞 Call</div>
+            <div class="contact-btn-card">💬 Text</div>
+            <div class="contact-btn-card">📧 Email</div>
+          </div>
+        </div>
+
+        <!-- Quick stats (Starter tier) -->
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-value">8</div>
+            <div class="stat-label">Loads</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value">$12,400</div>
+            <div class="stat-label">Revenue</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" style="color:var(--green);">22d</div>
+            <div class="stat-label">Avg Pay</div>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="section-title">Notes</div>
+        <div class="notes-area">
+          <div class="note-entry">
+            <div class="note-date">Jun 10</div>
+            Pays by check, usually within 20–25 days. Always pays. Good relationship — call Mike directly for rates.
+          </div>
+          <div class="note-entry">
+            <div class="note-date">May 28</div>
+            Prefers morning pickups. Dock 3 at Chicago warehouse.
+          </div>
+        </div>
+        <button class="btn ghost" style="padding:10px;">+ Add Note</button>
+
+        <!-- Load history preview -->
+        <div class="section-title">Recent Loads</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div class="load-history-item">
+            <div class="lhi-status" style="background:var(--amber);"></div>
+            <div class="lhi-content">
+              <div class="lhi-route">Chicago → Memphis</div>
+              <div class="lhi-date">Jun 17–18 · Load #FF-29381</div>
+            </div>
+            <div class="lhi-right">
+              <div class="lhi-amount">$1,850</div>
+              <div class="lhi-inv" style="color:var(--amber);">Invoiced</div>
+            </div>
+          </div>
+          <div class="load-history-item">
+            <div class="lhi-status" style="background:var(--green);"></div>
+            <div class="lhi-content">
+              <div class="lhi-route">Chicago → Nashville</div>
+              <div class="lhi-date">Jun 5–6 · Load #FF-28710</div>
+            </div>
+            <div class="lhi-right">
+              <div class="lhi-amount">$2,100</div>
+              <div class="lhi-inv" style="color:var(--green);">Paid ✓</div>
+            </div>
+          </div>
+          <div class="load-history-item">
+            <div class="lhi-status" style="background:var(--green);"></div>
+            <div class="lhi-content">
+              <div class="lhi-route">Indianapolis → Memphis</div>
+              <div class="lhi-date">May 28 · Load #FF-28290</div>
+            </div>
+            <div class="lhi-right">
+              <div class="lhi-amount">$1,620</div>
+              <div class="lhi-inv" style="color:var(--green);">Paid ✓</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn ghost" style="padding:10px;">View All 8 Loads</button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">Growth tier</div>
+  </div>
+
+  <!-- ── SCREEN 3: Customer Intelligence (Growth tier) ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 3 — Intelligence (Growth Tier)</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span class="back">‹ Profile</span>
+        <span class="title">FF Intelligence</span>
+        <span></span>
+      </div>
+      <div class="phone-content" style="overflow-y:auto;max-height:620px;">
+
+        <!-- Growth tier badge -->
+        <div style="background:rgba(244,121,32,.1);border:1px solid rgba(244,121,32,.3);border-radius:8px;padding:7px 12px;font-size:11px;color:var(--orange-lt);text-align:center;font-weight:600;">
+          ⭐ Growth Plan · Revenue Intelligence
+        </div>
+
+        <!-- Revenue insights -->
+        <div class="section-title">Revenue Insights</div>
+        <div class="info-box" style="display:flex;flex-direction:column;gap:0;">
+          <div class="insight-row">
+            <span class="ins-label">Total Revenue (YTD)</span>
+            <span class="ins-value" style="color:var(--orange-lt);">$12,400</span>
+          </div>
+          <div class="insight-row">
+            <span class="ins-label">% of Your Business</span>
+            <span class="ins-value">34%</span>
+          </div>
+          <div class="insight-row">
+            <span class="ins-label">Loads This Month</span>
+            <span class="ins-value">3</span>
+          </div>
+          <div class="insight-row">
+            <span class="ins-label">Avg Revenue / Load</span>
+            <span class="ins-value">$1,550</span>
+          </div>
+          <div class="insight-row">
+            <span class="ins-label">Avg Days to Pay</span>
+            <span class="ins-value" style="color:var(--green);">22 days ✓</span>
+          </div>
+        </div>
+
+        <!-- Rate history per lane -->
+        <div class="section-title">Rate History by Lane</div>
+        <div class="info-box" style="display:flex;flex-direction:column;gap:0;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--gray);margin-bottom:8px;">CHICAGO → MEMPHIS</div>
+          <div class="insight-row">
+            <span class="ins-label">Last Rate (Jun 17)</span>
+            <span class="ins-value">$1,850</span>
+          </div>
+          <div class="insight-row">
+            <span class="ins-label">Previous (May 28)</span>
+            <span class="ins-value">$1,620</span>
+          </div>
+          <div class="insight-row">
+            <span class="ins-label">Average (last 5)</span>
+            <span class="ins-value">$1,710</span>
+          </div>
+          <div style="font-size:11px;color:var(--green);margin-top:4px;">↑ You negotiated $140 above avg on last load</div>
+        </div>
+
+        <!-- Invoice aging -->
+        <div class="section-title">Outstanding Balance</div>
+        <div class="info-box">
+          <div class="insight-row">
+            <span class="ins-label">Invoice #1042</span>
+            <span class="ins-value" style="color:var(--amber);">$1,850 · Due Jul 18</span>
+          </div>
+          <div class="insight-row">
+            <span class="ins-label">Days Until Due</span>
+            <span class="ins-value">30 days</span>
+          </div>
+          <div class="insight-row">
+            <span class="ins-label">Oldest Unpaid</span>
+            <span class="ins-value" style="color:var(--green);">Current — no overdue</span>
+          </div>
+        </div>
+
+        <!-- Relationship health -->
+        <div class="section-title">Relationship Health</div>
+        <div style="background:rgba(46,204,113,.08);border:1.5px solid rgba(46,204,113,.3);border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:24px;">💚</span>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--green);">Healthy</div>
+            <div style="font-size:11px;color:var(--gray);margin-top:2px;">Active · Last load 2 days ago · Pays on time</div>
+          </div>
+        </div>
+
+        <button class="btn" style="margin-top:4px;">+ New Load for Fast Freight</button>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── CSV/XLS IMPORT SECTION ── -->
+<div style="width:100%;max-width:1280px;margin-top:48px;z-index:1;padding:0 0 8px;">
+  <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:24px;text-align:center;">CSV / XLS IMPORT FLOW</div>
+  <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;justify-content:center;">
+
+    <!-- IMPORT SCREEN 1: Entry point -->
+    <div class="phone">
+      <div class="screen-label">Import Entry — Customer List</div>
+      <div class="phone-frame">
+        <div class="phone-bar">
+          <span></span><span class="title">Customers</span><span class="action">+ Add</span>
+        </div>
+        <div class="phone-content">
+          <div class="search-bar"><span class="si">🔍</span> Search customers…</div>
+          <!-- Empty state — perfect time to import -->
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;padding:20px 0;">
+            <div style="font-size:48px;">📋</div>
+            <div style="font-size:17px;font-weight:800;">No customers yet</div>
+            <div style="font-size:13px;color:var(--gray);line-height:1.55;">Add the brokers and shippers you work with. Import your existing list or add one at a time.</div>
+            <button class="btn">📥 Import from CSV / XLS</button>
+            <button class="btn ghost">+ Add Manually</button>
+            <div style="font-size:10px;color:var(--gray);margin-top:4px;">Or import during setup — we'll walk you through it</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ARROW -->
+    <div class="flow-arrow">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="arrow-label">Tap Import</div>
+    </div>
+
+    <!-- IMPORT SCREEN 2: Upload -->
+    <div class="phone">
+      <div class="screen-label">Import — Upload File</div>
+      <div class="phone-frame">
+        <div class="phone-bar">
+          <span class="back">‹ Customers</span><span class="title">Import Customers</span><span></span>
+        </div>
+        <div class="phone-content">
+          <div style="font-size:13px;color:var(--gray);">Upload your customer list. We'll map the columns for you.</div>
+
+          <!-- Upload zone -->
+          <div style="border:2px dashed rgba(255,255,255,.18);border-radius:var(--radius);padding:28px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;background:rgba(255,255,255,.02);">
+            <div style="font-size:36px;">📂</div>
+            <div style="font-size:14px;font-weight:700;">Tap to choose file</div>
+            <div style="font-size:12px;color:var(--gray);">CSV or Excel (.xls, .xlsx)</div>
+          </div>
+
+          <!-- Column mapping info -->
+          <div class="section-title">What We Import</div>
+          <div class="info-box" style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;font-size:12px;">
+              <span style="color:var(--gray);">Company Name</span>
+              <span style="color:var(--orange);font-weight:700;">Required</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;">
+              <span style="color:var(--gray);">Contact Name</span>
+              <span style="font-weight:600;">Optional</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;">
+              <span style="color:var(--gray);">Email</span>
+              <span style="font-weight:600;">Optional</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;">
+              <span style="color:var(--gray);">Phone</span>
+              <span style="font-weight:600;">Optional</span>
+            </div>
+            <div style="height:1px;background:rgba(255,255,255,.06);margin:2px 0;"></div>
+            <div style="font-size:11px;color:var(--gray);">Max 50 customers per import</div>
+          </div>
+
+          <!-- Template download -->
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-size:13px;font-weight:700;">Don't have a file?</div>
+              <div style="font-size:11px;color:var(--gray);margin-top:2px;">Download our template and fill it in</div>
+            </div>
+            <button style="background:transparent;border:1.5px solid rgba(244,121,32,.4);color:var(--orange);font-size:11px;font-weight:700;border-radius:6px;padding:7px 12px;cursor:pointer;">⬇ Template</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ARROW -->
+    <div class="flow-arrow">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="arrow-label">File chosen</div>
+    </div>
+
+    <!-- IMPORT SCREEN 3: Preview table -->
+    <div class="phone">
+      <div class="screen-label">Import — Preview &amp; Confirm</div>
+      <div class="phone-frame">
+        <div class="phone-bar">
+          <span class="back">‹ Upload</span><span class="title">Review Import</span><span></span>
+        </div>
+        <div class="phone-content" style="overflow-y:auto;max-height:620px;">
+          <!-- File info -->
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius-sm);padding:10px 12px;display:flex;align-items:center;gap:10px;">
+            <span style="font-size:22px;">📊</span>
+            <div>
+              <div style="font-size:12px;font-weight:700;">brokers_2026.xlsx</div>
+              <div style="font-size:10px;color:var(--gray);margin-top:1px;">12 rows found · 1 skipped (missing name) · 1 duplicate</div>
+            </div>
+          </div>
+
+          <!-- Warning: skipped + duplicate -->
+          <div style="background:rgba(240,165,0,.08);border:1.5px solid rgba(240,165,0,.3);border-radius:var(--radius-sm);padding:10px 12px;display:flex;flex-direction:column;gap:4px;">
+            <div style="font-size:11px;font-weight:700;color:var(--amber);">⚠️ 1 row skipped — Company Name missing (row 7)</div>
+            <div style="font-size:11px;font-weight:700;color:var(--amber);">⚠️ 1 duplicate — "Swift Logistics" already exists</div>
+            <div style="font-size:10px;color:var(--gray);margin-top:2px;">Choose action for duplicate below ↓</div>
+          </div>
+
+          <!-- Preview table -->
+          <div class="section-title">11 Customers to Import</div>
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:11px;">
+              <thead>
+                <tr style="border-bottom:1px solid rgba(255,255,255,.1);">
+                  <th style="text-align:left;padding:6px 4px;color:var(--gray);font-weight:700;letter-spacing:.5px;">COMPANY</th>
+                  <th style="text-align:left;padding:6px 4px;color:var(--gray);font-weight:700;letter-spacing:.5px;">CONTACT</th>
+                  <th style="text-align:left;padding:6px 4px;color:var(--gray);font-weight:700;letter-spacing:.5px;">STATUS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom:1px solid rgba(255,255,255,.05);">
+                  <td style="padding:7px 4px;font-weight:600;">Fast Freight LLC</td>
+                  <td style="padding:7px 4px;color:var(--gray);">Mike Paulson</td>
+                  <td style="padding:7px 4px;"><span style="color:var(--green);font-weight:700;font-size:10px;">✓ New</span></td>
+                </tr>
+                <tr style="border-bottom:1px solid rgba(255,255,255,.05);">
+                  <td style="padding:7px 4px;font-weight:600;">Apex Logistics</td>
+                  <td style="padding:7px 4px;color:var(--gray);">—</td>
+                  <td style="padding:7px 4px;"><span style="color:var(--green);font-weight:700;font-size:10px;">✓ New</span></td>
+                </tr>
+                <tr style="border-bottom:1px solid rgba(255,255,255,.05);background:rgba(240,165,0,.05);">
+                  <td style="padding:7px 4px;font-weight:600;">Swift Logistics</td>
+                  <td style="padding:7px 4px;color:var(--gray);">Tom R.</td>
+                  <td style="padding:7px 4px;"><span style="color:var(--amber);font-weight:700;font-size:10px;">⚠ Exists</span></td>
+                </tr>
+                <tr style="border-bottom:1px solid rgba(255,255,255,.05);">
+                  <td style="padding:7px 4px;font-weight:600;">Midwest Trans.</td>
+                  <td style="padding:7px 4px;color:var(--gray);">—</td>
+                  <td style="padding:7px 4px;"><span style="color:var(--green);font-weight:700;font-size:10px;">✓ New</span></td>
+                </tr>
+                <tr>
+                  <td colspan="3" style="padding:6px 4px;color:var(--gray);font-style:italic;font-size:10px;">+ 7 more…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Duplicate resolution -->
+          <div class="section-title">Duplicate: Swift Logistics</div>
+          <div style="display:flex;gap:8px;">
+            <div style="flex:1;background:rgba(244,121,32,.1);border:1.5px solid rgba(244,121,32,.4);border-radius:var(--radius-sm);padding:10px;text-align:center;cursor:pointer;">
+              <div style="font-size:12px;font-weight:700;color:var(--orange);">Skip</div>
+              <div style="font-size:10px;color:var(--gray);margin-top:2px;">Keep existing record</div>
+            </div>
+            <div style="flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-sm);padding:10px;text-align:center;cursor:pointer;">
+              <div style="font-size:12px;font-weight:700;">Overwrite</div>
+              <div style="font-size:10px;color:var(--gray);margin-top:2px;">Replace with file data</div>
+            </div>
+          </div>
+
+          <button class="btn green">✓ Import 11 Customers</button>
+          <button class="btn secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ARROW -->
+    <div class="flow-arrow">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="arrow-label">Confirmed</div>
+    </div>
+
+    <!-- IMPORT SCREEN 4: Success -->
+    <div class="phone">
+      <div class="screen-label">Import — Complete</div>
+      <div class="phone-frame">
+        <div class="phone-bar">
+          <span></span><span class="title">Import Complete</span><span></span>
+        </div>
+        <div class="phone-content">
+          <div style="text-align:center;padding:20px 0 8px;">
+            <div style="font-size:56px;">🎉</div>
+            <div style="font-size:20px;font-weight:900;margin-top:12px;">11 Customers Added</div>
+            <div style="font-size:12px;color:var(--gray);margin-top:4px;">Your directory is ready to use</div>
+          </div>
+
+          <!-- Summary -->
+          <div class="info-box" style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;font-size:12px;">
+              <span style="color:var(--gray);">✓ Imported</span><span style="color:var(--green);font-weight:700;">11</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;">
+              <span style="color:var(--gray);">⚠ Skipped (no name)</span><span style="color:var(--amber);font-weight:700;">1</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;">
+              <span style="color:var(--gray);">⟳ Duplicate skipped</span><span style="font-weight:700;">1</span>
+            </div>
+          </div>
+
+          <!-- Customers now showing -->
+          <div class="section-title">Your Customers</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div class="customer-item">
+              <div class="cust-avatar" style="background:rgba(244,121,32,.2);">FF</div>
+              <div class="cust-info"><div class="cust-name">Fast Freight LLC</div><div class="cust-meta">Mike Paulson</div></div>
+              <span style="color:var(--green);font-size:12px;">New ✓</span>
+            </div>
+            <div class="customer-item">
+              <div class="cust-avatar" style="background:rgba(26,188,156,.15);">AL</div>
+              <div class="cust-info"><div class="cust-name">Apex Logistics</div><div class="cust-meta">Imported</div></div>
+              <span style="color:var(--green);font-size:12px;">New ✓</span>
+            </div>
+            <div style="text-align:center;font-size:11px;color:var(--gray);padding:4px 0;">+ 9 more customers</div>
+          </div>
+
+          <button class="btn" style="margin-top:4px;">View All Customers</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="page-footer">
+  <span>📋 Basic intelligence (Starter): load history, notes, tags, last load date</span>
+  <span>⭐ Revenue intelligence (Growth): rates, pay speed, relationship health</span>
+  <span>📥 CSV/XLS import: P0 MVP — available at onboarding + directory</span>
+  <span style="color:rgba(143,163,184,.3);">CarrierOS Mockup 07 · June 2026</span>
+</div>
+
+</body>
+</html>

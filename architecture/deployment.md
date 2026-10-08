@@ -19,10 +19,11 @@ App Runner and over Amplify Hosting (doesn't support Next.js 16's managed SSR ye
 > **Infrastructure is now codified.** Since 2026-09-30 staging's AWS resources are managed by AWS CDK
 > in `infra/`, and auto-deploy targets the CDK-managed service `carrieros-web-staging-cdk`
 > (`https://ca-4f7c487503aa47609a79a96746866bb8.ecs.us-east-1.on.aws`), with MCP at
-> `https://ca-f68d8ab0d62b4f638db9eaec01052b4f.ecs.us-east-1.on.aws`. The original hand-built
-> `carrieros-web-staging` / `carrieros-mcp-staging` still exist, are no longer auto-deployed, and are
-> pending an explicit decommission decision. Read `architecture/infrastructure-as-code.md` first for
-> what CDK manages, the cutover checklist, and what is still manual.
+> `https://ca-f68d8ab0d62b4f638db9eaec01052b4f.ecs.us-east-1.on.aws`. **As of 2026-10-01 the original
+> hand-built `carrieros-web-staging` / `carrieros-mcp-staging` services were deleted** after a full
+> cutover (WebAuthn RP config repointed, auto-deploy repointed, new pair verified end-to-end) —
+> staging is now sole-sourced from the CDK pair. Read `architecture/infrastructure-as-code.md` first
+> for what CDK manages and the full cutover evidence trail.
 
 ## Current state: staging auto-deploys on push to main (2026-09-29)
 

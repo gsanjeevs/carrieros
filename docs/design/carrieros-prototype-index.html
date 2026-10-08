@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarrierOS — Design Prototype Index</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy: #0f1e35;
+  --navy-mid: #182c46;
+  --navy-light: #1f3a58;
+  --orange: #f47920;
+  --orange-dim: rgba(244,121,32,0.12);
+  --orange-border: rgba(244,121,32,0.3);
+  --green: #2ecc71;
+  --green-dim: rgba(46,204,113,0.12);
+  --green-border: rgba(46,204,113,0.3);
+  --teal: #1abc9c;
+  --purple: #9b59b6;
+  --amber: #f0a500;
+  --gray: #8fa3b8;
+  --border: rgba(255,255,255,0.07);
+  --card: rgba(255,255,255,0.04);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+  background: var(--navy);
+  color: white;
+  min-height: 100vh;
+  padding: 0 0 80px;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none; z-index: 0;
+}
+
+/* ── HEADER ── */
+header {
+  background: rgba(15,30,53,0.98);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(12px);
+}
+
+.logo { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; }
+.logo span { color: var(--orange); }
+
+.header-meta {
+  display: flex; align-items: center; gap: 20px;
+  font-size: 12px; color: var(--gray);
+}
+
+.version-badge {
+  background: var(--orange-dim);
+  border: 1px solid var(--orange-border);
+  color: var(--orange);
+  font-size: 11px; font-weight: 700;
+  padding: 4px 10px; border-radius: 20px;
+  letter-spacing: 0.3px;
+}
+
+/* ── HERO ── */
+.hero {
+  text-align: center;
+  padding: 60px 40px 48px;
+  position: relative; z-index: 1;
+  max-width: 760px; margin: 0 auto;
+}
+
+.hero-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--orange);
+  margin-bottom: 14px;
+}
+
+.hero h1 {
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 900; letter-spacing: -1px;
+  line-height: 1.1; margin-bottom: 14px;
+}
+
+.hero p {
+  font-size: 16px; color: var(--gray); line-height: 1.6;
+  max-width: 540px; margin: 0 auto 32px;
+}
+
+.hero-stats {
+  display: flex; gap: 32px; justify-content: center; flex-wrap: wrap;
+}
+
+.hero-stat { text-align: center; }
+.hero-stat .num {
+  font-size: 28px; font-weight: 900;
+  color: var(--orange); letter-spacing: -1px;
+}
+.hero-stat .lbl {
+  font-size: 11px; color: var(--gray);
+  margin-top: 2px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  padding: 0 40px 32px; justify-content: center;
+  position: relative; z-index: 1;
+}
+
+.filter-btn {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--gray);
+  padding: 7px 16px; border-radius: 20px;
+  font-size: 12px; font-weight: 700; cursor: pointer;
+  transition: all 0.15s; letter-spacing: 0.3px;
+}
+.filter-btn:hover { border-color: rgba(255,255,255,0.2); color: white; }
+.filter-btn.active {
+  background: var(--orange-dim);
+  border-color: var(--orange-border);
+  color: var(--orange);
+}
+
+/* ── SECTION ── */
+.section {
+  padding: 0 40px; margin-bottom: 48px;
+  position: relative; z-index: 1;
+  max-width: 1320px; margin-left: auto; margin-right: auto;
+}
+
+@media (max-width: 640px) {
+  .section { padding: 0 16px; }
+  .filter-bar { padding: 0 16px 24px; }
+  header { padding: 0 16px; }
+}
+
+.section-header {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 20px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-icon { font-size: 22px; }
+.section-title { font-size: 13px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--orange); }
+.section-count { font-size: 12px; color: var(--gray); margin-left: auto; }
+
+/* ── CARDS ── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  display: flex; flex-direction: column;
+}
+.card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(244,121,32,0.3);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.card-preview {
+  height: 120px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 48px;
+  position: relative; overflow: hidden;
+}
+
+.card-preview .screen-count {
+  position: absolute; bottom: 8px; right: 10px;
+  font-size: 10px; font-weight: 700;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.3px;
+}
+
+.card-body { padding: 16px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+
+.card-top {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 8px;
+}
+
+.card-num {
+  font-size: 10px; font-weight: 700; color: var(--gray);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+
+.card-name { font-size: 16px; font-weight: 800; line-height: 1.2; }
+
+.card-desc { font-size: 12px; color: var(--gray); line-height: 1.6; flex: 1; }
+
+.card-footer {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-top: 4px;
+  padding-top: 10px; border-top: 1px solid var(--border);
+}
+
+.role-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.role-tag {
+  font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 20px; letter-spacing: 0.3px;
+}
+.role-owner { background: rgba(37,99,235,0.15); color: #93c5fd; border: 1px solid rgba(37,99,235,0.25); }
+.role-driver { background: rgba(244,121,32,0.15); color: #fdba74; border: 1px solid rgba(244,121,32,0.25); }
+.role-customer { background: rgba(155,89,182,0.15); color: #d8b4fe; border: 1px solid rgba(155,89,182,0.25); }
+.role-new { background: rgba(46,204,113,0.15); color: #86efac; border: 1px solid rgba(46,204,113,0.25); }
+
+.open-btn {
+  font-size: 11px; font-weight: 700;
+  color: var(--orange); display: flex;
+  align-items: center; gap: 4px;
+  white-space: nowrap;
+}
+
+/* Status badges */
+.status-badge {
+  font-size: 10px; font-weight: 700; padding: 3px 8px;
+  border-radius: 20px; letter-spacing: 0.3px;
+}
+.status-new { background: rgba(46,204,113,0.15); color: var(--green); border: 1px solid rgba(46,204,113,0.3); }
+.status-updated { background: rgba(244,121,32,0.15); color: var(--orange); border: 1px solid rgba(244,121,32,0.3); }
+.status-stable { background: rgba(255,255,255,0.06); color: var(--gray); border: 1px solid var(--border); }
+
+/* ── FEATURED CARD ── */
+.card.featured {
+  border-color: rgba(244,121,32,0.35);
+  background: rgba(244,121,32,0.05);
+}
+.card.featured:hover { border-color: var(--orange); }
+
+/* ── LEGEND ── */
+.legend {
+  display: flex; gap: 20px; flex-wrap: wrap;
+  padding: 20px 40px;
+  border-top: 1px solid var(--border);
+  margin-top: 48px;
+  position: relative; z-index: 1;
+  justify-content: center;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--gray);
+}
+
+/* ── FLOW SECTION (prototype card) ── */
+.prototype-card {
+  background: linear-gradient(135deg, rgba(244,121,32,0.1) 0%, rgba(26,188,156,0.06) 100%);
+  border: 1px solid rgba(244,121,32,0.3);
+  border-radius: 16px; padding: 28px;
+  display: flex; align-items: center; gap: 24px;
+  cursor: pointer; text-decoration: none; color: inherit;
+  transition: transform 0.15s, box-shadow 0.15s;
+  margin-bottom: 16px;
+}
+.prototype-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+
+.proto-icon { font-size: 52px; flex-shrink: 0; }
+.proto-text { flex: 1; }
+.proto-title { font-size: 20px; font-weight: 900; letter-spacing: -0.3px; margin-bottom: 4px; }
+.proto-desc { font-size: 13px; color: var(--gray); line-height: 1.6; }
+.proto-meta { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+.proto-badge {
+  font-size: 11px; font-weight: 700; padding: 3px 10px;
+  border-radius: 20px; background: rgba(244,121,32,0.15);
+  color: var(--orange); border: 1px solid rgba(244,121,32,0.3);
+}
+.proto-arrow { font-size: 24px; color: var(--orange); flex-shrink: 0; }
+
+@media (max-width: 480px) {
+  .prototype-card { flex-direction: column; text-align: center; }
+  .proto-meta { justify-content: center; }
+}
+
+.divider-line {
+  height: 1px; background: var(--border);
+  margin: 40px 40px; position: relative; z-index: 1;
+}
+
+/* ── FOOTER ── */
+footer {
+  text-align: center; padding: 32px 40px 0;
+  position: relative; z-index: 1;
+  font-size: 11px; color: rgba(143,163,184,0.4);
+  line-height: 1.8;
+  border-top: 1px solid var(--border);
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">Carrier<span>OS</span></div>
+  <div class="header-meta">
+    <span>Design Prototype</span>
+    <span class="version-badge">v1.9 · July 2026</span>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero" style="position:relative;z-index:1;">
+  <div class="hero-label">For the Development Team</div>
+  <h1>CarrierOS Prototype Index</h1>
+  <p>All flows, mockups, and interactive prototypes in one place. Open any file to explore the UX. Each flow links to the relevant PRD section and technical spec.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num">21</div><div class="lbl">Mockup Flows</div></div>
+    <div class="hero-stat"><div class="num">110+</div><div class="lbl">Screens</div></div>
+    <div class="hero-stat"><div class="num">45</div><div class="lbl">Features</div></div>
+    <div class="hero-stat"><div class="num">5</div><div class="lbl">User Roles</div></div>
+  </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="filterCards('all')">All Flows</button>
+  <button class="filter-btn" onclick="filterCards('owner')">Owner</button>
+  <button class="filter-btn" onclick="filterCards('driver')">Driver</button>
+  <button class="filter-btn" onclick="filterCards('new')">New User</button>
+  <button class="filter-btn" onclick="filterCards('new-july')">New in July</button>
+</div>
+
+<!-- ── SECTION: FULL PROTOTYPE ── -->
+<div class="section" style="margin-bottom:40px;">
+  <div class="section-header">
+    <span class="section-icon">🚀</span>
+    <span class="section-title">Full Clickable Prototype</span>
+  </div>
+
+  <a class="prototype-card" href="carrieros-sales-website.html" target="_blank" style="background:linear-gradient(135deg,rgba(15,30,53,0.8) 0%,rgba(31,58,88,0.5) 100%);border-color:rgba(255,255,255,0.1);">
+    <div class="proto-icon">🌐</div>
+    <div class="proto-text">
+      <div class="proto-title">CarrierOS Sales Website</div>
+      <div class="proto-desc">Full marketing/sales page for reference. Includes hero, pain points, feature sections, competitive comparison table, and pricing. Useful for understanding messaging and positioning alongside the product flows.</div>
+      <div class="proto-meta">
+        <span class="proto-badge" style="background:rgba(255,255,255,0.06);color:var(--gray);border-color:var(--border);">Pricing</span>
+        <span class="proto-badge" style="background:rgba(255,255,255,0.06);color:var(--gray);border-color:var(--border);">Feature Overview</span>
+        <span class="proto-badge" style="background:rgba(255,255,255,0.06);color:var(--gray);border-color:var(--border);">Competitive Table</span>
+      </div>
+    </div>
+    <div class="proto-arrow" style="color:var(--gray);">→</div>
+  </a>
+
+  <a class="prototype-card" href="carrieros-role-matrix.html" target="_blank" style="background:linear-gradient(135deg,rgba(124,58,237,0.08) 0%,rgba(15,30,53,0.6) 100%);border-color:rgba(124,58,237,0.25);">
+    <div class="proto-icon">🛡️</div>
+    <div class="proto-text">
+      <div class="proto-title">Role & Permission Matrix</div>
+      <div class="proto-desc">Dev reference doc. Full breakdown of what Owner, Solo, Driver, Dispatcher, and Finance roles can see and do — across every feature. Includes Supabase RLS implementation notes.</div>
+      <div class="proto-meta">
+        <span class="proto-badge" style="background:rgba(124,58,237,0.12);color:#a78bfa;border-color:rgba(124,58,237,0.25);">5 Roles</span>
+        <span class="proto-badge" style="background:rgba(124,58,237,0.12);color:#a78bfa;border-color:rgba(124,58,237,0.25);">RLS Notes</span>
+        <span class="proto-badge" style="background:rgba(124,58,237,0.12);color:#a78bfa;border-color:rgba(124,58,237,0.25);">Dev Reference</span>
+      </div>
+    </div>
+    <div class="proto-arrow" style="color:#a78bfa;">→</div>
+  </a>
+
+  <a class="prototype-card" href="carrieros-feature-matrix.html" target="_blank" style="background:linear-gradient(135deg,rgba(46,204,113,0.08) 0%,rgba(15,30,53,0.6) 100%);border-color:rgba(46,204,113,0.25);">
+    <div class="proto-icon">📊</div>
+    <div class="proto-text">
+      <div class="proto-title">Feature Matrix</div>
+      <div class="proto-desc">45 features across 9 categories — every feature listed by tier (Starter/Growth/Pro/Enterprise) with description, user benefit, and estimated dollar or time value. Filterable by tier, category, or value rating. Use alongside the PRD and pricing doc to understand what ships and when.</div>
+      <div class="proto-meta">
+        <span class="proto-badge" style="background:rgba(46,204,113,0.12);color:#86efac;border-color:rgba(46,204,113,0.25);">45 Features</span>
+        <span class="proto-badge" style="background:rgba(46,204,113,0.12);color:#86efac;border-color:rgba(46,204,113,0.25);">4 Tiers</span>
+        <span class="proto-badge" style="background:rgba(46,204,113,0.12);color:#86efac;border-color:rgba(46,204,113,0.25);">Value Estimates</span>
+      </div>
+    </div>
+    <div class="proto-arrow" style="color:#86efac;">→</div>
+  </a>
+
+  <a class="prototype-card" href="pilot-overview-presentation.html" target="_blank" style="background:linear-gradient(135deg,rgba(240,165,0,0.08) 0%,rgba(15,30,53,0.6) 100%);border-color:rgba(240,165,0,0.25);">
+    <div class="proto-icon">🎤</div>
+    <div class="proto-text">
+      <div class="proto-title">CA Pilot Deck</div>
+      <div class="proto-desc">10-slide presentation for the California pilot program. Covers the problem, product overview, 12 key features across tiers, full pricing cards, ROI (26× return), and pilot offer (Growth free 90 days). Use for carrier onboarding conversations and investor demos.</div>
+      <div class="proto-meta">
+        <span class="proto-badge" style="background:rgba(240,165,0,0.12);color:#fcd34d;border-color:rgba(240,165,0,0.25);">10 Slides</span>
+        <span class="proto-badge" style="background:rgba(240,165,0,0.12);color:#fcd34d;border-color:rgba(240,165,0,0.25);">Pilot Program</span>
+        <span class="proto-badge" style="background:rgba(240,165,0,0.12);color:#fcd34d;border-color:rgba(240,165,0,0.25);">ROI Story</span>
+      </div>
+    </div>
+    <div class="proto-arrow" style="color:#fcd34d;">→</div>
+  </a>
+
+  <a class="prototype-card" href="carrieros-asset-manifest.html" target="_blank" style="background:linear-gradient(135deg,rgba(99,102,241,0.08) 0%,rgba(15,30,53,0.6) 100%);border-color:rgba(99,102,241,0.25);">
+    <div class="proto-icon">🖼️</div>
+    <div class="proto-text">
+      <div class="proto-title">Visual Asset Manifest</div>
+      <div class="proto-desc">Complete inventory of all visual assets required for production — truck type icons (7 types), app icon &amp; splash specs, map SDK setup (Mapbox), empty state illustrations, stock photos, Material Symbols icon list, and sample demo data. Includes sourcing links, dimensions, formats, and a pre-pilot checklist with 12 P0 items.</div>
+      <div class="proto-meta">
+        <span class="proto-badge" style="background:rgba(99,102,241,0.12);color:#c4b5fd;border-color:rgba(99,102,241,0.25);">34 Assets</span>
+        <span class="proto-badge" style="background:rgba(99,102,241,0.12);color:#c4b5fd;border-color:rgba(99,102,241,0.25);">12 P0 Items</span>
+        <span class="proto-badge" style="background:rgba(99,102,241,0.12);color:#c4b5fd;border-color:rgba(99,102,241,0.25);">Source Links</span>
+      </div>
+    </div>
+    <div class="proto-arrow" style="color:#c4b5fd;">→</div>
+  </a>
+</div>
+
+<div class="divider-line"></div>
+
+<!-- ── SECTION: STRATEGY DOCS ── -->
+<div class="section" style="margin-bottom:40px;">
+  <div class="section-header">
+    <span class="section-icon">📄</span>
+    <span class="section-title">Strategy &amp; Spec Docs</span>
+    <span class="section-count">4 files · Open in your editor</span>
+  </div>
+
+  <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:14px 20px;margin-bottom:16px;font-size:12px;color:var(--gray);">
+    These are Markdown files — open them in VS Code, Cursor, or any editor. Path shown is relative to the <code style="background:rgba(255,255,255,0.06);padding:1px 6px;border-radius:4px;color:var(--orange-lt);">Carrier Portal/</code> folder root.
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:14px;">
+
+    <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:14px;padding:20px 22px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--orange);margin-bottom:4px;">PRD</div>
+          <div style="font-size:16px;font-weight:800;">Product Requirements Doc</div>
+        </div>
+        <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:rgba(46,204,113,0.12);color:#86efac;border:1px solid rgba(46,204,113,0.25);white-space:nowrap;">Ready for Dev</span>
+      </div>
+      <div style="font-size:12px;color:var(--gray);line-height:1.6;margin-bottom:12px;">Canonical product spec. Full user stories, acceptance criteria, feature scope, MVP vs. post-MVP gating, success metrics, and open questions. Drop this + tech-spec.md as context when prompting an AI coding assistant.</div>
+      <div style="background:rgba(0,0,0,0.25);border-radius:8px;padding:8px 12px;font-family:'SF Mono',monospace;font-size:11px;color:var(--orange-lt);display:flex;align-items:center;justify-content:space-between;">
+        <span>strategy/prd.md</span>
+        <span style="font-size:10px;color:var(--gray);">v2.1 · Jul 2026</span>
+      </div>
+    </div>
+
+    <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:14px;padding:20px 22px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--orange);margin-bottom:4px;">Tech Spec</div>
+          <div style="font-size:16px;font-weight:800;">Technical Specification</div>
+        </div>
+        <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:rgba(46,204,113,0.12);color:#86efac;border:1px solid rgba(46,204,113,0.25);white-space:nowrap;">v2.2</span>
+      </div>
+      <div style="font-size:12px;color:var(--gray);line-height:1.6;margin-bottom:12px;">Full stack spec: Next.js 14 + Supabase + Capacitor. Complete Postgres schema with SQL DDL, RLS policies for all 5 roles, API routes, i18n architecture, post-MVP tables (fuel_stops, ifta_state_crossings, driver_messages), GPS completeness check logic, and build order.</div>
+      <div style="background:rgba(0,0,0,0.25);border-radius:8px;padding:8px 12px;font-family:'SF Mono',monospace;font-size:11px;color:var(--orange-lt);display:flex;align-items:center;justify-content:space-between;">
+        <span>strategy/tech-spec.md</span>
+        <span style="font-size:10px;color:var(--gray);">v2.2 · Jul 2026</span>
+      </div>
+    </div>
+
+    <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:14px;padding:20px 22px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--orange);margin-bottom:4px;">Pricing</div>
+          <div style="font-size:16px;font-weight:800;">Tier Pricing Structure</div>
+        </div>
+        <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:rgba(240,165,0,0.12);color:#fcd34d;border:1px solid rgba(240,165,0,0.25);white-space:nowrap;">v4.0 · Locked</span>
+      </div>
+      <div style="font-size:12px;color:var(--gray);line-height:1.6;margin-bottom:12px;">Full 4-tier feature matrix — what's in each tier and why. Starter $49 / Growth $99 / Pro $199 / Enterprise $349. Gating philosophy (gate operational intelligence, never gate safety), upgrade triggers, pricing rationale, and scope exclusions for all tiers.</div>
+      <div style="background:rgba(0,0,0,0.25);border-radius:8px;padding:8px 12px;font-family:'SF Mono',monospace;font-size:11px;color:var(--orange-lt);display:flex;align-items:center;justify-content:space-between;">
+        <span>strategy/tier-pricing-structure.md</span>
+        <span style="font-size:10px;color:var(--gray);">v4.0 · Jul 2026</span>
+      </div>
+    </div>
+
+    <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:14px;padding:20px 22px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--orange);margin-bottom:4px;">Market</div>
+          <div style="font-size:16px;font-weight:800;">Competitive Brief</div>
+        </div>
+        <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:rgba(255,255,255,0.06);color:var(--gray);border:1px solid var(--border);white-space:nowrap;">v4.0</span>
+      </div>
+      <div style="font-size:12px;color:var(--gray);line-height:1.6;margin-bottom:12px;">Micro-carrier SaaS competitive landscape. Covers Motive, KeepTruckin, Samsara, Onfleet, and others. Full tier comparison table showing CarrierOS vs. competitors by feature. Sales battle card logic and differentiation rationale (EN/ES/PA/UR, price point, IFTA, driver chat).</div>
+      <div style="background:rgba(0,0,0,0.25);border-radius:8px;padding:8px 12px;font-family:'SF Mono',monospace;font-size:11px;color:var(--orange-lt);display:flex;align-items:center;justify-content:space-between;">
+        <span>strategy/competitive-brief-micro-carrier-saas.md</span>
+        <span style="font-size:10px;color:var(--gray);">v4.0 · Jul 2026</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="divider-line"></div>
+
+<!-- ── SECTION: INDIVIDUAL MOCKUPS ── -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-icon">📐</span>
+    <span class="section-title">Individual Flow Mockups</span>
+    <span class="section-count">21 flows · Click any card to open</span>
+  </div>
+
+  <div class="cards" id="cardGrid">
+
+    <!-- 09: Signup & Trial -->
+    <a class="card featured" href="mockups/mockup-09-signup-trial.html" target="_blank" data-roles="new new-july">
+      <div class="card-preview" style="background:linear-gradient(135deg,#0f1e35,#1a3a5c);">
+        🎁
+        <div class="screen-count">8 screens</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="card-num">Mockup 09</div>
+            <div class="card-name">Signup &amp; Free Trial</div>
+          </div>
+          <span class="status-badge status-new">NEW</span>
+        </div>
+        <div class="card-desc">Cold-start flow for every new carrier. Welcome splash → plan picker (Starter/Growth) → account creation → company setup → truck → <strong>CC collection with live card preview</strong> → 30-day trial confirmation.</div>
+        <div class="card-footer">
+          <div class="role-tags"><span class="role-tag role-new">New User</span></div>
+          <span class="open-btn">Open →</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- 06: Onboarding -->
+    <a class="card" href="mockups/mockup-06-onboarding.html" target="_blank" data-roles="owner new-july">
+      <div class="card-preview" style="background:linear-gradient(135deg,#0f1e35,#162340);">
+        👋
+        <div class="screen-count">6 screens</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="card-num">Mockup 06</div>
+            <div class="card-name">Onboarding Flow</div>
+          </div>
+          <span class="status-badge status-updated">UPDATED</span>
+        </div>
+        <div class="card-desc">Side-by-side screen layout showing the full setup flow. Company info → truck → customer → <strong>CC collection (new)</strong> → setup complete with load email revealed. Desktop annotation format.</div>
+        <div class="card-footer">
+          <div class="role-tags"><span class="role-tag role-owner">Owner</span><span class="role-tag role-new">New User</span></div>
+          <span class="open-btn">Open →</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- 01: Load Intake -->
+    <a class="card" href="mockups/mockup-01-load-intake.html" target="_blank" data-roles="owner">
+      <div class="card-preview" style="background:linear-gradient(135deg,#1a2e4a,#0f1e35);">
+        📥
+        <div class="screen-count">~6 screens</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="card-num">Mockup 01</div>
+            <div class="card-name">Load Intake</div>
+          </div>
+          <span class="status-badge status-stable">STABLE</span>
+        </div>
+        <div class="card-desc">4 intake methods: email forward, PDF upload, paste text, manual entry. AI extraction with confidence indicators, field-level review, accept/decline action.</div>
+        <div class="card-footer">
+          <div class="role-tags"><span class="role-tag role-owner">Owner</span></div>
+          <span class="open-btn">Open →</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- 02: Dispatch -->
+    <a class="card" href="mockups/mockup-02-dispatch.html" target="_blank" data-roles="owner">
+      <div class="card-preview" style="background:linear-gradient(135deg,#162033,#0d2040);">
+        🚚
+        <div class="screen-count">~5 screens</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="card-num">Mockup 02</div>
+            <div class="card-name">Dispatch</div>
+          </div>
+          <span class="status-badge status-stable">STABLE</span>
+        </div>
+        <div class="card-desc">Active load list → select load → assign driver and truck → dispatch confirmation. Driver availability states shown. Push notification sent on dispatch.</div>
+        <div class="card-footer">
+          <div class="role-tags"><span class="role-tag role-owner">Owner</span></div>
+          <span class="open-btn">Open →</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- 03: Driver App -->
+    <a class="card" href="mockups/mockup-03-driver-app.html" target="_blank" data-roles="driver">
+      <div class="card-preview" style="background:linear-gradient(135deg,#1a2000,#2a3510);">
+        📱
+        <div class="screen-count">~6 screens</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="card-num">Mockup 03</div>
+            <div class="card-name">Driver App</div>
+          </div>
+          <span class="status-badge status-stable">STABLE</span>
+        </div>
+        <div class="card-desc">Driver mode — rates and invoices hidden. Current load, status update flow (Picked Up → In Transit → Delivered), POD/BOL photo upload, open in Maps links.</div>
+        <div class="card-footer">
+          <div class="role-tags"><span class="role-tag role-driver">Driver</span></div>
+          <span class="open-btn">Open →</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- 04: Invoice -->
+    <a class="card" href="mockups/mockup-04-invoice.html" target="_blank" data-roles="owner">
+      <div class="card-preview" style="background:linear-gradient(135deg,#1a2e1a,#0d2010);">
+        💰
+        <div class="screen-count">~5 screens</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="card-num">Mockup 04</div>
+            <div class="card-name">Invoice</div>
+          </div>
+          <span class="status-badge status-stable">STABLE</span>
+        </div>
+        <div class="card-desc">Auto-populate invoice from delivered load → review/edit → send via email → invoice dashboard with outstanding/paid/overdue states. PDF download flow.</div>
+        <div class="card-footer">
+          <div class="role-tags"><span class="role-tag role-owner">Owner</span></div>
+          <span class="open-btn">Open →</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- 05: Tracking Link -->
+    <a class="card" href="mockups/mockup-05-tracking-link.html" target="_blank" data-roles="owner">
+      <div class="card-preview" style="background:linear-gradient(135deg,#0d1f2d,#1a3040);">
+        📍
+        <div class="screen-count">~4 screens</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="card-num">Mockup 05</div>
+            <div class="card-name">Tracking Link</div>
+          </div>
+          <span class="status-badge status-stable">STABLE</span>
+        </div>
+        <div class="card-desc">Owner shares link → customer public view with live status, location last updated, timeline, and ETA. No login required. Shows delivered state with full timeline.</div>
+        <div class="card-footer">
+          <div class="role-tags"><span class="role-tag role-owner">Owner</span><span class="role-tag role-customer">Customer</span></div>
+          <span class="open-btn">Open →</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- 07: Customer Directory -->
+    <a class="card" href="mockups/mockup-07-customer-directory.html" target="_blank" data-roles="owner">
+      <div class="card-preview" style="background:linear-gradient(135deg,#1a1a2e,#2a1a40);">
+        🏢
+        <div class="screen-count">~5 screens</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="card-num">Mockup 07</div>
+            <div class="card-name">Customer Directory</div>
+          </div>
+          <span class="status-badge status-stable">STABLE</span>
+        </div>
+        <div class="card-desc">Customer list with search and last-load date → customer profile with notes, tags, and load history → CSV/XLS bulk import with preview table and duplicate warnings.</div>
+        <div class="card-footer">
+          <div class="role-tags"><span class="role-tag role-owner">Owner</span></div>
+          <span class="open-btn">Open →</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- 08: Load Detail -->
+    <a class="card" href="mockups/mockup-08-load-detail.html" target="_blank" data-roles="owner">
+      <div class="card-preview" style="background:linear-gradient(135deg,#1f1a0d,#2e2510);">
+        📋
+        <div class="screen-count">~4 screens</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="card-num">Mockup 08</div>
+            <div class="card-name">Load Detail</div>
+          </div>
+          <span class="status-badge status-stable">STABLE</span>
+        </div>
+        <div class="card-desc">Full owner load view — route, driver, rate, status timeline, attached documents. Quick actions: share tracking link, generate invoice, reassign driver.</div>
+        <div class="card-footer">
+          <div class="role-tags"><span class="role-tag role-owner">Owner</span></div>
+          <span class="open-btn">Open →</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- 10: DVIR -->
+    <a class="card featured" href="mockups/mockup-10-dvir.html" target="_blank" data-roles="driver owner new-july">
+      <div class="card-preview" style="background:linear-gradient(135deg,#1a0d0d,#2e1010);">
+        📋
+        <div class="screen-count">9 screens</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="card-num">Mockup 10</div>
+            <div class="card-name">DVIR Inspection</div>
+          </div>
+          <span class="status-badge status-new">NEW</span>
+        </div>
+        <div class="card-desc">FMCSA-compliant pre/post-trip inspection. Interactive checklist with OK/Defect toggles → defect detail with photo → digital signature → owner alert view with resolve/schedule repair workflow.</div>
+        <div class="card-footer">
+          <div class="role-tags"><span class="role-tag role-driver">Driver</span><span class="role-tag role-owner">Owner</span></div>
+          <span class="open-btn">Open →</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- 12: Team & Roles -->
+    <a class="card featured" href="mockups/mockup-12-team-roles.html" target="_blank" data-roles="owner new-july">
+      <div class="card-preview" style="background:linear-gradient(135deg,#0f1e35,#1a1040);">
+        👥
+        <div class="screen-count">12 screens</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="card-num">Mockup 12</div>
+            <div class="card-name">Team &amp; Roles</div>
+          </div>
+          <span class="status-badge status-new">NEW</span>
+        </div>
+        <div class="card-desc">Invite flow for all 4 roles (Driver, Dispatcher, Finance, Owner). Team hub with member list → role picker with permission preview → driver receives SMS invite → role-specific home screens showing locked vs. accessible features.</div>
+        <div class="card-footer">
+          <div class="role-tags"><span class="role-tag role-owner">Owner</span><span class="role-tag role-driver">Driver</span></div>
+          <span class="open-btn">Open →</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- 11: Maintenance -->
+    <a class="card featured" href="mockups/mockup-11-maintenance.html" target="_blank" data-roles="owner new-july">
+      <div class="card-preview" style="background:linear-gradient(135deg,#0d1a2e,#102040);">
+        🔧
+        <div class="screen-count">8 screens</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="card-num">Mockup 11</div>
+            <div class="card-name">Truck Maintenance</div>
+          </div>
+          <span class="status-badge status-new">NEW</span>
+        </div>
+        <div class="card-desc">Truck profile with 3 tabs: Service Log (history, costs, receipts), Reminders (mileage + date-based with progress bars, due-soon alerts), Documents (registration, insurance, DOT authority with expiry tracking).</div>
+        <div class="card-footer">
+          <div class="role-tags"><span class="role-tag role-owner">Owner</span></div>
+          <span class="open-btn">Open →</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- 13: Visual Design -->
+    <a class="card featured" href="mockups/mockup-13-visual-design.html" target="_blank" data-roles="owner driver new-july">
+      <div class="card-preview" style="background:linear-gradient(135deg,#0f1e35,#2a1a0d);">
+        🎨
+        <div class="screen-count">10 screens</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="card-num">Mockup 13</div>
+            <div class="card-name">Visual Design System</div>
+          </div>
+          <span class="status-badge status-new">NEW</span>
+        </div>
+        <div class="card-desc">Truck type SVG silhouettes + color picker, CDL card visual, DVIR tap diagram with clickable zones, maintenance icons with progress bars, document expiry cards, enhanced load cards.</div>
+        <div class="card-footer">
+          <div class="role-tags"><span class="role-tag role-owner">Owner</span><span class="role-tag role-driver">Driver</span></div>
+          <span class="open-btn">Open →</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- 14: Exception Management -->
+    <a class="card featured" href="mockups/mockup-14-exceptions.html" target="_blank" data-roles="owner new-july">
+      <div class="card-preview" style="background:linear-gradient(135deg,#2d0a0a,#1a1a35);">
+        ⚠️
+        <div class="screen-count">6 screens</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="card-num">Mockup 14</div>
+            <div class="card-name">Exception Management</div>
+          </div>
+          <span class="status-badge status-new">NEW</span>
+        </div>
+        <div class="card-desc">Exceptions Inbox with Today/This Week/Upcoming grouping, driver profile with document + compliance history, truck load history with revenue stats, customer profile with health score + exception timeline, inline exception flags on list cards, language picker for all roles.</div>
+        <div class="card-footer">
+          <div class="role-tags"><span class="role-tag role-owner">Owner</span><span class="role-tag role-driver">Driver</span></div>
+          <span class="open-btn">Open →</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- 15: Home Screens by Role -->
+    <a class="card featured" href="mockups/mockup-15-home-screens.html" target="_blank" data-roles="owner driver new-july">
+      <div class="card-preview" style="background:linear-gradient(135deg,#0f1e35,#1a2e1a);">
+        🏠
+        <div class="screen-count">5 screens</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="card-num">Mockup 15</div>
+            <div class="card-name">Home Screens by Role</div>
+          </div>
+          <span class="status-badge status-new">NEW</span>
+        </div>
+        <div class="card-desc">Per-role home screens: Owner (command center with exceptions, revenue, loads, fleet, compliance), Solo (owner + driving today hybrid), Driver (current load prominent + DVIR reminder), Dispatcher (ops board, no financials), Finance (revenue sparkline, invoice aging, action queue, payments).</div>
+        <div class="card-footer">
+          <div class="role-tags"><span class="role-tag role-owner">Owner</span><span class="role-tag role-driver">Driver</span></div>
+          <span class="open-btn">Open →</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- 16: Language Localization -->
+    <a class="card featured" href="mockups/mockup-16-localization.html" target="_blank" data-roles="driver owner new-july">
+      <div class="card-preview" style="background:linear-gradient(135deg,#1a0a2e,#0a1a2e);">
+        🌐
+        <div class="screen-count">4 screens</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="card-num">Mockup 16</div>
+            <div class="card-name">Language Localization</div>
+          </div>
+          <span class="status-badge status-new">NEW</span>
+        </div>
+        <div class="card-desc">Same driver screen in 4 languages side-by-side: English (LTR), Spanish/Español (LTR), Punjabi/ਪੰਜਾਬੀ (LTR, Gurmukhi font), and Urdu/اردو (RTL, Nastaliq font with full layout mirror). Proves i18n architecture. Includes dev notes on font loading + RTL implementation.</div>
+        <div class="card-footer">
+          <div class="role-tags"><span class="role-tag role-driver">Driver</span><span class="role-tag role-owner">Owner</span></div>
+          <span class="open-btn">Open →</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- 17: Pro Desktop Finance & IFTA Hub -->
+    <a class="card featured" href="mockups/mockup-17/index.html" target="_blank" data-roles="finance owner pro new-july">
+      <div class="card-preview" style="background:linear-gradient(135deg,#0f1923,#1e3a5f);">
+        🖥
+        <div class="screen-count">1 desktop view</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="card-num">Mockup 17</div>
+            <div class="card-name">Pro Desktop: Finance & IFTA Hub</div>
+          </div>
+          <span class="status-badge status-new">NEW</span>
+        </div>
+        <div class="card-desc">Full desktop command center for the Finance and Owner roles (Pro tier). Fixed 256px sidebar nav, sticky topbar with period selector, 4-column KPI strip, IFTA quarterly state breakdown table with auto-computed tax due, invoice pipeline, driver settlements with ACH, fuel cost-per-mile by driver, and revenue-per-mile by lane. Includes database schema notes for all Pro analytics tables.</div>
+        <div class="card-footer">
+          <div class="role-tags"><span class="role-tag role-owner">Owner</span><span class="role-tag" style="background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.3)">Finance</span><span class="role-tag" style="background:rgba(249,115,22,0.15);color:#f97316;border:1px solid rgba(249,115,22,0.3)">Pro</span></div>
+          <span class="open-btn">Open →</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card featured" href="mockups/mockup-18/index.html" target="_blank" data-roles="driver owner new-july">
+      <div class="card-preview" style="background:linear-gradient(135deg,#1a2a1a,#2a4a1a);">
+        ⛽
+        <div class="screen-count">3 screens</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="card-num">Mockup 18</div>
+            <div class="card-name">Fuel Stop Logging</div>
+          </div>
+          <span class="status-badge status-new">NEW</span>
+        </div>
+        <div class="card-desc">All-tier mobile flow. Driver logs a fuel stop mid-trip: state, station, gallons, price/gal (auto-totals cost), and odometer. Trip fuel history with per-state breakdown. Load detail fuel cost card shows cost/mile. Data feeds into Growth IFTA mileage log (mockup-20). Schema: <code>fuel_stops</code> table, Supabase Storage for receipts.</div>
+        <div class="card-footer">
+          <div class="role-tags"><span class="role-tag role-driver">Driver</span><span class="role-tag role-owner">Owner</span><span class="role-tag" style="background:rgba(46,204,113,0.12);color:#2ecc71;border:1px solid rgba(46,204,113,0.3)">All Tiers</span></div>
+          <span class="open-btn">Open →</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card featured" href="mockups/mockup-19/index.html" target="_blank" data-roles="driver owner new-july">
+      <div class="card-preview" style="background:linear-gradient(135deg,#0f1e35,#1a2f4a);">
+        💬
+        <div class="screen-count">3 screens</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="card-num">Mockup 19</div>
+            <div class="card-name">Driver In-App Chat</div>
+          </div>
+          <span class="status-badge status-new">NEW</span>
+        </div>
+        <div class="card-desc">Growth tier. Per-load chat thread between driver and dispatcher. Driver view with chat bubbles, load context header, system messages (status changes). Dispatcher Messages list with unread badges per load. Driver load card shows unread count badge. Supabase Realtime push — no polling. Finance role has NO access. Schema: <code>driver_messages</code> table.</div>
+        <div class="card-footer">
+          <div class="role-tags"><span class="role-tag role-driver">Driver</span><span class="role-tag role-owner">Owner</span><span class="role-tag" style="background:rgba(240,165,0,0.12);color:#f0a500;border:1px solid rgba(240,165,0,0.3)">Growth+</span></div>
+          <span class="open-btn">Open →</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card featured" href="mockups/mockup-20/index.html" target="_blank" data-roles="driver owner new-july">
+      <div class="card-preview" style="background:linear-gradient(135deg,#0f1e35,#1f3855);">
+        🗺️
+        <div class="screen-count">3 screens</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="card-num">Mockup 20</div>
+            <div class="card-name">IFTA Mileage Log</div>
+          </div>
+          <span class="status-badge status-new">NEW</span>
+        </div>
+        <div class="card-desc">Growth tier. GPS auto-logs state boundary crossings every 15 min — driver sees live GPS active indicator and per-state miles for their current trip. Owner sees quarterly IFTA state summary (miles by state, 5-state bar chart, Q2 filing reminder). Per-trip crossing detail with fuel stop reconciliation. Pro upsell to full tax calculation (mockup-17). Schema: <code>ifta_state_crossings</code>.</div>
+        <div class="card-footer">
+          <div class="role-tags"><span class="role-tag role-driver">Driver</span><span class="role-tag role-owner">Owner</span><span class="role-tag" style="background:rgba(240,165,0,0.12);color:#f0a500;border:1px solid rgba(240,165,0,0.3)">Growth+</span></div>
+          <span class="open-btn">Open →</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card featured" href="mockups/mockup-21/index.html" target="_blank" data-roles="owner new-july">
+      <div class="card-preview" style="background:linear-gradient(135deg,#0c1a2e,#182c46);">
+        🖥️
+        <div class="screen-count">2 desktop views</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="card-num">Mockup 21</div>
+            <div class="card-name">Growth Desktop Command Center</div>
+          </div>
+          <span class="status-badge status-new">NEW</span>
+        </div>
+        <div class="card-desc">Growth tier desktop (web). Two role views sharing a fixed sidebar. Owner: fleet-wide KPI strip (active loads, revenue MTD, trucks on road, fuel spend, unread messages), live fleet map with truck positions + exception strip, active loads table. Dispatcher: load queue with status + unread badges, driver assign panel with availability scoring and best-match recommendation. Push notification on assignment.</div>
+        <div class="card-footer">
+          <div class="role-tags"><span class="role-tag role-owner">Owner</span><span class="role-tag" style="background:rgba(26,188,156,0.12);color:#1abc9c;border:1px solid rgba(26,188,156,0.3)">Dispatcher</span><span class="role-tag" style="background:rgba(240,165,0,0.12);color:#f0a500;border:1px solid rgba(240,165,0,0.3)">Growth+</span></div>
+          <span class="open-btn">Open →</span>
+        </div>
+      </div>
+    </a>
+          <a class="card" href="mockups/mockup-22-fleet-inventory.html">
+            <div class="card-header">
+              <div class="card-title">Mockup 22 — Truck Fleet Inventory</div>
+              <div class="card-badges">
+                <span class="badge badge-mobile">Mobile</span>
+                <span class="badge badge-web">Desktop</span>
+                <span class="badge">All Tiers</span>
+              </div>
+            </div>
+            <div class="card-desc">Fleet overview grid (desktop) with truck type SVGs, make/model/year, status, driver assignment. Truck detail/profile with photo upload, docs, service. Add truck mobile flow with type picker + color swatches. Mobile fleet list with status filter tabs.</div>
+            <div class="card-meta">4 screens · Owner · Photo upload · Type picker · Service summary</div>
+          </a>
+
+          <a class="card featured" href="mockups/mockup-23-super-admin.html" target="_blank" data-roles="owner">
+            <div class="card-header">
+              <div class="card-title">Mockup 23 — Super Admin Command Center</div>
+              <div class="card-badges">
+                <span class="badge badge-web">Desktop</span>
+                <span class="badge" style="background:rgba(249,115,22,0.15);color:#f97316">Internal</span>
+                <span class="status-badge status-new">NEW</span>
+              </div>
+            </div>
+            <div class="card-desc">7-screen platform-operator workspace: Triage Queue (exception-driven inbox, severity-grouped), Customer Health Board (health scores + tier filter), Org Detail (adoption checklist, timeline, admin actions, notes), Billing &amp; Payments (failed charges, dunning queue), Sales Pipeline (trial countdowns, upgrade candidates), Audit &amp; Activity (cross-org event stream, auth log), Feature Flags. Click "Build Spec" in the file for per-screen data sources and SQL.</div>
+            <div class="card-meta">7 screens · Platform team · Separate auth surface · 5 new DB tables · Build Spec embedded</div>
+          </a>
+
+          <a class="card featured" href="mockups/mockup-24-dvir-native.html" target="_blank" data-roles="driver">
+            <div class="card-header"><div class="card-title">Mockup 24 — DVIR Inspection (Native)</div><div class="card-badges"><span class="badge badge-mobile">Mobile</span><span class="badge">Driver</span></div></div>
+            <div class="card-desc">Phone-frame DVIR flow with vehicle walkaround checklist, photo-per-defect, signature, history, and attachment-upload warning states.</div>
+            <div class="card-meta">Driver workflow · Checklist · Photos · Signature</div>
+          </a>
+
+          <a class="card featured" href="mockups/mockup-25-maintenance-native.html" target="_blank" data-roles="owner driver">
+            <div class="card-header"><div class="card-title">Mockup 25 — Maintenance (Native)</div><div class="card-badges"><span class="badge badge-mobile">Mobile</span><span class="badge">Fleet</span></div></div>
+            <div class="card-desc">Phone-frame maintenance reminder overview, vehicle service-log entry, and maintenance document review.</div>
+            <div class="card-meta">Fleet owner · Driver · Service log · Documents</div>
+          </a>
+
+          <a class="card featured" href="mockups/mockup-26-settlements-native.html" target="_blank" data-roles="owner driver">
+            <div class="card-header"><div class="card-title">Mockup 26 — Settlements (Native)</div><div class="card-badges"><span class="badge badge-mobile">Mobile</span><span class="badge">Finance</span></div></div>
+            <div class="card-desc">Mobile settlement list and review/approval of computed settlements; settlement calculation remains a separate higher-stakes workflow.</div>
+            <div class="card-meta">Owner · Driver · Settlement review</div>
+          </a>
+
+          <a class="card featured" href="mockups/mockup-27-billing-native.html" target="_blank" data-roles="owner">
+            <div class="card-header"><div class="card-title">Mockup 27 — Billing (Native)</div><div class="card-badges"><span class="badge badge-mobile">Mobile</span><span class="badge">Owner</span></div></div>
+            <div class="card-desc">Native billing summary, fleet usage, biometric confirmation concept, and secure browser handoff for subscription changes.</div>
+            <div class="card-meta">Owner · Plan summary · Web handoff · No PDF</div>
+          </a>
+
+          <a class="card featured" href="mockups/mockup-28-loadboard-marketplace.html" target="_blank" data-roles="owner dispatcher solo">
+            <div class="card-header">
+              <div class="card-title">Mockup 28 — One-Stop Load Marketplace</div>
+              <div class="card-badges">
+                <span class="badge badge-web">Responsive Web</span>
+                <span class="badge">Product Discovery</span>
+                <span class="status-badge status-new">NEW</span>
+              </div>
+            </div>
+            <div class="card-desc">Search sample DAT, Truckstop, and 123Loadboard freight in one CarrierOS workspace; compare route, equipment, gross rate, loaded-mile RPM, deadhead, provider source and explainable fit. Includes pursuit detail, cross-board application activity, connection states, and explicit demo/no-live-action disclosures.</div>
+            <div class="card-meta">3 views · Owner / Solo / Dispatcher · Synthetic data only · Companion PRD</div>
+          </a>
+
+
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-item"><span class="status-badge status-new">NEW</span> Added in this design release</div>
+  <div class="legend-item"><span class="status-badge status-updated">UPDATED</span> Revised this sprint</div>
+  <div class="legend-item"><span class="status-badge status-stable">STABLE</span> No changes since last review</div>
+  <div class="legend-item"><span class="role-tag role-owner">Owner</span> Fleet owner / dispatcher</div>
+  <div class="legend-item"><span class="role-tag role-driver">Driver</span> Employed driver</div>
+  <div class="legend-item"><span class="role-tag role-customer">Customer</span> Shipper / broker</div>
+  <div class="legend-item"><span class="role-tag role-new">New User</span> First-time signup</div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>CarrierOS · Design Prototype Index · v2.0 · September 2026</p>
+  <p>PRD: <code>prd.md</code> &nbsp;·&nbsp; Tech Spec: <code>tech-spec.md</code> &nbsp;·&nbsp; Pricing: <code>tier-pricing-structure.md</code></p>
+  <p style="margin-top:6px;">All files in <code>Zoho Drive → General → Product → Carrier Portal</code></p>
+</footer>
+
+<script>
+function filterCards(filter) {
+  document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+
+  const cards = document.querySelectorAll('#cardGrid .card');
+  cards.forEach(card => {
+    if (filter === 'all') {
+      card.style.display = '';
+    } else {
+      const roles = (card.dataset.roles || '').split(' ');
+      card.style.display = roles.includes(filter) ? '' : 'none';
+    }
+  });
+}
+</script>
+
+</body>
+</html>

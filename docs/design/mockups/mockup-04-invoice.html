@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarrierOS — Invoice Flow</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f1e35;--navy-mid:#182c46;--navy-light:#1f3a58;--navy-card:#162033;
+  --orange:#f47920;--orange-lt:#f9a55a;--orange-dim:rgba(244,121,32,.15);
+  --white:#fff;--gray:#8fa3b8;--gray-lt:#d6e0ea;--gray-dim:rgba(214,224,234,.08);
+  --green:#2ecc71;--green-dim:rgba(46,204,113,.13);
+  --amber:#f0a500;--amber-dim:rgba(240,165,0,.15);
+  --red:#e55353;--red-dim:rgba(229,83,83,.13);
+  --teal:#1abc9c;
+  --radius:14px;--radius-sm:8px;
+}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;
+  background:var(--navy);color:var(--white);
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  padding:32px 16px 60px;
+}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(rgba(255,255,255,.018) 1px,transparent 1px);background-size:28px 28px;pointer-events:none;z-index:0;}
+.page-header{text-align:center;margin-bottom:40px;z-index:1;}
+.page-header .logo{font-size:13px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--orange);margin-bottom:6px;}
+.page-header h1{font-size:22px;font-weight:700;}
+.page-header p{font-size:13px;color:var(--gray);margin-top:4px;}
+
+.screens{display:flex;gap:24px;align-items:flex-start;z-index:1;flex-wrap:wrap;justify-content:center;width:100%;max-width:1280px;}
+.phone{display:flex;flex-direction:column;width:360px;flex-shrink:0;}
+.screen-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:10px;text-align:center;}
+.phone-frame{background:var(--navy-card);border-radius:24px;border:1.5px solid rgba(255,255,255,.08);overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.45);min-height:620px;display:flex;flex-direction:column;}
+.phone-bar{background:var(--navy-mid);padding:14px 20px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.05);}
+.phone-bar .back{color:var(--orange);font-size:13px;font-weight:600;}
+.phone-bar .title{font-size:15px;font-weight:700;}
+.phone-bar .action{color:var(--orange);font-size:13px;font-weight:600;}
+.phone-content{padding:20px 16px;flex:1;display:flex;flex-direction:column;gap:14px;}
+
+/* Invoice prompt */
+.invoice-prompt{
+  background:linear-gradient(135deg,rgba(244,121,32,.15),rgba(244,121,32,.05));
+  border:2px solid rgba(244,121,32,.4);border-radius:var(--radius);
+  padding:18px;text-align:center;
+}
+.invoice-prompt .big{font-size:36px;margin-bottom:10px;}
+.invoice-prompt .title{font-size:17px;font-weight:800;color:var(--white);}
+.invoice-prompt .sub{font-size:12px;color:var(--gray);margin-top:4px;line-height:1.5;}
+
+/* Invoice preview card (the actual invoice) */
+.invoice-card{
+  background:#fff;color:#1a1a2e;border-radius:var(--radius);overflow:hidden;
+  box-shadow:0 4px 20px rgba(0,0,0,.3);
+}
+.invoice-header{background:var(--navy);padding:16px 18px;display:flex;align-items:flex-start;justify-content:space-between;}
+.company-block{}
+.company-name{font-size:15px;font-weight:800;color:var(--white);}
+.company-sub{font-size:10px;color:var(--gray);margin-top:2px;line-height:1.5;}
+.invoice-number{text-align:right;}
+.inv-label{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--gray);text-transform:uppercase;}
+.inv-number{font-size:18px;font-weight:800;color:var(--orange);margin-top:2px;}
+.inv-date{font-size:10px;color:var(--gray);margin-top:2px;}
+
+.invoice-body{padding:14px 18px;}
+.inv-section{margin-bottom:12px;}
+.inv-section-label{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#888;margin-bottom:5px;}
+.inv-to{font-size:13px;font-weight:700;color:#1a1a2e;}
+.inv-to-sub{font-size:11px;color:#666;margin-top:1px;}
+
+.inv-divider{height:1px;background:#e8edf2;margin:10px 0;}
+
+/* Line items */
+.line-items{width:100%;border-collapse:collapse;}
+.line-items th{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#888;text-align:left;padding:4px 0;border-bottom:1px solid #e8edf2;}
+.line-items td{font-size:12px;color:#1a1a2e;padding:6px 0;border-bottom:1px solid #f0f4f8;vertical-align:top;}
+.line-items td.right{text-align:right;font-weight:700;}
+.line-items .total-row td{font-size:14px;font-weight:800;color:var(--navy);border-bottom:none;padding-top:10px;}
+.line-items .total-row td.right{color:var(--orange);}
+
+.inv-terms{background:#f8fafc;border-radius:6px;padding:8px 10px;margin-top:8px;}
+.inv-terms-label{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#888;margin-bottom:3px;}
+.inv-terms-text{font-size:11px;color:#666;}
+
+/* Payment instructions */
+.pay-block{margin-top:10px;background:#f0f8f4;border-radius:6px;padding:8px 10px;border:1px solid rgba(46,204,113,.2);}
+.pay-block-label{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#2ecc71;margin-bottom:3px;}
+.pay-block-text{font-size:11px;color:#333;line-height:1.5;}
+
+/* Section titles */
+.section-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--orange);}
+.divider{height:1px;background:rgba(255,255,255,.06);}
+
+/* Buttons */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--orange);color:#fff;font-size:14px;font-weight:700;border-radius:var(--radius-sm);padding:13px;cursor:pointer;border:none;width:100%;}
+.btn.secondary{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);color:var(--gray-lt);}
+.btn.green{background:var(--green);}
+.btn.ghost{background:transparent;border:1.5px solid rgba(244,121,32,.4);color:var(--orange);}
+
+/* Invoice list items */
+.inv-list-item{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+  border-radius:var(--radius-sm);padding:12px 14px;
+  display:flex;align-items:center;gap:12px;
+}
+.ili-status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.ili-content{flex:1;}
+.ili-number{font-size:11px;color:var(--gray);font-weight:700;letter-spacing:1px;}
+.ili-route{font-size:13px;font-weight:700;margin-top:1px;}
+.ili-meta{font-size:11px;color:var(--gray);margin-top:2px;}
+.ili-right{text-align:right;}
+.ili-amount{font-size:15px;font-weight:800;color:var(--orange-lt);}
+.ili-status{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;margin-top:4px;display:inline-block;}
+.s-sent{background:rgba(240,165,0,.15);color:var(--amber);}
+.s-paid{background:var(--green-dim);color:var(--green);}
+.s-overdue{background:var(--red-dim);color:var(--red);}
+.s-draft{background:rgba(255,255,255,.07);color:var(--gray);}
+
+/* Overdue banner */
+.overdue-banner{background:var(--red-dim);border:1.5px solid rgba(229,83,83,.35);border-radius:var(--radius-sm);padding:10px 12px;display:flex;align-items:center;gap:8px;}
+.overdue-banner .ob-icon{font-size:18px;}
+.overdue-banner .ob-text{}
+.overdue-banner .ob-title{font-size:12px;font-weight:700;color:var(--red);}
+.overdue-banner .ob-sub{font-size:11px;color:var(--gray);margin-top:1px;}
+
+/* Send modal */
+.send-detail{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius-sm);padding:12px 14px;display:flex;flex-direction:column;gap:4px;}
+.send-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gray);}
+.send-value{font-size:13px;font-weight:600;}
+
+/* Callout */
+.callout{background:rgba(244,121,32,.1);border:1px solid rgba(244,121,32,.25);border-radius:8px;padding:8px 11px;font-size:11px;color:var(--orange-lt);}
+
+/* flow arrow */
+.flow-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:80px;color:var(--gray);gap:6px;flex-shrink:0;}
+.flow-arrow .arrow-label{font-size:10px;color:var(--gray);text-align:center;max-width:60px;}
+
+/* Paid screen */
+.paid-amount{font-size:36px;font-weight:900;color:var(--green);text-align:center;margin:8px 0;}
+.stats-row{display:flex;gap:8px;}
+.stat-box{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius-sm);padding:12px;text-align:center;}
+.stat-value{font-size:18px;font-weight:800;color:var(--orange-lt);}
+.stat-label{font-size:10px;color:var(--gray);margin-top:3px;font-weight:600;}
+
+.page-footer{margin-top:48px;text-align:center;z-index:1;font-size:11px;color:rgba(143,163,184,.4);display:flex;gap:24px;justify-content:center;flex-wrap:wrap;}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="logo">CarrierOS</div>
+  <h1>Invoice Generation Flow</h1>
+  <p>Mockup 04 — Auto-generated · Review · Send · Track to Paid</p>
+</div>
+
+<div class="screens">
+
+  <!-- ── SCREEN 1: Invoice Prompt (post-delivery) ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 1 — Ready to Invoice</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span class="back">‹ Loads</span>
+        <span class="title">Load #FF-29381</span>
+        <span></span>
+      </div>
+      <div class="phone-content">
+
+        <!-- Delivered load summary -->
+        <div style="background:var(--green-dim);border:1.5px solid rgba(46,204,113,.3);border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:22px;">✅</span>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--green);">Delivered — Jun 18 · 11:32 AM</div>
+            <div style="font-size:11px;color:var(--gray);margin-top:2px;">Chicago → Memphis · POD uploaded</div>
+          </div>
+        </div>
+
+        <!-- Invoice prompt -->
+        <div class="invoice-prompt">
+          <div class="big">🧾</div>
+          <div class="title">Ready to Invoice?</div>
+          <div class="sub">We've auto-filled the invoice from this load.<br>Review and send in under 2 minutes.</div>
+        </div>
+
+        <!-- Quick preview -->
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius-sm);padding:12px 14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div style="font-size:12px;color:var(--gray);font-weight:600;">Invoice Preview</div>
+            <div style="font-size:11px;color:var(--orange);">Edit →</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+            <span style="color:var(--gray);">Bill To:</span><span style="font-weight:600;">Fast Freight LLC</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+            <span style="color:var(--gray);">Load Ref:</span><span style="font-weight:600;">FF-29381</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+            <span style="color:var(--gray);">Route:</span><span style="font-weight:600;">Chicago → Memphis</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.07);">
+            <span style="font-size:13px;font-weight:700;">Total Due</span>
+            <span style="font-size:18px;font-weight:900;color:var(--orange);">$1,850.00</span>
+          </div>
+        </div>
+
+        <button class="btn">🧾 Review &amp; Send Invoice</button>
+        <button class="btn secondary">Skip for Now</button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">Review invoice</div>
+  </div>
+
+  <!-- ── SCREEN 2: Invoice Review ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 2 — Review Invoice</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span class="back">‹ Back</span>
+        <span class="title">Invoice #1042</span>
+        <span class="action">Edit</span>
+      </div>
+      <div class="phone-content" style="overflow-y:auto;max-height:600px;">
+
+        <!-- The invoice itself (white card) -->
+        <div class="invoice-card">
+          <div class="invoice-header">
+            <div class="company-block">
+              <div class="company-name">⬡ Acme Trucking LLC</div>
+              <div class="company-sub">DOT #8834422 · EIN 82-4492001<br>Chicago, IL 60601</div>
+            </div>
+            <div class="invoice-number">
+              <div class="inv-label">Invoice</div>
+              <div class="inv-number">#1042</div>
+              <div class="inv-date">Issued: Jun 18, 2026</div>
+              <div class="inv-date">Due: Jul 18, 2026</div>
+            </div>
+          </div>
+          <div class="invoice-body">
+            <div class="inv-section">
+              <div class="inv-section-label">Bill To</div>
+              <div class="inv-to">Fast Freight LLC</div>
+              <div class="inv-to-sub">dispatch@fastfreight.com<br>(312) 555-0190</div>
+            </div>
+
+            <div class="inv-divider"></div>
+
+            <table class="line-items">
+              <tr>
+                <th>Description</th>
+                <th class="right">Amount</th>
+              </tr>
+              <tr>
+                <td>
+                  <div style="font-weight:600;">Freight Transportation</div>
+                  <div style="font-size:10px;color:#666;margin-top:2px;">Chicago, IL → Memphis, TN<br>Ref: FF-29381 · Jun 17–18, 2026</div>
+                </td>
+                <td class="right">$1,850.00</td>
+              </tr>
+              <tr class="total-row">
+                <td><strong>Total Due</strong></td>
+                <td class="right">$1,850.00</td>
+              </tr>
+            </table>
+
+            <div class="inv-terms">
+              <div class="inv-terms-label">Payment Terms</div>
+              <div class="inv-terms-text">Net 30 · Due Jul 18, 2026</div>
+            </div>
+
+            <div class="pay-block">
+              <div class="pay-block-label">Remit Payment To</div>
+              <div class="pay-block-text">
+                Acme Trucking LLC<br>
+                Bank: Chase · Routing: ●●●●0011<br>
+                Acct: ●●●●4892
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Documents attached -->
+        <div class="section-title">Attached Documents</div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius-sm);padding:10px 12px;display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:18px;">📄</span>
+            <div>
+              <div style="font-size:12px;font-weight:700;">BOL_FF29381.jpg</div>
+              <div style="font-size:10px;color:var(--gray);">Proof of Delivery · 2.1 MB</div>
+            </div>
+          </div>
+          <span style="color:var(--green);font-weight:700;">✓</span>
+        </div>
+
+        <button class="btn" style="margin-top:4px;">📤 Send Invoice to Fast Freight</button>
+        <button class="btn ghost">⬇ Download PDF</button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">Sent!</div>
+  </div>
+
+  <!-- ── SCREEN 3: Sent + Invoice Tracker ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 3 — Sent &amp; Tracking</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span class="back">‹ Invoice</span>
+        <span class="title">Invoice Tracker</span>
+        <span></span>
+      </div>
+      <div class="phone-content">
+
+        <!-- Sent confirmation -->
+        <div style="background:var(--green-dim);border:1.5px solid rgba(46,204,113,.3);border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:20px;">✉️</span>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--green);">Invoice #1042 Sent</div>
+            <div style="font-size:11px;color:var(--gray);margin-top:2px;">To: dispatch@fastfreight.com · Jun 18 · 11:48 AM</div>
+          </div>
+        </div>
+
+        <!-- Invoice status timeline -->
+        <div class="section-title">Status Timeline</div>
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <div style="display:flex;gap:12px;position:relative;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--green-dim);border:1.5px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:2px;">✓</div>
+            <div style="position:absolute;left:13px;top:30px;bottom:-16px;width:2px;background:rgba(255,255,255,.07);"></div>
+            <div style="flex:1;padding-bottom:16px;">
+              <div style="font-size:13px;font-weight:700;">Invoice Sent</div>
+              <div style="font-size:11px;color:var(--gray);margin-top:1px;">Jun 18 · 11:48 AM</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;position:relative;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--green-dim);border:1.5px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:2px;">✓</div>
+            <div style="position:absolute;left:13px;top:30px;bottom:-16px;width:2px;background:rgba(255,255,255,.07);"></div>
+            <div style="flex:1;padding-bottom:16px;">
+              <div style="font-size:13px;font-weight:700;">Opened by Fast Freight</div>
+              <div style="font-size:11px;color:var(--gray);margin-top:1px;">Jun 18 · 2:14 PM · 1 view</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;position:relative;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--amber-dim);border:1.5px solid var(--amber);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;color:var(--amber);font-weight:700;margin-top:2px;">⏳</div>
+            <div style="position:absolute;left:13px;top:30px;bottom:-16px;width:2px;background:rgba(255,255,255,.07);"></div>
+            <div style="flex:1;padding-bottom:16px;">
+              <div style="font-size:13px;font-weight:700;color:var(--amber);">Awaiting Payment</div>
+              <div style="font-size:11px;color:var(--gray);margin-top:1px;">Due Jul 18 · 30 days remaining</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;">
+            <div style="width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;color:var(--gray);margin-top:2px;">4</div>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:700;color:var(--gray);">Mark as Paid</div>
+              <div style="font-size:11px;color:var(--gray);margin-top:1px;">When check or ACH arrives</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action -->
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+          <button class="btn green">✓ Mark as Paid</button>
+          <button class="btn secondary">📤 Resend Reminder</button>
+        </div>
+
+        <div class="callout">We'll notify you when Fast Freight opens your invoice.</div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">All invoices</div>
+  </div>
+
+  <!-- ── SCREEN 4: Invoice Dashboard ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 4 — Invoice Dashboard</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span></span>
+        <span class="title">Invoices</span>
+        <span class="action">+ New</span>
+      </div>
+      <div class="phone-content">
+
+        <!-- Summary stats -->
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-value">$8,450</div>
+            <div class="stat-label">Outstanding</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" style="color:var(--red);">$2,100</div>
+            <div class="stat-label">Overdue</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" style="color:var(--green);">$12,300</div>
+            <div class="stat-label">Paid MTD</div>
+          </div>
+        </div>
+
+        <!-- Overdue alert -->
+        <div class="overdue-banner">
+          <div class="ob-icon">⚠️</div>
+          <div class="ob-text">
+            <div class="ob-title">1 Invoice Overdue — 7 Days</div>
+            <div class="ob-sub">Invoice #1038 · Midwest Logistics · $2,100</div>
+          </div>
+          <span style="color:var(--red);font-size:16px;margin-left:auto;">›</span>
+        </div>
+
+        <!-- Filter chips -->
+        <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;">
+          <span style="background:var(--orange);color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;white-space:nowrap;">All</span>
+          <span style="background:var(--gray-dim);color:var(--gray);font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;white-space:nowrap;">Unpaid</span>
+          <span style="background:var(--gray-dim);color:var(--gray);font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;white-space:nowrap;">Overdue</span>
+          <span style="background:var(--gray-dim);color:var(--gray);font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;white-space:nowrap;">Paid</span>
+        </div>
+
+        <!-- Invoice list -->
+        <div class="inv-list-item">
+          <div class="ili-status-dot" style="background:var(--amber);"></div>
+          <div class="ili-content">
+            <div class="ili-number">INV #1042</div>
+            <div class="ili-route">Fast Freight LLC</div>
+            <div class="ili-meta">Chicago → Memphis · Due Jul 18</div>
+          </div>
+          <div class="ili-right">
+            <div class="ili-amount">$1,850</div>
+            <div class="ili-status s-sent">Sent</div>
+          </div>
+        </div>
+
+        <div class="inv-list-item">
+          <div class="ili-status-dot" style="background:var(--red);"></div>
+          <div class="ili-content">
+            <div class="ili-number">INV #1038</div>
+            <div class="ili-route">Midwest Logistics</div>
+            <div class="ili-meta">Detroit → Indianapolis · 7 days past due</div>
+          </div>
+          <div class="ili-right">
+            <div class="ili-amount">$2,100</div>
+            <div class="ili-status s-overdue">Overdue</div>
+          </div>
+        </div>
+
+        <div class="inv-list-item">
+          <div class="ili-status-dot" style="background:var(--amber);"></div>
+          <div class="ili-content">
+            <div class="ili-number">INV #1040</div>
+            <div class="ili-route">Swift Logistics</div>
+            <div class="ili-meta">Memphis → St. Louis · Due Jun 30</div>
+          </div>
+          <div class="ili-right">
+            <div class="ili-amount">$2,200</div>
+            <div class="ili-status s-sent">Sent</div>
+          </div>
+        </div>
+
+        <div class="inv-list-item">
+          <div class="ili-status-dot" style="background:var(--green);"></div>
+          <div class="ili-content">
+            <div class="ili-number">INV #1035</div>
+            <div class="ili-route">Apex Freight</div>
+            <div class="ili-meta">Chicago → Atlanta · Paid Jun 10</div>
+          </div>
+          <div class="ili-right">
+            <div class="ili-amount">$3,400</div>
+            <div class="ili-status s-paid">Paid ✓</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="page-footer">
+  <span>🧾 Invoice auto-fills from completed load — zero re-entry</span>
+  <span>📧 Email open tracking built in</span>
+  <span>✅ Manual mark-as-paid for check &amp; ACH (MVP)</span>
+  <span style="color:rgba(143,163,184,.3);">CarrierOS Mockup 04 · June 2026</span>
+</div>
+
+</body>
+</html>

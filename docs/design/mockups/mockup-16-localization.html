@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarrierOS — Mockup 16: Language Localization</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gurmukhi:wght@400;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:       #0f1e35;
+    --navy-light: #1a2e4a;
+    --orange:     #f47920;
+    --green:      #2ecc71;
+    --amber:      #f0a500;
+    --red:        #e74c3c;
+    --bg:         #f4f6f9;
+    --card:       #ffffff;
+    --text:       #1a1a2e;
+    --muted:      #6b7280;
+    --border:     #e5e7eb;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #12121f;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 16px 48px;
+    min-height: 100vh;
+  }
+
+  h1 { color: #fff; font-size: 22px; margin-bottom: 6px; text-align: center; }
+  .subtitle { color: rgba(255,255,255,0.5); font-size: 13px; margin-bottom: 8px; text-align: center; }
+  .note { color: rgba(255,255,255,0.3); font-size: 11px; margin-bottom: 32px; text-align: center; font-style: italic; }
+
+  /* Language key */
+  .lang-key {
+    display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+    margin-bottom: 28px;
+  }
+  .lk-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: rgba(255,255,255,0.6);
+  }
+  .lk-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* Phone grid */
+  .phone-row {
+    display: flex; gap: 24px; flex-wrap: wrap; justify-content: center;
+    max-width: 1700px;
+  }
+
+  /* Phone shell */
+  .phone { width: 360px; flex-shrink: 0; }
+  .phone-label {
+    text-align: center; margin-bottom: 10px;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .lang-name { font-size: 15px; font-weight: 700; color: #fff; }
+  .lang-native { font-size: 13px; }
+  .lang-tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 2px 8px; border-radius: 99px; }
+
+  .phone-screen {
+    background: var(--bg);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Status bar */
+  .status-bar {
+    background: var(--navy);
+    color: rgba(255,255,255,0.8);
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 13px 18px 10px;
+    font-size: 12px; font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  /* Nav header */
+  .nav-header { background: var(--navy); padding: 10px 16px 14px; flex-shrink: 0; }
+  .nav-header .back { font-size: 13px; color: var(--orange); margin-bottom: 6px; }
+  .nav-header .back-rtl { font-size: 13px; color: var(--orange); margin-bottom: 6px; text-align: left; }
+  .nav-header h2 { font-size: 19px; font-weight: 700; color: #fff; }
+
+  /* Scroll area */
+  .scroll-area { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+
+  /* Current load card */
+  .load-card {
+    background: var(--navy);
+    border-radius: 16px;
+    padding: 16px;
+    color: #fff;
+  }
+
+  .lc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .lc-id { font-size: 11px; color: rgba(255,255,255,0.45); }
+  .lc-customer { font-size: 19px; font-weight: 800; margin: 3px 0; }
+  .lc-commodity { font-size: 12px; color: rgba(255,255,255,0.55); }
+  .lc-badge {
+    background: rgba(244,121,32,0.25);
+    color: var(--orange);
+    border-radius: 99px; padding: 4px 10px;
+    font-size: 11px; font-weight: 700;
+    white-space: nowrap; flex-shrink: 0;
+  }
+
+  .lc-route {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 10px; padding: 10px 12px;
+    margin: 10px 0;
+  }
+  .lc-city { font-size: 13px; font-weight: 600; flex: 1; }
+  .lc-city.dest { text-align: right; }
+  .lc-arrow { color: var(--orange); font-size: 18px; flex-shrink: 0; }
+
+  .lc-stops { display: flex; gap: 8px; margin-bottom: 10px; }
+  .lc-stop { flex: 1; background: rgba(255,255,255,0.06); border-radius: 8px; padding: 8px 10px; }
+  .lc-stop-label { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.06em; }
+  .lc-stop-val { font-size: 12px; font-weight: 600; margin-top: 2px; }
+  .lc-stop-val.done { color: var(--green); }
+  .lc-stop-val.eta { color: var(--orange); }
+
+  .lc-btn {
+    width: 100%;
+    background: var(--orange);
+    color: #fff;
+    border: none; border-radius: 10px;
+    padding: 13px; font-size: 14px; font-weight: 700;
+    cursor: pointer; margin-top: 2px;
+  }
+  .lc-btn-ghost {
+    width: 100%;
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.8);
+    border: none; border-radius: 10px;
+    padding: 11px; font-size: 13px; font-weight: 600;
+    cursor: pointer; margin-top: 6px;
+  }
+
+  /* DVIR reminder */
+  .dvir-card {
+    background: #fef3cd;
+    border: 1.5px solid #fde68a;
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .dvir-icon { font-size: 22px; flex-shrink: 0; }
+  .dvir-body { flex: 1; }
+  .dvir-title { font-size: 13px; font-weight: 700; color: #92400e; }
+  .dvir-sub { font-size: 11px; color: #b45309; margin-top: 2px; }
+  .dvir-btn {
+    background: var(--amber); color: #fff;
+    border: none; border-radius: 8px;
+    padding: 7px 12px; font-size: 11px; font-weight: 700;
+    cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  }
+
+  /* Compliance chips */
+  .chips { display: flex; gap: 8px; }
+  .chip { flex: 1; border-radius: 10px; padding: 9px 10px; display: flex; align-items: center; gap: 6px; }
+  .chip.green { background: #d1fae5; }
+  .chip-icon { font-size: 15px; }
+  .chip-label { font-size: 11px; font-weight: 700; color: #065f46; }
+  .chip-sub { font-size: 10px; color: #4ade80; margin-top: 1px; }
+
+  /* Tab bar */
+  .tab-bar {
+    background: var(--navy);
+    display: flex; justify-content: space-around;
+    padding: 10px 0 16px;
+    flex-shrink: 0;
+  }
+  .tab-item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 9px; color: rgba(255,255,255,0.4); min-width: 50px; }
+  .tab-item.active { color: var(--orange); }
+  .tab-icon { font-size: 19px; }
+
+  /* Urdu-specific */
+  .urdu { font-family: 'Noto Nastaliq Urdu', serif; }
+  .punjabi { font-family: 'Noto Sans Gurmukhi', sans-serif; }
+
+  /* RTL container */
+  [dir="rtl"] .lc-city { text-align: right; }
+  [dir="rtl"] .lc-city.dest { text-align: left; }
+  [dir="rtl"] .nav-header .back { text-align: right; }
+  [dir="rtl"] .dvir-card { flex-direction: row-reverse; }
+  [dir="rtl"] .tab-bar { flex-direction: row-reverse; }
+
+  /* Language accent colors */
+  .accent-en { background: #1e3a5f; }
+  .accent-es { background: #3b1f00; }
+  .accent-pa { background: #1a2e00; }
+  .accent-ur { background: #2d0a2d; }
+
+  .tag-en { background: #1e3a5f; color: #93c5fd; }
+  .tag-es { background: #7c2d12; color: #fed7aa; }
+  .tag-pa { background: #14532d; color: #86efac; }
+  .tag-ur { background: #581c87; color: #d8b4fe; }
+
+  /* RTL indicator banner */
+  .rtl-banner {
+    background: rgba(139,92,246,0.15);
+    border: 1px solid rgba(139,92,246,0.4);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 11px;
+    color: #c4b5fd;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+</style>
+</head>
+<body>
+
+<h1>CarrierOS — Mockup 16: Language Localization</h1>
+<p class="subtitle">Same driver screen · Four languages · One codebase</p>
+<p class="note">Translations are representative. Verify with native speakers before shipping. Urdu uses RTL layout — entire UI mirrors.</p>
+
+<div class="lang-key">
+  <div class="lk-item"><div class="lk-dot" style="background:#60a5fa;"></div> English — LTR</div>
+  <div class="lk-item"><div class="lk-dot" style="background:#fb923c;"></div> Español — LTR</div>
+  <div class="lk-item"><div class="lk-dot" style="background:#4ade80;"></div> ਪੰਜਾਬੀ — LTR (Gurmukhi)</div>
+  <div class="lk-item"><div class="lk-dot" style="background:#c084fc;"></div> اردو — RTL (Nastaliq)</div>
+</div>
+
+<div class="phone-row">
+
+  <!-- ══════════════════════════════ -->
+  <!-- ENGLISH                       -->
+  <!-- ══════════════════════════════ -->
+  <div class="phone">
+    <div class="phone-label">
+      <div class="lang-name">🇺🇸 English</div>
+      <div class="lang-native" style="color:rgba(255,255,255,0.5);">Default</div>
+      <span class="lang-tag tag-en">LTR · Latin</span>
+    </div>
+    <div class="phone-screen" dir="ltr">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="nav-header accent-en">
+        <div class="back">← My Loads</div>
+        <h2>Current Load</h2>
+      </div>
+
+      <div class="scroll-area">
+
+        <div class="dvir-card">
+          <div class="dvir-icon">📋</div>
+          <div class="dvir-body">
+            <div class="dvir-title">Pre-trip inspection required</div>
+            <div class="dvir-sub">No inspection logged today</div>
+          </div>
+          <button class="dvir-btn">Start DVIR</button>
+        </div>
+
+        <div class="load-card">
+          <div class="lc-top">
+            <div>
+              <div class="lc-id">L-0042 · Big Blue</div>
+              <div class="lc-customer">Sysco Foods</div>
+              <div class="lc-commodity">🥩 Frozen Meat · 22,000 lbs</div>
+            </div>
+            <div class="lc-badge">In Transit</div>
+          </div>
+
+          <div class="lc-route">
+            <div class="lc-city">
+              <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:2px;">PICKUP</div>
+              Los Angeles, CA
+            </div>
+            <div class="lc-arrow">→</div>
+            <div class="lc-city dest">
+              <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:2px;">DELIVERY</div>
+              Fresno, CA
+            </div>
+          </div>
+
+          <div class="lc-stops">
+            <div class="lc-stop">
+              <div class="lc-stop-label">Picked up</div>
+              <div class="lc-stop-val done">7:15 AM ✓</div>
+            </div>
+            <div class="lc-stop">
+              <div class="lc-stop-label">Est. arrival</div>
+              <div class="lc-stop-val eta">2:30 PM</div>
+            </div>
+          </div>
+
+          <button class="lc-btn">Update Status</button>
+          <button class="lc-btn-ghost">Start Inspection (DVIR)</button>
+        </div>
+
+        <div class="chips">
+          <div class="chip green">
+            <div class="chip-icon">🪪</div>
+            <div>
+              <div class="chip-label">CDL Valid</div>
+              <div class="chip-sub">Exp. Aug 2028</div>
+            </div>
+          </div>
+          <div class="chip green">
+            <div class="chip-icon">🩺</div>
+            <div>
+              <div class="chip-label">Med Cert</div>
+              <div class="chip-sub">Exp. Jan 2028</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab-item active"><div class="tab-icon">🏠</div>My Load</div>
+        <div class="tab-item"><div class="tab-icon">📋</div>DVIR</div>
+        <div class="tab-item"><div class="tab-icon">🕐</div>History</div>
+        <div class="tab-item"><div class="tab-icon">👤</div>Profile</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ -->
+  <!-- SPANISH                        -->
+  <!-- ══════════════════════════════ -->
+  <div class="phone">
+    <div class="phone-label">
+      <div class="lang-name">🇲🇽 Spanish</div>
+      <div class="lang-native" style="color:rgba(255,255,255,0.5);">Español</div>
+      <span class="lang-tag tag-es">LTR · Latin</span>
+    </div>
+    <div class="phone-screen" dir="ltr">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="nav-header accent-es">
+        <div class="back">← Mis Cargas</div>
+        <h2>Carga Actual</h2>
+      </div>
+
+      <div class="scroll-area">
+
+        <div class="dvir-card">
+          <div class="dvir-icon">📋</div>
+          <div class="dvir-body">
+            <div class="dvir-title">Inspección previa requerida</div>
+            <div class="dvir-sub">Sin inspección registrada hoy</div>
+          </div>
+          <button class="dvir-btn">Inspeccionar</button>
+        </div>
+
+        <div class="load-card">
+          <div class="lc-top">
+            <div>
+              <div class="lc-id">L-0042 · Big Blue</div>
+              <div class="lc-customer">Sysco Foods</div>
+              <div class="lc-commodity">🥩 Carne Congelada · 22,000 lbs</div>
+            </div>
+            <div class="lc-badge">En Tránsito</div>
+          </div>
+
+          <div class="lc-route">
+            <div class="lc-city">
+              <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:2px;">RECOGIDA</div>
+              Los Angeles, CA
+            </div>
+            <div class="lc-arrow">→</div>
+            <div class="lc-city dest">
+              <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:2px;">ENTREGA</div>
+              Fresno, CA
+            </div>
+          </div>
+
+          <div class="lc-stops">
+            <div class="lc-stop">
+              <div class="lc-stop-label">Recogido</div>
+              <div class="lc-stop-val done">7:15 AM ✓</div>
+            </div>
+            <div class="lc-stop">
+              <div class="lc-stop-label">Llegada est.</div>
+              <div class="lc-stop-val eta">2:30 PM</div>
+            </div>
+          </div>
+
+          <button class="lc-btn">Actualizar Estado</button>
+          <button class="lc-btn-ghost">Iniciar Inspección (DVIR)</button>
+        </div>
+
+        <div class="chips">
+          <div class="chip green">
+            <div class="chip-icon">🪪</div>
+            <div>
+              <div class="chip-label">CDL Válida</div>
+              <div class="chip-sub">Vence ago. 2028</div>
+            </div>
+          </div>
+          <div class="chip green">
+            <div class="chip-icon">🩺</div>
+            <div>
+              <div class="chip-label">Cert. Médico</div>
+              <div class="chip-sub">Vence ene. 2028</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab-item active"><div class="tab-icon">🏠</div>Mi Carga</div>
+        <div class="tab-item"><div class="tab-icon">📋</div>DVIR</div>
+        <div class="tab-item"><div class="tab-icon">🕐</div>Historial</div>
+        <div class="tab-item"><div class="tab-icon">👤</div>Perfil</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ -->
+  <!-- PUNJABI                        -->
+  <!-- ══════════════════════════════ -->
+  <div class="phone">
+    <div class="phone-label">
+      <div class="lang-name">🇮🇳 Punjabi</div>
+      <div class="lang-native punjabi" style="color:rgba(255,255,255,0.7);font-size:16px;">ਪੰਜਾਬੀ</div>
+      <span class="lang-tag tag-pa">LTR · Gurmukhi</span>
+    </div>
+    <div class="phone-screen" dir="ltr">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="nav-header accent-pa">
+        <div class="back">← ਮੇਰੇ ਲੋਡ</div>
+        <h2 class="punjabi">ਮੌਜੂਦਾ ਲੋਡ</h2>
+      </div>
+
+      <div class="scroll-area">
+
+        <div class="dvir-card">
+          <div class="dvir-icon">📋</div>
+          <div class="dvir-body">
+            <div class="dvir-title punjabi">ਯਾਤਰਾ ਤੋਂ ਪਹਿਲਾਂ ਜਾਂਚ ਜ਼ਰੂਰੀ ਹੈ</div>
+            <div class="dvir-sub punjabi">ਅੱਜ ਕੋਈ ਜਾਂਚ ਦਰਜ ਨਹੀਂ ਕੀਤੀ</div>
+          </div>
+          <button class="dvir-btn punjabi">ਜਾਂਚ ਕਰੋ</button>
+        </div>
+
+        <div class="load-card">
+          <div class="lc-top">
+            <div>
+              <div class="lc-id">L-0042 · Big Blue</div>
+              <div class="lc-customer">Sysco Foods</div>
+              <div class="lc-commodity punjabi">🥩 ਜੰਮੇ ਹੋਏ ਮੀਟ · 22,000 ਪੌਂਡ</div>
+            </div>
+            <div class="lc-badge punjabi">ਰਾਹ ਵਿੱਚ</div>
+          </div>
+
+          <div class="lc-route">
+            <div class="lc-city">
+              <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:2px;" class="punjabi">ਚੁੱਕਣ ਦੀ ਥਾਂ</div>
+              Los Angeles, CA
+            </div>
+            <div class="lc-arrow">→</div>
+            <div class="lc-city dest">
+              <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:2px;" class="punjabi">ਡਿਲੀਵਰੀ</div>
+              Fresno, CA
+            </div>
+          </div>
+
+          <div class="lc-stops">
+            <div class="lc-stop">
+              <div class="lc-stop-label punjabi">ਚੁੱਕਿਆ</div>
+              <div class="lc-stop-val done">7:15 AM ✓</div>
+            </div>
+            <div class="lc-stop">
+              <div class="lc-stop-label punjabi">ਅਨੁਮਾਨਿਤ ਆਗਮਨ</div>
+              <div class="lc-stop-val eta">2:30 PM</div>
+            </div>
+          </div>
+
+          <button class="lc-btn punjabi">ਸਥਿਤੀ ਅੱਪਡੇਟ ਕਰੋ</button>
+          <button class="lc-btn-ghost punjabi">ਮੁਆਇਨਾ ਸ਼ੁਰੂ ਕਰੋ (DVIR)</button>
+        </div>
+
+        <div class="chips">
+          <div class="chip green">
+            <div class="chip-icon">🪪</div>
+            <div>
+              <div class="chip-label punjabi">CDL ਵੈਧ</div>
+              <div class="chip-sub punjabi">ਮਿਆਦ ਅਗਸਤ 2028</div>
+            </div>
+          </div>
+          <div class="chip green">
+            <div class="chip-icon">🩺</div>
+            <div>
+              <div class="chip-label punjabi">ਮੈਡੀਕਲ ਸਰਟੀਫਿਕੇਟ</div>
+              <div class="chip-sub punjabi">ਮਿਆਦ ਜਨ 2028</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab-item active"><div class="tab-icon">🏠</div><span class="punjabi">ਮੇਰਾ ਲੋਡ</span></div>
+        <div class="tab-item"><div class="tab-icon">📋</div><span class="punjabi">DVIR</span></div>
+        <div class="tab-item"><div class="tab-icon">🕐</div><span class="punjabi">ਇਤਿਹਾਸ</span></div>
+        <div class="tab-item"><div class="tab-icon">👤</div><span class="punjabi">ਪ੍ਰੋਫਾਈਲ</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ -->
+  <!-- URDU (RTL)                     -->
+  <!-- ══════════════════════════════ -->
+  <div class="phone">
+    <div class="phone-label">
+      <div class="lang-name">🇵🇰 Urdu</div>
+      <div class="lang-native urdu" style="color:rgba(255,255,255,0.7);font-size:18px;">اردو</div>
+      <span class="lang-tag tag-ur">RTL · Nastaliq ← Layout mirrors</span>
+    </div>
+
+    <div class="rtl-banner">⟵ Entire UI mirrors for RTL — arrows, tabs, icons, layout all flip</div>
+
+    <div class="phone-screen" dir="rtl">
+      <div class="status-bar"><span>●●●</span><span>9:41</span></div>
+
+      <div class="nav-header accent-ur" style="text-align:right;">
+        <div style="font-size:13px;color:var(--orange);margin-bottom:6px;text-align:right;" class="urdu">میری ڈھلائی ←</div>
+        <h2 class="urdu" style="text-align:right;">موجودہ لوڈ</h2>
+      </div>
+
+      <div class="scroll-area">
+
+        <!-- DVIR reminder — RTL -->
+        <div class="dvir-card" style="flex-direction:row-reverse;">
+          <div class="dvir-icon">📋</div>
+          <div class="dvir-body" style="text-align:right;">
+            <div class="dvir-title urdu">سفر سے پہلے معائنہ ضروری ہے</div>
+            <div class="dvir-sub urdu">آج کوئی معائنہ درج نہیں</div>
+          </div>
+          <button class="dvir-btn urdu">معائنہ کریں</button>
+        </div>
+
+        <div class="load-card">
+          <!-- Card top — mirrored -->
+          <div class="lc-top" style="flex-direction:row-reverse;">
+            <div style="text-align:right;">
+              <div class="lc-id">L-0042 · Big Blue</div>
+              <div class="lc-customer">Sysco Foods</div>
+              <div class="lc-commodity urdu">🥩 منجمد گوشت · ۲۲٬۰۰۰ پاؤنڈ</div>
+            </div>
+            <div class="lc-badge urdu">راستے میں</div>
+          </div>
+
+          <!-- Route — RTL: Fresno on left, LA on right (destination first in reading direction) -->
+          <div class="lc-route" style="flex-direction:row-reverse;">
+            <div class="lc-city" style="text-align:right;">
+              <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:2px;" class="urdu">اٹھانے کی جگہ</div>
+              Los Angeles, CA
+            </div>
+            <div class="lc-arrow">←</div>
+            <div class="lc-city dest" style="text-align:left;">
+              <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:2px;" class="urdu">ڈیلیوری</div>
+              Fresno, CA
+            </div>
+          </div>
+
+          <!-- Stops — mirrored -->
+          <div class="lc-stops" style="flex-direction:row-reverse;">
+            <div class="lc-stop" style="text-align:right;">
+              <div class="lc-stop-label urdu">اٹھایا</div>
+              <div class="lc-stop-val done">7:15 AM ✓</div>
+            </div>
+            <div class="lc-stop" style="text-align:right;">
+              <div class="lc-stop-label urdu">متوقع آمد</div>
+              <div class="lc-stop-val eta">2:30 PM</div>
+            </div>
+          </div>
+
+          <button class="lc-btn urdu" style="text-align:center;">حالت اپ ڈیٹ کریں</button>
+          <button class="lc-btn-ghost urdu" style="text-align:center;">معائنہ شروع کریں (DVIR)</button>
+        </div>
+
+        <!-- Compliance chips — RTL -->
+        <div class="chips" style="flex-direction:row-reverse;">
+          <div class="chip green" style="flex-direction:row-reverse;text-align:right;">
+            <div class="chip-icon">🪪</div>
+            <div>
+              <div class="chip-label urdu">CDL درست</div>
+              <div class="chip-sub urdu">میعاد اگست 2028</div>
+            </div>
+          </div>
+          <div class="chip green" style="flex-direction:row-reverse;text-align:right;">
+            <div class="chip-icon">🩺</div>
+            <div>
+              <div class="chip-label urdu">طبی سند</div>
+              <div class="chip-sub urdu">میعاد جنوری 2028</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Tab bar — RTL order -->
+      <div class="tab-bar" style="flex-direction:row-reverse;">
+        <div class="tab-item active"><div class="tab-icon">🏠</div><span class="urdu" style="font-size:9px;">میرا لوڈ</span></div>
+        <div class="tab-item"><div class="tab-icon">📋</div><span class="urdu" style="font-size:9px;">DVIR</span></div>
+        <div class="tab-item"><div class="tab-icon">🕐</div><span class="urdu" style="font-size:9px;">تاریخ</span></div>
+        <div class="tab-item"><div class="tab-icon">👤</div><span class="urdu" style="font-size:9px;">پروفائل</span></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end phone-row -->
+
+<!-- Dev notes -->
+<div style="max-width:900px;margin:48px auto 0;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:24px;color:rgba(255,255,255,0.7);font-size:12px;line-height:1.7;">
+  <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:14px;">🛠 Developer Notes</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+    <div>
+      <div style="font-weight:700;color:#93c5fd;margin-bottom:6px;">Fonts</div>
+      <div>EN + ES: system font stack — no extra loading</div>
+      <div>PA: <code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:4px;">Noto Sans Gurmukhi</code> — load conditionally</div>
+      <div>UR: <code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:4px;">Noto Nastaliq Urdu</code> — load conditionally</div>
+    </div>
+    <div>
+      <div style="font-weight:700;color:#c084fc;margin-bottom:6px;">RTL (Urdu only)</div>
+      <div>Set <code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:4px;">dir="rtl"</code> on root layout div when <code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:4px;">locale === 'ur'</code></div>
+      <div>Flex, text-align, margins mirror automatically</div>
+      <div>Route display: explicitly reverse origin ↔ destination order in code</div>
+      <div>Arrow icon: swap → for ← in RTL mode</div>
+    </div>
+    <div>
+      <div style="font-weight:700;color:#86efac;margin-bottom:6px;">Language codes</div>
+      <div><code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:4px;">'en' | 'es' | 'pa' | 'ur'</code></div>
+      <div>Stored in <code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:4px;">profiles.preferred_language</code></div>
+      <div>Cached in <code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:4px;">localStorage</code> for offline</div>
+    </div>
+    <div>
+      <div style="font-weight:700;color:#fde68a;margin-bottom:6px;">Translation files</div>
+      <div><code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:4px;">messages/en.json</code> — English (default)</div>
+      <div><code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:4px;">messages/es.json</code> — Spanish</div>
+      <div><code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:4px;">messages/pa.json</code> — Punjabi</div>
+      <div><code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:4px;">messages/ur.json</code> — Urdu</div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:32px;color:rgba(255,255,255,0.25);font-size:11px;text-align:center;">
+  CarrierOS — Mockup 16: Language Localization · July 2026 · shipmentx.com
+</div>
+
+</body>
+</html>

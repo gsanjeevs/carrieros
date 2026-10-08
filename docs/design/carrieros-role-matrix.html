@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarrierOS — Role & Permission Matrix</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+  background: #0f1e35;
+  color: #1a1a2e;
+  min-height: 100vh;
+  padding: 48px 24px 80px;
+}
+
+/* HEADER */
+.page-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+.header-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: #f47920; margin-bottom: 10px;
+}
+.page-header h1 {
+  font-size: 32px; font-weight: 900; color: white;
+  letter-spacing: -0.5px; margin-bottom: 8px;
+}
+.page-header p { font-size: 14px; color: rgba(255,255,255,0.45); line-height: 1.6; }
+
+/* ROLE LEGEND */
+.role-legend {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  justify-content: center; margin-bottom: 32px;
+}
+.legend-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; padding: 12px 18px;
+  text-align: center; min-width: 110px;
+}
+.legend-card .icon { font-size: 24px; margin-bottom: 4px; }
+.legend-card .name { font-size: 13px; font-weight: 800; color: white; }
+.legend-card .desc { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+.legend-card .tier { font-size: 10px; font-weight: 700; margin-top: 6px; padding: 2px 8px; border-radius: 20px; display: inline-block; }
+.tier-all { background: rgba(244,121,32,0.15); color: #f47920; }
+.tier-growth { background: rgba(124,58,237,0.15); color: #a78bfa; }
+
+/* TABLE WRAPPER */
+.table-wrapper {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+  max-width: 1100px;
+  margin: 0 auto 40px;
+}
+
+/* TABLE */
+table { width: 100%; border-collapse: collapse; }
+
+thead tr {
+  background: #0f1e35;
+}
+thead th {
+  padding: 16px 14px;
+  font-size: 12px; font-weight: 800;
+  letter-spacing: 0.5px; text-align: center;
+  white-space: nowrap;
+  color: white;
+}
+thead th:first-child { text-align: left; padding-left: 24px; width: 240px; }
+
+thead .role-header { color: white; }
+thead .role-header .role-icon { font-size: 18px; display: block; margin-bottom: 4px; }
+thead .role-header .role-name { font-size: 12px; font-weight: 800; }
+thead .role-header .role-tier { font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 10px; margin-top: 3px; display: inline-block; }
+
+/* SECTION ROW */
+.section-row td {
+  background: #f4f6f9;
+  padding: 10px 24px;
+  font-size: 11px; font-weight: 800;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: #5a7a9a; border-top: 2px solid #e8ecf0;
+}
+
+/* DATA ROWS */
+tbody tr:not(.section-row) {
+  border-bottom: 1px solid #f0f2f5;
+}
+tbody tr:not(.section-row):hover { background: #fafbfc; }
+
+td { padding: 12px 14px; text-align: center; vertical-align: middle; }
+td:first-child {
+  text-align: left; padding-left: 24px;
+  font-size: 13px; color: #1a1a2e;
+}
+.feature-name { font-weight: 700; }
+.feature-note { font-size: 11px; color: #8fa3b8; margin-top: 1px; font-weight: 400; }
+
+/* CELLS */
+.yes { font-size: 18px; }
+.no { font-size: 15px; opacity: 0.25; }
+.partial { font-size: 13px; font-weight: 700; color: #f47920; }
+
+/* LEGEND BELOW */
+.table-legend {
+  display: flex; gap: 24px; flex-wrap: wrap;
+  justify-content: center;
+  padding: 16px 24px;
+  background: #f4f6f9;
+  border-top: 1px solid #e8ecf0;
+}
+.table-legend-item { font-size: 12px; color: #5a7a9a; display: flex; align-items: center; gap: 6px; }
+
+/* NOTES SECTION */
+.notes-section {
+  max-width: 1100px; margin: 0 auto 40px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.note-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px; padding: 20px;
+}
+.note-title { font-size: 13px; font-weight: 800; color: white; margin-bottom: 8px; }
+.note-body { font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.7; }
+
+/* SUPABASE RLS NOTE */
+.rls-card {
+  max-width: 1100px; margin: 0 auto;
+  background: rgba(244,121,32,0.06);
+  border: 1px solid rgba(244,121,32,0.2);
+  border-radius: 16px; padding: 24px;
+}
+.rls-title { font-size: 14px; font-weight: 800; color: #f47920; margin-bottom: 12px; }
+.rls-body { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.8; }
+.rls-body code {
+  background: rgba(255,255,255,0.08);
+  padding: 1px 6px; border-radius: 4px;
+  font-family: 'SF Mono', Monaco, monospace;
+  font-size: 12px; color: #f47920;
+}
+
+/* FOOTER */
+footer {
+  text-align: center; margin-top: 48px;
+  font-size: 11px; color: rgba(255,255,255,0.2);
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="header-label">Dev Reference · CarrierOS v1.4</div>
+  <h1>Role & Permission Matrix</h1>
+  <p>Defines what each user role can see and do. Enforced via Supabase RLS at the database layer — UI visibility is secondary.</p>
+</div>
+
+<!-- ROLE LEGEND -->
+<div class="role-legend">
+  <div class="legend-card">
+    <div class="icon">👤</div>
+    <div class="name">Owner</div>
+    <div class="desc">Account holder</div>
+    <div class="tier tier-all">All Tiers</div>
+  </div>
+  <div class="legend-card">
+    <div class="icon">🚗</div>
+    <div class="name">Solo</div>
+    <div class="desc">Owner + driver</div>
+    <div class="tier tier-all">All Tiers</div>
+  </div>
+  <div class="legend-card">
+    <div class="icon">🚚</div>
+    <div class="name">Driver</div>
+    <div class="desc">Employed driver</div>
+    <div class="tier tier-all">All Tiers</div>
+  </div>
+  <div class="legend-card">
+    <div class="icon">📋</div>
+    <div class="name">Dispatcher</div>
+    <div class="desc">Ops / office staff</div>
+    <div class="tier tier-growth">Growth+</div>
+  </div>
+  <div class="legend-card">
+    <div class="icon">💼</div>
+    <div class="name">Finance</div>
+    <div class="desc">Billing / accounting</div>
+    <div class="tier tier-growth">Growth+</div>
+  </div>
+</div>
+
+<!-- MAIN TABLE -->
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th>Feature / Action</th>
+        <th class="role-header">
+          <span class="role-icon">👤</span>
+          <span class="role-name">Owner</span>
+          <span class="role-tier tier-all">All Tiers</span>
+        </th>
+        <th class="role-header">
+          <span class="role-icon">🚗</span>
+          <span class="role-name">Solo</span>
+          <span class="role-tier tier-all">All Tiers</span>
+        </th>
+        <th class="role-header">
+          <span class="role-icon">🚚</span>
+          <span class="role-name">Driver</span>
+          <span class="role-tier tier-all">All Tiers</span>
+        </th>
+        <th class="role-header">
+          <span class="role-icon">📋</span>
+          <span class="role-name">Dispatcher</span>
+          <span class="role-tier tier-growth">Growth+</span>
+        </th>
+        <th class="role-header">
+          <span class="role-icon">💼</span>
+          <span class="role-name">Finance</span>
+          <span class="role-tier tier-growth">Growth+</span>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- LOAD MANAGEMENT -->
+      <tr class="section-row"><td colspan="6">📥 Load Management</td></tr>
+      <tr>
+        <td><div class="feature-name">Create / intake load</div><div class="feature-note">Email, PDF, paste, manual</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">View all loads</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="partial">Delivered only</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">View own assigned loads</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">Edit / delete load</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">View load rates / revenue</div><div class="feature-note">Per-load dollar amounts</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">Update load status</div><div class="feature-note">Picked up, In transit, Delivered</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">Upload POD / BOL</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">Share tracking link</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+
+      <!-- DISPATCH -->
+      <tr class="section-row"><td colspan="6">🚚 Dispatch</td></tr>
+      <tr>
+        <td><div class="feature-name">Assign driver to load</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">Reassign / unassign driver</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">View all drivers &amp; status</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">View driver location</div><div class="feature-note">Live GPS on active loads</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+
+      <!-- INVOICING & BILLING -->
+      <tr class="section-row"><td colspan="6">💰 Invoicing & Billing</td></tr>
+      <tr>
+        <td><div class="feature-name">Create &amp; send invoice</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">Edit / void invoice</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">Mark invoice as paid</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">View invoice list / history</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">Export to QuickBooks / CSV</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">View revenue reports</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">Manage CarrierOS subscription</div><div class="feature-note">Plan, billing, CC on file</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+
+      <!-- CUSTOMERS -->
+      <tr class="section-row"><td colspan="6">🏢 Customer Directory</td></tr>
+      <tr>
+        <td><div class="feature-name">View customer list</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">Add / edit customer</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">View customer rates / terms</div><div class="feature-note">What the carrier charges per lane</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">Import customers (CSV)</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+      </tr>
+
+      <!-- COMPLIANCE & SAFETY -->
+      <tr class="section-row"><td colspan="6">📋 Compliance & Safety</td></tr>
+      <tr>
+        <td><div class="feature-name">Complete DVIR (pre/post-trip)</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">View DVIR history &amp; alerts</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="partial">Own only</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">Resolve / acknowledge defect</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">View &amp; log maintenance</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">Manage truck documents</div><div class="feature-note">Registration, insurance, DOT auth</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+
+      <!-- TEAM MANAGEMENT -->
+      <tr class="section-row"><td colspan="6">👥 Team Management</td></tr>
+      <tr>
+        <td><div class="feature-name">Invite team members</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">Change member roles</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">Remove team member</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">View team member activity</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+
+      <!-- ACCOUNT & SETTINGS -->
+      <tr class="section-row"><td colspan="6">⚙️ Account & Settings</td></tr>
+      <tr>
+        <td><div class="feature-name">Company profile &amp; logo</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">Add / edit trucks</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="no">—</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">Own profile &amp; password</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+      </tr>
+      <tr>
+        <td><div class="feature-name">Notification preferences</div></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+        <td><span class="yes">✅</span></td>
+      </tr>
+
+    </tbody>
+  </table>
+
+  <!-- TABLE LEGEND -->
+  <div class="table-legend">
+    <div class="table-legend-item"><span style="font-size:16px;">✅</span> Full access</div>
+    <div class="table-legend-item"><span style="font-size:14px;opacity:.25;">—</span> No access (hidden from UI + blocked at DB)</div>
+    <div class="table-legend-item"><span style="font-size:12px;color:#f47920;font-weight:700;">Partial</span> Scoped access (own records only)</div>
+  </div>
+</div>
+
+<!-- NOTES -->
+<div class="notes-section">
+  <div class="note-card">
+    <div class="note-title">🚗 Solo Mode (default)</div>
+    <div class="note-body">When an owner hasn't added any drivers, they operate in Solo mode. They see the full Owner UI but also have Driver-level actions available (update status, DVIR). No role switching needed — it's a single unified view. Solo mode unlocks Team management the moment a first driver is invited.</div>
+  </div>
+  <div class="note-card">
+    <div class="note-title">💰 Why Drivers Can't See Rates</div>
+    <div class="note-body">Carriers are sensitive about what they charge customers. A driver knowing the load rate creates negotiation leverage and competitive risk. Rate and invoice data is excluded from all driver-visible API responses — not just hidden in the UI.</div>
+  </div>
+  <div class="note-card">
+    <div class="note-title">📋 Dispatcher vs Finance</div>
+    <div class="note-body">These two roles are intentionally non-overlapping: a Dispatcher can see all operational data but zero financial data; Finance can see all financial data but zero operational dispatch data. The Owner is the only role that spans both. Neither role can invite team members or change the subscription.</div>
+  </div>
+  <div class="note-card">
+    <div class="note-title">⏫ Tier Gating</div>
+    <div class="note-body">Dispatcher and Finance roles require Growth plan or above ($79/mo+). Attempting to invite someone to these roles on a Starter plan shows an upgrade prompt. The role options are visible but disabled with a lock icon and "Upgrade to Growth" CTA.</div>
+  </div>
+  <div class="note-card">
+    <div class="note-title">🔗 Driver Accounts</div>
+    <div class="note-body">Drivers create accounts via an invite link (SMS or email). They are subordinate to the carrier's account — no plan selection, no billing, no CC. If the carrier's subscription lapses, driver access is suspended. If the carrier removes a driver, the driver's app account is immediately deactivated.</div>
+  </div>
+  <div class="note-card">
+    <div class="note-title">📱 Driver Tab Bar</div>
+    <div class="note-body">The driver tab bar only shows: My Load, DVIR, History, Profile. The full owner tab bar (Loads, Dispatch, Invoice, Team, Settings) is never rendered for driver accounts. Role is checked server-side on every authenticated request, not just on login.</div>
+  </div>
+</div>
+
+<!-- SUPABASE RLS NOTE -->
+<div class="rls-card">
+  <div class="rls-title">🛡️ Implementation: Supabase RLS</div>
+  <div class="rls-body">
+    Permissions must be enforced at the <strong style="color:white;">database layer via Row Level Security</strong>, not just the frontend UI. Key tables:<br><br>
+    • <code>user_roles</code> — <code>(user_id, company_id, role ENUM)</code> — source of truth for all permission checks<br>
+    • <code>loads</code> — drivers can only SELECT rows where <code>assigned_driver_id = auth.uid()</code><br>
+    • <code>invoices</code> — RLS policy: <code>role IN ('owner', 'finance')</code> only<br>
+    • <code>loads.rate</code> — column-level: excluded from driver queries via a <code>loads_driver_view</code> view that omits rate columns<br>
+    • <code>company_members</code> — only owners can INSERT/DELETE (invite &amp; remove team members)<br><br>
+    <strong style="color:white;">Never trust the client for role enforcement.</strong> All role checks should be re-verified server-side. Frontend visibility is UX only.
+  </div>
+</div>
+
+<footer style="margin-top:40px;">
+  CarrierOS · Role &amp; Permission Matrix · v1.4 · July 2026<br>
+  PRD reference: <code>prd-mvp-v1.1.md</code> · Mockup reference: <code>mockup-12-team-roles.html</code>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup 12 — Team & Roles · CarrierOS</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:#1a1a2e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;flex-direction:column;align-items:center;padding:40px 16px 80px;gap:12px;}
+h1{color:white;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:.4;margin-bottom:8px;}
+
+/* PHONE SHELL */
+.phone{width:100%;max-width:430px;background:white;border-radius:40px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,0.5);min-height:760px;display:flex;flex-direction:column;position:relative;}
+
+/* SCREEN */
+.screen{display:none;flex-direction:column;flex:1;}
+.screen.active{display:flex;}
+
+/* STATUS BAR */
+.status-bar{background:#0f1e35;display:flex;justify-content:space-between;align-items:center;padding:12px 24px 8px;flex-shrink:0;}
+.status-bar .time{color:white;font-size:13px;font-weight:700;}
+.status-bar .icons{color:white;font-size:11px;letter-spacing:2px;}
+
+/* NAV BAR */
+.nav-bar{background:#0f1e35;padding:14px 20px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.back-btn{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:14px;color:white;}
+.nav-title{color:white;font-size:17px;font-weight:800;flex:1;}
+.nav-action{color:#f47920;font-size:14px;font-weight:700;cursor:pointer;}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;background:#f4f6f9;}
+
+/* SECTION LABEL */
+.section-label{font-size:11px;font-weight:700;color:#8fa3b8;letter-spacing:1.5px;text-transform:uppercase;padding:20px 20px 8px;}
+
+/* TEAM MEMBER ROW */
+.member-row{background:white;display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid #f0f2f5;cursor:pointer;}
+.member-row:active{background:#f9f9f9;}
+.member-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.member-info{flex:1;}
+.member-name{font-size:15px;font-weight:700;color:#1a1a2e;}
+.member-sub{font-size:12px;color:#8fa3b8;margin-top:2px;}
+.role-pill{font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:0.5px;}
+.pill-owner{background:#e8f0fe;color:#1a56db;}
+.pill-driver{background:#fef3e8;color:#f47920;}
+.pill-dispatcher{background:#e8faf4;color:#0d9f6e;}
+.pill-finance{background:#f3e8fe;color:#7c3aed;}
+.pill-solo{background:#0f1e35;color:white;}
+
+/* INVITE BTN */
+.invite-btn{background:#f47920;color:white;font-size:15px;font-weight:800;text-align:center;padding:16px;cursor:pointer;margin:20px;border-radius:14px;}
+
+/* ROLE OPTION */
+.role-option{background:white;border-radius:16px;margin:0 20px 12px;padding:16px;cursor:pointer;border:2px solid transparent;transition:all .15s;}
+.role-option:active,.role-option.selected{border-color:#f47920;background:#fff9f5;}
+.role-option-header{display:flex;align-items:center;gap:12px;margin-bottom:6px;}
+.role-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.role-option-title{font-size:15px;font-weight:800;color:#1a1a2e;}
+.role-option-sub{font-size:12px;color:#8fa3b8;line-height:1.5;}
+.role-perms{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.perm-tag{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:#f4f6f9;color:#5a7a9a;}
+.perm-tag.no{background:#fef2f2;color:#ef4444;text-decoration:line-through;}
+
+/* FORM */
+.form-card{background:white;border-radius:16px;margin:0 20px 16px;padding:18px;}
+.form-label{font-size:11px;font-weight:700;color:#8fa3b8;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.form-input{width:100%;border:1.5px solid #e8ecf0;border-radius:10px;padding:12px 14px;font-size:15px;color:#1a1a2e;outline:none;font-family:inherit;}
+.form-input:focus{border-color:#f47920;}
+.form-input+.form-label{margin-top:14px;}
+.form-hint{font-size:11px;color:#8fa3b8;margin-top:6px;line-height:1.5;}
+
+/* PRIMARY BTN */
+.primary-btn{background:#0f1e35;color:white;font-size:15px;font-weight:800;text-align:center;padding:16px;cursor:pointer;margin:8px 20px 0;border-radius:14px;}
+.primary-btn.orange{background:#f47920;}
+.primary-btn.disabled{background:#c0cad4;cursor:default;}
+
+/* SUCCESS */
+.success-card{background:white;border-radius:20px;margin:24px 20px 0;padding:28px;text-align:center;}
+.success-icon{font-size:52px;margin-bottom:12px;}
+.success-title{font-size:20px;font-weight:900;color:#1a1a2e;margin-bottom:6px;}
+.success-sub{font-size:13px;color:#8fa3b8;line-height:1.6;}
+.success-detail{background:#f4f6f9;border-radius:12px;padding:14px;margin:16px 0;text-align:left;}
+.success-detail-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;}
+.success-detail-label{font-size:12px;color:#8fa3b8;font-weight:600;}
+.success-detail-val{font-size:12px;font-weight:700;color:#1a1a2e;}
+
+/* ALERT BANNER */
+.alert-banner{background:#fff3cd;border-left:4px solid #f47920;padding:12px 16px;margin:12px 20px;border-radius:10px;font-size:12px;color:#856404;line-height:1.5;}
+
+/* ROLE HOME HEADER */
+.role-home-hero{background:#0f1e35;padding:20px 20px 24px;}
+.role-home-greeting{font-size:13px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:2px;}
+.role-home-name{font-size:22px;font-weight:900;color:white;}
+.role-pill-lg{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:800;margin-top:8px;}
+
+/* QUICK ACTIONS */
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:20px 20px 0;}
+.quick-action{background:white;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:6px;cursor:pointer;}
+.qa-icon{font-size:26px;}
+.qa-title{font-size:13px;font-weight:800;color:#1a1a2e;}
+.qa-sub{font-size:11px;color:#8fa3b8;}
+.quick-action.locked{opacity:0.4;cursor:not-allowed;}
+
+/* LOCKED NOTICE */
+.locked-notice{background:#fef2f2;border-radius:12px;padding:14px 16px;margin:16px 20px;display:flex;gap:10px;align-items:flex-start;}
+.locked-notice-icon{font-size:16px;flex-shrink:0;}
+.locked-notice-text{font-size:12px;color:#991b1b;line-height:1.5;}
+
+/* DIVIDER */
+.divider{height:8px;background:#f4f6f9;}
+
+/* BOTTOM TAB BAR */
+.tab-bar{background:white;border-top:1px solid #e8ecf0;display:flex;padding:8px 0 20px;flex-shrink:0;}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;}
+.tab-icon{font-size:22px;}
+.tab-label{font-size:10px;font-weight:700;color:#8fa3b8;}
+.tab-item.active .tab-label{color:#f47920;}
+</style>
+</head>
+<body>
+<h1>Mockup 12 — Team &amp; Roles · CarrierOS</h1>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 1: TEAM HUB
+═══════════════════════════════════════ -->
+<div class="phone" id="s1">
+  <div class="screen active">
+    <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● WiFi 🔋</span></div>
+    <div class="nav-bar">
+      <div class="nav-title">Team</div>
+      <div class="nav-action" onclick="goto('s2')">+ Invite</div>
+    </div>
+    <div class="content">
+      <div class="section-label">My Team · 4 Members</div>
+
+      <div class="member-row">
+        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7V1sXOQtAXyR7oXYN_-7umstQpvS2nLFyFlc2NXzSmUYSyepsSElsEaJuWbWvX3UdiFRRfPZ75SgweHw4YHFhcDBdlQZfrdyxUl9JYiYDb0tFrWwwl4CJNbzkKIa8fYePpgF3jZE8xbsd-uoPEVqZkbgrLT1Vq2tyaYmQCXFQdL-MeEb_i_GVNDRb2TcokdnvmqePeurcJxGNmZKVqFrhwS3oumfu4-TOpNxeQctRCBB1zKqATBvW58wv3VOzbHXEnm3r7aixm3I" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="Ravi Singh">
+        <div class="member-info">
+          <div class="member-name">Sam Rivera</div>
+          <div class="member-sub">sam@riveratrucking.com · You</div>
+        </div>
+        <span class="role-pill pill-owner">OWNER</span>
+      </div>
+
+      <div class="member-row" onclick="goto('s7a')">
+        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0w8Jhki8Y_EIsrZgtQq_RJggrrBpzpZrnDc2GhXNJW7b6xKix0AfqDSCVDPPkIbz6oA94r35GA0rR10wvBx4aS3EGBDT3_RXKidrH9y0LDkOkMt0ev_DwGbXDegrGoL7853Pbnfnc56lPzCo0UQYcVJ0d94QqUl80E4V2pzVD_-KoXcD0LATtuSSbrpMWYEUPsqJKGwRlfAhJick2zVvI5XTAv637JIaIiLk0KL9jFqnkWpUSFIcnXYzZuMtyh0sSHJPf6zbjvyI" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="Mike Rodriguez">
+        <div class="member-info">
+          <div class="member-name">Marcus T.</div>
+          <div class="member-sub">marcus@gmail.com · Active</div>
+        </div>
+        <span class="role-pill pill-driver">DRIVER</span>
+      </div>
+
+      <div class="member-row">
+        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0hXDewAihbXEUGtzecdUFht7yBDOYf-gql7g5EmrCLgQFSbMVZTAoyemGyhSOnJ95AziEQxn7DbJdx4amPiGsT0GdGdgar650ihFA5v7d0YS6P4n_qAc9tPmlaAtje5gox9FdSGKYIsKBdcVvTa-vxaKCbF-lwSjtHJOynTtvZeh4g9rGBulkJA0Hr8E1VzOYIZmLUh52DakobgQa35B8kOtZsqAqvvumJQ_vWbiVa2HKdIr1l4UoepsWlOgenBur9JSiFanK3vk" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="Alex Chen">
+        <div class="member-info">
+          <div class="member-name">Jamie L.</div>
+          <div class="member-sub">jamie@riveratrucking.com · Active</div>
+        </div>
+        <span class="role-pill pill-dispatcher">DISPATCH</span>
+      </div>
+
+      <div class="member-row">
+        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBomCX3VYKKOEdFXaf-43JZ3nY5N9Ey71BpDbi6TjtgRwft-bznwR95652Nk4_dLYuUQZEwL91oj07QmwDnVpGYXSABtq3SlWz2dtOMFwqeBWuqn4TjSYkZOyWyEasI24scCh5FJqbR8F0nUqrPfyfN7lhbdx5abT6__SMG5LeQ6M5R8rkpXVcSCqsd2skDqtW6nIiHVV9EkZvrgWTW9EL87UQE7g6_RO58Wt9mBH41xCZANlUhVCLoo1jQV1WdBzHcaC43W92c3sk" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="Jordan Lee">
+        <div class="member-info">
+          <div class="member-name">Priya M.</div>
+          <div class="member-sub">priya@gmail.com · Invite Pending</div>
+        </div>
+        <span class="role-pill pill-finance">FINANCE</span>
+      </div>
+
+      <div class="divider" style="margin-top:12px;"></div>
+      <div class="section-label">Pending Invites</div>
+      <div class="member-row">
+        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlMdjLEtC9gPbJOVkd8JbjRbWKFTsebE4JgO8p6E_N3z_TIOLxbA778t5-pOazzn7iwh4YFoFATnOE4XFFtzj6fCRPsAsJVQlFYUutiXnTwsvwIxLYJe6r2bqx0g-zDpJOJ_21a3iInA94TXpKr9h_AdJHDUsXQyvNS27Agp7Me952qhkOjr1LRjn89n_FWMZzo6MNamkXpZTwGcTFeGSsiQ1IKIhPZOwF0E_bSopWF78IE3-Tvc_i8H-zYnxfTthbp_ajwj8FuQ4" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;opacity:0.6;filter:grayscale(40%);" alt="Pending Invite">
+        <div class="member-info">
+          <div class="member-name">priya@gmail.com</div>
+          <div class="member-sub">Sent 2 days ago · Finance</div>
+        </div>
+        <span style="font-size:12px;color:#f47920;font-weight:700;cursor:pointer;">Resend</span>
+      </div>
+
+      <div class="invite-btn" onclick="goto('s2')">+ Invite Team Member</div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item"><div class="tab-icon">📥</div><div class="tab-label">Loads</div></div>
+      <div class="tab-item"><div class="tab-icon">🚚</div><div class="tab-label">Dispatch</div></div>
+      <div class="tab-item"><div class="tab-icon">💰</div><div class="tab-label">Invoice</div></div>
+      <div class="tab-item active"><div class="tab-icon">👥</div><div class="tab-label" style="color:#f47920;">Team</div></div>
+      <div class="tab-item"><div class="tab-icon">⚙️</div><div class="tab-label">Settings</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 2: PICK A ROLE
+═══════════════════════════════════════ -->
+<div class="phone" id="s2">
+  <div class="screen active">
+    <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● WiFi 🔋</span></div>
+    <div class="nav-bar">
+      <div class="back-btn" onclick="goto('s1')">←</div>
+      <div class="nav-title">Invite Team Member</div>
+    </div>
+    <div class="content">
+      <div class="section-label">Select a Role</div>
+
+      <!-- DRIVER -->
+      <div class="role-option selected" id="roleDriver" onclick="selectRole('driver')">
+        <div class="role-option-header">
+          <div class="role-icon" style="background:#fef3e8;">🚚</div>
+          <div>
+            <div class="role-option-title">Driver</div>
+            <div class="role-option-sub">Can view &amp; update their assigned loads, complete DVIR inspections, upload POD photos.</div>
+          </div>
+        </div>
+        <div class="role-perms">
+          <span class="perm-tag">Assigned loads</span>
+          <span class="perm-tag">Status updates</span>
+          <span class="perm-tag">DVIR</span>
+          <span class="perm-tag">POD upload</span>
+          <span class="perm-tag no">Rates</span>
+          <span class="perm-tag no">Invoices</span>
+          <span class="perm-tag no">Other drivers</span>
+        </div>
+      </div>
+
+      <!-- DISPATCHER -->
+      <div class="role-option" id="roleDispatcher" onclick="selectRole('dispatcher')">
+        <div class="role-option-header">
+          <div class="role-icon" style="background:#e8faf4;">📋</div>
+          <div>
+            <div class="role-option-title">Dispatcher</div>
+            <div class="role-option-sub">Manages loads and drivers day-to-day. Can dispatch, reassign, and view the full fleet — but cannot bill or access financials.</div>
+          </div>
+        </div>
+        <div class="role-perms">
+          <span class="perm-tag">All loads</span>
+          <span class="perm-tag">Dispatch</span>
+          <span class="perm-tag">Drivers</span>
+          <span class="perm-tag">Customers</span>
+          <span class="perm-tag">Maintenance</span>
+          <span class="perm-tag no">Invoices</span>
+          <span class="perm-tag no">Reports</span>
+          <span class="perm-tag no">Billing</span>
+        </div>
+      </div>
+
+      <!-- FINANCE -->
+      <div class="role-option" id="roleFinance" onclick="selectRole('finance')">
+        <div class="role-option-header">
+          <div class="role-icon" style="background:#f3e8fe;">💼</div>
+          <div>
+            <div class="role-option-title">Finance</div>
+            <div class="role-option-sub">Handles invoicing, payments, and reporting. Cannot manage drivers or dispatch loads.</div>
+          </div>
+        </div>
+        <div class="role-perms">
+          <span class="perm-tag">Invoices</span>
+          <span class="perm-tag">Payments</span>
+          <span class="perm-tag">Reports</span>
+          <span class="perm-tag">Customers</span>
+          <span class="perm-tag no">Dispatch</span>
+          <span class="perm-tag no">Drivers</span>
+          <span class="perm-tag no">DVIR</span>
+        </div>
+      </div>
+
+      <div class="alert-banner">
+        🔒 <strong>Dispatcher &amp; Finance roles</strong> require Growth plan or above.
+      </div>
+
+      <div class="primary-btn orange" onclick="goto('s3')">Continue →</div>
+      <div style="height:20px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 3: ENTER DETAILS
+═══════════════════════════════════════ -->
+<div class="phone" id="s3">
+  <div class="screen active">
+    <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● WiFi 🔋</span></div>
+    <div class="nav-bar">
+      <div class="back-btn" onclick="goto('s2')">←</div>
+      <div class="nav-title">Driver Details</div>
+    </div>
+    <div class="content">
+      <div class="section-label" style="padding-top:20px;">Contact Info</div>
+      <div class="form-card">
+        <div class="form-label">Full Name</div>
+        <input class="form-input" type="text" placeholder="e.g. Marcus Torres" value="Marcus Torres">
+        <div class="form-label" style="margin-top:14px;">Mobile Number</div>
+        <input class="form-input" type="tel" placeholder="+1 (555) 000-0000" value="+1 (555) 481-2290">
+        <div class="form-hint">Driver will receive a text to download the app and set up their account.</div>
+        <div class="form-label" style="margin-top:14px;">Email (optional)</div>
+        <input class="form-input" type="email" placeholder="driver@email.com">
+      </div>
+
+      <div class="section-label">Assign a Truck (optional)</div>
+      <div class="form-card">
+        <div class="form-label">Primary Truck</div>
+        <select class="form-input" style="appearance:none;">
+          <option>2019 Freightliner Cascadia — TX-4821</option>
+          <option>2021 Kenworth T680 — TX-9034</option>
+          <option>Unassigned</option>
+        </select>
+        <div class="form-hint">You can reassign trucks at any time from the Dispatch screen.</div>
+      </div>
+
+      <div class="primary-btn orange" onclick="goto('s4')">Send Invite →</div>
+      <div style="height:24px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 4: INVITE SENT
+═══════════════════════════════════════ -->
+<div class="phone" id="s4">
+  <div class="screen active">
+    <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● WiFi 🔋</span></div>
+    <div class="nav-bar">
+      <div class="nav-title">Invite Sent</div>
+    </div>
+    <div class="content">
+      <div class="success-card">
+        <div class="success-icon">📱</div>
+        <div class="success-title">Invite sent to Marcus!</div>
+        <div class="success-sub">He'll receive a text message with a link to download CarrierOS and set up his driver account.</div>
+        <div class="success-detail">
+          <div class="success-detail-row"><span class="success-detail-label">Name</span><span class="success-detail-val">Marcus Torres</span></div>
+          <div class="success-detail-row"><span class="success-detail-label">Role</span><span class="success-detail-val">🚚 Driver</span></div>
+          <div class="success-detail-row"><span class="success-detail-label">Sent to</span><span class="success-detail-val">+1 (555) 481-2290</span></div>
+          <div class="success-detail-row"><span class="success-detail-label">Truck</span><span class="success-detail-val">Cascadia TX-4821</span></div>
+          <div class="success-detail-row"><span class="success-detail-label">Expires</span><span class="success-detail-val">In 7 days</span></div>
+        </div>
+        <div class="success-sub" style="font-size:11px;color:#8fa3b8;">Once Marcus accepts, he'll appear as Active on your Team page. His account is linked to your fleet — you control his access.</div>
+      </div>
+
+      <div class="primary-btn orange" onclick="goto('s2')" style="margin-top:20px;">+ Invite Another</div>
+      <div class="primary-btn" onclick="goto('s1')" style="margin-top:8px;background:white;color:#0f1e35;border:1.5px solid #e8ecf0;">Back to Team</div>
+      <div style="height:24px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 5: DRIVER RECEIVES INVITE (driver's phone)
+═══════════════════════════════════════ -->
+<div class="phone" id="s5">
+  <div class="screen active">
+    <div class="status-bar" style="background:#1c1c1e;"><span class="time">9:44</span><span class="icons">●●● WiFi 🔋</span></div>
+    <!-- SMS message bubble simulation -->
+    <div style="background:#1c1c1e;padding:16px 20px;flex-shrink:0;">
+      <div style="color:rgba(255,255,255,0.5);font-size:12px;text-align:center;margin-bottom:12px;">Messages · CarrierOS</div>
+      <div style="background:#2c2c2e;border-radius:16px;padding:14px 16px;">
+        <div style="color:white;font-size:14px;line-height:1.6;">
+          👋 Hi Marcus! Sam Rivera at Rivera Trucking has added you as a <strong>Driver</strong> on CarrierOS.<br><br>
+          Download the app and set up your account:<br>
+          <span style="color:#0a84ff;">carrieros.app/join/drv-4821xk</span>
+        </div>
+        <div style="color:rgba(255,255,255,0.35);font-size:11px;margin-top:8px;">Delivered · 9:43 AM</div>
+      </div>
+    </div>
+    <div style="background:#f4f6f9;flex:1;padding:20px;">
+      <!-- Deep link opens app install / account creation -->
+      <div style="background:white;border-radius:20px;padding:24px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
+        <div style="font-size:40px;margin-bottom:8px;">🚛</div>
+        <div style="font-size:20px;font-weight:900;color:#0f1e35;margin-bottom:4px;">CarrierOS</div>
+        <div style="font-size:13px;color:#8fa3b8;margin-bottom:20px;">You've been invited by<br><strong style="color:#0f1e35;">Rivera Trucking</strong></div>
+        <div style="background:#f4f6f9;border-radius:12px;padding:12px;margin-bottom:20px;text-align:left;">
+          <div style="font-size:12px;color:#8fa3b8;font-weight:700;margin-bottom:4px;">YOUR ROLE</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:20px;">🚚</span>
+            <div>
+              <div style="font-size:14px;font-weight:800;color:#0f1e35;">Driver</div>
+              <div style="font-size:11px;color:#8fa3b8;">Loads · DVIR · Status updates</div>
+            </div>
+          </div>
+        </div>
+        <div onclick="goto('s6')" style="background:#f47920;color:white;font-size:15px;font-weight:800;padding:14px;border-radius:12px;cursor:pointer;">Accept &amp; Set Up Account</div>
+        <div style="font-size:11px;color:#8fa3b8;margin-top:10px;">No billing required · Driver accounts are free</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 6: DRIVER HOME (what driver sees after login)
+═══════════════════════════════════════ -->
+<div class="phone" id="s6">
+  <div class="screen active">
+    <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● WiFi 🔋</span></div>
+    <div class="role-home-hero">
+      <div class="role-home-greeting">Good morning,</div>
+      <div class="role-home-name">Marcus Torres</div>
+      <span class="role-pill-lg" style="background:rgba(244,121,32,0.2);color:#f47920;">🚚 Driver · Rivera Trucking</span>
+    </div>
+    <div class="content">
+      <div class="section-label">Today's Load</div>
+      <div style="background:white;border-radius:16px;margin:0 20px;padding:18px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+          <div>
+            <div style="font-size:13px;color:#8fa3b8;font-weight:700;">LOAD #4821</div>
+            <div style="font-size:17px;font-weight:900;color:#0f1e35;margin-top:2px;">Dallas → Houston</div>
+          </div>
+          <span style="background:#e8f5e9;color:#2e7d32;font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px;">IN TRANSIT</span>
+        </div>
+        <div style="font-size:12px;color:#8fa3b8;margin-bottom:14px;">Pickup: 07:00 AM · Delivery: 3:30 PM</div>
+        <div style="display:flex;gap:8px;">
+          <div onclick="goto('s6b')" style="flex:1;background:#f47920;color:white;text-align:center;padding:11px;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;">Update Status</div>
+          <div style="flex:1;background:#f4f6f9;color:#0f1e35;text-align:center;padding:11px;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;">Navigate</div>
+        </div>
+      </div>
+
+      <div class="quick-actions" style="padding-top:16px;">
+        <div class="quick-action" onclick="goto('s6c')">
+          <div class="qa-icon">📋</div>
+          <div class="qa-title">DVIR</div>
+          <div class="qa-sub">Pre &amp; post-trip inspection</div>
+        </div>
+        <div class="quick-action">
+          <div class="qa-icon">📄</div>
+          <div class="qa-title">My Loads</div>
+          <div class="qa-sub">Past &amp; upcoming</div>
+        </div>
+        <div class="quick-action locked">
+          <div class="qa-icon">🔒</div>
+          <div class="qa-title">Rates</div>
+          <div class="qa-sub">Not available</div>
+        </div>
+        <div class="quick-action locked">
+          <div class="qa-icon">🔒</div>
+          <div class="qa-title">Invoices</div>
+          <div class="qa-sub">Not available</div>
+        </div>
+      </div>
+
+      <div class="locked-notice" style="margin-top:16px;">
+        <div class="locked-notice-icon">🔒</div>
+        <div class="locked-notice-text">Rates, invoices, and customer details are only visible to the account owner. Contact Sam Rivera for billing questions.</div>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item active"><div class="tab-icon">📦</div><div class="tab-label" style="color:#f47920;">My Load</div></div>
+      <div class="tab-item"><div class="tab-icon">📋</div><div class="tab-label">DVIR</div></div>
+      <div class="tab-item"><div class="tab-icon">📄</div><div class="tab-label">History</div></div>
+      <div class="tab-item"><div class="tab-icon">👤</div><div class="tab-label">Profile</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 6b: DRIVER STATUS UPDATE
+═══════════════════════════════════════ -->
+<div class="phone" id="s6b">
+  <div class="screen active">
+    <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● WiFi 🔋</span></div>
+    <div class="nav-bar">
+      <div class="back-btn" onclick="goto('s6')">←</div>
+      <div class="nav-title">Update Load Status</div>
+    </div>
+    <div class="content">
+      <div style="background:white;border-radius:16px;margin:20px 20px 12px;overflow:hidden;">
+        <div style="padding:16px 18px;border-bottom:1px solid #f0f2f5;">
+          <div style="font-size:12px;color:#8fa3b8;font-weight:700;">LOAD #4821 · DALLAS → HOUSTON</div>
+        </div>
+        <div style="padding:4px 0;">
+          <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid #f0f2f5;opacity:0.4;">
+            <span style="font-size:20px;">✅</span>
+            <div>
+              <div style="font-size:14px;font-weight:700;color:#0f1e35;">Picked Up</div>
+              <div style="font-size:11px;color:#8fa3b8;">7:02 AM · Completed</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid #f0f2f5;background:#fff9f5;border-left:3px solid #f47920;">
+            <span style="font-size:20px;">🚚</span>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:800;color:#f47920;">In Transit</div>
+              <div style="font-size:11px;color:#8fa3b8;">Current status · ETA 3:30 PM</div>
+            </div>
+            <span style="font-size:12px;color:#f47920;font-weight:700;">Now</span>
+          </div>
+          <div onclick="goto('s6d')" style="display:flex;align-items:center;gap:14px;padding:14px 18px;cursor:pointer;">
+            <span style="font-size:20px;">📦</span>
+            <div>
+              <div style="font-size:14px;font-weight:700;color:#0f1e35;">Mark Delivered</div>
+              <div style="font-size:11px;color:#8fa3b8;">Tap to confirm delivery + upload POD</div>
+            </div>
+            <span style="font-size:16px;color:#8fa3b8;">→</span>
+          </div>
+        </div>
+      </div>
+      <div class="alert-banner">
+        📍 Location sharing is on. Sam Rivera can see your current position while on an active load.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 6c: DRIVER DVIR SHORTCUT
+═══════════════════════════════════════ -->
+<div class="phone" id="s6c">
+  <div class="screen active">
+    <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● WiFi 🔋</span></div>
+    <div class="nav-bar">
+      <div class="back-btn" onclick="goto('s6')">←</div>
+      <div class="nav-title">Inspections</div>
+    </div>
+    <div class="content">
+      <div class="section-label">Today · July 3, 2026</div>
+      <div style="background:white;border-radius:16px;margin:0 20px;padding:16px;">
+        <div style="display:flex;gap:12px;">
+          <div style="flex:1;border:1.5px solid #e8ecf0;border-radius:12px;padding:14px;text-align:center;cursor:pointer;">
+            <div style="font-size:28px;">🌅</div>
+            <div style="font-size:13px;font-weight:800;color:#0f1e35;margin-top:6px;">Pre-Trip</div>
+            <div style="margin-top:6px;"><span style="background:#e8f5e9;color:#2e7d32;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;">✓ DONE</span></div>
+          </div>
+          <div style="flex:1;border:1.5px solid #f47920;border-radius:12px;padding:14px;text-align:center;background:#fff9f5;cursor:pointer;">
+            <div style="font-size:28px;">🌆</div>
+            <div style="font-size:13px;font-weight:800;color:#f47920;margin-top:6px;">Post-Trip</div>
+            <div style="margin-top:6px;"><span style="background:#fef3e8;color:#f47920;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;">DUE</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="section-label">Recent</div>
+      <div style="background:white;border-radius:16px;margin:0 20px;">
+        <div style="padding:14px 16px;border-bottom:1px solid #f0f2f5;display:flex;justify-content:space-between;align-items:center;">
+          <div><div style="font-size:13px;font-weight:700;color:#0f1e35;">Pre-Trip · Jul 3</div><div style="font-size:11px;color:#8fa3b8;">No defects · Cascadia TX-4821</div></div>
+          <span style="background:#e8f5e9;color:#2e7d32;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;">PASS</span>
+        </div>
+        <div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
+          <div><div style="font-size:13px;font-weight:700;color:#0f1e35;">Post-Trip · Jul 2</div><div style="font-size:11px;color:#8fa3b8;">1 defect reported · Resolved</div></div>
+          <span style="background:#fef3e8;color:#c05621;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;">DEFECT</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 6d: DELIVERED + POD UPLOAD
+═══════════════════════════════════════ -->
+<div class="phone" id="s6d">
+  <div class="screen active">
+    <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● WiFi 🔋</span></div>
+    <div class="nav-bar">
+      <div class="back-btn" onclick="goto('s6b')">←</div>
+      <div class="nav-title">Confirm Delivery</div>
+    </div>
+    <div class="content">
+      <div class="form-card" style="margin-top:20px;">
+        <div class="form-label">Delivered to</div>
+        <input class="form-input" value="ABC Freight · 4901 Gulf Fwy, Houston TX" readonly style="background:#f9f9f9;">
+        <div class="form-label" style="margin-top:14px;">Delivery Time</div>
+        <input class="form-input" value="3:18 PM · Jul 3, 2026">
+        <div class="form-label" style="margin-top:14px;">Receiver Name (optional)</div>
+        <input class="form-input" placeholder="e.g. John Doe">
+      </div>
+
+      <div class="section-label">Proof of Delivery</div>
+      <div style="background:white;border-radius:16px;margin:0 20px;padding:16px;">
+        <div style="border:2px dashed #e8ecf0;border-radius:12px;padding:24px;text-align:center;cursor:pointer;" onclick="this.style.background='#f0fff4';this.style.borderColor='#2e7d32';this.innerHTML='<div style=\'font-size:28px\'>✅</div><div style=\'font-size:13px;font-weight:700;color:#2e7d32;margin-top:6px\'>BOL_4821.jpg uploaded</div>'">
+          <div style="font-size:28px;">📷</div>
+          <div style="font-size:13px;font-weight:700;color:#0f1e35;margin-top:6px;">Take Photo or Upload</div>
+          <div style="font-size:11px;color:#8fa3b8;margin-top:4px;">Signed BOL, delivery receipt</div>
+        </div>
+      </div>
+
+      <div class="primary-btn orange" onclick="goto('s6e')" style="margin-top:20px;">Confirm Delivered ✓</div>
+      <div style="height:24px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 6e: DELIVERED CONFIRMATION
+═══════════════════════════════════════ -->
+<div class="phone" id="s6e">
+  <div class="screen active">
+    <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● WiFi 🔋</span></div>
+    <div class="content" style="background:#0f1e35;justify-content:center;align-items:center;display:flex;flex-direction:column;">
+      <div style="text-align:center;padding:40px 32px;">
+        <div style="font-size:72px;margin-bottom:16px;">🎉</div>
+        <div style="font-size:26px;font-weight:900;color:white;margin-bottom:8px;">Load Delivered!</div>
+        <div style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:24px;">Sam Rivera has been notified. The customer tracking link will update automatically.</div>
+        <div style="background:rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:24px;text-align:left;">
+          <div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:rgba(255,255,255,0.5);font-size:12px;">Load</span><span style="color:white;font-size:12px;font-weight:700;">#4821 · DAL → HOU</span></div>
+          <div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:rgba(255,255,255,0.5);font-size:12px;">Delivered</span><span style="color:white;font-size:12px;font-weight:700;">3:18 PM · Jul 3</span></div>
+          <div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:rgba(255,255,255,0.5);font-size:12px;">POD</span><span style="color:#2ecc71;font-size:12px;font-weight:700;">✓ Uploaded</span></div>
+        </div>
+        <div onclick="goto('s6c')" style="background:#f47920;color:white;font-size:15px;font-weight:800;padding:14px;border-radius:12px;cursor:pointer;margin-bottom:10px;">Complete Post-Trip DVIR →</div>
+        <div onclick="goto('s6')" style="color:rgba(255,255,255,0.5);font-size:13px;font-weight:700;cursor:pointer;">Back to Home</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 7a: DISPATCHER HOME
+═══════════════════════════════════════ -->
+<div class="phone" id="s7a">
+  <div class="screen active">
+    <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● WiFi 🔋</span></div>
+    <div class="role-home-hero">
+      <div class="role-home-greeting">Good morning,</div>
+      <div class="role-home-name">Jamie L.</div>
+      <span class="role-pill-lg" style="background:rgba(13,159,110,0.2);color:#0d9f6e;">📋 Dispatcher · Rivera Trucking</span>
+    </div>
+    <div class="content">
+      <div class="section-label">Fleet Overview</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:0 20px 16px;">
+        <div style="background:white;border-radius:12px;padding:12px;text-align:center;">
+          <div style="font-size:22px;font-weight:900;color:#f47920;">3</div>
+          <div style="font-size:10px;font-weight:700;color:#8fa3b8;margin-top:2px;">ACTIVE</div>
+        </div>
+        <div style="background:white;border-radius:12px;padding:12px;text-align:center;">
+          <div style="font-size:22px;font-weight:900;color:#0d9f6e;">2</div>
+          <div style="font-size:10px;font-weight:700;color:#8fa3b8;margin-top:2px;">AVAILABLE</div>
+        </div>
+        <div style="background:white;border-radius:12px;padding:12px;text-align:center;">
+          <div style="font-size:22px;font-weight:900;color:#ef4444;">1</div>
+          <div style="font-size:10px;font-weight:700;color:#8fa3b8;margin-top:2px;">UNASSIGNED</div>
+        </div>
+      </div>
+
+      <div class="quick-actions" style="padding-top:0;">
+        <div class="quick-action">
+          <div class="qa-icon">🚚</div>
+          <div class="qa-title">Dispatch</div>
+          <div class="qa-sub">Assign loads to drivers</div>
+        </div>
+        <div class="quick-action">
+          <div class="qa-icon">📥</div>
+          <div class="qa-title">Load Queue</div>
+          <div class="qa-sub">Review &amp; assign</div>
+        </div>
+        <div class="quick-action">
+          <div class="qa-icon">👥</div>
+          <div class="qa-title">Drivers</div>
+          <div class="qa-sub">Status &amp; location</div>
+        </div>
+        <div class="quick-action">
+          <div class="qa-icon">🔧</div>
+          <div class="qa-title">Maintenance</div>
+          <div class="qa-sub">Alerts &amp; DVIR</div>
+        </div>
+        <div class="quick-action locked">
+          <div class="qa-icon">🔒</div>
+          <div class="qa-title">Invoices</div>
+          <div class="qa-sub">Owner only</div>
+        </div>
+        <div class="quick-action locked">
+          <div class="qa-icon">🔒</div>
+          <div class="qa-title">Reports</div>
+          <div class="qa-sub">Owner only</div>
+        </div>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item active"><div class="tab-icon">📋</div><div class="tab-label" style="color:#f47920;">Dispatch</div></div>
+      <div class="tab-item"><div class="tab-icon">📥</div><div class="tab-label">Loads</div></div>
+      <div class="tab-item"><div class="tab-icon">👥</div><div class="tab-label">Drivers</div></div>
+      <div class="tab-item"><div class="tab-icon">🔧</div><div class="tab-label">Fleet</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 7b: FINANCE HOME
+═══════════════════════════════════════ -->
+<div class="phone" id="s7b">
+  <div class="screen active">
+    <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● WiFi 🔋</span></div>
+    <div class="role-home-hero">
+      <div class="role-home-greeting">Good morning,</div>
+      <div class="role-home-name">Priya M.</div>
+      <span class="role-pill-lg" style="background:rgba(124,58,237,0.2);color:#7c3aed;">💼 Finance · Rivera Trucking</span>
+    </div>
+    <div class="content">
+      <div class="section-label">Billing Overview · July 2026</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 20px 16px;">
+        <div style="background:white;border-radius:12px;padding:14px;">
+          <div style="font-size:11px;font-weight:700;color:#8fa3b8;margin-bottom:4px;">OUTSTANDING</div>
+          <div style="font-size:22px;font-weight:900;color:#f47920;">$12,400</div>
+        </div>
+        <div style="background:white;border-radius:12px;padding:14px;">
+          <div style="font-size:11px;font-weight:700;color:#8fa3b8;margin-bottom:4px;">PAID THIS MONTH</div>
+          <div style="font-size:22px;font-weight:900;color:#0d9f6e;">$28,750</div>
+        </div>
+      </div>
+
+      <div class="quick-actions" style="padding-top:0;">
+        <div class="quick-action">
+          <div class="qa-icon">💰</div>
+          <div class="qa-title">Invoices</div>
+          <div class="qa-sub">Create &amp; send</div>
+        </div>
+        <div class="quick-action">
+          <div class="qa-icon">📊</div>
+          <div class="qa-title">Reports</div>
+          <div class="qa-sub">Revenue &amp; P&amp;L</div>
+        </div>
+        <div class="quick-action">
+          <div class="qa-icon">🏢</div>
+          <div class="qa-title">Customers</div>
+          <div class="qa-sub">Accounts &amp; terms</div>
+        </div>
+        <div class="quick-action">
+          <div class="qa-icon">📤</div>
+          <div class="qa-title">Export</div>
+          <div class="qa-sub">QuickBooks, CSV</div>
+        </div>
+        <div class="quick-action locked">
+          <div class="qa-icon">🔒</div>
+          <div class="qa-title">Dispatch</div>
+          <div class="qa-sub">Owner only</div>
+        </div>
+        <div class="quick-action locked">
+          <div class="qa-icon">🔒</div>
+          <div class="qa-title">Drivers</div>
+          <div class="qa-sub">Owner only</div>
+        </div>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item active"><div class="tab-icon">💰</div><div class="tab-label" style="color:#f47920;">Invoices</div></div>
+      <div class="tab-item"><div class="tab-icon">📊</div><div class="tab-label">Reports</div></div>
+      <div class="tab-item"><div class="tab-icon">🏢</div><div class="tab-label">Customers</div></div>
+      <div class="tab-item"><div class="tab-icon">📤</div><div class="tab-label">Export</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 8: DRIVER PROFILE SETUP — CDL
+     (After account creation, driver fills this in)
+═══════════════════════════════════════ -->
+<div class="phone" id="s8">
+  <div class="screen active">
+    <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● WiFi 🔋</span></div>
+    <div class="nav-bar">
+      <div class="nav-title">Your Driver Profile</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.4);">Step 1 of 3</div>
+    </div>
+    <div style="background:#0f1e35;padding:0 20px 20px;flex-shrink:0;">
+      <div style="background:rgba(255,255,255,0.06);border-radius:10px;height:4px;overflow:hidden;">
+        <div style="background:#f47920;height:100%;width:33%;border-radius:10px;"></div>
+      </div>
+      <div style="color:rgba(255,255,255,0.5);font-size:12px;margin-top:10px;">This info stays with Rivera Trucking for compliance. You control your own data.</div>
+    </div>
+    <div class="content">
+      <div class="section-label">Commercial Driver's License</div>
+      <div class="form-card">
+        <div class="form-label">CDL Number</div>
+        <input class="form-input" value="TX-D8241033">
+        <div class="form-label" style="margin-top:14px;">Issuing State</div>
+        <select class="form-input" style="appearance:none;">
+          <option selected>Texas (TX)</option>
+          <option>California (CA)</option>
+          <option>Florida (FL)</option>
+        </select>
+        <div class="form-label" style="margin-top:14px;">License Class</div>
+        <div style="display:flex;gap:8px;margin-top:2px;">
+          <div id="classA" onclick="selectClass('A')" style="flex:1;border:2px solid #f47920;background:#fff9f5;border-radius:10px;padding:12px;text-align:center;cursor:pointer;">
+            <div style="font-size:18px;font-weight:900;color:#f47920;">A</div>
+            <div style="font-size:10px;color:#8fa3b8;margin-top:2px;">Semi / tractor-trailer</div>
+          </div>
+          <div id="classB" onclick="selectClass('B')" style="flex:1;border:1.5px solid #e8ecf0;border-radius:10px;padding:12px;text-align:center;cursor:pointer;">
+            <div style="font-size:18px;font-weight:900;color:#1a1a2e;">B</div>
+            <div style="font-size:10px;color:#8fa3b8;margin-top:2px;">Straight truck / bus</div>
+          </div>
+          <div id="classC" onclick="selectClass('C')" style="flex:1;border:1.5px solid #e8ecf0;border-radius:10px;padding:12px;text-align:center;cursor:pointer;">
+            <div style="font-size:18px;font-weight:900;color:#1a1a2e;">C</div>
+            <div style="font-size:10px;color:#8fa3b8;margin-top:2px;">Small vehicle / HazMat</div>
+          </div>
+        </div>
+        <div class="form-label" style="margin-top:14px;">Expiration Date</div>
+        <input class="form-input" type="date" value="2027-08-15">
+        <div class="form-hint">You'll receive an alert 60 days before expiry.</div>
+      </div>
+
+      <div class="section-label">Endorsements</div>
+      <div class="form-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;">
+          <div>
+            <div style="font-size:14px;font-weight:700;color:#1a1a2e;">HazMat (H)</div>
+            <div style="font-size:11px;color:#8fa3b8;">Hazardous materials transport</div>
+          </div>
+          <div id="toggleHaz" onclick="toggleSwitch('haz')" style="width:44px;height:24px;background:#e8ecf0;border-radius:12px;cursor:pointer;position:relative;transition:background .2s;">
+            <div id="thumbHaz" style="width:20px;height:20px;background:white;border-radius:50%;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,0.2);"></div>
+          </div>
+        </div>
+        <div style="height:1px;background:#f0f2f5;margin:10px 0;"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;">
+          <div>
+            <div style="font-size:14px;font-weight:700;color:#1a1a2e;">Tanker (N)</div>
+            <div style="font-size:11px;color:#8fa3b8;">Tank vehicle operation</div>
+          </div>
+          <div id="toggleTank" onclick="toggleSwitch('tank')" style="width:44px;height:24px;background:#f47920;border-radius:12px;cursor:pointer;position:relative;transition:background .2s;">
+            <div id="thumbTank" style="width:20px;height:20px;background:white;border-radius:50%;position:absolute;top:2px;left:22px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,0.2);"></div>
+          </div>
+        </div>
+        <div style="height:1px;background:#f0f2f5;margin:10px 0;"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;">
+          <div>
+            <div style="font-size:14px;font-weight:700;color:#1a1a2e;">Double/Triple (T)</div>
+            <div style="font-size:11px;color:#8fa3b8;">Multiple trailers</div>
+          </div>
+          <div style="width:44px;height:24px;background:#e8ecf0;border-radius:12px;cursor:pointer;position:relative;">
+            <div style="width:20px;height:20px;background:white;border-radius:50%;position:absolute;top:2px;left:2px;box-shadow:0 1px 4px rgba(0,0,0,0.2);"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="primary-btn orange" onclick="goto('s9')">Next — Medical Cert →</div>
+      <div style="height:24px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 9: DRIVER PROFILE — MEDICAL CERT
+═══════════════════════════════════════ -->
+<div class="phone" id="s9">
+  <div class="screen active">
+    <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● WiFi 🔋</span></div>
+    <div class="nav-bar">
+      <div class="back-btn" onclick="goto('s8')">←</div>
+      <div class="nav-title">Medical Certificate</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.4);">Step 2 of 3</div>
+    </div>
+    <div style="background:#0f1e35;padding:0 20px 20px;flex-shrink:0;">
+      <div style="background:rgba(255,255,255,0.06);border-radius:10px;height:4px;overflow:hidden;">
+        <div style="background:#f47920;height:100%;width:66%;border-radius:10px;"></div>
+      </div>
+      <div style="color:rgba(255,255,255,0.5);font-size:12px;margin-top:10px;">FMCSA requires a valid DOT physical on file. Your employer will be notified if this expires.</div>
+    </div>
+    <div class="content">
+      <div class="section-label">DOT Physical / Medical Examiner's Certificate</div>
+      <div class="form-card">
+        <div class="form-label">Medical Certificate Expiry</div>
+        <input class="form-input" type="date" value="2026-11-30">
+        <div class="form-hint">Usually valid for 24 months. Alert sent 60 days before expiry.</div>
+        <div class="form-label" style="margin-top:14px;">Upload Certificate (optional)</div>
+        <div onclick="this.style.background='#f0fff4';this.style.borderColor='#2e7d32';this.innerHTML='<div style=\'text-align:center;padding:8px\'><div style=\'font-size:22px\'>✅</div><div style=\'font-size:12px;font-weight:700;color:#2e7d32;margin-top:4px\'>med-cert-2026.pdf uploaded</div></div>'" style="border:2px dashed #e8ecf0;border-radius:10px;padding:18px;text-align:center;cursor:pointer;">
+          <div style="font-size:22px;">📄</div>
+          <div style="font-size:12px;font-weight:700;color:#1a1a2e;margin-top:6px;">Upload PDF or Photo</div>
+          <div style="font-size:11px;color:#8fa3b8;margin-top:2px;">Issued by certified medical examiner</div>
+        </div>
+      </div>
+
+      <div class="section-label">Restrictions (if any)</div>
+      <div class="form-card">
+        <div class="form-label">Medical Restrictions</div>
+        <select class="form-input" style="appearance:none;">
+          <option>None</option>
+          <option>Corrective lenses required</option>
+          <option>Hearing aid required</option>
+          <option>Limited to daylight driving</option>
+          <option>Other (specify in notes)</option>
+        </select>
+        <div class="form-label" style="margin-top:14px;">Notes (optional)</div>
+        <textarea class="form-input" rows="2" placeholder="Any notes for the fleet manager..."></textarea>
+      </div>
+
+      <div class="primary-btn orange" onclick="goto('s10')">Next — Emergency Contact →</div>
+      <div style="height:24px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 10: DRIVER PROFILE — EMERGENCY CONTACT + DONE
+═══════════════════════════════════════ -->
+<div class="phone" id="s10">
+  <div class="screen active">
+    <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● WiFi 🔋</span></div>
+    <div class="nav-bar">
+      <div class="back-btn" onclick="goto('s9')">←</div>
+      <div class="nav-title">Emergency Contact</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.4);">Step 3 of 3</div>
+    </div>
+    <div style="background:#0f1e35;padding:0 20px 20px;flex-shrink:0;">
+      <div style="background:rgba(255,255,255,0.06);border-radius:10px;height:4px;overflow:hidden;">
+        <div style="background:#f47920;height:100%;width:100%;border-radius:10px;"></div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="section-label">Emergency Contact</div>
+      <div class="form-card">
+        <div class="form-label">Full Name</div>
+        <input class="form-input" value="Angela Torres">
+        <div class="form-label" style="margin-top:14px;">Relationship</div>
+        <select class="form-input" style="appearance:none;">
+          <option>Spouse / Partner</option>
+          <option>Parent</option>
+          <option>Sibling</option>
+          <option>Other</option>
+        </select>
+        <div class="form-label" style="margin-top:14px;">Phone Number</div>
+        <input class="form-input" type="tel" value="+1 (555) 204-8812">
+      </div>
+
+      <div class="section-label">Profile Photo (optional)</div>
+      <div class="form-card" style="text-align:center;padding:20px;">
+        <div style="width:72px;height:72px;border-radius:50%;background:#f4f6f9;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 12px;">🚚</div>
+        <div style="font-size:13px;font-weight:700;color:#f47920;cursor:pointer;">Upload Photo</div>
+        <div style="font-size:11px;color:#8fa3b8;margin-top:4px;">Shown on your loads and DVIR reports</div>
+      </div>
+
+      <div class="primary-btn orange" onclick="goto('s10b')">Complete My Profile ✓</div>
+      <div style="height:24px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 10b: DRIVER PROFILE COMPLETE
+═══════════════════════════════════════ -->
+<div class="phone" id="s10b">
+  <div class="screen active">
+    <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● WiFi 🔋</span></div>
+    <div class="content" style="background:#0f1e35;display:flex;flex-direction:column;justify-content:center;align-items:center;">
+      <div style="text-align:center;padding:40px 32px;">
+        <div style="font-size:64px;margin-bottom:16px;">✅</div>
+        <div style="font-size:24px;font-weight:900;color:white;margin-bottom:8px;">You're all set, Marcus!</div>
+        <div style="font-size:14px;color:rgba(255,255,255,0.55);line-height:1.6;margin-bottom:28px;">Your profile is complete and Rivera Trucking has been notified. You'll get an alert 60 days before your CDL or medical cert expires.</div>
+        <div style="background:rgba(255,255,255,0.07);border-radius:16px;padding:16px;margin-bottom:28px;text-align:left;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+            <span style="color:rgba(255,255,255,0.5);font-size:12px;">CDL</span>
+            <span style="color:white;font-size:12px;font-weight:700;">TX-D8241033 · Class A</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+            <span style="color:rgba(255,255,255,0.5);font-size:12px;">CDL Expiry</span>
+            <span style="color:#2ecc71;font-size:12px;font-weight:700;">Aug 15, 2027 ✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+            <span style="color:rgba(255,255,255,0.5);font-size:12px;">Med Cert Expiry</span>
+            <span style="color:#2ecc71;font-size:12px;font-weight:700;">Nov 30, 2026 ✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;">
+            <span style="color:rgba(255,255,255,0.5);font-size:12px;">Endorsements</span>
+            <span style="color:white;font-size:12px;font-weight:700;">Tanker (N)</span>
+          </div>
+        </div>
+        <div onclick="goto('s6')" style="background:#f47920;color:white;font-size:15px;font-weight:800;padding:14px;border-radius:12px;cursor:pointer;">Go to My Dashboard →</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 11: OWNER — FLEET COMPLIANCE DASHBOARD
+     (Owner sees all driver compliance status)
+═══════════════════════════════════════ -->
+<div class="phone" id="s11">
+  <div class="screen active">
+    <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● WiFi 🔋</span></div>
+    <div class="nav-bar">
+      <div class="back-btn" onclick="goto('s1')">←</div>
+      <div class="nav-title">Driver Compliance</div>
+    </div>
+    <div class="content">
+      <div class="alert-banner" style="background:#fef2f2;border-left-color:#ef4444;color:#991b1b;">
+        ⚠️ <strong>1 item needs attention</strong> — Maria's medical cert expires in 18 days.
+      </div>
+
+      <div class="section-label">All Drivers · 3 Active</div>
+
+      <!-- Driver 1 — Good -->
+      <div style="background:white;border-radius:16px;margin:0 20px 12px;overflow:hidden;">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #f0f2f5;">
+          <div style="width:40px;height:40px;border-radius:50%;background:#fef3e8;display:flex;align-items:center;justify-content:center;font-size:18px;">🚚</div>
+          <div style="flex:1;">
+            <div style="font-size:15px;font-weight:800;color:#1a1a2e;">Marcus Torres</div>
+            <div style="font-size:11px;color:#8fa3b8;">Cascadia TX-4821 · Class A CDL</div>
+          </div>
+          <span style="background:#e8f5e9;color:#2e7d32;font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;">ALL CLEAR</span>
+        </div>
+        <div style="padding:10px 16px;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div style="font-size:11px;">
+            <div style="color:#8fa3b8;font-weight:700;margin-bottom:2px;">CDL EXPIRY</div>
+            <div style="font-weight:700;color:#2e7d32;">Aug 2027</div>
+          </div>
+          <div style="font-size:11px;">
+            <div style="color:#8fa3b8;font-weight:700;margin-bottom:2px;">MED CERT</div>
+            <div style="font-weight:700;color:#2e7d32;">Nov 2026</div>
+          </div>
+          <div style="font-size:11px;">
+            <div style="color:#8fa3b8;font-weight:700;margin-bottom:2px;">ENDORSEMENTS</div>
+            <div style="font-weight:700;color:#1a1a2e;">Tanker (N)</div>
+          </div>
+          <div style="font-size:11px;">
+            <div style="color:#8fa3b8;font-weight:700;margin-bottom:2px;">LAST DVIR</div>
+            <div style="font-weight:700;color:#1a1a2e;">Today · Pass</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Driver 2 — Expiring soon -->
+      <div style="background:white;border-radius:16px;margin:0 20px 12px;overflow:hidden;border:1.5px solid #fef3c7;">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #f0f2f5;">
+          <div style="width:40px;height:40px;border-radius:50%;background:#f4f6f9;display:flex;align-items:center;justify-content:center;font-size:18px;">👤</div>
+          <div style="flex:1;">
+            <div style="font-size:15px;font-weight:800;color:#1a1a2e;">Maria Gutierrez</div>
+            <div style="font-size:11px;color:#8fa3b8;">Kenworth TX-9034 · Class A CDL</div>
+          </div>
+          <span style="background:#fef3c7;color:#92400e;font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;">DUE SOON</span>
+        </div>
+        <div style="padding:10px 16px;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div style="font-size:11px;">
+            <div style="color:#8fa3b8;font-weight:700;margin-bottom:2px;">CDL EXPIRY</div>
+            <div style="font-weight:700;color:#2e7d32;">Mar 2028</div>
+          </div>
+          <div style="font-size:11px;">
+            <div style="color:#8fa3b8;font-weight:700;margin-bottom:2px;">MED CERT</div>
+            <div style="font-weight:700;color:#ef4444;">Jul 21, 2026 ⚠️</div>
+          </div>
+          <div style="font-size:11px;">
+            <div style="color:#8fa3b8;font-weight:700;margin-bottom:2px;">ENDORSEMENTS</div>
+            <div style="font-weight:700;color:#1a1a2e;">HazMat (H)</div>
+          </div>
+          <div style="font-size:11px;">
+            <div style="color:#8fa3b8;font-weight:700;margin-bottom:2px;">LAST DVIR</div>
+            <div style="font-weight:700;color:#1a1a2e;">Yesterday · Pass</div>
+          </div>
+        </div>
+        <div style="padding:10px 16px;border-top:1px solid #f0f2f5;display:flex;gap:8px;">
+          <div style="flex:1;background:#fef3c7;color:#92400e;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">Remind Maria</div>
+          <div style="flex:1;background:#f4f6f9;color:#1a1a2e;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">View Details</div>
+        </div>
+      </div>
+
+      <!-- Driver 3 — Profile incomplete -->
+      <div style="background:white;border-radius:16px;margin:0 20px 12px;overflow:hidden;border:1.5px solid #f0f2f5;">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #f0f2f5;">
+          <div style="width:40px;height:40px;border-radius:50%;background:#f4f6f9;display:flex;align-items:center;justify-content:center;font-size:18px;">👤</div>
+          <div style="flex:1;">
+            <div style="font-size:15px;font-weight:800;color:#1a1a2e;">Dev Johnson</div>
+            <div style="font-size:11px;color:#8fa3b8;">Unassigned truck</div>
+          </div>
+          <span style="background:#f4f6f9;color:#5a7a9a;font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;">INCOMPLETE</span>
+        </div>
+        <div style="padding:12px 16px;font-size:12px;color:#8fa3b8;">CDL and medical cert not yet added. Send a reminder to complete profile.</div>
+        <div style="padding:0 16px 12px;">
+          <div style="background:#f47920;color:white;text-align:center;padding:10px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">Send Profile Reminder</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab-item"><div class="tab-icon">📥</div><div class="tab-label">Loads</div></div>
+      <div class="tab-item"><div class="tab-icon">🚚</div><div class="tab-label">Dispatch</div></div>
+      <div class="tab-item"><div class="tab-icon">💰</div><div class="tab-label">Invoice</div></div>
+      <div class="tab-item active"><div class="tab-icon">👥</div><div class="tab-label" style="color:#f47920;">Team</div></div>
+      <div class="tab-item"><div class="tab-icon">⚙️</div><div class="tab-label">Settings</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function goto(id){
+  document.querySelectorAll('.phone').forEach(p=>p.style.display='none');
+  document.getElementById(id).style.display='flex';
+  window.scrollTo({top:document.getElementById(id).offsetTop-60,behavior:'smooth'});
+}
+
+function selectRole(role){
+  ['roleDriver','roleDispatcher','roleFinance'].forEach(id=>{
+    document.getElementById(id).classList.remove('selected');
+  });
+  const map={driver:'roleDriver',dispatcher:'roleDispatcher',finance:'roleFinance'};
+  document.getElementById(map[role]).classList.add('selected');
+}
+
+function selectClass(cls){
+  ['A','B','C'].forEach(c=>{
+    const el=document.getElementById('class'+c);
+    if(c===cls){
+      el.style.border='2px solid #f47920';
+      el.style.background='#fff9f5';
+      el.querySelector('div').style.color='#f47920';
+    } else {
+      el.style.border='1.5px solid #e8ecf0';
+      el.style.background='white';
+      el.querySelector('div').style.color='#1a1a2e';
+    }
+  });
+}
+
+const switchState={haz:false,tank:true};
+function toggleSwitch(id){
+  switchState[id]=!switchState[id];
+  const toggle=document.getElementById('toggle'+id.charAt(0).toUpperCase()+id.slice(1));
+  const thumb=document.getElementById('thumb'+id.charAt(0).toUpperCase()+id.slice(1));
+  if(switchState[id]){
+    toggle.style.background='#f47920';
+    thumb.style.left='22px';
+  } else {
+    toggle.style.background='#e8ecf0';
+    thumb.style.left='2px';
+  }
+}
+
+// Show all phones on page load
+document.querySelectorAll('.phone').forEach(p=>p.style.display='flex');
+</script>
+</body>
+</html>

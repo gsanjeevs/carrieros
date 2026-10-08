@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarrierOS — Onboarding Flow</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f1e35;--navy-mid:#182c46;--navy-light:#1f3a58;--navy-card:#162033;
+  --orange:#f47920;--orange-lt:#f9a55a;--orange-dim:rgba(244,121,32,.15);
+  --white:#fff;--gray:#8fa3b8;--gray-lt:#d6e0ea;--gray-dim:rgba(214,224,234,.08);
+  --green:#2ecc71;--green-dim:rgba(46,204,113,.13);
+  --amber:#f0a500;--teal:#1abc9c;
+  --radius:14px;--radius-sm:8px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;background:var(--navy);color:var(--white);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 16px 60px;}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(rgba(255,255,255,.018) 1px,transparent 1px);background-size:28px 28px;pointer-events:none;z-index:0;}
+.page-header{text-align:center;margin-bottom:40px;z-index:1;}
+.page-header .logo{font-size:13px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--orange);margin-bottom:6px;}
+.page-header h1{font-size:22px;font-weight:700;}
+.page-header p{font-size:13px;color:var(--gray);margin-top:4px;}
+.screens{display:flex;gap:24px;align-items:flex-start;z-index:1;flex-wrap:wrap;justify-content:center;width:100%;max-width:1600px;}
+.phone{display:flex;flex-direction:column;width:340px;flex-shrink:0;}
+.screen-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:10px;text-align:center;}
+.phone-frame{background:var(--navy-card);border-radius:24px;border:1.5px solid rgba(255,255,255,.08);overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.45);min-height:620px;display:flex;flex-direction:column;}
+.phone-bar{background:var(--navy-mid);padding:14px 18px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.05);}
+.phone-bar .back{color:var(--orange);font-size:13px;font-weight:600;}
+.phone-bar .title{font-size:14px;font-weight:700;}
+.phone-bar .action{color:var(--orange);font-size:13px;font-weight:600;}
+.phone-content{padding:18px 16px;flex:1;display:flex;flex-direction:column;gap:12px;}
+
+/* Progress bar */
+.ob-progress{height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;}
+.ob-progress-fill{height:100%;background:var(--orange);border-radius:2px;transition:width .3s;}
+.ob-step-label{font-size:10px;color:var(--gray);font-weight:600;text-align:right;}
+
+/* Welcome screen */
+.welcome-hero{text-align:center;padding:20px 8px 8px;display:flex;flex-direction:column;align-items:center;gap:14px;}
+.welcome-icon{font-size:56px;margin-bottom:4px;}
+.welcome-title{font-size:24px;font-weight:900;line-height:1.1;}
+.welcome-sub{font-size:13px;color:var(--gray);line-height:1.55;}
+.welcome-features{width:100%;display:flex;flex-direction:column;gap:8px;text-align:left;}
+.wf-item{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;}
+.wf-icon{font-size:18px;flex-shrink:0;}
+.wf-text{font-size:12px;font-weight:600;}
+.wf-sub{font-size:10px;color:var(--gray);margin-top:1px;}
+
+/* Form fields */
+.field-group{display:flex;flex-direction:column;gap:4px;}
+.field-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gray);}
+.field-label .req{color:var(--orange);}
+.field-input{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;color:var(--white);display:flex;align-items:center;justify-content:space-between;}
+.field-input.filled{border-color:rgba(46,204,113,.35);background:rgba(46,204,113,.04);}
+.field-input.focused{border-color:rgba(244,121,32,.5);background:rgba(244,121,32,.05);}
+.field-input .placeholder{color:var(--gray);font-size:12px;}
+.field-input .value{color:var(--white);font-size:13px;}
+.field-input .check{color:var(--green);font-size:14px;}
+.field-hint{font-size:10px;color:var(--gray);margin-top:1px;}
+
+/* Logo upload zone */
+.logo-upload{border:2px dashed rgba(255,255,255,.15);border-radius:var(--radius-sm);padding:16px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;}
+.logo-upload .lu-icon{font-size:24px;}
+.logo-upload .lu-text{font-size:12px;color:var(--gray);text-align:center;}
+.logo-upload .lu-sub{font-size:10px;color:rgba(143,163,184,.6);}
+
+/* Truck card (filled) */
+.entity-card{background:rgba(255,255,255,.05);border:1.5px solid rgba(46,204,113,.3);border-radius:var(--radius);padding:14px;display:flex;align-items:center;gap:12px;}
+.entity-icon{font-size:28px;flex-shrink:0;}
+.entity-info{flex:1;}
+.entity-name{font-size:14px;font-weight:700;}
+.entity-sub{font-size:11px;color:var(--gray);margin-top:2px;}
+.entity-check{color:var(--green);font-size:18px;flex-shrink:0;}
+.add-another{display:flex;align-items:center;gap:8px;color:var(--orange);font-size:13px;font-weight:600;cursor:pointer;padding:8px 0;}
+
+/* Checklist */
+.checklist-item{
+  display:flex;align-items:center;gap:12px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+  border-radius:var(--radius-sm);padding:12px 14px;
+}
+.checklist-item.done{border-color:rgba(46,204,113,.25);background:rgba(46,204,113,.05);}
+.checklist-item.pending{opacity:.6;}
+.ci-check{width:24px;height:24px;border-radius:50%;border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;}
+.ci-check.done{background:var(--green);border-color:var(--green);color:#fff;}
+.ci-check.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+.ci-text{flex:1;}
+.ci-title{font-size:13px;font-weight:700;}
+.ci-sub{font-size:11px;color:var(--gray);margin-top:1px;}
+.ci-action{color:var(--orange);font-size:12px;font-weight:600;flex-shrink:0;}
+
+/* Progress ring */
+.progress-ring-container{display:flex;align-items:center;gap:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:14px;}
+.progress-text{flex:1;}
+.progress-text .pt-pct{font-size:28px;font-weight:900;color:var(--orange);}
+.progress-text .pt-label{font-size:12px;color:var(--gray);margin-top:2px;}
+.progress-text .pt-sub{font-size:11px;color:var(--gray-lt);margin-top:6px;line-height:1.5;}
+
+/* Buttons */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--orange);color:#fff;font-size:14px;font-weight:700;border-radius:var(--radius-sm);padding:13px;cursor:pointer;border:none;width:100%;}
+.btn.secondary{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);color:var(--gray-lt);}
+.btn.green{background:var(--green);}
+.btn.ghost{background:transparent;border:1.5px solid rgba(244,121,32,.4);color:var(--orange);}
+.btn-sm{display:inline-flex;align-items:center;gap:6px;background:var(--orange);color:#fff;font-size:12px;font-weight:700;border-radius:6px;padding:8px 14px;cursor:pointer;border:none;}
+
+.section-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--orange);}
+.divider{height:1px;background:rgba(255,255,255,.06);}
+.callout{background:rgba(244,121,32,.1);border:1px solid rgba(244,121,32,.25);border-radius:8px;padding:8px 11px;font-size:11px;color:var(--orange-lt);}
+
+.flow-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:80px;color:var(--gray);gap:6px;flex-shrink:0;}
+.flow-arrow .arrow-label{font-size:10px;color:var(--gray);text-align:center;max-width:56px;}
+.page-footer{margin-top:48px;text-align:center;z-index:1;font-size:11px;color:rgba(143,163,184,.4);display:flex;gap:24px;justify-content:center;flex-wrap:wrap;}
+
+/* Celebration */
+.confetti-banner{text-align:center;padding:16px 8px 0;}
+.confetti-emoji{font-size:48px;}
+.confetti-title{font-size:22px;font-weight:900;margin-top:10px;}
+.confetti-sub{font-size:13px;color:var(--gray);margin-top:4px;line-height:1.5;}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="logo">CarrierOS</div>
+  <h1>Onboarding Flow</h1>
+  <p>Mockup 06 — Welcome · Company · Truck · Customer · Billing · Done</p>
+</div>
+
+<div class="screens">
+
+  <!-- ── SCREEN 1: Welcome ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 1 — Welcome</div>
+    <div class="phone-frame">
+      <div class="phone-content" style="justify-content:space-between;">
+        <div class="welcome-hero">
+          <div class="welcome-icon">🚛</div>
+          <div class="welcome-title">Welcome to CarrierOS</div>
+          <div class="welcome-sub">Set up your account in under 60 minutes. Then run your first load.</div>
+          <div class="welcome-features">
+            <div class="wf-item">
+              <div class="wf-icon">📧</div>
+              <div><div class="wf-text">Forward It</div><div class="wf-sub">Email loads directly from brokers</div></div>
+            </div>
+            <div class="wf-item">
+              <div class="wf-icon">🚛</div>
+              <div><div class="wf-text">Dispatch It</div><div class="wf-sub">Assign drivers in one tap</div></div>
+            </div>
+            <div class="wf-item">
+              <div class="wf-icon">🧾</div>
+              <div><div class="wf-text">Invoice It</div><div class="wf-sub">Auto-generate from every load</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;padding-bottom:8px;">
+          <button class="btn">Get Started — Takes ~10 min</button>
+          <div style="text-align:center;font-size:11px;color:var(--gray);">Already have an account? <span style="color:var(--orange);font-weight:600;">Sign in</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">Start setup</div>
+  </div>
+
+  <!-- ── SCREEN 2: Company Setup ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 2 — Company Info</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span></span>
+        <span class="title">Company Info</span>
+        <span class="action">Skip</span>
+      </div>
+      <div class="phone-content">
+        <!-- Progress -->
+        <div>
+          <div class="ob-progress"><div class="ob-progress-fill" style="width:25%;"></div></div>
+          <div class="ob-step-label" style="margin-top:4px;">Step 1 of 5</div>
+        </div>
+
+        <div style="font-size:13px;color:var(--gray);">This appears on your invoices and tracking pages.</div>
+
+        <div class="field-group">
+          <div class="field-label">Company Name <span class="req">*</span></div>
+          <div class="field-input filled"><span class="value">Acme Trucking LLC</span><span class="check">✓</span></div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">DOT Number <span class="req">*</span></div>
+          <div class="field-input filled"><span class="value">8834422</span><span class="check">✓</span></div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">EIN / Tax ID <span class="req">*</span></div>
+          <div class="field-input focused"><span class="value">82-4492001</span><span style="width:2px;height:16px;background:var(--orange);animation:blink 1s infinite;display:inline-block;"></span></div>
+          <div class="field-hint">EIN or SSN (sole proprietor) — used on invoices only</div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Default Payment Terms</div>
+          <div class="field-input filled"><span class="value">Net 30</span><span style="color:var(--gray);font-size:11px;">▾</span></div>
+          <div class="field-hint">You can change this per invoice</div>
+        </div>
+
+        <!-- Logo upload -->
+        <div class="field-group">
+          <div class="field-label">Company Logo <span style="color:var(--gray);font-weight:400;">(optional)</span></div>
+          <div class="logo-upload">
+            <div class="lu-icon">🖼️</div>
+            <div class="lu-text">Upload logo</div>
+            <div class="lu-sub">PNG or JPG · Appears on invoices &amp; tracking</div>
+          </div>
+        </div>
+
+        <button class="btn" style="margin-top:auto;">Next — Add Your Truck</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">Add truck</div>
+  </div>
+
+  <!-- ── SCREEN 3: Add Truck ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 3 — Add Your Truck</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span class="back">‹ Company</span>
+        <span class="title">Your Truck</span>
+        <span class="action">Skip</span>
+      </div>
+      <div class="phone-content">
+        <div>
+          <div class="ob-progress"><div class="ob-progress-fill" style="width:50%;"></div></div>
+          <div class="ob-step-label" style="margin-top:4px;">Step 2 of 5</div>
+        </div>
+
+        <div style="font-size:13px;color:var(--gray);">Assign loads to trucks and track your fleet.</div>
+
+        <!-- Truck already added -->
+        <div class="section-title">Truck Added</div>
+        <div class="entity-card">
+          <div class="entity-icon">🚛</div>
+          <div class="entity-info">
+            <div class="entity-name">Peterbilt 389</div>
+            <div class="entity-sub">IL · 4B2918 · DOT 8834422<br>VIN: 1XPBD49X8JD489221</div>
+          </div>
+          <div class="entity-check">✓</div>
+        </div>
+
+        <!-- Add another -->
+        <div class="add-another">＋ Add another truck</div>
+
+        <div class="field-group">
+          <div class="field-label">Nickname <span style="color:var(--gray);font-weight:400;">(optional)</span></div>
+          <div class="field-input"><span class="placeholder">e.g. "Big Red", "Truck 1"</span></div>
+          <div class="field-hint">Makes it easier to identify in dispatch</div>
+        </div>
+
+        <div class="callout">Starter: 1 truck (+$15 each additional). Growth: up to 3 trucks (+$20 each additional).</div>
+
+        <button class="btn" style="margin-top:auto;">Next — Add a Customer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">Add customer</div>
+  </div>
+
+  <!-- ── SCREEN 4: Add Customer ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 4 — Add First Customer</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span class="back">‹ Truck</span>
+        <span class="title">First Customer</span>
+        <span class="action">Skip</span>
+      </div>
+      <div class="phone-content">
+        <div>
+          <div class="ob-progress"><div class="ob-progress-fill" style="width:75%;"></div></div>
+          <div class="ob-step-label" style="margin-top:4px;">Step 3 of 5</div>
+        </div>
+
+        <div style="font-size:13px;color:var(--gray);">Add a broker or shipper you work with — you can add more later.</div>
+
+        <div class="field-group">
+          <div class="field-label">Company Name <span class="req">*</span></div>
+          <div class="field-input filled"><span class="value">Fast Freight LLC</span><span class="check">✓</span></div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Contact Name</div>
+          <div class="field-input filled"><span class="value">Mike Paulson</span><span class="check">✓</span></div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Email <span class="req">*</span></div>
+          <div class="field-input filled"><span class="value">dispatch@fastfreight.com</span><span class="check">✓</span></div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Phone</div>
+          <div class="field-input filled"><span class="value">(312) 555-0190</span><span class="check">✓</span></div>
+        </div>
+
+        <!-- Tags -->
+        <div class="field-group">
+          <div class="field-label">Tags <span style="color:var(--gray);font-weight:400;">(optional)</span></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <span style="background:rgba(46,204,113,.15);border:1px solid rgba(46,204,113,.3);color:var(--green);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;">Fast Pay ✓</span>
+            <span style="background:rgba(244,121,32,.12);border:1px solid rgba(244,121,32,.3);color:var(--orange);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;">Preferred ✓</span>
+            <span style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--gray);font-size:11px;padding:4px 10px;border-radius:20px;">+ Add tag</span>
+          </div>
+        </div>
+
+        <button class="btn" style="margin-top:auto;">Next — Start Your Free Trial</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">Activate trial</div>
+  </div>
+
+  <!-- ── SCREEN 5: Billing / CC Collection ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 5 — Start Free Trial</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span class="back">‹ Customer</span>
+        <span class="title">Start Trial</span>
+        <span></span>
+      </div>
+      <div class="phone-content">
+        <div>
+          <div class="ob-progress"><div class="ob-progress-fill" style="width:80%;"></div></div>
+          <div class="ob-step-label" style="margin-top:4px;">Step 4 of 5 — Almost there</div>
+        </div>
+
+        <!-- Trial callout -->
+        <div style="background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);border-radius:8px;padding:11px 13px;display:flex;gap:10px;align-items:flex-start;">
+          <div style="font-size:18px;flex-shrink:0;">🎁</div>
+          <div style="font-size:11px;line-height:1.6;color:#a5d6a7;">
+            <strong style="color:var(--green);">30 days free</strong> — trial runs until <strong style="color:var(--green);">Aug 2, 2026</strong>.<br>
+            Your Starter plan ($49/mo) begins only if you don't cancel. Cancel anytime.
+          </div>
+        </div>
+
+        <!-- Card preview -->
+        <div style="background:linear-gradient(135deg,#0f1e35 0%,#1a3a5c 100%);border-radius:12px;padding:18px;position:relative;overflow:hidden;">
+          <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:rgba(255,255,255,.04);border-radius:50%;"></div>
+          <div style="font-size:20px;margin-bottom:12px;">▣</div>
+          <div style="font-size:15px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,.85);margin-bottom:14px;font-family:monospace;">•••• •••• •••• 4291</div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+            <div>
+              <div style="font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:2px;">Card Holder</div>
+              <div style="font-size:12px;font-weight:700;color:white;">Sam Johnson</div>
+            </div>
+            <div>
+              <div style="font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:2px;">Expires</div>
+              <div style="font-size:12px;font-weight:700;color:white;">09 / 28</div>
+            </div>
+            <div style="font-size:26px;">💳</div>
+          </div>
+        </div>
+
+        <!-- Card fields -->
+        <div class="field-group">
+          <div class="field-label">Card Number</div>
+          <div class="field-input filled"><span class="value" style="letter-spacing:2px;font-family:monospace;">•••• •••• •••• 4291</span><span class="check">✓</span></div>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <div class="field-group" style="flex:1;">
+            <div class="field-label">Expiry</div>
+            <div class="field-input filled"><span class="value">09 / 28</span><span class="check">✓</span></div>
+          </div>
+          <div class="field-group" style="flex:1;">
+            <div class="field-label">CVV</div>
+            <div class="field-input filled"><span class="value">•••</span><span class="check">✓</span></div>
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Name on Card</div>
+          <div class="field-input filled"><span class="value">Sam Johnson</span><span class="check">✓</span></div>
+        </div>
+
+        <!-- Security badges -->
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+          <span style="font-size:10px;color:var(--gray);display:flex;align-items:center;gap:4px;">🔒 SSL</span>
+          <span style="font-size:10px;color:var(--gray);display:flex;align-items:center;gap:4px;">🛡️ PCI</span>
+          <span style="font-size:10px;color:var(--gray);display:flex;align-items:center;gap:4px;">⚡ Stripe</span>
+        </div>
+
+        <button class="btn" style="margin-top:auto;">Start My Free Trial →</button>
+        <div style="text-align:center;font-size:10px;color:var(--gray);">No charge today · Reminder 3 days before trial ends</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#8fa3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="arrow-label">All done</div>
+  </div>
+
+  <!-- ── SCREEN 6: Setup Complete / Checklist ── -->
+  <div class="phone">
+    <div class="screen-label">Screen 6 — Setup Complete</div>
+    <div class="phone-frame">
+      <div class="phone-bar">
+        <span></span>
+        <span class="title">You're Ready</span>
+        <span></span>
+      </div>
+      <div class="phone-content">
+        <div>
+          <div class="ob-progress"><div class="ob-progress-fill" style="width:100%;background:var(--green);"></div></div>
+          <div class="ob-step-label" style="margin-top:4px;color:var(--green);">Setup complete ✓</div>
+        </div>
+
+        <!-- Celebration -->
+        <div class="confetti-banner">
+          <div class="confetti-emoji">🎉</div>
+          <div class="confetti-title">You're all set!</div>
+          <div class="confetti-sub">Your dedicated load email is ready.<br>Forward your first rate conf to get started.</div>
+        </div>
+
+        <!-- Load email address -->
+        <div style="background:rgba(244,121,32,.1);border:1.5px solid rgba(244,121,32,.35);border-radius:var(--radius-sm);padding:12px 14px;text-align:center;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--orange);text-transform:uppercase;margin-bottom:4px;">Your Load Email</div>
+          <div style="font-size:13px;font-weight:700;color:var(--white);font-family:monospace;">loads@acme.carrierosapp.com</div>
+          <div style="font-size:10px;color:var(--gray);margin-top:4px;">Forward broker emails here → loads auto-created</div>
+          <button class="btn-sm" style="margin-top:10px;width:100%;justify-content:center;">📋 Copy Address</button>
+        </div>
+
+        <!-- Checklist -->
+        <div class="section-title">Setup Checklist</div>
+
+        <div class="checklist-item done">
+          <div class="ci-check done">✓</div>
+          <div class="ci-text"><div class="ci-title">Company Info</div><div class="ci-sub">Acme Trucking LLC · EIN set</div></div>
+        </div>
+        <div class="checklist-item done">
+          <div class="ci-check done">✓</div>
+          <div class="ci-text"><div class="ci-title">First Truck Added</div><div class="ci-sub">Peterbilt 389 · IL 4B2918</div></div>
+        </div>
+        <div class="checklist-item done">
+          <div class="ci-check done">✓</div>
+          <div class="ci-text"><div class="ci-title">First Customer Added</div><div class="ci-sub">Fast Freight LLC</div></div>
+        </div>
+        <div class="checklist-item done">
+          <div class="ci-check done">✓</div>
+          <div class="ci-text"><div class="ci-title">Free Trial Activated</div><div class="ci-sub">30 days free · First charge Aug 3</div></div>
+        </div>
+        <div class="checklist-item" style="border-color:rgba(244,121,32,.3);background:rgba(244,121,32,.05);">
+          <div class="ci-check active">→</div>
+          <div class="ci-text"><div class="ci-title">Add Your First Load</div><div class="ci-sub">Forward, upload, paste, or enter manually</div></div>
+          <div class="ci-action">Start →</div>
+        </div>
+
+        <button class="btn green">🚛 Add First Load</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="page-footer">
+  <span>⏱ Target: complete in under 10 min</span>
+  <span>✓ Smart defaults pre-loaded (Net 30, standard invoice)</span>
+  <span>💳 CC collected at end of onboarding — not at start</span>
+  <span>📧 Dedicated load email ready immediately after setup</span>
+  <span style="color:rgba(143,163,184,.3);">CarrierOS Mockup 06 · v2 · July 2026</span>
+</div>
+
+</body>
+</html>

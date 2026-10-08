@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>CarrierOS — Mockup 13: Visual Design Enhancements</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f1e35;
+  --navy-light:#1a2e4a;
+  --orange:#f47920;
+  --green:#2ecc71;
+  --teal:#1abc9c;
+  --amber:#f0a500;
+  --red:#e74c3c;
+  --bg:#f4f6f9;
+}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:#dce3ea;
+  display:flex;justify-content:center;
+  padding:24px 16px;min-height:100vh;
+}
+.phone{
+  width:390px;background:var(--bg);
+  border-radius:44px;overflow:hidden;
+  box-shadow:0 24px 60px rgba(0,0,0,0.22);
+  position:relative;
+}
+.screen{display:none;flex-direction:column;min-height:820px}
+.screen.active{display:flex}
+
+/* Top bar */
+.topbar{
+  background:var(--navy);padding:50px 18px 14px;
+  color:white;display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.back-btn{
+  width:30px;height:30px;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;font-size:20px;opacity:0.7;flex-shrink:0;
+}
+.topbar-text .title{font-size:17px;font-weight:600}
+.topbar-text .sub{font-size:11px;opacity:0.55;margin-top:1px}
+.topbar-action{margin-left:auto;font-size:13px;color:var(--orange);font-weight:600;cursor:pointer;white-space:nowrap}
+
+/* Content */
+.content{flex:1;overflow-y:auto;padding:14px}
+
+/* Cards */
+.card{background:white;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 1px 6px rgba(0,0,0,0.06)}
+.card-label{font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px}
+
+/* Buttons */
+.btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:8px;transition:opacity .15s}
+.btn:active{opacity:0.85}
+.btn-primary{background:var(--orange);color:white}
+.btn-outline{background:transparent;border:1.5px solid #e0e0e0;color:#444}
+.btn-navy{background:var(--navy);color:white}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-green{background:#e8f9f1;color:#1a9e5c}
+.badge-amber{background:#fff7e0;color:#b37d00}
+.badge-red{background:#fdecea;color:#c0392b}
+.badge-blue{background:#e8f0fe;color:#1a5eb8}
+.badge-orange{background:#fff0e6;color:#c05a00}
+.badge-purple{background:#f3eeff;color:#6c3abf}
+
+/* Nav hub cards */
+.hub-card{
+  background:white;border-radius:14px;padding:14px 16px;
+  margin-bottom:10px;display:flex;align-items:center;gap:14px;
+  cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,0.06);transition:transform .1s;
+}
+.hub-card:active{transform:scale(0.98)}
+.hub-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.hub-title{font-size:14px;font-weight:600;color:#1a1a2e}
+.hub-desc{font-size:12px;color:#999;margin-top:2px}
+.hub-arrow{margin-left:auto;color:#ccc;font-size:18px;flex-shrink:0}
+
+/* ─── TRUCK TYPE PICKER ─── */
+.type-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.type-option{
+  background:white;border-radius:14px;padding:12px 6px 10px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  cursor:pointer;border:2px solid transparent;
+  box-shadow:0 1px 4px rgba(0,0,0,0.07);transition:all .15s;
+}
+.type-option.selected{border-color:var(--orange);background:#fff8f3}
+.type-option svg{width:80px;height:42px}
+.type-label{font-size:11px;font-weight:600;color:#555;text-align:center}
+
+/* ─── COLOR PICKER ─── */
+.color-grid{display:flex;flex-wrap:wrap;gap:10px;padding:4px 0}
+.color-swatch{
+  width:38px;height:38px;border-radius:50%;cursor:pointer;
+  border:3px solid transparent;transition:all .15s;position:relative;
+}
+.color-swatch.selected::after{
+  content:'✓';position:absolute;inset:0;display:flex;
+  align-items:center;justify-content:center;
+  font-size:16px;font-weight:700;color:white;text-shadow:0 1px 3px rgba(0,0,0,0.4);
+}
+.color-swatch:hover{transform:scale(1.1)}
+
+/* Truck preview card */
+.truck-preview{
+  background:linear-gradient(135deg,#1a2e4a,#0f1e35);
+  border-radius:16px;padding:20px 16px;margin-bottom:12px;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+}
+.truck-preview-name{color:white;font-size:16px;font-weight:700;margin-top:4px}
+.truck-preview-detail{color:rgba(255,255,255,0.5);font-size:12px}
+
+/* ─── FLEET LIST ─── */
+.truck-card{
+  background:white;border-radius:16px;padding:0;
+  margin-bottom:12px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,0.07);
+}
+.truck-card-banner{height:90px;display:flex;align-items:center;justify-content:center;position:relative}
+.truck-card-body{padding:14px 16px}
+.truck-status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
+
+/* ─── CDL CARD ─── */
+.cdl-card{
+  border-radius:18px;overflow:hidden;
+  box-shadow:0 4px 20px rgba(0,0,0,0.15);margin-bottom:16px;
+}
+.cdl-header{
+  background:linear-gradient(135deg,#1a3a6e,#0d2347);
+  padding:14px 16px 10px;display:flex;justify-content:space-between;align-items:flex-start;
+}
+.cdl-state{color:white;font-size:22px;font-weight:800;letter-spacing:1px}
+.cdl-type-label{color:rgba(255,255,255,0.6);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.cdl-class-badge{
+  background:var(--orange);color:white;
+  font-size:20px;font-weight:800;width:44px;height:44px;
+  border-radius:10px;display:flex;align-items:center;justify-content:center;
+}
+.cdl-body{background:#f0f4fa;padding:12px 16px}
+.cdl-row{display:flex;gap:16px;margin-bottom:8px}
+.cdl-field label{font-size:9px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px}
+.cdl-field value{display:block;font-size:13px;font-weight:600;color:#1a1a2e;margin-top:1px}
+.cdl-footer{
+  background:#e6edf7;padding:10px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.cdl-expiry-label{font-size:10px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.4px}
+.cdl-expiry-date{font-size:13px;font-weight:700;color:#1a1a2e}
+.cdl-status-ring{
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:700;
+}
+
+/* Endorsement badges */
+.endorsement-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.endorsement-badge{
+  display:flex;align-items:center;gap:5px;
+  padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700;
+}
+.end-hazmat{background:#fff0e0;color:#c05a00;border:1.5px solid #f47920}
+.end-tanker{background:#e0f0ff;color:#1a5eb8;border:1.5px solid #4a9eff}
+.end-doubles{background:#f0e8ff;color:#6c3abf;border:1.5px solid #9b6bff}
+
+/* ─── DVIR DIAGRAM ─── */
+.dvir-diagram-wrap{background:white;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 1px 6px rgba(0,0,0,0.06)}
+.dvir-instructions{font-size:12px;color:#888;text-align:center;margin-bottom:14px}
+.truck-diagram{width:100%;cursor:pointer}
+.zone-overlay{cursor:pointer;transition:all .2s}
+.zone-overlay:hover{opacity:0.8}
+
+/* Zone tap label chips */
+.zone-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.zone-chip{
+  padding:5px 10px;border-radius:20px;font-size:11px;font-weight:600;
+  background:#f4f6f9;color:#555;cursor:pointer;border:1.5px solid #e8e8e8;transition:all .15s;
+}
+.zone-chip.active{background:var(--orange);color:white;border-color:var(--orange)}
+.zone-chip.defect{background:#fdecea;color:#c0392b;border-color:#e74c3c}
+
+/* Defect entry panel */
+.defect-panel{
+  background:#fdecea;border-radius:14px;padding:14px;
+  margin-top:10px;border:1.5px solid rgba(231,76,60,0.2);
+}
+.defect-panel-title{font-size:13px;font-weight:700;color:#c0392b;margin-bottom:10px}
+.defect-textarea{
+  width:100%;border:1.5px solid #e0e0e0;border-radius:10px;
+  padding:10px;font-size:13px;resize:none;color:#333;
+  font-family:inherit;background:white;
+}
+.severity-row{display:flex;gap:8px;margin-top:8px}
+.severity-btn{
+  flex:1;padding:8px;border-radius:10px;border:1.5px solid #e0e0e0;
+  font-size:12px;font-weight:600;cursor:pointer;background:white;transition:all .15s;
+}
+.severity-btn.minor.active{background:#fff7e0;border-color:var(--amber);color:#b37d00}
+.severity-btn.major.active{background:#fdecea;border-color:var(--red);color:#c0392b}
+
+/* ─── MAINTENANCE LIST ─── */
+.maint-item{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 0;border-bottom:1px solid #f0f0f0;
+}
+.maint-item:last-child{border-bottom:none}
+.maint-icon{
+  width:44px;height:44px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;
+}
+.maint-info{flex:1;min-width:0}
+.maint-name{font-size:14px;font-weight:600;color:#1a1a2e}
+.maint-due{font-size:11px;color:#888;margin-top:2px}
+.maint-progress-wrap{margin-top:6px}
+.maint-progress-bg{background:#f0f0f0;border-radius:6px;height:6px;overflow:hidden}
+.maint-progress-fill{height:100%;border-radius:6px;transition:width 0.5s}
+.maint-progress-label{display:flex;justify-content:space-between;font-size:10px;color:#aaa;margin-top:3px}
+
+/* ─── DOCUMENT CARDS ─── */
+.docs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.doc-card{
+  background:white;border-radius:14px;padding:14px;
+  box-shadow:0 1px 6px rgba(0,0,0,0.06);position:relative;overflow:hidden;cursor:pointer;
+}
+.doc-card:active{transform:scale(0.97)}
+.doc-ribbon{
+  position:absolute;top:0;right:0;
+  font-size:9px;font-weight:700;padding:3px 8px;
+  border-radius:0 14px 0 8px;text-transform:uppercase;letter-spacing:0.4px;
+}
+.ribbon-green{background:#e8f9f1;color:#1a9e5c}
+.ribbon-amber{background:#fff7e0;color:#b37d00}
+.ribbon-red{background:#fdecea;color:#c0392b}
+.doc-icon-wrap{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:10px}
+.doc-name{font-size:12px;font-weight:700;color:#1a1a2e;line-height:1.3}
+.doc-detail{font-size:11px;color:#aaa;margin-top:3px}
+
+/* ─── LOAD CARDS ─── */
+.load-card{
+  background:white;border-radius:16px;padding:0;
+  margin-bottom:12px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,0.07);cursor:pointer;
+}
+.load-card-header{
+  padding:14px 16px 10px;
+  display:flex;align-items:flex-start;justify-content:space-between;
+}
+.load-commodity{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#666}
+.load-route-strip{
+  padding:10px 16px;background:#f9fafb;
+  display:flex;align-items:center;gap:0;position:relative;
+}
+.route-city{flex:1;text-align:center}
+.route-city-name{font-size:13px;font-weight:700;color:#1a1a2e}
+.route-city-state{font-size:10px;color:#aaa;font-weight:500}
+.route-line{
+  flex:1;height:2px;background:linear-gradient(90deg,var(--orange),#f4af20);
+  position:relative;margin:0 6px;
+}
+.route-line::after{content:'▶';position:absolute;right:-6px;top:-7px;font-size:13px;color:#f4af20}
+.route-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.route-dot-start{background:var(--orange)}
+.route-dot-end{background:var(--green)}
+.load-card-footer{
+  padding:10px 16px;display:flex;align-items:center;justify-content:space-between;
+  border-top:1px solid #f4f4f4;
+}
+.load-meta{font-size:11px;color:#aaa}
+.load-rate{font-size:16px;font-weight:800;color:var(--navy)}
+
+/* Status pipeline */
+.status-pipeline{
+  display:flex;align-items:center;padding:0 16px 12px;
+  overflow-x:auto;gap:0;
+}
+.pipeline-step{
+  display:flex;align-items:center;gap:0;flex-shrink:0;
+}
+.pipeline-dot{
+  width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;flex-shrink:0;
+}
+.pipeline-dot.done{background:var(--green);color:white}
+.pipeline-dot.current{background:var(--orange);color:white}
+.pipeline-dot.todo{background:#e8e8e8;color:#aaa}
+.pipeline-line{width:18px;height:2px;flex-shrink:0}
+.pipeline-line.done{background:var(--green)}
+.pipeline-line.todo{background:#e8e8e8}
+.pipeline-label{font-size:8px;font-weight:600;color:#aaa;text-align:center;position:absolute;top:22px;white-space:nowrap;transform:translateX(-50%);left:50%}
+.pipeline-step-wrap{display:flex;flex-direction:column;align-items:center;position:relative;gap:0}
+.pipeline-step-wrap .pipeline-label{color:#aaa}
+.pipeline-step-wrap.current .pipeline-label{color:var(--orange);font-weight:700}
+.pipeline-step-wrap.done .pipeline-label{color:var(--green)}
+
+/* Tab bar */
+.tabbar{
+  background:white;border-top:1px solid #eee;
+  display:flex;padding:8px 0 20px;flex-shrink:0;
+}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+.tab-icon{font-size:22px}
+.tab-label{font-size:9px;font-weight:600;color:#bbb}
+.tab-item.active .tab-label{color:var(--orange)}
+
+/* Input */
+.input-field{
+  width:100%;border:1.5px solid #e8e8e8;border-radius:12px;
+  padding:12px 14px;font-size:14px;color:#333;font-family:inherit;
+  background:white;margin-bottom:10px;
+}
+.input-field:focus{outline:none;border-color:var(--orange)}
+.field-label{font-size:12px;font-weight:600;color:#555;margin-bottom:5px;display:block}
+</style>
+</head>
+<body>
+<div class="phone">
+
+<!-- ══════════════════════════════════════
+     S-HUB: Visual Features Overview
+══════════════════════════════════════ -->
+<div class="screen active" id="s-hub">
+  <div class="topbar">
+    <div class="topbar-text">
+      <div class="title">Visual Design</div>
+      <div class="sub">UI enhancement concepts</div>
+    </div>
+  </div>
+  <div class="content">
+    <p style="font-size:13px;color:#888;margin-bottom:14px;line-height:1.5">Tap any concept below to see how it looks in the app.</p>
+
+    <div class="hub-card" onclick="goto('s-truck-type')">
+      <div class="hub-icon" style="background:#fff0e6">🚛</div>
+      <div><div class="hub-title">Truck Type + Color</div><div class="hub-desc">Silhouettes, color picker, fleet cards</div></div>
+      <div class="hub-arrow">›</div>
+    </div>
+
+    <div class="hub-card" onclick="goto('s-driver-cdl')">
+      <div class="hub-icon" style="background:#e8f0fe">🪪</div>
+      <div><div class="hub-title">Driver CDL Card</div><div class="hub-desc">License visual, status ring, endorsements</div></div>
+      <div class="hub-arrow">›</div>
+    </div>
+
+    <div class="hub-card" onclick="goto('s-dvir')">
+      <div class="hub-icon" style="background:#e8f9f1">🔍</div>
+      <div><div class="hub-title">DVIR Tap Diagram</div><div class="hub-desc">Tap truck zones to log defects</div></div>
+      <div class="hub-arrow">›</div>
+    </div>
+
+    <div class="hub-card" onclick="goto('s-maintenance')">
+      <div class="hub-icon" style="background:#f3eeff">🔧</div>
+      <div><div class="hub-title">Maintenance Icons</div><div class="hub-desc">Service type icons + mileage progress bars</div></div>
+      <div class="hub-arrow">›</div>
+    </div>
+
+    <div class="hub-card" onclick="goto('s-docs')">
+      <div class="hub-icon" style="background:#fff7e0">📋</div>
+      <div><div class="hub-title">Document Cards</div><div class="hub-desc">Type icons, expiry ribbons, status colors</div></div>
+      <div class="hub-arrow">›</div>
+    </div>
+
+    <div class="hub-card" onclick="goto('s-loads')">
+      <div class="hub-icon" style="background:#e0f7f3">📦</div>
+      <div><div class="hub-title">Enhanced Load Cards</div><div class="hub-desc">Route visual, commodity icons, status pipeline</div></div>
+      <div class="hub-arrow">›</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S-TRUCK-TYPE: Type Picker
+══════════════════════════════════════ -->
+<div class="screen" id="s-truck-type">
+  <div class="topbar">
+    <div class="back-btn" onclick="goto('s-hub')">‹</div>
+    <div class="topbar-text">
+      <div class="title">Add Truck</div>
+      <div class="sub">Step 1 of 2 — Choose type</div>
+    </div>
+    <div class="topbar-action" onclick="goto('s-truck-color')">Next →</div>
+  </div>
+  <div class="content">
+    <div class="card">
+      <div class="card-label">What type of truck?</div>
+      <div class="type-grid" id="typeGrid">
+
+        <!-- Semi / Tractor-Trailer -->
+        <div class="type-option selected" onclick="selectType(this,'semi')">
+          <svg viewBox="0 0 90 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Trailer -->
+            <rect x="26" y="6" width="62" height="28" rx="3" fill="#bdc3cc" stroke="#8a9099" stroke-width="1.2"/>
+            <!-- Trailer door lines -->
+            <line x1="74" y1="6" x2="74" y2="34" stroke="#8a9099" stroke-width="1" stroke-dasharray="2,2"/>
+            <!-- Cab -->
+            <path d="M4,34 L4,15 Q4,8 10,6 L26,6 L26,34 Z" fill="#bdc3cc" stroke="#8a9099" stroke-width="1.2"/>
+            <!-- Windshield -->
+            <path d="M10,8 L24,6 L24,20 L8,20 Q6,20 6,18 L6,12 Q6,8 10,8 Z" fill="#7eb8d4" opacity="0.7"/>
+            <!-- Headlight -->
+            <rect x="4" y="22" width="4" height="5" rx="1" fill="#ffe066"/>
+            <!-- Front wheel -->
+            <circle cx="16" cy="38" r="7" fill="#444" stroke="#666" stroke-width="1"/>
+            <circle cx="16" cy="38" r="3.5" fill="#666"/>
+            <!-- Drive wheels (tandem) -->
+            <circle cx="58" cy="38" r="7" fill="#444" stroke="#666" stroke-width="1"/>
+            <circle cx="58" cy="38" r="3.5" fill="#666"/>
+            <circle cx="73" cy="38" r="7" fill="#444" stroke="#666" stroke-width="1"/>
+            <circle cx="73" cy="38" r="3.5" fill="#666"/>
+            <!-- Tail lights -->
+            <rect x="85" y="8" width="3" height="8" rx="1" fill="#e74c3c"/>
+            <rect x="85" y="26" width="3" height="7" rx="1" fill="#e74c3c"/>
+          </svg>
+          <div class="type-label">Semi / 18-Wheeler</div>
+        </div>
+
+        <!-- Box Truck -->
+        <div class="type-option" onclick="selectType(this,'box')">
+          <svg viewBox="0 0 90 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Body (integrated cab+box) -->
+            <path d="M8,34 L8,10 Q8,6 12,6 L82,6 L82,34 Z" fill="#bdc3cc" stroke="#8a9099" stroke-width="1.2"/>
+            <!-- Cab division -->
+            <line x1="30" y1="6" x2="30" y2="34" stroke="#8a9099" stroke-width="1" stroke-dasharray="2,2"/>
+            <!-- Windshield -->
+            <path d="M12,8 L28,6 L28,22 L8,22 Q8,14 8,12 Z" fill="#7eb8d4" opacity="0.7"/>
+            <!-- Headlight -->
+            <rect x="8" y="24" width="4" height="5" rx="1" fill="#ffe066"/>
+            <!-- Rear door -->
+            <rect x="76" y="8" width="4" height="26" rx="1" fill="#8a9099"/>
+            <!-- Front wheel -->
+            <circle cx="22" cy="38" r="7" fill="#444" stroke="#666" stroke-width="1"/>
+            <circle cx="22" cy="38" r="3.5" fill="#666"/>
+            <!-- Rear wheels -->
+            <circle cx="62" cy="38" r="7" fill="#444" stroke="#666" stroke-width="1"/>
+            <circle cx="62" cy="38" r="3.5" fill="#666"/>
+            <circle cx="76" cy="38" r="7" fill="#444" stroke="#666" stroke-width="1"/>
+            <circle cx="76" cy="38" r="3.5" fill="#666"/>
+            <!-- Tail light -->
+            <rect x="80" y="8" width="3" height="8" rx="1" fill="#e74c3c"/>
+            <rect x="80" y="26" width="3" height="7" rx="1" fill="#e74c3c"/>
+          </svg>
+          <div class="type-label">Box Truck</div>
+        </div>
+
+        <!-- Flatbed -->
+        <div class="type-option" onclick="selectType(this,'flatbed')">
+          <svg viewBox="0 0 90 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Cab -->
+            <path d="M4,30 L4,14 Q4,8 10,6 L26,6 L26,30 Z" fill="#bdc3cc" stroke="#8a9099" stroke-width="1.2"/>
+            <!-- Windshield -->
+            <path d="M10,8 L24,6 L24,20 L8,20 Q6,20 6,18 L6,12 Q6,8 10,8 Z" fill="#7eb8d4" opacity="0.7"/>
+            <!-- Flat deck -->
+            <rect x="26" y="27" width="62" height="5" rx="1" fill="#bdc3cc" stroke="#8a9099" stroke-width="1.2"/>
+            <!-- Deck stake pockets -->
+            <rect x="30" y="25" width="3" height="4" rx="1" fill="#8a9099"/>
+            <rect x="45" y="25" width="3" height="4" rx="1" fill="#8a9099"/>
+            <rect x="60" y="25" width="3" height="4" rx="1" fill="#8a9099"/>
+            <rect x="75" y="25" width="3" height="4" rx="1" fill="#8a9099"/>
+            <!-- Headlight -->
+            <rect x="4" y="20" width="4" height="5" rx="1" fill="#ffe066"/>
+            <!-- Front wheel -->
+            <circle cx="16" cy="38" r="7" fill="#444" stroke="#666" stroke-width="1"/>
+            <circle cx="16" cy="38" r="3.5" fill="#666"/>
+            <!-- Drive wheels -->
+            <circle cx="56" cy="38" r="7" fill="#444" stroke="#666" stroke-width="1"/>
+            <circle cx="56" cy="38" r="3.5" fill="#666"/>
+            <circle cx="70" cy="38" r="7" fill="#444" stroke="#666" stroke-width="1"/>
+            <circle cx="70" cy="38" r="3.5" fill="#666"/>
+          </svg>
+          <div class="type-label">Flatbed</div>
+        </div>
+
+        <!-- Reefer -->
+        <div class="type-option" onclick="selectType(this,'reefer')">
+          <svg viewBox="0 0 90 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Trailer with vent unit on top -->
+            <rect x="26" y="8" width="62" height="26" rx="3" fill="#bdc3cc" stroke="#8a9099" stroke-width="1.2"/>
+            <!-- Reefer unit on top front of trailer -->
+            <rect x="26" y="4" width="16" height="6" rx="2" fill="#8a9099"/>
+            <!-- Vent lines on trailer side -->
+            <line x1="30" y1="14" x2="30" y2="30" stroke="#8a9099" stroke-width="0.8"/>
+            <line x1="38" y1="14" x2="38" y2="30" stroke="#8a9099" stroke-width="0.8"/>
+            <line x1="46" y1="14" x2="46" y2="30" stroke="#8a9099" stroke-width="0.8"/>
+            <!-- Cab -->
+            <path d="M4,34 L4,15 Q4,8 10,6 L26,8 L26,34 Z" fill="#bdc3cc" stroke="#8a9099" stroke-width="1.2"/>
+            <!-- Windshield -->
+            <path d="M10,8 L24,8 L24,20 L8,20 Q6,20 6,18 L6,12 Q6,8 10,8 Z" fill="#7eb8d4" opacity="0.7"/>
+            <!-- Headlight -->
+            <rect x="4" y="22" width="4" height="5" rx="1" fill="#ffe066"/>
+            <!-- Front wheel -->
+            <circle cx="16" cy="38" r="7" fill="#444" stroke="#666" stroke-width="1"/>
+            <circle cx="16" cy="38" r="3.5" fill="#666"/>
+            <!-- Drive wheels -->
+            <circle cx="58" cy="38" r="7" fill="#444" stroke="#666" stroke-width="1"/>
+            <circle cx="58" cy="38" r="3.5" fill="#666"/>
+            <circle cx="73" cy="38" r="7" fill="#444" stroke="#666" stroke-width="1"/>
+            <circle cx="73" cy="38" r="3.5" fill="#666"/>
+            <!-- Tail lights -->
+            <rect x="85" y="10" width="3" height="8" rx="1" fill="#e74c3c"/>
+            <rect x="85" y="26" width="3" height="6" rx="1" fill="#e74c3c"/>
+          </svg>
+          <div class="type-label">Reefer</div>
+        </div>
+
+        <!-- Tanker -->
+        <div class="type-option" onclick="selectType(this,'tanker')">
+          <svg viewBox="0 0 90 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Tank cylinder -->
+            <ellipse cx="57" cy="22" rx="31" ry="14" fill="#bdc3cc" stroke="#8a9099" stroke-width="1.2"/>
+            <!-- Tank highlight -->
+            <ellipse cx="57" cy="17" rx="28" ry="5" fill="rgba(255,255,255,0.2)"/>
+            <!-- Tank bands -->
+            <line x1="38" y1="9" x2="38" y2="35" stroke="#8a9099" stroke-width="1" opacity="0.5"/>
+            <line x1="57" y1="8" x2="57" y2="36" stroke="#8a9099" stroke-width="1" opacity="0.5"/>
+            <line x1="76" y1="9" x2="76" y2="35" stroke="#8a9099" stroke-width="1" opacity="0.5"/>
+            <!-- Cab -->
+            <path d="M4,34 L4,15 Q4,8 10,6 L26,8 L26,34 Z" fill="#bdc3cc" stroke="#8a9099" stroke-width="1.2"/>
+            <!-- Windshield -->
+            <path d="M10,8 L24,8 L24,20 L8,20 Q6,20 6,18 L6,12 Q6,8 10,8 Z" fill="#7eb8d4" opacity="0.7"/>
+            <!-- Headlight -->
+            <rect x="4" y="22" width="4" height="5" rx="1" fill="#ffe066"/>
+            <!-- Front wheel -->
+            <circle cx="16" cy="40" r="6" fill="#444" stroke="#666" stroke-width="1"/>
+            <circle cx="16" cy="40" r="3" fill="#666"/>
+            <!-- Drive wheels -->
+            <circle cx="58" cy="40" r="6" fill="#444" stroke="#666" stroke-width="1"/>
+            <circle cx="58" cy="40" r="3" fill="#666"/>
+            <circle cx="72" cy="40" r="6" fill="#444" stroke="#666" stroke-width="1"/>
+            <circle cx="72" cy="40" r="3" fill="#666"/>
+          </svg>
+          <div class="type-label">Tanker</div>
+        </div>
+
+        <!-- Dump Truck -->
+        <div class="type-option" onclick="selectType(this,'dump')">
+          <svg viewBox="0 0 90 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Dump bed (raised angle) -->
+            <path d="M28,32 L28,10 L72,6 L72,32 Z" fill="#bdc3cc" stroke="#8a9099" stroke-width="1.2"/>
+            <!-- Cab -->
+            <path d="M4,34 L4,14 Q4,7 10,6 L28,6 L28,34 Z" fill="#bdc3cc" stroke="#8a9099" stroke-width="1.2"/>
+            <!-- Windshield -->
+            <path d="M10,8 L26,6 L26,20 L8,20 Q6,20 6,18 L6,12 Q6,8 10,8 Z" fill="#7eb8d4" opacity="0.7"/>
+            <!-- Hydraulic ram -->
+            <rect x="46" y="28" width="4" height="8" rx="1" fill="#8a9099"/>
+            <!-- Headlight -->
+            <rect x="4" y="22" width="4" height="5" rx="1" fill="#ffe066"/>
+            <!-- Front wheel -->
+            <circle cx="18" cy="38" r="7" fill="#444" stroke="#666" stroke-width="1"/>
+            <circle cx="18" cy="38" r="3.5" fill="#666"/>
+            <!-- Rear wheels -->
+            <circle cx="60" cy="38" r="7" fill="#444" stroke="#666" stroke-width="1"/>
+            <circle cx="60" cy="38" r="3.5" fill="#666"/>
+            <circle cx="75" cy="38" r="7" fill="#444" stroke="#666" stroke-width="1"/>
+            <circle cx="75" cy="38" r="3.5" fill="#666"/>
+          </svg>
+          <div class="type-label">Dump Truck</div>
+        </div>
+
+      </div><!-- /type-grid -->
+    </div>
+
+    <div class="card">
+      <div class="card-label">Truck nickname</div>
+      <input class="input-field" type="text" placeholder="e.g. Truck #101 or Big Blue" value="Big Blue">
+    </div>
+
+    <button class="btn btn-primary" onclick="goto('s-truck-color')">Next: Choose Color →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S-TRUCK-COLOR: Color Picker + Preview
+══════════════════════════════════════ -->
+<div class="screen" id="s-truck-color">
+  <div class="topbar">
+    <div class="back-btn" onclick="goto('s-truck-type')">‹</div>
+    <div class="topbar-text">
+      <div class="title">Add Truck</div>
+      <div class="sub">Step 2 of 2 — Choose color</div>
+    </div>
+    <div class="topbar-action" onclick="goto('s-fleet')">Save</div>
+  </div>
+  <div class="content">
+
+    <!-- Live Preview -->
+    <div class="truck-preview" id="colorPreview">
+      <svg id="previewSvg" viewBox="0 0 260 80" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:240px;height:auto">
+        <!-- Trailer -->
+        <rect id="pTrailer" x="72" y="10" width="174" height="44" rx="5" fill="#2563eb" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+        <line x1="212" y1="10" x2="212" y2="54" stroke="rgba(255,255,255,0.15)" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="154" y1="10" x2="154" y2="54" stroke="rgba(255,255,255,0.1)" stroke-width="1" stroke-dasharray="3,3"/>
+        <!-- Cab -->
+        <path d="M10,58 L10,26 Q10,12 20,10 L72,10 L72,58 Z" id="pCab" fill="#2563eb" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+        <!-- Windshield -->
+        <path d="M22,13 L68,10 L68,36 L14,36 Q12,36 12,34 L12,22 Q12,14 22,13 Z" fill="#7eb8d4" opacity="0.55"/>
+        <!-- Headlight -->
+        <rect x="10" y="40" width="8" height="9" rx="2" fill="#ffe066"/>
+        <!-- Front wheel -->
+        <circle cx="44" cy="68" r="11" fill="#2a2a2a" stroke="#555" stroke-width="1.5"/>
+        <circle cx="44" cy="68" r="5.5" fill="#444"/>
+        <!-- Drive wheels -->
+        <circle cx="170" cy="68" r="11" fill="#2a2a2a" stroke="#555" stroke-width="1.5"/>
+        <circle cx="170" cy="68" r="5.5" fill="#444"/>
+        <circle cx="198" cy="68" r="11" fill="#2a2a2a" stroke="#555" stroke-width="1.5"/>
+        <circle cx="198" cy="68" r="5.5" fill="#444"/>
+        <!-- Tail lights -->
+        <rect x="241" y="14" width="5" height="12" rx="2" fill="#e74c3c"/>
+        <rect x="241" y="44" width="5" height="10" rx="2" fill="#e74c3c"/>
+        <!-- 5th wheel -->
+        <rect x="70" y="53" width="10" height="7" rx="2" fill="rgba(255,255,255,0.2)"/>
+      </svg>
+      <div class="truck-preview-name" id="previewName">Big Blue</div>
+      <div class="truck-preview-detail" id="previewType">Semi / 18-Wheeler · 2020 Kenworth T680</div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Truck color</div>
+      <div class="color-grid" id="colorGrid">
+        <div class="color-swatch" style="background:#ffffff;border:2px solid #ddd" onclick="pickColor(this,'#e2e8f0','#b0bec5','White')"></div>
+        <div class="color-swatch" style="background:#1a1a2e" onclick="pickColor(this,'#1a1a2e','#111','Black')"></div>
+        <div class="color-swatch selected" style="background:#2563eb" onclick="pickColor(this,'#2563eb','#1a4db8','Blue')"></div>
+        <div class="color-swatch" style="background:#dc2626" onclick="pickColor(this,'#dc2626','#b01a1a','Red')"></div>
+        <div class="color-swatch" style="background:#16a34a" onclick="pickColor(this,'#16a34a','#0e7a33','Green')"></div>
+        <div class="color-swatch" style="background:#f47920" onclick="pickColor(this,'#f47920','#c45e10','Orange')"></div>
+        <div class="color-swatch" style="background:#9333ea" onclick="pickColor(this,'#9333ea','#7120bb','Purple')"></div>
+        <div class="color-swatch" style="background:#64748b" onclick="pickColor(this,'#64748b','#4a5568','Silver')"></div>
+        <div class="color-swatch" style="background:#854d0e" onclick="pickColor(this,'#854d0e','#6b3d08','Brown')"></div>
+        <div class="color-swatch" style="background:#fbbf24" onclick="pickColor(this,'#fbbf24','#d4990c','Yellow')"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Vehicle details</div>
+      <label class="field-label">Year</label>
+      <input class="input-field" type="text" value="2020">
+      <label class="field-label">Make</label>
+      <input class="input-field" type="text" value="Kenworth">
+      <label class="field-label">Model</label>
+      <input class="input-field" type="text" value="T680">
+      <label class="field-label">VIN</label>
+      <input class="input-field" type="text" placeholder="17-digit VIN">
+    </div>
+
+    <button class="btn btn-primary" onclick="goto('s-fleet')">Save Truck</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S-FLEET: Fleet List
+══════════════════════════════════════ -->
+<div class="screen" id="s-fleet">
+  <div class="topbar">
+    <div class="back-btn" onclick="goto('s-hub')">‹</div>
+    <div class="topbar-text">
+      <div class="title">My Fleet</div>
+      <div class="sub">3 trucks</div>
+    </div>
+    <div class="topbar-action">+ Add</div>
+  </div>
+  <div class="content">
+
+    <!-- Truck 1: Semi, Blue -->
+    <div class="truck-card" onclick="goto('s-dvir')">
+      <div class="truck-card-banner" style="background:linear-gradient(135deg,#1a3a8a,#2563eb)">
+        <svg viewBox="0 0 200 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:180px">
+          <rect x="56" y="6" width="134" height="34" rx="4" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+          <path d="M6,44 L6,18 Q6,8 13,6 L56,6 L56,44 Z" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+          <path d="M13,8 L52,6 L52,22 L10,22 Q8,22 8,20 L8,14 Q8,8 13,8 Z" fill="rgba(255,255,255,0.25)"/>
+          <rect x="6" y="28" width="5" height="7" rx="1" fill="#ffe066"/>
+          <circle cx="30" cy="50" r="6" fill="rgba(0,0,0,0.4)"/><circle cx="30" cy="50" r="3" fill="rgba(0,0,0,0.6)"/>
+          <circle cx="140" cy="50" r="6" fill="rgba(0,0,0,0.4)"/><circle cx="140" cy="50" r="3" fill="rgba(0,0,0,0.6)"/>
+          <circle cx="158" cy="50" r="6" fill="rgba(0,0,0,0.4)"/><circle cx="158" cy="50" r="3" fill="rgba(0,0,0,0.6)"/>
+          <rect x="184" y="9" width="3" height="8" rx="1" fill="#e74c3c"/>
+          <rect x="184" y="30" width="3" height="7" rx="1" fill="#e74c3c"/>
+        </svg>
+      </div>
+      <div class="truck-card-body">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:15px;font-weight:700;color:#1a1a2e">Big Blue</div>
+            <div style="font-size:11px;color:#aaa;margin-top:2px">2020 Kenworth T680 · Semi</div>
+          </div>
+          <span class="badge badge-green"><span class="truck-status-dot" style="background:#2ecc71"></span>Available</span>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <span class="badge" style="background:#f4f6f9;color:#666">VIN ···5821</span>
+          <span class="badge" style="background:#f4f6f9;color:#666">CDL-A Required</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Truck 2: Box Truck, Red -->
+    <div class="truck-card">
+      <div class="truck-card-banner" style="background:linear-gradient(135deg,#8a1a1a,#dc2626)">
+        <svg viewBox="0 0 200 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:170px">
+          <path d="M14,44 L14,12 Q14,8 18,6 L174,6 L174,44 Z" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+          <line x1="60" y1="6" x2="60" y2="44" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-dasharray="3,3"/>
+          <path d="M18,8 L56,6 L56,24 L14,24 Q14,16 14,14 Z" fill="rgba(255,255,255,0.25)"/>
+          <rect x="14" y="28" width="5" height="7" rx="1" fill="#ffe066"/>
+          <rect x="168" y="8" width="5" height="36" rx="1" fill="rgba(255,255,255,0.3)"/>
+          <circle cx="40" cy="50" r="6" fill="rgba(0,0,0,0.4)"/><circle cx="40" cy="50" r="3" fill="rgba(0,0,0,0.6)"/>
+          <circle cx="130" cy="50" r="6" fill="rgba(0,0,0,0.4)"/><circle cx="130" cy="50" r="3" fill="rgba(0,0,0,0.6)"/>
+          <circle cx="150" cy="50" r="6" fill="rgba(0,0,0,0.4)"/><circle cx="150" cy="50" r="3" fill="rgba(0,0,0,0.6)"/>
+          <rect x="171" y="9" width="3" height="8" rx="1" fill="#e74c3c"/>
+        </svg>
+      </div>
+      <div class="truck-card-body">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:15px;font-weight:700;color:#1a1a2e">Red Express</div>
+            <div style="font-size:11px;color:#aaa;margin-top:2px">2019 Freightliner M2 · Box Truck</div>
+          </div>
+          <span class="badge badge-amber"><span class="truck-status-dot" style="background:var(--amber)"></span>On Load</span>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <span class="badge" style="background:#f4f6f9;color:#666">VIN ···3340</span>
+          <span class="badge" style="background:#fff7e0;color:#b37d00">Driver: Maria R.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Truck 3: Flatbed, Silver -->
+    <div class="truck-card">
+      <div class="truck-card-banner" style="background:linear-gradient(135deg,#374151,#64748b)">
+        <svg viewBox="0 0 200 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:175px">
+          <!-- Cab -->
+          <path d="M6,40 L6,18 Q6,10 13,8 L56,8 L56,40 Z" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+          <path d="M13,10 L52,8 L52,24 L10,24 Q8,24 8,22 L8,16 Q8,10 13,10 Z" fill="rgba(255,255,255,0.25)"/>
+          <!-- Flat deck -->
+          <rect x="56" y="35" width="138" height="7" rx="2" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+          <!-- Stake pockets -->
+          <rect x="64" y="32" width="4" height="5" rx="1" fill="rgba(255,255,255,0.35)"/>
+          <rect x="90" y="32" width="4" height="5" rx="1" fill="rgba(255,255,255,0.35)"/>
+          <rect x="116" y="32" width="4" height="5" rx="1" fill="rgba(255,255,255,0.35)"/>
+          <rect x="142" y="32" width="4" height="5" rx="1" fill="rgba(255,255,255,0.35)"/>
+          <rect x="168" y="32" width="4" height="5" rx="1" fill="rgba(255,255,255,0.35)"/>
+          <rect x="6" y="28" width="5" height="7" rx="1" fill="#ffe066"/>
+          <circle cx="32" cy="50" r="6" fill="rgba(0,0,0,0.4)"/><circle cx="32" cy="50" r="3" fill="rgba(0,0,0,0.6)"/>
+          <circle cx="140" cy="50" r="6" fill="rgba(0,0,0,0.4)"/><circle cx="140" cy="50" r="3" fill="rgba(0,0,0,0.6)"/>
+          <circle cx="160" cy="50" r="6" fill="rgba(0,0,0,0.4)"/><circle cx="140" cy="50" r="3" fill="rgba(0,0,0,0.6)"/>
+        </svg>
+      </div>
+      <div class="truck-card-body">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:15px;font-weight:700;color:#1a1a2e">Silver Streak</div>
+            <div style="font-size:11px;color:#aaa;margin-top:2px">2022 Peterbilt 567 · Flatbed</div>
+          </div>
+          <span class="badge badge-red"><span class="truck-status-dot" style="background:var(--red)"></span>In Shop</span>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <span class="badge" style="background:#fdecea;color:#c0392b">🔧 Brake service</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="tabbar">
+    <div class="tab-item"><div class="tab-icon">📦</div><div class="tab-label">Loads</div></div>
+    <div class="tab-item active"><div class="tab-icon">🚛</div><div class="tab-label">Fleet</div></div>
+    <div class="tab-item"><div class="tab-icon">💰</div><div class="tab-label">Invoices</div></div>
+    <div class="tab-item"><div class="tab-icon">👥</div><div class="tab-label">Team</div></div>
+    <div class="tab-item"><div class="tab-icon">⚙️</div><div class="tab-label">Settings</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S-DRIVER-CDL: CDL Card Visual
+══════════════════════════════════════ -->
+<div class="screen" id="s-driver-cdl">
+  <div class="topbar">
+    <div class="back-btn" onclick="goto('s-hub')">‹</div>
+    <div class="topbar-text">
+      <div class="title">Driver Profile</div>
+      <div class="sub">Marcus Johnson</div>
+    </div>
+    <div class="topbar-action">Edit</div>
+  </div>
+  <div class="content">
+
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+      <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0w8Jhki8Y_EIsrZgtQq_RJggrrBpzpZrnDc2GhXNJW7b6xKix0AfqDSCVDPPkIbz6oA94r35GA0rR10wvBx4aS3EGBDT3_RXKidrH9y0LDkOkMt0ev_DwGbXDegrGoL7853Pbnfnc56lPzCo0UQYcVJ0d94QqUl80E4V2pzVD_-KoXcD0LATtuSSbrpMWYEUPsqJKGwRlfAhJick2zVvI5XTAv637JIaIiLk0KL9jFqnkWpUSFIcnXYzZuMtyh0sSHJPf6zbjvyI" style="width:56px;height:56px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="Marcus Johnson">
+      <div>
+        <div style="font-size:18px;font-weight:700;color:#1a1a2e">Marcus Johnson</div>
+        <div style="font-size:12px;color:#aaa;margin-top:2px">Driver · Joined Mar 2024</div>
+      </div>
+      <span class="badge badge-green" style="margin-left:auto">Active</span>
+    </div>
+
+    <!-- CDL Card -->
+    <div class="cdl-card">
+      <div class="cdl-header">
+        <div>
+          <div class="cdl-type-label">Commercial Driver's License</div>
+          <div class="cdl-state">TEXAS</div>
+        </div>
+        <div style="text-align:right">
+          <div class="cdl-type-label" style="margin-bottom:4px">Class</div>
+          <div class="cdl-class-badge">A</div>
+        </div>
+      </div>
+      <div class="cdl-body">
+        <div class="cdl-row">
+          <div class="cdl-field">
+            <label>License Number</label>
+            <value>TX-4482-9921</value>
+          </div>
+          <div class="cdl-field">
+            <label>Issuing State</label>
+            <value>TX</value>
+          </div>
+        </div>
+        <div class="cdl-row">
+          <div class="cdl-field">
+            <label>DOT Med Cert Expiry</label>
+            <value style="color:#1a9e5c">Sep 15, 2026</value>
+          </div>
+          <div class="cdl-field">
+            <label>Status</label>
+            <value style="color:#1a9e5c">✓ Valid</value>
+          </div>
+        </div>
+      </div>
+      <div class="cdl-footer">
+        <div>
+          <div class="cdl-expiry-label">CDL Expires</div>
+          <div class="cdl-expiry-date">Mar 2, 2027</div>
+        </div>
+        <div class="cdl-status-ring" style="color:#1a9e5c">
+          <div style="width:10px;height:10px;border-radius:50%;background:#2ecc71;box-shadow:0 0 6px #2ecc71"></div>
+          All Clear
+        </div>
+      </div>
+    </div>
+
+    <!-- Endorsements -->
+    <div class="card">
+      <div class="card-label">Endorsements</div>
+      <div class="endorsement-row">
+        <div class="endorsement-badge end-hazmat">☢️ HazMat</div>
+        <div class="endorsement-badge end-tanker">🛢️ Tanker</div>
+        <div class="endorsement-badge end-doubles">⊞ Doubles/Triples</div>
+      </div>
+    </div>
+
+    <!-- Emergency Contact -->
+    <div class="card">
+      <div class="card-label">Emergency Contact</div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:14px;font-weight:600;color:#1a1a2e">Sandra Johnson</div>
+          <div style="font-size:12px;color:#aaa;margin-top:2px">Spouse · (512) 448-9021</div>
+        </div>
+        <div style="font-size:20px">📞</div>
+      </div>
+    </div>
+
+    <!-- Compliance summary -->
+    <div class="card" style="background:linear-gradient(135deg,#e8f9f1,#d4f4e4);border:1.5px solid rgba(46,204,113,0.3)">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:28px">✅</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#1a6e3c">All Compliance Clear</div>
+          <div style="font-size:12px;color:#2e8b57;margin-top:2px">CDL · Med Cert · All endorsements on file</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example: due soon state -->
+    <div style="font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.5px;margin:4px 0 8px">Example: Due Soon State</div>
+    <div class="cdl-card">
+      <div class="cdl-header" style="background:linear-gradient(135deg,#7a3800,#c05a00)">
+        <div>
+          <div class="cdl-type-label">Commercial Driver's License</div>
+          <div class="cdl-state">FLORIDA</div>
+        </div>
+        <div style="text-align:right">
+          <div class="cdl-type-label" style="margin-bottom:4px">Class</div>
+          <div class="cdl-class-badge" style="background:rgba(255,255,255,0.2)">B</div>
+        </div>
+      </div>
+      <div class="cdl-body">
+        <div class="cdl-row">
+          <div class="cdl-field">
+            <label>License Number</label>
+            <value>FL-7710-4432</value>
+          </div>
+          <div class="cdl-field">
+            <label>DOT Med Cert Expiry</label>
+            <value style="color:#b37d00">⚠️ Aug 1, 2026</value>
+          </div>
+        </div>
+      </div>
+      <div class="cdl-footer" style="background:#fff3cd">
+        <div>
+          <div class="cdl-expiry-label">CDL Expires</div>
+          <div class="cdl-expiry-date" style="color:#b37d00">Aug 28, 2026</div>
+        </div>
+        <div class="cdl-status-ring" style="color:#b37d00">
+          <div style="width:10px;height:10px;border-radius:50%;background:var(--amber);box-shadow:0 0 6px var(--amber)"></div>
+          Due in 56 days
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S-DVIR: Tap Diagram
+══════════════════════════════════════ -->
+<div class="screen" id="s-dvir">
+  <div class="topbar">
+    <div class="back-btn" onclick="goto('s-fleet')">‹</div>
+    <div class="topbar-text">
+      <div class="title">Pre-Trip Inspection</div>
+      <div class="sub">Big Blue · Jul 3, 2026</div>
+    </div>
+  </div>
+  <div class="content">
+
+    <div class="dvir-diagram-wrap">
+      <div class="dvir-instructions">Tap any area of the truck to log a defect</div>
+
+      <!-- SVG Truck Diagram with tap zones -->
+      <svg id="dvirDiagram" class="truck-diagram" viewBox="0 0 360 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+        <!-- ── TRUCK BODY ── -->
+        <!-- Trailer body -->
+        <rect x="98" y="16" width="248" height="74" rx="5" fill="#dde3ec" stroke="#b0bbc8" stroke-width="1.5"/>
+        <!-- Trailer door seam -->
+        <line x1="290" y1="16" x2="290" y2="90" stroke="#b0bbc8" stroke-width="1" stroke-dasharray="4,3"/>
+        <!-- Trailer reflector stripe -->
+        <rect x="100" y="85" width="244" height="5" rx="2" fill="#f0a500" opacity="0.4"/>
+
+        <!-- Cab body -->
+        <path d="M12,90 L12,38 Q12,18 26,16 L98,16 L98,90 Z" fill="#dde3ec" stroke="#b0bbc8" stroke-width="1.5"/>
+        <!-- Windshield -->
+        <path d="M28,19 L94,16 L94,52 L16,52 Q14,52 14,50 L14,34 Q14,20 28,19 Z" fill="#7eb8d4" opacity="0.6"/>
+        <!-- Headlights -->
+        <rect x="12" y="58" width="8" height="12" rx="2" fill="#ffe066"/>
+        <rect x="12" y="72" width="8" height="8" rx="2" fill="#fff" opacity="0.7"/>
+        <!-- Cab door -->
+        <rect x="36" y="52" width="58" height="38" rx="2" fill="none" stroke="#b0bbc8" stroke-width="1" stroke-dasharray="3,2"/>
+        <!-- Door handle -->
+        <rect x="84" y="70" width="8" height="3" rx="1.5" fill="#b0bbc8"/>
+        <!-- Side mirror -->
+        <rect x="6" y="30" width="10" height="7" rx="2" fill="#b0bbc8"/>
+        <!-- Fuel tank -->
+        <rect x="98" y="68" width="20" height="24" rx="3" fill="#c8d0dc" stroke="#b0bbc8" stroke-width="1"/>
+        <!-- Steps -->
+        <rect x="20" y="88" width="20" height="4" rx="1" fill="#b0bbc8"/>
+
+        <!-- Wheels -->
+        <!-- Front axle -->
+        <circle cx="44" cy="104" r="15" fill="#333" stroke="#555" stroke-width="1.5"/>
+        <circle cx="44" cy="104" r="9" fill="#555"/>
+        <circle cx="44" cy="104" r="4" fill="#444"/>
+        <!-- Drive axle 1 -->
+        <circle cx="230" cy="104" r="15" fill="#333" stroke="#555" stroke-width="1.5"/>
+        <circle cx="230" cy="104" r="9" fill="#555"/>
+        <circle cx="230" cy="104" r="4" fill="#444"/>
+        <circle cx="258" cy="104" r="15" fill="#333" stroke="#555" stroke-width="1.5"/>
+        <circle cx="258" cy="104" r="9" fill="#555"/>
+        <circle cx="258" cy="104" r="4" fill="#444"/>
+        <!-- Trailer axle -->
+        <circle cx="310" cy="104" r="15" fill="#333" stroke="#555" stroke-width="1.5"/>
+        <circle cx="310" cy="104" r="9" fill="#555"/>
+        <circle cx="310" cy="104" r="4" fill="#444"/>
+        <circle cx="338" cy="104" r="15" fill="#333" stroke="#555" stroke-width="1.5"/>
+        <circle cx="338" cy="104" r="9" fill="#555"/>
+        <circle cx="338" cy="104" r="4" fill="#444"/>
+
+        <!-- Tail lights -->
+        <rect x="342" y="18" width="6" height="16" rx="2" fill="#e74c3c"/>
+        <rect x="342" y="72" width="6" height="16" rx="2" fill="#e74c3c"/>
+
+        <!-- ── TAP ZONES (transparent overlays) ── -->
+        <!-- Zone 1: Front / Cab Front -->
+        <rect id="zone-front" x="8" y="14" width="56" height="80" rx="4"
+          fill="transparent" stroke="transparent" stroke-width="2"
+          onclick="tapZone('front','Front / Cab')" class="zone-overlay"/>
+
+        <!-- Zone 2: Cab Interior / Door -->
+        <rect id="zone-cab" x="36" y="50" width="62" height="42" rx="4"
+          fill="transparent" stroke="transparent" stroke-width="2"
+          onclick="tapZone('cab','Cab &amp; Door')" class="zone-overlay"/>
+
+        <!-- Zone 3: Engine / Hood area — we'll use the fuel tank area -->
+        <rect id="zone-engine" x="96" y="14" width="68" height="80" rx="4"
+          fill="transparent" stroke="transparent" stroke-width="2"
+          onclick="tapZone('engine','Engine Bay')" class="zone-overlay"/>
+
+        <!-- Zone 4: Drive axles / tires -->
+        <rect id="zone-tires" x="210" y="82" width="80" height="36" rx="4"
+          fill="transparent" stroke="transparent" stroke-width="2"
+          onclick="tapZone('tires','Drive Tires')" class="zone-overlay"/>
+
+        <!-- Zone 5: Trailer body -->
+        <rect id="zone-trailer" x="164" y="14" width="128" height="72" rx="4"
+          fill="transparent" stroke="transparent" stroke-width="2"
+          onclick="tapZone('trailer','Trailer Body')" class="zone-overlay"/>
+
+        <!-- Zone 6: Rear / Tail -->
+        <rect id="zone-rear" x="290" y="14" width="60" height="80" rx="4"
+          fill="transparent" stroke="transparent" stroke-width="2"
+          onclick="tapZone('rear','Rear &amp; Lights')" class="zone-overlay"/>
+
+        <!-- Zone labels (always visible, small) -->
+        <text x="36" y="32" text-anchor="middle" font-size="8" fill="#8a9099" font-weight="600">FRONT</text>
+        <text x="130" y="32" text-anchor="middle" font-size="8" fill="#8a9099" font-weight="600">ENGINE</text>
+        <text x="228" y="32" text-anchor="middle" font-size="8" fill="#8a9099" font-weight="600">TRAILER</text>
+        <text x="322" y="32" text-anchor="middle" font-size="8" fill="#8a9099" font-weight="600">REAR</text>
+        <text x="244" y="96" text-anchor="middle" font-size="8" fill="#8a9099" font-weight="600">DRIVE TIRES</text>
+
+      </svg>
+
+      <!-- Zone chip selectors -->
+      <div class="zone-chips" id="zoneChips">
+        <div class="zone-chip" id="chip-front" onclick="tapZone('front','Front / Cab')">🔦 Front</div>
+        <div class="zone-chip" id="chip-cab" onclick="tapZone('cab','Cab & Door')">🚪 Cab</div>
+        <div class="zone-chip" id="chip-engine" onclick="tapZone('engine','Engine Bay')">⚙️ Engine</div>
+        <div class="zone-chip" id="chip-tires" onclick="tapZone('tires','Drive Tires')">🔄 Drive Tires</div>
+        <div class="zone-chip" id="chip-trailer" onclick="tapZone('trailer','Trailer Body')">📦 Trailer</div>
+        <div class="zone-chip" id="chip-rear" onclick="tapZone('rear','Rear & Lights')">🔴 Rear</div>
+      </div>
+
+      <!-- Defect panel (hidden until zone tapped) -->
+      <div class="defect-panel" id="defectPanel" style="display:none">
+        <div class="defect-panel-title" id="defectPanelTitle">⚠️ Log defect — Front / Cab</div>
+        <textarea class="defect-textarea" rows="2" placeholder="Describe the defect (e.g. Left headlight cracked, not working)"></textarea>
+        <div class="severity-row">
+          <button class="severity-btn minor" id="sevMinor" onclick="setSeverity('minor')">⚠️ Minor</button>
+          <button class="severity-btn major" id="sevMajor" onclick="setSeverity('major')">🛑 Major</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn btn-outline" style="margin:0;flex:1;padding:10px;font-size:12px" onclick="clearZone()">Cancel</button>
+          <button class="btn btn-primary" style="margin:0;flex:1;padding:10px;font-size:12px;background:#e74c3c" onclick="logDefect()">Log Defect</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checklist below diagram -->
+    <div class="card">
+      <div class="card-label">Inspection checklist</div>
+      <div id="checklistItems">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f4f4f4">
+          <span style="font-size:14px;color:#333">Brakes &amp; Air System</span>
+          <span class="badge badge-green">✓ Pass</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f4f4f4">
+          <span style="font-size:14px;color:#333">Lights &amp; Reflectors</span>
+          <span class="badge badge-red" id="lightsStatus">⚠️ Defect</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f4f4f4">
+          <span style="font-size:14px;color:#333">Tires &amp; Wheels</span>
+          <span class="badge badge-green">✓ Pass</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f4f4f4">
+          <span style="font-size:14px;color:#333">Steering &amp; Horn</span>
+          <span class="badge badge-green">✓ Pass</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0">
+          <span style="font-size:14px;color:#333">Coupling / 5th Wheel</span>
+          <span class="badge badge-green">✓ Pass</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline" style="flex:1">Satisfactory</button>
+      <button class="btn btn-primary" style="flex:1;background:#e74c3c">Submit with Defects</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S-MAINTENANCE: Icons + Progress Bars
+══════════════════════════════════════ -->
+<div class="screen" id="s-maintenance">
+  <div class="topbar">
+    <div class="back-btn" onclick="goto('s-hub')">‹</div>
+    <div class="topbar-text">
+      <div class="title">Maintenance</div>
+      <div class="sub">Big Blue — Kenworth T680</div>
+    </div>
+    <div class="topbar-action">+ Add</div>
+  </div>
+  <div class="content">
+
+    <div style="font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Upcoming Service</div>
+
+    <div class="card">
+      <!-- Oil Change -->
+      <div class="maint-item">
+        <div class="maint-icon" style="background:#fff7e0">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <path d="M13 3 C13 3 7 10 7 15 C7 18.3 9.7 21 13 21 C16.3 21 19 18.3 19 15 C19 10 13 3 13 3Z" fill="#f0a500" opacity="0.2" stroke="#f0a500" stroke-width="1.5"/>
+            <path d="M13 6 C13 6 9 11.5 9 15 C9 17.2 10.8 19 13 19" stroke="#f0a500" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="20" cy="6" r="3" fill="#f0a500" opacity="0.4"/>
+            <path d="M18 4 L22 8" stroke="#f0a500" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="maint-info">
+          <div class="maint-name">Oil Change</div>
+          <div class="maint-due">Due at 148,000 mi · 3,200 mi away</div>
+          <div class="maint-progress-wrap">
+            <div class="maint-progress-bg">
+              <div class="maint-progress-fill" style="width:36%;background:#2ecc71"></div>
+            </div>
+            <div class="maint-progress-label"><span>144,800 mi</span><span>148,000 mi</span></div>
+          </div>
+        </div>
+        <span class="badge badge-green" style="flex-shrink:0">OK</span>
+      </div>
+
+      <!-- Tire Rotation -->
+      <div class="maint-item">
+        <div class="maint-icon" style="background:#e8f0fe">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <circle cx="13" cy="13" r="9" stroke="#4a9eff" stroke-width="1.5"/>
+            <circle cx="13" cy="13" r="4" fill="#4a9eff" opacity="0.2" stroke="#4a9eff" stroke-width="1.5"/>
+            <path d="M13 4 L13 7" stroke="#4a9eff" stroke-width="2" stroke-linecap="round"/>
+            <path d="M13 19 L13 22" stroke="#4a9eff" stroke-width="2" stroke-linecap="round"/>
+            <path d="M4 13 L7 13" stroke="#4a9eff" stroke-width="2" stroke-linecap="round"/>
+            <path d="M19 13 L22 13" stroke="#4a9eff" stroke-width="2" stroke-linecap="round"/>
+            <path d="M6.6 6.6 L8.8 8.8" stroke="#4a9eff" stroke-width="2" stroke-linecap="round"/>
+            <path d="M17.2 17.2 L19.4 19.4" stroke="#4a9eff" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="maint-info">
+          <div class="maint-name">Tire Rotation</div>
+          <div class="maint-due">Due at 150,000 mi · 5,200 mi away</div>
+          <div class="maint-progress-wrap">
+            <div class="maint-progress-bg">
+              <div class="maint-progress-fill" style="width:22%;background:#2ecc71"></div>
+            </div>
+            <div class="maint-progress-label"><span>144,800 mi</span><span>150,000 mi</span></div>
+          </div>
+        </div>
+        <span class="badge badge-green" style="flex-shrink:0">OK</span>
+      </div>
+
+      <!-- Annual DOT -->
+      <div class="maint-item">
+        <div class="maint-icon" style="background:#fff0e6">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <rect x="4" y="5" width="18" height="18" rx="3" stroke="#f47920" stroke-width="1.5"/>
+            <path d="M4 10 L22 10" stroke="#f47920" stroke-width="1.5"/>
+            <path d="M9 3 L9 7" stroke="#f47920" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M17 3 L17 7" stroke="#f47920" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M9 15 L12 18 L17 13" stroke="#f47920" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="maint-info">
+          <div class="maint-name">Annual DOT Inspection</div>
+          <div class="maint-due">Due Oct 15, 2026 · 104 days away</div>
+          <div class="maint-progress-wrap">
+            <div class="maint-progress-bg">
+              <div class="maint-progress-fill" style="width:71%;background:#2ecc71"></div>
+            </div>
+            <div class="maint-progress-label"><span>Oct 2025</span><span>Oct 2026</span></div>
+          </div>
+        </div>
+        <span class="badge badge-green" style="flex-shrink:0">OK</span>
+      </div>
+
+      <!-- Brake Service — Due Soon -->
+      <div class="maint-item">
+        <div class="maint-icon" style="background:#fdecea">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <circle cx="13" cy="13" r="9" stroke="#e74c3c" stroke-width="1.5"/>
+            <circle cx="13" cy="13" r="5" fill="#e74c3c" opacity="0.15" stroke="#e74c3c" stroke-width="1.5"/>
+            <path d="M13 8 L13 13 L16 16" stroke="#e74c3c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="13" cy="13" r="1.5" fill="#e74c3c"/>
+          </svg>
+        </div>
+        <div class="maint-info">
+          <div class="maint-name">Brake Inspection</div>
+          <div class="maint-due" style="color:#c0392b">⚠️ Due at 145,500 mi · 700 mi away</div>
+          <div class="maint-progress-wrap">
+            <div class="maint-progress-bg">
+              <div class="maint-progress-fill" style="width:93%;background:#e74c3c"></div>
+            </div>
+            <div class="maint-progress-label"><span>144,800 mi</span><span style="color:#c0392b;font-weight:700">145,500 mi</span></div>
+          </div>
+        </div>
+        <span class="badge badge-red" style="flex-shrink:0">Soon</span>
+      </div>
+
+      <!-- Fuel Filter -->
+      <div class="maint-item">
+        <div class="maint-icon" style="background:#e8f9f1">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <rect x="9" y="3" width="8" height="14" rx="2" stroke="#2ecc71" stroke-width="1.5"/>
+            <path d="M9 8 L17 8" stroke="#2ecc71" stroke-width="1" stroke-dasharray="1,1"/>
+            <path d="M9 11 L17 11" stroke="#2ecc71" stroke-width="1" stroke-dasharray="1,1"/>
+            <path d="M13 17 L13 23" stroke="#2ecc71" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M10 23 L16 23" stroke="#2ecc71" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M6 5 L9 5" stroke="#2ecc71" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M6 8 L9 8" stroke="#2ecc71" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="maint-info">
+          <div class="maint-name">Fuel Filter</div>
+          <div class="maint-due">Due at 160,000 mi · 15,200 mi away</div>
+          <div class="maint-progress-wrap">
+            <div class="maint-progress-bg">
+              <div class="maint-progress-fill" style="width:4%;background:#2ecc71"></div>
+            </div>
+            <div class="maint-progress-label"><span>144,800 mi</span><span>160,000 mi</span></div>
+          </div>
+        </div>
+        <span class="badge badge-green" style="flex-shrink:0">OK</span>
+      </div>
+
+    </div>
+
+    <!-- Current Odometer -->
+    <div class="card" style="background:var(--navy);color:white;text-align:center;padding:18px">
+      <div style="font-size:11px;opacity:0.5;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Current Odometer</div>
+      <div style="font-size:32px;font-weight:800;letter-spacing:1px">144,800 <span style="font-size:16px;opacity:0.5">mi</span></div>
+      <button style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;margin-top:8px">Update Odometer</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S-DOCS: Document Cards
+══════════════════════════════════════ -->
+<div class="screen" id="s-docs">
+  <div class="topbar">
+    <div class="back-btn" onclick="goto('s-hub')">‹</div>
+    <div class="topbar-text">
+      <div class="title">Company Documents</div>
+      <div class="sub">Fleet-wide · 8 documents</div>
+    </div>
+    <div class="topbar-action">+ Upload</div>
+  </div>
+  <div class="content">
+
+    <div style="font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Insurance</div>
+    <div class="docs-grid">
+
+      <div class="doc-card">
+        <div class="doc-ribbon ribbon-amber">Due Soon</div>
+        <div class="doc-icon-wrap" style="background:#fff7e0">🛡️</div>
+        <div class="doc-name">Cargo Insurance (COI)</div>
+        <div class="doc-detail">Expires Aug 1, 2026</div>
+        <div style="margin-top:6px"><span class="badge badge-amber">29 days</span></div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-ribbon ribbon-green">Current</div>
+        <div class="doc-icon-wrap" style="background:#e8f9f1">🛡️</div>
+        <div class="doc-name">General Liability</div>
+        <div class="doc-detail">Expires Jan 15, 2027</div>
+        <div style="margin-top:6px"><span class="badge badge-green">Current</span></div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-ribbon ribbon-green">Current</div>
+        <div class="doc-icon-wrap" style="background:#f3eeff">🛡️</div>
+        <div class="doc-name">Workers' Comp</div>
+        <div class="doc-detail">Expires Mar 1, 2027</div>
+        <div style="margin-top:6px"><span class="badge badge-green">Current</span></div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-ribbon ribbon-red">Expired</div>
+        <div class="doc-icon-wrap" style="background:#fdecea">🛡️</div>
+        <div class="doc-name">Physical Damage</div>
+        <div class="doc-detail">Expired Jun 1, 2026</div>
+        <div style="margin-top:6px"><span class="badge badge-red">Renew now</span></div>
+      </div>
+
+    </div>
+
+    <div style="font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 10px">Operating Authority</div>
+    <div class="docs-grid">
+
+      <div class="doc-card">
+        <div class="doc-ribbon ribbon-green">Current</div>
+        <div class="doc-icon-wrap" style="background:#e8f0fe">🏛️</div>
+        <div class="doc-name">MC Authority Letter</div>
+        <div class="doc-detail">MC-448821 · No expiry</div>
+        <div style="margin-top:6px"><span class="badge badge-blue">Permanent</span></div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-ribbon ribbon-amber">Due Soon</div>
+        <div class="doc-icon-wrap" style="background:#fff0e6">🏛️</div>
+        <div class="doc-name">UCR Registration</div>
+        <div class="doc-detail">Expires Dec 31, 2026</div>
+        <div style="margin-top:6px"><span class="badge badge-amber">182 days</span></div>
+      </div>
+
+    </div>
+
+    <div style="font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 10px">Tax &amp; Business</div>
+    <div class="docs-grid">
+
+      <div class="doc-card">
+        <div class="doc-ribbon ribbon-green">On file</div>
+        <div class="doc-icon-wrap" style="background:#f4f6f9">📋</div>
+        <div class="doc-name">W-9 / EIN</div>
+        <div class="doc-detail">No expiry</div>
+        <div style="margin-top:6px"><span class="badge" style="background:#f4f6f9;color:#666">On file</span></div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-ribbon ribbon-green">Current</div>
+        <div class="doc-icon-wrap" style="background:#e8f9f1">📄</div>
+        <div class="doc-name">Business License</div>
+        <div class="doc-detail">Expires Dec 31, 2026</div>
+        <div style="margin-top:6px"><span class="badge badge-green">Current</span></div>
+      </div>
+
+    </div>
+
+    <!-- Alert summary -->
+    <div class="card" style="background:linear-gradient(135deg,#fff7e0,#fff3cd);border:1.5px solid rgba(240,165,0,0.3);margin-top:4px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:26px">⚠️</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#b37d00">2 items need attention</div>
+          <div style="font-size:12px;color:#9a6600;margin-top:3px">Cargo COI expires in 29 days · Physical Damage expired</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     S-LOADS: Enhanced Load Cards
+══════════════════════════════════════ -->
+<div class="screen" id="s-loads">
+  <div class="topbar">
+    <div class="back-btn" onclick="goto('s-hub')">‹</div>
+    <div class="topbar-text">
+      <div class="title">Active Loads</div>
+      <div class="sub">4 loads this week</div>
+    </div>
+    <div class="topbar-action">+ New</div>
+  </div>
+  <div class="content">
+
+    <!-- Load 1: In Transit, Refrigerated -->
+    <div class="load-card">
+      <div class="load-card-header">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.4px">L-0041</div>
+          <div style="font-size:14px;font-weight:700;color:#1a1a2e;margin-top:2px">Sysco Foods</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <span class="badge badge-blue">🚛 In Transit</span>
+          <div class="load-commodity">❄️ Refrigerated</div>
+        </div>
+      </div>
+
+      <!-- Status pipeline -->
+      <div style="padding:0 16px 8px;display:flex;align-items:flex-start;gap:2px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <div style="width:18px;height:18px;border-radius:50%;background:var(--green);color:white;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">✓</div>
+          <div style="font-size:7px;font-weight:600;color:var(--green);text-align:center;white-space:nowrap">Booked</div>
+        </div>
+        <div style="flex:1;height:2px;background:var(--green);margin-top:9px"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <div style="width:18px;height:18px;border-radius:50%;background:var(--green);color:white;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">✓</div>
+          <div style="font-size:7px;font-weight:600;color:var(--green);text-align:center;white-space:nowrap">Dispatched</div>
+        </div>
+        <div style="flex:1;height:2px;background:var(--green);margin-top:9px"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <div style="width:18px;height:18px;border-radius:50%;background:var(--green);color:white;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">✓</div>
+          <div style="font-size:7px;font-weight:600;color:var(--green);text-align:center;white-space:nowrap">Picked Up</div>
+        </div>
+        <div style="flex:1;height:2px;background:var(--orange);margin-top:9px"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <div style="width:18px;height:18px;border-radius:50%;background:var(--orange);color:white;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">→</div>
+          <div style="font-size:7px;font-weight:600;color:var(--orange);text-align:center;white-space:nowrap">In Transit</div>
+        </div>
+        <div style="flex:1;height:2px;background:#e8e8e8;margin-top:9px"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <div style="width:18px;height:18px;border-radius:50%;background:#e8e8e8;color:#aaa;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">5</div>
+          <div style="font-size:7px;font-weight:600;color:#aaa;text-align:center;white-space:nowrap">Delivered</div>
+        </div>
+        <div style="flex:1;height:2px;background:#e8e8e8;margin-top:9px"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <div style="width:18px;height:18px;border-radius:50%;background:#e8e8e8;color:#aaa;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">6</div>
+          <div style="font-size:7px;font-weight:600;color:#aaa;text-align:center;white-space:nowrap">Invoiced</div>
+        </div>
+      </div>
+
+      <div class="load-route-strip">
+        <div class="route-city">
+          <div class="route-city-name">Chicago</div>
+          <div class="route-city-state">IL</div>
+        </div>
+        <div class="route-dot route-dot-start"></div>
+        <div class="route-line"></div>
+        <div class="route-dot route-dot-end"></div>
+        <div class="route-city">
+          <div class="route-city-name">Nashville</div>
+          <div class="route-city-state">TN</div>
+        </div>
+      </div>
+      <div class="load-card-footer">
+        <div>
+          <div class="load-meta">Driver: Marcus J. · Big Blue</div>
+          <div class="load-meta" style="margin-top:2px">Pickup Jul 3 · Delivery Jul 4</div>
+        </div>
+        <div class="load-rate">$2,850</div>
+      </div>
+    </div>
+
+    <!-- Load 2: Scheduled, HazMat -->
+    <div class="load-card">
+      <div class="load-card-header">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.4px">L-0042</div>
+          <div style="font-size:14px;font-weight:700;color:#1a1a2e;margin-top:2px">Dow Chemical</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <span class="badge" style="background:#f3eeff;color:#6c3abf">📅 Scheduled</span>
+          <div class="load-commodity">☢️ HazMat</div>
+        </div>
+      </div>
+      <div class="load-route-strip">
+        <div class="route-city">
+          <div class="route-city-name">Houston</div>
+          <div class="route-city-state">TX</div>
+        </div>
+        <div class="route-dot route-dot-start"></div>
+        <div class="route-line" style="background:linear-gradient(90deg,#6c3abf,#9b59b6)"></div>
+        <div class="route-dot" style="background:#6c3abf"></div>
+        <div class="route-city">
+          <div class="route-city-name">Dallas</div>
+          <div class="route-city-state">TX</div>
+        </div>
+      </div>
+      <div class="load-card-footer">
+        <div>
+          <div class="load-meta">Driver: TBD · Jul 5</div>
+          <div class="load-meta" style="margin-top:2px">Requires HazMat endorsement</div>
+        </div>
+        <div class="load-rate">$1,640</div>
+      </div>
+    </div>
+
+    <!-- Load 3: Delivered, General Freight -->
+    <div class="load-card" style="opacity:0.75">
+      <div class="load-card-header">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.4px">L-0040</div>
+          <div style="font-size:14px;font-weight:700;color:#1a1a2e;margin-top:2px">Home Depot</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <span class="badge badge-green">✓ Delivered</span>
+          <div class="load-commodity">📦 General</div>
+        </div>
+      </div>
+      <div class="load-route-strip">
+        <div class="route-city">
+          <div class="route-city-name">Atlanta</div>
+          <div class="route-city-state">GA</div>
+        </div>
+        <div class="route-dot route-dot-start" style="background:#2ecc71"></div>
+        <div class="route-line" style="background:linear-gradient(90deg,#2ecc71,#1abc9c)"></div>
+        <div class="route-dot route-dot-end"></div>
+        <div class="route-city">
+          <div class="route-city-name">Charlotte</div>
+          <div class="route-city-state">NC</div>
+        </div>
+      </div>
+      <div class="load-card-footer">
+        <div>
+          <div class="load-meta">Delivered Jul 2 · Invoice pending</div>
+        </div>
+        <div class="load-rate" style="color:#2ecc71">$1,920</div>
+      </div>
+    </div>
+
+  </div>
+  <div class="tabbar">
+    <div class="tab-item active"><div class="tab-icon">📦</div><div class="tab-label" style="color:var(--orange)">Loads</div></div>
+    <div class="tab-item"><div class="tab-icon">🚛</div><div class="tab-label">Fleet</div></div>
+    <div class="tab-item"><div class="tab-icon">💰</div><div class="tab-label">Invoices</div></div>
+    <div class="tab-item"><div class="tab-icon">👥</div><div class="tab-label">Team</div></div>
+    <div class="tab-item"><div class="tab-icon">⚙️</div><div class="tab-label">Settings</div></div>
+  </div>
+</div>
+
+<!-- ══ JAVASCRIPT ══ -->
+<script>
+// Navigation
+const history = [];
+function goto(id) {
+  const cur = document.querySelector('.screen.active');
+  if (cur) history.push(cur.id);
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelector('.phone').scrollTop = 0;
+}
+function goBack() {
+  if (history.length) goto(history.pop());
+}
+
+// Truck type selection
+function selectType(el, type) {
+  document.querySelectorAll('.type-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// Color picker
+const truckColors = {
+  parts: ['#pTrailer','#pCab'],
+};
+let currentPickEl = null;
+function pickColor(el, fill, dark, name) {
+  // Update swatches
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  // Update preview SVG
+  document.getElementById('pTrailer').setAttribute('fill', fill);
+  document.getElementById('pCab').setAttribute('fill', fill);
+  // Update preview background
+  document.getElementById('colorPreview').style.background =
+    `linear-gradient(135deg,${dark},${fill})`;
+}
+
+// DVIR tap zones
+let activeZone = null;
+const zoneColors = {
+  front: '#f47920', cab: '#f47920', engine: '#f47920',
+  tires: '#f47920', trailer: '#f47920', rear: '#e74c3c'
+};
+
+function tapZone(zone, label) {
+  // Clear previous
+  if (activeZone) {
+    document.getElementById('zone-' + activeZone).setAttribute('fill', 'transparent');
+    document.getElementById('zone-' + activeZone).setAttribute('stroke', 'transparent');
+    document.getElementById('chip-' + activeZone).classList.remove('active');
+  }
+  // If clicking same zone, deselect
+  if (activeZone === zone) {
+    activeZone = null;
+    document.getElementById('defectPanel').style.display = 'none';
+    return;
+  }
+  activeZone = zone;
+  // Highlight zone
+  document.getElementById('zone-' + zone).setAttribute('fill', 'rgba(244,121,32,0.18)');
+  document.getElementById('zone-' + zone).setAttribute('stroke', '#f47920');
+  document.getElementById('chip-' + zone).classList.add('active');
+  // Show defect panel
+  document.getElementById('defectPanelTitle').textContent = '⚠️ Log defect — ' + label;
+  document.getElementById('defectPanel').style.display = 'block';
+  // Reset severity
+  document.getElementById('sevMinor').classList.remove('active');
+  document.getElementById('sevMajor').classList.remove('active');
+}
+
+function clearZone() {
+  if (activeZone) {
+    document.getElementById('zone-' + activeZone).setAttribute('fill', 'transparent');
+    document.getElementById('zone-' + activeZone).setAttribute('stroke', 'transparent');
+    document.getElementById('chip-' + activeZone).classList.remove('active');
+    activeZone = null;
+  }
+  document.getElementById('defectPanel').style.display = 'none';
+}
+
+function setSeverity(level) {
+  document.getElementById('sevMinor').classList.remove('active');
+  document.getElementById('sevMajor').classList.remove('active');
+  document.getElementById('sev' + level.charAt(0).toUpperCase() + level.slice(1)).classList.add('active');
+}
+
+function logDefect() {
+  if (!activeZone) return;
+  // Mark chip as defect
+  document.getElementById('chip-' + activeZone).classList.remove('active');
+  document.getElementById('chip-' + activeZone).classList.add('defect');
+  // Turn zone red
+  document.getElementById('zone-' + activeZone).setAttribute('fill', 'rgba(231,76,60,0.15)');
+  document.getElementById('zone-' + activeZone).setAttribute('stroke', '#e74c3c');
+  activeZone = null;
+  document.getElementById('defectPanel').style.display = 'none';
+}
+</script>
+
+</div><!-- /phone -->
+</body>
+</html>
